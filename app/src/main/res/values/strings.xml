@@ -1,3 +1,13 @@
 <resources>
+
 	<string name="app_name">PassNotes</string>
+
+	<string name="retry">retry</string>
+
+	<!-- Recently opened files screen -->
+	<string name="recently_used">Recently used</string>
+
+	<!-- Open file screen -->
+	<string name="file_path">File path</string>
+
 </resources>

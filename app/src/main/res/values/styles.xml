@@ -1,20 +1,61 @@
 <resources>
 
 	<!-- Base application theme. -->
-	<style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+	<style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
 		<!-- Customize your theme here. -->
-		<item name="colorPrimary">@color/colorPrimary</item>
-		<item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-		<item name="colorAccent">@color/colorAccent</item>
+		<item name="colorPrimary">@color/primary</item>
+		<item name="colorPrimaryDark">@color/primary_dark</item>
+		<item name="colorAccent">@color/accent</item>
 	</style>
 
-	<style name="AppTheme.NoActionBar">
-		<item name="windowActionBar">false</item>
-		<item name="windowNoTitle">true</item>
+	<!--<style name="AppTheme.NoActionBar">-->
+		<!--<item name="windowActionBar">false</item>-->
+		<!--<item name="windowNoTitle">true</item>-->
+	<!--</style>-->
+
+	<!--<style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>-->
+
+	<!--<style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>-->
+
+	<style name="ActionBarStyle" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
 	</style>
 
-	<style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+	<!-- Material design styles -->
 
-	<style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+	<style name="Material">
+	</style>
+
+	<style name="Material.ProgressBar" parent="@style/Base.Widget.AppCompat.ProgressBar">
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">wrap_content</item>
+	</style>
+
+	<style name="Material.FlatButton" parent="@style/Widget.AppCompat.Button.Borderless">
+		<item name="android:layout_height">36dp</item>
+		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
+	</style>
+
+	<style name="Material.PrimaryText">
+		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
+		<item name="android:textColor">@color/material_list_item_primary_text</item>
+	</style>
+
+	<style name="Material.ErrorSecondaryText">
+		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
+		<item name="android:textColor">@color/material_error_secondary_text</item>
+	</style>
+	
+	<style name="Material.ListItem">
+	</style>
+
+	<style name="Material.ListItem.PrimaryText">
+		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
+		<item name="android:textColor">@color/material_list_item_primary_text</item>
+	</style>
+
+	<style name="Material.ListItem.SecondaryText">
+		<item name="android:textSize">@dimen/material_list_item_secondary_text_size</item>
+		<item name="android:textColor">@color/material_list_item_secondary_text</item>
+	</style>
 
 </resources>

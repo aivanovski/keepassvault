@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto">
+
+	<android.support.constraint.ConstraintLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<Button
+			android:id="@+id/open_file_btn"
+			style="@style/Material.FlatButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+
+			app:layout_constraintRight_toLeftOf="parent"/>
+
+		<android.support.design.widget.TextInputLayout
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			app:layout_constraintRight_toLeftOf="@id/open_file_btn"
+			app:layout_constraintLeft_toLeftOf="parent">
+
+			<android.support.design.widget.TextInputEditText
+				style="@style/Material.PrimaryText"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:hint="@string/file_path"/>
+
+		</android.support.design.widget.TextInputLayout>
+
+
+
+	</android.support.constraint.ConstraintLayout>
+
+</layout>

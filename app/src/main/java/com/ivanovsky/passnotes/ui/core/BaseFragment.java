@@ -13,7 +13,7 @@ import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.databinding.CoreBaseFragmentBinding;
 import com.ivanovsky.passnotes.ui.core.widget.FragmentStateView;
 
-public abstract class BaseFragment extends Fragment {
+public abstract class BaseFragment extends Fragment implements BaseView {
 
 	private boolean isViewCreated;
 	private CharSequence emptyText;

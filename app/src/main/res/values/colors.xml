@@ -10,7 +10,7 @@
 
 	<!-- list item colors -->
 	<color name="material_list_item_primary_text">#212121</color>
-	<color name="material_list_item_secondary_text">#212121</color>
+	<color name="material_list_item_secondary_text">#757575</color>
 
 	<!-- error panel -->
 	<color name="material_error_panel_background">#e7e7e7</color>

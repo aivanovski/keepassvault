@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding;
 import com.ivanovsky.passnotes.ui.core.BaseActivity;
+import com.ivanovsky.passnotes.ui.core.FragmentState;
 
 public class RecentlyUsedActivity extends BaseActivity {
 
@@ -19,6 +20,10 @@ public class RecentlyUsedActivity extends BaseActivity {
 		setSupportActionBar(binding.toolBar);
 		getCurrentActionBar().setTitle(R.string.app_name);
 
+		RecentlyUsedFragment fragment = RecentlyUsedFragment.newInstance();
 
+		getSupportFragmentManager().beginTransaction()
+				.replace(R.id.fragment_container, fragment)
+				.commit();
 	}
 }

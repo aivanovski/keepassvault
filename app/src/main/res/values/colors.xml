@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="colorPrimary">#3F51B5</color>
-	<color name="colorPrimaryDark">#303F9F</color>
-	<color name="colorAccent">#FF4081</color>
+
+	<color name="primary">#3F51B5</color>
+	<color name="primary_dark">#303F9F</color>
+	<color name="accent">#FF4081</color>
+	<color name="divider">#B6B6B6</color>
+
+	<color name="material_selector_pressed">#66999999</color>
+
+	<!-- list item colors -->
+	<color name="material_list_item_primary_text">#212121</color>
+	<color name="material_list_item_secondary_text">#757575</color>
+
+	<!-- error panel -->
+	<color name="material_error_panel_background">#e7e7e7</color>
+
+	<!-- action bar -->
+	<color name="action_bar_background">@color/primary</color>
+
+	<!-- progress bar -->
+	<color name="material_progress_bar">@color/primary</color>
+
+	<!-- errors -->
+	<color name="material_error_secondary_text">#b0b0b0</color>
+
 </resources>

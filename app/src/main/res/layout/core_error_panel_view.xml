@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:orientation="vertical">
+
+	<TextView
+		android:id="@+id/error_panel_text"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:padding="@dimen/group_margin"
+		android:gravity="center"
+		android:minHeight="96dp"
+		android:textColor="@color/accent"
+		android:textSize="@dimen/material_primary_text_size"/>
+
+</FrameLayout>

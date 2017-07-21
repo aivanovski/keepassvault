@@ -7,9 +7,10 @@ import android.support.annotation.Nullable;
 import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding;
 import com.ivanovsky.passnotes.ui.core.BaseActivity;
-import com.ivanovsky.passnotes.ui.core.FragmentState;
 
 public class RecentlyUsedActivity extends BaseActivity {
+
+	private RecentlyUsedPresenter presenter;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -25,5 +26,8 @@ public class RecentlyUsedActivity extends BaseActivity {
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.fragment_container, fragment)
 				.commit();
+
+		presenter = new RecentlyUsedPresenter(fragment);
+		fragment.setPresenter(presenter);
 	}
 }

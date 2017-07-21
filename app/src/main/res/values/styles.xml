@@ -35,6 +35,13 @@
 		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
 	</style>
 
+	<style name="Material.FloatingActionButton">
+		<item name="android:layout_width">@dimen/material_fab_size</item>
+		<item name="android:layout_height">@dimen/material_fab_size</item>
+		<item name="android:layout_marginRight">@dimen/material_fab_margin</item>
+		<item name="android:layout_marginBottom">@dimen/material_fab_margin</item>
+	</style>
+
 	<style name="Material.PrimaryText">
 		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
 		<item name="android:textColor">@color/material_list_item_primary_text</item>

@@ -13,7 +13,7 @@ import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.databinding.CoreBaseFragmentBinding;
 import com.ivanovsky.passnotes.ui.core.widget.FragmentStateView;
 
-public abstract class BaseFragment extends Fragment implements BaseView {
+public abstract class BaseFragment extends Fragment {
 
 	private boolean isViewCreated;
 	private CharSequence emptyText;
@@ -21,6 +21,7 @@ public abstract class BaseFragment extends Fragment implements BaseView {
 	private CharSequence errorPanelText;
 	private CoreBaseFragmentBinding binding;
 	private FragmentState state;
+	private View contentContainer;
 
 	protected abstract View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
 
@@ -32,6 +33,13 @@ public abstract class BaseFragment extends Fragment implements BaseView {
 		View contentView = onCreateContentView(inflater, binding.contentContainer, savedInstanceState);
 		if (contentView != null) {
 			binding.contentContainer.addView(contentView);
+		}
+
+		if (getContentContainerId() != -1) {
+			//noinspection ConstantConditions
+			contentContainer = contentView.findViewById(getContentContainerId());
+		} else {
+			contentContainer = binding.contentContainer;
 		}
 
 		isViewCreated = true;
@@ -58,6 +66,11 @@ public abstract class BaseFragment extends Fragment implements BaseView {
 		return binding.getRoot();
 	}
 
+	protected int getContentContainerId() {
+		//determines view that will be shown/hidden if fragment state will be changed, should be overridden in derived class
+		return -1;
+	}
+
 	public final FragmentState getState() {
 		return state;
 	}
@@ -77,30 +90,30 @@ public abstract class BaseFragment extends Fragment implements BaseView {
 	private void applyStateToViews(FragmentState state) {
 		switch (state) {
 			case LOADING:
-				binding.contentContainer.setVisibility(View.GONE);
+				contentContainer.setVisibility(View.GONE);
 				binding.stateView.setState(FragmentStateView.State.LOADING);
 				binding.stateView.setVisibility(View.VISIBLE);
 				binding.errorPanelView.setVisibility(View.GONE);
 				break;
 			case EMPTY:
-				binding.contentContainer.setVisibility(View.GONE);
+				contentContainer.setVisibility(View.GONE);
 				binding.stateView.setState(FragmentStateView.State.EMPTY);
 				binding.stateView.setVisibility(View.VISIBLE);
 				binding.errorPanelView.setVisibility(View.GONE);
 				break;
 			case DISPLAYING_DATA:
-				binding.contentContainer.setVisibility(View.VISIBLE);
+				contentContainer.setVisibility(View.VISIBLE);
 				binding.stateView.setVisibility(View.GONE);
 				binding.errorPanelView.setVisibility(View.GONE);
 				break;
 			case ERROR:
-				binding.contentContainer.setVisibility(View.GONE);
+				contentContainer.setVisibility(View.GONE);
 				binding.stateView.setState(FragmentStateView.State.ERROR);
 				binding.stateView.setVisibility(View.VISIBLE);
 				binding.errorPanelView.setVisibility(View.GONE);
 				break;
 			case DISPLAYING_DATA_WITH_ERROR_PANEL:
-				binding.contentContainer.setVisibility(View.VISIBLE);
+				contentContainer.setVisibility(View.VISIBLE);
 				binding.stateView.setVisibility(View.GONE);
 				binding.errorPanelView.setVisibility(View.VISIBLE);
 				break;

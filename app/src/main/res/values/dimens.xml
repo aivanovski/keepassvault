@@ -1,6 +1,5 @@
 <resources>
 
-	<dimen name="fab_margin">16dp</dimen>
 	<dimen name="group_margin">24dp</dimen>
 
 	<dimen name="material_primary_text_size">16sp</dimen>
@@ -16,5 +15,9 @@
 
 	<!-- progress bar -->
 	<dimen name="material_progress_bar_size">48dp</dimen>
+
+	<!-- floating action bar -->
+	<dimen name="material_fab_size">56dp</dimen>
+	<dimen name="material_fab_margin">16dp</dimen>
 
 </resources>

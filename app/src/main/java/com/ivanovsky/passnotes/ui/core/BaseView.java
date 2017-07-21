@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.ui.core;
 
-public interface BaseView {
+public interface BaseView<T extends BasePresenter> {
 
-	void setState();
+	void setPresenter(T presenter);
+	void setState(FragmentState state);
 }

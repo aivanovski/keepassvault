@@ -3,9 +3,10 @@ package com.ivanovsky.passnotes.injection;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 
-import com.ivanovsky.passnotes.db.AppDatabase;
-import com.ivanovsky.passnotes.db.dao.UsedFileDao;
-import com.ivanovsky.passnotes.db.model.UsedFile;
+import com.ivanovsky.passnotes.data.db.AppDatabase;
+import com.ivanovsky.passnotes.data.db.dao.UsedFileDao;
+import com.ivanovsky.passnotes.data.db.model.UsedFile;
+import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.settings.SettingsManager;
 
 import javax.inject.Singleton;
@@ -17,9 +18,11 @@ import dagger.Provides;
 public class AppModule {
 
 	private final Context context;
+	private final AppDatabase db;
 
 	public AppModule(Context context) {
 		this.context = context;
+		this.db = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "passnotes").build();
 	}
 
 	@Provides
@@ -31,9 +34,6 @@ public class AppModule {
 	@Provides
 	@Singleton
 	public AppDatabase provideAppDatabase() {
-		AppDatabase db = Room.databaseBuilder(context.getApplicationContext(),
-				AppDatabase.class, "passnotes").build();
-
 		//TODO: remove test values
 		new Thread(() -> {
 			UsedFileDao dao = db.getUsedFileDao();
@@ -47,5 +47,11 @@ public class AppModule {
 		}).start();
 
 		return db;
+	}
+
+	@Provides
+	@Singleton
+	public UsedFileRepository providesUsedFileRepository() {
+		return new UsedFileRepository(db);
 	}
 }

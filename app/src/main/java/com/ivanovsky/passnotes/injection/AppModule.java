@@ -19,10 +19,12 @@ public class AppModule {
 
 	private final Context context;
 	private final AppDatabase db;
+	private final UsedFileRepository usedFileRepository;
 
 	public AppModule(Context context) {
 		this.context = context;
 		this.db = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "passnotes").build();
+		this.usedFileRepository = new UsedFileRepository(db);
 	}
 
 	@Provides
@@ -44,6 +46,8 @@ public class AppModule {
 
 				dao.insert(usedFile);
 			}
+
+			usedFileRepository.notifyDataSetChanged();
 		}).start();
 
 		return db;
@@ -52,6 +56,6 @@ public class AppModule {
 	@Provides
 	@Singleton
 	public UsedFileRepository providesUsedFileRepository() {
-		return new UsedFileRepository(db);
+		return usedFileRepository;
 	}
 }

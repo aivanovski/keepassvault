@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.ui.recentlyused;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -15,6 +16,7 @@ import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.ui.core.BaseFragment;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 import com.ivanovsky.passnotes.ui.core.adapter.TwoLineTwoTextAdapter;
+import com.ivanovsky.passnotes.ui.newdb.NewDatabaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,9 +48,13 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 		binding.recyclerView.addItemDecoration(dividerItemDecoration);
 		binding.recyclerView.setAdapter(adapter = new TwoLineTwoTextAdapter(getContext()));
 
-		binding.fab.setOnClickListener(view -> {});
+		binding.fab.setOnClickListener(view -> onFabClicked());
 
 		return binding.getRoot();
+	}
+
+	private void onFabClicked() {
+		startActivity(new Intent(getContext(), NewDatabaseActivity.class));
 	}
 
 	@Override

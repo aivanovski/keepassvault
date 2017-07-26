@@ -16,6 +16,8 @@
 			android:id="@+id/fab"
 			style="@style/Material.FloatingActionButton"
 			android:layout_gravity="bottom|right"
+			android:layout_marginRight="@dimen/material_fab_margin"
+			android:layout_marginBottom="@dimen/material_fab_margin"
 			app:srcCompat="@drawable/ic_add_white_24dp"/>
 
 	</FrameLayout>

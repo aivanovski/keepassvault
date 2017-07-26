@@ -8,26 +8,26 @@ import java.util.concurrent.Callable;
 
 import rx.Observable;
 import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
+import rx.subjects.BehaviorSubject;
 
 public class UsedFileRepository {
 
+	@SuppressWarnings("unused")
+	private static final String TAG = UsedFileRepository.class.getSimpleName();
+
 	private final AppDatabase db;
-	private volatile PublishSubject<List<UsedFile>> filesSubject;
+	private volatile BehaviorSubject<List<UsedFile>> filesSubject;
 
 	public UsedFileRepository(AppDatabase db) {
 		this.db = db;
 	}
 
-	public PublishSubject<List<UsedFile>> getAllUsedFiles() {
+	public BehaviorSubject<List<UsedFile>> getAllUsedFiles() {
 		if (filesSubject == null) {
-			filesSubject = PublishSubject.create();
+			filesSubject = BehaviorSubject.create();
 		}
 
-		Callable<List<UsedFile>> task = () -> db.getUsedFileDao().getAll();
-
-		Observable.fromCallable(task)
-				.subscribeOn(Schedulers.newThread())
+		loadAllInBackground()
 				.subscribe(files -> {
 					if (filesSubject != null) {
 						filesSubject.onNext(files);
@@ -35,5 +35,19 @@ public class UsedFileRepository {
 				});
 
 		return filesSubject;
+	}
+
+	private Observable<List<UsedFile>> loadAllInBackground() {
+		Callable<List<UsedFile>> task = () -> db.getUsedFileDao().getAll();
+		return Observable.fromCallable(task)
+				.subscribeOn(Schedulers.newThread());
+	}
+
+	public void notifyDataSetChanged() {
+		loadAllInBackground().subscribe(files -> {
+			if (filesSubject != null) {
+				filesSubject.onNext(files);
+			}
+		});
 	}
 }

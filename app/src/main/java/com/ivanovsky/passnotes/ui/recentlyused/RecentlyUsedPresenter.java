@@ -19,7 +19,7 @@ public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
 
 	private RecentlyUsedContract.View view;
 
-	public RecentlyUsedPresenter(RecentlyUsedContract.View view) {
+	RecentlyUsedPresenter(RecentlyUsedContract.View view) {
 		this.view = view;
 		App.getDaggerComponent().inject(this);
 	}

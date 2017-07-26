@@ -7,6 +7,11 @@
 	<!-- Recently opened files screen -->
 	<string name="recently_used">Recently used</string>
 
+	<!-- New database screen -->
+	<string name="file_name">File name</string>
+	<string name="password">Password</string>
+	<string name="confirm">Confirm</string>
+
 	<!-- Open file screen -->
 	<string name="file_path">File path</string>
 

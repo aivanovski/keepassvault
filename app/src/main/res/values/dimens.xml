@@ -1,9 +1,13 @@
 <resources>
 
 	<dimen name="group_margin">24dp</dimen>
+	<dimen name="element_margin">24dp</dimen>
 
 	<dimen name="material_primary_text_size">16sp</dimen>
 	<dimen name="material_secondary_text_size">14sp</dimen>
+
+	<!-- text fields parameters -->
+	<dimen name="material_edit_text_primary_text_size">@dimen/material_primary_text_size</dimen>
 
 	<!-- list item parameters -->
 	<dimen name="material_list_item_height_single_line">56dp</dimen>

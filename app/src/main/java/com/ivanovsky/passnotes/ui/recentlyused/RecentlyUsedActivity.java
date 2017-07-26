@@ -27,7 +27,7 @@ public class RecentlyUsedActivity extends BaseActivity {
 				.replace(R.id.fragment_container, fragment)
 				.commit();
 
-		presenter = new RecentlyUsedPresenter(fragment);
+		presenter = new RecentlyUsedPresenter(this, fragment);
 		fragment.setPresenter(presenter);
 	}
 }

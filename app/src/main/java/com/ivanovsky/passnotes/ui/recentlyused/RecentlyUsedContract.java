@@ -14,5 +14,6 @@ public class RecentlyUsedContract {
 
 	interface Presenter extends BasePresenter {
 		void loadData();
+		void showNewDatabaseScreen();
 	}
 }

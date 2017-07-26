@@ -48,13 +48,9 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 		binding.recyclerView.addItemDecoration(dividerItemDecoration);
 		binding.recyclerView.setAdapter(adapter = new TwoLineTwoTextAdapter(getContext()));
 
-		binding.fab.setOnClickListener(view -> onFabClicked());
+		binding.fab.setOnClickListener(view -> presenter.showNewDatabaseScreen());
 
 		return binding.getRoot();
-	}
-
-	private void onFabClicked() {
-		startActivity(new Intent(getContext(), NewDatabaseActivity.class));
 	}
 
 	@Override

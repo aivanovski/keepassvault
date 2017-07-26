@@ -9,6 +9,5 @@ public class NewDatabaseContract {
 	}
 
 	interface Presenter extends BasePresenter {
-		void loadData();
 	}
 }

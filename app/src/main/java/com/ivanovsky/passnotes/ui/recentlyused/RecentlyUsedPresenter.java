@@ -1,9 +1,13 @@
 package com.ivanovsky.passnotes.ui.recentlyused;
 
+import android.content.Context;
+import android.content.Intent;
+
 import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
+import com.ivanovsky.passnotes.ui.newdb.NewDatabaseActivity;
 
 import java.util.List;
 
@@ -17,9 +21,11 @@ public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
 	@Inject
 	UsedFileRepository repository;
 
+	private Context context;
 	private RecentlyUsedContract.View view;
 
-	RecentlyUsedPresenter(RecentlyUsedContract.View view) {
+	RecentlyUsedPresenter(Context context, RecentlyUsedContract.View view) {
+		this.context = context;
 		this.view = view;
 		App.getDaggerComponent().inject(this);
 	}
@@ -46,5 +52,10 @@ public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
 		} else {
 			view.setState(FragmentState.EMPTY);
 		}
+	}
+
+	@Override
+	public void showNewDatabaseScreen() {
+		context.startActivity(new Intent(context, NewDatabaseActivity.class));
 	}
 }

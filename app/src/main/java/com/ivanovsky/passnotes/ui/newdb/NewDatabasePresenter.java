@@ -15,9 +15,4 @@ public class NewDatabasePresenter implements Presenter {
 	public void start() {
 		view.setState(FragmentState.DISPLAYING_DATA);
 	}
-
-	@Override
-	public void loadData() {
-
-	}
 }

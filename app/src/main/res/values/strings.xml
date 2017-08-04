@@ -2,7 +2,10 @@
 
 	<string name="app_name">PassNotes</string>
 
+	<!-- Menu and buttons -->
 	<string name="retry">retry</string>
+	<string name="create">Create</string>
+	<string name="done">Done</string>
 
 	<!-- Recently opened files screen -->
 	<string name="recently_used">Recently used</string>
@@ -11,6 +14,8 @@
 	<string name="file_name">File name</string>
 	<string name="password">Password</string>
 	<string name="confirm">Confirm</string>
+	<string name="field_contains_illegal_character">Field contains illegal character</string>
+	<string name="you_entered_two_different_passwords_please_try_again">You entered two different passwords. Please try again.</string>
 
 	<!-- Open file screen -->
 	<string name="file_path">File path</string>

@@ -1,10 +1,13 @@
 package com.ivanovsky.passnotes.ui.core;
 
+import android.app.Activity;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -122,6 +125,17 @@ public abstract class BaseFragment extends Fragment {
 
 	protected void onStateChanged(FragmentState oldState, FragmentState newState) {
 		//empty, should be overridden in derived class
+	}
+
+	protected ActionBar getActionBar() {
+		ActionBar result = null;
+
+		AppCompatActivity activity = (AppCompatActivity) getActivity();
+		if (activity != null) {
+			result = activity.getSupportActionBar();
+		}
+
+		return result;
 	}
 
 	protected boolean isViewCreated() {

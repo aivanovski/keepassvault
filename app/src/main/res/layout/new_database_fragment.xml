@@ -15,7 +15,7 @@
 			android:layout_marginRight="@dimen/element_margin">
 
 			<android.support.design.widget.TextInputEditText
-				android:id="@+id/file_name"
+				android:id="@+id/filename"
 				style="@style/Material.EditText.PrimarySingleLine"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
@@ -47,7 +47,7 @@
 			android:layout_marginRight="@dimen/element_margin">
 
 			<android.support.design.widget.TextInputEditText
-				android:id="@+id/pasword_confirm"
+				android:id="@+id/password_confirmation"
 				style="@style/Material.EditText.Password"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"

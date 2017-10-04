@@ -5,6 +5,9 @@ import android.widget.EditText;
 
 import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
+import com.ivanovsky.passnotes.ui.core.validation.NotEmptyValidation;
+import com.ivanovsky.passnotes.ui.core.validation.PatternValidation;
+import com.ivanovsky.passnotes.ui.core.validation.Validator;
 import com.ivanovsky.passnotes.ui.newdb.NewDatabaseContract.Presenter;
 
 import java.util.regex.Pattern;
@@ -20,10 +23,29 @@ public class NewDatabasePresenter implements Presenter {
 
 	private final NewDatabaseContract.View view;
 	private final Context context;
+	private final Validator validator;
 
 	public NewDatabasePresenter(NewDatabaseContract.View view, Context context) {
 		this.view = view;
 		this.context = context;
+		this.validator = new Validator.Builder()
+				.nextValidation(new NotEmptyValidation.Builder()
+						.withTarget(view.getFilenameEditText())
+						.withTarget(view.getPasswordEditText())
+						.withTarget(view.getPasswordConfirmationEditText())
+						.withErrorMessage(R.string.empty_field)
+						.build())
+				.nextValidation(new PatternValidation.Builder()
+						.withPattern(FILE_NAME_PATTERN)
+						.withTarget(view.getFilenameEditText())
+						.withErrorMessage(R.string.field_contains_illegal_character)
+						.build())
+				.nextValidation(new PatternValidation.Builder()
+						.withPattern(PASSWORD_PATTERN)
+						.withTarget(view.getPasswordEditText())
+						.withErrorMessage(R.string.field_contains_illegal_character)
+						.build())
+				.build();
 	}
 
 	@Override
@@ -103,6 +125,16 @@ public class NewDatabasePresenter implements Presenter {
 		}
 
 		return result;
+	}
+
+	private void validateEditTextIsNotEmpty(EditText editText) {
+		String text = editText.getText().toString();
+
+		if (text.isEmpty()) {
+			editText.setError(context.getString(R.string.empty_field));
+		} else {
+			editText.setError(null);
+		}
 	}
 
 	private boolean isValidFilenameText(String filename) {

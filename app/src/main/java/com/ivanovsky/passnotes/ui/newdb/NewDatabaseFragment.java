@@ -56,4 +56,8 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	public void showHomeActivity() {
 		getActivity().finish();
 	}
+
+	@Override
+	public void askForPermission() {
+	}
 }

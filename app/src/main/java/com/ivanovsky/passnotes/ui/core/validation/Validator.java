@@ -1,15 +1,10 @@
 package com.ivanovsky.passnotes.ui.core.validation;
 
-import android.util.Pair;
-
-import com.ivanovsky.passnotes.util.CollectionUtils;
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import static com.ivanovsky.passnotes.util.CollectionUtils.newLinkedListWith;
-import static java.util.Arrays.asList;
 
 public class Validator {
 
@@ -22,44 +17,42 @@ public class Validator {
 	public boolean validateAll() {
 		boolean result = true;
 
-		for (BaseValidation validation : builder.validations) {
+		List<BaseValidation> sortedValidations = sortValidations(builder.validations);
+
+		for (BaseValidation validation : sortedValidations) {
 			if (!validation.validateFields()) {
 				result = false;
+
+				if (validation.isAbortOnError()) {
+					break;
+				}
 			}
 		}
 
 		return result;
 	}
 
+	public List<BaseValidation> sortValidations(List<BaseValidation> validations) {
+		return Stream.of(validations)
+				.sorted((v1, v2) -> (v2.getPriority() - v1.getPriority()))
+				.collect(Collectors.toList());
+	}
+
 	public static class Builder {
 
-		final List<Pair<ExecutionMode, List<BaseValidation>>> validations;
+		final List<BaseValidation> validations;
 
 		public Builder() {
 			validations = new ArrayList<>();
 		}
 
-		public Builder preValidation() {
-
-		}
-
-		public Builder nextValidation(BaseValidation validation) {
-			validations.add(new Pair<>(ExecutionMode.CONSISTENTLY, newLinkedListWith(validation)))
-			return this;
-		}
-
-		public Builder withExclusiveValidations(BaseValidation first, BaseValidation second) {
-			validations.add(new Pair<>(ExecutionMode.EXCLUSIVE, asList(first, second)));
+		public Builder validation(BaseValidation validation) {
+			validations.add(validation);
 			return this;
 		}
 
 		public Validator build() {
 			return new Validator(this);
 		}
-	}
-
-	private enum ExecutionMode {
-		CONSISTENTLY,
-		EXCLUSIVE
 	}
 }

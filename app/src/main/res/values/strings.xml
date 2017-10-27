@@ -17,6 +17,7 @@
 	<string name="field_contains_illegal_character">Field contains illegal character</string>
 	<string name="you_entered_two_different_passwords_please_try_again">You entered two different passwords. Please try again.</string>
 	<string name="empty_field">Empty field</string>
+	<string name="this_field_should_match_password">This field should match password</string>
 
 	<!-- Open file screen -->
 	<string name="file_path">File path</string>

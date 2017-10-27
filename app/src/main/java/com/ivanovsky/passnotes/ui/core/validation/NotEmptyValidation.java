@@ -14,6 +14,7 @@ public class NotEmptyValidation extends BaseValidation {
 	private Builder builder;
 
 	private NotEmptyValidation(Builder builder) {
+		super(builder.abortOnError, builder.priority);
 		this.builder = builder;
 	}
 
@@ -36,11 +37,14 @@ public class NotEmptyValidation extends BaseValidation {
 
 	public static class Builder {
 
+		boolean abortOnError;
+		int priority;
 		int errorMessageId;
 		final List<EditText> editTexts;
 
 		public Builder() {
 			editTexts = new ArrayList<>();
+			priority = BaseValidation.PRIORITY_NORMAL;
 		}
 
 		public Builder withTarget(EditText editText) {
@@ -50,6 +54,16 @@ public class NotEmptyValidation extends BaseValidation {
 
 		public Builder withErrorMessage(@StringRes int messageResId) {
 			this.errorMessageId = messageResId;
+			return this;
+		}
+
+		public Builder withPriority(int priority) {
+			this.priority = priority;
+			return this;
+		}
+
+		public Builder abortOnError(boolean abortOnError) {
+			this.abortOnError = abortOnError;
 			return this;
 		}
 

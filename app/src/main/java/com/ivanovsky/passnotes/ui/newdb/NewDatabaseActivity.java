@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.ui.newdb;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import com.ivanovsky.passnotes.App;
@@ -43,18 +42,12 @@ public class NewDatabaseActivity extends BaseActivity {
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.new_database, menu);
-		return true;
-	}
-
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == android.R.id.home) {
 			onBackPressed();
 			return true;
 		} else {
-			return presenter.onOptionsItemSelected(item.getItemId());
+			return super.onOptionsItemSelected(item);
 		}
 	}
 }

@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.ui.core.validation;
 
 import android.content.res.Resources;
-import android.support.annotation.StringRes;
 import android.widget.EditText;
 
 import com.annimon.stream.Collectors;
@@ -15,7 +14,27 @@ import static com.ivanovsky.passnotes.util.CollectionUtils.getFirstOrNull;
 
 public abstract class BaseValidation {
 
-	protected abstract boolean validateFields();
+	public static final int PRIORITY_MAX = 3;
+	public static final int PRIORITY_NORMAL = 2;
+	public static final int PRIORITY_MIN = 1;
+
+	private final boolean abortOnError;
+	private final int priority;
+
+	abstract boolean validateFields();
+
+	BaseValidation(boolean abortOnError, int priority) {
+		this.abortOnError = abortOnError;
+		this.priority = priority;
+	}
+
+	boolean isAbortOnError() {
+		return abortOnError;
+	}
+
+	int getPriority() {
+		return priority;
+	}
 
 	Resources getResourcesFromEditText(List<EditText> editTexts) {
 		Resources result = null;

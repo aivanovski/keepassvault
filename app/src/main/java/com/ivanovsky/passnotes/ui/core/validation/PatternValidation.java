@@ -15,6 +15,7 @@ public class PatternValidation extends BaseValidation {
 	private final Builder builder;
 
 	private PatternValidation(Builder builder) {
+		super(builder.abortOnError, builder.priority);
 		this.builder = builder;
 	}
 
@@ -31,12 +32,14 @@ public class PatternValidation extends BaseValidation {
 	private Predicate<EditText> createErrorMatcher() {
 		return editText -> {
 			String text = editText.getText().toString();
-			return builder.pattern.matcher(text).matches();
+			return !builder.pattern.matcher(text).matches();
 		};
 	}
 
 	public static class Builder {
 
+		boolean abortOnError;
+		int priority;
 		int errorMessageId;
 		Pattern pattern;
 		final List<EditText> editTexts;
@@ -57,6 +60,16 @@ public class PatternValidation extends BaseValidation {
 
 		public Builder withPattern(Pattern pattern) {
 			this.pattern = pattern;
+			return this;
+		}
+
+		public Builder withPriority(int priority) {
+			this.priority = priority;
+			return this;
+		}
+
+		public Builder abortOnError(boolean abortOnError) {
+			this.abortOnError = abortOnError;
 			return this;
 		}
 

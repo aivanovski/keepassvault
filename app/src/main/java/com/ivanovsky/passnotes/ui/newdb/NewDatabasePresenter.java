@@ -25,10 +25,23 @@ public class NewDatabasePresenter implements Presenter {
 	}
 
 	private Boolean createNewDatabaseFile() {
-		return null;
+
+		//TODO: implement
+		try {
+			Thread.sleep(4000L);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		return false;
 	}
 
 	private void onNewDatabaseCreated(Boolean created) {
+		if (created) {
+			view.showHomeActivity();
+		} else {
+			view.setState(FragmentState.DISPLAYING_DATA);
+		}
 	}
 
 	@Override
@@ -42,6 +55,6 @@ public class NewDatabasePresenter implements Presenter {
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(this::onNewDatabaseCreated);
 
-		view.showHomeActivity();
+		view.setState(FragmentState.LOADING);
 	}
 }

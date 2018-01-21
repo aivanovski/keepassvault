@@ -32,7 +32,7 @@ public class IdenticalContentValidation extends BaseValidation {
 		return editText -> {
 			String firstText = builder.firstEditText.getText().toString();
 			String secondText = builder.secondEditText.getText().toString();
-			return firstText.equals(secondText);
+			return !firstText.equals(secondText);
 		};
 	}
 

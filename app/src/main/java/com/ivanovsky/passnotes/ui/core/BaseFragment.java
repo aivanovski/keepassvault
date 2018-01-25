@@ -180,6 +180,11 @@ public abstract class BaseFragment extends Fragment {
 		setState(FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL);
 	}
 
+	public void setErrorPanelTextAndState(CharSequence errorPanelText) {
+		setErrorPanelText(errorPanelText);
+		setState(FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL);
+	}
+
 	public void setErrorPanelText(int resId) {
 		Context context = getActivity();
 		if (context != null) {

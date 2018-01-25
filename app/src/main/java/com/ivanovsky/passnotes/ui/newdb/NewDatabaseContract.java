@@ -7,12 +7,12 @@ public class NewDatabaseContract {
 
 	interface View extends BaseView<Presenter> {
 		void showHomeActivity();
-		void askForPermission();
 		void onDoneMenuClicked();
+		void showError(String message);
+		void setDoneButtonVisible(boolean visible);
 	}
 
 	interface Presenter extends BasePresenter {
-		void onPermissionResult(boolean granted);
 		void createNewDatabaseFile(String filename, String password);
 	}
 }

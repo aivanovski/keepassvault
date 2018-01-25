@@ -7,6 +7,9 @@
 	<string name="create">Create</string>
 	<string name="done">Done</string>
 
+	<!-- Common for error -->
+	<string name="error_was_occurred">Error was occurred</string>
+
 	<!-- Recently opened files screen -->
 	<string name="recently_used">Recently used</string>
 

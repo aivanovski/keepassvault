@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.data.db.AppDatabase;
 import com.ivanovsky.passnotes.data.db.dao.UsedFileDao;
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
+import com.ivanovsky.passnotes.data.encrdb.EncryptedDatabaseProvider;
 import com.ivanovsky.passnotes.settings.SettingsManager;
 
 import javax.inject.Singleton;
@@ -23,7 +24,8 @@ public class AppModule {
 
 	public AppModule(Context context) {
 		this.context = context;
-		this.db = Room.databaseBuilder(context.getApplicationContext(), AppDatabase.class, "passnotes").build();
+		this.db = Room.databaseBuilder(context.getApplicationContext(),
+				AppDatabase.class, AppDatabase.FILE_NAME).build();
 		this.usedFileRepository = new UsedFileRepository(db);
 	}
 
@@ -58,4 +60,11 @@ public class AppModule {
 	public UsedFileRepository providesUsedFileRepository() {
 		return usedFileRepository;
 	}
+
+	@Provides
+	@Singleton
+	public EncryptedDatabaseProvider provideEncryptedDBProvider() {
+		return new EncryptedDatabaseProvider(context);
+	}
+
 }

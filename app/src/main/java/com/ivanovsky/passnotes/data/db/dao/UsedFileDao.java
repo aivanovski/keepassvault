@@ -15,5 +15,5 @@ public interface UsedFileDao {
 	List<UsedFile> getAll();
 
 	@Insert
-	void insert(UsedFile file);
+	long insert(UsedFile file);
 }

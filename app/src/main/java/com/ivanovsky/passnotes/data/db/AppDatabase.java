@@ -9,5 +9,7 @@ import com.ivanovsky.passnotes.data.db.model.UsedFile;
 @Database(entities = { UsedFile.class }, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
 
+	public static final String FILE_NAME = "passnotes.db";
+
 	public abstract UsedFileDao getUsedFileDao();
 }

@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository;
 
 import com.ivanovsky.passnotes.data.db.AppDatabase;
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
+import com.ivanovsky.passnotes.util.Logger;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -35,6 +36,13 @@ public class UsedFileRepository {
 				});
 
 		return filesSubject;
+	}
+
+	public void insert(UsedFile file) {
+		long id = db.getUsedFileDao().insert(file);
+		file.setId((int) id);
+
+		Logger.d(TAG, "id after: " + file.getId());
 	}
 
 	private Observable<List<UsedFile>> loadAllInBackground() {

@@ -8,7 +8,7 @@ import android.arch.persistence.room.PrimaryKey;
 @Entity(tableName = "used_file")
 public class UsedFile {
 
-	@PrimaryKey
+	@PrimaryKey(autoGenerate = true)
 	int id;
 
 	@ColumnInfo(name = "file_path")

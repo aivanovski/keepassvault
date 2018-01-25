@@ -28,6 +28,7 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 
 	private NewDatabaseContract.Presenter presenter;
 	private NewDatabaseFragmentBinding binding;
+	private Menu menu;
 
 	public static NewDatabaseFragment newInstance() {
 		return new NewDatabaseFragment();
@@ -58,6 +59,8 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		this.menu = menu;
+
 		inflater.inflate(R.menu.new_database, menu);
 	}
 
@@ -72,12 +75,23 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	}
 
 	@Override
+	public void setDoneButtonVisible(boolean visible) {
+		if (menu != null) {
+			MenuItem item = menu.findItem(R.id.menu_done);
+			if (item != null) {
+				item.setVisible(visible);
+			}
+		}
+	}
+
+	@Override
 	public void showHomeActivity() {
 		getActivity().finish();
 	}
 
 	@Override
-	public void askForPermission() {
+	public void showError(String message) {
+		setErrorPanelTextAndState(message);
 	}
 
 	@Override

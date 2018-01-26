@@ -8,6 +8,7 @@ import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 import com.ivanovsky.passnotes.ui.newdb.NewDatabaseActivity;
+import com.ivanovsky.passnotes.ui.notepads.NotepadsActivity;
 
 import java.util.List;
 
@@ -47,15 +48,18 @@ public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
 
 	private void onFilesLoaded(List<UsedFile> files) {
 		if (files.size() != 0) {
-			view.setRecentlyUsedFiles(files);
-			view.setState(FragmentState.DISPLAYING_DATA);
+			view.showRecentlyUsedFiles(files);
 		} else {
-			view.setState(FragmentState.EMPTY);
+			view.showNoItems();
 		}
 	}
 
 	@Override
 	public void showNewDatabaseScreen() {
 		context.startActivity(new Intent(context, NewDatabaseActivity.class));
+	}
+
+	@Override
+	public void onFileSelected(UsedFile file) {
 	}
 }

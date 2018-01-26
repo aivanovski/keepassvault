@@ -42,7 +42,7 @@ public class UsedFileRepository {
 		long id = db.getUsedFileDao().insert(file);
 		file.setId((int) id);
 
-		Logger.d(TAG, "id after: " + file.getId());
+		notifyDataSetChanged();
 	}
 
 	private Observable<List<UsedFile>> loadAllInBackground() {

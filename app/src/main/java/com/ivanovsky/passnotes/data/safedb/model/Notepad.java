@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.data.encrdb.model;
+package com.ivanovsky.passnotes.data.safedb.model;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;

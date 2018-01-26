@@ -12,6 +12,7 @@
 
 	<!-- Recently opened files screen -->
 	<string name="recently_used">Recently used</string>
+	<string name="no_files_to_open">No files to open</string>
 
 	<!-- New database screen -->
 	<string name="file_name">File name</string>
@@ -24,5 +25,9 @@
 
 	<!-- Open file screen -->
 	<string name="file_path">File path</string>
+
+	<!-- Notepads -->
+	<string name="notepads">Notepads</string>
+	<string name="no_items_to_show">No items to show</string>
 
 </resources>

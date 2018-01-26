@@ -142,10 +142,6 @@ public abstract class BaseFragment extends Fragment {
 		return isViewCreated;
 	}
 
-	public void setEmptyText(Integer textResId) {
-		setEmptyText(textResId != null ? getResources().getString(textResId) : null);
-	}
-
 	public void setEmptyText(CharSequence emptyText) {
 		this.emptyText = emptyText;
 		if (isViewCreated) {
@@ -153,8 +149,8 @@ public abstract class BaseFragment extends Fragment {
 		}
 	}
 
-	public void setEmptyState(Integer textResId) {
-		setEmptyText(textResId);
+	public void setEmptyTextAndState(CharSequence emptyText) {
+		setEmptyText(emptyText);
 		setState(FragmentState.EMPTY);
 	}
 

@@ -4,9 +4,8 @@ import android.content.Context;
 
 import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.data.db.dao.UsedFileDao;
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
-import com.ivanovsky.passnotes.data.encrdb.EncryptedDatabaseProvider;
+import com.ivanovsky.passnotes.data.safedb.SafeDatabaseProvider;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 import com.ivanovsky.passnotes.ui.newdb.NewDatabaseContract.Presenter;
@@ -21,16 +20,16 @@ import rx.schedulers.Schedulers;
 
 public class NewDatabasePresenter implements Presenter {
 
-	private final NewDatabaseContract.View view;
-	private final Context context;
-
 	@Inject
-	EncryptedDatabaseProvider encryptedDbProvider;
+	SafeDatabaseProvider encryptedDbProvider;
 
 	@Inject
 	UsedFileRepository usedFileRepository;
 
-	public NewDatabasePresenter(NewDatabaseContract.View view, Context context) {
+	private final NewDatabaseContract.View view;
+	private final Context context;
+
+	NewDatabasePresenter(NewDatabaseContract.View view, Context context) {
 		App.getDaggerComponent().inject(this);
 		this.view = view;
 		this.context = context;

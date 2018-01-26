@@ -79,4 +79,14 @@
 		<item name="android:inputType">textWebPassword</item>
 	</style>
 
+	<style name="Notepad">
+	</style>
+
+	<style name="Notepad.TitleText">
+		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
+		<item name="android:textColor">@color/material_list_item_primary_text</item>
+		<item name="android:maxLines">1</item>
+		<item name="android:ellipsize">end</item>
+	</style>
+
 </resources>

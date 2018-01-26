@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.ui.recentlyused;
 
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -16,7 +15,6 @@ import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.ui.core.BaseFragment;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 import com.ivanovsky.passnotes.ui.core.adapter.TwoLineTwoTextAdapter;
-import com.ivanovsky.passnotes.ui.newdb.NewDatabaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,9 +42,11 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 		LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
 		DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(getContext(), layoutManager.getOrientation());
 
+		adapter = new TwoLineTwoTextAdapter(getContext());
+
 		binding.recyclerView.setLayoutManager(layoutManager);
 		binding.recyclerView.addItemDecoration(dividerItemDecoration);
-		binding.recyclerView.setAdapter(adapter = new TwoLineTwoTextAdapter(getContext()));
+		binding.recyclerView.setAdapter(adapter);
 
 		binding.fab.setOnClickListener(view -> presenter.showNewDatabaseScreen());
 
@@ -80,8 +80,15 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 	}
 
 	@Override
-	public void setRecentlyUsedFiles(List<UsedFile> files) {
+	public void showRecentlyUsedFiles(List<UsedFile> files) {
 		adapter.setItems(createAdapterItems(files));
+		setState(FragmentState.DISPLAYING_DATA);
+	}
+
+	@Override
+	public void showNoItems() {
+		setEmptyText(getString(R.string.no_files_to_open));
+		setState(FragmentState.EMPTY);
 	}
 
 	private List<TwoLineTwoTextAdapter.ListItem> createAdapterItems(List<UsedFile> files) {
@@ -96,7 +103,7 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 
 			String fileName = getFileNameFromPath(filePath);
 
-			result.add(new TwoLineTwoTextAdapter.ListItem(filePath, fileName));
+			result.add(new TwoLineTwoTextAdapter.ListItem(fileName, filePath));
 		}
 
 		return result;
@@ -110,8 +117,9 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 		String fileName = "";
 
 		int idx = filePath.lastIndexOf("/");
-		if (idx > 0 && idx < filePath.length() - 1) {
-			fileName = filePath.substring(idx, filePath.length() - 1);
+		if (idx > 0
+				&& idx + 1 < filePath.length()) {
+			fileName = filePath.substring(idx + 1, filePath.length());
 		}
 
 		return fileName;

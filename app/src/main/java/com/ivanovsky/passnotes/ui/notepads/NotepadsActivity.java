@@ -1,7 +1,10 @@
 package com.ivanovsky.passnotes.ui.notepads;
 
+import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.ivanovsky.passnotes.R;
@@ -10,7 +13,15 @@ import com.ivanovsky.passnotes.ui.core.BaseActivity;
 
 public class NotepadsActivity extends BaseActivity {
 
+	private static final String EXTRA_DB_NAME = "dbName";
+
 	private NotepadsContract.Presenter presenter;
+
+	public static Intent createIntent(Context context, @NonNull String dbName) {
+		Intent intent = new Intent(context, NotepadsActivity.class);
+		intent.putExtra(EXTRA_DB_NAME, dbName);
+		return intent;
+	}
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,7 +38,15 @@ public class NotepadsActivity extends BaseActivity {
 				.replace(R.id.fragment_container, fragment)
 				.commit();
 
-		presenter = new NotepadsPresenter(this, fragment);
+		String dbName = null;
 
+		if (getIntent() != null && getIntent().getExtras() != null) {
+			Bundle extras = getIntent().getExtras();
+
+			dbName = extras.getString(EXTRA_DB_NAME);
+		}
+
+		presenter = new NotepadsPresenter(this, fragment, dbName);
+		fragment.setPresenter(presenter);
 	}
 }

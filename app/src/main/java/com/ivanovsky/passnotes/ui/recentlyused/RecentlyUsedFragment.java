@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.ui.recentlyused;
 
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.widget.DividerItemDecoration;
@@ -15,9 +16,13 @@ import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.ui.core.BaseFragment;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 import com.ivanovsky.passnotes.ui.core.adapter.TwoLineTwoTextAdapter;
+import com.ivanovsky.passnotes.ui.newdb.NewDatabaseActivity;
+import com.ivanovsky.passnotes.ui.notepads.NotepadsActivity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.ivanovsky.passnotes.util.FileUtils.getFileNameFromPath;
 
 public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedContract.View {
 
@@ -48,7 +53,7 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 		binding.recyclerView.addItemDecoration(dividerItemDecoration);
 		binding.recyclerView.setAdapter(adapter);
 
-		binding.fab.setOnClickListener(view -> presenter.showNewDatabaseScreen());
+		binding.fab.setOnClickListener(view -> showNewDatabaseScreen());
 
 		return binding.getRoot();
 	}
@@ -82,13 +87,29 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 	@Override
 	public void showRecentlyUsedFiles(List<UsedFile> files) {
 		adapter.setItems(createAdapterItems(files));
+		adapter.setOnListItemClickListener(position -> onFileClicked(files.get(position)));
 		setState(FragmentState.DISPLAYING_DATA);
+	}
+
+	private void onFileClicked(UsedFile file) {
+		showNotepadsScreen(file);
 	}
 
 	@Override
 	public void showNoItems() {
 		setEmptyText(getString(R.string.no_files_to_open));
 		setState(FragmentState.EMPTY);
+	}
+
+	@Override
+	public void showNotepadsScreen(UsedFile file) {
+		String dbName = getFileNameFromPath(file.getFilePath());
+		startActivity(NotepadsActivity.createIntent(getContext(), dbName));
+	}
+
+	@Override
+	public void showNewDatabaseScreen() {
+		startActivity(new Intent(getContext(), NewDatabaseActivity.class));
 	}
 
 	private List<TwoLineTwoTextAdapter.ListItem> createAdapterItems(List<UsedFile> files) {
@@ -107,21 +128,5 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 		}
 
 		return result;
-	}
-
-	private String getFileNameFromPath(String filePath) {
-		if (filePath == null) {
-			return null;
-		}
-
-		String fileName = "";
-
-		int idx = filePath.lastIndexOf("/");
-		if (idx > 0
-				&& idx + 1 < filePath.length()) {
-			fileName = filePath.substring(idx + 1, filePath.length());
-		}
-
-		return fileName;
 	}
 }

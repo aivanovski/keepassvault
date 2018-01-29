@@ -6,10 +6,10 @@ import com.ivanovsky.passnotes.ui.core.BaseView;
 public class NewDatabaseContract {
 
 	interface View extends BaseView<Presenter> {
-		void showHomeActivity();
 		void onDoneMenuClicked();
 		void showError(String message);
 		void setDoneButtonVisible(boolean visible);
+		void showNotepadsScreen(String dbName);
 	}
 
 	interface Presenter extends BasePresenter {

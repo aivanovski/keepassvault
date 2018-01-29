@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.ui.newdb;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,6 +20,7 @@ import com.ivanovsky.passnotes.ui.core.validation.IdenticalContentValidation;
 import com.ivanovsky.passnotes.ui.core.validation.NotEmptyValidation;
 import com.ivanovsky.passnotes.ui.core.validation.PatternValidation;
 import com.ivanovsky.passnotes.ui.core.validation.Validator;
+import com.ivanovsky.passnotes.ui.notepads.NotepadsActivity;
 
 import java.util.regex.Pattern;
 
@@ -85,8 +88,13 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	}
 
 	@Override
-	public void showHomeActivity() {
-		getActivity().finish();
+	public void showNotepadsScreen(String dbName) {
+		Activity activity = getActivity();
+		if (activity != null) {
+			activity.finish();
+
+			startActivity(NotepadsActivity.createIntent(getContext(), dbName));
+		}
 	}
 
 	@Override

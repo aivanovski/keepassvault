@@ -11,11 +11,11 @@ public class RecentlyUsedContract {
 	interface View extends BaseView<Presenter> {
 		void showRecentlyUsedFiles(List<UsedFile> files);
 		void showNoItems();
+		void showNotepadsScreen(UsedFile file);
+		void showNewDatabaseScreen();
 	}
 
 	interface Presenter extends BasePresenter {
 		void loadData();
-		void showNewDatabaseScreen();
-		void onFileSelected(UsedFile file);
 	}
 }

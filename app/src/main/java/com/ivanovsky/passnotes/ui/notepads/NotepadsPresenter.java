@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -20,15 +21,17 @@ public class NotepadsPresenter implements NotepadsContract.Presenter {
 	@Inject
 	SafeDatabaseProvider safeDbProvider;
 
+	private final String dbName;
 	private final Context context;
 	private final NotepadsContract.View view;
-	private final NotepadRepository repository;
+	private Subscription openDbSubscription;
+	private Subscription loadDataSubscription;
 
-	NotepadsPresenter(Context context, NotepadsContract.View view) {
+	NotepadsPresenter(Context context, NotepadsContract.View view, String dbName) {
 		App.getDaggerComponent().inject(this);
 		this.context = context;
 		this.view = view;
-		this.repository = safeDbProvider.getNotepadRepository();
+		this.dbName = dbName;
 	}
 
 	@Override
@@ -39,8 +42,39 @@ public class NotepadsPresenter implements NotepadsContract.Presenter {
 	}
 
 	@Override
+	public void stop() {
+		if (openDbSubscription != null) {
+			openDbSubscription.unsubscribe();
+			openDbSubscription = null;
+		}
+
+		if (loadDataSubscription != null) {
+			loadDataSubscription.unsubscribe();
+			loadDataSubscription = null;
+		}
+	}
+
+	@Override
 	public void loadData() {
-		repository.getAllNotepads()
+		if (safeDbProvider.isDatabaseOpened()) {
+			NotepadRepository repository = safeDbProvider.getNotepadRepository();
+
+			loadDataSubscription = repository.getAllNotepads()
+					.subscribeOn(Schedulers.newThread())
+					.observeOn(AndroidSchedulers.mainThread())
+					.subscribe(this::onNotepadsLoaded);
+		} else {
+			openDbSubscription = safeDbProvider.observeDatabase(dbName + ".db")
+					.subscribeOn(Schedulers.newThread())
+					.observeOn(AndroidSchedulers.mainThread())
+					.subscribe(db -> onDbOpened());
+		}
+	}
+
+	private void onDbOpened() {
+		NotepadRepository repository = safeDbProvider.getNotepadRepository();
+
+		loadDataSubscription = repository.getAllNotepads()
 				.subscribeOn(Schedulers.newThread())
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(this::onNotepadsLoaded);

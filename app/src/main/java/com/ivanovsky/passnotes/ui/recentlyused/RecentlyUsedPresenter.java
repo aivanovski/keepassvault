@@ -1,14 +1,11 @@
 package com.ivanovsky.passnotes.ui.recentlyused;
 
 import android.content.Context;
-import android.content.Intent;
 
 import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
-import com.ivanovsky.passnotes.ui.newdb.NewDatabaseActivity;
-import com.ivanovsky.passnotes.ui.notepads.NotepadsActivity;
 
 import java.util.List;
 
@@ -39,6 +36,11 @@ public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
 	}
 
 	@Override
+	public void stop() {
+		//TODO: implement method
+	}
+
+	@Override
 	public void loadData() {
 		repository.getAllUsedFiles()
 				.subscribeOn(Schedulers.newThread())
@@ -52,14 +54,5 @@ public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
 		} else {
 			view.showNoItems();
 		}
-	}
-
-	@Override
-	public void showNewDatabaseScreen() {
-		context.startActivity(new Intent(context, NewDatabaseActivity.class));
-	}
-
-	@Override
-	public void onFileSelected(UsedFile file) {
 	}
 }

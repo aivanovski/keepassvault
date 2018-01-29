@@ -7,6 +7,10 @@ import com.ivanovsky.passnotes.data.repository.NotepadRepository;
 import com.ivanovsky.passnotes.util.FileUtils;
 
 import java.io.File;
+import java.util.concurrent.Callable;
+
+import rx.Observable;
+import rx.schedulers.Schedulers;
 
 public class SafeDatabaseProvider {
 
@@ -39,6 +43,13 @@ public class SafeDatabaseProvider {
 
 		}
 		return db;
+	}
+
+	public Observable<SafeDatabase> observeDatabase(String name) {
+		Callable<SafeDatabase> task = () -> openDatabase(name);
+
+		return Observable.fromCallable(task)
+				.subscribeOn(Schedulers.newThread());
 	}
 
 	private void clearAllRepositories() {

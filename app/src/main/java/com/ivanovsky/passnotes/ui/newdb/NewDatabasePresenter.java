@@ -45,6 +45,20 @@ public class NewDatabasePresenter implements Presenter {
 		//TODO: implement methods
 	}
 
+	@Override
+	public void createNewDatabaseFile(String filename, String password) {
+		view.setDoneButtonVisible(false);
+
+		String dbName = filename + ".db";
+
+		Observable.fromCallable(() -> createNewDatabase(dbName))
+				.subscribeOn(Schedulers.newThread())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe(created -> onNewDatabaseCreated(created, dbName));
+
+		view.setState(FragmentState.LOADING);
+	}
+
 	private Boolean createNewDatabase(String name) {
 		boolean result = false;
 
@@ -71,19 +85,5 @@ public class NewDatabasePresenter implements Presenter {
 			view.showError(context.getString(R.string.error_was_occurred));
 			view.setDoneButtonVisible(true);
 		}
-	}
-
-	@Override
-	public void createNewDatabaseFile(String filename, String password) {
-		view.setDoneButtonVisible(false);
-
-		String dbName = filename + ".db";
-
-		Observable.fromCallable(() -> createNewDatabase(dbName))
-				.subscribeOn(Schedulers.newThread())
-				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe(created -> onNewDatabaseCreated(created, dbName));
-
-		view.setState(FragmentState.LOADING);
 	}
 }

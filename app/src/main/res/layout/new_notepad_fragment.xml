@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+	xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<android.support.constraint.ConstraintLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_marginTop="8dp">
+
+		<android.support.design.widget.TextInputLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/group_margin"
+			android:layout_marginLeft="@dimen/element_margin"
+			android:layout_marginRight="@dimen/element_margin">
+
+			<android.support.design.widget.TextInputEditText
+				android:id="@+id/notepad_title"
+				style="@style/Material.EditText.PrimarySingleLine"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:hint="@string/notepad_title"/>
+
+		</android.support.design.widget.TextInputLayout>
+
+	</android.support.constraint.ConstraintLayout>
+
+</layout>

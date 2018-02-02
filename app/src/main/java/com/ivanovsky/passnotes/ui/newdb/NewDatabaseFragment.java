@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.ui.newdb;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -64,7 +63,7 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		this.menu = menu;
 
-		inflater.inflate(R.menu.new_database, menu);
+		inflater.inflate(R.menu.done, menu);
 	}
 
 	@Override

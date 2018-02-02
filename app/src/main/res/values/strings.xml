@@ -9,6 +9,7 @@
 
 	<!-- Common for error -->
 	<string name="error_was_occurred">Error was occurred</string>
+	<string name="empty_field">Empty field</string>
 
 	<!-- Recently opened files screen -->
 	<string name="recently_used">Recently used</string>
@@ -20,14 +21,18 @@
 	<string name="confirm">Confirm</string>
 	<string name="field_contains_illegal_character">Field contains illegal character</string>
 	<string name="you_entered_two_different_passwords_please_try_again">You entered two different passwords. Please try again.</string>
-	<string name="empty_field">Empty field</string>
 	<string name="this_field_should_match_password">This field should match password</string>
 
 	<!-- Open file screen -->
 	<string name="file_path">File path</string>
 
-	<!-- Notepads -->
+	<!-- Notepads screen -->
 	<string name="notepads">Notepads</string>
 	<string name="no_items_to_show">No items to show</string>
+
+	<!-- New notepad screen -->
+	<string name="new_notepad">New notepad</string>
+	<string name="notepad_title">Notepad title</string>
+	<string name="notepad_with_this_name_is_already_exist">Notepad with this name is already exist</string>
 
 </resources>

@@ -37,6 +37,10 @@
 			android:name=".ui.notepads.NotepadsActivity"
 			android:screenOrientation="portrait"/>
 
+		<activity
+			android:name=".ui.newnotepad.NewNotepadActivity"
+			android:screenOrientation="portrait"/>
+
 	</application>
 
 </manifest>

@@ -15,5 +15,5 @@ public interface NotepadDao {
 	List<Notepad> getAll();
 
 	@Insert
-	void insert(Notepad notepad);
+	long insert(Notepad notepad);
 }

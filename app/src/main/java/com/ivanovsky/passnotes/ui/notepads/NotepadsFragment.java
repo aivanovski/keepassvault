@@ -12,6 +12,7 @@ import com.ivanovsky.passnotes.data.safedb.model.Notepad;
 import com.ivanovsky.passnotes.databinding.NotepadsFragmentBinding;
 import com.ivanovsky.passnotes.ui.core.BaseFragment;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
+import com.ivanovsky.passnotes.ui.newnotepad.NewNotepadActivity;
 import com.ivanovsky.passnotes.ui.notepads.NotepadsAdapter.ListItem;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class NotepadsFragment extends BaseFragment implements NotepadsContract.V
 		binding.recyclerView.setLayoutManager(layoutManager);
 		binding.recyclerView.setAdapter(adapter = new NotepadsAdapter(getContext()));
 
-		binding.fab.setOnClickListener(view -> presenter.showNewNotepadScreen());
+		binding.fab.setOnClickListener(view -> showNewNotepadScreen());
 
 		return binding.getRoot();
 	}
@@ -85,12 +86,6 @@ public class NotepadsFragment extends BaseFragment implements NotepadsContract.V
 		setState(FragmentState.DISPLAYING_DATA);
 	}
 
-	@Override
-	public void showNoItems() {
-		setEmptyText(getString(R.string.no_items_to_show));
-		setState(FragmentState.EMPTY);
-	}
-
 	private List<ListItem> createAdapterItems(List<Notepad> notepads) {
 		List<ListItem> result = new ArrayList<>();
 
@@ -99,5 +94,16 @@ public class NotepadsFragment extends BaseFragment implements NotepadsContract.V
 		}
 
 		return result;
+	}
+
+	@Override
+	public void showNoItems() {
+		setEmptyText(getString(R.string.no_items_to_show));
+		setState(FragmentState.EMPTY);
+	}
+
+	@Override
+	public void showNewNotepadScreen() {
+		startActivity(NewNotepadActivity.createIntent(getContext()));
 	}
 }

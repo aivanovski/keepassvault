@@ -11,10 +11,9 @@ public class NotepadsContract {
 	interface View extends BaseView<Presenter> {
 		void showNotepads(List<Notepad> notepads);
 		void showNoItems();
+		void showNewNotepadScreen();
 	}
-
 	interface Presenter extends BasePresenter {
 		void loadData();
-		void showNewNotepadScreen();
 	}
 }

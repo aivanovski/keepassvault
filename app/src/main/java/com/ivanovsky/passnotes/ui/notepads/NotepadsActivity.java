@@ -15,8 +15,6 @@ public class NotepadsActivity extends BaseActivity {
 
 	private static final String EXTRA_DB_NAME = "dbName";
 
-	private NotepadsContract.Presenter presenter;
-
 	public static Intent createIntent(Context context, @NonNull String dbName) {
 		Intent intent = new Intent(context, NotepadsActivity.class);
 		intent.putExtra(EXTRA_DB_NAME, dbName);
@@ -46,7 +44,7 @@ public class NotepadsActivity extends BaseActivity {
 			dbName = extras.getString(EXTRA_DB_NAME);
 		}
 
-		presenter = new NotepadsPresenter(this, fragment, dbName);
+		NotepadsContract.Presenter presenter = new NotepadsPresenter(this, fragment, dbName);
 		fragment.setPresenter(presenter);
 	}
 }

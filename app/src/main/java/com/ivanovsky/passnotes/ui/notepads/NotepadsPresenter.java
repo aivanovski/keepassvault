@@ -87,8 +87,4 @@ public class NotepadsPresenter implements NotepadsContract.Presenter {
 			view.showNoItems();
 		}
 	}
-
-	@Override
-	public void showNewNotepadScreen() {
-	}
 }

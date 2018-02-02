@@ -6,13 +6,13 @@ def versionPatch = 0
 
 android {
 
-	compileSdkVersion 25
-	buildToolsVersion '25.0.2'
+	compileSdkVersion 26
+	buildToolsVersion '26.0.2'
 
 	defaultConfig {
 		applicationId 'com.ivanovsky.passnotes'
 		minSdkVersion 14
-		targetSdkVersion 25
+		targetSdkVersion 26
 		versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
 		versionName "${versionMajor}.${versionMinor}.${versionPatch}"
 		testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
@@ -42,6 +42,7 @@ android {
 
 dependencies {
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
+
 	androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
 		exclude group: 'com.android.support', module: 'support-annotations'
 	})
@@ -52,16 +53,16 @@ dependencies {
 	implementation 'com.google.dagger:dagger:2.11'
 
 	//Room
-	annotationProcessor 'android.arch.persistence.room:compiler:1.0.0-alpha3'
-	implementation 'android.arch.persistence.room:runtime:1.0.0-alpha3'
+	annotationProcessor 'android.arch.persistence.room:compiler:1.0.0'
+	implementation 'android.arch.persistence.room:runtime:1.0.0'
 
 	//Support libraries
-	implementation 'com.android.support:appcompat-v7:25.4.0'
+	implementation 'com.android.support:appcompat-v7:26.1.0'
 	implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-	implementation 'com.android.support:design:25.4.0'
-	implementation 'com.android.support:support-v4:25.4.0'
-	implementation 'com.android.support:recyclerview-v7:25.4.0'
-	implementation 'com.android.support:support-annotations:25.4.0'
+	implementation 'com.android.support:design:26.1.0'
+	implementation 'com.android.support:support-v4:26.1.0'
+	implementation 'com.android.support:recyclerview-v7:26.1.0'
+	implementation 'com.android.support:support-annotations:26.1.0'
 
 	//Java stream api
 	implementation 'com.annimon:stream:1.1.4'

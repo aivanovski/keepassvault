@@ -4,12 +4,16 @@
 	xmlns:tools="http://schemas.android.com/tools">
 
 	<LinearLayout
+		android:id="@+id/layout"
 		android:layout_width="match_parent"
 		android:layout_height="@dimen/material_list_item_height_two_line"
 		android:orientation="vertical"
 		android:gravity="center_vertical"
 		android:paddingLeft="@dimen/material_list_item_horizontal_padding"
-		android:paddingRight="@dimen/material_list_item_horizontal_padding">
+		android:paddingRight="@dimen/material_list_item_horizontal_padding"
+		android:background="@drawable/material_selector"
+		android:clickable="true"
+		android:focusable="true">
 
 		<TextView
 			android:id="@+id/primary_text"

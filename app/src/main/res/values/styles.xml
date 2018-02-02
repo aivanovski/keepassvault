@@ -35,6 +35,11 @@
 		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
 	</style>
 
+	<style name="Material.FloatingActionButton">
+		<item name="android:layout_width">@dimen/material_fab_size</item>
+		<item name="android:layout_height">@dimen/material_fab_size</item>
+	</style>
+
 	<style name="Material.PrimaryText">
 		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
 		<item name="android:textColor">@color/material_list_item_primary_text</item>
@@ -56,6 +61,32 @@
 	<style name="Material.ListItem.SecondaryText">
 		<item name="android:textSize">@dimen/material_list_item_secondary_text_size</item>
 		<item name="android:textColor">@color/material_list_item_secondary_text</item>
+	</style>
+
+	<style name="Material.EditText">
+	</style>
+
+	<style name="Material.EditText.PrimarySingleLine">
+		<item name="android:textSize">@dimen/material_edit_text_primary_text_size</item>
+		<item name="android:textColor">@color/material_edit_text_primary_text</item>
+		<item name="android:maxLines">1</item>
+		<item name="android:ellipsize">end</item>
+	</style>
+
+	<style name="Material.EditText.Password">
+		<item name="android:textSize">@dimen/material_edit_text_primary_text_size</item>
+		<item name="android:textColor">@color/material_edit_text_primary_text</item>
+		<item name="android:inputType">textWebPassword</item>
+	</style>
+
+	<style name="Notepad">
+	</style>
+
+	<style name="Notepad.TitleText">
+		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
+		<item name="android:textColor">@color/material_list_item_primary_text</item>
+		<item name="android:maxLines">1</item>
+		<item name="android:ellipsize">end</item>
 	</style>
 
 </resources>

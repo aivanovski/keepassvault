@@ -25,6 +25,22 @@
 			android:name=".ui.openfile.OpenFileActivity"
 			android:screenOrientation="portrait"/>
 
+		<activity
+			android:name=".ui.recentlyused.RecentlyUsedActivity"
+			android:screenOrientation="portrait"/>
+
+		<activity
+			android:name=".ui.newdb.NewDatabaseActivity"
+			android:screenOrientation="portrait"/>
+
+		<activity
+			android:name=".ui.notepads.NotepadsActivity"
+			android:screenOrientation="portrait"/>
+
+		<activity
+			android:name=".ui.newnotepad.NewNotepadActivity"
+			android:screenOrientation="portrait"/>
+
 	</application>
 
 </manifest>

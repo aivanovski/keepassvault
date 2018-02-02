@@ -1,15 +1,13 @@
 package com.ivanovsky.passnotes.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.ivanovsky.passnotes.App;
-import com.ivanovsky.passnotes.db.AppDatabase;
-import com.ivanovsky.passnotes.db.model.UsedFile;
+import com.ivanovsky.passnotes.data.db.AppDatabase;
 import com.ivanovsky.passnotes.ui.core.BaseActivity;
-
-import java.util.List;
+import com.ivanovsky.passnotes.ui.recentlyused.RecentlyUsedActivity;
 
 import javax.inject.Inject;
 
@@ -25,10 +23,13 @@ public class StartActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		App.getDaggerComponent().inject(this);
 
-		new Thread(() -> {
-			List<UsedFile> usedFiles = database.getUsedFileDao().getAll();
-			Log.d(TAG, "usedFiles=" + usedFiles);
-		}).start();
+		startActivity(new Intent(this, RecentlyUsedActivity.class));
+		finish();
+
+//		new Thread(() -> {
+//			List<UsedFile> usedFiles = database.getUsedFileDao().getAll();
+//			Log.d(TAG, "usedFiles=" + usedFiles);
+//		}).start();
 
 //		new Thread(() -> {
 //

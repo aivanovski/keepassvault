@@ -6,10 +6,16 @@
 	<color name="accent">#FF4081</color>
 	<color name="divider">#B6B6B6</color>
 
+	<color name="primary_text">#212121</color>
+
 	<color name="material_selector_pressed">#66999999</color>
 
+	<!-- text fields colors -->
+	<color name="material_edit_text_primary_text">@color/primary_text</color>
+
+
 	<!-- list item colors -->
-	<color name="material_list_item_primary_text">#212121</color>
+	<color name="material_list_item_primary_text">@color/primary_text</color>
 	<color name="material_list_item_secondary_text">#757575</color>
 
 	<!-- error panel -->

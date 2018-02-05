@@ -7,14 +7,13 @@ import com.ivanovsky.passnotes.data.repository.NotepadRepository;
 import com.ivanovsky.passnotes.util.FileUtils;
 
 import java.io.File;
-import java.util.concurrent.Callable;
 
-import rx.Observable;
-import rx.schedulers.Schedulers;
+import io.reactivex.Single;
 
 public class SafeDatabaseProvider {
 
 	private Context context;
+	private volatile String dbName;
 	private volatile SafeDatabase db;
 	private volatile NotepadRepository notepadRepository;
 	private final Object lock;
@@ -35,21 +34,37 @@ public class SafeDatabaseProvider {
 
 	public SafeDatabase openDatabase(String name) {
 		synchronized (lock) {
-			db = Room.databaseBuilder(context.getApplicationContext(),
-					SafeDatabase.class, name).build();
+			closeDatabase();
+
+			dbName = name;
+
+			db = Room.databaseBuilder(context.getApplicationContext(), SafeDatabase.class, name)
+					.build();
 			db.getNotepadDao().getAll();
-
-			clearAllRepositories();
-
 		}
+
 		return db;
 	}
 
-	public Observable<SafeDatabase> observeDatabase(String name) {
-		Callable<SafeDatabase> task = () -> openDatabase(name);
+	public Single<SafeDatabase> openDatabaseAsync(String name) {
+		return Single.fromCallable(() -> openDatabase(name));
+	}
 
-		return Observable.fromCallable(task)
-				.subscribeOn(Schedulers.newThread());
+	private SafeDatabase buildDatabase(String name) {
+		return Room.databaseBuilder(context.getApplicationContext(), SafeDatabase.class, name)
+				.build();
+	}
+
+	public void closeDatabase() {
+		synchronized (lock) {
+			if (db != null) {
+				db.close();
+
+				db = null;
+				dbName = null;
+				clearAllRepositories();
+			}
+		}
 	}
 
 	private void clearAllRepositories() {
@@ -67,8 +82,8 @@ public class SafeDatabaseProvider {
 		return result;
 	}
 
-	public boolean isDatabaseOpened() {
-		return db != null;
+	public String getOpenedDBName() {
+		return dbName;
 	}
 
 	public NotepadRepository getNotepadRepository() {

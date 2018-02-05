@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.data.safedb.SafeDatabaseProvider;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
+import com.ivanovsky.passnotes.event.UsedFileDataSetChangedEvent;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 import com.ivanovsky.passnotes.ui.newdb.NewDatabaseContract.Presenter;
 
@@ -14,9 +15,12 @@ import java.io.File;
 
 import javax.inject.Inject;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import de.greenrobot.event.EventBus;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class NewDatabasePresenter implements Presenter {
 
@@ -28,11 +32,13 @@ public class NewDatabasePresenter implements Presenter {
 
 	private final NewDatabaseContract.View view;
 	private final Context context;
+	private final CompositeDisposable disposables;
 
 	NewDatabasePresenter(NewDatabaseContract.View view, Context context) {
 		App.getDaggerComponent().inject(this);
 		this.view = view;
 		this.context = context;
+		this.disposables = new CompositeDisposable();
 	}
 
 	@Override
@@ -42,19 +48,20 @@ public class NewDatabasePresenter implements Presenter {
 
 	@Override
 	public void stop() {
-		//TODO: implement methods
+		disposables.clear();
 	}
 
 	@Override
 	public void createNewDatabaseFile(String filename, String password) {
 		view.setDoneButtonVisible(false);
 
-		String dbName = filename + ".db";
+		String dbName = filename + ".db";//TODO: fix db name creation
 
-		Observable.fromCallable(() -> createNewDatabase(dbName))
+		Disposable disposable = Observable.fromCallable(() -> createNewDatabase(dbName))
 				.subscribeOn(Schedulers.newThread())
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(created -> onNewDatabaseCreated(created, dbName));
+		disposables.add(disposable);
 
 		view.setState(FragmentState.LOADING);
 	}
@@ -71,6 +78,8 @@ public class NewDatabasePresenter implements Presenter {
 			usedFile.setFilePath(dbFile.getPath());
 			usedFile.setLastAccessTime(System.currentTimeMillis());
 			usedFileRepository.insert(usedFile);
+
+			EventBus.getDefault().post(new UsedFileDataSetChangedEvent());
 
 			result = true;
 		}

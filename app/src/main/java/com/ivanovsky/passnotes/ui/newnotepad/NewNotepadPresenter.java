@@ -7,13 +7,17 @@ import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.repository.NotepadRepository;
 import com.ivanovsky.passnotes.data.safedb.SafeDatabaseProvider;
 import com.ivanovsky.passnotes.data.safedb.model.Notepad;
+import com.ivanovsky.passnotes.event.NotepadDataSetChangedEvent;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 
 import javax.inject.Inject;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import de.greenrobot.event.EventBus;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 import static android.text.TextUtils.isEmpty;
 
@@ -24,11 +28,13 @@ public class NewNotepadPresenter implements NewNotepadContract.Presenter {
 
 	private final Context context;
 	private final NewNotepadContract.View view;
+	private final CompositeDisposable disposables;
 
 	NewNotepadPresenter(Context context, NewNotepadContract.View view) {
 		App.getDaggerComponent().inject(this);
 		this.context = context;
 		this.view = view;
+		this.disposables = new CompositeDisposable();
 	}
 
 	@Override
@@ -38,6 +44,7 @@ public class NewNotepadPresenter implements NewNotepadContract.Presenter {
 
 	@Override
 	public void stop() {
+		disposables.clear();
 	}
 
 	@Override
@@ -46,10 +53,11 @@ public class NewNotepadPresenter implements NewNotepadContract.Presenter {
 		if (!isEmpty(trimmedTitle)) {
 			view.setState(FragmentState.LOADING);
 
-			Observable.fromCallable(() -> createNotepad(trimmedTitle))
+			Disposable disposable = Observable.fromCallable(() -> createNotepad(trimmedTitle))
 					.subscribeOn(Schedulers.newThread())
 					.observeOn(AndroidSchedulers.mainThread())
 					.subscribe(this::onNotepadCreated);
+			disposables.add(disposable);
 
 		} else {
 			view.showTitleEditTextError(context.getString(R.string.empty_field));
@@ -64,8 +72,8 @@ public class NewNotepadPresenter implements NewNotepadContract.Presenter {
 			Notepad notepad = new Notepad();
 			notepad.setTitle(title);
 
-			repository.saveNotepad(notepad);
-			repository.notifyDataSetChanged();
+			repository.insert(notepad);
+			EventBus.getDefault().post(new NotepadDataSetChangedEvent());
 
 			result.created = true;
 		} else {

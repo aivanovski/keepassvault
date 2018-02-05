@@ -4,6 +4,7 @@ import com.ivanovsky.passnotes.ui.StartActivity;
 import com.ivanovsky.passnotes.ui.newdb.NewDatabaseActivity;
 import com.ivanovsky.passnotes.ui.newdb.NewDatabasePresenter;
 import com.ivanovsky.passnotes.ui.newnotepad.NewNotepadPresenter;
+import com.ivanovsky.passnotes.ui.notepads.NotepadsActivity;
 import com.ivanovsky.passnotes.ui.notepads.NotepadsPresenter;
 import com.ivanovsky.passnotes.ui.recentlyused.RecentlyUsedPresenter;
 
@@ -21,4 +22,5 @@ public interface AppComponent {
 	void inject(NewDatabasePresenter newDatabasePresenter);
 	void inject(NotepadsPresenter notepadsPresenter);
 	void inject(NewNotepadPresenter newNotepadPresenter);
+	void inject(NotepadsActivity notepadsActivity);
 }

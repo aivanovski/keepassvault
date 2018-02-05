@@ -68,6 +68,9 @@ dependencies {
 	implementation 'com.annimon:stream:1.1.4'
 
 	//Rx
-	implementation 'io.reactivex:rxandroid:1.2.1'
-	implementation 'io.reactivex:rxjava:1.2.7'
+	implementation 'io.reactivex.rxjava2:rxjava:2.0.6'
+	implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+
+	//EventBus
+	implementation 'de.greenrobot:eventbus:2.4.0'
 }

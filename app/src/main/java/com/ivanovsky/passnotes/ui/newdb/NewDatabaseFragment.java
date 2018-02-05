@@ -101,8 +101,7 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 		setErrorPanelTextAndState(message);
 	}
 
-	@Override
-	public void onDoneMenuClicked() {
+	private void onDoneMenuClicked() {
 		Validator validator = new Validator.Builder()
 				.validation(new NotEmptyValidation.Builder()
 						.withTarget(binding.filename)

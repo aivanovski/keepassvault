@@ -41,6 +41,12 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 	}
 
 	@Override
+	public void onPause() {
+		super.onPause();
+		presenter.stop();
+	}
+
+	@Override
 	protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		binding = DataBindingUtil.inflate(inflater, R.layout.recently_used_fragment, container, false);
 

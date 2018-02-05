@@ -22,10 +22,6 @@
 		</activity>
 
 		<activity
-			android:name=".ui.openfile.OpenFileActivity"
-			android:screenOrientation="portrait"/>
-
-		<activity
 			android:name=".ui.recentlyused.RecentlyUsedActivity"
 			android:screenOrientation="portrait"/>
 

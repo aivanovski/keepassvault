@@ -53,7 +53,7 @@ public class NewNotepadFragment extends BaseFragment implements NewNotepadContra
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		this.menu = menu;
 
-		inflater.inflate(R.menu.done, menu);
+		inflater.inflate(R.menu.base_done, menu);
 	}
 
 	@Override

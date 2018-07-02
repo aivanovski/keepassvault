@@ -4,8 +4,8 @@ import android.content.Context;
 
 import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.data.repository.NotepadRepository;
-import com.ivanovsky.passnotes.data.safedb.SafeDatabaseProvider;
+import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
+import com.ivanovsky.passnotes.data.safedb.NotepadRepository;
 import com.ivanovsky.passnotes.data.safedb.model.Notepad;
 import com.ivanovsky.passnotes.event.NotepadDataSetChangedEvent;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
@@ -24,7 +24,7 @@ import static android.text.TextUtils.isEmpty;
 public class NewNotepadPresenter implements NewNotepadContract.Presenter {
 
 	@Inject
-	SafeDatabaseProvider dbProvider;
+	EncryptedDatabaseProvider dbProvider;
 
 	private final Context context;
 	private final NewNotepadContract.View view;
@@ -67,7 +67,7 @@ public class NewNotepadPresenter implements NewNotepadContract.Presenter {
 	private CreationResult createNotepad(String title) {
 		CreationResult result = new CreationResult();
 
-		NotepadRepository repository = dbProvider.getNotepadRepository();
+		NotepadRepository repository = dbProvider.getDatabase().getNotepadRepository();
 		if (repository.isTitleFree(title)) {
 			Notepad notepad = new Notepad();
 			notepad.setTitle(title);

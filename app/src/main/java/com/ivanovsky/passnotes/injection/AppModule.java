@@ -4,7 +4,8 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.data.db.AppDatabase;
-import com.ivanovsky.passnotes.data.safedb.SafeDatabaseProvider;
+import com.ivanovsky.passnotes.data.keepass.KeepassDatabaseProvider;
+import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.settings.SettingsManager;
 
@@ -47,8 +48,7 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	public SafeDatabaseProvider provideEncryptedDBProvider() {
-		return new SafeDatabaseProvider(context);
+	public EncryptedDatabaseProvider provideEncryptedDBProvider() {
+		return new KeepassDatabaseProvider(context);
 	}
-
 }

@@ -1,28 +1,19 @@
 package com.ivanovsky.passnotes.data.safedb.model;
 
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
-
-@SuppressWarnings("WeakerAccess")
-@Entity(tableName = "notepad")
 public class Notepad {
 
-	@PrimaryKey(autoGenerate = true)
-	int id;
-
-	@ColumnInfo(name = "title")
-	String title;
+	private String uid;
+	private String title;
 
 	public Notepad() {
 	}
 
-	public int getId() {
-		return id;
+	public String getUid() {
+		return uid;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setUid(String uid) {
+		this.uid = uid;
 	}
 
 	public String getTitle() {

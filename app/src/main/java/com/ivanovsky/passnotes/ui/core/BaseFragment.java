@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.ui.core;
 
-import android.app.Activity;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;

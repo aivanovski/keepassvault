@@ -1,12 +1,12 @@
 package com.ivanovsky.passnotes;
 
-import android.app.Application;
+import android.support.multidex.MultiDexApplication;
 
 import com.ivanovsky.passnotes.injection.AppComponent;
 import com.ivanovsky.passnotes.injection.AppModule;
 import com.ivanovsky.passnotes.injection.DaggerAppComponent;
 
-public class App extends Application {
+public class App extends MultiDexApplication {
 
 	private static AppComponent component;
 

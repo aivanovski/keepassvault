@@ -3,12 +3,16 @@ package com.ivanovsky.passnotes.ui.notepads;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.App;
-import com.ivanovsky.passnotes.data.repository.NotepadRepository;
-import com.ivanovsky.passnotes.data.safedb.SafeDatabaseProvider;
+import com.ivanovsky.passnotes.data.DbDescriptor;
+import com.ivanovsky.passnotes.data.keepass.KeepassDatabaseKey;
+import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseKey;
+import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
+import com.ivanovsky.passnotes.data.safedb.NotepadRepository;
 import com.ivanovsky.passnotes.data.safedb.model.Notepad;
 import com.ivanovsky.passnotes.event.NotepadDataSetChangedEvent;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 
+import java.io.File;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -22,18 +26,18 @@ import io.reactivex.schedulers.Schedulers;
 public class NotepadsPresenter implements NotepadsContract.Presenter {
 
 	@Inject
-	SafeDatabaseProvider safeDbProvider;
+	EncryptedDatabaseProvider safeDbProvider;
 
-	private final String dbName;
+	private final DbDescriptor dbDescriptor;
 	private final Context context;
 	private final NotepadsContract.View view;
 	private final CompositeDisposable disposables;
 
-	NotepadsPresenter(Context context, NotepadsContract.View view, String dbName) {
+	NotepadsPresenter(Context context, NotepadsContract.View view, DbDescriptor dbDescriptor) {
 		App.getDaggerComponent().inject(this);
 		this.context = context;
 		this.view = view;
-		this.dbName = dbName;
+		this.dbDescriptor = dbDescriptor;
 		this.disposables = new CompositeDisposable();
 	}
 
@@ -52,9 +56,9 @@ public class NotepadsPresenter implements NotepadsContract.Presenter {
 
 	@Override
 	public void loadData() {
-		String openedDBName = safeDbProvider.getOpenedDBName();
-		if (openedDBName != null && openedDBName.equals(dbName)) {
-			NotepadRepository repository = safeDbProvider.getNotepadRepository();
+		String openedDBPath = safeDbProvider.getOpenedDatabasePath();
+		if (openedDBPath != null && openedDBPath.equals(dbDescriptor.getFile().getPath())) {
+			NotepadRepository repository = safeDbProvider.getDatabase().getNotepadRepository();
 
 			Disposable disposable = repository.getAllNotepads()
 					.subscribeOn(Schedulers.newThread())
@@ -63,7 +67,9 @@ public class NotepadsPresenter implements NotepadsContract.Presenter {
 			disposables.add(disposable);
 
 		} else {
-			Disposable disposable = safeDbProvider.openDatabaseAsync(dbName + ".db")
+			KeepassDatabaseKey key = new KeepassDatabaseKey(dbDescriptor.getPassword());
+
+			Disposable disposable = safeDbProvider.openAsync(key, dbDescriptor.getFile())
 					.subscribeOn(Schedulers.newThread())
 					.observeOn(AndroidSchedulers.mainThread())
 					.subscribe(db -> onDbOpened());
@@ -72,7 +78,7 @@ public class NotepadsPresenter implements NotepadsContract.Presenter {
 	}
 
 	private void onDbOpened() {
-		NotepadRepository repository = safeDbProvider.getNotepadRepository();
+		NotepadRepository repository = safeDbProvider.getDatabase().getNotepadRepository();
 
 		Disposable disposable = repository.getAllNotepads()
 				.subscribeOn(Schedulers.newThread())

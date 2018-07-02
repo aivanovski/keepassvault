@@ -7,10 +7,52 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent">
 
-		<android.support.v7.widget.RecyclerView
-			android:id="@+id/recycler_view"
+		<android.support.constraint.ConstraintLayout
+			android:id="@+id/content"
 			android:layout_width="match_parent"
-			android:layout_height="match_parent"/>
+			android:layout_height="match_parent">
+
+			<Spinner
+				android:id="@+id/file_spinner"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="@dimen/element_margin"
+				android:layout_marginLeft="@dimen/element_margin"
+				android:layout_marginRight="@dimen/element_margin"
+				app:layout_constraintTop_toTopOf="parent"/>
+
+			<android.support.design.widget.TextInputLayout
+				android:id="@+id/password_layout"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="@dimen/element_margin"
+				android:layout_marginLeft="@dimen/element_margin"
+				android:layout_marginRight="@dimen/element_margin"
+				app:layout_constraintTop_toBottomOf="@id/file_spinner">
+
+				<android.support.design.widget.TextInputEditText
+					android:id="@+id/password"
+					style="@style/Material.EditText.Password"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:hint="@string/password"/>
+
+			</android.support.design.widget.TextInputLayout>
+
+			<Button
+				style="@style/Material.FlatButton"
+				android:id="@+id/unlock_btn"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="@dimen/element_margin"
+				android:layout_marginLeft="@dimen/element_margin"
+				android:layout_marginRight="@dimen/element_margin"
+				android:text="@string/unlock"
+				app:layout_constraintTop_toBottomOf="@id/password_layout"/>
+
+
+		</android.support.constraint.ConstraintLayout>
+
 
 		<android.support.design.widget.FloatingActionButton
 			android:id="@+id/fab"

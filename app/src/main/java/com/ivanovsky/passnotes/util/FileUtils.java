@@ -29,6 +29,18 @@ public class FileUtils {
 	}
 
 	@Nullable
+	public static File getKeepassDir(@NonNull Context context) {
+		File result = null;
+
+		File dbDir = context.getDir("keepass-databases", Context.MODE_PRIVATE);
+		if (dbDir != null && dbDir.exists()) {
+			result = dbDir;
+		}
+
+		return result;
+	}
+
+	@Nullable
 	public static String getFileNameFromPath(@Nullable String filePath) {
 		if (filePath == null) {
 			return null;

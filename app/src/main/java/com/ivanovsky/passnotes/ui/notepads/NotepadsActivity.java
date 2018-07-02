@@ -10,22 +10,26 @@ import android.view.MenuItem;
 
 import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.data.safedb.SafeDatabaseProvider;
+import com.ivanovsky.passnotes.data.DbDescriptor;
+import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding;
 import com.ivanovsky.passnotes.ui.core.BaseActivity;
+
+import java.io.File;
 
 import javax.inject.Inject;
 
 public class NotepadsActivity extends BaseActivity {
 
-	private static final String EXTRA_DB_NAME = "dbName";
+	private static final String EXTRA_DB_DESCRIPTOR = "dbDescriptor";
 
 	@Inject
-	SafeDatabaseProvider dbProvider;
+	EncryptedDatabaseProvider dbProvider;
 
-	public static Intent createIntent(Context context, @NonNull String dbName) {
+	public static Intent createIntent(Context context,
+									  @NonNull DbDescriptor dbDescriptor) {
 		Intent intent = new Intent(context, NotepadsActivity.class);
-		intent.putExtra(EXTRA_DB_NAME, dbName);
+		intent.putExtra(EXTRA_DB_DESCRIPTOR, dbDescriptor);
 		return intent;
 	}
 
@@ -46,15 +50,14 @@ public class NotepadsActivity extends BaseActivity {
 				.replace(R.id.fragment_container, fragment)
 				.commit();
 
-		String dbName = null;
-
+		DbDescriptor dbDescriptor = null;
 		if (getIntent() != null && getIntent().getExtras() != null) {
 			Bundle extras = getIntent().getExtras();
 
-			dbName = extras.getString(EXTRA_DB_NAME);
+			dbDescriptor = extras.getParcelable(EXTRA_DB_DESCRIPTOR);
 		}
 
-		NotepadsContract.Presenter presenter = new NotepadsPresenter(this, fragment, dbName);
+		NotepadsContract.Presenter presenter = new NotepadsPresenter(this, fragment, dbDescriptor);
 		fragment.setPresenter(presenter);
 	}
 
@@ -62,8 +65,8 @@ public class NotepadsActivity extends BaseActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == android.R.id.home) {
 
-			if (dbProvider.getOpenedDBName() != null) {
-				dbProvider.closeDatabase();
+			if (dbProvider.isOpened()) {
+				dbProvider.close();
 			}
 
 			onBackPressed();

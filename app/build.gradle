@@ -17,6 +17,7 @@ android {
 		versionName "${versionMajor}.${versionMinor}.${versionPatch}"
 		testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
 		vectorDrawables.useSupportLibrary true
+		multiDexEnabled true
 	}
 
 	dataBinding {
@@ -90,7 +91,15 @@ dependencies {
 	//EventBus
 	implementation 'de.greenrobot:eventbus:2.4.0'
 
-	//Google Drive API
-	implementation 'com.google.android.gms:play-services-drive:11.8.0'
-	implementation 'com.google.android.gms:play-services-auth:11.8.0'
+//	Google Drive API
+//	implementation 'com.google.android.gms:play-services-drive:11.8.0'
+//	implementation 'com.google.android.gms:play-services-auth:11.8.0'
+
+	//KeePassJava2
+	implementation project(':libs:KeePassJava2-database')
+	implementation project(':libs:KeePassJava2-kdbx')
+	implementation project(':libs:KeePassJava2-simple')
+
+	//MultiDex
+	implementation 'com.android.support:multidex:1.0.3'
 }

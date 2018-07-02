@@ -14,6 +14,7 @@
 	<!-- Recently opened files screen -->
 	<string name="recently_used">Recently used</string>
 	<string name="no_files_to_open">No files to open</string>
+	<string name="unlock">Unlock</string>
 
 	<!-- New database screen -->
 	<string name="file_name">File name</string>

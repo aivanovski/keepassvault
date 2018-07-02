@@ -3,30 +3,29 @@ package com.ivanovsky.passnotes.ui.recentlyused;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.R;
+import com.ivanovsky.passnotes.data.DbDescriptor;
 import com.ivanovsky.passnotes.databinding.RecentlyUsedFragmentBinding;
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.ui.core.BaseFragment;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
-import com.ivanovsky.passnotes.ui.core.adapter.TwoLineTwoTextAdapter;
 import com.ivanovsky.passnotes.ui.newdb.NewDatabaseActivity;
 import com.ivanovsky.passnotes.ui.notepads.NotepadsActivity;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static com.ivanovsky.passnotes.util.FileUtils.getFileNameFromPath;
 
 public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedContract.View {
 
-	private TwoLineTwoTextAdapter adapter;
+	private UsedFile selectedUsedFile;
+	private ArrayAdapter<String> fileAdapter;
 	private RecentlyUsedFragmentBinding binding;
 	private RecentlyUsedContract.Presenter presenter;
 
@@ -50,23 +49,23 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 	protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		binding = DataBindingUtil.inflate(inflater, R.layout.recently_used_fragment, container, false);
 
-		LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
-		DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(getContext(), layoutManager.getOrientation());
-
-		adapter = new TwoLineTwoTextAdapter(getContext());
-
-		binding.recyclerView.setLayoutManager(layoutManager);
-		binding.recyclerView.addItemDecoration(dividerItemDecoration);
-		binding.recyclerView.setAdapter(adapter);
+		fileAdapter = new ArrayAdapter<>(getContext(),
+				android.R.layout.simple_spinner_item);
+		fileAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		binding.fileSpinner.setAdapter(fileAdapter);
 
 		binding.fab.setOnClickListener(view -> showNewDatabaseScreen());
+		binding.unlockBtn.setOnClickListener(view -> onUnlockButtonClicked());
 
 		return binding.getRoot();
 	}
 
+	private void onUnlockButtonClicked() {
+	}
+
 	@Override
 	protected int getContentContainerId() {
-		return R.id.recycler_view;
+		return R.id.content;
 	}
 
 	@Override
@@ -92,13 +91,25 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 
 	@Override
 	public void showRecentlyUsedFiles(List<UsedFile> files) {
-		adapter.setItems(createAdapterItems(files));
-		adapter.setOnListItemClickListener(position -> onFileClicked(files.get(position)));
+		fileAdapter.clear();
+		fileAdapter.addAll(createAdapterItems(files));
+
+		binding.fileSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				onFileSelected(files.get(position));
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+		});
+
 		setState(FragmentState.DISPLAYING_DATA);
 	}
 
-	private void onFileClicked(UsedFile file) {
-		showNotepadsScreen(file);
+	private void onFileSelected(UsedFile file) {
+		selectedUsedFile = file;
 	}
 
 	@Override
@@ -108,9 +119,8 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 	}
 
 	@Override
-	public void showNotepadsScreen(UsedFile file) {
-		String dbName = getFileNameFromPath(file.getFilePath());
-		startActivity(NotepadsActivity.createIntent(getContext(), dbName));
+	public void showNotepadsScreen(DbDescriptor descriptor) {
+		startActivity(NotepadsActivity.createIntent(getContext(), descriptor));
 	}
 
 	@Override
@@ -118,21 +128,9 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 		startActivity(new Intent(getContext(), NewDatabaseActivity.class));
 	}
 
-	private List<TwoLineTwoTextAdapter.ListItem> createAdapterItems(List<UsedFile> files) {
-		List<TwoLineTwoTextAdapter.ListItem> result = new ArrayList<>();
-
-		for (UsedFile file : files) {
-			String filePath = file.getFilePath();
-
-			if (TextUtils.isEmpty(filePath)) {
-				continue;
-			}
-
-			String fileName = getFileNameFromPath(filePath);
-
-			result.add(new TwoLineTwoTextAdapter.ListItem(fileName, filePath));
-		}
-
-		return result;
+	private List<String> createAdapterItems(List<UsedFile> files) {
+		return Stream.of(files)
+				.map(UsedFile::getFilePath)
+				.collect(Collectors.toList());
 	}
 }

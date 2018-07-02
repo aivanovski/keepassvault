@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ivanovsky.passnotes.R;
+import com.ivanovsky.passnotes.data.DbDescriptor;
 import com.ivanovsky.passnotes.databinding.NewDatabaseFragmentBinding;
 import com.ivanovsky.passnotes.ui.core.BaseFragment;
 import com.ivanovsky.passnotes.ui.core.validation.BaseValidation;
@@ -87,12 +88,12 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	}
 
 	@Override
-	public void showNotepadsScreen(String dbName) {
+	public void showNotepadsScreen(DbDescriptor dbDescriptor) {
 		Activity activity = getActivity();
 		if (activity != null) {
 			activity.finish();
 
-			startActivity(NotepadsActivity.createIntent(getContext(), dbName));
+			startActivity(NotepadsActivity.createIntent(getContext(), dbDescriptor));
 		}
 	}
 

@@ -8,7 +8,7 @@ public interface EncryptedDatabaseProvider {
 
 	boolean isOpened();
 	EncryptedDatabase getDatabase();
-	EncryptedDatabase open(EncryptedDatabaseKey key, File file);
+	EncryptedDatabase open(EncryptedDatabaseKey key, File file) throws  DbOpenException;
 	Single<EncryptedDatabase> openAsync(EncryptedDatabaseKey key, File file);
 	boolean createNew(EncryptedDatabaseKey key, File file);
 	String getOpenedDatabasePath();

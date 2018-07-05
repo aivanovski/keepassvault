@@ -3,11 +3,15 @@ package com.ivanovsky.passnotes.ui.recentlyused;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.App;
+import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
+import com.ivanovsky.passnotes.data.keepass.KeepassDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
+import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
 import com.ivanovsky.passnotes.event.UsedFileDataSetChangedEvent;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 
+import java.io.File;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -24,6 +28,9 @@ public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
 
 	@Inject
 	UsedFileRepository repository;
+
+	@Inject
+	EncryptedDatabaseProvider dbProvider;
 
 	private Context context;
 	private RecentlyUsedContract.View view;
@@ -66,6 +73,33 @@ public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
 		} else {
 			view.showNoItems();
 		}
+	}
+
+	@Override
+	public void onUnlockButtonClicked(String password, File dbFile) {
+		view.showLoading();
+
+		if (dbProvider.isOpened()) {
+			dbProvider.close();
+		}
+
+		KeepassDatabaseKey key = new KeepassDatabaseKey(password);
+
+		dbProvider.openAsync(key, dbFile)
+				.subscribeOn(Schedulers.newThread())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe(db -> onDbOpened(),
+						this::onFailedToOpenDb);
+
+//		view.showNotepadsScreen(new DbDescriptor(password, dbFile));
+	}
+
+	private void onFailedToOpenDb(Throwable exception) {
+		view.showError(context.getString(R.string.error_was_occurred));
+	}
+
+	private void onDbOpened() {
+		view.showNotepadsScreen();
 	}
 
 	public void onEvent(UsedFileDataSetChangedEvent event) {

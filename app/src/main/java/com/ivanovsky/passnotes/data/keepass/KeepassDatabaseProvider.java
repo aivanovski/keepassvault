@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.keepass;
 
 import android.content.Context;
 
+import com.ivanovsky.passnotes.data.safedb.DbOpenException;
 import com.ivanovsky.passnotes.data.safedb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseKey;
 import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
@@ -50,7 +51,7 @@ public class KeepassDatabaseProvider implements EncryptedDatabaseProvider {
 	}
 
 	@Override
-	public EncryptedDatabase open(EncryptedDatabaseKey key, File file) {
+	public EncryptedDatabase open(EncryptedDatabaseKey key, File file) throws DbOpenException {
 		synchronized (lock) {
 			if (db != null) {
 				close();
@@ -59,13 +60,19 @@ public class KeepassDatabaseProvider implements EncryptedDatabaseProvider {
 			Credentials credentials = new KdbxCreds(key.getKey());
 
 			InputStream in = null;
-			Database keepassDb = null;
+			Database keepassDb;
 
 			try {
 				in = new BufferedInputStream(new FileInputStream(file));
 				keepassDb = SimpleDatabase.load(credentials, in);
+
+				db = new KeepassDatabase(keepassDb);
+				dbFile = file;
+
 			} catch (Exception e) {
 				Logger.printStackTrace(e);
+				throw new DbOpenException(e);
+
 			} finally {
 				if (in != null) {
 					try {
@@ -74,11 +81,6 @@ public class KeepassDatabaseProvider implements EncryptedDatabaseProvider {
 						Logger.printStackTrace(e);
 					}
 				}
-			}
-
-			if (keepassDb != null) {
-				db = new KeepassDatabase(keepassDb);
-				dbFile = file;
 			}
 		}
 

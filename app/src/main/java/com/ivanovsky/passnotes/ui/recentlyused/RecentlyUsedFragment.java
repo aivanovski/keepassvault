@@ -12,7 +12,6 @@ import android.widget.ArrayAdapter;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.data.DbDescriptor;
 import com.ivanovsky.passnotes.databinding.RecentlyUsedFragmentBinding;
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.ui.core.BaseFragment;
@@ -20,6 +19,7 @@ import com.ivanovsky.passnotes.ui.core.FragmentState;
 import com.ivanovsky.passnotes.ui.newdb.NewDatabaseActivity;
 import com.ivanovsky.passnotes.ui.notepads.NotepadsActivity;
 
+import java.io.File;
 import java.util.List;
 
 public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedContract.View {
@@ -61,6 +61,10 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 	}
 
 	private void onUnlockButtonClicked() {
+		String password = binding.password.getText().toString().trim();
+
+		File dbFile = new File(selectedUsedFile.getFilePath());
+		presenter.onUnlockButtonClicked(password, dbFile);
 	}
 
 	@Override
@@ -91,6 +95,8 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 
 	@Override
 	public void showRecentlyUsedFiles(List<UsedFile> files) {
+		selectedUsedFile = files.get(0);
+
 		fileAdapter.clear();
 		fileAdapter.addAll(createAdapterItems(files));
 
@@ -108,6 +114,12 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 		setState(FragmentState.DISPLAYING_DATA);
 	}
 
+	private List<String> createAdapterItems(List<UsedFile> files) {
+		return Stream.of(files)
+				.map(UsedFile::getFilePath)
+				.collect(Collectors.toList());
+	}
+
 	private void onFileSelected(UsedFile file) {
 		selectedUsedFile = file;
 	}
@@ -119,8 +131,8 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 	}
 
 	@Override
-	public void showNotepadsScreen(DbDescriptor descriptor) {
-		startActivity(NotepadsActivity.createIntent(getContext(), descriptor));
+	public void showNotepadsScreen() {
+		startActivity(NotepadsActivity.createIntent(getContext()));
 	}
 
 	@Override
@@ -128,9 +140,14 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 		startActivity(new Intent(getContext(), NewDatabaseActivity.class));
 	}
 
-	private List<String> createAdapterItems(List<UsedFile> files) {
-		return Stream.of(files)
-				.map(UsedFile::getFilePath)
-				.collect(Collectors.toList());
+	@Override
+	public void showLoading() {
+		setState(FragmentState.LOADING);
+	}
+
+	@Override
+	public void showError(String message) {
+		setState(FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL);
+		setErrorText(message);
 	}
 }

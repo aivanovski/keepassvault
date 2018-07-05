@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MenuItem;
 
@@ -15,22 +14,15 @@ import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding;
 import com.ivanovsky.passnotes.ui.core.BaseActivity;
 
-import java.io.File;
-
 import javax.inject.Inject;
 
 public class NotepadsActivity extends BaseActivity {
 
-	private static final String EXTRA_DB_DESCRIPTOR = "dbDescriptor";
-
 	@Inject
 	EncryptedDatabaseProvider dbProvider;
 
-	public static Intent createIntent(Context context,
-									  @NonNull DbDescriptor dbDescriptor) {
-		Intent intent = new Intent(context, NotepadsActivity.class);
-		intent.putExtra(EXTRA_DB_DESCRIPTOR, dbDescriptor);
-		return intent;
+	public static Intent createIntent(Context context) {
+		return new Intent(context, NotepadsActivity.class);
 	}
 
 	@Override
@@ -50,14 +42,7 @@ public class NotepadsActivity extends BaseActivity {
 				.replace(R.id.fragment_container, fragment)
 				.commit();
 
-		DbDescriptor dbDescriptor = null;
-		if (getIntent() != null && getIntent().getExtras() != null) {
-			Bundle extras = getIntent().getExtras();
-
-			dbDescriptor = extras.getParcelable(EXTRA_DB_DESCRIPTOR);
-		}
-
-		NotepadsContract.Presenter presenter = new NotepadsPresenter(this, fragment, dbDescriptor);
+		NotepadsContract.Presenter presenter = new NotepadsPresenter(this, fragment);
 		fragment.setPresenter(presenter);
 	}
 

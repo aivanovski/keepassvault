@@ -20,7 +20,7 @@ import com.ivanovsky.passnotes.ui.core.validation.IdenticalContentValidation;
 import com.ivanovsky.passnotes.ui.core.validation.NotEmptyValidation;
 import com.ivanovsky.passnotes.ui.core.validation.PatternValidation;
 import com.ivanovsky.passnotes.ui.core.validation.Validator;
-import com.ivanovsky.passnotes.ui.notepads.NotepadsActivity;
+import com.ivanovsky.passnotes.ui.groups.GroupsActivity;
 
 import java.util.regex.Pattern;
 
@@ -93,7 +93,7 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 		if (activity != null) {
 			activity.finish();
 
-			startActivity(NotepadsActivity.createIntent(getContext(), dbDescriptor));
+			startActivity(GroupsActivity.createIntent(getContext()));
 		}
 	}
 

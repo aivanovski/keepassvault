@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.ui.notepads;
+package com.ivanovsky.passnotes.ui.groups;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,20 +9,19 @@ import android.view.MenuItem;
 
 import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.data.DbDescriptor;
 import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding;
 import com.ivanovsky.passnotes.ui.core.BaseActivity;
 
 import javax.inject.Inject;
 
-public class NotepadsActivity extends BaseActivity {
+public class GroupsActivity extends BaseActivity {
 
 	@Inject
 	EncryptedDatabaseProvider dbProvider;
 
 	public static Intent createIntent(Context context) {
-		return new Intent(context, NotepadsActivity.class);
+		return new Intent(context, GroupsActivity.class);
 	}
 
 	@Override
@@ -33,16 +32,16 @@ public class NotepadsActivity extends BaseActivity {
 		CoreBaseActivityBinding binding = DataBindingUtil.setContentView(this, R.layout.core_base_activity);
 
 		setSupportActionBar(binding.toolBar);
-		getCurrentActionBar().setTitle(R.string.notepads);
+		getCurrentActionBar().setTitle(R.string.groups);
 		getCurrentActionBar().setDisplayHomeAsUpEnabled(true);
 
-		NotepadsFragment fragment = NotepadsFragment.newInstance();
+		GroupsFragment fragment = GroupsFragment.newInstance();
 
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.fragment_container, fragment)
 				.commit();
 
-		NotepadsContract.Presenter presenter = new NotepadsPresenter(this, fragment);
+		GroupsContract.Presenter presenter = new GroupsPresenter(this, fragment);
 		fragment.setPresenter(presenter);
 	}
 

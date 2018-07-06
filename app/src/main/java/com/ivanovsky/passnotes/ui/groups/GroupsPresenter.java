@@ -1,34 +1,38 @@
-package com.ivanovsky.passnotes.ui.notepads;
+package com.ivanovsky.passnotes.ui.groups;
 
 import android.content.Context;
 
 import com.ivanovsky.passnotes.App;
+import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
-import com.ivanovsky.passnotes.data.safedb.NotepadRepository;
-import com.ivanovsky.passnotes.data.safedb.model.Notepad;
-import com.ivanovsky.passnotes.event.NotepadDataSetChangedEvent;
+import com.ivanovsky.passnotes.data.safedb.GroupRepository;
+import com.ivanovsky.passnotes.data.safedb.model.Group;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-import de.greenrobot.event.EventBus;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class NotepadsPresenter implements NotepadsContract.Presenter {
+public class GroupsPresenter implements
+		GroupsContract.Presenter,
+		ObserverBus.GroupDataSetObserver {
 
 	@Inject
 	EncryptedDatabaseProvider dbProvider;
 
+	@Inject
+	ObserverBus observerBus;
+
 	private final Context context;
-	private final NotepadsContract.View view;
+	private final GroupsContract.View view;
 	private final CompositeDisposable disposables;
 
-	NotepadsPresenter(Context context, NotepadsContract.View view) {
+	GroupsPresenter(Context context, GroupsContract.View view) {
 		App.getDaggerComponent().inject(this);
 		this.context = context;
 		this.view = view;
@@ -38,28 +42,32 @@ public class NotepadsPresenter implements NotepadsContract.Presenter {
 	@Override
 	public void start() {
 		view.setState(FragmentState.LOADING);
-		EventBus.getDefault().register(this);
+		observerBus.register(this);
 		loadData();
 	}
 
 	@Override
 	public void stop() {
-		EventBus.getDefault().unregister(this);
+		observerBus.unregister(this);
 		disposables.clear();
 	}
 
 	@Override
 	public void loadData() {
-		
+		if (dbProvider.isOpened()) {
+
+		} else {
+
+		}
 
 //		String openedDBPath = dbProvider.getOpenedDatabasePath();
 //		if (openedDBPath != null && openedDBPath.equals(dbDescriptor.getFile().getPath())) {
-//			NotepadRepository repository = dbProvider.getDatabase().getNotepadRepository();
+//			GroupRepository repository = dbProvider.getDatabase().getNotepadRepository();
 //
 //			Disposable disposable = repository.getAllNotepads()
 //					.subscribeOn(Schedulers.newThread())
 //					.observeOn(AndroidSchedulers.mainThread())
-//					.subscribe(this::onNotepadsLoaded);
+//					.subscribe(this::onGroupsLoaded);
 //			disposables.add(disposable);
 //
 //		} else {
@@ -74,24 +82,25 @@ public class NotepadsPresenter implements NotepadsContract.Presenter {
 	}
 
 	private void onDbOpened() {
-		NotepadRepository repository = dbProvider.getDatabase().getNotepadRepository();
+		GroupRepository repository = dbProvider.getDatabase().getNotepadRepository();
 
 		Disposable disposable = repository.getAllNotepads()
 				.subscribeOn(Schedulers.newThread())
 				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe(this::onNotepadsLoaded);
+				.subscribe(this::onGroupsLoaded);
 		disposables.add(disposable);
 	}
 
-	private void onNotepadsLoaded(List<Notepad> notepads) {
-		if (notepads.size() != 0) {
-			view.showNotepads(notepads);
+	private void onGroupsLoaded(List<Group> groups) {
+		if (groups.size() != 0) {
+			view.showGroups(groups);
 		} else {
 			view.showNoItems();
 		}
 	}
 
-	public void onEvent(NotepadDataSetChangedEvent event) {
+	@Override
+	public void onGroupDataSetChanged() {
 		loadData();
 	}
 }

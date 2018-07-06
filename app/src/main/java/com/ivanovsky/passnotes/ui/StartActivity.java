@@ -7,7 +7,7 @@ import android.support.annotation.Nullable;
 import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.data.db.AppDatabase;
 import com.ivanovsky.passnotes.ui.core.BaseActivity;
-import com.ivanovsky.passnotes.ui.recentlyused.RecentlyUsedActivity;
+import com.ivanovsky.passnotes.ui.unlock.UnlockActivity;
 
 import javax.inject.Inject;
 
@@ -23,7 +23,7 @@ public class StartActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		App.getDaggerComponent().inject(this);
 
-		startActivity(new Intent(this, RecentlyUsedActivity.class));
+		startActivity(new Intent(this, UnlockActivity.class));
 		finish();
 
 //		new Thread(() -> {

@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.ui.newnotepad;
+package com.ivanovsky.passnotes.ui.newgroup;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -11,18 +11,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.databinding.NewNotepadFragmentBinding;
+import com.ivanovsky.passnotes.databinding.NewGroupFragmentBinding;
 import com.ivanovsky.passnotes.ui.core.BaseFragment;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 
-public class NewNotepadFragment extends BaseFragment implements NewNotepadContract.View {
+public class NewGroupFragment extends BaseFragment implements NewGroupContract.View {
 
-	private NewNotepadContract.Presenter presenter;
-	private NewNotepadFragmentBinding binding;
-	private Menu menu;
+	private NewGroupContract.Presenter presenter;
+	private NewGroupFragmentBinding binding;
 
-	public static NewNotepadFragment newInstance() {
-		return new NewNotepadFragment();
+	public static NewGroupFragment newInstance() {
+		return new NewGroupFragment();
 	}
 
 	@Override
@@ -45,14 +44,12 @@ public class NewNotepadFragment extends BaseFragment implements NewNotepadContra
 
 	@Override
 	protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		binding = DataBindingUtil.inflate(inflater, R.layout.new_notepad_fragment, container, false);
+		binding = DataBindingUtil.inflate(inflater, R.layout.new_group_fragment, container, false);
 		return binding.getRoot();
 	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		this.menu = menu;
-
 		inflater.inflate(R.menu.base_done, menu);
 	}
 
@@ -68,11 +65,11 @@ public class NewNotepadFragment extends BaseFragment implements NewNotepadContra
 
 	private void onDoneMenuClicked() {
 		String title = binding.notepadTitle.getText().toString();
-		presenter.createNewNotepad(title);
+		presenter.createNewGroup(title);
 	}
 
 	@Override
-	public void setPresenter(NewNotepadContract.Presenter presenter) {
+	public void setPresenter(NewGroupContract.Presenter presenter) {
 		this.presenter = presenter;
 	}
 

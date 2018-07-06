@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.ui.notepads;
+package com.ivanovsky.passnotes.ui.groups;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -8,24 +8,24 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.data.safedb.model.Notepad;
-import com.ivanovsky.passnotes.databinding.NotepadsFragmentBinding;
+import com.ivanovsky.passnotes.data.safedb.model.Group;
+import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding;
 import com.ivanovsky.passnotes.ui.core.BaseFragment;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
-import com.ivanovsky.passnotes.ui.newnotepad.NewNotepadActivity;
-import com.ivanovsky.passnotes.ui.notepads.NotepadsAdapter.ListItem;
+import com.ivanovsky.passnotes.ui.newgroup.NewGroupActivity;
+import com.ivanovsky.passnotes.ui.groups.GroupsAdapter.ListItem;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotepadsFragment extends BaseFragment implements NotepadsContract.View {
+public class GroupsFragment extends BaseFragment implements GroupsContract.View {
 
-	private NotepadsContract.Presenter presenter;
-	private NotepadsFragmentBinding binding;
-	private NotepadsAdapter adapter;
+	private GroupsContract.Presenter presenter;
+	private GroupsFragmentBinding binding;
+	private GroupsAdapter adapter;
 
-	public static NotepadsFragment newInstance() {
-		return new NotepadsFragment();
+	public static GroupsFragment newInstance() {
+		return new GroupsFragment();
 	}
 
 	@Override
@@ -42,14 +42,14 @@ public class NotepadsFragment extends BaseFragment implements NotepadsContract.V
 
 	@Override
 	protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		binding = DataBindingUtil.inflate(inflater, R.layout.notepads_fragment, container, false);
+		binding = DataBindingUtil.inflate(inflater, R.layout.groups_fragment, container, false);
 
 		GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
 
 		binding.recyclerView.setLayoutManager(layoutManager);
-		binding.recyclerView.setAdapter(adapter = new NotepadsAdapter(getContext()));
+		binding.recyclerView.setAdapter(adapter = new GroupsAdapter(getContext()));
 
-		binding.fab.setOnClickListener(view -> showNewNotepadScreen());
+		binding.fab.setOnClickListener(view -> showNewGroupScreen());
 
 		return binding.getRoot();
 	}
@@ -76,21 +76,21 @@ public class NotepadsFragment extends BaseFragment implements NotepadsContract.V
 	}
 
 	@Override
-	public void setPresenter(NotepadsContract.Presenter presenter) {
+	public void setPresenter(GroupsContract.Presenter presenter) {
 		this.presenter = presenter;
 	}
 
 	@Override
-	public void showNotepads(List<Notepad> notepads) {
-		adapter.setItems(createAdapterItems(notepads));
+	public void showGroups(List<Group> groups) {
+		adapter.setItems(createAdapterItems(groups));
 		setState(FragmentState.DISPLAYING_DATA);
 	}
 
-	private List<ListItem> createAdapterItems(List<Notepad> notepads) {
+	private List<ListItem> createAdapterItems(List<Group> groups) {
 		List<ListItem> result = new ArrayList<>();
 
-		for (Notepad notepad : notepads) {
-			result.add(new ListItem(notepad.getTitle()));
+		for (Group group : groups) {
+			result.add(new ListItem(group.getTitle()));
 		}
 
 		return result;
@@ -103,7 +103,7 @@ public class NotepadsFragment extends BaseFragment implements NotepadsContract.V
 	}
 
 	@Override
-	public void showNewNotepadScreen() {
-		startActivity(NewNotepadActivity.createIntent(getContext()));
+	public void showNewGroupScreen() {
+		startActivity(NewGroupActivity.createIntent(getContext()));
 	}
 }

@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.ui.notepads;
+package com.ivanovsky.passnotes.ui.groups;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
@@ -7,17 +7,17 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.databinding.ListItemNotepadBinding;
+import com.ivanovsky.passnotes.databinding.ListItemGroupBinding;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotepadsAdapter extends RecyclerView.Adapter<NotepadsAdapter.ViewHolder> {
+public class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.ViewHolder> {
 
 	private final LayoutInflater inflater;
 	private final List<ListItem> items;
 
-	public NotepadsAdapter(Context context) {
+	public GroupsAdapter(Context context) {
 		this.inflater = LayoutInflater.from(context);
 		this.items = new ArrayList<>();
 	}
@@ -34,8 +34,8 @@ public class NotepadsAdapter extends RecyclerView.Adapter<NotepadsAdapter.ViewHo
 
 	@Override
 	public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-		ListItemNotepadBinding binding = DataBindingUtil.inflate(inflater,
-				R.layout.list_item_notepad, parent, false);
+		ListItemGroupBinding binding = DataBindingUtil.inflate(inflater,
+				R.layout.list_item_group, parent, false);
 
 		return new ViewHolder(binding);
 	}
@@ -53,9 +53,9 @@ public class NotepadsAdapter extends RecyclerView.Adapter<NotepadsAdapter.ViewHo
 
 	static class ViewHolder extends RecyclerView.ViewHolder {
 
-		final ListItemNotepadBinding binding;
+		final ListItemGroupBinding binding;
 
-		ViewHolder(ListItemNotepadBinding binding) {
+		ViewHolder(ListItemGroupBinding binding) {
 			super(binding.getRoot());
 			this.binding = binding;
 		}

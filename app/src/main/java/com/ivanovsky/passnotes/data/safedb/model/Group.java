@@ -1,11 +1,11 @@
 package com.ivanovsky.passnotes.data.safedb.model;
 
-public class Notepad {
+public class Group {
 
 	private String uid;
 	private String title;
 
-	public Notepad() {
+	public Group() {
 	}
 
 	public String getUid() {

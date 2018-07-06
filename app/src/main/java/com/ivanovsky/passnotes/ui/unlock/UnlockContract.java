@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.ui.recentlyused;
+package com.ivanovsky.passnotes.ui.unlock;
 
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.ui.core.BasePresenter;
@@ -7,12 +7,12 @@ import com.ivanovsky.passnotes.ui.core.BaseView;
 import java.io.File;
 import java.util.List;
 
-public class RecentlyUsedContract {
+public class UnlockContract {
 
 	interface View extends BaseView<Presenter> {
 		void showRecentlyUsedFiles(List<UsedFile> files);
 		void showNoItems();
-		void showNotepadsScreen();
+		void showGroupsScreen();
 		void showNewDatabaseScreen();
 		void showLoading();
 		void showError(String message);

@@ -1,14 +1,14 @@
-package com.ivanovsky.passnotes.ui.recentlyused;
+package com.ivanovsky.passnotes.ui.unlock;
 
 import android.content.Context;
 
 import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.R;
+import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.data.keepass.KeepassDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
-import com.ivanovsky.passnotes.event.UsedFileDataSetChangedEvent;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 
 import java.io.File;
@@ -16,15 +16,16 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import de.greenrobot.event.EventBus;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
+public class UnlockPresenter implements
+		UnlockContract.Presenter,
+		ObserverBus.UsedFileDataSetObserver {
 
-	private static final String TAG = RecentlyUsedPresenter.class.getSimpleName();
+	private static final String TAG = UnlockPresenter.class.getSimpleName();
 
 	@Inject
 	UsedFileRepository repository;
@@ -32,11 +33,14 @@ public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
 	@Inject
 	EncryptedDatabaseProvider dbProvider;
 
+	@Inject
+	ObserverBus observerBus;
+
 	private Context context;
-	private RecentlyUsedContract.View view;
+	private UnlockContract.View view;
 	private CompositeDisposable disposables;
 
-	RecentlyUsedPresenter(Context context, RecentlyUsedContract.View view) {
+	UnlockPresenter(Context context, UnlockContract.View view) {
 		App.getDaggerComponent().inject(this);
 
 		this.context = context;
@@ -47,13 +51,13 @@ public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
 	@Override
 	public void start() {
 		view.setState(FragmentState.LOADING);
-		EventBus.getDefault().register(this);
+		observerBus.register(this);
 		loadData();
 	}
 
 	@Override
 	public void stop() {
-		EventBus.getDefault().unregister(this);
+		observerBus.unregister(this);
 		disposables.clear();
 	}
 
@@ -90,8 +94,6 @@ public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(db -> onDbOpened(),
 						this::onFailedToOpenDb);
-
-//		view.showNotepadsScreen(new DbDescriptor(password, dbFile));
 	}
 
 	private void onFailedToOpenDb(Throwable exception) {
@@ -99,10 +101,11 @@ public class RecentlyUsedPresenter implements RecentlyUsedContract.Presenter {
 	}
 
 	private void onDbOpened() {
-		view.showNotepadsScreen();
+		view.showGroupsScreen();
 	}
 
-	public void onEvent(UsedFileDataSetChangedEvent event) {
+	@Override
+	public void onUsedFileDataSetChanged() {
 		loadData();
 	}
 }

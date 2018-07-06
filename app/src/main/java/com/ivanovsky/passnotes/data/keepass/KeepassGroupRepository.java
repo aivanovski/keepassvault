@@ -1,26 +1,26 @@
 package com.ivanovsky.passnotes.data.keepass;
 
 import com.annimon.stream.Stream;
-import com.ivanovsky.passnotes.data.safedb.NotepadRepository;
-import com.ivanovsky.passnotes.data.safedb.dao.NotepadDao;
-import com.ivanovsky.passnotes.data.safedb.model.Notepad;
+import com.ivanovsky.passnotes.data.safedb.GroupRepository;
+import com.ivanovsky.passnotes.data.safedb.dao.GroupDao;
+import com.ivanovsky.passnotes.data.safedb.model.Group;
 
 import java.util.List;
 
 import io.reactivex.Single;
 
-public class KeepassNotepadRepository implements NotepadRepository {
+public class KeepassGroupRepository implements GroupRepository {
 
-	private final NotepadDao dao;
+	private final GroupDao dao;
 	private final Object lock;
 
-	KeepassNotepadRepository(NotepadDao dao) {
+	KeepassGroupRepository(GroupDao dao) {
 		this.dao = dao;
 		this.lock = new Object();
 	}
 
 	@Override
-	public Single<List<Notepad>> getAllNotepads() {
+	public Single<List<Group>> getAllNotepads() {
 		return Single.fromCallable(dao::getAll);
 	}
 
@@ -37,10 +37,10 @@ public class KeepassNotepadRepository implements NotepadRepository {
 	}
 
 	@Override
-	public void insert(Notepad notepad) {
+	public void insert(Group group) {
 		synchronized (lock) {
-			String uid = dao.insert(notepad);
-			notepad.setUid(uid);
+			String uid = dao.insert(group);
+			group.setUid(uid);
 		}
 	}
 }

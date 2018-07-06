@@ -3,10 +3,10 @@ package com.ivanovsky.passnotes.injection;
 import com.ivanovsky.passnotes.ui.StartActivity;
 import com.ivanovsky.passnotes.ui.newdb.NewDatabaseActivity;
 import com.ivanovsky.passnotes.ui.newdb.NewDatabasePresenter;
-import com.ivanovsky.passnotes.ui.newnotepad.NewNotepadPresenter;
-import com.ivanovsky.passnotes.ui.notepads.NotepadsActivity;
-import com.ivanovsky.passnotes.ui.notepads.NotepadsPresenter;
-import com.ivanovsky.passnotes.ui.recentlyused.RecentlyUsedPresenter;
+import com.ivanovsky.passnotes.ui.newgroup.NewGroupPresenter;
+import com.ivanovsky.passnotes.ui.groups.GroupsActivity;
+import com.ivanovsky.passnotes.ui.groups.GroupsPresenter;
+import com.ivanovsky.passnotes.ui.unlock.UnlockPresenter;
 
 import javax.inject.Singleton;
 
@@ -17,10 +17,10 @@ import dagger.Component;
 public interface AppComponent {
 
 	void inject(StartActivity startActivity);
-	void inject(RecentlyUsedPresenter recentlyUsedPresenter);
+	void inject(UnlockPresenter unlockPresenter);
 	void inject(NewDatabaseActivity newDatabaseActivity);
 	void inject(NewDatabasePresenter newDatabasePresenter);
-	void inject(NotepadsPresenter notepadsPresenter);
-	void inject(NewNotepadPresenter newNotepadPresenter);
-	void inject(NotepadsActivity notepadsActivity);
+	void inject(GroupsPresenter groupsPresenter);
+	void inject(NewGroupPresenter newGroupPresenter);
+	void inject(GroupsActivity groupsActivity);
 }

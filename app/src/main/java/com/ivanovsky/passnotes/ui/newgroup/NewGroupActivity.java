@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.ui.newnotepad;
+package com.ivanovsky.passnotes.ui.newgroup;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,10 +11,10 @@ import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding;
 import com.ivanovsky.passnotes.ui.core.BaseActivity;
 
-public class NewNotepadActivity extends BaseActivity {
+public class NewGroupActivity extends BaseActivity {
 
 	public static Intent createIntent(Context context) {
-		return new Intent(context, NewNotepadActivity.class);
+		return new Intent(context, NewGroupActivity.class);
 	}
 
 	@Override
@@ -27,13 +27,13 @@ public class NewNotepadActivity extends BaseActivity {
 		getCurrentActionBar().setTitle(R.string.new_notepad);
 		getCurrentActionBar().setDisplayHomeAsUpEnabled(true);
 
-		NewNotepadFragment fragment = NewNotepadFragment.newInstance();
+		NewGroupFragment fragment = NewGroupFragment.newInstance();
 
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.fragment_container, fragment)
 				.commit();
 
-		NewNotepadContract.Presenter presenter = new NewNotepadPresenter(this, fragment);
+		NewGroupContract.Presenter presenter = new NewGroupPresenter(this, fragment);
 		fragment.setPresenter(presenter);
 	}
 

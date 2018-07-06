@@ -1,18 +1,17 @@
-package com.ivanovsky.passnotes.ui.newnotepad;
+package com.ivanovsky.passnotes.ui.newgroup;
 
 import android.content.Context;
 
 import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.R;
+import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
-import com.ivanovsky.passnotes.data.safedb.NotepadRepository;
-import com.ivanovsky.passnotes.data.safedb.model.Notepad;
-import com.ivanovsky.passnotes.event.NotepadDataSetChangedEvent;
+import com.ivanovsky.passnotes.data.safedb.GroupRepository;
+import com.ivanovsky.passnotes.data.safedb.model.Group;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 
 import javax.inject.Inject;
 
-import de.greenrobot.event.EventBus;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -21,16 +20,19 @@ import io.reactivex.schedulers.Schedulers;
 
 import static android.text.TextUtils.isEmpty;
 
-public class NewNotepadPresenter implements NewNotepadContract.Presenter {
+public class NewGroupPresenter implements NewGroupContract.Presenter {
 
 	@Inject
 	EncryptedDatabaseProvider dbProvider;
 
+	@Inject
+	ObserverBus observerBus;
+
 	private final Context context;
-	private final NewNotepadContract.View view;
+	private final NewGroupContract.View view;
 	private final CompositeDisposable disposables;
 
-	NewNotepadPresenter(Context context, NewNotepadContract.View view) {
+	NewGroupPresenter(Context context, NewGroupContract.View view) {
 		App.getDaggerComponent().inject(this);
 		this.context = context;
 		this.view = view;
@@ -48,12 +50,12 @@ public class NewNotepadPresenter implements NewNotepadContract.Presenter {
 	}
 
 	@Override
-	public void createNewNotepad(String title) {
+	public void createNewGroup(String title) {
 		String trimmedTitle = title.trim();
 		if (!isEmpty(trimmedTitle)) {
 			view.setState(FragmentState.LOADING);
 
-			Disposable disposable = Observable.fromCallable(() -> createNotepad(trimmedTitle))
+			Disposable disposable = Observable.fromCallable(() -> createGroup(trimmedTitle))
 					.subscribeOn(Schedulers.newThread())
 					.observeOn(AndroidSchedulers.mainThread())
 					.subscribe(this::onNotepadCreated);
@@ -64,21 +66,22 @@ public class NewNotepadPresenter implements NewNotepadContract.Presenter {
 		}
 	}
 
-	private CreationResult createNotepad(String title) {
+	private CreationResult createGroup(String title) {
 		CreationResult result = new CreationResult();
 
-		NotepadRepository repository = dbProvider.getDatabase().getNotepadRepository();
+		GroupRepository repository = dbProvider.getDatabase().getNotepadRepository();
 		if (repository.isTitleFree(title)) {
-			Notepad notepad = new Notepad();
-			notepad.setTitle(title);
+			Group group = new Group();
+			group.setTitle(title);
 
-			repository.insert(notepad);
-			EventBus.getDefault().post(new NotepadDataSetChangedEvent());
+			repository.insert(group);
+
+			observerBus.notifyGroupDataSetChanged();
 
 			result.created = true;
 		} else {
 			result.created = false;
-			result.error = context.getString(R.string.notepad_with_this_name_is_already_exist);
+			result.error = context.getString(R.string.group_with_this_name_is_already_exist);
 		}
 
 		return result;

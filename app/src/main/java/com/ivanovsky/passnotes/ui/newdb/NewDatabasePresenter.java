@@ -5,11 +5,11 @@ import android.content.Context;
 import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.DbDescriptor;
+import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.data.keepass.KeepassDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
-import com.ivanovsky.passnotes.event.UsedFileDataSetChangedEvent;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 import com.ivanovsky.passnotes.ui.newdb.NewDatabaseContract.Presenter;
 import com.ivanovsky.passnotes.util.FileUtils;
@@ -18,7 +18,6 @@ import java.io.File;
 
 import javax.inject.Inject;
 
-import de.greenrobot.event.EventBus;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -32,6 +31,9 @@ public class NewDatabasePresenter implements Presenter {
 
 	@Inject
 	UsedFileRepository usedFileRepository;
+
+	@Inject
+	ObserverBus observerBus;
 
 	private final NewDatabaseContract.View view;
 	private final Context context;
@@ -87,7 +89,8 @@ public class NewDatabasePresenter implements Presenter {
 			usedFile.setLastAccessTime(System.currentTimeMillis());
 			usedFileRepository.insert(usedFile);
 
-			EventBus.getDefault().post(new UsedFileDataSetChangedEvent());
+			//TODO: move observerBus call to repository
+			observerBus.notifyUsedFileDataSetChanged();
 
 			result = true;
 		}

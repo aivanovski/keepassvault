@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.ui.recentlyused;
+package com.ivanovsky.passnotes.ui.unlock;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -8,9 +8,9 @@ import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding;
 import com.ivanovsky.passnotes.ui.core.BaseActivity;
 
-public class RecentlyUsedActivity extends BaseActivity {
+public class UnlockActivity extends BaseActivity {
 
-	private RecentlyUsedPresenter presenter;
+	private UnlockPresenter presenter;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -21,13 +21,13 @@ public class RecentlyUsedActivity extends BaseActivity {
 		setSupportActionBar(binding.toolBar);
 		getCurrentActionBar().setTitle(R.string.app_name);
 
-		RecentlyUsedFragment fragment = RecentlyUsedFragment.newInstance();
+		UnlockFragment fragment = UnlockFragment.newInstance();
 
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.fragment_container, fragment)
 				.commit();
 
-		presenter = new RecentlyUsedPresenter(this, fragment);
+		presenter = new UnlockPresenter(this, fragment);
 		fragment.setPresenter(presenter);
 	}
 }

@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.data.safedb;
 
-import com.ivanovsky.passnotes.data.safedb.dao.NotepadDao;
+import com.ivanovsky.passnotes.data.safedb.dao.GroupDao;
 
 public interface EncryptedDatabase {
 
-	NotepadDao getNotepadDao();
-	NotepadRepository getNotepadRepository();
+	GroupDao getNotepadDao();
+	GroupRepository getNotepadRepository();
 }

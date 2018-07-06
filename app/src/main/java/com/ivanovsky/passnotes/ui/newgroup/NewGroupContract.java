@@ -1,9 +1,9 @@
-package com.ivanovsky.passnotes.ui.newnotepad;
+package com.ivanovsky.passnotes.ui.newgroup;
 
 import com.ivanovsky.passnotes.ui.core.BasePresenter;
 import com.ivanovsky.passnotes.ui.core.BaseView;
 
-public class NewNotepadContract {
+public class NewGroupContract {
 
 	interface View extends BaseView<Presenter> {
 		void showTitleEditTextError(CharSequence error);
@@ -12,6 +12,6 @@ public class NewNotepadContract {
 	}
 
 	interface Presenter extends BasePresenter {
-		void createNewNotepad(String notepadTitle);
+		void createNewGroup(String title);
 	}
 }

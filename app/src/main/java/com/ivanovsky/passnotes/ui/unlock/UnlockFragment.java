@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.ui.recentlyused;
+package com.ivanovsky.passnotes.ui.unlock;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -16,21 +16,21 @@ import com.ivanovsky.passnotes.databinding.RecentlyUsedFragmentBinding;
 import com.ivanovsky.passnotes.data.db.model.UsedFile;
 import com.ivanovsky.passnotes.ui.core.BaseFragment;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
+import com.ivanovsky.passnotes.ui.groups.GroupsActivity;
 import com.ivanovsky.passnotes.ui.newdb.NewDatabaseActivity;
-import com.ivanovsky.passnotes.ui.notepads.NotepadsActivity;
 
 import java.io.File;
 import java.util.List;
 
-public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedContract.View {
+public class UnlockFragment extends BaseFragment implements UnlockContract.View {
 
 	private UsedFile selectedUsedFile;
 	private ArrayAdapter<String> fileAdapter;
 	private RecentlyUsedFragmentBinding binding;
-	private RecentlyUsedContract.Presenter presenter;
+	private UnlockContract.Presenter presenter;
 
-	public static RecentlyUsedFragment newInstance() {
-		return new RecentlyUsedFragment();
+	public static UnlockFragment newInstance() {
+		return new UnlockFragment();
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 	}
 
 	@Override
-	public void setPresenter(RecentlyUsedContract.Presenter presenter) {
+	public void setPresenter(UnlockContract.Presenter presenter) {
 		this.presenter = presenter;
 	}
 
@@ -131,8 +131,8 @@ public class RecentlyUsedFragment extends BaseFragment implements RecentlyUsedCo
 	}
 
 	@Override
-	public void showNotepadsScreen() {
-		startActivity(NotepadsActivity.createIntent(getContext()));
+	public void showGroupsScreen() {
+		startActivity(GroupsActivity.createIntent(getContext()));
 	}
 
 	@Override

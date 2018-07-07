@@ -58,7 +58,7 @@ public class NewGroupPresenter implements NewGroupContract.Presenter {
 			Disposable disposable = Observable.fromCallable(() -> createGroup(trimmedTitle))
 					.subscribeOn(Schedulers.newThread())
 					.observeOn(AndroidSchedulers.mainThread())
-					.subscribe(this::onNotepadCreated);
+					.subscribe(this::onGroupCreated);
 			disposables.add(disposable);
 
 		} else {
@@ -66,8 +66,8 @@ public class NewGroupPresenter implements NewGroupContract.Presenter {
 		}
 	}
 
-	private CreationResult createGroup(String title) {
-		CreationResult result = new CreationResult();
+	private GroupCreationResult createGroup(String title) {
+		GroupCreationResult result = new GroupCreationResult();
 
 		GroupRepository repository = dbProvider.getDatabase().getNotepadRepository();
 		if (repository.isTitleFree(title)) {
@@ -87,7 +87,7 @@ public class NewGroupPresenter implements NewGroupContract.Presenter {
 		return result;
 	}
 
-	private void onNotepadCreated(CreationResult result) {
+	private void onGroupCreated(GroupCreationResult result) {
 		if (result.created) {
 			view.finishScreen();
 		} else {
@@ -95,7 +95,7 @@ public class NewGroupPresenter implements NewGroupContract.Presenter {
 		}
 	}
 
-	private static class CreationResult {
+	private static class GroupCreationResult {
 		boolean created;
 		String error;
 	}

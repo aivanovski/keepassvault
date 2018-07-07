@@ -55,40 +55,16 @@ public class GroupsPresenter implements
 	@Override
 	public void loadData() {
 		if (dbProvider.isOpened()) {
+			GroupRepository repository = dbProvider.getDatabase().getNotepadRepository();
 
+			Disposable disposable = repository.getAllNotepads()
+					.subscribeOn(Schedulers.newThread())
+					.observeOn(AndroidSchedulers.mainThread())
+					.subscribe(this::onGroupsLoaded);
+			disposables.add(disposable);
 		} else {
-
+			view.showUnlockScreenAndFinish();
 		}
-
-//		String openedDBPath = dbProvider.getOpenedDatabasePath();
-//		if (openedDBPath != null && openedDBPath.equals(dbDescriptor.getFile().getPath())) {
-//			GroupRepository repository = dbProvider.getDatabase().getNotepadRepository();
-//
-//			Disposable disposable = repository.getAllNotepads()
-//					.subscribeOn(Schedulers.newThread())
-//					.observeOn(AndroidSchedulers.mainThread())
-//					.subscribe(this::onGroupsLoaded);
-//			disposables.add(disposable);
-//
-//		} else {
-//			KeepassDatabaseKey key = new KeepassDatabaseKey(dbDescriptor.getPassword());
-//
-//			Disposable disposable = dbProvider.openAsync(key, dbDescriptor.getFile())
-//					.subscribeOn(Schedulers.newThread())
-//					.observeOn(AndroidSchedulers.mainThread())
-//					.subscribe(db -> onDbOpened());
-//			disposables.add(disposable);
-//		}
-	}
-
-	private void onDbOpened() {
-		GroupRepository repository = dbProvider.getDatabase().getNotepadRepository();
-
-		Disposable disposable = repository.getAllNotepads()
-				.subscribeOn(Schedulers.newThread())
-				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe(this::onGroupsLoaded);
-		disposables.add(disposable);
 	}
 
 	private void onGroupsLoaded(List<Group> groups) {

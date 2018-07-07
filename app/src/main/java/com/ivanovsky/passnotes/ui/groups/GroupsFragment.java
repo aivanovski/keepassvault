@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.ui.core.BaseFragment;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 import com.ivanovsky.passnotes.ui.newgroup.NewGroupActivity;
 import com.ivanovsky.passnotes.ui.groups.GroupsAdapter.ListItem;
+import com.ivanovsky.passnotes.ui.unlock.UnlockActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,6 +105,13 @@ public class GroupsFragment extends BaseFragment implements GroupsContract.View 
 
 	@Override
 	public void showNewGroupScreen() {
-		startActivity(NewGroupActivity.createIntent(getContext()));
+		startActivity(NewGroupActivity.createStartIntent(getContext()));
+	}
+
+	@Override
+	public void showUnlockScreenAndFinish() {
+		startActivity(UnlockActivity.createStartIntent(getContext()));
+
+		getActivity().finish();
 	}
 }

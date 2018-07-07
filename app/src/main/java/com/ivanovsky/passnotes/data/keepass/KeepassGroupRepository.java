@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.safedb.dao.GroupDao;
 import com.ivanovsky.passnotes.data.safedb.model.Group;
 
 import java.util.List;
+import java.util.UUID;
 
 import io.reactivex.Single;
 
@@ -39,7 +40,7 @@ public class KeepassGroupRepository implements GroupRepository {
 	@Override
 	public void insert(Group group) {
 		synchronized (lock) {
-			String uid = dao.insert(group);
+			UUID uid = dao.insert(group);
 			group.setUid(uid);
 		}
 	}

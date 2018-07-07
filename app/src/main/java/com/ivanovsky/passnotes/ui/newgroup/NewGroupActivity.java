@@ -13,7 +13,7 @@ import com.ivanovsky.passnotes.ui.core.BaseActivity;
 
 public class NewGroupActivity extends BaseActivity {
 
-	public static Intent createIntent(Context context) {
+	public static Intent createStartIntent(Context context) {
 		return new Intent(context, NewGroupActivity.class);
 	}
 

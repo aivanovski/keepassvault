@@ -1,18 +1,20 @@
 package com.ivanovsky.passnotes.data.safedb.model;
 
+import java.util.UUID;
+
 public class Group {
 
-	private String uid;
+	private UUID uid;
 	private String title;
 
 	public Group() {
 	}
 
-	public String getUid() {
+	public UUID getUid() {
 		return uid;
 	}
 
-	public void setUid(String uid) {
+	public void setUid(UUID uid) {
 		this.uid = uid;
 	}
 

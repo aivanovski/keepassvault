@@ -12,7 +12,9 @@ public class GroupsContract {
 		void showGroups(List<Group> groups);
 		void showNoItems();
 		void showNewGroupScreen();
+		void showUnlockScreenAndFinish();
 	}
+
 	interface Presenter extends BasePresenter {
 		void loadData();
 	}

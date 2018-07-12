@@ -11,7 +11,7 @@ public class NewDatabaseContract {
 	interface View extends BaseView<Presenter> {
 		void showError(String message);
 		void setDoneButtonVisible(boolean visible);
-		void showNotepadsScreen(DbDescriptor descriptor);
+		void showGroupsScreen(DbDescriptor descriptor);
 	}
 
 	interface Presenter extends BasePresenter {

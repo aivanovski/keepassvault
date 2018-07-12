@@ -88,7 +88,7 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	}
 
 	@Override
-	public void showNotepadsScreen(DbDescriptor dbDescriptor) {
+	public void showGroupsScreen(DbDescriptor dbDescriptor) {
 		Activity activity = getActivity();
 		if (activity != null) {
 			activity.finish();

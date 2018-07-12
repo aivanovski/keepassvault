@@ -54,17 +54,16 @@ public class KeepassGroupDao implements GroupDao {
 
 	@Override
 	public UUID insert(Group group) {
-		org.linguafranca.pwdb.Group keepassGroup = createKeepassGroupFromGroup(group);
+		UUID result = null;
 
-		keepassDb.newGroup(keepassGroup);
+		SimpleGroup rootGroup = keepassDb.getRootGroup();
+		if (rootGroup != null) {
+			SimpleGroup newGroup = keepassDb.newGroup(group.getTitle());
 
-		return keepassGroup.getUuid();
-	}
+			rootGroup.addGroup(newGroup);
 
-	private org.linguafranca.pwdb.Group createKeepassGroupFromGroup(Group group) {
-		org.linguafranca.pwdb.Group result = SimpleGroup.createGroup(keepassDb);
-
-		result.setName(group.getTitle());
+			result = newGroup.getUuid();
+		}
 
 		return result;
 	}

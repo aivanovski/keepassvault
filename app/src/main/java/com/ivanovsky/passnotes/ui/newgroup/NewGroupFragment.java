@@ -64,7 +64,7 @@ public class NewGroupFragment extends BaseFragment implements NewGroupContract.V
 	}
 
 	private void onDoneMenuClicked() {
-		String title = binding.notepadTitle.getText().toString();
+		String title = binding.groupTitle.getText().toString();
 		presenter.createNewGroup(title);
 	}
 
@@ -75,7 +75,7 @@ public class NewGroupFragment extends BaseFragment implements NewGroupContract.V
 
 	@Override
 	public void showTitleEditTextError(CharSequence error) {
-		binding.notepadTitle.setError(error);
+		binding.groupTitle.setError(error);
 	}
 
 	@Override

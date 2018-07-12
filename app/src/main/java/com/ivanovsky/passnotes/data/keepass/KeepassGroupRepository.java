@@ -21,7 +21,7 @@ public class KeepassGroupRepository implements GroupRepository {
 	}
 
 	@Override
-	public Single<List<Group>> getAllNotepads() {
+	public Single<List<Group>> getAllGroup() {
 		return Single.fromCallable(dao::getAll);
 	}
 
@@ -31,7 +31,7 @@ public class KeepassGroupRepository implements GroupRepository {
 
 		synchronized (lock) {
 			result = !Stream.of(dao.getAll())
-					.anyMatch(notepad -> title.equals(notepad.getTitle()));
+					.anyMatch(group -> title.equals(group.getTitle()));
 		}
 
 		return result;

@@ -55,9 +55,9 @@ public class GroupsPresenter implements
 	@Override
 	public void loadData() {
 		if (dbProvider.isOpened()) {
-			GroupRepository repository = dbProvider.getDatabase().getNotepadRepository();
+			GroupRepository repository = dbProvider.getDatabase().getGroupRepository();
 
-			Disposable disposable = repository.getAllNotepads()
+			Disposable disposable = repository.getAllGroup()
 					.subscribeOn(Schedulers.newThread())
 					.observeOn(AndroidSchedulers.mainThread())
 					.subscribe(this::onGroupsLoaded);

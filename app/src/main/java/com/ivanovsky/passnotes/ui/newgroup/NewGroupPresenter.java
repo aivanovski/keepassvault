@@ -69,12 +69,14 @@ public class NewGroupPresenter implements NewGroupContract.Presenter {
 	private GroupCreationResult createGroup(String title) {
 		GroupCreationResult result = new GroupCreationResult();
 
-		GroupRepository repository = dbProvider.getDatabase().getNotepadRepository();
+		GroupRepository repository = dbProvider.getDatabase().getGroupRepository();
 		if (repository.isTitleFree(title)) {
 			Group group = new Group();
 			group.setTitle(title);
 
 			repository.insert(group);
+
+			dbProvider.commit();
 
 			observerBus.notifyGroupDataSetChanged();
 

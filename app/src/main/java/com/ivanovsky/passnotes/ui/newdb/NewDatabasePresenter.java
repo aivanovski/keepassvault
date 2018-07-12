@@ -100,7 +100,7 @@ public class NewDatabasePresenter implements Presenter {
 
 	private void onNewDatabaseCreated(Boolean created, File dbFile, String password) {
 		if (created) {
-			view.showNotepadsScreen(new DbDescriptor(password, dbFile));
+			view.showGroupsScreen(new DbDescriptor(password, dbFile));
 		} else {
 			view.showError(context.getString(R.string.error_was_occurred));
 			view.setDoneButtonVisible(true);

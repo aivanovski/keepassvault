@@ -6,10 +6,10 @@
 	<FrameLayout
 		android:layout_width="match_parent"
 		android:layout_height="120dp"
-		android:paddingLeft="@dimen/notepads_grid_item_horizontal_padding"
-		android:paddingRight="@dimen/notepads_grid_item_horizontal_padding"
-		android:paddingTop="@dimen/notepads_grid_item_vertical_padding"
-		android:paddingBottom="@dimen/notepads_grid_item_vertical_padding"
+		android:paddingLeft="@dimen/groups_grid_item_horizontal_padding"
+		android:paddingRight="@dimen/groups_grid_item_horizontal_padding"
+		android:paddingTop="@dimen/groups_grid_item_vertical_padding"
+		android:paddingBottom="@dimen/groups_grid_item_vertical_padding"
 		android:background="@drawable/material_selector"
 		android:clickable="true"
 		android:focusable="true">
@@ -21,7 +21,7 @@
 
 		<TextView
 			android:id="@+id/title"
-			style="@style/Notepad.TitleText"
+			style="@style/Group.TitleText"
 			android:layout_gravity="center"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"

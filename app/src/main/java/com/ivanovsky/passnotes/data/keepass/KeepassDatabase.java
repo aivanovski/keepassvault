@@ -10,22 +10,26 @@ import org.linguafranca.pwdb.Database;
 public class KeepassDatabase implements EncryptedDatabase {
 
 	private Database keepassDb;
-	private final KeepassGroupDao notepadDao;
-	private final KeepassGroupRepository notepadRepository;
+	private final KeepassGroupDao groupDao;
+	private final KeepassGroupRepository groupRepository;
 
 	public KeepassDatabase(Database keepassDb) {
 		this.keepassDb = keepassDb;
-		this.notepadDao = new KeepassGroupDao(keepassDb);
-		this.notepadRepository = new KeepassGroupRepository(notepadDao);
+		this.groupDao = new KeepassGroupDao(keepassDb);
+		this.groupRepository = new KeepassGroupRepository(groupDao);
 	}
 
 	@Override
-	public GroupDao getNotepadDao() {
-		return notepadDao;
+	public GroupDao getGroupDao() {
+		return groupDao;
 	}
 
 	@Override
-	public GroupRepository getNotepadRepository() {
-		return notepadRepository;
+	public GroupRepository getGroupRepository() {
+		return groupRepository;
+	}
+
+	Database getKeepassDatabase() {
+		return keepassDb;
 	}
 }

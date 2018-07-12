@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.data.keepass;
 
 import android.content.Context;
 
-import com.ivanovsky.passnotes.data.safedb.DbOpenException;
+import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseOperationException;
 import com.ivanovsky.passnotes.data.safedb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseKey;
 import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
@@ -27,6 +27,7 @@ public class KeepassDatabaseProvider implements EncryptedDatabaseProvider {
 
 	private volatile File dbFile;
 	private volatile KeepassDatabase db;
+	private volatile EncryptedDatabaseKey dbKey;
 	private final Context context;
 	private final Object lock;
 
@@ -51,7 +52,8 @@ public class KeepassDatabaseProvider implements EncryptedDatabaseProvider {
 	}
 
 	@Override
-	public EncryptedDatabase open(EncryptedDatabaseKey key, File file) throws DbOpenException {
+	public EncryptedDatabase open(EncryptedDatabaseKey key, File file)
+			throws EncryptedDatabaseOperationException {
 		synchronized (lock) {
 			if (db != null) {
 				close();
@@ -68,10 +70,11 @@ public class KeepassDatabaseProvider implements EncryptedDatabaseProvider {
 
 				db = new KeepassDatabase(keepassDb);
 				dbFile = file;
+				dbKey = key;
 
 			} catch (Exception e) {
 				Logger.printStackTrace(e);
-				throw new DbOpenException(e);
+				throw new EncryptedDatabaseOperationException(e);
 
 			} finally {
 				if (in != null) {
@@ -107,7 +110,7 @@ public class KeepassDatabaseProvider implements EncryptedDatabaseProvider {
 
 				Database keepassDb = SimpleDatabase.load(defaultCredentials, in);
 
-				keepassDb.save(newCredentials, new BufferedOutputStream(new FileOutputStream(file, false)));
+				keepassDb.save(newCredentials, new BufferedOutputStream(new FileOutputStream(file)));
 
 				result = true;
 			} catch (Exception e) {
@@ -127,11 +130,31 @@ public class KeepassDatabaseProvider implements EncryptedDatabaseProvider {
 	}
 
 	@Override
+	public boolean commit() {
+		boolean result = false;
+
+		synchronized (lock) {
+			Credentials credentials = new KdbxCreds(dbKey.getKey());
+
+			try {
+				db.getKeepassDatabase().save(credentials, new BufferedOutputStream(new FileOutputStream(dbFile)));
+
+				result = true;
+			} catch (IOException e) {
+				Logger.printStackTrace(e);
+			}
+		}
+
+		return result;
+	}
+
+	@Override
 	public void close() {
 		synchronized (lock) {
 			if (db != null) {
 				db = null;
 				dbFile = null;
+				dbKey = null;
 			}
 		}
 	}

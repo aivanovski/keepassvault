@@ -24,7 +24,7 @@ public class NewGroupActivity extends BaseActivity {
 		CoreBaseActivityBinding binding = DataBindingUtil.setContentView(this, R.layout.core_base_activity);
 
 		setSupportActionBar(binding.toolBar);
-		getCurrentActionBar().setTitle(R.string.new_notepad);
+		getCurrentActionBar().setTitle(R.string.new_group);
 		getCurrentActionBar().setDisplayHomeAsUpEnabled(true);
 
 		NewGroupFragment fragment = NewGroupFragment.newInstance();

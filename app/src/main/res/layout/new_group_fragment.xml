@@ -15,7 +15,7 @@
 			android:layout_marginRight="@dimen/element_margin">
 
 			<android.support.design.widget.TextInputEditText
-				android:id="@+id/notepad_title"
+				android:id="@+id/group_title"
 				style="@style/Material.EditText.PrimarySingleLine"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"

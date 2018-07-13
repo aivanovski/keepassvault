@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools">
+
+	<FrameLayout
+		android:layout_width="match_parent"
+		android:layout_height="120dp"
+		android:paddingLeft="@dimen/groups_grid_item_horizontal_padding"
+		android:paddingRight="@dimen/groups_grid_item_horizontal_padding"
+		android:paddingTop="@dimen/groups_grid_item_vertical_padding"
+		android:paddingBottom="@dimen/groups_grid_item_vertical_padding"
+		android:background="@drawable/material_selector"
+		android:clickable="true"
+		android:focusable="true">
+
+		<View
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:background="#44FF0000"/>
+
+		<TextView
+			android:id="@+id/title"
+			style="@style/Group.TitleText"
+			android:layout_gravity="center"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			tools:text="Title"/>
+
+	</FrameLayout>
+
+</layout>

@@ -1,7 +1,7 @@
 <resources>
 
 	<dimen name="group_margin">24dp</dimen>
-	<dimen name="element_margin">24dp</dimen>
+	<dimen name="element_margin">16dp</dimen>
 
 	<dimen name="material_primary_text_size">16sp</dimen>
 	<dimen name="material_secondary_text_size">14sp</dimen>
@@ -24,8 +24,8 @@
 	<dimen name="material_fab_size">56dp</dimen>
 	<dimen name="material_fab_margin">16dp</dimen>
 
-	<!-- Notepads screen parameters -->
-	<dimen name="notepads_grid_item_horizontal_padding">16dp</dimen>
-	<dimen name="notepads_grid_item_vertical_padding">8dp</dimen>
+	<!-- Groups screen parameters -->
+	<dimen name="groups_grid_item_horizontal_padding">16dp</dimen>
+	<dimen name="groups_grid_item_vertical_padding">8dp</dimen>
 
 </resources>

@@ -7,6 +7,7 @@ import java.util.List;
 
 import io.reactivex.Single;
 
+//TODO: move to package data/db/repository
 public class UsedFileRepository {
 
 	@SuppressWarnings("unused")

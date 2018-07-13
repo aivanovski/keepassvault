@@ -22,7 +22,7 @@
 		</activity>
 
 		<activity
-			android:name=".ui.recentlyused.RecentlyUsedActivity"
+			android:name=".ui.unlock.UnlockActivity"
 			android:screenOrientation="portrait"/>
 
 		<activity
@@ -30,11 +30,11 @@
 			android:screenOrientation="portrait"/>
 
 		<activity
-			android:name=".ui.notepads.NotepadsActivity"
+			android:name=".ui.groups.GroupsActivity"
 			android:screenOrientation="portrait"/>
 
 		<activity
-			android:name=".ui.newnotepad.NewNotepadActivity"
+			android:name=".ui.newgroup.NewGroupActivity"
 			android:screenOrientation="portrait"/>
 
 	</application>

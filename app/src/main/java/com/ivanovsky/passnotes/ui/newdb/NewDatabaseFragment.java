@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ivanovsky.passnotes.R;
+import com.ivanovsky.passnotes.data.DbDescriptor;
 import com.ivanovsky.passnotes.databinding.NewDatabaseFragmentBinding;
 import com.ivanovsky.passnotes.ui.core.BaseFragment;
 import com.ivanovsky.passnotes.ui.core.validation.BaseValidation;
@@ -19,7 +20,7 @@ import com.ivanovsky.passnotes.ui.core.validation.IdenticalContentValidation;
 import com.ivanovsky.passnotes.ui.core.validation.NotEmptyValidation;
 import com.ivanovsky.passnotes.ui.core.validation.PatternValidation;
 import com.ivanovsky.passnotes.ui.core.validation.Validator;
-import com.ivanovsky.passnotes.ui.notepads.NotepadsActivity;
+import com.ivanovsky.passnotes.ui.groups.GroupsActivity;
 
 import java.util.regex.Pattern;
 
@@ -87,12 +88,12 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	}
 
 	@Override
-	public void showNotepadsScreen(String dbName) {
+	public void showGroupsScreen(DbDescriptor dbDescriptor) {
 		Activity activity = getActivity();
 		if (activity != null) {
 			activity.finish();
 
-			startActivity(NotepadsActivity.createIntent(getContext(), dbName));
+			startActivity(GroupsActivity.createIntent(getContext()));
 		}
 	}
 

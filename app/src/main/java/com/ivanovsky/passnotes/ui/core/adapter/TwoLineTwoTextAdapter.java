@@ -72,10 +72,9 @@ public class TwoLineTwoTextAdapter extends RecyclerView.Adapter<TwoLineTwoTextAd
 
 	static class ViewHolder extends RecyclerView.ViewHolder {
 
-		View layout;
-		TextView title;
-		TextView description;
-
+		private View layout;
+		private TextView title;
+		private TextView description;
 
 		ViewHolder(ListItemTwoLineTwoTextBinding binding) {
 			super(binding.getRoot());
@@ -87,8 +86,8 @@ public class TwoLineTwoTextAdapter extends RecyclerView.Adapter<TwoLineTwoTextAd
 
 	public static class ListItem {
 
-		final String title;
-		final String description;
+		private final String title;
+		private final String description;
 
 		public ListItem(String title, String description) {
 			this.title = title;

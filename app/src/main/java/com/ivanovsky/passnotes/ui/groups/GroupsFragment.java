@@ -123,6 +123,6 @@ public class GroupsFragment extends BaseFragment implements GroupsContract.View 
 
 	@Override
 	public void showNotesScreen(Group group) {
-		startActivity(NotesActivity.Companion.createStartIntent(getContext()));
+		startActivity(NotesActivity.Companion.createStartIntent(getContext(), group));
 	}
 }

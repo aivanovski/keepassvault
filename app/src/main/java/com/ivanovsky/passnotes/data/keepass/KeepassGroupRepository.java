@@ -38,10 +38,16 @@ public class KeepassGroupRepository implements GroupRepository {
 	}
 
 	@Override
-	public void insert(Group group) {
+	public boolean insert(Group group) {
+		boolean result;
+
 		synchronized (lock) {
 			UUID uid = dao.insert(group);
 			group.setUid(uid);
+
+			result = true;
 		}
+
+		return result;
 	}
 }

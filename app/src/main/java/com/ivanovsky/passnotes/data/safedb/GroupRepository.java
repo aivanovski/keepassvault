@@ -9,6 +9,6 @@ import io.reactivex.Single;
 public interface GroupRepository {
 
 	Single<List<Group>> getAllGroup();
-	void insert(Group group);
+	boolean insert(Group group);
 	boolean isTitleFree(String title);
 }

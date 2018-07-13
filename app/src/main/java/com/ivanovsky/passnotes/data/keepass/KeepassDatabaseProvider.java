@@ -59,32 +59,9 @@ public class KeepassDatabaseProvider implements EncryptedDatabaseProvider {
 				close();
 			}
 
-			Credentials credentials = new KdbxCreds(key.getKey());
-
-			InputStream in = null;
-			Database keepassDb;
-
-			try {
-				in = new BufferedInputStream(new FileInputStream(file));
-				keepassDb = SimpleDatabase.load(credentials, in);
-
-				db = new KeepassDatabase(keepassDb);
-				dbFile = file;
-				dbKey = key;
-
-			} catch (Exception e) {
-				Logger.printStackTrace(e);
-				throw new EncryptedDatabaseOperationException(e);
-
-			} finally {
-				if (in != null) {
-					try {
-						in.close();
-					} catch (IOException e) {
-						Logger.printStackTrace(e);
-					}
-				}
-			}
+			db = KeepassDatabase.fromFile(file, key.getKey());
+			dbFile = file;
+			dbKey = key;
 		}
 
 		return db;

@@ -4,6 +4,7 @@
 	xmlns:tools="http://schemas.android.com/tools">
 
 	<FrameLayout
+		android:id="@+id/root_layout"
 		android:layout_width="match_parent"
 		android:layout_height="120dp"
 		android:paddingLeft="@dimen/groups_grid_item_horizontal_padding"

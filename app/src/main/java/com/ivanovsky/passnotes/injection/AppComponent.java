@@ -6,7 +6,10 @@ import com.ivanovsky.passnotes.ui.newdb.NewDatabasePresenter;
 import com.ivanovsky.passnotes.ui.newgroup.NewGroupPresenter;
 import com.ivanovsky.passnotes.ui.groups.GroupsActivity;
 import com.ivanovsky.passnotes.ui.groups.GroupsPresenter;
+import com.ivanovsky.passnotes.ui.notes.NotesActivity;
 import com.ivanovsky.passnotes.ui.unlock.UnlockPresenter;
+
+import org.jetbrains.annotations.NotNull;
 
 import javax.inject.Singleton;
 
@@ -23,4 +26,5 @@ public interface AppComponent {
 	void inject(GroupsPresenter groupsPresenter);
 	void inject(NewGroupPresenter newGroupPresenter);
 	void inject(GroupsActivity groupsActivity);
+	void inject(@NotNull NotesActivity notesActivity);
 }

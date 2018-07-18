@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.ui.core.BaseFragment;
 import com.ivanovsky.passnotes.ui.core.FragmentState;
 import com.ivanovsky.passnotes.ui.newgroup.NewGroupActivity;
 import com.ivanovsky.passnotes.ui.groups.GroupsAdapter.ListItem;
+import com.ivanovsky.passnotes.ui.notes.NotesActivity;
 import com.ivanovsky.passnotes.ui.unlock.UnlockActivity;
 
 import java.util.ArrayList;
@@ -84,6 +85,7 @@ public class GroupsFragment extends BaseFragment implements GroupsContract.View 
 	@Override
 	public void showGroups(List<Group> groups) {
 		adapter.setItems(createAdapterItems(groups));
+		adapter.setOnItemClickListener(position -> onGroupClicked(groups.get(position)));
 		setState(FragmentState.DISPLAYING_DATA);
 	}
 
@@ -95,6 +97,10 @@ public class GroupsFragment extends BaseFragment implements GroupsContract.View 
 		}
 
 		return result;
+	}
+
+	private void onGroupClicked(Group group) {
+		presenter.onGroupClicked(group);
 	}
 
 	@Override
@@ -113,5 +119,10 @@ public class GroupsFragment extends BaseFragment implements GroupsContract.View 
 		startActivity(UnlockActivity.createStartIntent(getContext()));
 
 		getActivity().finish();
+	}
+
+	@Override
+	public void showNotesScreen(Group group) {
+		startActivity(NotesActivity.Companion.createStartIntent(getContext(), group));
 	}
 }

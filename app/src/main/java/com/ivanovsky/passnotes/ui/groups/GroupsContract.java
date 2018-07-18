@@ -13,9 +13,11 @@ public class GroupsContract {
 		void showNoItems();
 		void showNewGroupScreen();
 		void showUnlockScreenAndFinish();
+		void showNotesScreen(Group group);
 	}
 
 	interface Presenter extends BasePresenter {
 		void loadData();
+		void onGroupClicked(Group group);
 	}
 }

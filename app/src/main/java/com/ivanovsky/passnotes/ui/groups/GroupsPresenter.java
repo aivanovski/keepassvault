@@ -79,4 +79,9 @@ public class GroupsPresenter implements
 	public void onGroupDataSetChanged() {
 		loadData();
 	}
+
+	@Override
+	public void onGroupClicked(Group group) {
+		view.showNotesScreen(group);
+	}
 }

@@ -76,8 +76,6 @@ public class NewGroupPresenter implements NewGroupContract.Presenter {
 
 			repository.insert(group);
 
-			dbProvider.commit();
-
 			observerBus.notifyGroupDataSetChanged();
 
 			result.created = true;

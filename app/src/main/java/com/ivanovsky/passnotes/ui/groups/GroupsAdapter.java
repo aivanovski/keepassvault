@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.ivanovsky.passnotes.R;
+import com.ivanovsky.passnotes.data.safedb.model.Group;
 import com.ivanovsky.passnotes.databinding.ListItemGroupBinding;
 
 import java.util.ArrayList;
@@ -16,10 +17,19 @@ public class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.ViewHolder
 
 	private final LayoutInflater inflater;
 	private final List<ListItem> items;
+	private OnItemClickListener listener;
+
+	public interface OnItemClickListener {
+		void onItemClicked(int position);
+	}
 
 	public GroupsAdapter(Context context) {
 		this.inflater = LayoutInflater.from(context);
 		this.items = new ArrayList<>();
+	}
+
+	public void setOnItemClickListener(OnItemClickListener listener) {
+		this.listener = listener;
 	}
 
 	public void setItems(List<ListItem> newItems) {
@@ -43,7 +53,15 @@ public class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.ViewHolder
 	@Override
 	public void onBindViewHolder(ViewHolder holder, int position) {
 		String title = items.get(position).title;
+
 		holder.binding.title.setText(title);
+		holder.binding.rootLayout.setOnClickListener(view -> onItemClicked(position));
+	}
+
+	private void onItemClicked(int position) {
+		if (listener != null) {
+			listener.onItemClicked(position);
+		}
 	}
 
 	@Override

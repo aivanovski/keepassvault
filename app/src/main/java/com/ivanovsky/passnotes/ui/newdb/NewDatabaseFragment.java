@@ -93,7 +93,7 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 		if (activity != null) {
 			activity.finish();
 
-			startActivity(GroupsActivity.createIntent(getContext()));
+			startActivity(GroupsActivity.Companion.createStartIntent(getContext()));
 		}
 	}
 

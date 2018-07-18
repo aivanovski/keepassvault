@@ -30,11 +30,15 @@
 			android:screenOrientation="portrait"/>
 
 		<activity
-			android:name=".ui.groups.GroupsActivity"
+			android:name=".ui.newgroup.NewGroupActivity"
 			android:screenOrientation="portrait"/>
 
 		<activity
-			android:name=".ui.newgroup.NewGroupActivity"
+			android:name=".ui.notes.NotesActivity"
+			android:screenOrientation="portrait"/>
+
+		<activity
+			android:name=".ui.groups.GroupsActivity"
 			android:screenOrientation="portrait"/>
 
 		<activity

@@ -132,7 +132,7 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 
 	@Override
 	public void showGroupsScreen() {
-		startActivity(GroupsActivity.createIntent(getContext()));
+		startActivity(GroupsActivity.Companion.createStartIntent(getContext()));
 	}
 
 	@Override

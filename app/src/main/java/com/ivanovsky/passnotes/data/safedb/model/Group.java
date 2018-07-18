@@ -4,10 +4,19 @@ import java.util.UUID;
 
 public class Group {
 
+	private int noteCount;
 	private UUID uid;
 	private String title;
 
 	public Group() {
+	}
+
+	public int getNoteCount() {
+		return noteCount;
+	}
+
+	public void setNoteCount(int noteCount) {
+		this.noteCount = noteCount;
 	}
 
 	public UUID getUid() {

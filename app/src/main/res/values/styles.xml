@@ -79,12 +79,20 @@
 		<item name="android:inputType">textWebPassword</item>
 	</style>
 
-	<style name="Group">
+	<style name="Groups">
 	</style>
 
-	<style name="Group.TitleText">
-		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
-		<item name="android:textColor">@color/material_list_item_primary_text</item>
+	<style name="Groups.TitleText">
+		<item name="android:textSize">@dimen/material_primary_text_size</item>
+		<item name="android:textColor">@color/primary_text_light</item>
+		<item name="android:maxLines">1</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:textStyle">bold</item>
+	</style>
+
+	<style name="Groups.CountText">
+		<item name="android:textSize">@dimen/material_secondary_text_size</item>
+		<item name="android:textColor">@color/primary_text</item>
 		<item name="android:maxLines">1</item>
 		<item name="android:ellipsize">end</item>
 	</style>

@@ -50,6 +50,7 @@ public class KeepassGroupDao implements GroupDao {
 
 		result.setUid(keepassGroup.getUuid());
 		result.setTitle(keepassGroup.getName());
+		result.setNoteCount(keepassGroup.getEntriesCount());
 
 		return result;
 	}

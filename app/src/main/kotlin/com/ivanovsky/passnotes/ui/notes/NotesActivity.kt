@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.databinding.DataBindingUtil
 import android.os.Bundle
+import android.view.MenuItem
 import com.ivanovsky.passnotes.App
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.safedb.model.Group
@@ -35,12 +36,30 @@ class NotesActivity : BaseActivity() {
 		super.onCreate(savedInstanceState)
 		App.getDaggerComponent().inject(this)
 
-		var binding = DataBindingUtil.setContentView<CoreBaseActivityBinding>(this, R.layout.core_base_activity)
+		val binding = DataBindingUtil.setContentView<CoreBaseActivityBinding>(this, R.layout.core_base_activity)
 
 		groupUid = intent.extras.getSerializable(EXTRA_GROUP_UID) as UUID
 		groupTitle = intent.extras.getString(EXTRA_GROUP_TITLE)
 
 		setSupportActionBar(binding.toolBar)
 		currentActionBar.title = groupTitle
+		currentActionBar.setDisplayHomeAsUpEnabled(true)
+
+		val fragment = NotesFragment.newInstance()
+		supportFragmentManager.beginTransaction()
+				.replace(R.id.fragment_container, fragment)
+				.commit()
+
+		val presenter = NotesPresenter(groupUid, this, fragment)
+		fragment.setPresenter(presenter)
+}
+
+	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+		if (item?.itemId == android.R.id.home) {
+			finish()
+			return true
+		} else {
+			return super.onOptionsItemSelected(item)
+		}
 	}
 }

@@ -7,6 +7,5 @@ import java.util.UUID;
 
 public interface NoteDao {
 
-	List<Note> getByGroupUid(UUID groupUid);
-	UUID insert(Note note);
+	List<Note> getNotesByGroupUid(UUID groupUid);
 }

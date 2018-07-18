@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.data.keepass.dao;
 
+import com.ivanovsky.passnotes.data.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.data.safedb.dao.GroupDao;
 import com.ivanovsky.passnotes.data.safedb.model.Group;
 
-import org.linguafranca.pwdb.Database;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
 
@@ -13,16 +13,18 @@ import java.util.UUID;
 
 public class KeepassGroupDao implements GroupDao {
 
-	private final SimpleDatabase keepassDb;
+	private final KeepassDatabase db;
 
 	//TODO: constructor should have SimpleDatabase as argument
-	public KeepassGroupDao(Database keepassDb) {
-		this.keepassDb = (SimpleDatabase) keepassDb;
+	public KeepassGroupDao(KeepassDatabase db) {
+		this.db = db;
 	}
 
 	@Override
 	public List<Group> getAll() {
 		List<Group> groups = new ArrayList<>();
+
+		SimpleDatabase keepassDb = db.getKeepassDatabase();
 
 		putAllGroupsIntoListRecursively(groups, keepassDb.getRootGroup());
 
@@ -56,13 +58,17 @@ public class KeepassGroupDao implements GroupDao {
 	public UUID insert(Group group) {
 		UUID result = null;
 
+		SimpleDatabase keepassDb = db.getKeepassDatabase();
+
 		SimpleGroup rootGroup = keepassDb.getRootGroup();
 		if (rootGroup != null) {
 			SimpleGroup newGroup = keepassDb.newGroup(group.getTitle());
 
 			rootGroup.addGroup(newGroup);
 
-			result = newGroup.getUuid();
+			if (newGroup.getUuid() != null && db.commit()) {
+				result = newGroup.getUuid();
+			}
 		}
 
 		return result;

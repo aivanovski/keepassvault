@@ -16,10 +16,10 @@ import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import io.reactivex.Single;
 
@@ -81,6 +81,7 @@ public class KeepassDatabaseProvider implements EncryptedDatabaseProvider {
 			Credentials newCredentials = new KdbxCreds(key.getKey());
 
 			InputStream in = null;
+			OutputStream out = null;
 
 			try {
 				in = new BufferedInputStream(context.getAssets().open("default.kdbx"));//TODO: make constant
@@ -100,25 +101,6 @@ public class KeepassDatabaseProvider implements EncryptedDatabaseProvider {
 						Logger.printStackTrace(e);
 					}
 				}
-			}
-		}
-
-		return result;
-	}
-
-	@Override
-	public boolean commit() {
-		boolean result = false;
-
-		synchronized (lock) {
-			Credentials credentials = new KdbxCreds(dbKey.getKey());
-
-			try {
-				db.getKeepassDatabase().save(credentials, new BufferedOutputStream(new FileOutputStream(dbFile)));
-
-				result = true;
-			} catch (IOException e) {
-				Logger.printStackTrace(e);
 			}
 		}
 

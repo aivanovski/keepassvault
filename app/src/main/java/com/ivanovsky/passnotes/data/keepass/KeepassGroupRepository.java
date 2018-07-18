@@ -13,11 +13,9 @@ import io.reactivex.Single;
 public class KeepassGroupRepository implements GroupRepository {
 
 	private final GroupDao dao;
-	private final Object lock;
 
 	KeepassGroupRepository(GroupDao dao) {
 		this.dao = dao;
-		this.lock = new Object();
 	}
 
 	@Override
@@ -29,7 +27,7 @@ public class KeepassGroupRepository implements GroupRepository {
 	public boolean isTitleFree(String title) {
 		boolean result;
 
-		synchronized (lock) {
+		synchronized (this) {
 			result = !Stream.of(dao.getAll())
 					.anyMatch(group -> title.equals(group.getTitle()));
 		}
@@ -39,13 +37,14 @@ public class KeepassGroupRepository implements GroupRepository {
 
 	@Override
 	public boolean insert(Group group) {
-		boolean result;
+		boolean result = false;
 
-		synchronized (lock) {
+		synchronized (this) {
 			UUID uid = dao.insert(group);
-			group.setUid(uid);
-
-			result = true;
+			if (uid != null) {
+				group.setUid(uid);
+				result = true;
+			}
 		}
 
 		return result;

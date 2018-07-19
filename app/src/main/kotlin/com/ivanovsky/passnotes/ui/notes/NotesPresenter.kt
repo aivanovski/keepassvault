@@ -2,8 +2,8 @@ package com.ivanovsky.passnotes.ui.notes
 
 import android.content.Context
 import com.ivanovsky.passnotes.App
-import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider
-import com.ivanovsky.passnotes.data.safedb.model.Note
+import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
+import com.ivanovsky.passnotes.data.entity.Note
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -14,7 +14,7 @@ class NotesPresenter(private val groupUid: UUID, private val context: Context, p
 		NotesContract.Presenter {
 
 	@Inject
-	lateinit var dbProvider: EncryptedDatabaseProvider
+	lateinit var dbRepository: EncryptedDatabaseRepository
 
 	private var disposables = CompositeDisposable()
 
@@ -31,8 +31,8 @@ class NotesPresenter(private val groupUid: UUID, private val context: Context, p
 	}
 
 	override fun loadData() {
-		if (dbProvider.isOpened) {
-			val noteRepository = dbProvider.database.noteRepository
+		if (dbRepository.isOpened) {
+			val noteRepository = dbRepository.database.noteRepository
 
 			val disposable = noteRepository.getNotesByGroupUid(groupUid)
 					.subscribeOn(Schedulers.newThread())

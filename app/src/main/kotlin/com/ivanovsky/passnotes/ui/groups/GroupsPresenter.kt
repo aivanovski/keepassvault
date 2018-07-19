@@ -3,9 +3,9 @@ package com.ivanovsky.passnotes.ui.groups
 import android.content.Context
 import com.ivanovsky.passnotes.App
 import com.ivanovsky.passnotes.data.ObserverBus
-import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider
-import com.ivanovsky.passnotes.data.safedb.model.Group
-import com.ivanovsky.passnotes.ui.core.FragmentState
+import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
+import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.presentation.core.FragmentState
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Consumer
@@ -17,7 +17,7 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 		ObserverBus.GroupDataSetObserver {
 
 	@Inject
-	lateinit var dbProvider: EncryptedDatabaseProvider
+	lateinit var dbRepository: EncryptedDatabaseRepository
 
 	@Inject
 	lateinit var observerBus: ObserverBus
@@ -41,8 +41,8 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 	}
 
 	override fun loadData() {
-		if (dbProvider.isOpened) {
-			val repository = dbProvider.database.groupRepository
+		if (dbRepository.isOpened) {
+			val repository = dbRepository.database.groupRepository
 
 			val disposable = repository.allGroup
 					.subscribeOn(Schedulers.newThread())

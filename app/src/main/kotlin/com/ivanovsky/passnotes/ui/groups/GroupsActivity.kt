@@ -7,15 +7,15 @@ import android.os.Bundle
 import android.view.MenuItem
 import com.ivanovsky.passnotes.App
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider
+import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding
-import com.ivanovsky.passnotes.ui.core.BaseActivity
+import com.ivanovsky.passnotes.presentation.core.BaseActivity
 import javax.inject.Inject
 
 class GroupsActivity : BaseActivity() {
 
 	@Inject
-	lateinit var dbProvider: EncryptedDatabaseProvider
+	lateinit var dbRepository: EncryptedDatabaseRepository
 
 	companion object {
 
@@ -48,8 +48,8 @@ class GroupsActivity : BaseActivity() {
 	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
 		if (item?.itemId == android.R.id.home) {
 
-			if (dbProvider.isOpened) {
-				dbProvider.close()
+			if (dbRepository.isOpened) {
+				dbRepository.close()
 			}
 
 			finish()

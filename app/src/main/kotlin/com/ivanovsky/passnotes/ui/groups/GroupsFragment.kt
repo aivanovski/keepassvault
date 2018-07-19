@@ -7,13 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.safedb.model.Group
+import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
-import com.ivanovsky.passnotes.ui.core.BaseFragment
-import com.ivanovsky.passnotes.ui.core.FragmentState
-import com.ivanovsky.passnotes.ui.newgroup.NewGroupActivity
+import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.presentation.core.FragmentState
+import com.ivanovsky.passnotes.presentation.newgroup.NewGroupActivity
 import com.ivanovsky.passnotes.ui.notes.NotesActivity
-import com.ivanovsky.passnotes.ui.unlock.UnlockActivity
+import com.ivanovsky.passnotes.presentation.unlock.UnlockActivity
 
 class GroupsFragment : BaseFragment(), GroupsContract.View {
 

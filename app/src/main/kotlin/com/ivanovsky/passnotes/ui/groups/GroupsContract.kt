@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.ui.groups
 
-import com.ivanovsky.passnotes.data.safedb.model.Group
-import com.ivanovsky.passnotes.ui.core.BasePresenter
-import com.ivanovsky.passnotes.ui.core.BaseView
+import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.presentation.core.BasePresenter
+import com.ivanovsky.passnotes.presentation.core.BaseView
 
 class GroupsContract {
 

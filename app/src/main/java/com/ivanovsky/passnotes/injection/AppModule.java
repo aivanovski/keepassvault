@@ -4,11 +4,12 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.data.ObserverBus;
-import com.ivanovsky.passnotes.data.db.AppDatabase;
-import com.ivanovsky.passnotes.data.keepass.KeepassDatabaseProvider;
-import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
+import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
+import com.ivanovsky.passnotes.data.repository.file.FileResolver;
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository;
+import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
-import com.ivanovsky.passnotes.settings.SettingsManager;
+import com.ivanovsky.passnotes.data.repository.SettingsRepository;
 
 import javax.inject.Singleton;
 
@@ -31,8 +32,8 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	public SettingsManager provideSettingsManager() {
-		return new SettingsManager(context);
+	public SettingsRepository provideSettingsManager() {
+		return new SettingsRepository(context);
 	}
 
 	@Provides
@@ -49,13 +50,19 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	public EncryptedDatabaseProvider provideEncryptedDBProvider() {
-		return new KeepassDatabaseProvider(context);
+	public EncryptedDatabaseRepository provideEncryptedDBProvider(FileResolver fileResolver) {
+		return new KeepassDatabaseRepository(context, fileResolver);
 	}
 
 	@Provides
 	@Singleton
 	public ObserverBus provideObserverBus() {
 		return new ObserverBus();
+	}
+
+	@Provides
+	@Singleton
+	public FileResolver provideFileResolver() {
+		return new FileResolver();
 	}
 }

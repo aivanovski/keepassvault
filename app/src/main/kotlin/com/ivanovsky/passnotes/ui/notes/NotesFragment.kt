@@ -8,12 +8,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.safedb.model.Note
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.databinding.NotesFragmentBinding
-import com.ivanovsky.passnotes.ui.core.BaseFragment
-import com.ivanovsky.passnotes.ui.core.FragmentState
-import com.ivanovsky.passnotes.ui.core.adapter.SingleLineAdapter
-import com.ivanovsky.passnotes.ui.newgroup.NewGroupActivity
+import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.presentation.core.FragmentState
+import com.ivanovsky.passnotes.presentation.core.adapter.SingleLineAdapter
+import com.ivanovsky.passnotes.presentation.newgroup.NewGroupActivity
 
 class NotesFragment: BaseFragment(), NotesContract.View {
 

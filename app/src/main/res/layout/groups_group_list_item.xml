@@ -3,7 +3,7 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools">
 
-	<com.ivanovsky.passnotes.ui.core.widget.SquareLayout
+	<com.ivanovsky.passnotes.presentation.core.widget.SquareLayout
 		android:id="@+id/root_layout"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -48,6 +48,6 @@
 			android:layout_alignParentBottom="true"
 			tools:text="13"/>
 
-	</com.ivanovsky.passnotes.ui.core.widget.SquareLayout>
+	</com.ivanovsky.passnotes.presentation.core.widget.SquareLayout>
 
 </layout>

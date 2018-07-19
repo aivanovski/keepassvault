@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes.data.repository;
 
-import com.ivanovsky.passnotes.data.db.AppDatabase;
-import com.ivanovsky.passnotes.data.db.model.UsedFile;
+import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
+import com.ivanovsky.passnotes.data.entity.UsedFile;
 
 import java.util.List;
 

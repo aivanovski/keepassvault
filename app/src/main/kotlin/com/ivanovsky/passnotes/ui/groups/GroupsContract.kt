@@ -7,7 +7,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseView
 class GroupsContract {
 
 	interface View: BaseView<Presenter> {
-		fun showGroups(groups: List<Group>)
+		fun showGroups(groupsAndCounts: List<Pair<Group, Int>>)
 		fun showNoItems()
 		fun showNewGroupScreen()
 		fun showUnlockScreenAndFinish()

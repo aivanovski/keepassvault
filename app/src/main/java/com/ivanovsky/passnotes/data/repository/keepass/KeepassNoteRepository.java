@@ -21,4 +21,9 @@ public class KeepassNoteRepository implements NoteRepository {
 	public Single<List<Note>> getNotesByGroupUid(UUID groupUid) {
 		return Single.fromCallable(() -> dao.getNotesByGroupUid(groupUid));
 	}
+
+	@Override
+	public Integer getNoteCountByGroupUid(UUID groupUid) {
+		return dao.getNotesByGroupUid(groupUid).size();
+	}
 }

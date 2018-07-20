@@ -1,17 +1,13 @@
 package com.ivanovsky.passnotes.ui.groups
 
 import android.content.Context
-import com.ivanovsky.passnotes.App
 import com.ivanovsky.passnotes.data.ObserverBus
-import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.entity.Group
-import com.ivanovsky.passnotes.data.repository.GroupRepository
+import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.FragmentState
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Consumer
-import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
@@ -19,7 +15,7 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 		ObserverBus.GroupDataSetObserver {
 
 	@Inject
-	lateinit var groupRepository: GroupRepository
+	lateinit var interactor: GroupsInteractor
 
 	@Inject
 	lateinit var observerBus: ObserverBus
@@ -43,17 +39,15 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 	}
 
 	override fun loadData() {
-		val disposable = groupRepository.allGroup
-				.subscribeOn(Schedulers.newThread())
-				.observeOn(AndroidSchedulers.mainThread())
+		val disposable = interactor.getAllGroupsWithNoteCount()
 				.subscribe(Consumer { onGroupsLoaded(it) })
 
 		disposables.add(disposable)
 	}
 
-	private fun onGroupsLoaded(groups: List<Group>) {
-		if (groups.isNotEmpty()) {
-			view.showGroups(groups)
+	private fun onGroupsLoaded(groupsAndCounts: List<Pair<Group, Int>>) {
+		if (groupsAndCounts.isNotEmpty()) {
+			view.showGroups(groupsAndCounts)
 		} else {
 			view.showNoItems()
 		}

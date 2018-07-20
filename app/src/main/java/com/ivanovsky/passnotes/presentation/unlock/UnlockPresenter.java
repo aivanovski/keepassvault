@@ -2,15 +2,13 @@ package com.ivanovsky.passnotes.presentation.unlock;
 
 import android.content.Context;
 
-import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.ObserverBus;
-import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.UsedFile;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey;
-import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
-import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
+import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor;
 import com.ivanovsky.passnotes.injection.Injector;
+import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
 import com.ivanovsky.passnotes.presentation.core.FragmentState;
 
 import java.io.File;
@@ -18,34 +16,27 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class UnlockPresenter implements
 		UnlockContract.Presenter,
 		ObserverBus.UsedFileDataSetObserver {
 
-	private static final String TAG = UnlockPresenter.class.getSimpleName();
+	@Inject
+	UnlockInteractor interactor;
 
 	@Inject
-	UsedFileRepository repository;
-
-	@Inject
-	EncryptedDatabaseRepository dbProvider;
+	ErrorInteractor errorInteractor;
 
 	@Inject
 	ObserverBus observerBus;
 
-	private Context context;
 	private UnlockContract.View view;
 	private CompositeDisposable disposables;
 
 	UnlockPresenter(Context context, UnlockContract.View view) {
 		Injector.getInstance().getAppComponent().inject(this);
-
-		this.context = context;
 		this.view = view;
 		this.disposables = new CompositeDisposable();
 	}
@@ -65,10 +56,8 @@ public class UnlockPresenter implements
 
 	@Override
 	public void loadData() {
-		Disposable disposable = repository.getAllUsedFiles()
-				.subscribeOn(Schedulers.newThread())
-				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe(this::onFilesLoaded);
+		Disposable disposable = interactor.getRecentlyOpenedFiles()
+				.subscribe(this::onFilesLoaded, this::onFailedToLoadFiles);
 
 		disposables.add(disposable);
 	}
@@ -81,33 +70,28 @@ public class UnlockPresenter implements
 		}
 	}
 
+	private void onFailedToLoadFiles(Throwable throwable) {
+		view.showError(errorInteractor.getErrorMessage(throwable));
+	}
+
 	@Override
 	public void onUnlockButtonClicked(String password, File dbFile) {
 		view.showLoading();
 
-		if (dbProvider.isOpened()) {
-			dbProvider.close();
-		}
-
 		KeepassDatabaseKey key = new KeepassDatabaseKey(password);
 
-		Disposable disposable = dbProvider.openAsync(key, FileDescriptor.newRegularFile(dbFile))
-				.subscribeOn(Schedulers.newThread())
-				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe(this::onDbOpened,
-						this::onFailedToOpenDb);
+		Disposable disposable = interactor.openDatabase(key, dbFile)
+				.subscribe(this::onDbOpened, this::onFailedToOpenDb);
 
 		disposables.add(disposable);
 	}
 
-	private void onFailedToOpenDb(Throwable exception) {
-		view.showError(context.getString(R.string.error_was_occurred));
+	private void onDbOpened(Boolean result) {
+		view.showGroupsScreen();
 	}
 
-	private void onDbOpened(EncryptedDatabase db) {
-		Injector.getInstance().createEncryptedDatabaseComponent(db);
-
-		view.showGroupsScreen();
+	private void onFailedToOpenDb(Throwable throwable) {
+		view.showError(errorInteractor.getErrorMessage(throwable));
 	}
 
 	@Override

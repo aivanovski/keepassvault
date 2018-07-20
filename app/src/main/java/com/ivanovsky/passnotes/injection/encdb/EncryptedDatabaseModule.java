@@ -3,6 +3,8 @@ package com.ivanovsky.passnotes.injection.encdb;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
+import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor;
+import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor;
 
 import dagger.Module;
 import dagger.Provides;
@@ -18,13 +20,26 @@ public class EncryptedDatabaseModule {
 
 	@Provides
 	@EncryptedDatabaseScope
-	public NoteRepository provideNoteRepository() {
+	NoteRepository provideNoteRepository() {
 		return database.getNoteRepository();
 	}
 
 	@Provides
 	@EncryptedDatabaseScope
-	public GroupRepository provideGroupRepository() {
+	GroupRepository provideGroupRepository() {
 		return database.getGroupRepository();
+	}
+
+	@Provides
+	@EncryptedDatabaseScope
+	GroupsInteractor provideGroupsInteractor(GroupRepository groupRepository,
+											 NoteRepository noteRepository) {
+		return new GroupsInteractor(groupRepository, noteRepository);
+	}
+
+	@Provides
+	@EncryptedDatabaseScope
+	NotesInteractor provideNotesInteractor(NoteRepository noteRepository) {
+		return new NotesInteractor(noteRepository);
 	}
 }

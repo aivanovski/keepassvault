@@ -10,4 +10,5 @@ import io.reactivex.Single;
 public interface NoteRepository {
 
 	Single<List<Note>> getNotesByGroupUid(UUID groupUid);
+	Integer getNoteCountByGroupUid(UUID groupUid);
 }

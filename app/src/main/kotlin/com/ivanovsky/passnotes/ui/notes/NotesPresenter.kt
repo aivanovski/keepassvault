@@ -2,11 +2,9 @@ package com.ivanovsky.passnotes.ui.notes
 
 import android.content.Context
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.repository.NoteRepository
+import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor
 import com.ivanovsky.passnotes.injection.Injector
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import java.util.*
 import javax.inject.Inject
 
@@ -14,7 +12,7 @@ class NotesPresenter(private val groupUid: UUID, private val context: Context, p
 		NotesContract.Presenter {
 
 	@Inject
-	lateinit var noteRepository: NoteRepository
+	lateinit var interactor: NotesInteractor
 
 	private var disposables = CompositeDisposable()
 
@@ -31,10 +29,8 @@ class NotesPresenter(private val groupUid: UUID, private val context: Context, p
 	}
 
 	override fun loadData() {
-		val disposable = noteRepository.getNotesByGroupUid(groupUid)
-				.subscribeOn(Schedulers.newThread())
-				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe({ notes -> onNotesLoaded(notes) })
+		val disposable = interactor.getNotesByGroupUid(groupUid)
+				.subscribe({ notes -> onNotesLoaded(notes)})
 
 		disposables.add(disposable)
 	}

@@ -11,7 +11,7 @@ public class FileDescriptor {
 		REGULAR_FILE
 	}
 
-	public static FileDescriptor newRegularFile(File file) {
+	public static FileDescriptor fromRegularFile(File file) {
 		FileDescriptor result = new FileDescriptor();
 		result.type = Type.REGULAR_FILE;
 		result.path = file.getPath();

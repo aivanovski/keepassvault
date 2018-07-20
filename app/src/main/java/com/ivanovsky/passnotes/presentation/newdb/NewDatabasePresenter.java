@@ -2,15 +2,11 @@ package com.ivanovsky.passnotes.presentation.newdb;
 
 import android.content.Context;
 
-import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.data.entity.FileDescriptor;
-import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.entity.DatabaseDescriptor;
-import com.ivanovsky.passnotes.data.ObserverBus;
-import com.ivanovsky.passnotes.data.entity.UsedFile;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey;
-import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
+import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
+import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
 import com.ivanovsky.passnotes.injection.Injector;
 import com.ivanovsky.passnotes.presentation.core.FragmentState;
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseContract.Presenter;
@@ -20,22 +16,16 @@ import java.io.File;
 
 import javax.inject.Inject;
 
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 public class NewDatabasePresenter implements Presenter {
 
 	@Inject
-	EncryptedDatabaseRepository encryptedDbProvider;
+	NewDatabaseInteractor interactor;
 
 	@Inject
-	UsedFileRepository usedFileRepository;
-
-	@Inject
-	ObserverBus observerBus;
+	ErrorInteractor errorInteractor;
 
 	private final NewDatabaseContract.View view;
 	private final Context context;
@@ -64,12 +54,12 @@ public class NewDatabasePresenter implements Presenter {
 
 		File dir = FileUtils.getKeepassDir(context);
 		if (dir != null) {
+			KeepassDatabaseKey key = new KeepassDatabaseKey(password);
 			File dbFile = new File(dir, filename + ".kdbx");//TODO: fix db name creation
 
-			Disposable disposable = Observable.fromCallable(() -> createNewDatabase(dbFile, password))
-					.subscribeOn(Schedulers.newThread())
-					.observeOn(AndroidSchedulers.mainThread())
-					.subscribe(created -> onNewDatabaseCreated(created, dbFile, password));
+			Disposable disposable = interactor.createNewDatabaseAndOpen(key, dbFile)
+					.subscribe(created -> onDatabaseCreated(created, dbFile, password),
+							this::onFailedToCreateDatabase);
 			disposables.add(disposable);
 
 			view.setState(FragmentState.LOADING);
@@ -78,34 +68,16 @@ public class NewDatabasePresenter implements Presenter {
 		}
 	}
 
-	private Boolean createNewDatabase(File dbFile, String password) {
-		boolean result = false;
-
-		KeepassDatabaseKey key = new KeepassDatabaseKey(password);
-
-		if (!dbFile.exists()
-				&& encryptedDbProvider.createNew(key, FileDescriptor.newRegularFile(dbFile))) {
-
-			UsedFile usedFile = new UsedFile();
-			usedFile.setFilePath(dbFile.getPath());
-			usedFile.setLastAccessTime(System.currentTimeMillis());
-			usedFileRepository.insert(usedFile);
-
-			//TODO: move observerBus call to repository
-			observerBus.notifyUsedFileDataSetChanged();
-
-			result = true;
-		}
-
-		return result;
-	}
-
-	private void onNewDatabaseCreated(Boolean created, File dbFile, String password) {
-		if (created) {
+	private void onDatabaseCreated(Boolean result, File dbFile, String password) {
+		if (result) {
 			view.showGroupsScreen(new DatabaseDescriptor(password, dbFile));
 		} else {
 			view.showError(context.getString(R.string.error_was_occurred));
 			view.setDoneButtonVisible(true);
 		}
+	}
+
+	private void onFailedToCreateDatabase(Throwable throwable) {
+		view.showError(errorInteractor.getErrorMessage(throwable));
 	}
 }

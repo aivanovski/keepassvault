@@ -34,21 +34,12 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 	}
 
 	@Override
-	public boolean isOpened() {
-		return db != null;
-	}
-
-	@Override
-	public EncryptedDatabase getDatabase() {
-		return db;
-	}
-
-	@Override
 	public Single<EncryptedDatabase> openAsync(EncryptedDatabaseKey key, FileDescriptor file) {
 		return Single.fromCallable(() -> open(key, file));
 	}
 
-	private EncryptedDatabase open(EncryptedDatabaseKey key, FileDescriptor file)
+	@Override
+	public EncryptedDatabase open(EncryptedDatabaseKey key, FileDescriptor file)
 			throws EncryptedDatabaseException {
 		synchronized (this) {
 			if (db != null) {

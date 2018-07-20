@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.App
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding
+import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.BaseActivity
 import java.util.*
 
@@ -34,7 +35,6 @@ class NotesActivity : BaseActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		App.getDaggerComponent().inject(this)
 
 		val binding = DataBindingUtil.setContentView<CoreBaseActivityBinding>(this, R.layout.core_base_activity)
 

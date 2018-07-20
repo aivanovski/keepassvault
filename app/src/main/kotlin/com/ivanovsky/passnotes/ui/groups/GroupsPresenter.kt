@@ -5,6 +5,8 @@ import com.ivanovsky.passnotes.App
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.repository.GroupRepository
+import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -17,7 +19,7 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 		ObserverBus.GroupDataSetObserver {
 
 	@Inject
-	lateinit var dbRepository: EncryptedDatabaseRepository
+	lateinit var groupRepository: GroupRepository
 
 	@Inject
 	lateinit var observerBus: ObserverBus
@@ -31,7 +33,7 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 	}
 
 	init {
-		App.getDaggerComponent().inject(this)
+		Injector.getInstance().encryptedDatabaseComponent.inject(this)
 		disposables = CompositeDisposable()
 	}
 
@@ -41,18 +43,12 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 	}
 
 	override fun loadData() {
-		if (dbRepository.isOpened) {
-			val repository = dbRepository.database.groupRepository
+		val disposable = groupRepository.allGroup
+				.subscribeOn(Schedulers.newThread())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe(Consumer { onGroupsLoaded(it) })
 
-			val disposable = repository.allGroup
-					.subscribeOn(Schedulers.newThread())
-					.observeOn(AndroidSchedulers.mainThread())
-					.subscribe(Consumer { onGroupsLoaded(it) })
-
-			disposables.add(disposable)
-		} else {
-			view.showUnlockScreenAndFinish()
-		}
+		disposables.add(disposable)
 	}
 
 	private fun onGroupsLoaded(groups: List<Group>) {

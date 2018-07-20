@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.data.repository.keepass;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
-import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseOperationException;
+import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
@@ -17,12 +17,8 @@ import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import io.reactivex.Single;
 
@@ -53,7 +49,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 	}
 
 	private EncryptedDatabase open(EncryptedDatabaseKey key, FileDescriptor file)
-			throws EncryptedDatabaseOperationException {
+			throws EncryptedDatabaseException {
 		synchronized (this) {
 			if (db != null) {
 				close();

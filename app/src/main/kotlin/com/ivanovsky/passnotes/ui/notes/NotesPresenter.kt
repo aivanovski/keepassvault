@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.ui.notes
 
 import android.content.Context
-import com.ivanovsky.passnotes.App
-import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.repository.NoteRepository
+import com.ivanovsky.passnotes.injection.Injector
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -14,12 +14,12 @@ class NotesPresenter(private val groupUid: UUID, private val context: Context, p
 		NotesContract.Presenter {
 
 	@Inject
-	lateinit var dbRepository: EncryptedDatabaseRepository
+	lateinit var noteRepository: NoteRepository
 
 	private var disposables = CompositeDisposable()
 
 	init {
-		App.getDaggerComponent().inject(this)
+		Injector.getInstance().encryptedDatabaseComponent.inject(this)
 	}
 
 	override fun start() {
@@ -31,18 +31,12 @@ class NotesPresenter(private val groupUid: UUID, private val context: Context, p
 	}
 
 	override fun loadData() {
-		if (dbRepository.isOpened) {
-			val noteRepository = dbRepository.database.noteRepository
+		val disposable = noteRepository.getNotesByGroupUid(groupUid)
+				.subscribeOn(Schedulers.newThread())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe({ notes -> onNotesLoaded(notes) })
 
-			val disposable = noteRepository.getNotesByGroupUid(groupUid)
-					.subscribeOn(Schedulers.newThread())
-					.observeOn(AndroidSchedulers.mainThread())
-					.subscribe({ notes -> onNotesLoaded(notes) })
-
-			disposables.add(disposable)
-		} else {
-			view.showUnlockScreenAndFinish()
-		}
+		disposables.add(disposable)
 	}
 
 	private fun onNotesLoaded(notes: List<Note>) {

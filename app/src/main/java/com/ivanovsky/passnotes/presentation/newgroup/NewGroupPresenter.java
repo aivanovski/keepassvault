@@ -2,12 +2,11 @@ package com.ivanovsky.passnotes.presentation.newgroup;
 
 import android.content.Context;
 
-import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.ObserverBus;
-import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.entity.Group;
+import com.ivanovsky.passnotes.injection.Injector;
 import com.ivanovsky.passnotes.presentation.core.FragmentState;
 
 import javax.inject.Inject;
@@ -23,17 +22,17 @@ import static android.text.TextUtils.isEmpty;
 public class NewGroupPresenter implements NewGroupContract.Presenter {
 
 	@Inject
-	EncryptedDatabaseRepository dbProvider;
+	ObserverBus observerBus;
 
 	@Inject
-	ObserverBus observerBus;
+	GroupRepository groupRepository;
 
 	private final Context context;
 	private final NewGroupContract.View view;
 	private final CompositeDisposable disposables;
 
 	NewGroupPresenter(Context context, NewGroupContract.View view) {
-		App.getDaggerComponent().inject(this);
+		Injector.getInstance().getEncryptedDatabaseComponent().inject(this);
 		this.context = context;
 		this.view = view;
 		this.disposables = new CompositeDisposable();
@@ -69,12 +68,11 @@ public class NewGroupPresenter implements NewGroupContract.Presenter {
 	private GroupCreationResult createGroup(String title) {
 		GroupCreationResult result = new GroupCreationResult();
 
-		GroupRepository repository = dbProvider.getDatabase().getGroupRepository();
-		if (repository.isTitleFree(title)) {
+		if (groupRepository.isTitleFree(title)) {
 			Group group = new Group();
 			group.setTitle(title);
 
-			repository.insert(group);
+			groupRepository.insert(group);
 
 			observerBus.notifyGroupDataSetChanged();
 

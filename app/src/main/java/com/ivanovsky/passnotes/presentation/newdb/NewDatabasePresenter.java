@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.UsedFile;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
+import com.ivanovsky.passnotes.injection.Injector;
 import com.ivanovsky.passnotes.presentation.core.FragmentState;
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseContract.Presenter;
 import com.ivanovsky.passnotes.util.FileUtils;
@@ -41,7 +42,7 @@ public class NewDatabasePresenter implements Presenter {
 	private final CompositeDisposable disposables;
 
 	NewDatabasePresenter(NewDatabaseContract.View view, Context context) {
-		App.getDaggerComponent().inject(this);
+		Injector.getInstance().getAppComponent().inject(this);
 		this.view = view;
 		this.context = context;
 		this.disposables = new CompositeDisposable();

@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.injection;
 
+import com.ivanovsky.passnotes.injection.encdb.EncryptedDatabaseComponent;
+import com.ivanovsky.passnotes.injection.encdb.EncryptedDatabaseModule;
 import com.ivanovsky.passnotes.presentation.StartActivity;
 import com.ivanovsky.passnotes.ui.groups.GroupsActivity;
 import com.ivanovsky.passnotes.ui.groups.GroupsPresenter;
@@ -24,9 +26,6 @@ public interface AppComponent {
 	void inject(UnlockPresenter unlockPresenter);
 	void inject(NewDatabaseActivity newDatabaseActivity);
 	void inject(NewDatabasePresenter newDatabasePresenter);
-	void inject(GroupsPresenter groupsPresenter);
-	void inject(NewGroupPresenter newGroupPresenter);
 	void inject(GroupsActivity groupsActivity);
-	void inject(@NotNull NotesActivity notesActivity);
-	void inject(@NotNull NotesPresenter notesPresenter);
+	EncryptedDatabaseComponent plus(EncryptedDatabaseModule module);
 }

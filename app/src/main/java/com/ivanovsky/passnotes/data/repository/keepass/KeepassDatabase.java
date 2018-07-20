@@ -4,7 +4,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileProvider;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassGroupDao;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
-import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseOperationException;
+import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.util.Logger;
@@ -13,11 +13,6 @@ import org.linguafranca.pwdb.Credentials;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,7 +25,7 @@ public class KeepassDatabase implements EncryptedDatabase {
 	private final KeepassNoteRepository noteRepository;
 	private final SimpleDatabase db;
 
-	static KeepassDatabase fromFile(FileProvider fileProvider, byte[] key) throws EncryptedDatabaseOperationException {
+	static KeepassDatabase fromFile(FileProvider fileProvider, byte[] key) throws EncryptedDatabaseException {
 		Credentials credentials = new KdbxCreds(key);
 
 		InputStream in = null;
@@ -42,7 +37,7 @@ public class KeepassDatabase implements EncryptedDatabase {
 
 		} catch (Exception e) {
 			Logger.printStackTrace(e);
-			throw new EncryptedDatabaseOperationException(e);
+			throw new EncryptedDatabaseException(e);
 
 		} finally {
 			if (in != null) {

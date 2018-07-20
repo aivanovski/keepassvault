@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding;
+import com.ivanovsky.passnotes.injection.Injector;
 import com.ivanovsky.passnotes.presentation.core.BaseActivity;
 
 import javax.inject.Inject;
@@ -23,7 +24,7 @@ public class NewDatabaseActivity extends BaseActivity {
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		App.getDaggerComponent().inject(this);
+		Injector.getInstance().getAppComponent().inject(this);
 
 		CoreBaseActivityBinding binding = DataBindingUtil.setContentView(this, R.layout.core_base_activity);
 

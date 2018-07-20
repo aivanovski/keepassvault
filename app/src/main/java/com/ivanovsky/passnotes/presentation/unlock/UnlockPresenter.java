@@ -2,14 +2,15 @@ package com.ivanovsky.passnotes.presentation.unlock;
 
 import android.content.Context;
 
-import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.UsedFile;
+import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
+import com.ivanovsky.passnotes.injection.Injector;
 import com.ivanovsky.passnotes.presentation.core.FragmentState;
 
 import java.io.File;
@@ -42,7 +43,7 @@ public class UnlockPresenter implements
 	private CompositeDisposable disposables;
 
 	UnlockPresenter(Context context, UnlockContract.View view) {
-		App.getDaggerComponent().inject(this);
+		Injector.getInstance().getAppComponent().inject(this);
 
 		this.context = context;
 		this.view = view;
@@ -90,18 +91,22 @@ public class UnlockPresenter implements
 
 		KeepassDatabaseKey key = new KeepassDatabaseKey(password);
 
-		dbProvider.openAsync(key, FileDescriptor.newRegularFile(dbFile))
+		Disposable disposable = dbProvider.openAsync(key, FileDescriptor.newRegularFile(dbFile))
 				.subscribeOn(Schedulers.newThread())
 				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe(db -> onDbOpened(),
+				.subscribe(this::onDbOpened,
 						this::onFailedToOpenDb);
+
+		disposables.add(disposable);
 	}
 
 	private void onFailedToOpenDb(Throwable exception) {
 		view.showError(context.getString(R.string.error_was_occurred));
 	}
 
-	private void onDbOpened() {
+	private void onDbOpened(EncryptedDatabase db) {
+		Injector.getInstance().createEncryptedDatabaseComponent(db);
+
 		view.showGroupsScreen();
 	}
 

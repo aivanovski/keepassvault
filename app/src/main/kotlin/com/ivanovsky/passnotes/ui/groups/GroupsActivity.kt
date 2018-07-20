@@ -9,13 +9,11 @@ import com.ivanovsky.passnotes.App
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding
+import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.BaseActivity
 import javax.inject.Inject
 
 class GroupsActivity : BaseActivity() {
-
-	@Inject
-	lateinit var dbRepository: EncryptedDatabaseRepository
 
 	companion object {
 
@@ -26,7 +24,7 @@ class GroupsActivity : BaseActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		App.getDaggerComponent().inject(this)
+		Injector.getInstance().appComponent.inject(this)
 
 		val binding = DataBindingUtil.setContentView<CoreBaseActivityBinding>(this,
 				R.layout.core_base_activity)
@@ -47,10 +45,7 @@ class GroupsActivity : BaseActivity() {
 
 	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
 		if (item?.itemId == android.R.id.home) {
-
-			if (dbRepository.isOpened) {
-				dbRepository.close()
-			}
+			Injector.getInstance().releaseEncryptedDatabaseComponent()
 
 			finish()
 

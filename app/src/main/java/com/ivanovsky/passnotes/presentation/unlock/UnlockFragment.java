@@ -7,28 +7,27 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.databinding.RecentlyUsedFragmentBinding;
 import com.ivanovsky.passnotes.data.entity.UsedFile;
+import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding;
 import com.ivanovsky.passnotes.presentation.core.BaseFragment;
 import com.ivanovsky.passnotes.presentation.core.FragmentState;
 import com.ivanovsky.passnotes.ui.groups.GroupsActivity;
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
+import static com.ivanovsky.passnotes.util.FileUtils.getFileNameFromPath;
 import static com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput;
 
 public class UnlockFragment extends BaseFragment implements UnlockContract.View {
 
 	private UsedFile selectedUsedFile;
-	private ArrayAdapter<String> fileAdapter;
-	private RecentlyUsedFragmentBinding binding;
+	private FileSpinnerAdapter fileAdapter;
+	private UnlockFragmentBinding binding;
 	private UnlockContract.Presenter presenter;
 
 	public static UnlockFragment newInstance() {
@@ -49,11 +48,11 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 
 	@Override
 	protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		binding = DataBindingUtil.inflate(inflater, R.layout.recently_used_fragment, container, false);
+		binding = DataBindingUtil.inflate(inflater, R.layout.unlock_fragment, container, false);
 
-		fileAdapter = new ArrayAdapter<>(getContext(),
-				android.R.layout.simple_spinner_item);
-		fileAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		fileAdapter = new FileSpinnerAdapter(getContext());
+//		fileAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
 		binding.fileSpinner.setAdapter(fileAdapter);
 
 		binding.fab.setOnClickListener(view -> showNewDatabaseScreen());
@@ -99,8 +98,8 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 	public void showRecentlyUsedFiles(List<UsedFile> files) {
 		selectedUsedFile = files.get(0);
 
-		fileAdapter.clear();
-		fileAdapter.addAll(createAdapterItems(files));
+		fileAdapter.setItem(createAdapterItems(files));
+		fileAdapter.notifyDataSetChanged();
 
 		binding.fileSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
@@ -116,10 +115,17 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 		setState(FragmentState.DISPLAYING_DATA);
 	}
 
-	private List<String> createAdapterItems(List<UsedFile> files) {
-		return Stream.of(files)
-				.map(UsedFile::getFilePath)
-				.collect(Collectors.toList());
+	private List<FileSpinnerAdapter.Item> createAdapterItems(List<UsedFile> files) {
+		List<FileSpinnerAdapter.Item> items = new ArrayList<>();
+
+		for (UsedFile file : files) {
+			String path = file.getFilePath();
+			String filename = getFileNameFromPath(path);
+
+			items.add(new FileSpinnerAdapter.Item(filename, path));
+		}
+
+		return items;
 	}
 
 	private void onFileSelected(UsedFile file) {

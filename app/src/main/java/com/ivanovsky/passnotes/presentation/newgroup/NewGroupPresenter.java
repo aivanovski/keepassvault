@@ -47,12 +47,14 @@ public class NewGroupPresenter implements NewGroupContract.Presenter {
 		String trimmedTitle = title.trim();
 
 		if (!isEmpty(trimmedTitle)) {
+			view.hideKeyboard();
+			view.setDoneButtonVisible(false);
 			view.setState(FragmentState.LOADING);
 
 			Disposable disposable = interactor.createNewGroup(trimmedTitle)
 					.subscribe(this::onCreateGroupResult);
-			disposables.add(disposable);
 
+			disposables.add(disposable);
 		} else {
 			view.showTitleEditTextError(context.getString(R.string.empty_field));
 		}
@@ -62,6 +64,7 @@ public class NewGroupPresenter implements NewGroupContract.Presenter {
 		if (result.getResult() != null) {
 			view.finishScreen();
 		} else {
+			view.setDoneButtonVisible(true);
 			view.showError(result.getError().getMessage());
 		}
 	}

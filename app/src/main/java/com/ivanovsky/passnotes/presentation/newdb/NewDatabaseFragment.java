@@ -24,6 +24,8 @@ import com.ivanovsky.passnotes.ui.groups.GroupsActivity;
 
 import java.util.regex.Pattern;
 
+import static com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput;
+
 public class NewDatabaseFragment extends BaseFragment implements NewDatabaseContract.View {
 
 	private static final Pattern FILE_NAME_PATTERN = Pattern.compile("[\\w]{1,50}");
@@ -141,5 +143,10 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 
 	private String getPassword() {
 		return binding.password.getText().toString().trim();
+	}
+
+	@Override
+	public void hideKeyboard() {
+		hideSoftInput(getActivity());
 	}
 }

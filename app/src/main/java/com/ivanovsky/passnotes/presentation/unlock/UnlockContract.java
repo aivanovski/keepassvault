@@ -14,8 +14,8 @@ public class UnlockContract {
 		void showNoItems();
 		void showGroupsScreen();
 		void showNewDatabaseScreen();
-		void showLoading();
 		void showError(String message);
+		void hideKeyboard();
 	}
 
 	interface Presenter extends BasePresenter {

@@ -51,10 +51,12 @@ public class NewDatabasePresenter implements Presenter {
 
 	@Override
 	public void createNewDatabaseFile(String filename, String password) {
-		view.setDoneButtonVisible(false);
-
 		File dir = FileUtils.getKeepassDir(context);
 		if (dir != null) {
+			view.hideKeyboard();
+			view.setDoneButtonVisible(false);
+			view.setState(FragmentState.LOADING);
+
 			KeepassDatabaseKey key = new KeepassDatabaseKey(password);
 			File dbFile = new File(dir, filename + ".kdbx");//TODO: fix db name creation
 
@@ -62,8 +64,6 @@ public class NewDatabasePresenter implements Presenter {
 					.subscribe(result -> onCreateDatabaseResult(result, dbFile, password));
 
 			disposables.add(disposable);
-
-			view.setState(FragmentState.LOADING);
 		} else {
 			view.showError(context.getString(R.string.error_was_occurred));
 		}

@@ -7,8 +7,10 @@ class NewGroupContract {
 
 	interface View extends BaseView<Presenter> {
 		void showTitleEditTextError(CharSequence error);
+		void setDoneButtonVisible(boolean visible);
 		void finishScreen();
 		void showError(String error);
+		void hideKeyboard();
 	}
 
 	interface Presenter extends BasePresenter {

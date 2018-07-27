@@ -17,10 +17,12 @@ import com.ivanovsky.passnotes.presentation.core.FragmentState;
 
 import static com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput;
 
+
 public class NewGroupFragment extends BaseFragment implements NewGroupContract.View {
 
 	private NewGroupContract.Presenter presenter;
 	private NewGroupFragmentBinding binding;
+	private Menu menu;
 
 	public static NewGroupFragment newInstance() {
 		return new NewGroupFragment();
@@ -52,6 +54,8 @@ public class NewGroupFragment extends BaseFragment implements NewGroupContract.V
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		this.menu = menu;
+
 		inflater.inflate(R.menu.base_done, menu);
 	}
 
@@ -71,6 +75,16 @@ public class NewGroupFragment extends BaseFragment implements NewGroupContract.V
 	}
 
 	@Override
+	public void setDoneButtonVisible(boolean visible) {
+		if (menu != null) {
+			MenuItem item = menu.findItem(R.id.menu_done);
+			if (item != null) {
+				item.setVisible(visible);
+			}
+		}
+	}
+
+	@Override
 	public void setPresenter(NewGroupContract.Presenter presenter) {
 		this.presenter = presenter;
 	}
@@ -82,13 +96,16 @@ public class NewGroupFragment extends BaseFragment implements NewGroupContract.V
 
 	@Override
 	public void finishScreen() {
-		hideSoftInput(getActivity());
 		getActivity().finish();
 	}
 
 	@Override
 	public void showError(String error) {
-		setErrorPanelText(error);
-		setState(FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL);
+		setErrorPanelTextAndState(error);
+	}
+
+	@Override
+	public void hideKeyboard() {
+		hideSoftInput(getActivity());
 	}
 }

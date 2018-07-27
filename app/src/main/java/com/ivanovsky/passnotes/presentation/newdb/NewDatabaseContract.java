@@ -10,6 +10,7 @@ public class NewDatabaseContract {
 		void showError(String message);
 		void setDoneButtonVisible(boolean visible);
 		void showGroupsScreen(DatabaseDescriptor descriptor);
+		void hideKeyboard();
 	}
 
 	interface Presenter extends BasePresenter {

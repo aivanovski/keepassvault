@@ -35,7 +35,7 @@ public class UnlockPresenter implements
 	private UnlockContract.View view;
 	private CompositeDisposable disposables;
 
-	UnlockPresenter(Context context, UnlockContract.View view) {
+	UnlockPresenter(UnlockContract.View view) {
 		Injector.getInstance().getAppComponent().inject(this);
 		this.view = view;
 		this.disposables = new CompositeDisposable();
@@ -77,7 +77,8 @@ public class UnlockPresenter implements
 
 	@Override
 	public void onUnlockButtonClicked(String password, File dbFile) {
-		view.showLoading();
+		view.hideKeyboard();
+		view.setState(FragmentState.LOADING);
 
 		KeepassDatabaseKey key = new KeepassDatabaseKey(password);
 

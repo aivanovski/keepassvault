@@ -12,8 +12,6 @@ import com.ivanovsky.passnotes.presentation.core.BaseActivity;
 
 public class UnlockActivity extends BaseActivity {
 
-	private UnlockPresenter presenter;
-
 	public static Intent createStartIntent(Context context) {
 		return new Intent(context, UnlockActivity.class);
 	}
@@ -33,7 +31,7 @@ public class UnlockActivity extends BaseActivity {
 				.replace(R.id.fragment_container, fragment)
 				.commit();
 
-		presenter = new UnlockPresenter(this, fragment);
+		UnlockPresenter presenter = new UnlockPresenter(fragment);
 		fragment.setPresenter(presenter);
 	}
 }

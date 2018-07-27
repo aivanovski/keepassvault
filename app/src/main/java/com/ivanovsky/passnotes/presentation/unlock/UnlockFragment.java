@@ -22,6 +22,8 @@ import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity;
 import java.io.File;
 import java.util.List;
 
+import static com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput;
+
 public class UnlockFragment extends BaseFragment implements UnlockContract.View {
 
 	private UsedFile selectedUsedFile;
@@ -141,13 +143,12 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 	}
 
 	@Override
-	public void showLoading() {
-		setState(FragmentState.LOADING);
+	public void showError(String message) {
+		setErrorPanelTextAndState(message);
 	}
 
 	@Override
-	public void showError(String message) {
-		setState(FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL);
-		setErrorText(message);
+	public void hideKeyboard() {
+		hideSoftInput(getActivity());
 	}
 }

@@ -7,13 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.safedb.model.Group
+import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
-import com.ivanovsky.passnotes.ui.core.BaseFragment
-import com.ivanovsky.passnotes.ui.core.FragmentState
-import com.ivanovsky.passnotes.ui.newgroup.NewGroupActivity
+import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.presentation.core.FragmentState
+import com.ivanovsky.passnotes.presentation.newgroup.NewGroupActivity
 import com.ivanovsky.passnotes.ui.notes.NotesActivity
-import com.ivanovsky.passnotes.ui.unlock.UnlockActivity
+import com.ivanovsky.passnotes.presentation.unlock.UnlockActivity
 
 class GroupsFragment : BaseFragment(), GroupsContract.View {
 
@@ -69,18 +69,23 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 		this.presenter = presenter
 	}
 
-	override fun showGroups(groups: List<Group>) {
-		adapter.setItems(createAdapterItems(groups))
-		adapter.onGroupItemClickListener = { position -> onGroupClicked(groups[position])}
+	override fun showGroups(groupsAndCounts: List<Pair<Group, Int>>) {
+		adapter.setItems(createAdapterItems(groupsAndCounts))
+		adapter.onGroupItemClickListener = { position -> onGroupClicked(groupsAndCounts[position].first)}
 		adapter.onButtonItemClickListener = { onNewGroupClicked() }
 
 		state = FragmentState.DISPLAYING_DATA
 	}
 
-	private fun createAdapterItems(groups: List<Group>): List<GroupsAdapter.ListItem> {
+	private fun createAdapterItems(groupsAndCounts: List<Pair<Group, Int>>): List<GroupsAdapter.ListItem> {
 		val result = mutableListOf<GroupsAdapter.ListItem>()
 
-		groups.forEach { group -> result.add(GroupsAdapter.GroupListItem(group.title, group.noteCount)) }
+		for (groupAndCount in groupsAndCounts) {
+			val group = groupAndCount.first
+			val noteCount = groupAndCount.second
+
+			result.add(GroupsAdapter.GroupListItem(group.title, noteCount))
+		}
 
 		result.add(GroupsAdapter.ButtonListItem())
 
@@ -112,5 +117,10 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 
 	override fun showNotesScreen(group: Group) {
 		startActivity(NotesActivity.createStartIntent(context, group))
+	}
+
+	override fun showError(message: String) {
+		setErrorText(message)
+		state = FragmentState.ERROR
 	}
 }

@@ -1,13 +1,10 @@
 package com.ivanovsky.passnotes.data.repository;
 
-import com.ivanovsky.passnotes.data.db.AppDatabase;
-import com.ivanovsky.passnotes.data.db.model.UsedFile;
+import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
+import com.ivanovsky.passnotes.data.entity.UsedFile;
 
 import java.util.List;
 
-import io.reactivex.Single;
-
-//TODO: move to package data/db/repository
 public class UsedFileRepository {
 
 	@SuppressWarnings("unused")
@@ -19,8 +16,8 @@ public class UsedFileRepository {
 		this.db = db;
 	}
 
-	public Single<List<UsedFile>> getAllUsedFiles() {
-		return Single.fromCallable(() -> db.getUsedFileDao().getAll());
+	public List<UsedFile> getAllUsedFiles() {
+		return db.getUsedFileDao().getAll();
 	}
 
 	public void insert(UsedFile file) {

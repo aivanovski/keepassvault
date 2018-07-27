@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.ui.notes
 
-import com.ivanovsky.passnotes.data.safedb.model.Note
-import com.ivanovsky.passnotes.ui.core.BasePresenter
-import com.ivanovsky.passnotes.ui.core.BaseView
+import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.presentation.core.BasePresenter
+import com.ivanovsky.passnotes.presentation.core.BaseView
 
 class NotesContract {
 
@@ -10,6 +10,7 @@ class NotesContract {
 		fun showNotes(notes: List<Note>)
 		fun showNotItems()
 		fun showUnlockScreenAndFinish()
+		fun showError(message: String)
 	}
 
 	interface Presenter: BasePresenter {

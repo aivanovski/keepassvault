@@ -4,11 +4,18 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.data.ObserverBus;
-import com.ivanovsky.passnotes.data.db.AppDatabase;
-import com.ivanovsky.passnotes.data.keepass.KeepassDatabaseProvider;
-import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider;
+import com.ivanovsky.passnotes.data.repository.GroupRepository;
+import com.ivanovsky.passnotes.data.repository.NoteRepository;
+import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
+import com.ivanovsky.passnotes.data.repository.file.FileResolver;
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository;
+import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
-import com.ivanovsky.passnotes.settings.SettingsManager;
+import com.ivanovsky.passnotes.data.repository.SettingsRepository;
+import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor;
+import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
+import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor;
+import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
 
 import javax.inject.Singleton;
 
@@ -31,31 +38,58 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	public SettingsManager provideSettingsManager() {
-		return new SettingsManager(context);
+	SettingsRepository provideSettingsManager() {
+		return new SettingsRepository(context);
 	}
 
 	@Provides
 	@Singleton
-	public AppDatabase provideAppDatabase() {
+	AppDatabase provideAppDatabase() {
 		return db;
 	}
 
 	@Provides
 	@Singleton
-	public UsedFileRepository providesUsedFileRepository() {
+	UsedFileRepository provideUsedFileRepository() {
 		return usedFileRepository;
 	}
 
 	@Provides
 	@Singleton
-	public EncryptedDatabaseProvider provideEncryptedDBProvider() {
-		return new KeepassDatabaseProvider(context);
+	EncryptedDatabaseRepository provideEncryptedDBProvider(FileResolver fileResolver) {
+		return new KeepassDatabaseRepository(context, fileResolver);
 	}
 
 	@Provides
 	@Singleton
-	public ObserverBus provideObserverBus() {
+	ObserverBus provideObserverBus() {
 		return new ObserverBus();
+	}
+
+	@Provides
+	@Singleton
+	FileResolver provideFileResolver() {
+		return new FileResolver();
+	}
+
+	@Provides
+	@Singleton
+	UnlockInteractor provideUnlockInteractor(EncryptedDatabaseRepository dbRepository,
+											 UsedFileRepository usedFileRepository) {
+		return new UnlockInteractor(usedFileRepository, dbRepository);
+	}
+
+	@Provides
+	@Singleton
+	ErrorInteractor provideErrorInteractor() {
+		return new ErrorInteractor(context);
+	}
+
+	@Provides
+	@Singleton
+	NewDatabaseInteractor provideNewDatabaseInteractor(EncryptedDatabaseRepository dbRepository,
+													   UsedFileRepository usedFileRepository,
+													   ObserverBus observerBus) {
+		return new NewDatabaseInteractor(context, dbRepository, usedFileRepository, observerBus);
 	}
 }

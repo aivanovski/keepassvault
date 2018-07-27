@@ -13,7 +13,7 @@
 
 		<!-- Activities -->
 		<activity
-			android:name=".ui.StartActivity"
+			android:name=".presentation.StartActivity"
 			android:screenOrientation="portrait">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"/>
@@ -22,15 +22,15 @@
 		</activity>
 
 		<activity
-			android:name=".ui.unlock.UnlockActivity"
+			android:name=".presentation.unlock.UnlockActivity"
 			android:screenOrientation="portrait"/>
 
 		<activity
-			android:name=".ui.newdb.NewDatabaseActivity"
+			android:name=".presentation.newdb.NewDatabaseActivity"
 			android:screenOrientation="portrait"/>
 
 		<activity
-			android:name=".ui.newgroup.NewGroupActivity"
+			android:name=".presentation.newgroup.NewGroupActivity"
 			android:screenOrientation="portrait"/>
 
 		<activity

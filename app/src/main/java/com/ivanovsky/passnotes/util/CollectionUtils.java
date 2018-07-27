@@ -22,4 +22,7 @@ public class CollectionUtils {
 		result.add(item);
 		return result;
 	}
+
+	private CollectionUtils() {
+	}
 }

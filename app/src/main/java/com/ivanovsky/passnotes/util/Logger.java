@@ -11,4 +11,7 @@ public class Logger {
 	public static void printStackTrace(Exception exception) {
 		exception.printStackTrace();
 	}
+
+	private Logger() {
+	}
 }

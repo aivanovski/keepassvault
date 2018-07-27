@@ -3,7 +3,7 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto">
 
-	<com.ivanovsky.passnotes.ui.core.widget.SquareLayout
+	<com.ivanovsky.passnotes.presentation.core.widget.SquareLayout
 		android:id="@+id/root_layout"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -27,6 +27,6 @@
 			android:layout_centerInParent="true"
 			app:srcCompat="@drawable/ic_add_black_48dp"/>
 
-	</com.ivanovsky.passnotes.ui.core.widget.SquareLayout>
+	</com.ivanovsky.passnotes.presentation.core.widget.SquareLayout>
 
 </layout>

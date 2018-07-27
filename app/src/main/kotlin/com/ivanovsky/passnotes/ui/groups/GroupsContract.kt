@@ -1,17 +1,19 @@
 package com.ivanovsky.passnotes.ui.groups
 
-import com.ivanovsky.passnotes.data.safedb.model.Group
-import com.ivanovsky.passnotes.ui.core.BasePresenter
-import com.ivanovsky.passnotes.ui.core.BaseView
+import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.presentation.core.BasePresenter
+import com.ivanovsky.passnotes.presentation.core.BaseView
 
 class GroupsContract {
 
 	interface View: BaseView<Presenter> {
-		fun showGroups(groups: List<Group>)
+		fun showGroups(groupsAndCounts: List<Pair<Group, Int>>)
 		fun showNoItems()
 		fun showNewGroupScreen()
 		fun showUnlockScreenAndFinish()
 		fun showNotesScreen(group: Group)
+		fun showError(message: String)
 	}
 
 	interface Presenter: BasePresenter {

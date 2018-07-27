@@ -56,4 +56,7 @@ public class FileUtils {
 
 		return fileName;
 	}
+
+	private FileUtils() {
+	}
 }

@@ -1,15 +1,15 @@
 package com.ivanovsky.passnotes.ui.groups
 
 import android.content.Context
-import com.ivanovsky.passnotes.App
 import com.ivanovsky.passnotes.data.ObserverBus
-import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider
-import com.ivanovsky.passnotes.data.safedb.model.Group
-import com.ivanovsky.passnotes.ui.core.FragmentState
-import io.reactivex.android.schedulers.AndroidSchedulers
+import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
+import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
+import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.presentation.core.FragmentState
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Consumer
-import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
@@ -17,7 +17,10 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 		ObserverBus.GroupDataSetObserver {
 
 	@Inject
-	lateinit var dbProvider: EncryptedDatabaseProvider
+	lateinit var interactor: GroupsInteractor
+
+	@Inject
+	lateinit var errorInteractor: ErrorInteractor
 
 	@Inject
 	lateinit var observerBus: ObserverBus
@@ -31,7 +34,7 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 	}
 
 	init {
-		App.getDaggerComponent().inject(this)
+		Injector.getInstance().encryptedDatabaseComponent.inject(this)
 		disposables = CompositeDisposable()
 	}
 
@@ -41,25 +44,23 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 	}
 
 	override fun loadData() {
-		if (dbProvider.isOpened) {
-			val repository = dbProvider.database.groupRepository
+		val disposable = interactor.getAllGroupsWithNoteCount()
+				.subscribe(Consumer { onGroupsLoaded(it) })
 
-			val disposable = repository.allGroup
-					.subscribeOn(Schedulers.newThread())
-					.observeOn(AndroidSchedulers.mainThread())
-					.subscribe(Consumer { onGroupsLoaded(it) })
-
-			disposables.add(disposable)
-		} else {
-			view.showUnlockScreenAndFinish()
-		}
+		disposables.add(disposable)
 	}
 
-	private fun onGroupsLoaded(groups: List<Group>) {
-		if (groups.isNotEmpty()) {
-			view.showGroups(groups)
+	private fun onGroupsLoaded(result: OperationResult<List<Pair<Group, Int>>>) {
+		if (result.isSuccessful) {
+			val groupsAndCounts = result.result
+
+			if (groupsAndCounts.isNotEmpty()) {
+				view.showGroups(groupsAndCounts)
+			} else {
+				view.showNoItems()
+			}
 		} else {
-			view.showNoItems()
+			view.showError(errorInteractor.processAndGetMessage(result.error))
 		}
 	}
 

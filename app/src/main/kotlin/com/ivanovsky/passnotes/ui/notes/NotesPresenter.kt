@@ -1,12 +1,12 @@
 package com.ivanovsky.passnotes.ui.notes
 
 import android.content.Context
-import com.ivanovsky.passnotes.App
-import com.ivanovsky.passnotes.data.safedb.EncryptedDatabaseProvider
-import com.ivanovsky.passnotes.data.safedb.model.Note
-import io.reactivex.android.schedulers.AndroidSchedulers
+import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
+import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor
+import com.ivanovsky.passnotes.injection.Injector
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import java.util.*
 import javax.inject.Inject
 
@@ -14,12 +14,15 @@ class NotesPresenter(private val groupUid: UUID, private val context: Context, p
 		NotesContract.Presenter {
 
 	@Inject
-	lateinit var dbProvider: EncryptedDatabaseProvider
+	lateinit var interactor: NotesInteractor
+
+	@Inject
+	lateinit var errorInteractor: ErrorInteractor
 
 	private var disposables = CompositeDisposable()
 
 	init {
-		App.getDaggerComponent().inject(this)
+		Injector.getInstance().encryptedDatabaseComponent.inject(this)
 	}
 
 	override fun start() {
@@ -31,25 +34,23 @@ class NotesPresenter(private val groupUid: UUID, private val context: Context, p
 	}
 
 	override fun loadData() {
-		if (dbProvider.isOpened) {
-			val noteRepository = dbProvider.database.noteRepository
+		val disposable = interactor.getNotesByGroupUid(groupUid)
+				.subscribe({ result -> onNotesLoadedResult(result)})
 
-			val disposable = noteRepository.getNotesByGroupUid(groupUid)
-					.subscribeOn(Schedulers.newThread())
-					.observeOn(AndroidSchedulers.mainThread())
-					.subscribe({ notes -> onNotesLoaded(notes) })
-
-			disposables.add(disposable)
-		} else {
-			view.showUnlockScreenAndFinish()
-		}
+		disposables.add(disposable)
 	}
 
-	private fun onNotesLoaded(notes: List<Note>) {
-		if (notes.isNotEmpty()) {
-			view.showNotes(notes)
+	private fun onNotesLoadedResult(result: OperationResult<List<Note>>) {
+		if (result.result != null) {
+			val notes = result.result
+
+			if (notes.isNotEmpty()) {
+				view.showNotes(notes)
+			} else {
+				view.showNotItems()
+			}
 		} else {
-			view.showNotItems()
+			view.showError(errorInteractor.processAndGetMessage(result.error))
 		}
 	}
 }

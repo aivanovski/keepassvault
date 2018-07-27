@@ -1,6 +1,8 @@
 package com.ivanovsky.passnotes.domain.interactor.groups
 
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.GroupRepository
 import com.ivanovsky.passnotes.data.repository.NoteRepository
 import io.reactivex.Single
@@ -10,21 +12,38 @@ import io.reactivex.schedulers.Schedulers
 class GroupsInteractor(private val groupRepository: GroupRepository,
                        private val noteRepository: NoteRepository) {
 
-	fun getAllGroupsWithNoteCount(): Single<List<Pair<Group, Int>>> {
-		return groupRepository.allGroup
+	fun getAllGroupsWithNoteCount(): Single<OperationResult<List<Pair<Group, Int>>>> {
+		return Single.fromCallable { groupRepository.allGroup }
 				.subscribeOn(Schedulers.newThread())
 				.observeOn(AndroidSchedulers.mainThread())
-				.map { groups -> createGroupToNoteCountPairs(groups)}
+				.map { groupsResult ->
+					val result: OperationResult<List<Pair<Group, Int>>>
+
+					if (groupsResult.result != null) {
+						result = createGroupToNoteCountPairs(groupsResult)
+					} else {
+						result = OperationResult.error(groupsResult.error)
+					}
+
+					result
+				}
 	}
 
-	private fun createGroupToNoteCountPairs(groups: List<Group>): List<Pair<Group, Int>> {
-		val result = mutableListOf<Pair<Group, Int>>()
+	private fun createGroupToNoteCountPairs(groupsResult: OperationResult<List<Group>>): OperationResult<List<Pair<Group, Int>>> {
+		val pairs = mutableListOf<Pair<Group, Int>>()
+		var error: OperationError? = null
 
-		for (group in groups) {
-			val noteCount = noteRepository.getNoteCountByGroupUid(group.uid)
-			result.add(Pair(group, noteCount))
+		for (group in groupsResult.result) {
+			val noteCountResult = noteRepository.getNoteCountByGroupUid(group.uid)
+
+			if (noteCountResult.result != null) {
+				pairs.add(Pair(group, noteCountResult.result))
+			} else {
+				error = noteCountResult.error
+				break
+			}
 		}
 
-		return result
+		return if (error == null) OperationResult.success(pairs) else OperationResult.error(error)
 	}
 }

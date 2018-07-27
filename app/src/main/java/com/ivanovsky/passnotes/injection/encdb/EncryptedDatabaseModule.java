@@ -1,9 +1,13 @@
 package com.ivanovsky.passnotes.injection.encdb;
 
+import android.content.Context;
+
+import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor;
+import com.ivanovsky.passnotes.domain.interactor.newgroup.NewGroupInteractor;
 import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor;
 
 import dagger.Module;
@@ -12,9 +16,11 @@ import dagger.Provides;
 @Module
 public class EncryptedDatabaseModule {
 
+	private final Context context;
 	private final EncryptedDatabase database;
 
-	public EncryptedDatabaseModule(EncryptedDatabase database) {
+	public EncryptedDatabaseModule(Context context, EncryptedDatabase database) {
+		this.context = context;
 		this.database = database;
 	}
 
@@ -41,5 +47,12 @@ public class EncryptedDatabaseModule {
 	@EncryptedDatabaseScope
 	NotesInteractor provideNotesInteractor(NoteRepository noteRepository) {
 		return new NotesInteractor(noteRepository);
+	}
+
+	@Provides
+	@EncryptedDatabaseScope
+	NewGroupInteractor provideNewGroupInteractor(GroupRepository groupRepository,
+												 ObserverBus observerBus) {
+		return new NewGroupInteractor(context, groupRepository, observerBus);
 	}
 }

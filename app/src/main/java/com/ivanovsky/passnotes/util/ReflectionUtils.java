@@ -8,5 +8,8 @@ public class ReflectionUtils {
 		return Stream.of(classType.getInterfaces())
 				.anyMatch(classInterface -> classInterface == interfaceType);
 	}
+
+	private ReflectionUtils() {
+	}
 }
 

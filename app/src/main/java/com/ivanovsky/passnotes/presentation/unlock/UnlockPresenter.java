@@ -3,8 +3,8 @@ package com.ivanovsky.passnotes.presentation.unlock;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.data.ObserverBus;
+import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.UsedFile;
-import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey;
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor;
 import com.ivanovsky.passnotes.injection.Injector;
@@ -57,21 +57,22 @@ public class UnlockPresenter implements
 	@Override
 	public void loadData() {
 		Disposable disposable = interactor.getRecentlyOpenedFiles()
-				.subscribe(this::onFilesLoaded, this::onFailedToLoadFiles);
+				.subscribe(this::onGetRecentlyOpenedFilesResult);
 
 		disposables.add(disposable);
 	}
 
-	private void onFilesLoaded(List<UsedFile> files) {
-		if (files.size() != 0) {
-			view.showRecentlyUsedFiles(files);
+	private void onGetRecentlyOpenedFilesResult(OperationResult<List<UsedFile>> result) {
+		if (result.isSuccessful()) {
+			List<UsedFile> files = result.getResult();
+			if (files.size() != 0) {
+				view.showRecentlyUsedFiles(files);
+			} else {
+				view.showNoItems();
+			}
 		} else {
-			view.showNoItems();
+			view.showError(errorInteractor.processAndGetMessage(result.getError()));
 		}
-	}
-
-	private void onFailedToLoadFiles(Throwable throwable) {
-		view.showError(errorInteractor.getErrorMessage(throwable));
 	}
 
 	@Override
@@ -81,17 +82,17 @@ public class UnlockPresenter implements
 		KeepassDatabaseKey key = new KeepassDatabaseKey(password);
 
 		Disposable disposable = interactor.openDatabase(key, dbFile)
-				.subscribe(this::onDbOpened, this::onFailedToOpenDb);
+				.subscribe(this::onOpenDatabaseResult);
 
 		disposables.add(disposable);
 	}
 
-	private void onDbOpened(Boolean result) {
-		view.showGroupsScreen();
-	}
-
-	private void onFailedToOpenDb(Throwable throwable) {
-		view.showError(errorInteractor.getErrorMessage(throwable));
+	private void onOpenDatabaseResult(OperationResult<Boolean> result) {
+		if (result.getResult() != null) {
+			view.showGroupsScreen();
+		} else {
+			view.showError(errorInteractor.processAndGetMessage(result.getError()));
+		}
 	}
 
 	@Override

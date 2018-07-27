@@ -1,6 +1,8 @@
 package com.ivanovsky.passnotes.domain.interactor.unlock;
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
+import com.ivanovsky.passnotes.data.entity.OperationError;
+import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.UsedFile;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
@@ -25,19 +27,25 @@ public class UnlockInteractor {
 		this.dbRepository = dbRepository;
 	}
 
-	public Single<List<UsedFile>> getRecentlyOpenedFiles() {
-		return fileRepository.getAllUsedFiles()
+	public Single<OperationResult<List<UsedFile>>> getRecentlyOpenedFiles() {
+		return Single.fromCallable(fileRepository::getAllUsedFiles)
 				.subscribeOn(Schedulers.newThread())
-				.observeOn(AndroidSchedulers.mainThread());
+				.observeOn(AndroidSchedulers.mainThread())
+				.map(OperationResult::success);
 	}
 
-	public Single<Boolean> openDatabase(KeepassDatabaseKey key, File file) {
-		return dbRepository.openAsync(key, FileDescriptor.fromRegularFile(file))
+	public Single<OperationResult<Boolean>> openDatabase(KeepassDatabaseKey key, File file) {
+		return Single.fromCallable(() -> dbRepository.open(key, FileDescriptor.fromRegularFile(file)))
 				.subscribeOn(Schedulers.newThread())
 				.observeOn(AndroidSchedulers.mainThread())
 				.map(db -> {
 					Injector.getInstance().createEncryptedDatabaseComponent(db);
-					return true;
-				});
+					return OperationResult.success(true);
+				})
+				.onErrorResumeNext(throwable -> Single.just(makeResultFromThrowable(throwable)));
+	}
+
+	private OperationResult<Boolean> makeResultFromThrowable(Throwable throwable) {
+		return OperationResult.error(new OperationError(OperationError.Type.GENERIC_ERROR, throwable));
 	}
 }

@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.keepass.dao;
 
+import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.data.entity.Note;
@@ -21,7 +22,7 @@ public class KeepassNoteDao implements NoteDao {
 	}
 
 	@Override
-	public List<Note> getNotesByGroupUid(UUID groupUid) {
+	public OperationResult<List<Note>> getNotesByGroupUid(UUID groupUid) {
 		List<Note> notes = new ArrayList<>();
 
 		SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
@@ -35,7 +36,7 @@ public class KeepassNoteDao implements NoteDao {
 			}
 		}
 
-		return notes;
+		return OperationResult.success(notes);
 	}
 
 	private SimpleGroup findGroupByUidRecursively(SimpleGroup group, UUID uid) {

@@ -38,7 +38,7 @@ public class Injector {
 	}
 
 	public void createEncryptedDatabaseComponent(EncryptedDatabase database) {
-		dbComponent = appComponent.plus(new EncryptedDatabaseModule(database));
+		dbComponent = appComponent.plus(new EncryptedDatabaseModule(App.getInstance(), database));
 	}
 
 	public void releaseEncryptedDatabaseComponent() {

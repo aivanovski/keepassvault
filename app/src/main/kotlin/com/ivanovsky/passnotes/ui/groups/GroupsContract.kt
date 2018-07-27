@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.ui.groups
 
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.presentation.core.BasePresenter
 import com.ivanovsky.passnotes.presentation.core.BaseView
 
@@ -12,6 +13,7 @@ class GroupsContract {
 		fun showNewGroupScreen()
 		fun showUnlockScreenAndFinish()
 		fun showNotesScreen(group: Group)
+		fun showError(message: String)
 	}
 
 	interface Presenter: BasePresenter {

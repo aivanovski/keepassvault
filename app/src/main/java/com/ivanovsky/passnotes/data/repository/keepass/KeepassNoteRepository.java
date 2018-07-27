@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.keepass;
 
+import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.data.entity.Note;
@@ -18,12 +19,21 @@ public class KeepassNoteRepository implements NoteRepository {
 	}
 
 	@Override
-	public Single<List<Note>> getNotesByGroupUid(UUID groupUid) {
-		return Single.fromCallable(() -> dao.getNotesByGroupUid(groupUid));
+	public OperationResult<List<Note>> getNotesByGroupUid(UUID groupUid) {
+		return dao.getNotesByGroupUid(groupUid);
 	}
 
 	@Override
-	public Integer getNoteCountByGroupUid(UUID groupUid) {
-		return dao.getNotesByGroupUid(groupUid).size();
+	public OperationResult<Integer> getNoteCountByGroupUid(UUID groupUid) {
+		OperationResult<Integer> operation;
+
+		OperationResult<List<Note>> notesOperation = dao.getNotesByGroupUid(groupUid);
+		if (notesOperation.getResult() != null) {
+			operation = OperationResult.success(notesOperation.getResult().size());
+		} else {
+			operation = OperationResult.error(notesOperation.getError());
+		}
+
+		return operation;
 	}
 }

@@ -90,6 +90,6 @@ public class AppModule {
 	NewDatabaseInteractor provideNewDatabaseInteractor(EncryptedDatabaseRepository dbRepository,
 													   UsedFileRepository usedFileRepository,
 													   ObserverBus observerBus) {
-		return new NewDatabaseInteractor(dbRepository, usedFileRepository, observerBus);
+		return new NewDatabaseInteractor(context, dbRepository, usedFileRepository, observerBus);
 	}
 }

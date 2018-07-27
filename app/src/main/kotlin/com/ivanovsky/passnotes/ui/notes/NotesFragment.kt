@@ -78,4 +78,9 @@ class NotesFragment: BaseFragment(), NotesContract.View {
 
 		activity.finish()
 	}
+
+	override fun showError(message: String) {
+		setErrorText(message)
+		state = FragmentState.ERROR
+	}
 }

@@ -1,14 +1,12 @@
 package com.ivanovsky.passnotes.data.repository.keepass;
 
-import com.annimon.stream.Stream;
+import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
 import com.ivanovsky.passnotes.data.entity.Group;
 
 import java.util.List;
 import java.util.UUID;
-
-import io.reactivex.Single;
 
 public class KeepassGroupRepository implements GroupRepository {
 
@@ -19,32 +17,21 @@ public class KeepassGroupRepository implements GroupRepository {
 	}
 
 	@Override
-	public Single<List<Group>> getAllGroup() {
-		return Single.fromCallable(dao::getAll);
+	public OperationResult<List<Group>> getAllGroup() {
+		return dao.getAll();
 	}
 
 	@Override
-	public boolean isTitleFree(String title) {
-		boolean result;
+	public OperationResult<Boolean> insert(Group group) {
+		OperationResult<Boolean> result = new OperationResult<>();
 
-		synchronized (this) {
-			result = !Stream.of(dao.getAll())
-					.anyMatch(group -> title.equals(group.getTitle()));
-		}
+		OperationResult<UUID> insertResult = dao.insert(group);
+		if (insertResult.getResult() != null) {
+			group.setUid(insertResult.getResult());
+			result.setResult(true);
 
-		return result;
-	}
-
-	@Override
-	public boolean insert(Group group) {
-		boolean result = false;
-
-		synchronized (this) {
-			UUID uid = dao.insert(group);
-			if (uid != null) {
-				group.setUid(uid);
-				result = true;
-			}
+		} else {
+			result.setError(insertResult.getError());
 		}
 
 		return result;

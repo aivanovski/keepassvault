@@ -118,4 +118,9 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 	override fun showNotesScreen(group: Group) {
 		startActivity(NotesActivity.createStartIntent(context, group))
 	}
+
+	override fun showError(message: String) {
+		setErrorText(message)
+		state = FragmentState.ERROR
+	}
 }

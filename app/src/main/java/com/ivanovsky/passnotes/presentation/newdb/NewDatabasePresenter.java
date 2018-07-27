@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.entity.DatabaseDescriptor;
+import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey;
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
@@ -58,8 +59,8 @@ public class NewDatabasePresenter implements Presenter {
 			File dbFile = new File(dir, filename + ".kdbx");//TODO: fix db name creation
 
 			Disposable disposable = interactor.createNewDatabaseAndOpen(key, dbFile)
-					.subscribe(created -> onDatabaseCreated(created, dbFile, password),
-							this::onFailedToCreateDatabase);
+					.subscribe(result -> onCreateDatabaseResult(result, dbFile, password));
+
 			disposables.add(disposable);
 
 			view.setState(FragmentState.LOADING);
@@ -68,16 +69,18 @@ public class NewDatabasePresenter implements Presenter {
 		}
 	}
 
-	private void onDatabaseCreated(Boolean result, File dbFile, String password) {
-		if (result) {
-			view.showGroupsScreen(new DatabaseDescriptor(password, dbFile));
-		} else {
-			view.showError(context.getString(R.string.error_was_occurred));
-			view.setDoneButtonVisible(true);
-		}
-	}
+	private void onCreateDatabaseResult(OperationResult<Boolean> result, File dbFile, String password) {
+		if (result.getResult() != null) {
+			boolean created = result.getResult();
 
-	private void onFailedToCreateDatabase(Throwable throwable) {
-		view.showError(errorInteractor.getErrorMessage(throwable));
+			if (created) {
+				view.showGroupsScreen(new DatabaseDescriptor(password, dbFile));
+			} else {
+				view.showError(context.getString(R.string.error_was_occurred));
+				view.setDoneButtonVisible(true);
+			}
+		} else {
+			view.showError(errorInteractor.processAndGetMessage(result.getError()));
+		}
 	}
 }

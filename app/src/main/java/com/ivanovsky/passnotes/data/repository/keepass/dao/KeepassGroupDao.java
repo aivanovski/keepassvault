@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.keepass.dao;
 
+import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
 import com.ivanovsky.passnotes.data.entity.Group;
@@ -15,20 +16,19 @@ public class KeepassGroupDao implements GroupDao {
 
 	private final KeepassDatabase db;
 
-	//TODO: constructor should have SimpleDatabase as argument
 	public KeepassGroupDao(KeepassDatabase db) {
 		this.db = db;
 	}
 
 	@Override
-	public List<Group> getAll() {
+	public OperationResult<List<Group>> getAll() {
 		List<Group> groups = new ArrayList<>();
 
 		SimpleDatabase keepassDb = db.getKeepassDatabase();
 
 		putAllGroupsIntoListRecursively(groups, keepassDb.getRootGroup());
 
-		return groups;
+		return OperationResult.success(groups);
 	}
 
 	private void putAllGroupsIntoListRecursively(List<Group> groups, org.linguafranca.pwdb.Group group) {
@@ -55,7 +55,7 @@ public class KeepassGroupDao implements GroupDao {
 	}
 
 	@Override
-	public UUID insert(Group group) {
+	public OperationResult<UUID> insert(Group group) {
 		UUID result = null;
 
 		SimpleDatabase keepassDb = db.getKeepassDatabase();
@@ -71,6 +71,6 @@ public class KeepassGroupDao implements GroupDao {
 			}
 		}
 
-		return result;
+		return OperationResult.success(result);
 	}
 }

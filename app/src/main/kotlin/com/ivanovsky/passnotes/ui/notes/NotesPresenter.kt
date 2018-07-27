@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.ui.notes
 
 import android.content.Context
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import io.reactivex.disposables.CompositeDisposable
@@ -13,6 +15,9 @@ class NotesPresenter(private val groupUid: UUID, private val context: Context, p
 
 	@Inject
 	lateinit var interactor: NotesInteractor
+
+	@Inject
+	lateinit var errorInteractor: ErrorInteractor
 
 	private var disposables = CompositeDisposable()
 
@@ -30,16 +35,22 @@ class NotesPresenter(private val groupUid: UUID, private val context: Context, p
 
 	override fun loadData() {
 		val disposable = interactor.getNotesByGroupUid(groupUid)
-				.subscribe({ notes -> onNotesLoaded(notes)})
+				.subscribe({ result -> onNotesLoadedResult(result)})
 
 		disposables.add(disposable)
 	}
 
-	private fun onNotesLoaded(notes: List<Note>) {
-		if (notes.isNotEmpty()) {
-			view.showNotes(notes)
+	private fun onNotesLoadedResult(result: OperationResult<List<Note>>) {
+		if (result.result != null) {
+			val notes = result.result
+
+			if (notes.isNotEmpty()) {
+				view.showNotes(notes)
+			} else {
+				view.showNotItems()
+			}
 		} else {
-			view.showNotItems()
+			view.showError(errorInteractor.processAndGetMessage(result.error))
 		}
 	}
 }

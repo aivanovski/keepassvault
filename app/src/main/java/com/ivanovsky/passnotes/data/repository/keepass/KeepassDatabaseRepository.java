@@ -20,8 +20,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import io.reactivex.Single;
-
 public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
 	private volatile KeepassDatabase db;
@@ -31,11 +29,6 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 	public KeepassDatabaseRepository(Context context, FileResolver fileResolver) {
 		this.context = context;
 		this.fileResolver = fileResolver;
-	}
-
-	@Override
-	public Single<EncryptedDatabase> openAsync(EncryptedDatabaseKey key, FileDescriptor file) {
-		return Single.fromCallable(() -> open(key, file));
 	}
 
 	@Override

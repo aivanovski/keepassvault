@@ -3,6 +3,8 @@ package com.ivanovsky.passnotes.ui.groups
 import android.content.Context
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.FragmentState
@@ -16,6 +18,9 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 
 	@Inject
 	lateinit var interactor: GroupsInteractor
+
+	@Inject
+	lateinit var errorInteractor: ErrorInteractor
 
 	@Inject
 	lateinit var observerBus: ObserverBus
@@ -45,11 +50,17 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 		disposables.add(disposable)
 	}
 
-	private fun onGroupsLoaded(groupsAndCounts: List<Pair<Group, Int>>) {
-		if (groupsAndCounts.isNotEmpty()) {
-			view.showGroups(groupsAndCounts)
+	private fun onGroupsLoaded(result: OperationResult<List<Pair<Group, Int>>>) {
+		if (result.isSuccessful) {
+			val groupsAndCounts = result.result
+
+			if (groupsAndCounts.isNotEmpty()) {
+				view.showGroups(groupsAndCounts)
+			} else {
+				view.showNoItems()
+			}
 		} else {
-			view.showNoItems()
+			view.showError(errorInteractor.processAndGetMessage(result.error))
 		}
 	}
 

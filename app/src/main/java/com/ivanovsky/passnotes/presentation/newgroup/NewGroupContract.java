@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.presentation.newgroup;
 import com.ivanovsky.passnotes.presentation.core.BasePresenter;
 import com.ivanovsky.passnotes.presentation.core.BaseView;
 
-public class NewGroupContract {
+class NewGroupContract {
 
 	interface View extends BaseView<Presenter> {
 		void showTitleEditTextError(CharSequence error);

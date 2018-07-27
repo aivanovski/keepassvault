@@ -15,6 +15,8 @@ import com.ivanovsky.passnotes.databinding.NewGroupFragmentBinding;
 import com.ivanovsky.passnotes.presentation.core.BaseFragment;
 import com.ivanovsky.passnotes.presentation.core.FragmentState;
 
+import static com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput;
+
 public class NewGroupFragment extends BaseFragment implements NewGroupContract.View {
 
 	private NewGroupContract.Presenter presenter;
@@ -80,6 +82,7 @@ public class NewGroupFragment extends BaseFragment implements NewGroupContract.V
 
 	@Override
 	public void finishScreen() {
+		hideSoftInput(getActivity());
 		getActivity().finish();
 	}
 

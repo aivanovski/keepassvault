@@ -3,11 +3,13 @@ package com.ivanovsky.passnotes.presentation.unlock;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 
+import com.ivanovsky.passnotes.BuildConfig;
 import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.entity.UsedFile;
 import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding;
@@ -19,8 +21,10 @@ import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.ivanovsky.passnotes.util.FileUtils.getFileNameFromPath;
+import static com.ivanovsky.passnotes.util.FileUtils.getFileNameWithoutExtensionFromPath;
 import static com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput;
 
 public class UnlockFragment extends BaseFragment implements UnlockContract.View {
@@ -29,9 +33,37 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 	private FileSpinnerAdapter fileAdapter;
 	private UnlockFragmentBinding binding;
 	private UnlockContract.Presenter presenter;
+	private List<PasswordRule> passwordRules;
 
 	public static UnlockFragment newInstance() {
 		return new UnlockFragment();
+	}
+
+	@Override
+	public void onCreate(@Nullable Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		if (BuildConfig.DEBUG) {
+			passwordRules = compileFileNamePatterns();
+		}
+	}
+
+	private List<PasswordRule> compileFileNamePatterns() {
+		List<PasswordRule> rules = new ArrayList<>();
+
+		for (int idx = 0; idx < BuildConfig.DEBUG_FILE_NAME_PATTERNS.length; idx++) {
+			String fileNamePattern = BuildConfig.DEBUG_FILE_NAME_PATTERNS[idx];
+			String password = BuildConfig.DEBUG_PASSWORDS[idx];
+
+			PasswordRule rule = new PasswordRule();
+
+			rule.pattern = Pattern.compile(fileNamePattern);
+			rule.password = password;
+
+			rules.add(rule);
+		}
+
+		return  rules;
 	}
 
 	@Override
@@ -51,7 +83,6 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 		binding = DataBindingUtil.inflate(inflater, R.layout.unlock_fragment, container, false);
 
 		fileAdapter = new FileSpinnerAdapter(getContext());
-//		fileAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 		binding.fileSpinner.setAdapter(fileAdapter);
 
@@ -130,6 +161,18 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 
 	private void onFileSelected(UsedFile file) {
 		selectedUsedFile = file;
+
+		if (BuildConfig.DEBUG) {
+			String fileName = getFileNameWithoutExtensionFromPath(file.getFilePath());
+			if (fileName != null) {
+				for (PasswordRule rule : passwordRules) {
+					if (rule.pattern.matcher(fileName).matches()) {
+						binding.password.setText(rule.password);
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	@Override
@@ -156,5 +199,10 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 	@Override
 	public void hideKeyboard() {
 		hideSoftInput(getActivity());
+	}
+
+	private static class PasswordRule {
+		private Pattern pattern;
+		private String password;
 	}
 }

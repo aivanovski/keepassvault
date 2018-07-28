@@ -1,0 +1,36 @@
+import groovy.json.JsonSlurper
+
+// Returns map which contains file name patterns (without file extension) and passwords for
+// password autocomplete in Unlock screen.
+// Emails and passwords should be written in property named 'debugPasswordRules'
+// in file 'debug.properties' in the format as follows:
+//
+//debugPasswordRules={ "[a-zA-Z0-9]*test[a-zA-Z0-9]*":"abc23" }
+def getDebugFileNameToPasswordMap = { ->
+	def result = null
+
+	Properties properties = new Properties()
+	def propertiesFile = project.file('debug.properties')
+
+	if (propertiesFile.canRead()) {
+		properties.load(new FileInputStream(propertiesFile))
+		if (properties.containsKey("debugPasswordRules")) {
+			def passwordRulesJson = properties["debugPasswordRules"]
+
+			result = new JsonSlurper().parseText(passwordRulesJson)
+
+			assert result instanceof Map
+
+			result.each { fileName, password ->
+				project.logger.lifecycle("Use password $password for file name matched $fileName")}
+		}
+	}
+
+	return result
+}
+
+ext {
+	debugFileNameToPasswordMap = getDebugFileNameToPasswordMap()
+}
+
+

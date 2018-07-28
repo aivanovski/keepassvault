@@ -41,10 +41,6 @@
 			android:name=".ui.groups.GroupsActivity"
 			android:screenOrientation="portrait"/>
 
-		<activity
-			android:name=".ui.notes.NotesActivity"
-			android:screenOrientation="portrait"/>
-
 	</application>
 
 </manifest>

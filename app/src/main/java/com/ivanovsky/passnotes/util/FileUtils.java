@@ -57,6 +57,24 @@ public class FileUtils {
 		return fileName;
 	}
 
+	@Nullable
+	public static String getFileNameWithoutExtensionFromPath(@Nullable String filePath) {
+		String result = null;
+
+		String fileName = getFileNameFromPath(filePath);
+		if (fileName == null) {
+			return null;
+		}
+
+		int idx = fileName.lastIndexOf(".");
+		if (idx > 0
+				&& idx + 1 < fileName.length()) {
+			result = fileName.substring(0, idx);
+		}
+
+		return result;
+	}
+
 	private FileUtils() {
 	}
 }

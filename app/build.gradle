@@ -7,6 +7,7 @@ def versionMinor = 1
 def versionPatch = 0
 
 android {
+	def ext = rootProject.extensions.ext
 
 	compileSdkVersion 26
 	buildToolsVersion '26.0.2'
@@ -20,6 +21,9 @@ android {
 		testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
 		vectorDrawables.useSupportLibrary true
 		multiDexEnabled true
+
+		buildConfigField "String[]", "DEBUG_FILE_NAME_PATTERNS", "null"
+		buildConfigField "String[]", "DEBUG_PASSWORDS", "null"
 	}
 
 	sourceSets {
@@ -52,6 +56,15 @@ android {
 			debuggable true
 			minifyEnabled false
 			signingConfig signingConfigs.debug
+
+			if (ext.debugFileNameToPasswordMap != null) {
+				buildConfigField "String[]", "DEBUG_FILE_NAME_PATTERNS", "{" +
+						ext.debugFileNameToPasswordMap.keySet().collect{"\"${it}\""}.join(",") +
+						"}"
+				buildConfigField "String[]", "DEBUG_PASSWORDS", "{" +
+						ext.debugFileNameToPasswordMap.values().collect{"\"${it}\""}.join(",") +
+						"}"
+			}
 		}
 		release {
 			minifyEnabled false

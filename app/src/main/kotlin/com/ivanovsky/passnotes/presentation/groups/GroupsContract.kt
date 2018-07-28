@@ -1,7 +1,6 @@
-package com.ivanovsky.passnotes.ui.groups
+package com.ivanovsky.passnotes.presentation.groups
 
 import com.ivanovsky.passnotes.data.entity.Group
-import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.presentation.core.BasePresenter
 import com.ivanovsky.passnotes.presentation.core.BaseView
 

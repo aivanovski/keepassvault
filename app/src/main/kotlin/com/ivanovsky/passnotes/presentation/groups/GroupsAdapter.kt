@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.ui.groups
+package com.ivanovsky.passnotes.presentation.groups
 
 import android.content.Context
 import android.databinding.DataBindingUtil

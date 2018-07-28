@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.ui.notes
+package com.ivanovsky.passnotes.presentation.notes
 
 import android.databinding.DataBindingUtil
 import android.os.Bundle

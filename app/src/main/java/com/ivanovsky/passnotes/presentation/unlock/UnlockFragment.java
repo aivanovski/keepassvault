@@ -15,7 +15,7 @@ import com.ivanovsky.passnotes.data.entity.UsedFile;
 import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding;
 import com.ivanovsky.passnotes.presentation.core.BaseFragment;
 import com.ivanovsky.passnotes.presentation.core.FragmentState;
-import com.ivanovsky.passnotes.ui.groups.GroupsActivity;
+import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity;
 
 import java.io.File;

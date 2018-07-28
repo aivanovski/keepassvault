@@ -20,7 +20,7 @@ import com.ivanovsky.passnotes.presentation.core.validation.IdenticalContentVali
 import com.ivanovsky.passnotes.presentation.core.validation.NotEmptyValidation;
 import com.ivanovsky.passnotes.presentation.core.validation.PatternValidation;
 import com.ivanovsky.passnotes.presentation.core.validation.Validator;
-import com.ivanovsky.passnotes.ui.groups.GroupsActivity;
+import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
 
 import java.util.regex.Pattern;
 

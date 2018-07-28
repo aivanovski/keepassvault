@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.injection.encdb;
 
 import com.ivanovsky.passnotes.presentation.newgroup.NewGroupPresenter;
-import com.ivanovsky.passnotes.ui.groups.GroupsActivity;
-import com.ivanovsky.passnotes.ui.groups.GroupsPresenter;
-import com.ivanovsky.passnotes.ui.notes.NotesPresenter;
+import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
+import com.ivanovsky.passnotes.presentation.groups.GroupsPresenter;
+import com.ivanovsky.passnotes.presentation.notes.NotesPresenter;
 
 import org.jetbrains.annotations.NotNull;
 

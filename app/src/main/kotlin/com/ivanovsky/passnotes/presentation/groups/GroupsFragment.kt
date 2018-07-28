@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.ui.groups
+package com.ivanovsky.passnotes.presentation.groups
 
 import android.databinding.DataBindingUtil
 import android.os.Bundle
@@ -12,7 +12,7 @@ import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.newgroup.NewGroupActivity
-import com.ivanovsky.passnotes.ui.notes.NotesActivity
+import com.ivanovsky.passnotes.presentation.notes.NotesActivity
 import com.ivanovsky.passnotes.presentation.unlock.UnlockActivity
 
 class GroupsFragment : BaseFragment(), GroupsContract.View {

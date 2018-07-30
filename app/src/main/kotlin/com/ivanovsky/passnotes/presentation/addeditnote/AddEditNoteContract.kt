@@ -8,6 +8,7 @@ class AddEditNoteContract {
 
 	interface View: BaseView<Presenter> {
 		fun showNote(note: Note)
+		fun editNote(note: Note)
 		fun showError(message: String)
 	}
 

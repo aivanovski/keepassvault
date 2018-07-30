@@ -96,6 +96,27 @@ public class KeepassNoteDao implements NoteDao {
 		return notes;
 	}
 
+	private Note createNoteFromEntry(SimpleEntry entry) {
+		Note note = new Note();
+
+		note.setUid(entry.getUuid());
+		note.setTitle(entry.getTitle());
+
+		List<Property> properties = new ArrayList<>();
+		List<String> propertyNames = entry.getPropertyNames();
+		if (propertyNames != null) {
+			for (String propertyName : propertyNames) {
+				String propertyValue = entry.getProperty(propertyName);
+
+				properties.add(new Property(propertyName, propertyValue));
+			}
+		}
+
+		note.setProperties(properties);
+
+		return note;
+	}
+
 	@Override
 	public OperationResult<UUID> insert(Note note) {
 		OperationResult<UUID> result = new OperationResult<>();
@@ -134,5 +155,32 @@ public class KeepassNoteDao implements NoteDao {
 		entry.setTitle(note.getTitle());
 
 		return entry;
+	}
+
+	@Override
+	public OperationResult<Note> getNoteById(UUID noteUid) {
+		OperationResult<Note> result = new OperationResult<>();
+
+		SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
+
+		if (noteUid != null) {
+			List<? extends SimpleEntry> entries = rootGroup.findEntries(
+					entry -> entry.getUuid().equals(noteUid),
+					true);
+			if (entries.size() != 0) {
+				result.setResult(createNotesFromEntries());
+			}
+		}
+
+
+		return result;
+	}
+
+	private SimpleEntry findEntryByUid(SimpleGroup group, UUID noteUid) {
+		SimpleEntry result = null;
+
+		List<SimpleEntry> matchedEnatries = group.findEntries()
+
+		return result;
 	}
 }

@@ -1,0 +1,64 @@
+package com.ivanovsky.passnotes.presentation.addeditnote
+
+import android.content.Context
+import android.content.Intent
+import android.databinding.DataBindingUtil
+import android.os.Bundle
+import android.view.MenuItem
+import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding
+import com.ivanovsky.passnotes.presentation.core.BaseActivity
+import java.util.*
+
+class AddEditNoteActivity: BaseActivity() {
+
+	private lateinit var noteUid: UUID
+	private lateinit var noteTitle: String
+
+	companion object {
+
+		private const val EXTRA_NOTE_UID = "noteUid"
+		private const val EXTRA_NOTE_TITLE = "noteTitle"
+
+		fun createStartIntent(context: Context, note: Note): Intent {
+			val result = Intent(context, AddEditNoteActivity::class.java)
+
+			result.putExtra(EXTRA_NOTE_UID, note.uid)
+			result.putExtra(EXTRA_NOTE_TITLE, note.title)
+
+			return result
+		}
+	}
+
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+
+		val binding = DataBindingUtil.setContentView<CoreBaseActivityBinding>(this,
+				R.layout.core_base_activity)
+
+		noteUid = intent.extras.getSerializable(EXTRA_NOTE_UID) as UUID
+		noteTitle = intent.extras.getString(EXTRA_NOTE_TITLE)
+
+		setSupportActionBar(binding.toolBar)
+		currentActionBar.title = noteTitle
+		currentActionBar.setDisplayHomeAsUpEnabled(true)
+
+		val fragment = AddEditNoteFragment.newInstance()
+		supportFragmentManager.beginTransaction()
+				.replace(R.id.fragment_container, fragment)
+				.commit()
+
+		val presenter = AddEditNotePresenter(fragment)
+		fragment.setPresenter(presenter)
+	}
+
+	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+		if (item?.itemId == android.R.id.home) {
+			finish()
+			return true
+		} else {
+			return super.onOptionsItemSelected(item)
+		}
+	}
+}

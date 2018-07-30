@@ -41,6 +41,10 @@
 			android:name="com.ivanovsky.passnotes.presentation.groups.GroupsActivity"
 			android:screenOrientation="portrait"/>
 
+		<activity
+			android:name=".presentation.addeditnote.AddEditNoteActivity"
+			android:screenOrientation="portrait"/>
+
 	</application>
 
 </manifest>

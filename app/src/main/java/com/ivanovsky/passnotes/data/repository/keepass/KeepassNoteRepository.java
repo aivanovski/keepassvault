@@ -8,8 +8,6 @@ import com.ivanovsky.passnotes.data.entity.Note;
 import java.util.List;
 import java.util.UUID;
 
-import io.reactivex.Single;
-
 public class KeepassNoteRepository implements NoteRepository {
 
 	private final NoteDao dao;
@@ -25,15 +23,26 @@ public class KeepassNoteRepository implements NoteRepository {
 
 	@Override
 	public OperationResult<Integer> getNoteCountByGroupUid(UUID groupUid) {
-		OperationResult<Integer> operation;
+		OperationResult<Integer> result = new OperationResult<>();
 
-		OperationResult<List<Note>> notesOperation = dao.getNotesByGroupUid(groupUid);
-		if (notesOperation.getResult() != null) {
-			operation = OperationResult.success(notesOperation.getResult().size());
+		OperationResult<List<Note>> getNotesResult = dao.getNotesByGroupUid(groupUid);
+		if (getNotesResult.getResult() != null) {
+			result.setResult(getNotesResult.getResult().size());
 		} else {
-			operation = OperationResult.error(notesOperation.getError());
+			result.setError(getNotesResult.getError());
 		}
 
-		return operation;
+		return result;
+	}
+
+	@Override
+	public OperationResult<UUID> insert(Note note) {
+		OperationResult<UUID> result = dao.insert(note);
+
+		if (result.getResult() != null) {
+			note.setUid(result.getResult());
+		}
+
+		return result;
 	}
 }

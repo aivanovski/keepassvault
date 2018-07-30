@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.keepass.dao;
 
+import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
@@ -93,5 +94,45 @@ public class KeepassNoteDao implements NoteDao {
 		}
 
 		return notes;
+	}
+
+	@Override
+	public OperationResult<UUID> insert(Note note) {
+		OperationResult<UUID> result = new OperationResult<>();
+
+		SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
+
+		SimpleGroup group = findGroupByUidRecursively(rootGroup, note.getGroupUid());
+		if (group != null) {
+			SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
+
+			if (newEntry != null && newEntry.getUuid() != null) {
+				if (db.commit()) {
+					result.setResult(newEntry.getUuid());
+				} else {
+					result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILTE_TO_COMMIT));
+				}
+
+			} else {
+				result.setError(OperationError.newDbError(OperationError.MESSAGE_UNKNOWN_ERROR));
+			}
+
+		} else {
+			result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_FIND_GROUP));
+		}
+
+		return result;
+	}
+
+	private SimpleEntry createEntryFromNote(Note note) {
+		SimpleEntry entry = SimpleEntry.createEntry(db.getKeepassDatabase());
+
+		for (Property property : note.getProperties()) {
+			entry.setProperty(property.getName(), property.getValue());
+		}
+
+		entry.setTitle(note.getTitle());
+
+		return entry;
 	}
 }

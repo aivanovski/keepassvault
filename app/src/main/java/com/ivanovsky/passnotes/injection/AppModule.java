@@ -4,15 +4,13 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.data.ObserverBus;
-import com.ivanovsky.passnotes.data.repository.GroupRepository;
-import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
 import com.ivanovsky.passnotes.data.repository.file.FileResolver;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
-import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor;
+import com.ivanovsky.passnotes.domain.ClipboardHelper;
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor;
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
@@ -91,5 +89,11 @@ public class AppModule {
 													   UsedFileRepository usedFileRepository,
 													   ObserverBus observerBus) {
 		return new NewDatabaseInteractor(context, dbRepository, usedFileRepository, observerBus);
+	}
+
+	@Provides
+	@Singleton
+	ClipboardHelper provideClipboardHelper() {
+		return new ClipboardHelper(context);
 	}
 }

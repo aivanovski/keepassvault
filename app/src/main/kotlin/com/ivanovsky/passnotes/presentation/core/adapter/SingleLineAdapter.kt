@@ -11,6 +11,8 @@ import com.ivanovsky.passnotes.databinding.ListItemSingleLineBinding
 class SingleLineAdapter(context: Context):
 		RecyclerView.Adapter<SingleLineAdapter.ViewHolder>() {
 
+	lateinit var onItemClickListener: (Int) -> Unit
+
 	private val items = mutableListOf<Item>()
 	private val inflater = LayoutInflater.from(context)
 
@@ -31,9 +33,14 @@ class SingleLineAdapter(context: Context):
 
 	override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
 		holder!!.binding.primaryTextView.text = items[position].title
+		holder.binding.primaryTextView.setOnClickListener { onItemClicked(position) }
 	}
 
-	inner class ViewHolder(val binding: ListItemSingleLineBinding): RecyclerView.ViewHolder(binding.root)
+	private fun onItemClicked(position: Int) {
+		onItemClickListener.invoke(position)
+	}
+
+	class ViewHolder(val binding: ListItemSingleLineBinding): RecyclerView.ViewHolder(binding.root)
 
 	class Item(val title: String)
 }

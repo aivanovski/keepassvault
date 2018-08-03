@@ -11,6 +11,7 @@ class NotesContract {
 		fun showNotItems()
 		fun showUnlockScreenAndFinish()
 		fun showError(message: String)
+		fun showNoteScreen(note: Note)
 	}
 
 	interface Presenter: BasePresenter {

@@ -9,6 +9,6 @@ import java.util.UUID;
 public interface NoteDao {
 
 	OperationResult<List<Note>> getNotesByGroupUid(UUID groupUid);
-	OperationResult<Note> getNoteById(UUID noteUid);
+	OperationResult<Note> getNoteByUid(UUID noteUid);
 	OperationResult<UUID> insert(Note note);
 }

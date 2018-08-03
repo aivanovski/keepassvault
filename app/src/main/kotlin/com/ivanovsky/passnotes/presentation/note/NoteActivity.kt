@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.presentation.addeditnote
+package com.ivanovsky.passnotes.presentation.note
 
 import android.content.Context
 import android.content.Intent
@@ -11,9 +11,9 @@ import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding
 import com.ivanovsky.passnotes.presentation.core.BaseActivity
 import java.util.*
 
-class AddEditNoteActivity: BaseActivity() {
+class NoteActivity : BaseActivity() {
 
-	private lateinit var noteUid: UUID
+	private var noteUid: UUID? = null
 	private lateinit var noteTitle: String
 
 	companion object {
@@ -22,7 +22,7 @@ class AddEditNoteActivity: BaseActivity() {
 		private const val EXTRA_NOTE_TITLE = "noteTitle"
 
 		fun createStartIntent(context: Context, note: Note): Intent {
-			val result = Intent(context, AddEditNoteActivity::class.java)
+			val result = Intent(context, NoteActivity::class.java)
 
 			result.putExtra(EXTRA_NOTE_UID, note.uid)
 			result.putExtra(EXTRA_NOTE_TITLE, note.title)
@@ -44,12 +44,12 @@ class AddEditNoteActivity: BaseActivity() {
 		currentActionBar.title = noteTitle
 		currentActionBar.setDisplayHomeAsUpEnabled(true)
 
-		val fragment = AddEditNoteFragment.newInstance()
+		val fragment = NoteFragment.newInstance()
 		supportFragmentManager.beginTransaction()
 				.replace(R.id.fragment_container, fragment)
 				.commit()
 
-		val presenter = AddEditNotePresenter(fragment)
+		val presenter = NotePresenter(this, noteUid, fragment)
 		fragment.setPresenter(presenter)
 	}
 

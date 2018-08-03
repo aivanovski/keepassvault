@@ -51,16 +51,19 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 	private List<PasswordRule> compileFileNamePatterns() {
 		List<PasswordRule> rules = new ArrayList<>();
 
-		for (int idx = 0; idx < BuildConfig.DEBUG_FILE_NAME_PATTERNS.length; idx++) {
-			String fileNamePattern = BuildConfig.DEBUG_FILE_NAME_PATTERNS[idx];
-			String password = BuildConfig.DEBUG_PASSWORDS[idx];
+		if (BuildConfig.DEBUG_FILE_NAME_PATTERNS != null
+				&& BuildConfig.DEBUG_PASSWORDS != null) {
+			for (int idx = 0; idx < BuildConfig.DEBUG_FILE_NAME_PATTERNS.length; idx++) {
+				String fileNamePattern = BuildConfig.DEBUG_FILE_NAME_PATTERNS[idx];
+				String password = BuildConfig.DEBUG_PASSWORDS[idx];
 
-			PasswordRule rule = new PasswordRule();
+				PasswordRule rule = new PasswordRule();
 
-			rule.pattern = Pattern.compile(fileNamePattern);
-			rule.password = password;
+				rule.pattern = Pattern.compile(fileNamePattern);
+				rule.password = password;
 
-			rules.add(rule);
+				rules.add(rule);
+			}
 		}
 
 		return  rules;

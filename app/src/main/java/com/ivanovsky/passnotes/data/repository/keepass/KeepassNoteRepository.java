@@ -45,4 +45,9 @@ public class KeepassNoteRepository implements NoteRepository {
 
 		return result;
 	}
+
+	@Override
+	public OperationResult<Note> getNoteByUid(UUID uid) {
+		return dao.getNoteByUid(uid);
+	}
 }

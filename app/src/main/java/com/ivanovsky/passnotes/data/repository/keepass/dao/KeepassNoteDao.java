@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository.keepass.dao;
 
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.entity.PropertyType;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.data.entity.Note;
@@ -15,6 +16,12 @@ import java.util.List;
 import java.util.UUID;
 
 public class KeepassNoteDao implements NoteDao {
+
+	private static final String PROPERTY_TITLE = "Title";
+	private static final String PROPERTY_PASSWORD = "Password";
+	private static final String PROPERTY_URL = "URL";
+	private static final String PROPERTY_USER_NAME = "UserName";
+	private static final String PROPERTY_NOTES = "Notes";
 
 	private final KeepassDatabase db;
 
@@ -72,24 +79,7 @@ public class KeepassNoteDao implements NoteDao {
 
 		if (entries != null) {
 			for (SimpleEntry entry : entries) {
-				Note note = new Note();
-
-				note.setUid(entry.getUuid());
-				note.setTitle(entry.getTitle());
-
-				List<Property> properties = new ArrayList<>();
-				List<String> propertyNames = entry.getPropertyNames();
-				if (propertyNames != null) {
-					for (String propertyName : propertyNames) {
-						String propertyValue = entry.getProperty(propertyName);
-
-						properties.add(new Property(propertyName, propertyValue));
-					}
-				}
-
-				note.setProperties(properties);
-
-				notes.add(note);
+				notes.add(createNoteFromEntry(entry));
 			}
 		}
 
@@ -101,6 +91,13 @@ public class KeepassNoteDao implements NoteDao {
 
 		note.setUid(entry.getUuid());
 		note.setTitle(entry.getTitle());
+		note.setCreated(entry.getCreationTime());
+
+		if (entry.getLastModificationTime() != null) {
+			note.setModified(entry.getLastModificationTime());
+		} else {
+			note.setModified(entry.getCreationTime());
+		}
 
 		List<Property> properties = new ArrayList<>();
 		List<String> propertyNames = entry.getPropertyNames();
@@ -108,13 +105,45 @@ public class KeepassNoteDao implements NoteDao {
 			for (String propertyName : propertyNames) {
 				String propertyValue = entry.getProperty(propertyName);
 
-				properties.add(new Property(propertyName, propertyValue));
+				Property property = createProperty(propertyName, propertyValue);
+				if (property != null) {
+					properties.add(property);
+				}
 			}
 		}
 
 		note.setProperties(properties);
 
 		return note;
+	}
+
+	private Property createProperty(String name, String value) {
+		if (name == null) return null;
+
+		Property property = new Property();
+
+		property.setName(name);
+		property.setValue(value);
+		property.setType(parsePropertyType(name));
+
+		return property;
+	}
+
+	private PropertyType parsePropertyType(String type) {
+		switch (type) {
+			case PROPERTY_TITLE:
+				return PropertyType.TITLE;
+			case PROPERTY_PASSWORD:
+				return PropertyType.PASSWORD;
+			case PROPERTY_USER_NAME:
+				return PropertyType.USER_NAME;
+			case PROPERTY_URL:
+				return PropertyType.URL;
+			case PROPERTY_NOTES:
+				return PropertyType.NOTES;
+			default:
+				return null;
+		}
 	}
 
 	@Override
@@ -131,7 +160,7 @@ public class KeepassNoteDao implements NoteDao {
 				if (db.commit()) {
 					result.setResult(newEntry.getUuid());
 				} else {
-					result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILTE_TO_COMMIT));
+					result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_COMMIT));
 				}
 
 			} else {
@@ -158,28 +187,19 @@ public class KeepassNoteDao implements NoteDao {
 	}
 
 	@Override
-	public OperationResult<Note> getNoteById(UUID noteUid) {
+	public OperationResult<Note> getNoteByUid(UUID noteUid) {
 		OperationResult<Note> result = new OperationResult<>();
 
 		SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
 
-		if (noteUid != null) {
-			List<? extends SimpleEntry> entries = rootGroup.findEntries(
-					entry -> entry.getUuid().equals(noteUid),
-					true);
-			if (entries.size() != 0) {
-				result.setResult(createNotesFromEntries());
-			}
+		List<? extends SimpleEntry> entries = rootGroup.findEntries(
+				entry -> entry.getUuid().equals(noteUid),
+				true);
+		if (entries.size() != 0) {
+			result.setResult(createNoteFromEntry(entries.get(0)));
+		} else {
+			result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_FIND_NOTE));
 		}
-
-
-		return result;
-	}
-
-	private SimpleEntry findEntryByUid(SimpleGroup group, UUID noteUid) {
-		SimpleEntry result = null;
-
-		List<SimpleEntry> matchedEnatries = group.findEntries()
 
 		return result;
 	}

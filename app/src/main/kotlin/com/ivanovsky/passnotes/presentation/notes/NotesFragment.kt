@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.core.adapter.SingleLineAdapter
 import com.ivanovsky.passnotes.presentation.newgroup.NewGroupActivity
+import com.ivanovsky.passnotes.presentation.note.NoteActivity
 
 class NotesFragment: BaseFragment(), NotesContract.View {
 
@@ -61,6 +62,7 @@ class NotesFragment: BaseFragment(), NotesContract.View {
 	override fun showNotes(notes: List<Note>) {
 		adapter.setItems(createAdapterItems(notes))
 		adapter.notifyDataSetChanged()
+		adapter.onItemClickListener = { position -> showNoteScreen(notes[position]) }
 		state = FragmentState.DISPLAYING_DATA
 	}
 
@@ -82,5 +84,9 @@ class NotesFragment: BaseFragment(), NotesContract.View {
 	override fun showError(message: String) {
 		setErrorText(message)
 		state = FragmentState.ERROR
+	}
+
+	override fun showNoteScreen(note: Note) {
+		startActivity(NoteActivity.createStartIntent(activity, note))
 	}
 }

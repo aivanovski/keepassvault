@@ -34,11 +34,15 @@
 			android:screenOrientation="portrait"/>
 
 		<activity
-			android:name="com.ivanovsky.passnotes.presentation.notes.NotesActivity"
+			android:name=".presentation.notes.NotesActivity"
 			android:screenOrientation="portrait"/>
 
 		<activity
-			android:name="com.ivanovsky.passnotes.presentation.groups.GroupsActivity"
+			android:name=".presentation.groups.GroupsActivity"
+			android:screenOrientation="portrait"/>
+
+		<activity
+			android:name=".presentation.note.NoteActivity"
 			android:screenOrientation="portrait"/>
 
 	</application>

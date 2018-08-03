@@ -1,20 +1,19 @@
-package com.ivanovsky.passnotes.presentation.notes
+package com.ivanovsky.passnotes.presentation.note
 
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.presentation.core.BasePresenter
 import com.ivanovsky.passnotes.presentation.core.BaseView
 
-class NotesContract {
+class NoteContract {
 
 	interface View: BaseView<Presenter> {
-		fun showNotes(notes: List<Note>)
-		fun showNotItems()
-		fun showUnlockScreenAndFinish()
+		fun showNote(note: Note)
 		fun showError(message: String)
-		fun showNoteScreen(note: Note)
 	}
 
 	interface Presenter: BasePresenter {
 		fun loadData()
+		fun onEditNoteButtonClicked()
+		fun onCopyToClipboardClicked(text: String)
 	}
 }

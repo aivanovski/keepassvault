@@ -2,13 +2,25 @@ package com.ivanovsky.passnotes.data.entity;
 
 public class OperationError {
 
+	public static final String MESSAGE_FAILED_TO_FIND_GROUP = "Failed to find group";
+	public static final String MESSAGE_FAILED_TO_FIND_NOTE = "Failed to find note";
+	public static final String MESSAGE_FAILED_TO_COMMIT = "Failed to commit";
+	public static final String MESSAGE_UNKNOWN_ERROR = "Unknown error";
+
 	private Type type;
 	private String message;
 	private Throwable throwable;
 
+	public static OperationError newDbError(String message) {
+		OperationError error = new OperationError(Type.DB_ERROR);
+		error.setMessage(message);
+		return error;
+	}
+
 	public enum Type {
 		GENERIC_ERROR,
-		DB_AUTH_ERROR
+		DB_AUTH_ERROR,
+		DB_ERROR
 	}
 
 	public OperationError(Type type) {

@@ -2,19 +2,34 @@ package com.ivanovsky.passnotes.data.entity;
 
 public class Property {
 
-	private final String name;
-	private final String value;
+	private String name;
+	private String value;
+	private PropertyType type;
 
-	public Property(String name, String value) {
-		this.name = name;
-		this.value = value;
+	public Property() {
 	}
 
 	public String getName() {
 		return name;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public String getValue() {
 		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+
+	public PropertyType getType() {
+		return type;
+	}
+
+	public void setType(PropertyType type) {
+		this.type = type;
 	}
 }

@@ -1,16 +1,35 @@
 package com.ivanovsky.passnotes.data.entity;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 public class Note {
 
+	private Date created;
+	private Date modified;
 	private UUID uid;
 	private UUID groupUid;
 	private String title;
 	private List<Property> properties;
 
 	public Note() {
+	}
+
+	public Date getCreated() {
+		return created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	public Date getModified() {
+		return modified;
+	}
+
+	public void setModified(Date modified) {
+		this.modified = modified;
 	}
 
 	public UUID getUid() {

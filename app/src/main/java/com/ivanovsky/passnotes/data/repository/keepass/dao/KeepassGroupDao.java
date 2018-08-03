@@ -56,7 +56,7 @@ public class KeepassGroupDao implements GroupDao {
 
 	@Override
 	public OperationResult<UUID> insert(Group group) {
-		UUID result = null;
+		OperationResult<UUID> result = new OperationResult<>();
 
 		SimpleDatabase keepassDb = db.getKeepassDatabase();
 
@@ -67,10 +67,10 @@ public class KeepassGroupDao implements GroupDao {
 			rootGroup.addGroup(newGroup);
 
 			if (newGroup.getUuid() != null && db.commit()) {
-				result = newGroup.getUuid();
+				result.setResult(newGroup.getUuid());
 			}
 		}
 
-		return OperationResult.success(result);
+		return result;
 	}
 }

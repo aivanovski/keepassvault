@@ -37,6 +37,8 @@
 	<string name="group_title">Group title</string>
 	<string name="group_with_this_name_is_already_exist">Group with this name is already exist</string>
 
-	<!-- Notes screen -->
+	<!-- Note screen -->
+	<string name="copied_clipboard_will_be_cleared_in_seconds">Copied! Clipboard will be cleared in %d seconds</string>
+	<string name="edited_at">Edited %s</string>
 
 </resources>

@@ -1,7 +1,10 @@
 package com.ivanovsky.passnotes.presentation.unlock;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 
+import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.UsedFile;
@@ -10,6 +13,8 @@ import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor;
 import com.ivanovsky.passnotes.injection.Injector;
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
 import com.ivanovsky.passnotes.presentation.core.FragmentState;
+import com.ivanovsky.passnotes.presentation.core.ScreenState;
+import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction;
 
 import java.io.File;
 import java.util.List;
@@ -32,13 +37,51 @@ public class UnlockPresenter implements
 	@Inject
 	ObserverBus observerBus;
 
+	private MutableLiveData<List<UsedFile>> recentlyUsedFilesData;
+	private MutableLiveData<ScreenState> screenStateData;
+	private SingleLiveAction<Void> showGroupsScreenAction;
+	private SingleLiveAction<Void> showNewDatabaseScreenAction;
+	private SingleLiveAction<Void> hideKeyboardAction;
+	private Context context;
 	private UnlockContract.View view;
 	private CompositeDisposable disposables;
 
-	UnlockPresenter(UnlockContract.View view) {
+	UnlockPresenter(Context context, UnlockContract.View view) {
 		Injector.getInstance().getAppComponent().inject(this);
+		this.context = context;
 		this.view = view;
-		this.disposables = new CompositeDisposable();
+
+		disposables = new CompositeDisposable();
+		recentlyUsedFilesData = new MutableLiveData<>();
+		screenStateData = new MutableLiveData<>();
+		showGroupsScreenAction = new SingleLiveAction<>();
+		showNewDatabaseScreenAction = new SingleLiveAction<>();
+		hideKeyboardAction = new SingleLiveAction<>();
+	}
+
+	@Override
+	public LiveData<List<UsedFile>> getRecentlyUsedFilesData() {
+		return recentlyUsedFilesData;
+	}
+
+	@Override
+	public LiveData<ScreenState> getScreenStateData() {
+		return screenStateData;
+	}
+
+	@Override
+	public LiveData<Void> getShowGroupsScreenAction() {
+		return showGroupsScreenAction;
+	}
+
+	@Override
+	public LiveData<Void> getShowNewDatabaseScreenAction() {
+		return showNewDatabaseScreenAction;
+	}
+
+	@Override
+	public LiveData<Void> getHideKeyboardAction() {
+		return hideKeyboardAction;
 	}
 
 	@Override
@@ -66,19 +109,22 @@ public class UnlockPresenter implements
 		if (result.isSuccessful()) {
 			List<UsedFile> files = result.getResult();
 			if (files.size() != 0) {
-				view.showRecentlyUsedFiles(files);
+				recentlyUsedFilesData.setValue(files);
+				screenStateData.setValue(ScreenState.data());
 			} else {
-				view.showNoItems();
+				screenStateData.setValue(ScreenState.empty(
+						context.getString(R.string.no_files_to_open)));
 			}
 		} else {
-			view.showError(errorInteractor.processAndGetMessage(result.getError()));
+			String message = errorInteractor.processAndGetMessage(result.getError());
+			screenStateData.setValue(ScreenState.error(message));
 		}
 	}
 
 	@Override
 	public void onUnlockButtonClicked(String password, File dbFile) {
-		view.hideKeyboard();
-		view.setState(FragmentState.LOADING);
+		hideKeyboardAction.call();
+		screenStateData.setValue(ScreenState.loading());
 
 		KeepassDatabaseKey key = new KeepassDatabaseKey(password);
 
@@ -90,9 +136,10 @@ public class UnlockPresenter implements
 
 	private void onOpenDatabaseResult(OperationResult<Boolean> result) {
 		if (result.getResult() != null) {
-			view.showGroupsScreen();
+			showGroupsScreenAction.call();
 		} else {
-			view.showError(errorInteractor.processAndGetMessage(result.getError()));
+			String message = errorInteractor.processAndGetMessage(result.getError());
+			screenStateData.setValue(ScreenState.error(message));
 		}
 	}
 

@@ -195,6 +195,24 @@ public abstract class BaseFragment extends Fragment {
 		}
 	}
 
+	public void setScreenState(ScreenState screenState) {
+		FragmentState state = screenState.getState();
+
+		switch (state) {
+			case EMPTY:
+				setEmptyText(screenState.getMessage());
+				break;
+			case ERROR:
+				setErrorText(screenState.getMessage());
+				break;
+			case DISPLAYING_DATA_WITH_ERROR_PANEL:
+				setErrorPanelText(screenState.getMessage());
+				break;
+		}
+
+		setState(state);
+	}
+
 	public void showSnackbar(String message) {
 		Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_SHORT)
 				.show();

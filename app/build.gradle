@@ -123,6 +123,10 @@ dependencies {
 	implementation 'com.android.support:multidex:1.0.3'
 
 	//Kotlin
-	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.51"
+	implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.51'
 	kapt 'com.android.databinding:compiler:3.0.1'
+
+	//LiveData
+	implementation 'android.arch.lifecycle:livedata:1.1.1'
+	kapt 'android.arch.lifecycle:compiler:1.1.1'
 }

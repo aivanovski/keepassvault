@@ -31,7 +31,7 @@ public class UnlockActivity extends BaseActivity {
 				.replace(R.id.fragment_container, fragment)
 				.commit();
 
-		UnlockPresenter presenter = new UnlockPresenter(fragment);
+		UnlockPresenter presenter = new UnlockPresenter(this, fragment);
 		fragment.setPresenter(presenter);
 	}
 }

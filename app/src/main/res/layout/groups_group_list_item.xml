@@ -1,53 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
+<com.ivanovsky.passnotes.presentation.core.widget.SquareLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools">
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/root_layout"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:paddingLeft="4dp"
+	android:paddingRight="4dp"
+	android:paddingTop="4dp"
+	android:paddingBottom="4dp"
+	android:background="@drawable/material_selector"
+	android:clickable="true"
+	android:focusable="true">
 
-	<com.ivanovsky.passnotes.presentation.core.widget.SquareLayout
-		android:id="@+id/root_layout"
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@drawable/group_frame"/>
+
+	<TextView
+		android:id="@+id/title"
+		style="@style/Groups.TitleText"
+		android:layout_gravity="center"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:paddingLeft="8dp"
+		android:paddingRight="8dp"
+		android:paddingTop="4dp"
+		android:paddingBottom="4dp"
+		android:gravity="right"
+		android:background="@color/primary"
+		tools:text="Title"/>
+
+	<TextView
+		android:id="@+id/count"
+		style="@style/Groups.CountText"
+		android:layout_gravity="center"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:paddingLeft="4dp"
 		android:paddingRight="4dp"
 		android:paddingTop="4dp"
 		android:paddingBottom="4dp"
-		android:background="@drawable/material_selector"
-		android:clickable="true"
-		android:focusable="true">
+		android:layout_alignParentRight="true"
+		android:layout_alignParentBottom="true"
+		tools:text="13"/>
 
-		<View
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:background="@drawable/group_frame"/>
-
-		<TextView
-			android:id="@+id/title"
-			style="@style/Groups.TitleText"
-			android:layout_gravity="center"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:paddingLeft="8dp"
-			android:paddingRight="8dp"
-			android:paddingTop="4dp"
-			android:paddingBottom="4dp"
-			android:gravity="right"
-			android:background="@color/primary"
-			tools:text="Title"/>
-
-		<TextView
-			android:id="@+id/count"
-			style="@style/Groups.CountText"
-			android:layout_gravity="center"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:paddingLeft="4dp"
-			android:paddingRight="4dp"
-			android:paddingTop="4dp"
-			android:paddingBottom="4dp"
-			android:layout_alignParentRight="true"
-			android:layout_alignParentBottom="true"
-			tools:text="13"/>
-
-	</com.ivanovsky.passnotes.presentation.core.widget.SquareLayout>
-
-</layout>
+</com.ivanovsky.passnotes.presentation.core.widget.SquareLayout>

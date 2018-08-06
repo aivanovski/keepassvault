@@ -1,60 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-	xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical">
 
-	<LinearLayout
+	<android.support.design.widget.TextInputLayout
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:orientation="vertical">
+		android:layout_height="wrap_content"
+		android:layout_marginTop="@dimen/group_margin"
+		android:layout_marginLeft="@dimen/element_margin"
+		android:layout_marginRight="@dimen/element_margin">
 
-		<android.support.design.widget.TextInputLayout
+		<android.support.design.widget.TextInputEditText
+			android:id="@+id/filename"
+			style="@style/Material.EditText.PrimarySingleLine"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="@dimen/group_margin"
-			android:layout_marginLeft="@dimen/element_margin"
-			android:layout_marginRight="@dimen/element_margin">
+			android:hint="@string/file_name"/>
 
-			<android.support.design.widget.TextInputEditText
-				android:id="@+id/filename"
-				style="@style/Material.EditText.PrimarySingleLine"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:hint="@string/file_name"/>
+	</android.support.design.widget.TextInputLayout>
 
-		</android.support.design.widget.TextInputLayout>
+	<android.support.design.widget.TextInputLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="@dimen/element_margin"
+		android:layout_marginLeft="@dimen/element_margin"
+		android:layout_marginRight="@dimen/element_margin">
 
-		<android.support.design.widget.TextInputLayout
+		<android.support.design.widget.TextInputEditText
+			android:id="@+id/password"
+			style="@style/Material.EditText.Password"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="@dimen/element_margin"
-			android:layout_marginLeft="@dimen/element_margin"
-			android:layout_marginRight="@dimen/element_margin">
+			android:hint="@string/password"/>
 
-			<android.support.design.widget.TextInputEditText
-				android:id="@+id/password"
-				style="@style/Material.EditText.Password"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:hint="@string/password"/>
+	</android.support.design.widget.TextInputLayout>
 
-		</android.support.design.widget.TextInputLayout>
+	<android.support.design.widget.TextInputLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="@dimen/element_margin"
+		android:layout_marginLeft="@dimen/element_margin"
+		android:layout_marginRight="@dimen/element_margin">
 
-		<android.support.design.widget.TextInputLayout
+		<android.support.design.widget.TextInputEditText
+			android:id="@+id/password_confirmation"
+			style="@style/Material.EditText.Password"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_marginTop="@dimen/element_margin"
-			android:layout_marginLeft="@dimen/element_margin"
-			android:layout_marginRight="@dimen/element_margin">
+			android:hint="@string/confirm"/>
 
-			<android.support.design.widget.TextInputEditText
-				android:id="@+id/password_confirmation"
-				style="@style/Material.EditText.Password"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:hint="@string/confirm"/>
+	</android.support.design.widget.TextInputLayout>
 
-		</android.support.design.widget.TextInputLayout>
-
-	</LinearLayout>
-
-</layout>
+</LinearLayout>

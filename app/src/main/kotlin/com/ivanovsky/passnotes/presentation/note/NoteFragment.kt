@@ -1,16 +1,16 @@
 package com.ivanovsky.passnotes.presentation.note
 
-import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
-import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
 import com.ivanovsky.passnotes.domain.entity.PropertySpreader
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
@@ -20,9 +20,10 @@ import java.util.*
 class NoteFragment : BaseFragment(),
 		NoteContract.View {
 
-	private lateinit var binding: NoteFragmentBinding
 	private lateinit var presenter: NoteContract.Presenter
 	private lateinit var adapter: NoteAdapter
+	private lateinit var recyclerView: RecyclerView
+	private lateinit var modifiedTextView: TextView
 
 	companion object {
 
@@ -41,21 +42,22 @@ class NoteFragment : BaseFragment(),
 		presenter.stop()
 	}
 
-	override fun onCreateContentView(inflater: LayoutInflater?,
-									 container: ViewGroup?,
+	override fun onCreateContentView(inflater: LayoutInflater,
+									 container: ViewGroup,
 									 savedInstanceState: Bundle?): View {
-		binding = DataBindingUtil.inflate(inflater,
-				R.layout.note_fragment,
-				container, false)
+		val view = inflater.inflate(R.layout.note_fragment, container, false)
+
+		recyclerView = view.findViewById(R.id.recycler_view)
+		modifiedTextView = view.findViewById(R.id.modified_date)
 
 		val layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
 		adapter = NoteAdapter(context)
 
-		binding.recyclerView.layoutManager = layoutManager
-		binding.recyclerView.adapter = adapter
+		recyclerView.layoutManager = layoutManager
+		recyclerView.adapter = adapter
 
-		return binding.root
+		return view
 	}
 
 	override fun setPresenter(presenter: NoteContract.Presenter?) {
@@ -72,7 +74,7 @@ class NoteFragment : BaseFragment(),
 		adapter.onCopyButtonClickListener = {
 			position -> onCopyButtonClicked(propertySpreader.visibleProperties[position]) }
 
-		binding.modifiedTextView.text = formatModifiedDate(note.modified)
+		modifiedTextView.text = formatModifiedDate(note.modified)
 	}
 
 	private fun formatModifiedDate(edited: Date): String {
@@ -88,7 +90,6 @@ class NoteFragment : BaseFragment(),
 			items.add(NoteAdapter.NotePropertyItem(property.name,
 					property.value,
 					isVisibilityButtonVisible,
-					true,
 					isVisibilityButtonVisible))
 		}
 

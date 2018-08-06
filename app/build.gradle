@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
 
 def versionMajor = 0
 def versionMinor = 1
@@ -9,13 +10,13 @@ def versionPatch = 0
 android {
 	def ext = rootProject.extensions.ext
 
-	compileSdkVersion 26
-	buildToolsVersion '26.0.2'
+	compileSdkVersion ext.android.compileSdk
+	buildToolsVersion ext.android.buildTools
 
 	defaultConfig {
 		applicationId 'com.ivanovsky.passnotes'
-		minSdkVersion 14
-		targetSdkVersion 26
+		minSdkVersion ext.android.minSdk
+		targetSdkVersion ext.android.targetSdk
 		versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
 		versionName "${versionMajor}.${versionMinor}.${versionPatch}"
 		testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
@@ -28,10 +29,6 @@ android {
 
 	sourceSets {
 		main.java.srcDirs += 'src/main/kotlin'
-	}
-
-	dataBinding {
-		enabled = true
 	}
 
 	compileOptions {
@@ -81,52 +78,56 @@ android {
 dependencies {
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-	androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
-		exclude group: 'com.android.support', module: 'support-annotations'
-	})
-	testImplementation 'junit:junit:4.12'
+	// Test dependencies
+	testImplementation "junit:junit:$jUnitVersion"
+	testImplementation "org.mockito:mockito-core:$mockitoVersion"
+	testImplementation "org.robolectric:robolectric:$robolectricVersion"
 
-	//Dagger
-	kapt 'com.google.dagger:dagger-compiler:2.11'
-	implementation 'com.google.dagger:dagger:2.11'
+	// Android test dependencies
+	androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
+	androidTestImplementation "com.android.support.test:rules:$androidTestVersion"
+	androidTestImplementation "android.arch.persistence.room:testing:$roomVersion"
 
-	//Room
-	kapt 'android.arch.persistence.room:compiler:1.1.1'
-	implementation 'android.arch.persistence.room:runtime:1.1.1'
+	// MultiDex
+	implementation "com.android.support:multidex:$multidexVersion"
 
-	//Support libraries
-	implementation 'com.android.support:appcompat-v7:26.1.0'
-	implementation 'com.android.support.constraint:constraint-layout:1.1.2'
-	implementation 'com.android.support:design:26.1.0'
-	implementation 'com.android.support:support-v4:26.1.0'
-	implementation 'com.android.support:recyclerview-v7:26.1.0'
-	implementation 'com.android.support:cardview-v7:26.1.0'
-	implementation 'com.android.support:support-annotations:26.1.0'
+	// Dagger
+	implementation "com.google.dagger:dagger:$daggerVersion"
+	kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
-	//Java stream api
-	implementation 'com.annimon:stream:1.1.4'
+	// Room
+	implementation "android.arch.persistence.room:runtime:$roomVersion"
+	kapt "android.arch.persistence.room:compiler:$roomVersion"
 
-	//Rx
-	implementation 'io.reactivex.rxjava2:rxjava:2.0.6'
-	implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+	// Lifecycle libraries
+	implementation "android.arch.lifecycle:livedata:$lifecycleVersion"
+	kapt "android.arch.lifecycle:compiler:$lifecycleVersion"
+
+	// Support libraries
+	implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
+	implementation "com.android.support:design:$supportLibraryVersion"
+	implementation "com.android.support:support-v4:$supportLibraryVersion"
+	implementation "com.android.support:recyclerview-v7:$supportLibraryVersion"
+	implementation "com.android.support:cardview-v7:$supportLibraryVersion"
+	implementation "com.android.support:support-annotations:$supportLibraryVersion"
+	implementation "com.android.support.constraint:constraint-layout:$constraintLayoutVersion"
+
+	// Rx
+	implementation "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
+	implementation "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
 
 //	Google Drive API
 //	implementation 'com.google.android.gms:play-services-drive:11.8.0'
 //	implementation 'com.google.android.gms:play-services-auth:11.8.0'
 
-	//KeePassJava2
+	// Java stream API
+	implementation "com.annimon:stream:$annimonStreamApiVersion"
+
+	// Kotlin
+	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$compiler.kotlin"
+
+	// KeePassJava2
 	implementation project(':libs:KeePassJava2-database')
 	implementation project(':libs:KeePassJava2-kdbx')
 	implementation project(':libs:KeePassJava2-simple')
-
-	//MultiDex
-	implementation 'com.android.support:multidex:1.0.3'
-
-	//Kotlin
-	implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.2.51'
-	kapt 'com.android.databinding:compiler:3.0.1'
-
-	//LiveData
-	implementation 'android.arch.lifecycle:livedata:1.1.1'
-	kapt 'android.arch.lifecycle:compiler:1.1.1'
 }

@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.presentation.core.adapter;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.databinding.ListItemTwoLineTwoTextBinding;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +43,8 @@ public class TwoLineTwoTextAdapter extends RecyclerView.Adapter<TwoLineTwoTextAd
 
 	@Override
 	public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-		ListItemTwoLineTwoTextBinding binding = DataBindingUtil.inflate(inflater, R.layout.list_item_two_line_two_text, parent, false);
-		return new ViewHolder(binding);
+		View view = inflater.inflate(R.layout.list_item_two_line_two_text, parent, false);
+		return new ViewHolder(view);
 	}
 
 	@Override
@@ -76,11 +74,11 @@ public class TwoLineTwoTextAdapter extends RecyclerView.Adapter<TwoLineTwoTextAd
 		private TextView title;
 		private TextView description;
 
-		ViewHolder(ListItemTwoLineTwoTextBinding binding) {
-			super(binding.getRoot());
-			layout = binding.layout;
-			title = binding.primaryText;
-			description = binding.secondaryText;
+		ViewHolder(View view) {
+			super(view);
+			layout = view;
+			title = view.findViewById(R.id.primary_text);
+			description = view.findViewById(R.id.secondary_text);
 		}
 	}
 

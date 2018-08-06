@@ -2,11 +2,9 @@ package com.ivanovsky.passnotes.presentation.groups
 
 import android.content.Context
 import android.content.Intent
-import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.view.MenuItem
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.BaseActivity
 
@@ -23,10 +21,9 @@ class GroupsActivity : BaseActivity() {
 		super.onCreate(savedInstanceState)
 		Injector.getInstance().appComponent.inject(this)
 
-		val binding = DataBindingUtil.setContentView<CoreBaseActivityBinding>(this,
-				R.layout.core_base_activity)
+		setContentView(R.layout.core_base_activity)
 
-		setSupportActionBar(binding.toolBar)
+		setSupportActionBar(findViewById(R.id.tool_bar))
 		currentActionBar.title = getString(R.string.groups)
 		currentActionBar.setDisplayHomeAsUpEnabled(true)
 

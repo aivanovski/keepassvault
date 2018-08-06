@@ -1,15 +1,14 @@
 package com.ivanovsky.passnotes.presentation.notes
 
-import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.databinding.NotesFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.core.adapter.SingleLineAdapter
@@ -18,9 +17,9 @@ import com.ivanovsky.passnotes.presentation.note.NoteActivity
 
 class NotesFragment: BaseFragment(), NotesContract.View {
 
-	private lateinit var binding: NotesFragmentBinding
 	private lateinit var presenter: NotesContract.Presenter
 	private lateinit var adapter: SingleLineAdapter
+	private lateinit var recyclerView: RecyclerView
 
 	companion object {
 
@@ -39,20 +38,22 @@ class NotesFragment: BaseFragment(), NotesContract.View {
 		presenter.stop()
 	}
 
-	override fun onCreateContentView(inflater: LayoutInflater?, container: ViewGroup?,
+	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup,
 	                                 savedInstanceState: Bundle?): View {
-		binding = DataBindingUtil.inflate(inflater, R.layout.notes_fragment, container, false)
+		val view = inflater.inflate(R.layout.notes_fragment, container, false)
+
+		recyclerView = view.findViewById(R.id.recycler_view)
 
 		val layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 		val dividerDecorator = DividerItemDecoration(context, layoutManager.orientation)
 
 		adapter = SingleLineAdapter(context)
 
-		binding.recyclerView.layoutManager = layoutManager
-		binding.recyclerView.addItemDecoration(dividerDecorator)
-		binding.recyclerView.adapter = adapter
+		recyclerView.layoutManager = layoutManager
+		recyclerView.addItemDecoration(dividerDecorator)
+		recyclerView.adapter = adapter
 
-		return binding.root
+		return view
 	}
 
 	override fun setPresenter(presenter: NotesContract.Presenter?) {

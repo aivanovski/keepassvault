@@ -1,14 +1,11 @@
 package com.ivanovsky.passnotes.presentation.newdb;
 
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.MenuItem;
 
-import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
-import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding;
 import com.ivanovsky.passnotes.injection.Injector;
 import com.ivanovsky.passnotes.presentation.core.BaseActivity;
 
@@ -19,16 +16,14 @@ public class NewDatabaseActivity extends BaseActivity {
 	@Inject
 	AppDatabase db;
 
-	private NewDatabasePresenter presenter;
-
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Injector.getInstance().getAppComponent().inject(this);
 
-		CoreBaseActivityBinding binding = DataBindingUtil.setContentView(this, R.layout.core_base_activity);
+		setContentView(R.layout.core_base_activity);
 
-		setSupportActionBar(binding.toolBar);
+		setSupportActionBar(findViewById(R.id.tool_bar));
 		getCurrentActionBar().setTitle(R.string.app_name);
 		getCurrentActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -38,7 +33,7 @@ public class NewDatabaseActivity extends BaseActivity {
 				.replace(R.id.fragment_container, fragment)
 				.commit();
 
-		presenter = new NewDatabasePresenter(fragment, this);
+		NewDatabasePresenter presenter = new NewDatabasePresenter(fragment, this);
 		fragment.setPresenter(presenter);
 	}
 

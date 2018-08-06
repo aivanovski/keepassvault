@@ -1,12 +1,12 @@
 package com.ivanovsky.passnotes.presentation.core.adapter
 
 import android.content.Context
-import android.databinding.DataBindingUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.databinding.ListItemSingleLineBinding
 
 class SingleLineAdapter(context: Context):
 		RecyclerView.Adapter<SingleLineAdapter.ViewHolder>() {
@@ -26,21 +26,23 @@ class SingleLineAdapter(context: Context):
 	}
 
 	override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
-		val binding = DataBindingUtil.inflate<ListItemSingleLineBinding>(inflater,
-				R.layout.list_item_single_line, parent, false)
-		return ViewHolder(binding)
+		val view = inflater.inflate(R.layout.list_item_single_line, parent, false)
+		return ViewHolder(view)
 	}
 
-	override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-		holder!!.binding.primaryTextView.text = items[position].title
-		holder.binding.primaryTextView.setOnClickListener { onItemClicked(position) }
+	override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+		holder.primaryText.text = items[position].title
+		holder.primaryText.setOnClickListener { onItemClicked(position) }
 	}
 
 	private fun onItemClicked(position: Int) {
 		onItemClickListener.invoke(position)
 	}
 
-	class ViewHolder(val binding: ListItemSingleLineBinding): RecyclerView.ViewHolder(binding.root)
+	class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
+
+		val primaryText: TextView = view.findViewById(R.id.primary_text)
+	}
 
 	class Item(val title: String)
 }

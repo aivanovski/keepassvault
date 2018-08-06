@@ -1,12 +1,14 @@
 apply plugin: 'com.android.library'
 
 android {
-	compileSdkVersion 26
-	buildToolsVersion '26.0.2'
+	def ext = rootProject.extensions.ext
+
+	compileSdkVersion ext.android.compileSdk
+	buildToolsVersion ext.android.buildTools
 
 	defaultConfig {
-		minSdkVersion 14
-		targetSdkVersion 22
+		minSdkVersion ext.android.minSdk
+		targetSdkVersion ext.android.targetSdk
 		versionCode 1
 		versionName "1.0"
 
@@ -23,11 +25,11 @@ android {
 
 dependencies {
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
-	implementation 'org.jetbrains:annotations:15.0'
-	implementation ('com.google.guava:guava:24.0-android') {
+	implementation "org.jetbrains:annotations:$jetbrainsAnnotationsVersion"
+	implementation ("com.google.guava:guava:$guavaVersion") {
 		exclude group: 'com.google.code.findbugs', module: 'jsr305'
 	}
-	implementation 'com.madgag.spongycastle:core:1.58.0.0'
+	implementation "com.madgag.spongycastle:core:$spongyCastleVersion"
 	implementation project(':libs:KeePassJava2-database')
 	implementation project(':libs:commons-codec-repacked')
 }

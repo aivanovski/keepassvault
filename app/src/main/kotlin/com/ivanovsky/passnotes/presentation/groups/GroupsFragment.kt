@@ -1,14 +1,14 @@
 package com.ivanovsky.passnotes.presentation.groups
 
-import android.databinding.DataBindingUtil
 import android.os.Bundle
+import android.support.design.widget.FloatingActionButton
 import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
-import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.newgroup.NewGroupActivity
@@ -18,8 +18,9 @@ import com.ivanovsky.passnotes.presentation.unlock.UnlockActivity
 class GroupsFragment : BaseFragment(), GroupsContract.View {
 
 	private lateinit var presenter: GroupsContract.Presenter
-	private lateinit var binding: GroupsFragmentBinding
 	private lateinit var adapter: GroupsAdapter
+	private lateinit var recyclerView: RecyclerView
+	private lateinit var fab: FloatingActionButton
 
 	companion object {
 
@@ -39,18 +40,21 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 	}
 
 	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
-		binding = DataBindingUtil.inflate(inflater, R.layout.groups_fragment, container, false)
+		val view = inflater.inflate(R.layout.groups_fragment, container, false)
+
+		recyclerView =  view.findViewById(R.id.recycler_view)
+		fab = view.findViewById(R.id.fab)
 
 		val layoutManager = GridLayoutManager(context, 3)
 
 		adapter = GroupsAdapter(context)
 
-		binding.recyclerView.layoutManager = layoutManager
-		binding.recyclerView.adapter = adapter
+		recyclerView.layoutManager = layoutManager
+		recyclerView.adapter = adapter
 
-		binding.fab.setOnClickListener { view -> showNewGroupScreen() }
+		fab.setOnClickListener { v -> showNewGroupScreen() }
 
-		return binding.root
+		return view
 	}
 
 	override fun getContentContainerId(): Int {
@@ -59,9 +63,9 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 
 	override fun onStateChanged(oldState: FragmentState?, newState: FragmentState) {
 		when (newState) {
-			FragmentState.EMPTY, FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL, FragmentState.DISPLAYING_DATA -> binding.fab.visibility = View.VISIBLE
+			FragmentState.EMPTY, FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL, FragmentState.DISPLAYING_DATA -> fab.visibility = View.VISIBLE
 
-			FragmentState.LOADING, FragmentState.ERROR -> binding.fab.visibility = View.GONE
+			FragmentState.LOADING, FragmentState.ERROR -> fab.visibility = View.GONE
 		}
 	}
 

@@ -1,13 +1,12 @@
 package com.ivanovsky.passnotes.presentation.groups
 
 import android.content.Context
-import android.databinding.DataBindingUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.databinding.GroupsButtonListItemBinding
-import com.ivanovsky.passnotes.databinding.GroupsGroupListItemBinding
 
 class GroupsAdapter(val context: Context): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -37,14 +36,12 @@ class GroupsAdapter(val context: Context): RecyclerView.Adapter<RecyclerView.Vie
 		val result: RecyclerView.ViewHolder
 
 		if (viewType == VIEW_TYPE_GROUP) {
-			val binding = DataBindingUtil.inflate<GroupsGroupListItemBinding>(inflater,
-					R.layout.groups_group_list_item, parent, false)
-			result = GroupItemViewHolder(binding)
+			val view = inflater.inflate(R.layout.groups_group_list_item, parent, false)
+			result = GroupItemViewHolder(view)
 
 		} else {
-			val binding = DataBindingUtil.inflate<GroupsButtonListItemBinding>(inflater,
-					R.layout.groups_button_list_item, parent, false)
-			result = ButtonItemViewHolder(binding)
+			val view = inflater.inflate(R.layout.groups_button_list_item, parent, false)
+			result = ButtonItemViewHolder(view)
 		}
 
 		return result
@@ -57,15 +54,15 @@ class GroupsAdapter(val context: Context): RecyclerView.Adapter<RecyclerView.Vie
 			val viewHolder = holder as GroupItemViewHolder
 			val item = items[position] as GroupListItem
 
-			viewHolder.binding.title.text = item.title
-			viewHolder.binding.count.text = item.noteCount.toString()
+			viewHolder.title.text = item.title
+			viewHolder.count.text = item.noteCount.toString()
 
-			viewHolder.binding.rootLayout.setOnClickListener { onGroupItemClicked(position) }
+			viewHolder.rootLayout.setOnClickListener { onGroupItemClicked(position) }
 
 		} else if (viewType == VIEW_TYPE_BUTTON) {
 			val viewHolder = holder as ButtonItemViewHolder
 
-			viewHolder.binding.rootLayout.setOnClickListener { onButtonItemClicked() }
+			viewHolder.rootLayout.setOnClickListener { onButtonItemClicked() }
 		}
 	}
 
@@ -77,11 +74,17 @@ class GroupsAdapter(val context: Context): RecyclerView.Adapter<RecyclerView.Vie
 		onButtonItemClickListener.invoke()
 	}
 
-	private inner class GroupItemViewHolder(val binding: GroupsGroupListItemBinding):
-			RecyclerView.ViewHolder(binding.root)
+	private inner class GroupItemViewHolder(view: View): RecyclerView.ViewHolder(view) {
 
-	private inner class ButtonItemViewHolder(val binding: GroupsButtonListItemBinding):
-			RecyclerView.ViewHolder(binding.root)
+		val title: TextView = view.findViewById(R.id.title)
+		val count: TextView = view.findViewById(R.id.count)
+		val rootLayout: ViewGroup = view.findViewById(R.id.root_layout)
+	}
+
+	private inner class ButtonItemViewHolder(view: View): RecyclerView.ViewHolder(view) {
+
+		val rootLayout: ViewGroup = view.findViewById(R.id.root_layout)
+	}
 
 	open class ListItem(val viewType: Int)
 

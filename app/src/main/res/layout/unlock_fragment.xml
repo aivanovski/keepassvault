@@ -1,67 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
+<FrameLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto">
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
 
-	<FrameLayout
+	<android.support.constraint.ConstraintLayout
+		android:id="@+id/content"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent">
 
-		<android.support.constraint.ConstraintLayout
-			android:id="@+id/content"
+		<Spinner
+			android:id="@+id/file_spinner"
 			android:layout_width="match_parent"
-			android:layout_height="match_parent">
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/element_margin"
+			android:layout_marginLeft="@dimen/element_margin"
+			android:layout_marginRight="@dimen/element_margin"
+			app:layout_constraintTop_toTopOf="parent"/>
 
-			<Spinner
-				android:id="@+id/file_spinner"
+		<android.support.design.widget.TextInputLayout
+			android:id="@+id/password_layout"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/element_margin"
+			android:layout_marginLeft="@dimen/element_margin"
+			android:layout_marginRight="@dimen/element_margin"
+			app:layout_constraintTop_toBottomOf="@id/file_spinner">
+
+			<android.support.design.widget.TextInputEditText
+				android:id="@+id/password"
+				style="@style/Material.EditText.Password"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				android:layout_marginTop="@dimen/element_margin"
-				android:layout_marginLeft="@dimen/element_margin"
-				android:layout_marginRight="@dimen/element_margin"
-				app:layout_constraintTop_toTopOf="parent"/>
+				android:hint="@string/password"/>
 
-			<android.support.design.widget.TextInputLayout
-				android:id="@+id/password_layout"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="@dimen/element_margin"
-				android:layout_marginLeft="@dimen/element_margin"
-				android:layout_marginRight="@dimen/element_margin"
-				app:layout_constraintTop_toBottomOf="@id/file_spinner">
+		</android.support.design.widget.TextInputLayout>
 
-				<android.support.design.widget.TextInputEditText
-					android:id="@+id/password"
-					style="@style/Material.EditText.Password"
-					android:layout_width="match_parent"
-					android:layout_height="wrap_content"
-					android:hint="@string/password"/>
-
-			</android.support.design.widget.TextInputLayout>
-
-			<Button
-				style="@style/Material.FlatButton"
-				android:id="@+id/unlock_btn"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:layout_marginTop="@dimen/element_margin"
-				android:layout_marginLeft="@dimen/element_margin"
-				android:layout_marginRight="@dimen/element_margin"
-				android:text="@string/unlock"
-				app:layout_constraintTop_toBottomOf="@id/password_layout"/>
+		<Button
+			style="@style/Material.FlatButton"
+			android:id="@+id/unlock_button"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="@dimen/element_margin"
+			android:layout_marginLeft="@dimen/element_margin"
+			android:layout_marginRight="@dimen/element_margin"
+			android:text="@string/unlock"
+			app:layout_constraintTop_toBottomOf="@id/password_layout"/>
 
 
-		</android.support.constraint.ConstraintLayout>
+	</android.support.constraint.ConstraintLayout>
 
 
-		<android.support.design.widget.FloatingActionButton
-			android:id="@+id/fab"
-			style="@style/Material.FloatingActionButton"
-			android:layout_gravity="bottom|right"
-			android:layout_marginRight="@dimen/material_fab_margin"
-			android:layout_marginBottom="@dimen/material_fab_margin"
-			app:srcCompat="@drawable/ic_add_white_24dp"/>
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab"
+		style="@style/Material.FloatingActionButton"
+		android:layout_gravity="bottom|right"
+		android:layout_marginRight="@dimen/material_fab_margin"
+		android:layout_marginBottom="@dimen/material_fab_margin"
+		app:srcCompat="@drawable/ic_add_white_24dp"/>
 
-	</FrameLayout>
-
-</layout>
+</FrameLayout>

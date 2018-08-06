@@ -1,32 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
+<com.ivanovsky.passnotes.presentation.core.widget.SquareLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto">
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:id="@+id/root_layout"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:paddingLeft="4dp"
+	android:paddingRight="4dp"
+	android:paddingTop="4dp"
+	android:paddingBottom="4dp"
+	android:background="@drawable/material_selector"
+	android:clickable="true"
+	android:focusable="true">
 
-	<com.ivanovsky.passnotes.presentation.core.widget.SquareLayout
-		android:id="@+id/root_layout"
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@drawable/group_frame"/>
+
+	<ImageView
+		android:id="@+id/plus_icon"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:paddingLeft="4dp"
-		android:paddingRight="4dp"
-		android:paddingTop="4dp"
-		android:paddingBottom="4dp"
-		android:background="@drawable/material_selector"
-		android:clickable="true"
-		android:focusable="true">
+		android:layout_centerInParent="true"
+		app:srcCompat="@drawable/ic_add_black_48dp"/>
 
-		<View
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:background="@drawable/group_frame"/>
-
-		<ImageView
-			android:id="@+id/plus_icon"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_centerInParent="true"
-			app:srcCompat="@drawable/ic_add_black_48dp"/>
-
-	</com.ivanovsky.passnotes.presentation.core.widget.SquareLayout>
-
-</layout>
+</com.ivanovsky.passnotes.presentation.core.widget.SquareLayout>

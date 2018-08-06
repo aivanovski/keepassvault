@@ -1,13 +1,13 @@
 package com.ivanovsky.passnotes.presentation.note
 
 import android.content.Context
-import android.databinding.DataBindingUtil
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.databinding.NoteListItemSimplePropertyBinding
+import com.ivanovsky.passnotes.presentation.core.widget.SecureTextView
 
 class NoteAdapter(context: Context):
 		RecyclerView.Adapter<NoteAdapter.ViewHolder>() {
@@ -33,10 +33,9 @@ class NoteAdapter(context: Context):
 	override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): NoteAdapter.ViewHolder {
 		val result: NoteAdapter.ViewHolder
 
-		val binding = DataBindingUtil.inflate<NoteListItemSimplePropertyBinding>(inflater,
-				R.layout.note_list_item_simple_property, parent, false)
+		val view = inflater.inflate(R.layout.note_list_item_simple_property, parent, false)
 
-		result = NotePropertyViewHolder(binding)
+		result = NotePropertyViewHolder(view)
 
 		return result
 	}
@@ -47,39 +46,23 @@ class NoteAdapter(context: Context):
 		if (viewType == VIEW_TYPE_NOTE_PROPERTY) {
 			val viewHolder = holder as NotePropertyViewHolder
 			val item = items[position] as NotePropertyItem
-			val binding = viewHolder.binding
 
-			binding.propertyName.text = item.propertyName
-			binding.propertyValue.text = item.propertyValue
+			viewHolder.propertyName.text = item.propertyName
+			viewHolder.propertyValue.text = item.propertyValue
 
 			if (item.isPropertyValueHidden) {
-				binding.propertyValue.hideText()
+				viewHolder.propertyValue.hideText()
 			} else {
-				binding.propertyValue.showText()
+				viewHolder.propertyValue.showText()
 			}
 
-			binding.visibilityButton.setOnClickListener { onVisibilityButtonClicked(position) }
-			binding.copyButton.setOnClickListener { onCopyButtonClicked(position) }
+			viewHolder.visibilityButton.setOnClickListener { onVisibilityButtonClicked(position) }
+			viewHolder.copyButton.setOnClickListener { onCopyButtonClicked(position) }
 
 			if (item.isVisibilityBtnVisible) {
-				binding.visibilityButton.visibility = View.VISIBLE
+				viewHolder.visibilityButton.visibility = View.VISIBLE
 			} else {
-				binding.visibilityButton.visibility = View.GONE
-			}
-
-			if (item.isCopyBtnVisible) {
-				binding.copyButton.visibility = View.VISIBLE
-			} else {
-				binding.copyButton.visibility = View.GONE
-			}
-
-			if ((item.isVisibilityBtnVisible && !item.isCopyBtnVisible)
-					|| (!item.isVisibilityBtnVisible && item.isCopyBtnVisible)) {
-				binding.buttonDivider.visibility = View.GONE
-			} else if (!item.isVisibilityBtnVisible && !item.isCopyBtnVisible) {
-				binding.buttonDivider.visibility = View.GONE
-			} else {
-				binding.buttonDivider.visibility = View.VISIBLE
+				viewHolder.visibilityButton.visibility = View.GONE
 			}
 		}
 	}
@@ -96,17 +79,21 @@ class NoteAdapter(context: Context):
 		onCopyButtonClickListener.invoke(position)
 	}
 
-	abstract class ViewHolder(private val root: View): RecyclerView.ViewHolder(root)
+	abstract class ViewHolder(root: View): RecyclerView.ViewHolder(root)
 
-	private class NotePropertyViewHolder(val binding: NoteListItemSimplePropertyBinding):
-			ViewHolder(binding.root)
+	private class NotePropertyViewHolder(view: View): ViewHolder(view) {
+
+		val propertyName: TextView = view.findViewById(R.id.property_name)
+		val propertyValue: SecureTextView = view.findViewById(R.id.property_value)
+		val visibilityButton: View = view.findViewById(R.id.visibility_button)
+		val copyButton: View = view.findViewById(R.id.copy_button)
+	}
 
 	abstract class Item(val viewType: Int)
 
 	class NotePropertyItem(val propertyName: String,
 	                       val propertyValue: String,
 	                       val isVisibilityBtnVisible: Boolean,
-	                       val isCopyBtnVisible: Boolean,
 	                       var isPropertyValueHidden: Boolean) : Item(VIEW_TYPE_NOTE_PROPERTY)
 
 	companion object {

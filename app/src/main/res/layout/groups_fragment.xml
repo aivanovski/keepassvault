@@ -1,26 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
+<android.support.constraint.ConstraintLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto">
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
 
-	<android.support.constraint.ConstraintLayout
+	<android.support.v7.widget.RecyclerView
+		android:id="@+id/recycler_view"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent">
+		android:layout_height="match_parent"/>
 
-		<android.support.v7.widget.RecyclerView
-			android:id="@+id/recycler_view"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"/>
+	<android.support.design.widget.FloatingActionButton
+		android:id="@+id/fab"
+		style="@style/Material.FloatingActionButton"
+		android:layout_marginBottom="@dimen/material_fab_margin"
+		android:layout_marginRight="@dimen/material_fab_margin"
+		app:layout_constraintBottom_toBottomOf="@id/recycler_view"
+		app:layout_constraintRight_toRightOf="@id/recycler_view"
+		app:srcCompat="@drawable/ic_add_white_24dp"/>
 
-		<android.support.design.widget.FloatingActionButton
-			android:id="@+id/fab"
-			style="@style/Material.FloatingActionButton"
-			android:layout_marginRight="@dimen/material_fab_margin"
-			android:layout_marginBottom="@dimen/material_fab_margin"
-			app:layout_constraintBottom_toBottomOf="@id/recycler_view"
-			app:layout_constraintRight_toRightOf="@id/recycler_view"
-			app:srcCompat="@drawable/ic_add_white_24dp"/>
-
-	</android.support.constraint.ConstraintLayout>
-
-</layout>
+</android.support.constraint.ConstraintLayout>

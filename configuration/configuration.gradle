@@ -31,6 +31,44 @@ def getDebugFileNameToPasswordMap = { ->
 
 ext {
 	debugFileNameToPasswordMap = getDebugFileNameToPasswordMap()
+
+	compiler = [
+			kotlin: '1.2.50'
+	]
+
+	android = [
+			minSdk    : 15,
+			targetSdk : 26,
+			compileSdk: 26,
+			buildTools: '26.0.2'
+	]
+
+	// Libraries
+	daggerVersion = '2.16'
+	supportLibraryVersion = '26.1.0'
+	lifecycleVersion = '1.1.1'
+	roomVersion = '1.1.1'
+	constraintLayoutVersion = '1.1.2'
+	annimonStreamApiVersion = '1.1.4'
+	rxJavaVersion = '2.1.0'
+	rxAndroidVersion = '2.0.1'
+	multidexVersion = '1.0.3'
+
+	// Test
+	jUnitVersion = '4.12'
+	mockitoVersion = '2.19.1'
+	robolectricVersion = '3.5.1'
+
+	// Android test
+	androidTestVersion = '1.0.1'
+
+	// KeePassJava 2 dependencies
+	jetbrainsAnnotationsVersion = '15.0'
+	guavaVersion = '24.0-android'
+	spongyCastleVersion = '1.58.0.0'
+	simpleXmlVersion = '2.7.1'
+	aaltoXmlVersion = '1.0.0'
+
 }
 
 

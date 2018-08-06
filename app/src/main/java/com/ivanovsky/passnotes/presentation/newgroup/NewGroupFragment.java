@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.presentation.newgroup;
 
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -9,20 +8,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.databinding.NewGroupFragmentBinding;
 import com.ivanovsky.passnotes.presentation.core.BaseFragment;
-import com.ivanovsky.passnotes.presentation.core.FragmentState;
 
 import static com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput;
-
 
 public class NewGroupFragment extends BaseFragment implements NewGroupContract.View {
 
 	private NewGroupContract.Presenter presenter;
-	private NewGroupFragmentBinding binding;
 	private Menu menu;
+	private EditText titleEditText;
 
 	public static NewGroupFragment newInstance() {
 		return new NewGroupFragment();
@@ -48,8 +45,11 @@ public class NewGroupFragment extends BaseFragment implements NewGroupContract.V
 
 	@Override
 	protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		binding = DataBindingUtil.inflate(inflater, R.layout.new_group_fragment, container, false);
-		return binding.getRoot();
+		View view = inflater.inflate(R.layout.new_group_fragment, container, false);
+
+		titleEditText = view.findViewById(R.id.group_title);
+
+		return view;
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class NewGroupFragment extends BaseFragment implements NewGroupContract.V
 	}
 
 	private void onDoneMenuClicked() {
-		String title = binding.groupTitle.getText().toString();
+		String title = titleEditText.getText().toString();
 		presenter.createNewGroup(title);
 	}
 
@@ -91,7 +91,7 @@ public class NewGroupFragment extends BaseFragment implements NewGroupContract.V
 
 	@Override
 	public void showTitleEditTextError(CharSequence error) {
-		binding.groupTitle.setError(error);
+		titleEditText.setError(error);
 	}
 
 	@Override

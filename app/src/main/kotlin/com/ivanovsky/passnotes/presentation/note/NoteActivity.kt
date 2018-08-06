@@ -2,12 +2,10 @@ package com.ivanovsky.passnotes.presentation.note
 
 import android.content.Context
 import android.content.Intent
-import android.databinding.DataBindingUtil
 import android.os.Bundle
 import android.view.MenuItem
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.databinding.CoreBaseActivityBinding
 import com.ivanovsky.passnotes.presentation.core.BaseActivity
 import java.util.*
 
@@ -34,13 +32,12 @@ class NoteActivity : BaseActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
-		val binding = DataBindingUtil.setContentView<CoreBaseActivityBinding>(this,
-				R.layout.core_base_activity)
+		setContentView(R.layout.core_base_activity)
 
 		noteUid = intent.extras.getSerializable(EXTRA_NOTE_UID) as UUID
 		noteTitle = intent.extras.getString(EXTRA_NOTE_TITLE)
 
-		setSupportActionBar(binding.toolBar)
+		setSupportActionBar(findViewById(R.id.tool_bar))
 		currentActionBar.title = noteTitle
 		currentActionBar.setDisplayHomeAsUpEnabled(true)
 

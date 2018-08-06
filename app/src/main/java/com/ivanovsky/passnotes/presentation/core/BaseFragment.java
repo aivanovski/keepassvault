@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.presentation.core;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -13,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.databinding.CoreBaseFragmentBinding;
+import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView;
 import com.ivanovsky.passnotes.presentation.core.widget.FragmentStateView;
 
 public abstract class BaseFragment extends Fragment {
@@ -22,27 +21,32 @@ public abstract class BaseFragment extends Fragment {
 	private CharSequence emptyText;
 	private CharSequence errorText;
 	private CharSequence errorPanelText;
-	private CoreBaseFragmentBinding binding;
 	private FragmentState state;
-	private View contentContainer;
+	private ViewGroup contentContainer;
+	private FragmentStateView stateView;
+	private ErrorPanelView errorPanelView;
+	private ViewGroup rootLayout;
 
 	protected abstract View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
 
 	@Nullable
 	@Override
 	public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		binding = DataBindingUtil.inflate(inflater, R.layout.core_base_fragment, container, false);
+		View view = inflater.inflate(R.layout.core_base_fragment, container, false);
 
-		View contentView = onCreateContentView(inflater, binding.contentContainer, savedInstanceState);
+		contentContainer = view.findViewById(R.id.content_container);
+		stateView = view.findViewById(R.id.state_view);
+		errorPanelView = view.findViewById(R.id.error_panel_view);
+		rootLayout = view.findViewById(R.id.root_layout);
+
+		View contentView = onCreateContentView(inflater, contentContainer, savedInstanceState);
 		if (contentView != null) {
-			binding.contentContainer.addView(contentView);
+			contentContainer.addView(contentView);
 		}
 
 		if (getContentContainerId() != -1) {
 			//noinspection ConstantConditions
 			contentContainer = contentView.findViewById(getContentContainerId());
-		} else {
-			contentContainer = binding.contentContainer;
 		}
 
 		isViewCreated = true;
@@ -66,7 +70,7 @@ public abstract class BaseFragment extends Fragment {
 			setErrorPanelText(errorPanelText);
 		}
 
-		return binding.getRoot();
+		return view;
 	}
 
 	protected int getContentContainerId() {
@@ -94,31 +98,31 @@ public abstract class BaseFragment extends Fragment {
 		switch (state) {
 			case LOADING:
 				contentContainer.setVisibility(View.GONE);
-				binding.stateView.setState(FragmentStateView.State.LOADING);
-				binding.stateView.setVisibility(View.VISIBLE);
-				binding.errorPanelView.setVisibility(View.GONE);
+				stateView.setState(FragmentStateView.State.LOADING);
+				stateView.setVisibility(View.VISIBLE);
+				errorPanelView.setVisibility(View.GONE);
 				break;
 			case EMPTY:
 				contentContainer.setVisibility(View.GONE);
-				binding.stateView.setState(FragmentStateView.State.EMPTY);
-				binding.stateView.setVisibility(View.VISIBLE);
-				binding.errorPanelView.setVisibility(View.GONE);
+				stateView.setState(FragmentStateView.State.EMPTY);
+				stateView.setVisibility(View.VISIBLE);
+				errorPanelView.setVisibility(View.GONE);
 				break;
 			case DISPLAYING_DATA:
 				contentContainer.setVisibility(View.VISIBLE);
-				binding.stateView.setVisibility(View.GONE);
-				binding.errorPanelView.setVisibility(View.GONE);
+				stateView.setVisibility(View.GONE);
+				errorPanelView.setVisibility(View.GONE);
 				break;
 			case ERROR:
 				contentContainer.setVisibility(View.GONE);
-				binding.stateView.setState(FragmentStateView.State.ERROR);
-				binding.stateView.setVisibility(View.VISIBLE);
-				binding.errorPanelView.setVisibility(View.GONE);
+				stateView.setState(FragmentStateView.State.ERROR);
+				stateView.setVisibility(View.VISIBLE);
+				errorPanelView.setVisibility(View.GONE);
 				break;
 			case DISPLAYING_DATA_WITH_ERROR_PANEL:
 				contentContainer.setVisibility(View.VISIBLE);
-				binding.stateView.setVisibility(View.GONE);
-				binding.errorPanelView.setVisibility(View.VISIBLE);
+				stateView.setVisibility(View.GONE);
+				errorPanelView.setVisibility(View.VISIBLE);
 				break;
 		}
 	}
@@ -145,7 +149,7 @@ public abstract class BaseFragment extends Fragment {
 	public void setEmptyText(CharSequence emptyText) {
 		this.emptyText = emptyText;
 		if (isViewCreated) {
-			binding.stateView.setEmptyText(emptyText);
+			stateView.setEmptyText(emptyText);
 		}
 	}
 
@@ -167,7 +171,7 @@ public abstract class BaseFragment extends Fragment {
 	public void setErrorText(CharSequence errorText) {
 		this.errorText = errorText;
 		if (isViewCreated) {
-			binding.stateView.setErrorText(errorText);
+			stateView.setErrorText(errorText);
 		}
 	}
 
@@ -191,7 +195,7 @@ public abstract class BaseFragment extends Fragment {
 	public void setErrorPanelText(CharSequence errorPanelText) {
 		this.errorPanelText = errorPanelText;
 		if (isViewCreated) {
-			binding.errorPanelView.setText(errorPanelText);
+			errorPanelView.setText(errorPanelText);
 		}
 	}
 
@@ -214,7 +218,7 @@ public abstract class BaseFragment extends Fragment {
 	}
 
 	public void showSnackbar(String message) {
-		Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_SHORT)
+		Snackbar.make(rootLayout, message, Snackbar.LENGTH_SHORT)
 				.show();
 	}
 }

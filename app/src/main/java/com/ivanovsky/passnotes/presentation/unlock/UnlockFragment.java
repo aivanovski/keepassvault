@@ -92,6 +92,13 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 		binding.fab.setOnClickListener(view -> showNewDatabaseScreen());
 		binding.unlockBtn.setOnClickListener(view -> onUnlockButtonClicked());
 
+		presenter.getRecentlyUsedFilesData().observe(this, this::showRecentlyUsedFiles);
+		presenter.getScreenStateData().observe(this, this::setScreenState);
+		presenter.getShowGroupsScreenAction().observe(this, obj -> showGroupsScreen());
+		presenter.getShowNewDatabaseScreenAction().observe(this, obj -> showNewDatabaseScreen());
+		presenter.getHideKeyboardAction().observe(this, obj -> hideKeyboard());
+
+
 		return binding.getRoot();
 	}
 
@@ -128,8 +135,7 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 		this.presenter = presenter;
 	}
 
-	@Override
-	public void showRecentlyUsedFiles(List<UsedFile> files) {
+	private void showRecentlyUsedFiles(List<UsedFile> files) {
 		selectedUsedFile = files.get(0);
 
 		fileAdapter.setItem(createAdapterItems(files));
@@ -145,8 +151,6 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 			public void onNothingSelected(AdapterView<?> parent) {
 			}
 		});
-
-		setState(FragmentState.DISPLAYING_DATA);
 	}
 
 	private List<FileSpinnerAdapter.Item> createAdapterItems(List<UsedFile> files) {
@@ -178,29 +182,15 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 		}
 	}
 
-	@Override
-	public void showNoItems() {
-		setEmptyText(getString(R.string.no_files_to_open));
-		setState(FragmentState.EMPTY);
-	}
-
-	@Override
-	public void showGroupsScreen() {
+	private void showGroupsScreen() {
 		startActivity(GroupsActivity.Companion.createStartIntent(getContext()));
 	}
 
-	@Override
-	public void showNewDatabaseScreen() {
+	private void showNewDatabaseScreen() {
 		startActivity(new Intent(getContext(), NewDatabaseActivity.class));
 	}
 
-	@Override
-	public void showError(String message) {
-		setErrorPanelTextAndState(message);
-	}
-
-	@Override
-	public void hideKeyboard() {
+	private void hideKeyboard() {
 		hideSoftInput(getActivity());
 	}
 

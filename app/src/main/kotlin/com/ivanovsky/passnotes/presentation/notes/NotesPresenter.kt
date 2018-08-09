@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.presentation.notes
 
-import android.content.Context
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -10,8 +9,8 @@ import io.reactivex.disposables.CompositeDisposable
 import java.util.*
 import javax.inject.Inject
 
-class NotesPresenter(private val groupUid: UUID, private val context: Context, private val view: NotesContract.View):
-		NotesContract.Presenter {
+class NotesPresenter(private val groupUid: UUID,
+                     private val view: NotesContract.View) : NotesContract.Presenter {
 
 	@Inject
 	lateinit var interactor: NotesInteractor
@@ -35,7 +34,7 @@ class NotesPresenter(private val groupUid: UUID, private val context: Context, p
 
 	override fun loadData() {
 		val disposable = interactor.getNotesByGroupUid(groupUid)
-				.subscribe({ result -> onNotesLoadedResult(result)})
+				.subscribe({ result -> onNotesLoadedResult(result) })
 
 		disposables.add(disposable)
 	}

@@ -24,6 +24,9 @@
 	<string name="field_contains_illegal_character">Field contains illegal character</string>
 	<string name="you_entered_two_different_passwords_please_try_again">You entered two different passwords. Please try again.</string>
 	<string name="this_field_should_match_password">This field should match password</string>
+	<string name="storage_type">Storage type:</string>
+	<string name="not_selected">Not selected</string>
+	<string name="dot_kdbx">.kdbx</string>
 
 	<!-- Open file screen -->
 	<string name="file_path">File path</string>
@@ -40,5 +43,12 @@
 	<!-- Note screen -->
 	<string name="copied_clipboard_will_be_cleared_in_seconds">Copied! Clipboard will be cleared in %d seconds</string>
 	<string name="edited_at">Edited %s</string>
+
+	<!-- Storage screen -->
+	<string name="select_storage">Select storage</string>
+
+	<!-- File list screen -->
+	<string name="select_directory">Select directory</string>
+	<string name="application_requires_external_storage_permission">Application requires external storage permission</string>
 
 </resources>

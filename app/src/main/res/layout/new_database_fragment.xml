@@ -1,32 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.constraint.ConstraintLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:orientation="vertical">
+	xmlns:tools="http://schemas.android.com/tools">
+
+	<android.support.constraint.Guideline
+		android:id="@+id/guideline_start"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		app:layout_constraintGuide_begin="@dimen/element_margin"/>
+
+	<android.support.constraint.Guideline
+		android:id="@+id/guideline_end"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		app:layout_constraintGuide_end="@dimen/element_margin"/>
+
+	<android.support.constraint.ConstraintLayout
+		android:id="@+id/storage_layout"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="@dimen/element_margin"
+		android:background="@drawable/material_selector"
+		android:focusable="true"
+		android:clickable="true"
+		android:paddingTop="4dp"
+		android:paddingBottom="4dp"
+		app:layout_constraintStart_toEndOf="@id/guideline_start"
+		app:layout_constraintEnd_toStartOf="@id/guideline_end"
+		app:layout_constraintTop_toTopOf="parent">
+
+		<TextView
+			android:id="@+id/storage_type_header"
+			style="@style/Material.SecondaryText.SingleLine"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/storage_type"/>
+
+		<TextView
+			android:id="@+id/storage_type"
+			style="@style/Material.SecondaryText.SingleLine"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginLeft="8dp"
+			app:layout_constraintStart_toEndOf="@id/storage_type_header"
+			tools:text="SDCARD"/>
+
+		<TextView
+			android:id="@+id/storage_path"
+			style="@style/Material.PrimaryText.SingleLine"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:text="@string/not_selected"
+			app:layout_constraintTop_toBottomOf="@id/storage_type_header"/>
+
+	</android.support.constraint.ConstraintLayout>
 
 	<android.support.design.widget.TextInputLayout
-		android:layout_width="match_parent"
+		android:id="@+id/file_extension_layout"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_marginTop="@dimen/group_margin"
-		android:layout_marginLeft="@dimen/element_margin"
-		android:layout_marginRight="@dimen/element_margin">
+		android:layout_marginTop="@dimen/element_margin"
+		app:layout_constraintEnd_toStartOf="@id/guideline_end"
+		app:layout_constraintTop_toBottomOf="@id/storage_layout">
+
+		<android.support.design.widget.TextInputEditText
+			style="@style/Material.EditText.PrimarySingleLine"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:hint=""
+			android:text="@string/dot_kdbx"
+			android:enabled="false"/>
+
+	</android.support.design.widget.TextInputLayout>
+
+	<android.support.design.widget.TextInputLayout
+		android:id="@+id/filename_layout"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="@dimen/element_margin"
+		app:layout_constraintStart_toEndOf="@id/guideline_start"
+		app:layout_constraintEnd_toStartOf="@id/file_extension_layout"
+		app:layout_constraintTop_toBottomOf="@id/storage_layout">
 
 		<android.support.design.widget.TextInputEditText
 			android:id="@+id/filename"
 			style="@style/Material.EditText.PrimarySingleLine"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:hint="@string/file_name"/>
+			android:hint="@string/file_name"
+			android:inputType="text"
+			android:imeOptions="actionNext"
+			android:nextFocusForward="@id/password"/>
 
 	</android.support.design.widget.TextInputLayout>
 
 	<android.support.design.widget.TextInputLayout
-		android:layout_width="match_parent"
+		android:id="@+id/password_layout"
+		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="@dimen/element_margin"
-		android:layout_marginLeft="@dimen/element_margin"
-		android:layout_marginRight="@dimen/element_margin">
+		app:layout_constraintStart_toEndOf="@id/guideline_start"
+		app:layout_constraintEnd_toStartOf="@id/guideline_end"
+		app:layout_constraintTop_toBottomOf="@id/filename_layout">
 
 		<android.support.design.widget.TextInputEditText
 			android:id="@+id/password"
@@ -38,19 +118,22 @@
 	</android.support.design.widget.TextInputLayout>
 
 	<android.support.design.widget.TextInputLayout
-		android:layout_width="match_parent"
+		android:id="@+id/password_confirmation_layout"
+		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="@dimen/element_margin"
-		android:layout_marginLeft="@dimen/element_margin"
-		android:layout_marginRight="@dimen/element_margin">
+		app:layout_constraintStart_toEndOf="@id/guideline_start"
+		app:layout_constraintEnd_toStartOf="@id/guideline_end"
+		app:layout_constraintTop_toBottomOf="@id/password_layout">
 
 		<android.support.design.widget.TextInputEditText
 			android:id="@+id/password_confirmation"
 			style="@style/Material.EditText.Password"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:hint="@string/confirm"/>
+			android:hint="@string/confirm"
+			android:imeOptions="actionDone"/>
 
 	</android.support.design.widget.TextInputLayout>
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

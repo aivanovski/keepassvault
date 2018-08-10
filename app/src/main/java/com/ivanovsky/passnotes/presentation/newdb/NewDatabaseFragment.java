@@ -1,8 +1,10 @@
 package com.ivanovsky.passnotes.presentation.newdb;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -10,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.data.entity.DatabaseDescriptor;
@@ -20,6 +23,7 @@ import com.ivanovsky.passnotes.presentation.core.validation.NotEmptyValidation;
 import com.ivanovsky.passnotes.presentation.core.validation.PatternValidation;
 import com.ivanovsky.passnotes.presentation.core.validation.Validator;
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
+import com.ivanovsky.passnotes.presentation.storagelist.StorageListActivity;
 
 import java.util.regex.Pattern;
 
@@ -32,6 +36,9 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 
 	private NewDatabaseContract.Presenter presenter;
 	private Menu menu;
+	private View storageLayout;
+	private TextView storageTypeTextView;
+	private TextView storagePathTextView;
 	private EditText filenameEditText;
 	private EditText passwordEditText;
 	private EditText confirmationEditText;
@@ -56,9 +63,14 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.new_database_fragment, container, false);
 
+		storageLayout = view.findViewById(R.id.storage_layout);
+		storageTypeTextView = view.findViewById(R.id.storage_type);
+		storagePathTextView = view.findViewById(R.id.storage_path);
 		filenameEditText = view.findViewById(R.id.filename);
 		passwordEditText = view.findViewById(R.id.password);
 		confirmationEditText = view.findViewById(R.id.password_confirmation);
+
+		storageLayout.setOnClickListener(v -> presenter.selectStorage());
 
 		return view;
 	}
@@ -154,5 +166,17 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	@Override
 	public void hideKeyboard() {
 		hideSoftInput(getActivity());
+	}
+
+	@Override
+	public void showStorageScreen() {
+		startActivityForResult(StorageListActivity.Companion.createStartIntent(getContext()), 1);
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		Log.d(NewDatabaseFragment.class.getSimpleName(), "onActivityResult: " + requestCode);
 	}
 }

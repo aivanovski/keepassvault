@@ -11,9 +11,11 @@ public class NewDatabaseContract {
 		void setDoneButtonVisible(boolean visible);
 		void showGroupsScreen(DatabaseDescriptor descriptor);
 		void hideKeyboard();
+		void showStorageScreen();
 	}
 
 	interface Presenter extends BasePresenter {
 		void createNewDatabaseFile(String filename, String password);
+		void selectStorage();
 	}
 }

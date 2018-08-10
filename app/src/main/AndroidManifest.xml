@@ -2,6 +2,8 @@
 <manifest package="com.ivanovsky.passnotes"
 		  xmlns:android="http://schemas.android.com/apk/res/android">
 
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
 	<application
 		android:allowBackup="true"
 		android:icon="@mipmap/ic_launcher"
@@ -43,6 +45,14 @@
 
 		<activity
 			android:name=".presentation.note.NoteActivity"
+			android:screenOrientation="portrait"/>
+
+		<activity
+			android:name=".presentation.storagelist.StorageListActivity"
+			android:screenOrientation="portrait"/>
+
+		<activity
+			android:name=".presentation.filepicker.FilePickerActivity"
 			android:screenOrientation="portrait"/>
 
 	</application>

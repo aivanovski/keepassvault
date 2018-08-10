@@ -10,8 +10,9 @@
 	<dimen name="material_edit_text_primary_text_size">@dimen/material_primary_text_size</dimen>
 
 	<!-- list item parameters -->
-	<dimen name="material_list_item_height_single_line">56dp</dimen>
-	<dimen name="material_list_item_height_two_line">60dp</dimen>
+	<dimen name="material_list_item_height_single_line">48dp</dimen>
+	<dimen name="material_list_item_height_single_line_with_icon">56dp</dimen>
+	<dimen name="material_list_item_height_two_line">64dp</dimen>
 	<dimen name="material_list_item_height_two_line_with_icon">72dp</dimen>
 	<dimen name="material_list_item_primary_text_size">@dimen/material_primary_text_size</dimen>
 	<dimen name="material_list_item_secondary_text_size">@dimen/material_secondary_text_size</dimen>

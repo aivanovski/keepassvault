@@ -6,12 +6,17 @@ import android.content.Context;
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
 import com.ivanovsky.passnotes.data.repository.file.FileResolver;
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
 import com.ivanovsky.passnotes.domain.ClipboardHelper;
+import com.ivanovsky.passnotes.domain.PermissionHelper;
+import com.ivanovsky.passnotes.domain.ResourceHelper;
+import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor;
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
+import com.ivanovsky.passnotes.domain.interactor.storage.StorageInteractor;
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor;
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
 
@@ -72,6 +77,12 @@ public class AppModule {
 
 	@Provides
 	@Singleton
+	FileSystemResolver provideFilSystemResolver() {
+		return new FileSystemResolver();
+	}
+
+	@Provides
+	@Singleton
 	UnlockInteractor provideUnlockInteractor(EncryptedDatabaseRepository dbRepository,
 											 UsedFileRepository usedFileRepository) {
 		return new UnlockInteractor(usedFileRepository, dbRepository);
@@ -95,5 +106,29 @@ public class AppModule {
 	@Singleton
 	ClipboardHelper provideClipboardHelper() {
 		return new ClipboardHelper(context);
+	}
+
+	@Provides
+	@Singleton
+	StorageInteractor provideStorageInteractor() {
+		return new StorageInteractor();
+	}
+
+	@Provides
+	@Singleton
+	FilePickerInteractor provideFilePickerInteractor(FileSystemResolver fileSystemResolver) {
+		return new FilePickerInteractor(fileSystemResolver);
+	}
+
+	@Provides
+	@Singleton
+	PermissionHelper providerPermisionHelper() {
+		return new PermissionHelper(context);
+	}
+
+	@Provides
+	@Singleton
+	ResourceHelper providerResourceHelper() {
+		return new ResourceHelper(context);
 	}
 }

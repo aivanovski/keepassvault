@@ -10,7 +10,7 @@ public class FileResolver {
 	public FileProvider resolveProvider(FileDescriptor fileDescriptor) {
 		FileProvider provider;
 
-		if (fileDescriptor.getType() == FileDescriptor.Type.REGULAR_FILE) {
+		if (fileDescriptor.getFsType() == FSType.REGULAR_FS) {
 			provider = new RegularFileProvider(fileDescriptor);
 		} else {
 			throw new IllegalArgumentException("Incorrect FileDescriptor type");

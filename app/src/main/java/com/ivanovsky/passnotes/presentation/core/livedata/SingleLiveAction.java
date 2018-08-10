@@ -56,5 +56,10 @@ public class SingleLiveAction<T> extends MutableLiveData<T> {
 	public void call() {
 		setValue(null);
 	}
+
+	@MainThread
+	public void call(@Nullable T value) {
+		setValue(value);
+	}
 }
 

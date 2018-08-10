@@ -83,4 +83,9 @@ public class NewDatabasePresenter implements Presenter {
 			view.showError(errorInteractor.processAndGetMessage(result.getError()));
 		}
 	}
+
+	@Override
+	public void selectStorage() {
+		view.showStorageScreen();
+	}
 }

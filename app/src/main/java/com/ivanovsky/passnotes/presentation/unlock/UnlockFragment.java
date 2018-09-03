@@ -106,7 +106,6 @@ public class UnlockFragment extends BaseFragment implements UnlockContract.View 
 		presenter.getShowNewDatabaseScreenAction().observe(this, obj -> showNewDatabaseScreen());
 		presenter.getHideKeyboardAction().observe(this, obj -> hideKeyboard());
 
-
 		return view;
 	}
 

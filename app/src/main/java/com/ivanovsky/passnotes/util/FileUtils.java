@@ -75,6 +75,22 @@ public class FileUtils {
 		return result;
 	}
 
+	public static boolean isLocatedInPrivateStorage(@NonNull File file, @NonNull Context context) {
+		boolean result = false;
+
+		File privateDir = context.getFilesDir();
+		if (privateDir != null) {
+			File dataDir = privateDir.getParentFile();
+			if (dataDir != null) {
+				String dataDirPath = dataDir.getPath();
+
+				result = file.getPath().startsWith(dataDirPath);
+			}
+		}
+
+		return result;
+	}
+
 	private FileUtils() {
 	}
 }

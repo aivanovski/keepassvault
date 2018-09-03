@@ -52,7 +52,7 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 		recyclerView.layoutManager = layoutManager
 		recyclerView.adapter = adapter
 
-		fab.setOnClickListener { v -> showNewGroupScreen() }
+		fab.setOnClickListener { showNewGroupScreen() }
 
 		return view
 	}

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/root_layout"
+	android:layout_width="match_parent"
+	android:layout_height="@dimen/material_list_item_height_two_line_with_icon"
+	android:background="@drawable/material_selector"
+	android:focusable="true"
+	android:clickable="true">
+
+	<android.support.constraint.Guideline
+		android:id="@+id/guideline_start"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		app:layout_constraintGuide_begin="@dimen/element_margin"/>
+
+	<android.support.constraint.Guideline
+		android:id="@+id/guideline_end"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		app:layout_constraintGuide_end="@dimen/element_margin"/>
+
+	<View
+		android:id="@+id/selected_background"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:background="@color/material_list_item_selected"/>
+
+	<View
+		android:id="@+id/icon_background"
+		android:layout_width="40dp"
+		android:layout_height="40dp"
+		android:background="@drawable/material_icon_circle_background"
+		app:layout_constraintStart_toEndOf="@id/guideline_start"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintBottom_toBottomOf="parent"/>
+
+	<ImageView
+		android:id="@+id/icon"
+		android:layout_width="24dp"
+		android:layout_height="24dp"
+		app:layout_constraintStart_toStartOf="@id/icon_background"
+		app:layout_constraintEnd_toEndOf="@id/icon_background"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintBottom_toBottomOf="parent"
+		tools:src="@drawable/ic_file_white_24dp"/>
+
+	<TextView
+		style="@style/Material.ListItem.PrimaryText.SingleLine"
+		android:id="@+id/primary_text"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="@dimen/element_margin"
+		app:layout_constraintVertical_chainStyle="packed"
+		app:layout_constraintStart_toEndOf="@id/icon_background"
+		app:layout_constraintEnd_toStartOf="@id/guideline_end"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintBottom_toTopOf="@id/secondary_text"
+		tools:text="Android/"/>
+
+	<TextView
+		style="@style/Material.ListItem.SecondaryText.SingleLine"
+		android:id="@+id/secondary_text"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="@dimen/element_margin"
+		app:layout_constraintStart_toEndOf="@id/icon_background"
+		app:layout_constraintEnd_toStartOf="@id/guideline_end"
+		app:layout_constraintTop_toBottomOf="@+id/primary_text"
+		app:layout_constraintBottom_toBottomOf="parent"
+		tools:text="30 july 18:06"/>
+
+</android.support.constraint.ConstraintLayout>

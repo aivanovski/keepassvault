@@ -47,8 +47,25 @@
 	</style>
 
 	<style name="Material.PrimaryText">
-		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
-		<item name="android:textColor">@color/material_list_item_primary_text</item>
+		<item name="android:textSize">@dimen/material_primary_text_size</item>
+		<item name="android:textColor">@color/primary_text</item>
+	</style>
+
+	<style name="Material.PrimaryText.SingleLine" parent="Material.PrimaryText">
+		<item name="android:maxLines">1</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:lines">1</item>
+	</style>
+
+	<style name="Material.SecondaryText">
+		<item name="android:textSize">@dimen/material_secondary_text_size</item>
+		<item name="android:textColor">@color/secondary_text</item>
+	</style>
+
+	<style name="Material.SecondaryText.SingleLine" parent="Material.SecondaryText">
+		<item name="android:maxLines">1</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:lines">1</item>
 	</style>
 
 	<style name="Material.ErrorSecondaryText">
@@ -64,9 +81,21 @@
 		<item name="android:textColor">@color/material_list_item_primary_text</item>
 	</style>
 
+	<style name="Material.ListItem.PrimaryText.SingleLine" parent="Material.ListItem.PrimaryText">
+		<item name="android:maxLines">1</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:lines">1</item>
+	</style>
+
 	<style name="Material.ListItem.SecondaryText">
 		<item name="android:textSize">@dimen/material_list_item_secondary_text_size</item>
 		<item name="android:textColor">@color/material_list_item_secondary_text</item>
+	</style>
+
+	<style name="Material.ListItem.SecondaryText.SingleLine" parent="Material.ListItem.SecondaryText">
+		<item name="android:maxLines">1</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:lines">1</item>
 	</style>
 
 	<style name="Material.EditText">
@@ -77,12 +106,16 @@
 		<item name="android:textColor">@color/material_edit_text_primary_text</item>
 		<item name="android:maxLines">1</item>
 		<item name="android:ellipsize">end</item>
+		<item name="android:lines">1</item>
 	</style>
 
 	<style name="Material.EditText.Password">
 		<item name="android:textSize">@dimen/material_edit_text_primary_text_size</item>
 		<item name="android:textColor">@color/material_edit_text_primary_text</item>
 		<item name="android:inputType">textWebPassword</item>
+		<item name="android:maxLines">1</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:lines">1</item>
 	</style>
 
 	<style name="Groups">
@@ -94,6 +127,7 @@
 		<item name="android:maxLines">1</item>
 		<item name="android:ellipsize">end</item>
 		<item name="android:textStyle">bold</item>
+		<item name="android:lines">1</item>
 	</style>
 
 	<style name="Groups.CountText">
@@ -101,6 +135,7 @@
 		<item name="android:textColor">@color/primary_text</item>
 		<item name="android:maxLines">1</item>
 		<item name="android:ellipsize">end</item>
+		<item name="android:lines">1</item>
 	</style>
 
 </resources>

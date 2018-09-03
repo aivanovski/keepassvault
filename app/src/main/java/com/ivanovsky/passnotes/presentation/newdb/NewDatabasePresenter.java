@@ -3,8 +3,9 @@ package com.ivanovsky.passnotes.presentation.newdb;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.data.entity.DatabaseDescriptor;
+import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.repository.file.FSType;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey;
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
@@ -31,6 +32,7 @@ public class NewDatabasePresenter implements Presenter {
 	private final NewDatabaseContract.View view;
 	private final Context context;
 	private final CompositeDisposable disposables;
+	private FileDescriptor selectedStorageDir;
 
 	NewDatabasePresenter(NewDatabaseContract.View view, Context context) {
 		Injector.getInstance().getAppComponent().inject(this);
@@ -51,36 +53,58 @@ public class NewDatabasePresenter implements Presenter {
 
 	@Override
 	public void createNewDatabaseFile(String filename, String password) {
-		File dir = FileUtils.getKeepassDir(context);
-		if (dir != null) {
+		if (selectedStorageDir != null) {
 			view.hideKeyboard();
 			view.setDoneButtonVisible(false);
 			view.setState(FragmentState.LOADING);
 
 			KeepassDatabaseKey key = new KeepassDatabaseKey(password);
-			File dbFile = new File(dir, filename + ".kdbx");//TODO: fix db name creation
+			FileDescriptor dbFile = FileDescriptor.fromParent(selectedStorageDir, filename + ".kdbx");
 
 			Disposable disposable = interactor.createNewDatabaseAndOpen(key, dbFile)
-					.subscribe(result -> onCreateDatabaseResult(result, dbFile, password));
+					.subscribe(this::onCreateDatabaseResult);
 
 			disposables.add(disposable);
+
 		} else {
-			view.showError(context.getString(R.string.error_was_occurred));
+			view.showError(context.getString(R.string.storage_is_not_selected));
 		}
 	}
 
-	private void onCreateDatabaseResult(OperationResult<Boolean> result, File dbFile, String password) {
+	private void onCreateDatabaseResult(OperationResult<Boolean> result) {
 		if (result.getResult() != null) {
 			boolean created = result.getResult();
 
 			if (created) {
-				view.showGroupsScreen(new DatabaseDescriptor(password, dbFile));
+				view.showGroupsScreen();
 			} else {
 				view.showError(context.getString(R.string.error_was_occurred));
 				view.setDoneButtonVisible(true);
 			}
 		} else {
 			view.showError(errorInteractor.processAndGetMessage(result.getError()));
+		}
+	}
+
+	@Override
+	public void selectStorage() {
+		view.showStorageScreen();
+	}
+
+	@Override
+	public void onStorageSelected(FileDescriptor selectedFile) {
+		selectedStorageDir = selectedFile;
+
+		if (selectedFile.getFsType() == FSType.REGULAR_FS) {
+			File file = new File(selectedFile.getPath());
+
+			if (FileUtils.isLocatedInPrivateStorage(file, context)) {
+				view.setStorage(context.getString(R.string.private_storage), selectedFile.getPath());
+			} else {
+				view.setStorage(context.getString(R.string.public_storage), selectedFile.getPath());
+			}
+		} else if (selectedFile.getFsType() == FSType.DROPBOX) {
+			view.setStorage(context.getString(R.string.dropbox), selectedFile.getPath());
 		}
 	}
 }

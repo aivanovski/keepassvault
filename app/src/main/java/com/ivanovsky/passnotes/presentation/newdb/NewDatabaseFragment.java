@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.newdb;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -10,9 +11,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.data.entity.DatabaseDescriptor;
+import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.presentation.core.BaseFragment;
 import com.ivanovsky.passnotes.presentation.core.validation.BaseValidation;
 import com.ivanovsky.passnotes.presentation.core.validation.IdenticalContentValidation;
@@ -20,6 +22,8 @@ import com.ivanovsky.passnotes.presentation.core.validation.NotEmptyValidation;
 import com.ivanovsky.passnotes.presentation.core.validation.PatternValidation;
 import com.ivanovsky.passnotes.presentation.core.validation.Validator;
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
+import com.ivanovsky.passnotes.presentation.storagelist.Mode;
+import com.ivanovsky.passnotes.presentation.storagelist.StorageListActivity;
 
 import java.util.regex.Pattern;
 
@@ -27,11 +31,16 @@ import static com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput;
 
 public class NewDatabaseFragment extends BaseFragment implements NewDatabaseContract.View {
 
+	private static final int REQUEST_CODE_PICK_STORAGE = 100;
+
 	private static final Pattern FILE_NAME_PATTERN = Pattern.compile("[\\w]{1,50}");
 	private static final Pattern PASSWORD_PATTERN = Pattern.compile("[\\w@#$!%^&+=]{4,20}");
 
 	private NewDatabaseContract.Presenter presenter;
 	private Menu menu;
+	private View storageLayout;
+	private TextView storageTypeTextView;
+	private TextView storagePathTextView;
 	private EditText filenameEditText;
 	private EditText passwordEditText;
 	private EditText confirmationEditText;
@@ -56,11 +65,22 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	protected View onCreateContentView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.new_database_fragment, container, false);
 
+		storageLayout = view.findViewById(R.id.storage_layout);
+		storageTypeTextView = view.findViewById(R.id.storage_type);
+		storagePathTextView = view.findViewById(R.id.storage_path);
 		filenameEditText = view.findViewById(R.id.filename);
 		passwordEditText = view.findViewById(R.id.password);
 		confirmationEditText = view.findViewById(R.id.password_confirmation);
 
+		storageLayout.setOnClickListener(v -> presenter.selectStorage());
+
 		return view;
+	}
+
+	@Override
+	public void setStorage(String type, String path) {
+		storageTypeTextView.setText(type);
+		storagePathTextView.setText(path);
 	}
 
 	@Override
@@ -96,7 +116,7 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	}
 
 	@Override
-	public void showGroupsScreen(DatabaseDescriptor dbDescriptor) {
+	public void showGroupsScreen() {
 		Activity activity = getActivity();
 		if (activity != null) {
 			activity.finish();
@@ -154,5 +174,27 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	@Override
 	public void hideKeyboard() {
 		hideSoftInput(getActivity());
+	}
+
+	@Override
+	public void showStorageScreen() {
+		startActivityForResult(StorageListActivity.Companion.createStartIntent(getContext(),
+				Mode.PICK_DIRECTORY), REQUEST_CODE_PICK_STORAGE);
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (resultCode == Activity.RESULT_OK
+				&& requestCode == REQUEST_CODE_PICK_STORAGE
+				&& data != null
+				&& data.getExtras() != null) {
+			FileDescriptor file = data.getExtras().getParcelable(StorageListActivity.EXTRA_RESULT);
+
+			if (file != null) {
+				presenter.onStorageSelected(file);
+			}
+		}
 	}
 }

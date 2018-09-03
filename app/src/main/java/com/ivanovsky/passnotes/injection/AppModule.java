@@ -16,7 +16,7 @@ import com.ivanovsky.passnotes.domain.PermissionHelper;
 import com.ivanovsky.passnotes.domain.ResourceHelper;
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor;
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
-import com.ivanovsky.passnotes.domain.interactor.storage.StorageInteractor;
+import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor;
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor;
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
 
@@ -110,8 +110,8 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	StorageInteractor provideStorageInteractor() {
-		return new StorageInteractor();
+	StorageListInteractor provideStorageInteractor() {
+		return new StorageListInteractor(context);
 	}
 
 	@Provides

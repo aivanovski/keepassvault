@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.domain.entity
 
-import com.ivanovsky.passnotes.data.repository.file.FSType
+import com.ivanovsky.passnotes.data.entity.FileDescriptor
 
-data class StorageOption(val type: FSType, val name: String)
+data class StorageOption(val type: StorageOptionType,
+                         val title: String,
+                         val root: FileDescriptor?)

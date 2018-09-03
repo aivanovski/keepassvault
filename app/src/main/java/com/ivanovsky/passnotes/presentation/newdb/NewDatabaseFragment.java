@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,7 +14,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.ivanovsky.passnotes.R;
-import com.ivanovsky.passnotes.data.entity.DatabaseDescriptor;
+import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.presentation.core.BaseFragment;
 import com.ivanovsky.passnotes.presentation.core.validation.BaseValidation;
 import com.ivanovsky.passnotes.presentation.core.validation.IdenticalContentValidation;
@@ -23,6 +22,7 @@ import com.ivanovsky.passnotes.presentation.core.validation.NotEmptyValidation;
 import com.ivanovsky.passnotes.presentation.core.validation.PatternValidation;
 import com.ivanovsky.passnotes.presentation.core.validation.Validator;
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
+import com.ivanovsky.passnotes.presentation.storagelist.Mode;
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListActivity;
 
 import java.util.regex.Pattern;
@@ -30,6 +30,8 @@ import java.util.regex.Pattern;
 import static com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput;
 
 public class NewDatabaseFragment extends BaseFragment implements NewDatabaseContract.View {
+
+	private static final int REQUEST_CODE_PICK_STORAGE = 100;
 
 	private static final Pattern FILE_NAME_PATTERN = Pattern.compile("[\\w]{1,50}");
 	private static final Pattern PASSWORD_PATTERN = Pattern.compile("[\\w@#$!%^&+=]{4,20}");
@@ -76,6 +78,12 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	}
 
 	@Override
+	public void setStorage(String type, String path) {
+		storageTypeTextView.setText(type);
+		storagePathTextView.setText(path);
+	}
+
+	@Override
 	public void setPresenter(NewDatabaseContract.Presenter presenter) {
 		this.presenter = presenter;
 	}
@@ -108,7 +116,7 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	}
 
 	@Override
-	public void showGroupsScreen(DatabaseDescriptor dbDescriptor) {
+	public void showGroupsScreen() {
 		Activity activity = getActivity();
 		if (activity != null) {
 			activity.finish();
@@ -170,13 +178,23 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 
 	@Override
 	public void showStorageScreen() {
-		startActivityForResult(StorageListActivity.Companion.createStartIntent(getContext()), 1);
+		startActivityForResult(StorageListActivity.Companion.createStartIntent(getContext(),
+				Mode.PICK_DIRECTORY), REQUEST_CODE_PICK_STORAGE);
 	}
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
-		Log.d(NewDatabaseFragment.class.getSimpleName(), "onActivityResult: " + requestCode);
+		if (resultCode == Activity.RESULT_OK
+				&& requestCode == REQUEST_CODE_PICK_STORAGE
+				&& data != null
+				&& data.getExtras() != null) {
+			FileDescriptor file = data.getExtras().getParcelable(StorageListActivity.EXTRA_RESULT);
+
+			if (file != null) {
+				presenter.onStorageSelected(file);
+			}
+		}
 	}
 }

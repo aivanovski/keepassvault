@@ -43,7 +43,7 @@ class FilePickerActivity : BaseActivity() {
 				.replace(R.id.fragment_container, fragment)
 				.commit()
 
-		val presenter = FilePickerPresenter(mode, rootFile, fragment)
+		val presenter = FilePickerPresenter(mode, rootFile, this)
 		fragment.setPresenter(presenter)
 	}
 

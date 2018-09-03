@@ -7,20 +7,37 @@ import com.ivanovsky.passnotes.data.repository.file.FSType;
 import com.ivanovsky.passnotes.util.FileUtils;
 
 import java.io.File;
+import java.util.Date;
 
 public class FileDescriptor implements Parcelable {
 
 	private boolean directory;
 	private boolean root;
+	private Date modified;
 	private FSType fsType;
 	private String path;
 
 	public static FileDescriptor fromRegularFile(File file) {
 		FileDescriptor result = new FileDescriptor();
+
 		result.fsType = FSType.REGULAR_FS;
 		result.path = file.getPath();
 		result.directory = file.isDirectory();
+		result.modified = new Date(file.lastModified());
 		result.root = file.getPath().equals("/");
+
+		return result;
+	}
+
+	public static FileDescriptor fromParent(FileDescriptor parent, String filename) {
+		FileDescriptor result = new FileDescriptor();
+
+		result.fsType = parent.fsType;
+		result.path = parent.path + "/" + filename;
+		result.directory = false;
+		result.modified = null;
+		result.root = false;
+
 		return result;
 	}
 
@@ -47,6 +64,14 @@ public class FileDescriptor implements Parcelable {
 		this.root = root;
 	}
 
+	public Date getModified() {
+		return modified;
+	}
+
+	public void setModified(Date modified) {
+		this.modified = modified;
+	}
+
 	public FSType getFsType() {
 		return fsType;
 	}
@@ -68,6 +93,11 @@ public class FileDescriptor implements Parcelable {
 	}
 
 	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
@@ -76,6 +106,8 @@ public class FileDescriptor implements Parcelable {
 
 		if (directory != that.directory) return false;
 		if (root != that.root) return false;
+		if (modified != null ? !modified.equals(that.modified) : that.modified != null)
+			return false;
 		if (fsType != that.fsType) return false;
 		return path != null ? path.equals(that.path) : that.path == null;
 	}
@@ -84,20 +116,17 @@ public class FileDescriptor implements Parcelable {
 	public int hashCode() {
 		int result = (directory ? 1 : 0);
 		result = 31 * result + (root ? 1 : 0);
+		result = 31 * result + (modified != null ? modified.hashCode() : 0);
 		result = 31 * result + (fsType != null ? fsType.hashCode() : 0);
 		result = 31 * result + (path != null ? path.hashCode() : 0);
 		return result;
 	}
 
 	@Override
-	public int describeContents() {
-		return 0;
-	}
-
-	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeInt(directory ? 1 : 0);
 		dest.writeInt(root ? 1 : 0);
+		dest.writeSerializable(modified);
 		dest.writeSerializable(fsType);
 		dest.writeString(path);
 	}
@@ -105,6 +134,7 @@ public class FileDescriptor implements Parcelable {
 	private void readFromParcel(Parcel source) {
 		directory = (source.readInt() == 1);
 		root = (source.readInt() == 1);
+		modified = (Date) source.readSerializable();
 		fsType = (FSType) source.readSerializable();
 		path = source.readString();
 	}

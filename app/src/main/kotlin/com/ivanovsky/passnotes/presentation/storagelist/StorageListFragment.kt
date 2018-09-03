@@ -1,8 +1,9 @@
 package com.ivanovsky.passnotes.presentation.storagelist
 
+import android.app.Activity
 import android.arch.lifecycle.Observer
+import android.content.Intent
 import android.os.Bundle
-import android.os.Environment
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -16,8 +17,6 @@ import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.adapter.SingleLineAdapter
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerActivity
-import com.ivanovsky.passnotes.presentation.filepicker.Mode
-import java.io.File
 
 class StorageListFragment : BaseFragment(), StorageListContract.View {
 
@@ -25,6 +24,8 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 	private lateinit var adapter: SingleLineAdapter
 
 	companion object {
+
+		private const val REQUEST_CODE_PICK_FILE = 100
 
 		fun newInstance(): StorageListFragment {
 			return StorageListFragment()
@@ -61,39 +62,63 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 
 		presenter.screenState.observe(this,
 				Observer { screenState -> setScreenState(screenState)})
-
 		presenter.storageOptions.observe(this,
-				Observer { options -> showStorageOptions(options!!)})
-
+				Observer { options -> setStorageOptions(options!!)})
 		presenter.showFilePickerScreenAction.observe(this,
-				Observer { option -> showFilePickerScreen(option!!) })
+				Observer { fileAndMode -> showFilePickerScreen(fileAndMode!!.first, fileAndMode.second) })
+		presenter.fileSelectedAction.observe(this,
+				Observer { file -> selectFileAndFinish(file!!) })
 
 		return view
 	}
 
-	private fun showStorageOptions(options: List<StorageOption>) {
+	override fun setStorageOptions(options: List<StorageOption>) {
 		adapter.setItems(createAdapterItems(options))
 		adapter.notifyDataSetChanged()
 
-		adapter.onItemClickListener = { pos -> presenter.selectStorage(options[pos])}
+		adapter.onItemClickListener = { pos -> presenter.onStorageOptionClicked(options[pos])}
 	}
 
-	private fun showFilePickerScreen(option: StorageOption) {
-		if (option.type == FSType.REGULAR_FS) {
-			val mode = Mode.PICK_DIRECTORY
-			val rootFile = FileDescriptor.fromRegularFile(createExternalStorageDir())//TODO: fix path creating
+	override fun showFilePickerScreen(root: FileDescriptor, mode: Mode) {
+		if (root.fsType == FSType.REGULAR_FS) {
+			val intent = FilePickerActivity.createStartIntent(context,
+					convertModeForFilePicker(mode),
+					root)
 
-			startActivityForResult(FilePickerActivity.createStartIntent(context, mode, rootFile), 1)
-		} else if (option.type == FSType.DROPBOX) {
+			startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
+
+		} else if (root.fsType == FSType.DROPBOX) {
 			throw RuntimeException("Not implemented")//TODO: implement
 		}
 	}
 
-	private fun createAdapterItems(options: List<StorageOption>): List<SingleLineAdapter.Item> {
-		return options.map { option -> SingleLineAdapter.Item(option.name) }
+	private fun convertModeForFilePicker(mode: Mode): com.ivanovsky.passnotes.presentation.filepicker.Mode {
+		return when (mode) {
+			Mode.PICK_FILE -> com.ivanovsky.passnotes.presentation.filepicker.Mode.PICK_FILE
+			Mode.PICK_DIRECTORY -> com.ivanovsky.passnotes.presentation.filepicker.Mode.PICK_DIRECTORY
+		}
 	}
 
-	private fun createExternalStorageDir(): File {
-		return Environment.getExternalStorageDirectory()
+	private fun createAdapterItems(options: List<StorageOption>): List<SingleLineAdapter.Item> {
+		return options.map { option -> SingleLineAdapter.Item(option.title) }
+	}
+
+	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+		if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_PICK_FILE) {
+			val extras = data?.extras
+			if (extras != null) {
+				val file = extras.getParcelable<FileDescriptor>(FilePickerActivity.EXTRA_RESULT)
+				presenter.onFilePicked(file)
+			}
+		}
+	}
+
+	override fun selectFileAndFinish(file: FileDescriptor) {
+		val data = Intent()
+
+		data.putExtra(StorageListActivity.EXTRA_RESULT, file)
+
+		activity.setResult(Activity.RESULT_OK, data)
+		activity.finish()
 	}
 }

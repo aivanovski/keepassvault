@@ -2,6 +2,9 @@
 
 	<string name="app_name">PassNotes</string>
 
+	<!-- Common for all screens -->
+	<string name="dropbox">Dropbox</string>
+
 	<!-- Menu and buttons -->
 	<string name="retry">retry</string>
 	<string name="create">Create</string>
@@ -27,6 +30,9 @@
 	<string name="storage_type">Storage type:</string>
 	<string name="not_selected">Not selected</string>
 	<string name="dot_kdbx">.kdbx</string>
+	<string name="private_storage">Private storage</string>
+	<string name="public_storage">Public storage</string>
+	<string name="storage_is_not_selected">Storage is not selected</string>
 
 	<!-- Open file screen -->
 	<string name="file_path">File path</string>
@@ -46,9 +52,13 @@
 
 	<!-- Storage screen -->
 	<string name="select_storage">Select storage</string>
+	<string name="private_app_storage">Private app storage</string>
+	<string name="external_storage">External storage</string>
+	<string name="external_storage_system_picker">External storage (system picker)</string>
 
-	<!-- File list screen -->
+	<!-- File picker screen -->
 	<string name="select_directory">Select directory</string>
 	<string name="application_requires_external_storage_permission">Application requires external storage permission</string>
+	<string name="please_select_any_file">Please select any file</string>
 
 </resources>

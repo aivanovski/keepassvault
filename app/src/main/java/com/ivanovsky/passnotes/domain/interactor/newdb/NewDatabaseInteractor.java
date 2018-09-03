@@ -16,8 +16,6 @@ import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey;
 import com.ivanovsky.passnotes.injection.Injector;
 import com.ivanovsky.passnotes.util.Logger;
 
-import java.io.File;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -39,42 +37,39 @@ public class NewDatabaseInteractor {
 		this.observerBus = observerBus;
 	}
 
-	public Observable<OperationResult<Boolean>> createNewDatabaseAndOpen(KeepassDatabaseKey key, File file) {
+	public Observable<OperationResult<Boolean>> createNewDatabaseAndOpen(KeepassDatabaseKey key,
+																		 FileDescriptor file) {
 		return Observable.fromCallable(() -> makeDatabaseAndOpen(key, file))
 				.subscribeOn(Schedulers.newThread())
 				.observeOn(AndroidSchedulers.mainThread());
 	}
 
-	private OperationResult<Boolean> makeDatabaseAndOpen(KeepassDatabaseKey key, File file) {
+	private OperationResult<Boolean> makeDatabaseAndOpen(KeepassDatabaseKey key,
+														 FileDescriptor file) {
 		OperationResult<Boolean> result = new OperationResult<>();
 
-		if (!file.exists()) {
-			if (dbRepository.createNew(key, FileDescriptor.fromRegularFile(file))) {
-				UsedFile usedFile = new UsedFile();
-				usedFile.setFilePath(file.getPath());
-				usedFile.setLastAccessTime(System.currentTimeMillis());
-				usedFileRepository.insert(usedFile);
+		if (dbRepository.createNew(key, file)) {
+			UsedFile usedFile = new UsedFile();
+			usedFile.setFilePath(file.getPath());
+			usedFile.setLastAccessTime(System.currentTimeMillis());
+			usedFileRepository.insert(usedFile);
 
-				observerBus.notifyUsedFileDataSetChanged();
+			observerBus.notifyUsedFileDataSetChanged();
 
-				try {
-					EncryptedDatabase db = dbRepository.open(key, FileDescriptor.fromRegularFile(file));
+			try {
+				EncryptedDatabase db = dbRepository.open(key, file);
 
-					Injector.getInstance().createEncryptedDatabaseComponent(db);
+				Injector.getInstance().createEncryptedDatabaseComponent(db);
 
-					result.setResult(true);
-				} catch (EncryptedDatabaseException e) {
-					Logger.printStackTrace(e);
+				result.setResult(true);
+			} catch (EncryptedDatabaseException e) {
+				Logger.printStackTrace(e);
 
-					result.setError(new OperationError(OperationError.Type.GENERIC_ERROR, e));
-				}
-			} else {
-				result.setError(new OperationError(OperationError.Type.GENERIC_ERROR,
-						context.getString(R.string.error_was_occurred)));
+				result.setError(new OperationError(OperationError.Type.GENERIC_ERROR, e));
 			}
 		} else {
 			result.setError(new OperationError(OperationError.Type.GENERIC_ERROR,
-					context.getString(R.string.file_is_already_exist)));
+					context.getString(R.string.error_was_occurred)));
 		}
 
 		return result;

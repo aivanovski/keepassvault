@@ -1,8 +1,9 @@
 package com.ivanovsky.passnotes.presentation.filepicker
 
+import android.app.Activity
 import android.arch.lifecycle.Observer
+import android.content.Intent
 import android.os.Bundle
-import android.support.annotation.DrawableRes
 import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuInflater
@@ -10,7 +11,6 @@ import android.view.MenuItem
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.domain.PermissionHelper
-import com.ivanovsky.passnotes.domain.entity.FileListAndParent
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.BaseListFragment
 import javax.inject.Inject
@@ -42,13 +42,17 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 		super.onCreate(savedInstanceState)
 
 		presenter.items.observe(this,
-				Observer { files -> updateItems(files!!) })
+				Observer { files -> setItems(files!!) })
 		presenter.screenState.observe(this,
 				Observer { state -> setScreenState(state) })
 		presenter.requestPermissionAction.observe(this,
 				Observer { permission -> requestPermission(permission!!) })
 		presenter.doneButtonVisibility.observe(this,
-				Observer { isVisible -> updateDoneButtonVisibility(isVisible!!)})
+				Observer { isVisible -> setDoneButtonVisibility(isVisible!!) })
+		presenter.fileSelectedAction.observe(this,
+				Observer { file -> selectFileAndFinish(file!!) })
+		presenter.snackbarMessageAction.observe(this,
+				Observer { message -> showSnackbar(message!!) })
 
 		setHasOptionsMenu(true)
 	}
@@ -59,16 +63,25 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 		inflater.inflate(R.menu.base_done, menu)
 	}
 
-	private fun updateDoneButtonVisibility(isVisible: Boolean) {
+	override fun setDoneButtonVisibility(isVisible: Boolean) {
 		if (menu != null) {
 			val item = menu!!.findItem(R.id.menu_done) //TODO: wtf with !!
 			item.isVisible = isVisible
 		}
 	}
 
+	override fun selectFileAndFinish(file: FileDescriptor) {
+		val data = Intent()
+
+		data.putExtra(FilePickerActivity.EXTRA_RESULT, file)
+
+		activity.setResult(Activity.RESULT_OK, data)
+		activity.finish()
+	}
+
 	override fun onOptionsItemSelected(item: MenuItem): Boolean {
 		if (item.itemId == R.id.menu_done) {
-
+			presenter.onDoneButtonClicked()
 			return true
 		} else {
 			return super.onOptionsItemSelected(item)
@@ -101,39 +114,14 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 		return adapter
 	}
 
-	private fun updateItems(filesAndParent: FileListAndParent) {
-		val files = filesAndParent.files.toMutableList()
-
-		if (filesAndParent.parent != null) {
-			files.add(0, filesAndParent.parent)
-		}
-
-		adapter.setItems(createAdapterItems(files, filesAndParent.parent))
+	override fun setItems(items: List<FilePickerAdapter.Item>) {
+		adapter.setItems(items)
 		adapter.notifyDataSetChanged()
 
-		adapter.onItemClickListener = { position -> presenter.onFileSelected(files[position])}
+		adapter.onItemClickListener = { position -> presenter.onItemClicked(position)}
 	}
 
-	private fun createAdapterItems(files: List<FileDescriptor>, parent: FileDescriptor?): List<FilePickerAdapter.Item> {
-		val items = mutableListOf<FilePickerAdapter.Item>()
-
-		for (file in files) {
-			val iconResId = getIconResId(file.isDirectory)
-			val title = if (file == parent) ".." else file.name + "/"
-			val description = "25 Jun 2016"
-
-			items.add(FilePickerAdapter.Item(iconResId, title, description, false))
-		}
-
-		return items
-	}
-
-	@DrawableRes
-	private fun getIconResId(isDirectory: Boolean): Int {
-		return if (isDirectory) R.drawable.ic_folder_white_24dp else R.drawable.ic_file_white_24dp
-	}
-
-	private fun requestPermission(permission: String) {
+	override fun requestPermission(permission: String) {
 		permissionHelper.requestPermission(this, permission, REQUEST_CODE_PERMISSION)
 	}
 

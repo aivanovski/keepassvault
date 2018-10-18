@@ -55,6 +55,7 @@
 	<string name="private_app_storage">Private app storage</string>
 	<string name="external_storage">External storage</string>
 	<string name="external_storage_system_picker">External storage (system picker)</string>
+	<string name="authentication_failed">Authentication failed</string>
 
 	<!-- File picker screen -->
 	<string name="select_directory">Select directory</string>

@@ -10,6 +10,10 @@ public class OperationError {
 	public static final String MESSAGE_FILE_IS_NOT_A_DIRECTORY = "File is not a directory";
 	public static final String MESSAGE_FILE_NOT_FOUND = "File not found";
 	public static final String MESSAGE_FILE_DOES_NOT_EXIST = "File doesn't exist";
+	public static final String MESSAGE_AUTH_FAILED = "Auth failed";
+	public static final String MESSAGE_FAILED_TO_LOAD_FILE = "Failed to load file";
+	public static final String MESSAGE_FAILED_TO_LOAD_FILE_LIST = "Failed to load file list";
+	public static final String MESSAGE_IO_ERROR = "IO error";
 
 	private Type type;
 	private String message;
@@ -40,12 +44,26 @@ public class OperationError {
 		return error;
 	}
 
+	public static OperationError newAuthError(String message) {
+		OperationError error = new OperationError(Type.AUTH_ERROR);
+		error.message = message;
+		return error;
+	}
+
+	public static OperationError newNetworkIOError() {
+		OperationError error = new OperationError(Type.AUTH_ERROR);
+		error.message = MESSAGE_IO_ERROR;
+		return error;
+	}
+
 	public enum Type {
 		GENERIC_ERROR,
 		DB_AUTH_ERROR,
 		DB_ERROR,
 		FILE_ACCESS_ERROR,
-		GENERIC_IO_ERROR
+		GENERIC_IO_ERROR,
+		AUTH_ERROR,
+		NETWORK_IO_ERROR
 	}
 
 	//TODO: remove unnecessary constructors and refactor

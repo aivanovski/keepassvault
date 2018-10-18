@@ -6,34 +6,53 @@ import groovy.json.JsonSlurper
 // in file 'debug.properties' in the format as follows:
 //
 //debugPasswordRules={ "[a-zA-Z0-9]*test[a-zA-Z0-9]*":"abc23" }
-def getDebugFileNameToPasswordMap = { ->
-	def result = null
+
+def PROPERTY_DEBUG_PASSWORD_RULES = 'debugPasswordRules'
+def PROPERTY_DROPBOX_APP_KEY = 'dropboxAppKey'
+def PROPERTY_DROPBOX_APP_SECRET = 'dropboxAppSecret'
+
+def parsePropertiesMap = { ->
+	def result = [:]
 
 	Properties properties = new Properties()
 	def propertiesFile = project.file('debug.properties')
 
 	if (propertiesFile.canRead()) {
 		properties.load(new FileInputStream(propertiesFile))
-		if (properties.containsKey("debugPasswordRules")) {
-			def passwordRulesJson = properties["debugPasswordRules"]
 
-			result = new JsonSlurper().parseText(passwordRulesJson)
+		for (String propertyName : properties.stringPropertyNames()) {
+			def propertyValue
 
-			assert result instanceof Map
+			if (propertyName == PROPERTY_DEBUG_PASSWORD_RULES) {
+				def passwordRulesJson = properties[PROPERTY_DEBUG_PASSWORD_RULES]
+				def rules = new JsonSlurper().parseText(passwordRulesJson)
 
-			result.each { fileName, password ->
-				project.logger.lifecycle("Use password $password for file name matched $fileName")}
+				assert rules instanceof Map
+
+				rules.each { fileName, password ->
+					project.logger.lifecycle("Use password $password for file name matched $fileName")}
+
+				propertyValue = rules
+			} else {
+				propertyValue = properties[propertyName]
+			}
+
+			result[propertyName] = propertyValue
 		}
 	}
 
 	return result
 }
 
+def propertiesMap = parsePropertiesMap()
+
 ext {
-	debugFileNameToPasswordMap = getDebugFileNameToPasswordMap()
+	debugFileNameToPasswordMap = propertiesMap[PROPERTY_DEBUG_PASSWORD_RULES]
+	dropboxAppKey = propertiesMap[PROPERTY_DROPBOX_APP_KEY]
+	dropboxAppSecret = propertiesMap[PROPERTY_DROPBOX_APP_SECRET]
 
 	compiler = [
-			kotlin: '1.2.50'
+			kotlin: '1.2.70'
 	]
 
 	android = [
@@ -53,6 +72,8 @@ ext {
 	rxJavaVersion = '2.1.0'
 	rxAndroidVersion = '2.0.1'
 	multidexVersion = '1.0.3'
+	dropboxVersion = '3.0.10'
+	okHttpVersion = '3.10.0'
 
 	// Test
 	jUnitVersion = '4.12'

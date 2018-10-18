@@ -17,6 +17,11 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
+	public FileSystemAuthenticator getAuthenticator() {
+		return null;
+	}
+
+	@Override
 	public OperationResult<List<FileDescriptor>> listFiles(FileDescriptor dir) {
 		OperationResult<List<FileDescriptor>> result = new OperationResult<>();
 
@@ -60,6 +65,20 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 			} else {
 				result.setError(newGenericIOError(OperationError.MESSAGE_FILE_DOES_NOT_EXIST));
 			}
+		} else {
+			result.setError(newGenericIOError(OperationError.MESSAGE_FILE_NOT_FOUND));
+		}
+
+		return result;
+	}
+
+	@Override
+	public OperationResult<FileDescriptor> getRootFile() {
+		OperationResult<FileDescriptor> result = new OperationResult<>();
+
+		File root = new File("/");
+		if (root.exists()) {
+			result.setResult(FileDescriptor.fromRegularFile(root));
 		} else {
 			result.setError(newGenericIOError(OperationError.MESSAGE_FILE_NOT_FOUND));
 		}

@@ -49,12 +49,32 @@ public class FileUtils {
 		String fileName = "";
 
 		int idx = filePath.lastIndexOf("/");
-		if (idx > 0
-				&& idx + 1 < filePath.length()) {
+		if (idx >= 0 && idx < filePath.length() - 1) {
 			fileName = filePath.substring(idx + 1, filePath.length());
+
+		} else if (idx == 0 && filePath.length() == 1) {
+			fileName = filePath;
 		}
 
 		return fileName;
+	}
+
+	@Nullable
+	public static String getParentPath(@Nullable String path) {
+		if (path == null) {
+			return null;
+		}
+
+		String parentPath = null;
+
+		int idx = path.lastIndexOf("/");
+		if (idx > 0) {
+			parentPath = path.substring(0, idx);
+		} else if (idx == 0) {
+			parentPath = "/";
+		}
+
+		return parentPath;
 	}
 
 	@Nullable

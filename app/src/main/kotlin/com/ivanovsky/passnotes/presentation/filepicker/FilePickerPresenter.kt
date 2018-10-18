@@ -16,6 +16,7 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
 import com.ivanovsky.passnotes.util.formatAccordingSystemLocale
 import io.reactivex.disposables.CompositeDisposable
+import java.util.*
 import javax.inject.Inject
 
 class FilePickerPresenter(private val mode: Mode,
@@ -70,7 +71,7 @@ class FilePickerPresenter(private val mode: Mode,
 
 		if (permissionHelper.isPermissionGranted(SDCARD_PERMISSION)) {
 			val disposable = interactor.getFileList(currentDir)
-					.subscribe({ result -> onFilesLoaded(currentDir, result) })
+					.subscribe { result -> onFilesLoaded(currentDir, result) }
 
 			disposables.add(disposable)
 		} else {
@@ -84,7 +85,7 @@ class FilePickerPresenter(private val mode: Mode,
 
 			if (!dir.isRoot) {
 				val disposable = interactor.getParent(currentDir)
-						.subscribe({ parentResult -> onParentLoaded(unsortedFiles, parentResult)})
+						.subscribe { parentResult -> onParentLoaded(unsortedFiles, parentResult)}
 
 				disposables.add(disposable)
 			} else {
@@ -141,12 +142,16 @@ class FilePickerPresenter(private val mode: Mode,
 		for (file in files) {
 			val iconResId = getIconResId(file.isDirectory)
 			val title = if (file == parent) ".." else formatItemTitle(file)
-			val description = file.modified.formatAccordingSystemLocale(context)
+			val description = formatModifiedDate(file.modified)
 
 			items.add(FilePickerAdapter.Item(iconResId, title, description, false))
 		}
 
 		return items
+	}
+
+	private fun formatModifiedDate(modified: Date?): String {
+		return if (modified != null) modified.formatAccordingSystemLocale(context) else ""
 	}
 
 	@DrawableRes

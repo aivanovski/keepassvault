@@ -13,12 +13,18 @@ import android.view.ViewGroup
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.FSType
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.entity.StorageOption
+import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.adapter.SingleLineAdapter
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerActivity
+import javax.inject.Inject
 
 class StorageListFragment : BaseFragment(), StorageListContract.View {
+
+	@Inject
+	lateinit var fileSystemResolver: FileSystemResolver
 
 	private lateinit var presenter: StorageListContract.Presenter
 	private lateinit var adapter: SingleLineAdapter
@@ -30,6 +36,11 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 		fun newInstance(): StorageListFragment {
 			return StorageListFragment()
 		}
+	}
+
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		Injector.getInstance().appComponent.inject(this)
 	}
 
 	override fun setPresenter(presenter: StorageListContract.Presenter) {
@@ -68,6 +79,8 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 				Observer { fileAndMode -> showFilePickerScreen(fileAndMode!!.first, fileAndMode.second) })
 		presenter.fileSelectedAction.observe(this,
 				Observer { file -> selectFileAndFinish(file!!) })
+		presenter.authActivityStartedAction.observe(this,
+				Observer { fsType -> showAuthActivity(fsType!!) })
 
 		return view
 	}
@@ -80,16 +93,11 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 	}
 
 	override fun showFilePickerScreen(root: FileDescriptor, mode: Mode) {
-		if (root.fsType == FSType.REGULAR_FS) {
-			val intent = FilePickerActivity.createStartIntent(context,
-					convertModeForFilePicker(mode),
-					root)
+		val intent = FilePickerActivity.createStartIntent(context,
+				convertModeForFilePicker(mode),
+				root)
 
-			startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
-
-		} else if (root.fsType == FSType.DROPBOX) {
-			throw RuntimeException("Not implemented")//TODO: implement
-		}
+		startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
 	}
 
 	private fun convertModeForFilePicker(mode: Mode): com.ivanovsky.passnotes.presentation.filepicker.Mode {
@@ -120,5 +128,10 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 
 		activity.setResult(Activity.RESULT_OK, data)
 		activity.finish()
+	}
+
+	override fun showAuthActivity(fsType: FSType) {
+		val authenticator = fileSystemResolver.resolveProvider(fsType).authenticator
+		authenticator?.startAuthActivity(context)
 	}
 }

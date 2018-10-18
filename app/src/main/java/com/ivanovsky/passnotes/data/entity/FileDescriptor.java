@@ -16,6 +16,7 @@ public class FileDescriptor implements Parcelable {
 	private Date modified;
 	private FSType fsType;
 	private String path;
+	private String uid;
 
 	public static FileDescriptor fromRegularFile(File file) {
 		FileDescriptor result = new FileDescriptor();
@@ -25,6 +26,7 @@ public class FileDescriptor implements Parcelable {
 		result.directory = file.isDirectory();
 		result.modified = new Date(file.lastModified());
 		result.root = file.getPath().equals("/");
+		result.uid = result.path;
 
 		return result;
 	}
@@ -37,11 +39,12 @@ public class FileDescriptor implements Parcelable {
 		result.directory = false;
 		result.modified = null;
 		result.root = false;
+		result.uid = result.path;
 
 		return result;
 	}
 
-	private FileDescriptor() {
+	public FileDescriptor() {
 	}
 
 	private FileDescriptor(Parcel source) {
@@ -92,6 +95,14 @@ public class FileDescriptor implements Parcelable {
 		return FileUtils.getFileNameFromPath(path);
 	}
 
+	public String getUid() {
+		return uid;
+	}
+
+	public void setUid(String uid) {
+		this.uid = uid;
+	}
+
 	@Override
 	public int describeContents() {
 		return 0;
@@ -109,7 +120,8 @@ public class FileDescriptor implements Parcelable {
 		if (modified != null ? !modified.equals(that.modified) : that.modified != null)
 			return false;
 		if (fsType != that.fsType) return false;
-		return path != null ? path.equals(that.path) : that.path == null;
+		if (path != null ? !path.equals(that.path) : that.path != null) return false;
+		return uid != null ? uid.equals(that.uid) : that.uid == null;
 	}
 
 	@Override
@@ -119,6 +131,7 @@ public class FileDescriptor implements Parcelable {
 		result = 31 * result + (modified != null ? modified.hashCode() : 0);
 		result = 31 * result + (fsType != null ? fsType.hashCode() : 0);
 		result = 31 * result + (path != null ? path.hashCode() : 0);
+		result = 31 * result + (uid != null ? uid.hashCode() : 0);
 		return result;
 	}
 
@@ -129,6 +142,7 @@ public class FileDescriptor implements Parcelable {
 		dest.writeSerializable(modified);
 		dest.writeSerializable(fsType);
 		dest.writeString(path);
+		dest.writeString(uid);
 	}
 
 	private void readFromParcel(Parcel source) {
@@ -137,6 +151,7 @@ public class FileDescriptor implements Parcelable {
 		modified = (Date) source.readSerializable();
 		fsType = (FSType) source.readSerializable();
 		path = source.readString();
+		uid = source.readString();
 	}
 
 	public static Creator<FileDescriptor> CREATOR = new Creator<FileDescriptor>() {

@@ -77,8 +77,8 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	FileSystemResolver provideFilSystemResolver() {
-		return new FileSystemResolver();
+	FileSystemResolver provideFilSystemResolver(SettingsRepository settings) {
+		return new FileSystemResolver(settings);
 	}
 
 	@Provides

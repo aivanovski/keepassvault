@@ -9,4 +9,6 @@ public interface FileSystemProvider {
 
 	OperationResult<List<FileDescriptor>> listFiles(FileDescriptor dir);
 	OperationResult<FileDescriptor> getParent(FileDescriptor file);
+	OperationResult<FileDescriptor> getRootFile();
+	FileSystemAuthenticator getAuthenticator();
 }

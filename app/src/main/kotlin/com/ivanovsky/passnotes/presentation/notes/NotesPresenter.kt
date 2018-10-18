@@ -34,7 +34,7 @@ class NotesPresenter(private val groupUid: UUID,
 
 	override fun loadData() {
 		val disposable = interactor.getNotesByGroupUid(groupUid)
-				.subscribe({ result -> onNotesLoadedResult(result) })
+				.subscribe { result -> onNotesLoadedResult(result) }
 
 		disposables.add(disposable)
 	}

@@ -25,6 +25,9 @@ android {
 
 		buildConfigField "String[]", "DEBUG_FILE_NAME_PATTERNS", "null"
 		buildConfigField "String[]", "DEBUG_PASSWORDS", "null"
+
+		buildConfigField "String", "DROPBOX_APP_KEY", "$ext.dropboxAppKey"
+		buildConfigField "String", "DROPBOX_APP_SECRET", "$ext.dropboxAppSecret"
 	}
 
 	sourceSets {
@@ -116,18 +119,21 @@ dependencies {
 	implementation "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
 	implementation "io.reactivex.rxjava2:rxandroid:$rxAndroidVersion"
 
-//	Google Drive API
-//	implementation 'com.google.android.gms:play-services-drive:11.8.0'
-//	implementation 'com.google.android.gms:play-services-auth:11.8.0'
-
 	// Java stream API
 	implementation "com.annimon:stream:$annimonStreamApiVersion"
 
 	// Kotlin
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$compiler.kotlin"
+	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:0.30.2'
 
 	// KeePassJava2
 	implementation project(':libs:KeePassJava2-database')
 	implementation project(':libs:KeePassJava2-kdbx')
 	implementation project(':libs:KeePassJava2-simple')
+
+	//Dropbox
+	implementation "com.dropbox.core:dropbox-core-sdk:$dropboxVersion"
+
+	//OkHttp
+	implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
 }

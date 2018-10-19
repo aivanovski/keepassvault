@@ -10,7 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.ivanovsky.passnotes.R
 
-class FilePickerAdapter(private val context: Context) :
+class FilePickerAdapter(context: Context) :
 		RecyclerView.Adapter<FilePickerAdapter.ViewHolder>() {
 
 	lateinit var onItemClickListener: (Int) -> Unit

@@ -1,9 +1,12 @@
 package com.ivanovsky.passnotes.data.repository.keepass.dao;
 
+import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
 import com.ivanovsky.passnotes.data.entity.Group;
+import com.ivanovsky.passnotes.util.Logger;
 
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
@@ -66,8 +69,14 @@ public class KeepassGroupDao implements GroupDao {
 
 			rootGroup.addGroup(newGroup);
 
-			if (newGroup.getUuid() != null && db.commit()) {
-				result.setResult(newGroup.getUuid());
+			if (newGroup.getUuid() != null) {
+				try {
+					db.commit();
+					result.setResult(newGroup.getUuid());
+				} catch (EncryptedDatabaseException e) {
+					Logger.printStackTrace(e);
+					result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_COMMIT));
+				}
 			}
 		}
 

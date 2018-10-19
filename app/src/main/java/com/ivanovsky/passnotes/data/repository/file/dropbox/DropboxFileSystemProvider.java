@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.data.repository.file;
+package com.ivanovsky.passnotes.data.repository.file.dropbox;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
@@ -9,13 +9,18 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
-import com.dropbox.core.v2.paper.Folder;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
+import com.ivanovsky.passnotes.data.repository.file.FSType;
+import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
+import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
+import com.ivanovsky.passnotes.data.repository.file.exception.FileSystemException;
 import com.ivanovsky.passnotes.util.Logger;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -214,5 +219,17 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		root.setPath("/");
 
 		return root;
+	}
+
+	@Override
+	public InputStream openFileForRead(FileDescriptor file) throws FileSystemException {
+		//TODO: implement
+		return null;
+	}
+
+	@Override
+	public OutputStream openFileForWrite(FileDescriptor file) throws FileSystemException {
+		//TODO: implement
+		return null;
 	}
 }

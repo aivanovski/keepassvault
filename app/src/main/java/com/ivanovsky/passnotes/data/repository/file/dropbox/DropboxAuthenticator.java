@@ -1,10 +1,11 @@
-package com.ivanovsky.passnotes.data.repository.file;
+package com.ivanovsky.passnotes.data.repository.file.dropbox;
 
 import android.content.Context;
 
 import com.dropbox.core.android.Auth;
 import com.ivanovsky.passnotes.BuildConfig;
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
+import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 
 public class DropboxAuthenticator implements FileSystemAuthenticator {
 

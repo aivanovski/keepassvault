@@ -7,8 +7,8 @@ import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabase
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
-import com.ivanovsky.passnotes.data.repository.file.FileProvider;
-import com.ivanovsky.passnotes.data.repository.file.FileResolver;
+import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.util.Logger;
 
 import org.linguafranca.pwdb.Credentials;
@@ -19,16 +19,17 @@ import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
 	private volatile KeepassDatabase db;
 	private final Context context;
-	private final FileResolver fileResolver;
+	private final FileSystemResolver fileSystemResolver;
 
-	public KeepassDatabaseRepository(Context context, FileResolver fileResolver) {
+	public KeepassDatabaseRepository(Context context, FileSystemResolver fileSystemResolver) {
 		this.context = context;
-		this.fileResolver = fileResolver;
+		this.fileSystemResolver = fileSystemResolver;
 	}
 
 	@Override
@@ -39,9 +40,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 				close();
 			}
 
-			FileProvider fileProvider = fileResolver.resolveProvider(file);
-
-			db = KeepassDatabase.fromFile(fileProvider, key.getKey());
+			db = new KeepassDatabase(file, key.getKey());
 		}
 
 		return db;
@@ -56,15 +55,19 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 			Credentials newCredentials = new KdbxCreds(key.getKey());
 
 			InputStream in = null;
+			OutputStream out = null;
 
-			FileProvider fileProvider = fileResolver.resolveProvider(file);
+			FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsType());
 
 			try {
 				in = new BufferedInputStream(context.getAssets().open("default.kdbx"));//TODO: make constant
 
 				Database keepassDb = SimpleDatabase.load(defaultCredentials, in);
 
-				keepassDb.save(newCredentials, fileProvider.createOutputStream());
+				out = provider.openFileForWrite(file);
+				keepassDb.save(newCredentials, out);
+
+				out.flush();
 
 				result = true;
 			} catch (Exception e) {
@@ -75,6 +78,13 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 						in.close();
 					} catch (IOException e) {
 						Logger.printStackTrace(e);
+					}
+				}
+				if (out != null) {
+					try {
+						out.close();
+					} catch (IOException e) {
+						e.printStackTrace();
 					}
 				}
 			}

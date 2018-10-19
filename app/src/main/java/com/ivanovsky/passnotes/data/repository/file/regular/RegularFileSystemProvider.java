@@ -1,10 +1,20 @@
-package com.ivanovsky.passnotes.data.repository.file;
+package com.ivanovsky.passnotes.data.repository.file.regular;
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
+import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
+import com.ivanovsky.passnotes.data.repository.file.exception.FileSystemException;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,5 +94,31 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 		}
 
 		return result;
+	}
+
+	@Override
+	public InputStream openFileForRead(FileDescriptor file) throws FileSystemException {
+		InputStream in;
+
+		try {
+			in = new BufferedInputStream(new FileInputStream(file.getPath()));
+		} catch (FileNotFoundException e) {
+			throw new FileSystemException(e);
+		}
+
+		return in;
+	}
+
+	@Override
+	public OutputStream openFileForWrite(FileDescriptor file) throws FileSystemException {
+		OutputStream out;
+
+		try {
+			out = new BufferedOutputStream(new FileOutputStream(file.getPath()));
+		} catch (FileNotFoundException e) {
+			throw new FileSystemException(e);
+		}
+
+		return out;
 	}
 }

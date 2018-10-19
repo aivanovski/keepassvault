@@ -1,6 +1,8 @@
 package com.ivanovsky.passnotes.data.repository.file;
 
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
+import com.ivanovsky.passnotes.data.repository.file.dropbox.DropboxFileSystemProvider;
+import com.ivanovsky.passnotes.data.repository.file.regular.RegularFileSystemProvider;
 
 import java.util.EnumMap;
 import java.util.Map;

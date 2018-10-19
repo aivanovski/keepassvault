@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.injection;
 
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor;
 import com.ivanovsky.passnotes.injection.encdb.EncryptedDatabaseComponent;
 import com.ivanovsky.passnotes.injection.encdb.EncryptedDatabaseModule;
@@ -34,4 +35,5 @@ public interface AppComponent {
 	void inject(@NotNull FilePickerFragment filePickerFragment);
 	void inject(@NotNull StorageListInteractor storageListInteractor);
 	void inject(@NotNull StorageListFragment storageListFragment);
+	void inject(KeepassDatabase keepassDatabase);
 }

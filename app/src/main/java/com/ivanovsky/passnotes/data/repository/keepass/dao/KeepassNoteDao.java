@@ -3,10 +3,12 @@ package com.ivanovsky.passnotes.data.repository.keepass.dao;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.PropertyType;
+import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.data.entity.Note;
 import com.ivanovsky.passnotes.data.entity.Property;
+import com.ivanovsky.passnotes.util.Logger;
 
 import org.linguafranca.pwdb.kdbx.simple.SimpleEntry;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
@@ -154,12 +156,15 @@ public class KeepassNoteDao implements NoteDao {
 
 		SimpleGroup group = findGroupByUidRecursively(rootGroup, note.getGroupUid());
 		if (group != null) {
-			SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
 
-			if (newEntry != null && newEntry.getUuid() != null) {
-				if (db.commit()) {
+			SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
+			if (newEntry != null) {
+
+				try {
+					db.commit();
 					result.setResult(newEntry.getUuid());
-				} else {
+				} catch (EncryptedDatabaseException e) {
+					Logger.printStackTrace(e);
 					result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_COMMIT));
 				}
 

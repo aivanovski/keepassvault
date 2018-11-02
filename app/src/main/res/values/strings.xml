@@ -9,6 +9,9 @@
 	<string name="retry">retry</string>
 	<string name="create">Create</string>
 	<string name="done">Done</string>
+	<string name="open_file">Open file</string>
+	<string name="settings">Settings</string>
+	<string name="about">About</string>
 
 	<!-- Common for error -->
 	<string name="error_was_occurred">Error was occurred</string>

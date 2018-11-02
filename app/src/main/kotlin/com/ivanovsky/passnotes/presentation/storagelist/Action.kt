@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.presentation.storagelist
 
-enum class Mode {
+enum class Action {
 	PICK_FILE,
-	PICK_DIRECTORY
+	PICK_STORAGE
 }

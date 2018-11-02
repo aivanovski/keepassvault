@@ -77,8 +77,9 @@ public class AppModule {
 	@Provides
 	@Singleton
 	UnlockInteractor provideUnlockInteractor(EncryptedDatabaseRepository dbRepository,
-											 UsedFileRepository usedFileRepository) {
-		return new UnlockInteractor(usedFileRepository, dbRepository);
+											 UsedFileRepository usedFileRepository,
+											 ObserverBus observerBus) {
+		return new UnlockInteractor(usedFileRepository, dbRepository, observerBus);
 	}
 
 	@Provides
@@ -91,8 +92,9 @@ public class AppModule {
 	@Singleton
 	NewDatabaseInteractor provideNewDatabaseInteractor(EncryptedDatabaseRepository dbRepository,
 													   UsedFileRepository usedFileRepository,
+													   FileSystemResolver fileSystemResolver,
 													   ObserverBus observerBus) {
-		return new NewDatabaseInteractor(context, dbRepository, usedFileRepository, observerBus);
+		return new NewDatabaseInteractor(dbRepository, usedFileRepository, fileSystemResolver, observerBus);
 	}
 
 	@Provides

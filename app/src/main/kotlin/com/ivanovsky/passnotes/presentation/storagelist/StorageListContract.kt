@@ -13,7 +13,7 @@ class StorageListContract {
 
 	interface View: BaseView<Presenter> {
 		fun setStorageOptions(options: List<StorageOption>)
-		fun showFilePickerScreen(root: FileDescriptor, mode: Mode)
+		fun showFilePickerScreen(root: FileDescriptor, action: Action, isBrowsingEnabled: Boolean)
 		fun selectFileAndFinish(file: FileDescriptor)
 		fun showAuthActivity(fsType: FSType)
 	}
@@ -21,11 +21,13 @@ class StorageListContract {
 	interface Presenter: BasePresenter {
 		val storageOptions: LiveData<List<StorageOption>>
 		val screenState: LiveData<ScreenState>
-		val showFilePickerScreenAction: SingleLiveAction<Pair<FileDescriptor, Mode>>
+		val showFilePickerScreenAction: SingleLiveAction<FilePickerArgs>
 		val fileSelectedAction: SingleLiveAction<FileDescriptor>
 		val authActivityStartedAction: SingleLiveAction<FSType>
 
 		fun onStorageOptionClicked(option: StorageOption)
 		fun onFilePicked(file: FileDescriptor)
 	}
+
+	class FilePickerArgs(val root: FileDescriptor, val action: Action, val isBrowsingEnabled: Boolean)
 }

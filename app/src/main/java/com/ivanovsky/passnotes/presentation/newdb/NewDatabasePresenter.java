@@ -83,6 +83,7 @@ public class NewDatabasePresenter implements Presenter {
 			}
 		} else {
 			view.showError(errorInteractor.processAndGetMessage(result.getError()));
+			view.setDoneButtonVisible(true);
 		}
 	}
 

@@ -76,7 +76,7 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 		presenter.storageOptions.observe(this,
 				Observer { options -> setStorageOptions(options!!)})
 		presenter.showFilePickerScreenAction.observe(this,
-				Observer { fileAndMode -> showFilePickerScreen(fileAndMode!!.first, fileAndMode.second) })
+				Observer { args -> showFilePickerScreen(args!!.root, args.action, args.isBrowsingEnabled) })
 		presenter.fileSelectedAction.observe(this,
 				Observer { file -> selectFileAndFinish(file!!) })
 		presenter.authActivityStartedAction.observe(this,
@@ -92,18 +92,19 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 		adapter.onItemClickListener = { pos -> presenter.onStorageOptionClicked(options[pos])}
 	}
 
-	override fun showFilePickerScreen(root: FileDescriptor, mode: Mode) {
+	override fun showFilePickerScreen(root: FileDescriptor, action: Action, isBrowsingEnabled: Boolean) {
 		val intent = FilePickerActivity.createStartIntent(context,
-				convertModeForFilePicker(mode),
-				root)
+				convertActionToFilePickerMode(action),
+				root,
+				isBrowsingEnabled)
 
 		startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
 	}
 
-	private fun convertModeForFilePicker(mode: Mode): com.ivanovsky.passnotes.presentation.filepicker.Mode {
-		return when (mode) {
-			Mode.PICK_FILE -> com.ivanovsky.passnotes.presentation.filepicker.Mode.PICK_FILE
-			Mode.PICK_DIRECTORY -> com.ivanovsky.passnotes.presentation.filepicker.Mode.PICK_DIRECTORY
+	private fun convertActionToFilePickerMode(action: Action): com.ivanovsky.passnotes.presentation.filepicker.Mode {
+		return when (action) {
+			Action.PICK_FILE -> com.ivanovsky.passnotes.presentation.filepicker.Mode.PICK_FILE
+			Action.PICK_STORAGE -> com.ivanovsky.passnotes.presentation.filepicker.Mode.PICK_DIRECTORY
 		}
 	}
 

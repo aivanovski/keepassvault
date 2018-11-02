@@ -9,18 +9,18 @@ import com.ivanovsky.passnotes.presentation.core.BaseActivity
 
 class StorageListActivity : BaseActivity() {
 
-	private lateinit var mode: Mode
+	private lateinit var action: Action
 
 	companion object {
 
 		const val EXTRA_RESULT: String = "result"
 
-		private const val EXTRA_MODE = "mode"
+		private const val EXTRA_MODE = "action"
 
-		fun createStartIntent(context: Context, mode: Mode): Intent {
+		fun createStartIntent(context: Context, action: Action): Intent {
 			val intent = Intent(context, StorageListActivity::class.java)
 
-			intent.putExtra(EXTRA_MODE, mode)
+			intent.putExtra(EXTRA_MODE, action)
 
 			return intent
 		}
@@ -30,7 +30,7 @@ class StorageListActivity : BaseActivity() {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.core_base_activity)
 
-		mode = intent.extras.getSerializable(EXTRA_MODE) as Mode
+		action = intent.extras.getSerializable(EXTRA_MODE) as Action
 
 		setSupportActionBar(findViewById(R.id.tool_bar))
 		currentActionBar.title = getString(R.string.select_storage)
@@ -41,7 +41,7 @@ class StorageListActivity : BaseActivity() {
 				.replace(R.id.fragment_container, fragment)
 				.commit()
 
-		val presenter = StorageListPresenter(mode)
+		val presenter = StorageListPresenter(action)
 		fragment.setPresenter(presenter)
 	}
 

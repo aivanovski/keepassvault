@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.*
 import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.presentation.storagelist.Action
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -24,7 +25,7 @@ class StorageListInteractor(private val context: Context) {
 		Injector.getInstance().appComponent.inject(this)
 	}
 
-	fun getAvailableStorageOptions(): List<StorageOption> {
+	fun getAvailableStorageOptions(action: Action): List<StorageOption> {
 		return listOf(createPrivateStorageOption(),
 				createExternalStorageOption(),
 				createDropboxOption())

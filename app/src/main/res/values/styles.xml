@@ -30,6 +30,17 @@
 		<item name="android:layout_height">wrap_content</item>
 	</style>
 
+	<style name="Material.Navigation">
+	</style>
+
+	<style name="Material.Navigation.HeaderText">
+		<item name="android:textColor">@color/primary_text_light</item>
+		<item name="android:textSize">@dimen/material_header_text_size</item>
+		<item name="android:maxLines">1</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:lines">1</item>
+	</style>
+
 	<!-- TODO: create style according to new material guideline-->
 	<style name="Material.FlatButton" parent="@style/Widget.AppCompat.Button.Borderless">
 		<item name="android:layout_height">36dp</item>

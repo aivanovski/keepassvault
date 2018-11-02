@@ -21,6 +21,7 @@ import javax.inject.Inject
 
 class FilePickerPresenter(private val mode: Mode,
                           rootFile: FileDescriptor,
+                          private val isBrowsingEnabled: Boolean,
                           private val context: Context) : FilePickerContract.Presenter {
 
 	@Inject
@@ -69,6 +70,7 @@ class FilePickerPresenter(private val mode: Mode,
 		screenState.value = ScreenState.loading()
 		doneButtonVisibility.value = false
 
+		//TODO: app doesnt need permission for private storage and network storage
 		if (permissionHelper.isPermissionGranted(SDCARD_PERMISSION)) {
 			val disposable = interactor.getFileList(currentDir)
 					.subscribe { result -> onFilesLoaded(currentDir, result) }
@@ -83,14 +85,21 @@ class FilePickerPresenter(private val mode: Mode,
 		if (result.result != null) {
 			val unsortedFiles = result.result
 
-			if (!dir.isRoot) {
+			if (!dir.isRoot && isBrowsingEnabled) {
 				val disposable = interactor.getParent(currentDir)
 						.subscribe { parentResult -> onParentLoaded(unsortedFiles, parentResult)}
 
 				disposables.add(disposable)
-			} else {
 
-				files = sortFiles(unsortedFiles)
+			} else {
+				val sortedFiles = sortFiles(unsortedFiles)
+
+				if (isBrowsingEnabled) {
+					files = sortedFiles
+				} else {
+					//hide all directories
+					files = sortedFiles.filter { file -> !file.isDirectory }
+				}
 
 				items.value = createAdapterItems(files, null)
 				screenState.value = ScreenState.data()

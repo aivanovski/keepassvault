@@ -121,4 +121,9 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 
 		return out;
 	}
+
+	@Override
+	public boolean exists(FileDescriptor file) {
+		return new File(file.getPath()).exists();
+	}
 }

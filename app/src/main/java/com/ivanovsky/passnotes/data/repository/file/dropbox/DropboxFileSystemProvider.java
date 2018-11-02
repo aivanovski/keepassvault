@@ -232,4 +232,10 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		//TODO: implement
 		return null;
 	}
+
+	@Override
+	public boolean exists(FileDescriptor file) {
+		//TODO: exists
+		return false;
+	}
 }

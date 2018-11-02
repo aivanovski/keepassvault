@@ -5,6 +5,7 @@
 
 	<dimen name="material_primary_text_size">16sp</dimen>
 	<dimen name="material_secondary_text_size">14sp</dimen>
+	<dimen name="material_header_text_size">22sp</dimen>
 
 	<!-- text fields parameters -->
 	<dimen name="material_edit_text_primary_text_size">@dimen/material_primary_text_size</dimen>

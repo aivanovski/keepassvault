@@ -37,6 +37,6 @@ public class OperationResult<T> {
 	}
 
 	public boolean isSuccessful() {
-		return result != null;
+		return error == null;
 	}
 }

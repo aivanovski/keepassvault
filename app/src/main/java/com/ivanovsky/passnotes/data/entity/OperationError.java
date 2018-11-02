@@ -14,6 +14,8 @@ public class OperationError {
 	public static final String MESSAGE_FAILED_TO_LOAD_FILE = "Failed to load file";
 	public static final String MESSAGE_FAILED_TO_LOAD_FILE_LIST = "Failed to load file list";
 	public static final String MESSAGE_IO_ERROR = "IO error";
+	public static final String MESSAGE_RECORD_IS_ALREADY_EXISTS = "Record is already exists";
+	public static final String MESSAGE_FILE_IS_ALREADY_EXISTS = "File is already exists";
 
 	private Type type;
 	private String message;
@@ -28,6 +30,13 @@ public class OperationError {
 	public static OperationError newGenericError(String message) {
 		OperationError error = new OperationError(Type.GENERIC_ERROR);
 		error.message = message;
+		return error;
+	}
+
+	public static OperationError newGenericError(String message, Throwable throwable) {
+		OperationError error = new OperationError(Type.GENERIC_ERROR);
+		error.message = message;
+		error.throwable = throwable;
 		return error;
 	}
 
@@ -56,6 +65,12 @@ public class OperationError {
 		return error;
 	}
 
+	public static OperationError newFileIsAlreadyExistsError() {
+		OperationError error = new OperationError(Type.FILE_IS_ALREADY_EXISTS);
+		error.message = MESSAGE_FILE_IS_ALREADY_EXISTS;
+		return error;
+	}
+
 	public enum Type {
 		GENERIC_ERROR,
 		DB_AUTH_ERROR,
@@ -63,7 +78,8 @@ public class OperationError {
 		FILE_ACCESS_ERROR,
 		GENERIC_IO_ERROR,
 		AUTH_ERROR,
-		NETWORK_IO_ERROR
+		NETWORK_IO_ERROR,
+		FILE_IS_ALREADY_EXISTS
 	}
 
 	//TODO: remove unnecessary constructors and refactor

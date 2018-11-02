@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.data.repository.db.dao;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import com.ivanovsky.passnotes.data.entity.UsedFile;
 
@@ -16,4 +17,7 @@ public interface UsedFileDao {
 
 	@Insert
 	long insert(UsedFile file);
+
+	@Update
+	void update(UsedFile file);
 }

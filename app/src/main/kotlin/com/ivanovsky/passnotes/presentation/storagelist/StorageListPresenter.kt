@@ -14,10 +14,11 @@ import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteract
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
+import com.ivanovsky.passnotes.presentation.storagelist.StorageListContract.FilePickerArgs
 import io.reactivex.disposables.CompositeDisposable
 import javax.inject.Inject
 
-class StorageListPresenter(private val mode: Mode) :
+class StorageListPresenter(private val action: Action) :
 		StorageListContract.Presenter {
 
 	@Inject
@@ -34,7 +35,7 @@ class StorageListPresenter(private val mode: Mode) :
 
 	override val storageOptions = MutableLiveData<List<StorageOption>>()
 	override val screenState = MutableLiveData<ScreenState>()
-	override val showFilePickerScreenAction = SingleLiveAction<Pair<FileDescriptor, Mode>>()
+	override val showFilePickerScreenAction = SingleLiveAction<FilePickerArgs>()
 	override val fileSelectedAction = SingleLiveAction<FileDescriptor>()
 	override val authActivityStartedAction = SingleLiveAction<FSType>()
 
@@ -62,7 +63,7 @@ class StorageListPresenter(private val mode: Mode) :
 			}
 
 		} else {
-			storageOptions.value = interactor.getAvailableStorageOptions()
+			storageOptions.value = interactor.getAvailableStorageOptions(action)
 			screenState.value = ScreenState.data()
 		}
 	}
@@ -80,11 +81,16 @@ class StorageListPresenter(private val mode: Mode) :
 	}
 
 	private fun onPrivateStorageSelected(root: FileDescriptor) {
-		fileSelectedAction.call(root)
+		if (action == Action.PICK_FILE) {
+			showFilePickerScreenAction.call(FilePickerArgs(root, action, false))
+
+		} else if (action == Action.PICK_STORAGE) {
+			fileSelectedAction.call(root)
+		}
 	}
 
 	private fun onExternalStorageSelected(root: FileDescriptor) {
-		showFilePickerScreenAction.call(Pair(root, mode))
+		showFilePickerScreenAction.call(FilePickerArgs(root, action, true))
 	}
 
 	private fun onDropboxStorageSelected() {
@@ -111,7 +117,7 @@ class StorageListPresenter(private val mode: Mode) :
 	private fun onDropboxRootLoaded(result: OperationResult<FileDescriptor>) {
 		if (result.result != null) {
 			val rootFile = result.result
-			showFilePickerScreenAction.call(Pair(rootFile, mode))
+			showFilePickerScreenAction.call(FilePickerArgs(rootFile, action, true))
 
 		} else {
 			val message = errorInteractor.processAndGetMessage(result.error)

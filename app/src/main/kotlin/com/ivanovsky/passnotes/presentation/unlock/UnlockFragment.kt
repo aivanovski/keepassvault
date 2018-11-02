@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.unlock
 
+import android.app.Activity
 import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
@@ -13,13 +14,14 @@ import android.widget.Spinner
 
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.UsedFile
+import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity
+import com.ivanovsky.passnotes.presentation.storagelist.Action
+import com.ivanovsky.passnotes.presentation.storagelist.StorageListActivity
 
-import java.io.File
 import java.util.ArrayList
 import java.util.regex.Pattern
 
@@ -27,9 +29,13 @@ import com.ivanovsky.passnotes.util.FileUtils.getFileNameFromPath
 import com.ivanovsky.passnotes.util.FileUtils.getFileNameWithoutExtensionFromPath
 import com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput
 
+private const val REQUEST_CODE_PICK_FILE = 100
+
 class UnlockFragment : BaseFragment(), UnlockContract.View {
 
-	private lateinit var selectedUsedFile: UsedFile
+	private var selectedFile: FileDescriptor? = null
+	private var files: List<FileDescriptor>? = null
+
 	private lateinit var fileAdapter: FileSpinnerAdapter
 	private lateinit var presenter: UnlockContract.Presenter
 	private lateinit var passwordRules: List<PasswordRule>
@@ -96,6 +102,8 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 
 		presenter.recentlyUsedFiles.observe(this,
 				Observer { files -> setRecentlyUsedFiles(files!!) })
+		presenter.selectedRecentlyUsedFile.observe(this,
+				Observer { selectedFile -> setSelectedFile(selectedFile!!)})
 		presenter.screenState.observe(this,
 				Observer { state -> setScreenState(state) })
 		presenter.showGroupsScreenAction.observe(this,
@@ -104,15 +112,25 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 				Observer { showNewDatabaseScreen() })
 		presenter.hideKeyboardAction.observe(this,
 				Observer { hideKeyboard() })
+		presenter.showOpenFileScreenAction.observe(this,
+				Observer { showOpenFileScreen() })
+		presenter.showSettingsScreenAction.observe(this,
+				Observer { showSettingScreen() })
+		presenter.showAboutScreenAction.observe(this,
+				Observer { showAboutScreen() })
+		presenter.snackbarMessageAction.observe(this,
+				Observer { message -> showSnackbar(message!!) })
 
 		return view
 	}
 
 	private fun onUnlockButtonClicked() {
-		val password = passwordEditText.text.toString().trim { it <= ' ' }
+		val password = passwordEditText.text.toString().trim()
 
-		val dbFile = File(selectedUsedFile.filePath)
-		presenter.onUnlockButtonClicked(password, dbFile)
+		val file = selectedFile
+		if (file != null) {
+			presenter.onUnlockButtonClicked(password, file)
+		}
 	}
 
 	override fun getContentContainerId(): Int {
@@ -131,11 +149,11 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 		this.presenter = presenter
 	}
 
-	private fun createAdapterItems(files: List<UsedFile>): List<FileSpinnerAdapter.Item> {
+	private fun createAdapterItems(files: List<FileDescriptor>): List<FileSpinnerAdapter.Item> {
 		val items = ArrayList<FileSpinnerAdapter.Item>()
 
 		for (file in files) {
-			val path = file.filePath
+			val path = file.path
 			val filename = getFileNameFromPath(path)
 
 			if (filename != null) {
@@ -146,11 +164,11 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 		return items
 	}
 
-	private fun onFileSelected(file: UsedFile) {
-		selectedUsedFile = file
+	private fun setSelectedFile(file: FileDescriptor) {
+		selectedFile = file
 
 		if (BuildConfig.DEBUG) {
-			val fileName = getFileNameWithoutExtensionFromPath(file.filePath)
+			val fileName = getFileNameWithoutExtensionFromPath(file.path)
 			if (fileName != null) {
 				for (rule in passwordRules) {
 					if (rule.pattern.matcher(fileName).matches()) {
@@ -162,18 +180,31 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 		}
 	}
 
-	override fun setRecentlyUsedFiles(files: List<UsedFile>) {
-		selectedUsedFile = files[0]
+	override fun setRecentlyUsedFiles(files: List<FileDescriptor>) {
+		this.files = files
+
+		fileSpinner.onItemSelectedListener = null
 
 		fileAdapter.setItem(createAdapterItems(files))
 		fileAdapter.notifyDataSetChanged()
 
 		fileSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 			override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-				onFileSelected(files[position])
+				presenter.onFileSelectedByUser(files[position])
 			}
 
-			override fun onNothingSelected(parent: AdapterView<*>) {}
+			override fun onNothingSelected(parent: AdapterView<*>) {
+			}
+		}
+	}
+
+	override fun selectFileInSpinner(file: FileDescriptor) {
+		val files = this.files
+		if (files != null) {
+			val position = files.indexOfFirst { f -> f.uid == file.uid && f.fsType == file.fsType }
+			if (position != -1) {
+				fileSpinner.setSelection(position)
+			}
 		}
 	}
 
@@ -187,6 +218,29 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 
 	override fun hideKeyboard() {
 		hideSoftInput(activity)
+	}
+
+	override fun showOpenFileScreen() {
+		val intent = StorageListActivity.createStartIntent(context, Action.PICK_FILE)
+		startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
+	}
+
+	override fun showSettingScreen() {
+		throw RuntimeException("Not implemented") //TODO: handle menu click
+	}
+
+	override fun showAboutScreen() {
+		throw RuntimeException("Not implemented") //TODO: handle menu click
+	}
+
+	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+		if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_PICK_FILE) {
+			val extras = data?.extras
+			if (extras != null) {
+				val file = extras.getParcelable<FileDescriptor>(StorageListActivity.EXTRA_RESULT)
+				presenter.onFilePicked(file)
+			}
+		}
 	}
 
 	private class PasswordRule(val pattern: Pattern, val password: String)

@@ -22,7 +22,7 @@ import com.ivanovsky.passnotes.presentation.core.validation.NotEmptyValidation;
 import com.ivanovsky.passnotes.presentation.core.validation.PatternValidation;
 import com.ivanovsky.passnotes.presentation.core.validation.Validator;
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
-import com.ivanovsky.passnotes.presentation.storagelist.Mode;
+import com.ivanovsky.passnotes.presentation.storagelist.Action;
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListActivity;
 
 import java.util.regex.Pattern;
@@ -179,7 +179,7 @@ public class NewDatabaseFragment extends BaseFragment implements NewDatabaseCont
 	@Override
 	public void showStorageScreen() {
 		startActivityForResult(StorageListActivity.Companion.createStartIntent(getContext(),
-				Mode.PICK_DIRECTORY), REQUEST_CODE_PICK_STORAGE);
+				Action.PICK_STORAGE), REQUEST_CODE_PICK_STORAGE);
 	}
 
 	@Override

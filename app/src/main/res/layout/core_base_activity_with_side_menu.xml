@@ -47,6 +47,7 @@
 		android:layout_height="match_parent"
 		android:layout_gravity="start"
 		android:fitsSystemWindows="true"
-		app:menu="@menu/unlock_navigation"/>
+		app:menu="@menu/unlock_navigation"
+		app:headerLayout="@layout/unlock_navigation_header"/>
 
 </android.support.v4.widget.DrawerLayout>

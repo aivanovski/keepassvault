@@ -32,6 +32,7 @@ android {
 
 	sourceSets {
 		main.java.srcDirs += 'src/main/kotlin'
+		androidTest.java.srcDirs += 'src/androidTest/kotlin'
 	}
 
 	compileOptions {
@@ -90,6 +91,7 @@ dependencies {
 	androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
 	androidTestImplementation "com.android.support.test:rules:$androidTestVersion"
 	androidTestImplementation "android.arch.persistence.room:testing:$roomVersion"
+	androidTestImplementation "org.jetbrains.kotlin:kotlin-reflect:$compiler.kotlin"
 
 	// MultiDex
 	implementation "com.android.support:multidex:$multidexVersion"
@@ -101,6 +103,7 @@ dependencies {
 	// Room
 	implementation "android.arch.persistence.room:runtime:$roomVersion"
 	kapt "android.arch.persistence.room:compiler:$roomVersion"
+	androidTestImplementation "android.arch.persistence.room:testing:$roomVersion"
 
 	// Lifecycle libraries
 	implementation "android.arch.lifecycle:livedata:$lifecycleVersion"
@@ -125,6 +128,7 @@ dependencies {
 	// Kotlin
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$compiler.kotlin"
 	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:0.30.2'
+	implementation "org.jetbrains.kotlin:kotlin-reflect:$compiler.kotlin"
 
 	// KeePassJava2
 	implementation project(':libs:KeePassJava2-database')

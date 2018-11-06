@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.presentation.unlock
 
 import android.arch.lifecycle.MutableLiveData
 import android.content.Context
-import android.util.Log
 
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
@@ -55,7 +54,7 @@ class UnlockPresenter(private val context: Context,
 	override fun start() {
 		view.setState(FragmentState.LOADING)
 		observerBus.register(this)
-		loadData()
+		loadData(null)
 	}
 
 	override fun stop() {
@@ -63,29 +62,26 @@ class UnlockPresenter(private val context: Context,
 		disposables.clear()
 	}
 
-	override fun loadData() {
+	override fun loadData(selectedFile: FileDescriptor?) {
 		val disposable = interactor.getRecentlyOpenedFiles()
-				.subscribe { result -> onGetRecentlyOpenedFilesResult(result) }
+				.subscribe { result -> onGetRecentlyOpenedFilesResult(result, selectedFile) }
 
 		disposables.add(disposable)
 	}
 
-	private fun onGetRecentlyOpenedFilesResult(result: OperationResult<List<FileDescriptor>>) {
+	private fun onGetRecentlyOpenedFilesResult(result: OperationResult<List<FileDescriptor>>,
+	                                           selectedFile: FileDescriptor?) {
 		if (result.isSuccessful) {
 			val files = result.result
 			if (files.isNotEmpty()) {
 				recentlyUsedFiles.value = files
 
-//				val selectedFile = this.selectedFile
-//				if (selectedFile != null) {
-//					val selectedPosition = files.indexOfFirst { f -> f.uid == selectedFile.uid && f.fsType == selectedFile.fsType }
-//
-//					Log.d(UnlockPresenter::class.simpleName, "selectedPosition=$selectedPosition")
-//
-//					if (selectedPosition != -1) {
-//						selectedRecentlyUsedFile.value = selectedFile
-//					}
-//				}
+				if (selectedFile != null) {
+					val selectedPosition = files.indexOfFirst { f -> isFileEqualsByUidAndFsType(f, selectedFile) }
+					if (selectedPosition != -1) {
+						selectedRecentlyUsedFile.value = selectedFile
+					}
+				}
 
 				screenState.value = ScreenState.data()
 			} else {
@@ -97,18 +93,8 @@ class UnlockPresenter(private val context: Context,
 		}
 	}
 
-	private fun getIndexOfFile(file: FileDescriptor, files: List<FileDescriptor>): Int {
-		var result = -1
-
-		for (i in 0 until files.size) {
-			val f = files[i]
-			if (f.uid == file.uid && f.fsType == file.fsType) {
-				result = i
-				break
-			}
-		}
-
-		return result
+	private fun isFileEqualsByUidAndFsType(lhs: FileDescriptor, rhs: FileDescriptor): Boolean {
+		return lhs.uid == rhs.uid && lhs.fsType == rhs.fsType
 	}
 
 	override fun onUnlockButtonClicked(password: String, file: FileDescriptor) {
@@ -133,7 +119,7 @@ class UnlockPresenter(private val context: Context,
 	}
 
 	override fun onUsedFileDataSetChanged() {
-		loadData()
+		loadData(null)
 	}
 
 	override fun onOpenFileMenuClicked() {
@@ -166,9 +152,7 @@ class UnlockPresenter(private val context: Context,
 
 	private fun onPickedFileSaved(result: OperationResult<Boolean>, file: FileDescriptor) {
 		if (result.isSuccessful) {
-			selectedFile = file
-
-			loadData()
+			loadData(file)
 
 		} else {
 			screenState.value = ScreenState.data()

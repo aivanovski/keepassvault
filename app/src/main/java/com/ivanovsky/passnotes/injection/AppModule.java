@@ -4,6 +4,7 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.data.ObserverBus;
+import com.ivanovsky.passnotes.data.repository.DropboxFileLinkRepository;
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository;
@@ -30,12 +31,14 @@ public class AppModule {
 	private final Context context;
 	private final AppDatabase db;
 	private final UsedFileRepository usedFileRepository;
+	private final DropboxFileLinkRepository dropboxFileLinkRepository;
 
 	public AppModule(Context context) {
 		this.context = context;
 		this.db = Room.databaseBuilder(context.getApplicationContext(),
 				AppDatabase.class, AppDatabase.FILE_NAME).build();
 		this.usedFileRepository = new UsedFileRepository(db);
+		this.dropboxFileLinkRepository = new DropboxFileLinkRepository(db);
 	}
 
 	@Provides
@@ -58,6 +61,12 @@ public class AppModule {
 
 	@Provides
 	@Singleton
+	DropboxFileLinkRepository provideRemoteFileLinkRepositoty() {
+		return dropboxFileLinkRepository;
+	}
+
+	@Provides
+	@Singleton
 	EncryptedDatabaseRepository provideEncryptedDBProvider(FileSystemResolver fileSystemResolver) {
 		return new KeepassDatabaseRepository(context, fileSystemResolver);
 	}
@@ -70,8 +79,9 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	FileSystemResolver provideFilSystemResolver(SettingsRepository settings) {
-		return new FileSystemResolver(settings);
+	FileSystemResolver provideFilSystemResolver(SettingsRepository settings,
+												DropboxFileLinkRepository fileLinkRepository) {
+		return new FileSystemResolver(settings, fileLinkRepository);
 	}
 
 	@Provides

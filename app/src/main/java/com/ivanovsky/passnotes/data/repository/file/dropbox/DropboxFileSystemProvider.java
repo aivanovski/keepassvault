@@ -9,34 +9,52 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.ivanovsky.passnotes.App;
+import com.ivanovsky.passnotes.BuildConfig;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.entity.DropboxFileLink;
+import com.ivanovsky.passnotes.data.repository.DropboxFileLinkRepository;
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
 import com.ivanovsky.passnotes.data.repository.file.FSType;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
+import com.ivanovsky.passnotes.data.repository.file.exception.AuthException;
 import com.ivanovsky.passnotes.data.repository.file.exception.FileSystemException;
+import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.Logger;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.newAuthError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError;
 import static com.ivanovsky.passnotes.util.DateUtils.anyLast;
 import static com.ivanovsky.passnotes.util.FileUtils.getParentPath;
+import static com.ivanovsky.passnotes.util.ObjectUtils.isNotEquals;
 
 public class DropboxFileSystemProvider implements FileSystemProvider {
 
+	private static final String TAG = DropboxFileSystemProvider.class.getSimpleName();
+
 	private final DropboxAuthenticator authenticator;
+	private final DropboxFileLinkRepository dropboxLinkRepository;
 	private DbxClientV2 client;
 	private DbxRequestConfig config;
 
-	public DropboxFileSystemProvider(SettingsRepository settings) {
+	public DropboxFileSystemProvider(SettingsRepository settings,
+									 DropboxFileLinkRepository dropboxLinkRepository) {
+		this.dropboxLinkRepository = dropboxLinkRepository;
 		authenticator = new DropboxAuthenticator(settings);
 		config = DbxRequestConfig.newBuilder("Passnotes/Android")
 				.withHttpRequestor(new OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
@@ -223,8 +241,109 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 
 	@Override
 	public InputStream openFileForRead(FileDescriptor file) throws FileSystemException {
-		//TODO: implement
-		return null;
+		InputStream result;
+
+		String authToken = authenticator.getAuthToken();
+		if (authToken == null) {
+			throw new AuthException();
+		}
+
+		initClientIfNeed(authToken);
+
+		Metadata metadata;
+		try {
+			metadata = client.files().getMetadata(file.getPath());
+		} catch (DbxException e) {
+			Logger.printStackTrace(e);
+			throw new FileSystemException(e);
+		}
+
+		if (metadata == null) {
+			throw new FileSystemException("Failed to get file metadata: " + file.getPath());
+		}
+
+		if (!(metadata instanceof FileMetadata)) {
+			throw new FileSystemException("Specified file has incorrect type: " + file.getPath());
+		}
+
+		File destinationDir = FileUtils.getRemoteFilesDir(App.getInstance());
+		if (destinationDir == null) {
+			throw new FileSystemException("Failed to find app private dir");
+		}
+
+		FileMetadata fileMetadata = (FileMetadata) metadata;
+
+		String uid = fileMetadata.getId();
+		String revision = fileMetadata.getRev();
+		String remotePath = fileMetadata.getPathLower();
+
+		DropboxFileLink link = dropboxLinkRepository.findByUid(uid);
+		if (link == null) {
+			link = new DropboxFileLink();
+
+			link.setUid(uid);
+			link.setRemotePath(remotePath);
+			link.setLocalPath(generateDestinationFilePath(destinationDir));
+			link.setDownloaded(false);
+			link.setRevision(revision);
+
+			dropboxLinkRepository.insert(link);
+
+		} else if (isNotEquals(revision, link.getRevision())) {
+			link.setDownloaded(false);
+
+			dropboxLinkRepository.update(link);
+		}
+
+		if (!link.isDownloaded()) {
+			try {
+				downloadFileIntoDestination(link);
+
+				link.setDownloaded(true);
+				dropboxLinkRepository.update(link);
+			} catch (DbxException | IOException e) {
+				Logger.printStackTrace(e);
+				throw new FileSystemException(e);
+			}
+		}
+
+		try {
+			result = new FileInputStream(new File(link.getLocalPath()));
+		} catch (FileNotFoundException e) {
+			Logger.printStackTrace(e);
+			throw new FileSystemException(e);
+		}
+
+		return result;
+	}
+
+	private String generateDestinationFilePath(File dir) {
+		return dir.getPath() + "/" + UUID.randomUUID().toString();
+	}
+
+	private void downloadFileIntoDestination(DropboxFileLink link) throws DbxException, IOException {
+		OutputStream out = null;
+
+		File destinationFile = new File(link.getLocalPath());
+
+		try {
+			out = new FileOutputStream(destinationFile);
+
+			if (BuildConfig.DEBUG) {
+				Logger.d(TAG, "Downloading dropbox file " + link.getRemotePath() +
+						" into " + link.getLocalPath());
+			}
+
+			client.files().download(link.getRemotePath()).download(out);
+		} finally {
+			if (out != null) {
+				try {
+					out.close();
+				} catch (IOException e) {
+					Logger.printStackTrace(e);
+				}
+			}
+		}
 	}
 
 	@Override

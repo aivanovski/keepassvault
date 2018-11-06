@@ -12,22 +12,22 @@ import com.ivanovsky.passnotes.data.repository.file.FSType;
 public class UsedFile {
 
 	@PrimaryKey(autoGenerate = true)
-	int id;
+	private int id;
 
 	@ColumnInfo(name = "added_time")
-	long addedTime;
+	private long addedTime;
 
 	@ColumnInfo(name =  "last_access_time")
-	Long lastAccessTime;
+	private Long lastAccessTime;
 
 	@ColumnInfo(name = "file_path")
-	String filePath;
+	private String filePath;
 
 	@ColumnInfo(name = "file_uid")
-	String fileUid;
+	private String fileUid;
 
 	@ColumnInfo(name = "fs_type")
-	FSType fsType;
+	private FSType fsType;
 
 	public UsedFile() {
 	}

@@ -27,7 +27,7 @@ class UnlockInteractor(private val fileRepository: UsedFileRepository,
 	}
 
 	private fun loadAndSortUsedFiles(): List<FileDescriptor> {
-		return fileRepository.allUsedFiles
+		return fileRepository.all
 				.sortedByDescending { file -> if (file.lastAccessTime != null) file.lastAccessTime else file.addedTime }
 				.map { file ->  createFileDescriptor(file)}
 	}

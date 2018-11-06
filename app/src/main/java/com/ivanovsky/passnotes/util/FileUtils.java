@@ -9,6 +9,23 @@ import java.io.File;
 public class FileUtils {
 
 	@Nullable
+	public static File getRemoteFilesDir(@NonNull Context context) {
+		return getPrivateDir(context, "remote-files");
+	}
+
+	@Nullable
+	private static File getPrivateDir(@NonNull Context context, @NonNull String name) {
+		File result = null;
+
+		File dbDir = context.getDir(name, Context.MODE_PRIVATE);
+		if (dbDir != null && dbDir.exists()) {
+			result = dbDir;
+		}
+
+		return result;
+	}
+
+	@Nullable
 	public static File getDatabaseDir(@NonNull Context context) {
 		File result = null;
 
@@ -23,18 +40,6 @@ public class FileUtils {
 					result = databaseDir;
 				}
 			}
-		}
-
-		return result;
-	}
-
-	@Nullable
-	public static File getKeepassDir(@NonNull Context context) {
-		File result = null;
-
-		File dbDir = context.getDir("keepass-databases", Context.MODE_PRIVATE);
-		if (dbDir != null && dbDir.exists()) {
-			result = dbDir;
 		}
 
 		return result;

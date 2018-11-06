@@ -15,6 +15,7 @@ import android.widget.Spinner
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity
@@ -157,15 +158,23 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 			val filename = getFileNameFromPath(path)
 
 			if (filename != null) {
-				items.add(FileSpinnerAdapter.Item(filename, path))
+				items.add(FileSpinnerAdapter.Item(filename, path, formatFsType(file.fsType)))
 			}
 		}
 
 		return items
 	}
 
+	private fun formatFsType(fsType: FSType): String {
+		return when (fsType) {
+			FSType.DROPBOX -> "Dropbox"
+			FSType.REGULAR_FS -> "Device"
+		}
+	}
+
 	private fun setSelectedFile(file: FileDescriptor) {
 		selectedFile = file
+		selectFileInSpinner(file)
 
 		if (BuildConfig.DEBUG) {
 			val fileName = getFileNameWithoutExtensionFromPath(file.path)
@@ -201,11 +210,15 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 	override fun selectFileInSpinner(file: FileDescriptor) {
 		val files = this.files
 		if (files != null) {
-			val position = files.indexOfFirst { f -> f.uid == file.uid && f.fsType == file.fsType }
+			val position = files.indexOfFirst { f -> isFileEqualsByUidAndFsType(f, file) }
 			if (position != -1) {
 				fileSpinner.setSelection(position)
 			}
 		}
+	}
+
+	private fun isFileEqualsByUidAndFsType(lhs: FileDescriptor, rhs: FileDescriptor): Boolean {
+		return lhs.uid == rhs.uid && lhs.fsType == rhs.fsType
 	}
 
 	override fun showGroupsScreen() {

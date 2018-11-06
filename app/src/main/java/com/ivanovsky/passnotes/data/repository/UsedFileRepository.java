@@ -15,13 +15,19 @@ public class UsedFileRepository {
 
 	private UsedFileDao dao;
 
-
 	public UsedFileRepository(AppDatabase db) {
 		this.dao = db.getUsedFileDao();
 	}
 
-	public List<UsedFile> getAllUsedFiles() {
+	public List<UsedFile> getAll() {
 		return dao.getAll();
+	}
+
+	public UsedFile findByUidAndFsType(String fileUid, FSType fsType) {
+		return Stream.of(dao.getAll())
+				.filter(file -> file.getFileUid().equals(fileUid) && file.getFsType() == fsType)
+				.findFirst()
+				.orElse(null);
 	}
 
 	public void insert(UsedFile file) {
@@ -31,12 +37,5 @@ public class UsedFileRepository {
 
 	public void update(UsedFile file) {
 		dao.update(file);
-	}
-
-	public UsedFile findByUidAndFsType(String fileUid, FSType fsType) {
-		return Stream.of(dao.getAll())
-				.filter(file -> file.getFileUid().equals(fileUid) && file.getFsType() == fsType)
-				.findFirst()
-				.orElse(null);
 	}
 }

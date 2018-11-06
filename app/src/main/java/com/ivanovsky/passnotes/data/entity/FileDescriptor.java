@@ -136,6 +136,18 @@ public class FileDescriptor implements Parcelable {
 	}
 
 	@Override
+	public String toString() {
+		return "FileDescriptor{" +
+				"directory=" + directory +
+				", root=" + root +
+				", modified=" + modified +
+				", fsType=" + fsType +
+				", path='" + path + '\'' +
+				", uid='" + uid + '\'' +
+				'}';
+	}
+
+	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 		dest.writeInt(directory ? 1 : 0);
 		dest.writeInt(root ? 1 : 0);

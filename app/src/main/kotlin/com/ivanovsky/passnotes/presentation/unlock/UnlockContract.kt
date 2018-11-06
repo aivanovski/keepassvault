@@ -32,7 +32,7 @@ class UnlockContract {
 		val showAboutScreenAction: SingleLiveAction<Void>
 		val snackbarMessageAction: SingleLiveAction<String>
 
-		fun loadData()
+		fun loadData(selectedFile: FileDescriptor?)
 		fun onFileSelectedByUser(file: FileDescriptor)
 		fun onUnlockButtonClicked(password: String, file: FileDescriptor)
 		fun onOpenFileMenuClicked()

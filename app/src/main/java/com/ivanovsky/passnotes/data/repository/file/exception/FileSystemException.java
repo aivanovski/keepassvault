@@ -5,4 +5,8 @@ public class FileSystemException extends Exception {
 	public FileSystemException(Exception reason) {
 		super(reason);
 	}
+
+	public FileSystemException(String message) {
+		super(message);
+	}
 }

@@ -5,7 +5,10 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor
 import com.ivanovsky.passnotes.injection.Injector
-import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.experimental.Dispatchers
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.withContext
 import java.util.*
 import javax.inject.Inject
 
@@ -18,8 +21,6 @@ class NotesPresenter(private val groupUid: UUID,
 	@Inject
 	lateinit var errorInteractor: ErrorInteractor
 
-	private var disposables = CompositeDisposable()
-
 	init {
 		Injector.getInstance().encryptedDatabaseComponent.inject(this)
 	}
@@ -29,14 +30,16 @@ class NotesPresenter(private val groupUid: UUID,
 	}
 
 	override fun stop() {
-		disposables.clear()
 	}
 
 	override fun loadData() {
-		val disposable = interactor.getNotesByGroupUid(groupUid)
-				.subscribe { result -> onNotesLoadedResult(result) }
+		GlobalScope.launch(Dispatchers.IO) {
+			val notes = interactor.getNotesByGroupUid(groupUid)
 
-		disposables.add(disposable)
+			withContext(Dispatchers.Main) {
+				onNotesLoadedResult(notes)
+			}
+		}
 	}
 
 	private fun onNotesLoadedResult(result: OperationResult<List<Note>>) {

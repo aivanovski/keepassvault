@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.groups
 
 import android.content.Context
+import android.provider.Settings
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -10,6 +11,10 @@ import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.Consumer
+import kotlinx.coroutines.experimental.Dispatchers
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.withContext
 import javax.inject.Inject
 
 class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
@@ -25,8 +30,6 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 	@Inject
 	lateinit var observerBus: ObserverBus
 
-	private val disposables: CompositeDisposable
-
 	override fun start() {
 		view.setState(FragmentState.LOADING)
 		observerBus.register(this)
@@ -35,19 +38,20 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 
 	init {
 		Injector.getInstance().encryptedDatabaseComponent.inject(this)
-		disposables = CompositeDisposable()
 	}
 
 	override fun stop() {
 		observerBus.unregister(this)
-		disposables.clear()
 	}
 
 	override fun loadData() {
-		val disposable = interactor.getAllGroupsWithNoteCount()
-				.subscribe(Consumer { onGroupsLoaded(it) })
+		GlobalScope.launch(Dispatchers.IO) {
+			val groupsWithNoteCount = interactor.getAllGroupsWithNoteCount()
 
-		disposables.add(disposable)
+			withContext(Dispatchers.Main) {
+				onGroupsLoaded(groupsWithNoteCount)
+			}
+		}
 	}
 
 	private fun onGroupsLoaded(result: OperationResult<List<Pair<Group, Int>>>) {

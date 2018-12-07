@@ -16,6 +16,10 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
 import com.ivanovsky.passnotes.util.formatAccordingSystemLocale
 import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.experimental.Dispatchers
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.withContext
 import java.util.*
 import javax.inject.Inject
 
@@ -44,7 +48,6 @@ class FilePickerPresenter(private val mode: Mode,
 	override val snackbarMessageAction = SingleLiveAction<String>()
 
 	private lateinit var files: List<FileDescriptor>
-	private val disposables = CompositeDisposable()
 	private var currentDir = rootFile
 	private var isPermissionRejected  = false
 
@@ -63,7 +66,6 @@ class FilePickerPresenter(private val mode: Mode,
 	}
 
 	override fun stop() {
-		disposables.clear()
 	}
 
 	override fun loadData() {
@@ -72,10 +74,13 @@ class FilePickerPresenter(private val mode: Mode,
 
 		//TODO: app doesnt need permission for private storage and network storage
 		if (permissionHelper.isPermissionGranted(SDCARD_PERMISSION)) {
-			val disposable = interactor.getFileList(currentDir)
-					.subscribe { result -> onFilesLoaded(currentDir, result) }
+			GlobalScope.launch(Dispatchers.IO) {
+				val files = interactor.getFileList(currentDir)
 
-			disposables.add(disposable)
+				withContext(Dispatchers.Main) {
+					onFilesLoaded(currentDir, files)
+				}
+			}
 		} else {
 			requestPermissionAction.call(SDCARD_PERMISSION)
 		}

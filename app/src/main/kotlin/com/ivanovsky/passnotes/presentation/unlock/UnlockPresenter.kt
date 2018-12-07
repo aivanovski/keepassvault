@@ -18,7 +18,7 @@ import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
 
 import javax.inject.Inject
 
-import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.experimental.*
 
 class UnlockPresenter(private val context: Context,
                        private val view: UnlockContract.View) :
@@ -44,7 +44,6 @@ class UnlockPresenter(private val context: Context,
 	override val showSettingsScreenAction = SingleLiveAction<Void>()
 	override val showAboutScreenAction = SingleLiveAction<Void>()
 	override val snackbarMessageAction = SingleLiveAction<String>()
-	private val disposables = CompositeDisposable()
 	private var selectedFile: FileDescriptor? = null
 
 	init {
@@ -59,14 +58,16 @@ class UnlockPresenter(private val context: Context,
 
 	override fun stop() {
 		observerBus.unregister(this)
-		disposables.clear()
 	}
 
 	override fun loadData(selectedFile: FileDescriptor?) {
-		val disposable = interactor.getRecentlyOpenedFiles()
-				.subscribe { result -> onGetRecentlyOpenedFilesResult(result, selectedFile) }
+		GlobalScope.launch(Dispatchers.IO) {
+			val result = interactor.getRecentlyOpenedFiles()
 
-		disposables.add(disposable)
+			withContext(Dispatchers.Main) {
+				onGetRecentlyOpenedFilesResult(result, selectedFile)
+			}
+		}
 	}
 
 	private fun onGetRecentlyOpenedFilesResult(result: OperationResult<List<FileDescriptor>>,
@@ -103,10 +104,13 @@ class UnlockPresenter(private val context: Context,
 
 		val key = KeepassDatabaseKey(password)
 
-		val disposable = interactor.openDatabase(key, file)
-				.subscribe { result -> onOpenDatabaseResult(result) }
+		GlobalScope.launch(Dispatchers.IO) {
+			val result = interactor.openDatabase(key, file)
 
-		disposables.add(disposable)
+			withContext(Dispatchers.Main) {
+				onOpenDatabaseResult(result)
+			}
+		}
 	}
 
 	private fun onOpenDatabaseResult(result: OperationResult<Boolean>) {
@@ -144,10 +148,13 @@ class UnlockPresenter(private val context: Context,
 		usedFile.fileUid = file.uid
 		usedFile.fsType = file.fsType
 
-		val disposable = interactor.saveUsedFileWithoutAccessTime(usedFile)
-				.subscribe { result -> onPickedFileSaved(result, file) }
+		GlobalScope.launch(Dispatchers.IO) {
+			val result = interactor.saveUsedFileWithoutAccessTime(usedFile)
 
-		disposables.add(disposable)
+			withContext(Dispatchers.Main) {
+				onPickedFileSaved(result, file)
+			}
+		}
 	}
 
 	private fun onPickedFileSaved(result: OperationResult<Boolean>, file: FileDescriptor) {

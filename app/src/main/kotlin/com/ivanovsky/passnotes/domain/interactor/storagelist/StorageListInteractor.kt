@@ -10,10 +10,6 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.*
 import com.ivanovsky.passnotes.injection.Injector
-import com.ivanovsky.passnotes.presentation.storagelist.Action
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class StorageListInteractor(private val context: Context) {
@@ -25,7 +21,7 @@ class StorageListInteractor(private val context: Context) {
 		Injector.getInstance().appComponent.inject(this)
 	}
 
-	fun getAvailableStorageOptions(action: Action): List<StorageOption> {
+	fun getAvailableStorageOptions(): List<StorageOption> {
 		return listOf(createPrivateStorageOption(),
 				createExternalStorageOption(),
 				createDropboxOption())
@@ -68,11 +64,9 @@ class StorageListInteractor(private val context: Context) {
 		return file
 	}
 
-	fun getDropboxRoot(): Single<OperationResult<FileDescriptor>> {
+	fun getDropboxRoot(): OperationResult<FileDescriptor> {
 		val provider = fileSystemResolver.resolveProvider(FSType.DROPBOX)
-		return Single.fromCallable { provider.rootFile }
-				.subscribeOn(Schedulers.newThread())
-				.observeOn(AndroidSchedulers.mainThread())
+		return provider.rootFile
 
 	}
 }

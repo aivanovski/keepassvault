@@ -15,7 +15,10 @@ import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListContract.FilePickerArgs
-import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.experimental.Dispatchers
+import kotlinx.coroutines.experimental.GlobalScope
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.withContext
 import javax.inject.Inject
 
 class StorageListPresenter(private val action: Action) :
@@ -40,7 +43,6 @@ class StorageListPresenter(private val action: Action) :
 	override val authActivityStartedAction = SingleLiveAction<FSType>()
 
 	private var isDropboxAuthDisplayed = false
-	private val disposables = CompositeDisposable()
 
 	init {
 		Injector.getInstance().appComponent.inject(this)
@@ -56,20 +58,22 @@ class StorageListPresenter(private val action: Action) :
 				screenState.value = ScreenState.dataWithError(
 						resourceHelper.getString(R.string.authentication_failed))
 			} else {
-				val disposable = interactor.getDropboxRoot()
-						.subscribe { result -> onDropboxRootLoaded(result)}
+				GlobalScope.launch(Dispatchers.IO) {
+					val dropboxRoot = interactor.getDropboxRoot()
 
-				disposables.add(disposable)
+					withContext(Dispatchers.Main) {
+						onDropboxRootLoaded(dropboxRoot)
+					}
+				}
 			}
 
 		} else {
-			storageOptions.value = interactor.getAvailableStorageOptions(action)
+			storageOptions.value = interactor.getAvailableStorageOptions()
 			screenState.value = ScreenState.data()
 		}
 	}
 
 	override fun stop() {
-		disposables.clear()
 	}
 
 	override fun onStorageOptionClicked(option: StorageOption) {
@@ -103,10 +107,13 @@ class StorageListPresenter(private val action: Action) :
 			authActivityStartedAction.call(FSType.DROPBOX)
 
 		} else {
-			val disposable = interactor.getDropboxRoot()
-					.subscribe { result -> onDropboxRootLoaded(result)}
+			GlobalScope.launch(Dispatchers.IO) {
+				val dropboxRoot = interactor.getDropboxRoot()
 
-			disposables.add(disposable)
+				withContext(Dispatchers.Main) {
+					onDropboxRootLoaded(dropboxRoot)
+				}
+			}
 		}
 	}
 

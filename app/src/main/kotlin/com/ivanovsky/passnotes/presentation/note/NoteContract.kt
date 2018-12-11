@@ -6,6 +6,8 @@ import com.ivanovsky.passnotes.presentation.core.BaseView
 
 class NoteContract {
 
+	//TODO: rewrite with LiveData
+
 	interface View: BaseView<Presenter> {
 		fun showNote(note: Note)
 		fun showError(message: String)

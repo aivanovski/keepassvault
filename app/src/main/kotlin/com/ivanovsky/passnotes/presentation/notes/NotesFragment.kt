@@ -12,7 +12,7 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.core.adapter.SingleLineAdapter
-import com.ivanovsky.passnotes.presentation.newgroup.NewGroupActivity
+import com.ivanovsky.passnotes.presentation.group.GroupActivity
 import com.ivanovsky.passnotes.presentation.note.NoteActivity
 
 class NotesFragment: BaseFragment(), NotesContract.View {
@@ -77,7 +77,7 @@ class NotesFragment: BaseFragment(), NotesContract.View {
 	}
 
 	override fun showUnlockScreenAndFinish() {
-		startActivity(NewGroupActivity.createStartIntent(context))
+		startActivity(GroupActivity.createStartIntent(context))
 
 		activity.finish()
 	}

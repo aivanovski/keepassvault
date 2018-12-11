@@ -11,7 +11,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
-import com.ivanovsky.passnotes.presentation.newgroup.NewGroupActivity
+import com.ivanovsky.passnotes.presentation.group.GroupActivity
 import com.ivanovsky.passnotes.presentation.notes.NotesActivity
 import com.ivanovsky.passnotes.presentation.unlock.UnlockActivity
 
@@ -110,7 +110,7 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 	}
 
 	override fun showNewGroupScreen() {
-		startActivity(NewGroupActivity.createStartIntent(context))
+		startActivity(GroupActivity.createStartIntent(context))
 	}
 
 	override fun showUnlockScreenAndFinish() {

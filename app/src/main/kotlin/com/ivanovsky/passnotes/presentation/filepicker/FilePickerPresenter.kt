@@ -15,7 +15,6 @@ import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
 import com.ivanovsky.passnotes.util.formatAccordingSystemLocale
-import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.experimental.Dispatchers
 import kotlinx.coroutines.experimental.GlobalScope
 import kotlinx.coroutines.experimental.launch
@@ -91,10 +90,13 @@ class FilePickerPresenter(private val mode: Mode,
 			val unsortedFiles = result.result
 
 			if (!dir.isRoot && isBrowsingEnabled) {
-				val disposable = interactor.getParent(currentDir)
-						.subscribe { parentResult -> onParentLoaded(unsortedFiles, parentResult)}
+				GlobalScope.launch(Dispatchers.IO) {
+					val parent = interactor.getParent(currentDir)
 
-				disposables.add(disposable)
+					withContext(Dispatchers.Main) {
+						onParentLoaded(unsortedFiles, parent)
+					}
+				}
 
 			} else {
 				val sortedFiles = sortFiles(unsortedFiles)

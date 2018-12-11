@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.injection.encdb.EncryptedDatabaseModule;
 import com.ivanovsky.passnotes.presentation.StartActivity;
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment;
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerPresenter;
+import com.ivanovsky.passnotes.presentation.group.GroupPresenter;
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity;
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabasePresenter;

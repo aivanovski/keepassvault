@@ -33,7 +33,7 @@
 			android:screenOrientation="portrait"/>
 
 		<activity
-			android:name=".presentation.newgroup.NewGroupActivity"
+			android:name=".presentation.group.GroupActivity"
 			android:screenOrientation="portrait"/>
 
 		<activity

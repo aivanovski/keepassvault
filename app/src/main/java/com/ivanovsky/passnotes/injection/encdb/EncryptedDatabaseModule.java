@@ -7,9 +7,9 @@ import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.domain.ClipboardHelper;
+import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor;
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor;
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor;
-import com.ivanovsky.passnotes.domain.interactor.newgroup.NewGroupInteractor;
 import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor;
 
 import dagger.Module;
@@ -53,9 +53,9 @@ public class EncryptedDatabaseModule {
 
 	@Provides
 	@EncryptedDatabaseScope
-	NewGroupInteractor provideNewGroupInteractor(GroupRepository groupRepository,
-												 ObserverBus observerBus) {
-		return new NewGroupInteractor(context, groupRepository, observerBus);
+	GroupInteractor provideNewGroupInteractor(GroupRepository groupRepository,
+											  ObserverBus observerBus) {
+		return new GroupInteractor(context, groupRepository, observerBus);
 	}
 
 	@Provides

@@ -24,6 +24,7 @@
 	<string name="unlock">Unlock</string>
 
 	<!-- New database screen -->
+	<string name="new_database">New database</string>
 	<string name="file_name">File name</string>
 	<string name="password">Password</string>
 	<string name="confirm">Confirm</string>

@@ -9,3 +9,4 @@
 .externalNativeBuild
 dev.properties
 debug.properties
+/.project

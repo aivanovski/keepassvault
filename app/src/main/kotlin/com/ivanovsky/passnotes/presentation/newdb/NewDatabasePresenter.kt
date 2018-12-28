@@ -104,7 +104,8 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 						selectedFile.path)
 			}
 		} else if (selectedFile.fsType == FSType.DROPBOX) {
-
+			storageTypeAndPath.value = Pair(context.getString(R.string.dropbox),
+					selectedFile.path)
 		}
 	}
 }

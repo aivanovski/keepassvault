@@ -123,7 +123,7 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public boolean exists(FileDescriptor file) {
+	public boolean exists(FileDescriptor file) throws FileSystemException {
 		return new File(file.getPath()).exists();
 	}
 }

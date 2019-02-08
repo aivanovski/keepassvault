@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.data.repository.keepass;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
+import com.ivanovsky.passnotes.data.repository.file.RemoteFileOutputStream;
 import com.ivanovsky.passnotes.data.repository.file.exception.FileSystemException;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassGroupDao;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao;
@@ -11,15 +12,22 @@ import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabase
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.injection.Injector;
+import com.ivanovsky.passnotes.util.InputOutputUtils;
 import com.ivanovsky.passnotes.util.Logger;
 
 import org.linguafranca.pwdb.Credentials;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 
 import javax.inject.Inject;
 
@@ -90,23 +98,30 @@ public class KeepassDatabase implements EncryptedDatabase {
 
 		Credentials credentials = new KdbxCreds(key);
 
-		OutputStream out = null;
+		file.setModified(System.currentTimeMillis());
 
+		OutputStream out = null;
 		try {
 			out = provider.openFileForWrite(file);
-			db.save(credentials, out);
-			out.flush();
+
+			//method 'SimpleDatabase.save' closes output stream after work is done
+			if (out instanceof RemoteFileOutputStream) {
+				RemoteFileOutputStream remoteOut = (RemoteFileOutputStream) out;
+
+				File localFile = remoteOut.getOutputFile();
+
+				BufferedOutputStream localOut = new BufferedOutputStream(new FileOutputStream(localFile));
+				db.save(credentials, localOut);
+
+				InputOutputUtils.copy(new FileInputStream(localFile), out, false);
+
+				out.close();
+			} else {
+				db.save(credentials, out);
+			}
+
 		} catch (FileSystemException | IOException e) {
 			throw new EncryptedDatabaseException(e);
-
-		} finally {
-			if (out != null) {
-				try {
-					out.close();
-				} catch (IOException e) {
-					Logger.printStackTrace(e);
-				}
-			}
 		}
 	}
 

@@ -15,10 +15,7 @@ import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
 import com.ivanovsky.passnotes.util.formatAccordingSystemLocale
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
 
@@ -46,9 +43,10 @@ class FilePickerPresenter(private val mode: Mode,
 	override val fileSelectedAction = SingleLiveAction<FileDescriptor>()
 	override val snackbarMessageAction = SingleLiveAction<String>()
 
-	private lateinit var files: List<FileDescriptor>
+	private var isPermissionRejected = false
 	private var currentDir = rootFile
-	private var isPermissionRejected  = false
+	private lateinit var files: List<FileDescriptor>
+	private val scope = CoroutineScope(Dispatchers.IO)
 
 	companion object {
 		private const val SDCARD_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -73,7 +71,7 @@ class FilePickerPresenter(private val mode: Mode,
 
 		//TODO: app doesnt need permission for private storage and network storage
 		if (permissionHelper.isPermissionGranted(SDCARD_PERMISSION)) {
-			GlobalScope.launch(Dispatchers.IO) {
+			scope.launch(Dispatchers.IO) {
 				val files = interactor.getFileList(currentDir)
 
 				withContext(Dispatchers.Main) {
@@ -90,7 +88,7 @@ class FilePickerPresenter(private val mode: Mode,
 			val unsortedFiles = result.result
 
 			if (!dir.isRoot && isBrowsingEnabled) {
-				GlobalScope.launch(Dispatchers.IO) {
+				scope.launch(Dispatchers.IO) {
 					val parent = interactor.getParent(currentDir)
 
 					withContext(Dispatchers.Main) {
@@ -166,8 +164,8 @@ class FilePickerPresenter(private val mode: Mode,
 		return items
 	}
 
-	private fun formatModifiedDate(modified: Date?): String {
-		return if (modified != null) modified.formatAccordingSystemLocale(context) else ""
+	private fun formatModifiedDate(modified: Long?): String {
+		return if (modified != null) Date(modified).formatAccordingSystemLocale(context) else ""
 	}
 
 	@DrawableRes

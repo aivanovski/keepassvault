@@ -33,6 +33,7 @@ android {
 	sourceSets {
 		main.java.srcDirs += 'src/main/kotlin'
 		androidTest.java.srcDirs += 'src/androidTest/kotlin'
+		test.java.srcDirs += 'src/test/kotlin'
 	}
 
 	compileOptions {
@@ -74,6 +75,12 @@ android {
 		}
 	}
 
+	testOptions {
+		unitTests {
+			includeAndroidResources = true
+		}
+	}
+
 	kapt {
 		generateStubs = true
 	}
@@ -85,7 +92,9 @@ dependencies {
 	// Test dependencies
 	testImplementation "junit:junit:$jUnitVersion"
 	testImplementation "org.mockito:mockito-core:$mockitoVersion"
+	testImplementation "com.google.truth:truth:0.42"
 	testImplementation "org.robolectric:robolectric:$robolectricVersion"
+	testImplementation "org.robolectric:shadows-multidex:$robolectricVersion"
 
 	// Android test dependencies
 	androidTestImplementation "com.android.support.test:runner:$androidTestVersion"
@@ -108,6 +117,7 @@ dependencies {
 	// Lifecycle libraries
 	implementation "android.arch.lifecycle:livedata:$lifecycleVersion"
 	kapt "android.arch.lifecycle:compiler:$lifecycleVersion"
+	testImplementation "android.arch.core:core-testing:$lifecycleVersion"
 
 	// Support libraries
 	implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
@@ -127,7 +137,7 @@ dependencies {
 
 	// Kotlin
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$compiler.kotlin"
-	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:0.30.2'
+	implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.0'
 	implementation "org.jetbrains.kotlin:kotlin-reflect:$compiler.kotlin"
 
 	// KeePassJava2

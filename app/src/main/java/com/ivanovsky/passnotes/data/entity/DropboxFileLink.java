@@ -10,8 +10,17 @@ public class DropboxFileLink {
 	@ColumnInfo(name = "donwloaded")
 	private boolean downloaded;
 
+	@ColumnInfo(name = "uploaded")
+	private boolean uploaded;
+
 	@PrimaryKey(autoGenerate = true)
 	private Integer id;
+
+	@ColumnInfo(name = "retry_count")
+	private int retryCount;
+
+	@ColumnInfo(name = "last_retry_timestamp")
+	private Long lastRetryTimestamp;
 
 	@ColumnInfo(name = "last_download_timestamp")
 	private Long lastDownloadTimestamp;
@@ -42,12 +51,40 @@ public class DropboxFileLink {
 		this.downloaded = downloaded;
 	}
 
+	public boolean isUploaded() {
+		return uploaded;
+	}
+
+	public void setUploaded(boolean uploaded) {
+		this.uploaded = uploaded;
+	}
+
 	public Integer getId() {
 		return id;
 	}
 
 	public void setId(Integer id) {
 		this.id = id;
+	}
+
+	public int getRetryCount() {
+		return retryCount;
+	}
+
+	public void setRetryCount(int retryCount) {
+		this.retryCount = retryCount;
+	}
+
+	public void incrementRetryCount() {
+		retryCount++;
+	}
+
+	public Long getLastRetryTimestamp() {
+		return lastRetryTimestamp;
+	}
+
+	public void setLastRetryTimestamp(Long lastRetryTimestamp) {
+		this.lastRetryTimestamp = lastRetryTimestamp;
 	}
 
 	public Long getLastDownloadTimestamp() {
@@ -103,26 +140,33 @@ public class DropboxFileLink {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		DropboxFileLink that = (DropboxFileLink) o;
+		DropboxFileLink link = (DropboxFileLink) o;
 
-		if (downloaded != that.downloaded) return false;
-		if (id != null ? !id.equals(that.id) : that.id != null) return false;
-		if (lastDownloadTimestamp != null ? !lastDownloadTimestamp.equals(that.lastDownloadTimestamp) : that.lastDownloadTimestamp != null)
+		if (downloaded != link.downloaded) return false;
+		if (uploaded != link.uploaded) return false;
+		if (retryCount != link.retryCount) return false;
+		if (id != null ? !id.equals(link.id) : link.id != null) return false;
+		if (lastRetryTimestamp != null ? !lastRetryTimestamp.equals(link.lastRetryTimestamp) : link.lastRetryTimestamp != null)
 			return false;
-		if (lastModificationTimestamp != null ? !lastModificationTimestamp.equals(that.lastModificationTimestamp) : that.lastModificationTimestamp != null)
+		if (lastDownloadTimestamp != null ? !lastDownloadTimestamp.equals(link.lastDownloadTimestamp) : link.lastDownloadTimestamp != null)
 			return false;
-		if (localPath != null ? !localPath.equals(that.localPath) : that.localPath != null)
+		if (lastModificationTimestamp != null ? !lastModificationTimestamp.equals(link.lastModificationTimestamp) : link.lastModificationTimestamp != null)
 			return false;
-		if (remotePath != null ? !remotePath.equals(that.remotePath) : that.remotePath != null)
+		if (localPath != null ? !localPath.equals(link.localPath) : link.localPath != null)
 			return false;
-		if (uid != null ? !uid.equals(that.uid) : that.uid != null) return false;
-		return revision != null ? revision.equals(that.revision) : that.revision == null;
+		if (remotePath != null ? !remotePath.equals(link.remotePath) : link.remotePath != null)
+			return false;
+		if (uid != null ? !uid.equals(link.uid) : link.uid != null) return false;
+		return revision != null ? revision.equals(link.revision) : link.revision == null;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = (downloaded ? 1 : 0);
+		result = 31 * result + (uploaded ? 1 : 0);
 		result = 31 * result + (id != null ? id.hashCode() : 0);
+		result = 31 * result + retryCount;
+		result = 31 * result + (lastRetryTimestamp != null ? lastRetryTimestamp.hashCode() : 0);
 		result = 31 * result + (lastDownloadTimestamp != null ? lastDownloadTimestamp.hashCode() : 0);
 		result = 31 * result + (lastModificationTimestamp != null ? lastModificationTimestamp.hashCode() : 0);
 		result = 31 * result + (localPath != null ? localPath.hashCode() : 0);

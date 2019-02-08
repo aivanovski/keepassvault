@@ -16,5 +16,5 @@ public interface FileSystemProvider {
 	FileSystemAuthenticator getAuthenticator();
 	InputStream openFileForRead(FileDescriptor file) throws FileSystemException;
 	OutputStream openFileForWrite(FileDescriptor file) throws FileSystemException;
-	boolean exists(FileDescriptor file);
+	boolean exists(FileDescriptor file) throws FileSystemException;
 }

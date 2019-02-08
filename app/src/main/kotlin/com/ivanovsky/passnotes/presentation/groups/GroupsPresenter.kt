@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.presentation.groups
 
 import android.content.Context
-import android.provider.Settings
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -9,12 +8,7 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.FragmentState
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.functions.Consumer
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
@@ -29,6 +23,8 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 
 	@Inject
 	lateinit var observerBus: ObserverBus
+
+	private val scope = CoroutineScope(Dispatchers.IO)
 
 	override fun start() {
 		view.setState(FragmentState.LOADING)
@@ -45,7 +41,7 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 	}
 
 	override fun loadData() {
-		GlobalScope.launch(Dispatchers.IO) {
+		scope.launch(Dispatchers.IO) {
 			val groupsWithNoteCount = interactor.getAllGroupsWithNoteCount()
 
 			withContext(Dispatchers.Main) {

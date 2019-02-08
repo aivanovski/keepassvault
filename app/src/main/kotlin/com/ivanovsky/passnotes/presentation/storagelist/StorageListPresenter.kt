@@ -15,10 +15,10 @@ import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListContract.FilePickerArgs
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class StorageListPresenter(private val action: Action) :
@@ -43,6 +43,7 @@ class StorageListPresenter(private val action: Action) :
 	override val authActivityStartedAction = SingleLiveAction<FSType>()
 
 	private var isDropboxAuthDisplayed = false
+	private val scope = CoroutineScope(Dispatchers.IO)
 
 	init {
 		Injector.getInstance().appComponent.inject(this)
@@ -58,7 +59,7 @@ class StorageListPresenter(private val action: Action) :
 				screenState.value = ScreenState.dataWithError(
 						resourceHelper.getString(R.string.authentication_failed))
 			} else {
-				GlobalScope.launch(Dispatchers.IO) {
+				scope.launch(Dispatchers.IO) {
 					val dropboxRoot = interactor.getDropboxRoot()
 
 					withContext(Dispatchers.Main) {
@@ -107,7 +108,7 @@ class StorageListPresenter(private val action: Action) :
 			authActivityStartedAction.call(FSType.DROPBOX)
 
 		} else {
-			GlobalScope.launch(Dispatchers.IO) {
+			scope.launch(Dispatchers.IO) {
 				val dropboxRoot = interactor.getDropboxRoot()
 
 				withContext(Dispatchers.Main) {

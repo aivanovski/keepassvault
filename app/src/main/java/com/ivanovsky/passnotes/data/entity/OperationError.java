@@ -53,6 +53,13 @@ public class OperationError {
 		return error;
 	}
 
+	public static OperationError newGenericIOError(String message, Throwable throwable) {
+		OperationError error = new OperationError(Type.GENERIC_IO_ERROR);
+		error.message = message;
+		error.throwable = throwable;
+		return error;
+	}
+
 	public static OperationError newAuthError(String message) {
 		OperationError error = new OperationError(Type.AUTH_ERROR);
 		error.message = message;

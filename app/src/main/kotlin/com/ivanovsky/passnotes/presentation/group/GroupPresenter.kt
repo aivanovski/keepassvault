@@ -9,10 +9,7 @@ import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 class GroupPresenter(private val context: Context) : GroupContract.Presenter {
@@ -25,6 +22,11 @@ class GroupPresenter(private val context: Context) : GroupContract.Presenter {
 	override val titleEditTextError = MutableLiveData<String>()
 	override val hideKeyboardAction = SingleLiveAction<Void>()
 	override val finishScreenAction = SingleLiveAction<Void>()
+
+	private val handler = CoroutineExceptionHandler { ctx, e ->
+		e.printStackTrace()
+	}
+	private val scope = CoroutineScope(Dispatchers.IO + handler)
 
 	init {
 		Injector.getInstance().encryptedDatabaseComponent.inject(this)
@@ -46,7 +48,7 @@ class GroupPresenter(private val context: Context) : GroupContract.Presenter {
 			titleEditTextError.value = null
 			screenState.value = ScreenState.loading()
 
-			GlobalScope.launch(Dispatchers.IO) {
+			scope.launch(Dispatchers.IO) {
 				val result = interactor.createNewGroup(trimmedTitle)
 
 				withContext(Dispatchers.Main) {

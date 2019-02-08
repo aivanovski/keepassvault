@@ -5,10 +5,10 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor
 import com.ivanovsky.passnotes.injection.Injector
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
@@ -20,6 +20,8 @@ class NotesPresenter(private val groupUid: UUID,
 
 	@Inject
 	lateinit var errorInteractor: ErrorInteractor
+
+	private val scope = CoroutineScope(Dispatchers.IO)
 
 	init {
 		Injector.getInstance().encryptedDatabaseComponent.inject(this)
@@ -33,7 +35,7 @@ class NotesPresenter(private val groupUid: UUID,
 	}
 
 	override fun loadData() {
-		GlobalScope.launch(Dispatchers.IO) {
+		scope.launch(Dispatchers.IO) {
 			val notes = interactor.getNotesByGroupUid(groupUid)
 
 			withContext(Dispatchers.Main) {

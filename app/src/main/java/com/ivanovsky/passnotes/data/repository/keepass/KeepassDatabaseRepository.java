@@ -23,6 +23,8 @@ import java.io.OutputStream;
 
 public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
+	private static final String TEMPLATE_DB_PATH = "default.kdbx";
+
 	private volatile KeepassDatabase db;
 	private final Context context;
 	private final FileSystemResolver fileSystemResolver;
@@ -60,7 +62,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 			FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsType());
 
 			try {
-				in = new BufferedInputStream(context.getAssets().open("default.kdbx"));//TODO: make constant
+				in = new BufferedInputStream(context.getAssets().open(TEMPLATE_DB_PATH));
 
 				Database keepassDb = SimpleDatabase.load(defaultCredentials, in);
 

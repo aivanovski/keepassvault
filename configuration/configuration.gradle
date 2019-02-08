@@ -52,7 +52,7 @@ ext {
 	dropboxAppSecret = propertiesMap[PROPERTY_DROPBOX_APP_SECRET]
 
 	compiler = [
-			kotlin: '1.2.71'
+			kotlin: '1.3.21'
 	]
 
 	android = [

@@ -13,10 +13,10 @@ import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
 import com.ivanovsky.passnotes.util.FileUtils
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
@@ -34,7 +34,8 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 	override val showGroupsScreenAction = SingleLiveAction<Void>()
 	override val showStorageScreenAction = SingleLiveAction<Void>()
 	override val hideKeyboardAction = SingleLiveAction<Void>()
-	private var selectedStorageDir: FileDescriptor? = null
+	var selectedStorageDir: FileDescriptor? = null
+	private val scope = CoroutineScope(Dispatchers.IO)
 
 	init {
 		Injector.getInstance().appComponent.inject(this)
@@ -56,7 +57,7 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 			val dbKey = KeepassDatabaseKey(password)
 			val dbFile = FileDescriptor.fromParent(selectedStorageDir, "$filename.kdbx")
 
-			GlobalScope.launch(Dispatchers.IO) {
+			scope.launch(Dispatchers.IO) {
 				val result = interactor.createNewDatabaseAndOpen(dbKey, dbFile)
 
 				withContext(Dispatchers.Main) {
@@ -69,7 +70,7 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 		}
 	}
 
-	private fun onCreateDatabaseResult(result: OperationResult<Boolean>) {
+	fun onCreateDatabaseResult(result: OperationResult<Boolean>) {
 		if (result.isSuccessful) {
 			val created = result.result
 
@@ -97,15 +98,12 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 			val file = File(selectedFile.path)
 
 			if (FileUtils.isLocatedInPrivateStorage(file, context)) {
-				storageTypeAndPath.value = Pair(context.getString(R.string.private_storage),
-						selectedFile.path)
+				storageTypeAndPath.value = Pair(context.getString(R.string.private_storage), selectedFile.path)
 			} else {
-				storageTypeAndPath.value = Pair(context.getString(R.string.public_storage),
-						selectedFile.path)
+				storageTypeAndPath.value = Pair(context.getString(R.string.public_storage), selectedFile.path)
 			}
 		} else if (selectedFile.fsType == FSType.DROPBOX) {
-			storageTypeAndPath.value = Pair(context.getString(R.string.dropbox),
-					selectedFile.path)
+			storageTypeAndPath.value = Pair(context.getString(R.string.dropbox), selectedFile.path)
 		}
 	}
 }

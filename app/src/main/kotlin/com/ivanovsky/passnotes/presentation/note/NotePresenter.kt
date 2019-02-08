@@ -8,10 +8,10 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.FragmentState
-import kotlinx.coroutines.experimental.Dispatchers
-import kotlinx.coroutines.experimental.GlobalScope
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
@@ -25,6 +25,8 @@ class NotePresenter(private var context: Context,
 	@Inject
 	lateinit var errorInteractor: ErrorInteractor
 
+	private val scope = CoroutineScope(Dispatchers.IO)
+
 	init {
 		Injector.getInstance().encryptedDatabaseComponent.inject(this)
 	}
@@ -37,7 +39,7 @@ class NotePresenter(private var context: Context,
 	}
 
 	override fun loadData() {
-		GlobalScope.launch(Dispatchers.IO) {
+		scope.launch(Dispatchers.IO) {
 			val note = interactor.getNoteByUid(noteUid!!)//TODO: fix !!
 
 			withContext(Dispatchers.Main) {

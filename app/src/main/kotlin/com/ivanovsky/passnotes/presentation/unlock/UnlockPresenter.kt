@@ -15,10 +15,12 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import javax.inject.Inject
-
-import kotlinx.coroutines.experimental.*
 
 class UnlockPresenter(private val context: Context,
                        private val view: UnlockContract.View) :
@@ -45,6 +47,7 @@ class UnlockPresenter(private val context: Context,
 	override val showAboutScreenAction = SingleLiveAction<Void>()
 	override val snackbarMessageAction = SingleLiveAction<String>()
 	private var selectedFile: FileDescriptor? = null
+	private val scope = CoroutineScope(Dispatchers.IO)
 
 	init {
 		Injector.getInstance().appComponent.inject(this)
@@ -61,7 +64,7 @@ class UnlockPresenter(private val context: Context,
 	}
 
 	override fun loadData(selectedFile: FileDescriptor?) {
-		GlobalScope.launch(Dispatchers.IO) {
+		scope.launch(Dispatchers.IO) {
 			val result = interactor.getRecentlyOpenedFiles()
 
 			withContext(Dispatchers.Main) {
@@ -104,7 +107,7 @@ class UnlockPresenter(private val context: Context,
 
 		val key = KeepassDatabaseKey(password)
 
-		GlobalScope.launch(Dispatchers.IO) {
+		scope.launch(Dispatchers.IO) {
 			val result = interactor.openDatabase(key, file)
 
 			withContext(Dispatchers.Main) {
@@ -116,6 +119,7 @@ class UnlockPresenter(private val context: Context,
 	private fun onOpenDatabaseResult(result: OperationResult<Boolean>) {
 		if (result.result != null) {
 			showGroupsScreenAction.call()
+			screenState.value = ScreenState.data()
 		} else {
 			val message = errorInteractor.processAndGetMessage(result.error)
 			screenState.value = ScreenState.error(message)
@@ -148,7 +152,7 @@ class UnlockPresenter(private val context: Context,
 		usedFile.fileUid = file.uid
 		usedFile.fsType = file.fsType
 
-		GlobalScope.launch(Dispatchers.IO) {
+		scope.launch(Dispatchers.IO) {
 			val result = interactor.saveUsedFileWithoutAccessTime(usedFile)
 
 			withContext(Dispatchers.Main) {

@@ -7,13 +7,12 @@ import com.ivanovsky.passnotes.data.repository.file.FSType;
 import com.ivanovsky.passnotes.util.FileUtils;
 
 import java.io.File;
-import java.util.Date;
 
 public class FileDescriptor implements Parcelable {
 
 	private boolean directory;
 	private boolean root;
-	private Date modified;
+	private Long modified;
 	private FSType fsType;
 	private String path;
 	private String uid;
@@ -24,7 +23,7 @@ public class FileDescriptor implements Parcelable {
 		result.fsType = FSType.REGULAR_FS;
 		result.path = file.getPath();
 		result.directory = file.isDirectory();
-		result.modified = new Date(file.lastModified());
+		result.modified = file.lastModified();
 		result.root = file.getPath().equals("/");
 		result.uid = result.path;
 
@@ -67,11 +66,11 @@ public class FileDescriptor implements Parcelable {
 		this.root = root;
 	}
 
-	public Date getModified() {
+	public Long getModified() {
 		return modified;
 	}
 
-	public void setModified(Date modified) {
+	public void setModified(Long modified) {
 		this.modified = modified;
 	}
 
@@ -160,7 +159,7 @@ public class FileDescriptor implements Parcelable {
 	private void readFromParcel(Parcel source) {
 		directory = (source.readInt() == 1);
 		root = (source.readInt() == 1);
-		modified = (Date) source.readSerializable();
+		modified = (Long) source.readSerializable();
 		fsType = (FSType) source.readSerializable();
 		path = source.readString();
 		uid = source.readString();

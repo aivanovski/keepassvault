@@ -29,16 +29,9 @@ import dagger.Provides;
 public class AppModule {
 
 	private final Context context;
-	private final AppDatabase db;
-	private final UsedFileRepository usedFileRepository;
-	private final DropboxFileLinkRepository dropboxFileLinkRepository;
 
 	public AppModule(Context context) {
 		this.context = context;
-		this.db = Room.databaseBuilder(context.getApplicationContext(),
-				AppDatabase.class, AppDatabase.FILE_NAME).build();
-		this.usedFileRepository = new UsedFileRepository(db);
-		this.dropboxFileLinkRepository = new DropboxFileLinkRepository(db);
 	}
 
 	@Provides
@@ -50,19 +43,20 @@ public class AppModule {
 	@Provides
 	@Singleton
 	AppDatabase provideAppDatabase() {
-		return db;
+		return Room.databaseBuilder(context.getApplicationContext(),
+				AppDatabase.class, AppDatabase.FILE_NAME).build();
 	}
 
 	@Provides
 	@Singleton
-	UsedFileRepository provideUsedFileRepository() {
-		return usedFileRepository;
+	UsedFileRepository provideUsedFileRepository(AppDatabase db) {
+		return new UsedFileRepository(db);
 	}
 
 	@Provides
 	@Singleton
-	DropboxFileLinkRepository provideRemoteFileLinkRepositoty() {
-		return dropboxFileLinkRepository;
+	DropboxFileLinkRepository provideRemoteFileLinkRepositoty(AppDatabase db) {
+		return new DropboxFileLinkRepository(db);
 	}
 
 	@Provides

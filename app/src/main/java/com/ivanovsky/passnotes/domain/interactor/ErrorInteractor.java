@@ -14,37 +14,58 @@ public class ErrorInteractor {
 		this.context = context;
 	}
 
-	public void process(OperationError error) {
-		//TODO: implement method
-	}
-
 	public String processAndGetMessage(OperationError error) {
-		String message;
-
-		process(error);
-
-		if (error.getMessage() != null) {
-			message = error.getMessage();
-		} else if (error.getThrowable() != null) {
-			message = getDefaultMessageForException(error.getThrowable());
-		} else {
-			message = context.getString(R.string.error_was_occurred);
-		}
-
-		return message;
+		return getMessage(error);
 	}
 
-	private String getDefaultMessageForException(Throwable throwable) {
-		String message;
+	public ErrorProcessingResult process(OperationError error) {
+		return new ErrorProcessingResult(getMessage(error), getResolution(error));
+	}
 
-		//TODO: implement network error handling
+	private String getMessage(OperationError error) {
+		String message;
 
 		if (BuildConfig.DEBUG) {
-			message = throwable.toString();
+			message = formatDebugMessageFromOperationError(error);
 		} else {
-			message = context.getString(R.string.error_was_occurred);
+			message = getDefaultMessageForOperationErrorType(error.getType());
 		}
 
 		return message;
+	}
+
+	private ErrorResolution getResolution(OperationError error) {
+		switch (error.getType()) {
+			case NETWORK_IO_ERROR:
+				return ErrorResolution.RETRY;
+			default:
+				return ErrorResolution.NOTHING;
+		}
+	}
+
+	private String getDefaultMessageForOperationErrorType(OperationError.Type type) {
+		//TODO: implement other type handling
+		switch (type) {
+			case NETWORK_IO_ERROR:
+				return context.getString(R.string.network_error_was_occurred_check_internet_connection);
+			default:
+				return context.getString(R.string.error_was_occurred);
+		}
+	}
+
+	private String formatDebugMessageFromOperationError(OperationError error) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(error.getType());
+
+		if (error.getMessage() != null) {
+			sb.append(": ").append(error.getMessage());
+		}
+
+		if (error.getThrowable() != null) {
+			sb.append(": ").append(error.getThrowable().toString());
+		}
+
+		return sb.toString();
 	}
 }

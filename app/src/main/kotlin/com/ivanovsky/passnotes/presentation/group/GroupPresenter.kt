@@ -5,6 +5,8 @@ import android.content.Context
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
+import com.ivanovsky.passnotes.domain.interactor.ErrorResolution
 import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -16,6 +18,9 @@ class GroupPresenter(private val context: Context) : GroupContract.Presenter {
 
 	@Inject
 	lateinit var interactor: GroupInteractor
+
+	@Inject
+	lateinit var errorInteractor: ErrorInteractor
 
 	override val screenState = MutableLiveData<ScreenState>()
 	override val doneButtonVisibility = MutableLiveData<Boolean>()
@@ -65,7 +70,13 @@ class GroupPresenter(private val context: Context) : GroupContract.Presenter {
 			finishScreenAction.call()
 		} else {
 			doneButtonVisibility.value = true
-			screenState.value = ScreenState.dataWithError(result.error.message)
+
+			val processedError = errorInteractor.process(result.error)
+			if (processedError.resolution == ErrorResolution.RETRY) {
+				//TODO: implement retry state
+			} else {
+				screenState.value = ScreenState.dataWithError(processedError.message)
+			}
 		}
 	}
 }

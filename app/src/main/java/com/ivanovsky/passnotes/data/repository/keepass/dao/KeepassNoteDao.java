@@ -165,7 +165,12 @@ public class KeepassNoteDao implements NoteDao {
 					result.setResult(newEntry.getUuid());
 				} catch (EncryptedDatabaseException e) {
 					Logger.printStackTrace(e);
-					result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_COMMIT));
+
+					if (e.getError() != null) {
+						result.setError(e.getError());
+					} else {
+						result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_COMMIT));
+					}
 				}
 
 			} else {

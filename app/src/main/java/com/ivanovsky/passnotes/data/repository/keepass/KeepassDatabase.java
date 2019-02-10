@@ -19,7 +19,6 @@ import org.linguafranca.pwdb.Credentials;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,9 +26,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
-
 import javax.inject.Inject;
+
+import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError;
 
 public class KeepassDatabase implements EncryptedDatabase {
 
@@ -100,7 +99,7 @@ public class KeepassDatabase implements EncryptedDatabase {
 
 		file.setModified(System.currentTimeMillis());
 
-		OutputStream out = null;
+		OutputStream out;
 		try {
 			out = provider.openFileForWrite(file);
 
@@ -119,8 +118,10 @@ public class KeepassDatabase implements EncryptedDatabase {
 			} else {
 				db.save(credentials, out);
 			}
+		} catch (IOException e) {
+			throw new EncryptedDatabaseException(newNetworkIOError());
 
-		} catch (FileSystemException | IOException e) {
+		} catch (FileSystemException e) {
 			throw new EncryptedDatabaseException(e);
 		}
 	}

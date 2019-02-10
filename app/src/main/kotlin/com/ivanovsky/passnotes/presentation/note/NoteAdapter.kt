@@ -1,11 +1,11 @@
 package com.ivanovsky.passnotes.presentation.note
 
 import android.content.Context
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.widget.SecureTextView
 
@@ -30,7 +30,7 @@ class NoteAdapter(context: Context):
 		return items[position].viewType
 	}
 
-	override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): NoteAdapter.ViewHolder {
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteAdapter.ViewHolder {
 		val result: NoteAdapter.ViewHolder
 
 		val view = inflater.inflate(R.layout.note_list_item_simple_property, parent, false)
@@ -40,7 +40,7 @@ class NoteAdapter(context: Context):
 		return result
 	}
 
-	override fun onBindViewHolder(holder: NoteAdapter.ViewHolder?, position: Int) {
+	override fun onBindViewHolder(holder: NoteAdapter.ViewHolder, position: Int) {
 		val viewType = getItemViewType(position)
 
 		if (viewType == VIEW_TYPE_NOTE_PROPERTY) {

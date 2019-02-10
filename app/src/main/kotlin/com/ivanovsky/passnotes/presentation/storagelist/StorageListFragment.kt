@@ -1,15 +1,15 @@
 package com.ivanovsky.passnotes.presentation.storagelist
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.FSType
@@ -62,10 +62,10 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 
 		val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
 
-		val layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+		val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
 		val dividerDecorator = DividerItemDecoration(context, layoutManager.orientation)
 
-		adapter = SingleLineAdapter(context)
+		adapter = SingleLineAdapter(context!!)
 
 		recyclerView.layoutManager = layoutManager
 		recyclerView.addItemDecoration(dividerDecorator)
@@ -93,7 +93,7 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 	}
 
 	override fun showFilePickerScreen(root: FileDescriptor, action: Action, isBrowsingEnabled: Boolean) {
-		val intent = FilePickerActivity.createStartIntent(context,
+		val intent = FilePickerActivity.createStartIntent(context!!,
 				convertActionToFilePickerMode(action),
 				root,
 				isBrowsingEnabled)
@@ -127,8 +127,8 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 
 		data.putExtra(StorageListActivity.EXTRA_RESULT, file)
 
-		activity.setResult(Activity.RESULT_OK, data)
-		activity.finish()
+		activity!!.setResult(Activity.RESULT_OK, data)
+		activity!!.finish()
 	}
 
 	override fun showAuthActivity(fsType: FSType) {

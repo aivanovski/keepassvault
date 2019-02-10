@@ -24,7 +24,7 @@ class GroupInteractor(private val context: Context,
 				observerBus.notifyGroupDataSetChanged()
 				result.result = group
 			} else {
-				result.error = newGenericError(context.getString(R.string.error_was_occurred))
+				result.error = insertResult.error
 			}
 		} else {
 			result.error = newGenericError(context.getString(R.string.group_with_this_name_is_already_exist))

@@ -2,11 +2,11 @@ package com.ivanovsky.passnotes.presentation.core;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -123,6 +123,8 @@ public abstract class BaseFragment extends Fragment {
 				contentContainer.setVisibility(View.VISIBLE);
 				stateView.setVisibility(View.GONE);
 				errorPanelView.setVisibility(View.VISIBLE);
+				break;
+			case DISPLAYING_DATA_WITH_RETRY_BUTTON:
 				break;
 		}
 	}

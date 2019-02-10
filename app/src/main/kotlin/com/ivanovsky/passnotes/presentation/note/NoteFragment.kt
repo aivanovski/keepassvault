@@ -1,12 +1,12 @@
 package com.ivanovsky.passnotes.presentation.note
 
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
@@ -50,9 +50,9 @@ class NoteFragment : BaseFragment(),
 		recyclerView = view.findViewById(R.id.recycler_view)
 		modifiedTextView = view.findViewById(R.id.modified_date)
 
-		val layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+		val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
 
-		adapter = NoteAdapter(context)
+		adapter = NoteAdapter(context!!)
 
 		recyclerView.layoutManager = layoutManager
 		recyclerView.adapter = adapter
@@ -78,7 +78,7 @@ class NoteFragment : BaseFragment(),
 	}
 
 	private fun formatModifiedDate(edited: Date): String {
-		return getString(R.string.edited_at, edited.formatAccordingSystemLocale(context))
+		return getString(R.string.edited_at, edited.formatAccordingSystemLocale(context!!))
 	}
 
 	private fun createAdapterItemsFromProperties(properties: List<Property>): List<NoteAdapter.Item> {

@@ -1,10 +1,10 @@
 package com.ivanovsky.passnotes.presentation.unlock
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -94,7 +94,7 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 		passwordEditText = view.findViewById(R.id.password)
 		val unlockButton = view.findViewById<View>(R.id.unlock_button)
 
-		fileAdapter = FileSpinnerAdapter(context)
+		fileAdapter = FileSpinnerAdapter(context!!)
 
 		fileSpinner.adapter = fileAdapter
 
@@ -140,9 +140,11 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 
 	override fun onStateChanged(oldState: FragmentState?, newState: FragmentState) {
 		when (newState) {
-			FragmentState.EMPTY, FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL, FragmentState.DISPLAYING_DATA -> fab.visibility = View.VISIBLE
+			FragmentState.EMPTY,
+			FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL,
+			FragmentState.DISPLAYING_DATA -> fab.show()
 
-			FragmentState.LOADING, FragmentState.ERROR -> fab.visibility = View.GONE
+			FragmentState.LOADING, FragmentState.ERROR -> fab.hide()
 		}
 	}
 
@@ -222,7 +224,7 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 	}
 
 	override fun showGroupsScreen() {
-		startActivity(GroupsActivity.createStartIntent(context))
+		startActivity(GroupsActivity.createStartIntent(context!!))
 	}
 
 	override fun showNewDatabaseScreen() {
@@ -234,7 +236,7 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 	}
 
 	override fun showOpenFileScreen() {
-		val intent = StorageListActivity.createStartIntent(context, Action.PICK_FILE)
+		val intent = StorageListActivity.createStartIntent(context!!, Action.PICK_FILE)
 		startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
 	}
 
@@ -251,7 +253,9 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 			val extras = data?.extras
 			if (extras != null) {
 				val file = extras.getParcelable<FileDescriptor>(StorageListActivity.EXTRA_RESULT)
-				presenter.onFilePicked(file)
+				if (file != null) {
+					presenter.onFilePicked(file)
+				}
 			}
 		}
 	}

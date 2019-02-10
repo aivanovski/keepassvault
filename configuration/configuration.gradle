@@ -30,7 +30,7 @@ def parsePropertiesMap = { ->
 				assert rules instanceof Map
 
 				rules.each { fileName, password ->
-					project.logger.lifecycle("Use password $password for file name matched $fileName")}
+					project.logger.lifecycle("Use password $password for file with name matched $fileName")}
 
 				propertyValue = rules
 			} else {
@@ -57,12 +57,13 @@ ext {
 
 	android = [
 			minSdk    : 15,
-			targetSdk : 26,
-			compileSdk: 26,
-			buildTools: '26.0.2'
+			targetSdk : 28,
+			compileSdk: 28,
+			buildTools: '28.0.3'
 	]
 
 	// Libraries
+	androidXVersion = '1.0.0'
 	daggerVersion = '2.16'
 	supportLibraryVersion = '26.1.0'
 	lifecycleVersion = '1.1.1'
@@ -72,8 +73,10 @@ ext {
 	rxJavaVersion = '2.1.0'
 	rxAndroidVersion = '2.0.1'
 	multidexVersion = '1.0.3'
-	dropboxVersion = '3.0.10'
+	dropboxVersion = '3.0.11'
 	okHttpVersion = '3.10.0'
+	kotlinCoroutineVersion = '1.0.0'
+	apacheCommonsLangVersion = '3.0'
 
 	// Test
 	jUnitVersion = '4.12'

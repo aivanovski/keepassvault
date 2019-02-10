@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes.presentation.newdb
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
@@ -21,9 +21,6 @@ private const val REQUEST_CODE_PICK_STORAGE = 100
 
 class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 
-	private val FILE_NAME_PATTERN = Pattern.compile("[\\w]{1,50}")
-	private val PASSWORD_PATTERN = Pattern.compile("[\\w@#$!%^&+=]{4,20}")
-
 	private lateinit var presenter: NewDatabaseContract.Presenter
 	private lateinit var menu: Menu
 	private lateinit var storageLayout: View
@@ -34,6 +31,9 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 	private lateinit var confirmationEditText: EditText
 
 	companion object {
+
+		private val FILE_NAME_PATTERN = Pattern.compile("[\\w]{1,50}")
+		private val PASSWORD_PATTERN = Pattern.compile("[\\w@#$!%^&+=]{4,20}")
 
 		fun newInstance(): NewDatabaseFragment {
 			return NewDatabaseFragment()
@@ -148,13 +148,13 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 	}
 
 	override fun showGroupsScreen() {
-		activity.finish()
+		activity!!.finish()
 
-		startActivity(GroupsActivity.createStartIntent(context))
+		startActivity(GroupsActivity.createStartIntent(context!!))
 	}
 
 	override fun showStorageScreen() {
-		startActivityForResult(StorageListActivity.createStartIntent(context, Action.PICK_STORAGE),
+		startActivityForResult(StorageListActivity.createStartIntent(context!!, Action.PICK_STORAGE),
 				REQUEST_CODE_PICK_STORAGE)
 	}
 

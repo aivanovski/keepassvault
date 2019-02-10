@@ -1,15 +1,15 @@
 package com.ivanovsky.passnotes.presentation.core
 
 import android.os.Bundle
-import android.support.annotation.DrawableRes
-import android.support.design.widget.FloatingActionButton
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.DrawableRes
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ivanovsky.passnotes.R
 
 abstract class BaseListFragment<T> : BaseFragment() {
@@ -35,7 +35,7 @@ abstract class BaseListFragment<T> : BaseFragment() {
 		val layoutManager: RecyclerView.LayoutManager
 
 		if (config.layout == Layout.VERTICAL_LIST) {
-			layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+			layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
 
 			if (config.isDividerEnabled) {
 				recyclerView.addItemDecoration(DividerItemDecoration(context, layoutManager.orientation))
@@ -45,7 +45,7 @@ abstract class BaseListFragment<T> : BaseFragment() {
 		}
 
 		if (!config.isFloatingActionButtonEnabled) {
-			fab.visibility = View.GONE
+			fab.hide()
 		}
 
 		if (config.floatingActionButtonIconId != -1) {

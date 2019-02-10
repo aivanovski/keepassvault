@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.presentation.group
 
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 import com.ivanovsky.passnotes.presentation.core.BasePresenter
 import com.ivanovsky.passnotes.presentation.core.BaseView
 import com.ivanovsky.passnotes.presentation.core.ScreenState

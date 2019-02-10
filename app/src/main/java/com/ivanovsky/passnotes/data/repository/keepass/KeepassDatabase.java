@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.file.RemoteFileOutputStream;
 import com.ivanovsky.passnotes.data.repository.file.exception.FileSystemException;
+import com.ivanovsky.passnotes.data.repository.file.exception.IOFileSystemException;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassGroupDao;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
@@ -49,6 +50,8 @@ public class KeepassDatabase implements EncryptedDatabase {
 		this.key = key;
 		this.groupRepository = new KeepassGroupRepository(new KeepassGroupDao(this));
 		this.noteRepository = new KeepassNoteRepository(new KeepassNoteDao(this));
+
+		db.enableRecycleBin(false);
 	}
 
 	private SimpleDatabase readDatabaseFile(FileDescriptor file, byte[] key) throws EncryptedDatabaseException {
@@ -118,7 +121,7 @@ public class KeepassDatabase implements EncryptedDatabase {
 			} else {
 				db.save(credentials, out);
 			}
-		} catch (IOException e) {
+		} catch (IOException | IOFileSystemException e) {
 			throw new EncryptedDatabaseException(newNetworkIOError());
 
 		} catch (FileSystemException e) {

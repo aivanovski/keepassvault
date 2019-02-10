@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.presentation.group
 
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.os.Bundle
 import android.view.*
 import android.widget.EditText

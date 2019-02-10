@@ -76,6 +76,8 @@ public class KeepassGroupDao implements GroupDao {
 				} catch (EncryptedDatabaseException e) {
 					Logger.printStackTrace(e);
 
+					keepassDb.deleteGroup(newGroup.getUuid());
+
 					if (e.getError() != null) {
 						result.setError(e.getError());
 					} else {

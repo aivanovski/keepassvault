@@ -1,11 +1,11 @@
 package com.ivanovsky.passnotes.presentation.core.adapter
 
 import android.content.Context
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.R
 
 class SingleLineAdapter(context: Context):
@@ -25,7 +25,7 @@ class SingleLineAdapter(context: Context):
 		return items.size
 	}
 
-	override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 		val view = inflater.inflate(R.layout.list_item_single_line, parent, false)
 		return ViewHolder(view)
 	}

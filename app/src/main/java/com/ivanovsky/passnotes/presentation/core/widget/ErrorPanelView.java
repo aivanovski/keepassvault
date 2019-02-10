@@ -27,7 +27,7 @@ public class ErrorPanelView extends FrameLayout {
 
 		LayoutInflater.from(getContext()).inflate(R.layout.core_error_panel_view, this, true);
 
-		errorTextView = (TextView) findViewById(R.id.error_panel_text);
+		errorTextView = findViewById(R.id.error_panel_text);
 	}
 
 	public void setText(CharSequence text) {

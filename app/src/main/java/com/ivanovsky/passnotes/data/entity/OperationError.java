@@ -67,7 +67,7 @@ public class OperationError {
 	}
 
 	public static OperationError newNetworkIOError() {
-		OperationError error = new OperationError(Type.AUTH_ERROR);
+		OperationError error = new OperationError(Type.NETWORK_IO_ERROR);
 		error.message = MESSAGE_IO_ERROR;
 		return error;
 	}

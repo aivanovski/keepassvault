@@ -2,9 +2,8 @@ package com.ivanovsky.passnotes.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
-import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.injection.Injector;
 import com.ivanovsky.passnotes.presentation.core.BaseActivity;
 import com.ivanovsky.passnotes.presentation.unlock.UnlockActivity;

@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes
 
-import android.arch.persistence.room.Room
-import android.support.test.InstrumentationRegistry
+import androidx.room.Room
+import androidx.test.platform.app.InstrumentationRegistry
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
 import java.util.*
 
@@ -15,6 +15,7 @@ fun dateInMillis(year: Int, month: Int, day: Int): Long {
 }
 
 fun initInMemoryDatabase(): AppDatabase {
-	return Room.inMemoryDatabaseBuilder(InstrumentationRegistry.getContext(), AppDatabase::class.java)
+	return Room.inMemoryDatabaseBuilder(InstrumentationRegistry.getInstrumentation().context,
+			AppDatabase::class.java)
 			.build()
 }

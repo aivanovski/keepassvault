@@ -166,6 +166,8 @@ public class KeepassNoteDao implements NoteDao {
 				} catch (EncryptedDatabaseException e) {
 					Logger.printStackTrace(e);
 
+					rootGroup.removeEntry(newEntry);
+
 					if (e.getError() != null) {
 						result.setError(e.getError());
 					} else {

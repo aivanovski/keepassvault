@@ -1,7 +1,9 @@
 package com.ivanovsky.passnotes.presentation.core.adapter;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,14 +43,15 @@ public class TwoLineTwoTextAdapter extends RecyclerView.Adapter<TwoLineTwoTextAd
 		this.clickListener = clickListener;
 	}
 
+	@NonNull
 	@Override
-	public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+	public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 		View view = inflater.inflate(R.layout.list_item_two_line_two_text, parent, false);
 		return new ViewHolder(view);
 	}
 
 	@Override
-	public void onBindViewHolder(ViewHolder holder, int position) {
+	public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 		ListItem item = items.get(position);
 
 		holder.title.setText(item.title);

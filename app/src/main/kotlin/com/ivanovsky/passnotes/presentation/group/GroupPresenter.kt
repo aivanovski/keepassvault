@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.presentation.group
 
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import android.content.Context
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
@@ -28,7 +28,7 @@ class GroupPresenter(private val context: Context) : GroupContract.Presenter {
 	override val hideKeyboardAction = SingleLiveAction<Void>()
 	override val finishScreenAction = SingleLiveAction<Void>()
 
-	private val handler = CoroutineExceptionHandler { ctx, e ->
+	private val handler = CoroutineExceptionHandler { _, e ->
 		e.printStackTrace()
 	}
 	private val scope = CoroutineScope(Dispatchers.IO + handler)
@@ -74,6 +74,7 @@ class GroupPresenter(private val context: Context) : GroupContract.Presenter {
 			val processedError = errorInteractor.process(result.error)
 			if (processedError.resolution == ErrorResolution.RETRY) {
 				//TODO: implement retry state
+				screenState.value = ScreenState.dataWithError("Test")
 			} else {
 				screenState.value = ScreenState.dataWithError(processedError.message)
 			}

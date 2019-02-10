@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes;
 
-import android.support.multidex.MultiDexApplication;
+import androidx.multidex.MultiDexApplication;
 
 public class App extends MultiDexApplication {
 

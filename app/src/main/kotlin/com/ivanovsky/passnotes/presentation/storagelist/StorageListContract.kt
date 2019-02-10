@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.presentation.storagelist
 
-import android.arch.lifecycle.LiveData
+import androidx.lifecycle.LiveData
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.domain.entity.StorageOption

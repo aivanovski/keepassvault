@@ -1,8 +1,11 @@
 package com.ivanovsky.passnotes.data.entity;
 
-import android.arch.persistence.room.ColumnInfo;
-import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.PrimaryKey;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 @Entity(tableName = "dropbox_file_link")
 public class DropboxFileLink {
@@ -138,41 +141,40 @@ public class DropboxFileLink {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
+
 		if (o == null || getClass() != o.getClass()) return false;
 
-		DropboxFileLink link = (DropboxFileLink) o;
+		DropboxFileLink that = (DropboxFileLink) o;
 
-		if (downloaded != link.downloaded) return false;
-		if (uploaded != link.uploaded) return false;
-		if (retryCount != link.retryCount) return false;
-		if (id != null ? !id.equals(link.id) : link.id != null) return false;
-		if (lastRetryTimestamp != null ? !lastRetryTimestamp.equals(link.lastRetryTimestamp) : link.lastRetryTimestamp != null)
-			return false;
-		if (lastDownloadTimestamp != null ? !lastDownloadTimestamp.equals(link.lastDownloadTimestamp) : link.lastDownloadTimestamp != null)
-			return false;
-		if (lastModificationTimestamp != null ? !lastModificationTimestamp.equals(link.lastModificationTimestamp) : link.lastModificationTimestamp != null)
-			return false;
-		if (localPath != null ? !localPath.equals(link.localPath) : link.localPath != null)
-			return false;
-		if (remotePath != null ? !remotePath.equals(link.remotePath) : link.remotePath != null)
-			return false;
-		if (uid != null ? !uid.equals(link.uid) : link.uid != null) return false;
-		return revision != null ? revision.equals(link.revision) : link.revision == null;
+		return new EqualsBuilder()
+				.append(downloaded, that.downloaded)
+				.append(uploaded, that.uploaded)
+				.append(retryCount, that.retryCount)
+				.append(id, that.id)
+				.append(lastRetryTimestamp, that.lastRetryTimestamp)
+				.append(lastDownloadTimestamp, that.lastDownloadTimestamp)
+				.append(lastModificationTimestamp, that.lastModificationTimestamp)
+				.append(localPath, that.localPath)
+				.append(remotePath, that.remotePath)
+				.append(uid, that.uid)
+				.append(revision, that.revision)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		int result = (downloaded ? 1 : 0);
-		result = 31 * result + (uploaded ? 1 : 0);
-		result = 31 * result + (id != null ? id.hashCode() : 0);
-		result = 31 * result + retryCount;
-		result = 31 * result + (lastRetryTimestamp != null ? lastRetryTimestamp.hashCode() : 0);
-		result = 31 * result + (lastDownloadTimestamp != null ? lastDownloadTimestamp.hashCode() : 0);
-		result = 31 * result + (lastModificationTimestamp != null ? lastModificationTimestamp.hashCode() : 0);
-		result = 31 * result + (localPath != null ? localPath.hashCode() : 0);
-		result = 31 * result + (remotePath != null ? remotePath.hashCode() : 0);
-		result = 31 * result + (uid != null ? uid.hashCode() : 0);
-		result = 31 * result + (revision != null ? revision.hashCode() : 0);
-		return result;
+		return new HashCodeBuilder(17, 37)
+				.append(downloaded)
+				.append(uploaded)
+				.append(id)
+				.append(retryCount)
+				.append(lastRetryTimestamp)
+				.append(lastDownloadTimestamp)
+				.append(lastModificationTimestamp)
+				.append(localPath)
+				.append(remotePath)
+				.append(uid)
+				.append(revision)
+				.toHashCode();
 	}
 }

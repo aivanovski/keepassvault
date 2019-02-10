@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	xmlns:tools="http://schemas.android.com/tools">
 
-	<android.support.constraint.Guideline
+	<androidx.constraintlayout.widget.Guideline
 		android:id="@+id/guideline_start"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
 		app:layout_constraintGuide_begin="@dimen/element_margin"/>
 
-	<android.support.constraint.Guideline
+	<androidx.constraintlayout.widget.Guideline
 		android:id="@+id/guideline_end"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
 		app:layout_constraintGuide_end="@dimen/element_margin"/>
 
-	<android.support.constraint.ConstraintLayout
+	<androidx.constraintlayout.widget.ConstraintLayout
 		android:id="@+id/storage_layout"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
@@ -39,7 +39,9 @@
 			style="@style/Material.SecondaryText.SingleLine"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="@string/storage_type"/>
+			android:text="@string/storage_type"
+			app:layout_constraintTop_toTopOf="parent"
+			app:layout_constraintStart_toStartOf="parent"/>
 
 		<TextView
 			android:id="@+id/storage_type"
@@ -47,6 +49,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="8dp"
+			app:layout_constraintTop_toTopOf="parent"
 			app:layout_constraintStart_toEndOf="@id/storage_type_header"
 			tools:text="SDCARD"/>
 
@@ -60,9 +63,9 @@
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintTop_toBottomOf="@id/storage_type_header"/>
 
-	</android.support.constraint.ConstraintLayout>
+	</androidx.constraintlayout.widget.ConstraintLayout>
 
-	<android.support.design.widget.TextInputLayout
+	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/file_extension_layout"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -70,7 +73,7 @@
 		app:layout_constraintEnd_toStartOf="@id/guideline_end"
 		app:layout_constraintTop_toBottomOf="@id/storage_layout">
 
-		<android.support.design.widget.TextInputEditText
+		<com.google.android.material.textfield.TextInputEditText
 			style="@style/Material.EditText.PrimarySingleLine"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
@@ -78,9 +81,9 @@
 			android:text="@string/dot_kdbx"
 			android:enabled="false"/>
 
-	</android.support.design.widget.TextInputLayout>
+	</com.google.android.material.textfield.TextInputLayout>
 
-	<android.support.design.widget.TextInputLayout
+	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/filename_layout"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
@@ -89,7 +92,7 @@
 		app:layout_constraintEnd_toStartOf="@id/file_extension_layout"
 		app:layout_constraintTop_toBottomOf="@id/storage_layout">
 
-		<android.support.design.widget.TextInputEditText
+		<com.google.android.material.textfield.TextInputEditText
 			android:id="@+id/filename"
 			style="@style/Material.EditText.PrimarySingleLine"
 			android:layout_width="match_parent"
@@ -99,9 +102,9 @@
 			android:imeOptions="actionNext"
 			android:nextFocusForward="@id/password"/>
 
-	</android.support.design.widget.TextInputLayout>
+	</com.google.android.material.textfield.TextInputLayout>
 
-	<android.support.design.widget.TextInputLayout
+	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/password_layout"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
@@ -110,16 +113,16 @@
 		app:layout_constraintEnd_toStartOf="@id/guideline_end"
 		app:layout_constraintTop_toBottomOf="@id/filename_layout">
 
-		<android.support.design.widget.TextInputEditText
+		<com.google.android.material.textfield.TextInputEditText
 			android:id="@+id/password"
 			style="@style/Material.EditText.Password"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:hint="@string/password"/>
 
-	</android.support.design.widget.TextInputLayout>
+	</com.google.android.material.textfield.TextInputLayout>
 
-	<android.support.design.widget.TextInputLayout
+	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/password_confirmation_layout"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
@@ -128,7 +131,7 @@
 		app:layout_constraintEnd_toStartOf="@id/guideline_end"
 		app:layout_constraintTop_toBottomOf="@id/password_layout">
 
-		<android.support.design.widget.TextInputEditText
+		<com.google.android.material.textfield.TextInputEditText
 			android:id="@+id/password_confirmation"
 			style="@style/Material.EditText.Password"
 			android:layout_width="match_parent"
@@ -136,6 +139,6 @@
 			android:hint="@string/confirm"
 			android:imeOptions="actionDone"/>
 
-	</android.support.design.widget.TextInputLayout>
+	</com.google.android.material.textfield.TextInputLayout>
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

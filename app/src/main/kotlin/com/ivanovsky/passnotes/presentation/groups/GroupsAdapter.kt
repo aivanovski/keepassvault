@@ -1,11 +1,11 @@
 package com.ivanovsky.passnotes.presentation.groups
 
 import android.content.Context
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.R
 
 class GroupsAdapter(val context: Context): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -31,7 +31,7 @@ class GroupsAdapter(val context: Context): RecyclerView.Adapter<RecyclerView.Vie
 		return items[position].viewType
 	}
 
-	override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int):
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int):
 			RecyclerView.ViewHolder {
 		val result: RecyclerView.ViewHolder
 
@@ -47,7 +47,7 @@ class GroupsAdapter(val context: Context): RecyclerView.Adapter<RecyclerView.Vie
 		return result
 	}
 
-	override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
+	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 		val viewType = getItemViewType(position)
 
 		if (viewType == VIEW_TYPE_GROUP) {

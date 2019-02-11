@@ -123,8 +123,13 @@ public abstract class BaseFragment extends Fragment {
 				contentContainer.setVisibility(View.VISIBLE);
 				stateView.setVisibility(View.GONE);
 				errorPanelView.setVisibility(View.VISIBLE);
+				errorPanelView.setState(ErrorPanelView.State.MESSAGE);
 				break;
 			case DISPLAYING_DATA_WITH_RETRY_BUTTON:
+				contentContainer.setVisibility(View.VISIBLE);
+				stateView.setVisibility(View.GONE);
+				errorPanelView.setVisibility(View.VISIBLE);
+				errorPanelView.setState(ErrorPanelView.State.MESSAGE_WITH_RETRY);
 				break;
 		}
 	}

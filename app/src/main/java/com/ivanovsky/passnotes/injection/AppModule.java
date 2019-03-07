@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.data.repository.SettingsRepository;
 import com.ivanovsky.passnotes.domain.ClipboardHelper;
 import com.ivanovsky.passnotes.domain.PermissionHelper;
 import com.ivanovsky.passnotes.domain.ResourceHelper;
+import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus;
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor;
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor;
@@ -129,5 +130,11 @@ public class AppModule {
 	@Singleton
 	ResourceHelper providerResourceHelper() {
 		return new ResourceHelper(context);
+	}
+
+	@Provides
+	@Singleton
+	GlobalSnackbarBus provideGlobalSnackbarBus() {
+		return new GlobalSnackbarBus();
 	}
 }

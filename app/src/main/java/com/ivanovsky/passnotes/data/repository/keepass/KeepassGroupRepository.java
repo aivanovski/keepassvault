@@ -26,10 +26,9 @@ public class KeepassGroupRepository implements GroupRepository {
 		OperationResult<Boolean> result = new OperationResult<>();
 
 		OperationResult<UUID> insertResult = dao.insert(group);
-		if (insertResult.getResult() != null) {
-			group.setUid(insertResult.getResult());
-			result.setResult(true);
-
+		if (insertResult.getObj() != null) {
+			group.setUid(insertResult.getObj());
+			result.setObj(true);
 		} else {
 			result.setError(insertResult.getError());
 		}

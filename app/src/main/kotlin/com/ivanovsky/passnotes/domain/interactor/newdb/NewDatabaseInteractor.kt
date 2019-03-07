@@ -50,7 +50,7 @@ open class NewDatabaseInteractor(private val dbRepository: EncryptedDatabaseRepo
 
 					Injector.getInstance().createEncryptedDatabaseComponent(db)
 
-					result.result = true
+					result.obj = true
 				} catch (e: EncryptedDatabaseException) {
 					Logger.printStackTrace(e)
 

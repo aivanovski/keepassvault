@@ -45,8 +45,8 @@ class NotesPresenter(private val groupUid: UUID,
 	}
 
 	private fun onNotesLoadedResult(result: OperationResult<List<Note>>) {
-		if (result.result != null) {
-			val notes = result.result
+		if (result.isSucceededOrDeferred) {
+			val notes = result.obj
 
 			if (notes.isNotEmpty()) {
 				view.showNotes(notes)

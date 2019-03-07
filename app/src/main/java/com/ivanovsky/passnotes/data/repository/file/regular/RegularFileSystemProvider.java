@@ -48,7 +48,7 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 						}
 					}
 
-					result.setResult(files);
+					result.setObj(files);
 				} catch (SecurityException e) {
 					result.setError(newFileAccessError(OperationError.MESSAGE_FILE_ACCESS_IS_FORBIDDEN, e));
 				}
@@ -71,7 +71,7 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 			File parentFile = file.getParentFile();
 
 			if (parentFile != null) {
-				result.setResult(FileDescriptor.fromRegularFile(parentFile));
+				result.setObj(FileDescriptor.fromRegularFile(parentFile));
 			} else {
 				result.setError(newGenericIOError(OperationError.MESSAGE_FILE_DOES_NOT_EXIST));
 			}
@@ -88,7 +88,7 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 
 		File root = new File("/");
 		if (root.exists()) {
-			result.setResult(FileDescriptor.fromRegularFile(root));
+			result.setObj(FileDescriptor.fromRegularFile(root));
 		} else {
 			result.setError(newGenericIOError(OperationError.MESSAGE_FILE_NOT_FOUND));
 		}
@@ -125,5 +125,10 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 	@Override
 	public boolean exists(FileDescriptor file) throws FileSystemException {
 		return new File(file.getPath()).exists();
+	}
+
+	@Override
+	public void sync() {
+
 	}
 }

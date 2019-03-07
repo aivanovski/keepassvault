@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.ivanovsky.passnotes.R;
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView;
@@ -226,6 +227,24 @@ public abstract class BaseFragment extends Fragment {
 
 	public void showSnackbar(String message) {
 		Snackbar.make(rootLayout, message, Snackbar.LENGTH_SHORT)
+				.show();
+	}
+
+	public void showSnackbar(SnackbarMessage message) {
+		Snackbar snackbar;
+
+		if (message.isDisplayOkButton()) {
+			snackbar = Snackbar.make(rootLayout, message.getMessage(), Snackbar.LENGTH_INDEFINITE);
+			snackbar.setAction(R.string.ok, view -> snackbar.dismiss());
+		} else {
+			snackbar = Snackbar.make(rootLayout, message.getMessage(), Snackbar.LENGTH_SHORT);
+		}
+
+		snackbar.show();
+	}
+
+	public void showToast(String message) {
+		Toast.makeText(getContext(), message, Toast.LENGTH_SHORT)
 				.show();
 	}
 }

@@ -8,6 +8,7 @@ import java.util.Locale;
 
 public class LocaleUtils {
 
+	@SuppressWarnings("deprecation")
 	@NonNull
 	public static Locale getSystemLocale(@NonNull Context context) {
 		Locale result;

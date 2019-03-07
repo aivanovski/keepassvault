@@ -84,8 +84,8 @@ class FilePickerPresenter(private val mode: Mode,
 	}
 
 	private fun onFilesLoaded(dir: FileDescriptor, result: OperationResult<List<FileDescriptor>>) {
-		if (result.result != null) {
-			val unsortedFiles = result.result
+		if (result.isSucceededOrDeferred) {
+			val unsortedFiles = result.obj
 
 			if (!dir.isRoot && isBrowsingEnabled) {
 				scope.launch(Dispatchers.IO) {
@@ -118,8 +118,8 @@ class FilePickerPresenter(private val mode: Mode,
 	}
 
 	private fun onParentLoaded(unsortedFiles: List<FileDescriptor>, result: OperationResult<FileDescriptor>) {
-		if (result.result != null) {
-			val parent = result.result
+		if (result.isSucceededOrDeferred) {
+			val parent = result.obj
 
 			val sortedFiles = sortFiles(unsortedFiles).toMutableList()
 			sortedFiles.add(0, parent)

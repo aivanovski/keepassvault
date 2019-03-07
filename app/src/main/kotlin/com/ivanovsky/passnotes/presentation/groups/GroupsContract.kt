@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.presentation.groups
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.presentation.core.BasePresenter
 import com.ivanovsky.passnotes.presentation.core.BaseView
+import com.ivanovsky.passnotes.presentation.core.GlobalSnackbarPresenter
 
 class GroupsContract {
 
@@ -15,7 +16,7 @@ class GroupsContract {
 		fun showError(message: String)
 	}
 
-	interface Presenter: BasePresenter {
+	interface Presenter: BasePresenter, GlobalSnackbarPresenter {
 		fun loadData()
 		fun onGroupClicked(group: Group)
 	}

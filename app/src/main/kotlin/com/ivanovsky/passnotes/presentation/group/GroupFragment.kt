@@ -5,7 +5,9 @@ import android.os.Bundle
 import android.view.*
 import android.widget.EditText
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.presentation.Screen
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.presentation.core.SnackbarMessage
 import com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput
 
 class GroupFragment: BaseFragment(), GroupContract.View {
@@ -51,6 +53,10 @@ class GroupFragment: BaseFragment(), GroupContract.View {
 				Observer { finishScreen() })
 		presenter.hideKeyboardAction.observe(this,
 				Observer { hideKeyboard() })
+		presenter.snackbarMessageAction.observe(this,
+				Observer { message -> showSnackbar(SnackbarMessage(message))})
+		presenter.globalSnackbarMessageAction.observe(this, Screen.GROUP,
+				Observer { message -> showSnackbar(message) })
 
 		return view
 	}

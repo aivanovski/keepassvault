@@ -12,25 +12,25 @@ class GroupsInteractor(private val groupRepository: GroupRepository,
 	fun getAllGroupsWithNoteCount(): OperationResult<List<Pair<Group, Int>>> {
 		val result: OperationResult<List<Pair<Group, Int>>>
 
-		val groups = groupRepository.allGroup
-		if (groups.result != null) {
-			result = createGroupToNoteCountPairs(groups)
+		val groupsResult = groupRepository.allGroup
+		if (groupsResult.isSucceededOrDeferred) {
+			result = createGroupToNoteCountPairs(groupsResult.obj)
 		} else {
-			result = OperationResult.error(groups.error)
+			result = OperationResult.error(groupsResult.error)
 		}
 
 		return result
 	}
 
-	private fun createGroupToNoteCountPairs(groupsResult: OperationResult<List<Group>>): OperationResult<List<Pair<Group, Int>>> {
+	private fun createGroupToNoteCountPairs(groups: List<Group>): OperationResult<List<Pair<Group, Int>>> {
 		val pairs = mutableListOf<Pair<Group, Int>>()
 		var error: OperationError? = null
 
-		for (group in groupsResult.result) {
+		for (group in groups) {
 			val noteCountResult = noteRepository.getNoteCountByGroupUid(group.uid)
 
-			if (noteCountResult.result != null) {
-				pairs.add(Pair(group, noteCountResult.result))
+			if (noteCountResult.isSucceededOrDeferred) {
+				pairs.add(Pair(group, noteCountResult.obj))
 			} else {
 				error = noteCountResult.error
 				break

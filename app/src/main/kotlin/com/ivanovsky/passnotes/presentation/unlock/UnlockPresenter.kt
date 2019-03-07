@@ -75,8 +75,8 @@ class UnlockPresenter(private val context: Context,
 
 	private fun onGetRecentlyOpenedFilesResult(result: OperationResult<List<FileDescriptor>>,
 	                                           selectedFile: FileDescriptor?) {
-		if (result.isSuccessful) {
-			val files = result.result
+		if (result.isSucceededOrDeferred) {
+			val files = result.obj
 			if (files.isNotEmpty()) {
 				recentlyUsedFiles.value = files
 
@@ -117,7 +117,7 @@ class UnlockPresenter(private val context: Context,
 	}
 
 	private fun onOpenDatabaseResult(result: OperationResult<Boolean>) {
-		if (result.result != null) {
+		if (result.isSucceededOrDeferred) {
 			showGroupsScreenAction.call()
 			screenState.value = ScreenState.data()
 		} else {
@@ -162,7 +162,7 @@ class UnlockPresenter(private val context: Context,
 	}
 
 	private fun onPickedFileSaved(result: OperationResult<Boolean>, file: FileDescriptor) {
-		if (result.isSuccessful) {
+		if (result.isSucceededOrDeferred) {
 			loadData(file)
 
 		} else {

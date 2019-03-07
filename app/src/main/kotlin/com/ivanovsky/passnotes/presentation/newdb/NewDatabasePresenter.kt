@@ -71,8 +71,8 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 	}
 
 	fun onCreateDatabaseResult(result: OperationResult<Boolean>) {
-		if (result.isSuccessful) {
-			val created = result.result
+		if (result.isSucceededOrDeferred) {
+			val created = result.obj
 
 			if (created) {
 				showGroupsScreenAction.call()

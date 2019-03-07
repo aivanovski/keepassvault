@@ -162,7 +162,7 @@ public class KeepassNoteDao implements NoteDao {
 
 				try {
 					db.commit();
-					result.setResult(newEntry.getUuid());
+					result.setObj(newEntry.getUuid());
 				} catch (EncryptedDatabaseException e) {
 					Logger.printStackTrace(e);
 
@@ -208,7 +208,7 @@ public class KeepassNoteDao implements NoteDao {
 				entry -> entry.getUuid().equals(noteUid),
 				true);
 		if (entries.size() != 0) {
-			result.setResult(createNoteFromEntry(entries.get(0)));
+			result.setObj(createNoteFromEntry(entries.get(0)));
 		} else {
 			result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_FIND_NOTE));
 		}

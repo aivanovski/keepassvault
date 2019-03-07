@@ -61,9 +61,9 @@ class UnlockInteractor(private val fileRepository: UsedFileRepository,
 			fileRepository.insert(file)
 			observerBus.notifyUsedFileDataSetChanged()
 
-			result.result = true
+			result.obj = true
 		} else {
-			result.result = false
+			result.obj = false
 			result.error = newDbError(MESSAGE_RECORD_IS_ALREADY_EXISTS)
 		}
 

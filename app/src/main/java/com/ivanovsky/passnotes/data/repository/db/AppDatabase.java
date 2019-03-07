@@ -9,7 +9,10 @@ import com.ivanovsky.passnotes.data.repository.db.dao.DropboxFileLinkDao;
 import com.ivanovsky.passnotes.data.repository.db.dao.UsedFileDao;
 import com.ivanovsky.passnotes.data.entity.UsedFile;
 
-@Database(entities = { UsedFile.class, DropboxFileLink.class }, version = 1)
+//TODO: param exportSchema should be true, this should be fixed before release
+@Database(entities = { UsedFile.class, DropboxFileLink.class },
+		version = 1,
+		exportSchema = false)
 @TypeConverters(UsedFile.FSTypeConverter.class)
 public abstract class AppDatabase extends RoomDatabase {
 

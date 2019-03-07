@@ -4,6 +4,8 @@ import android.content.Context
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus
+import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarMessageLiveAction
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.injection.Injector
@@ -24,16 +26,22 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 	@Inject
 	lateinit var observerBus: ObserverBus
 
+	@Inject
+	lateinit var globalSnackbarBus: GlobalSnackbarBus
+
+	override val globalSnackbarMessageAction: GlobalSnackbarMessageLiveAction
+
 	private val scope = CoroutineScope(Dispatchers.IO)
+
+	init {
+		Injector.getInstance().encryptedDatabaseComponent.inject(this)
+		globalSnackbarMessageAction = globalSnackbarBus.messageAction
+	}
 
 	override fun start() {
 		view.setState(FragmentState.LOADING)
 		observerBus.register(this)
 		loadData()
-	}
-
-	init {
-		Injector.getInstance().encryptedDatabaseComponent.inject(this)
 	}
 
 	override fun stop() {
@@ -51,8 +59,8 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 	}
 
 	private fun onGroupsLoaded(result: OperationResult<List<Pair<Group, Int>>>) {
-		if (result.isSuccessful) {
-			val groupsAndCounts = result.result
+		if (result.isSucceededOrDeferred) {
+			val groupsAndCounts = result.obj
 
 			if (groupsAndCounts.isNotEmpty()) {
 				view.showGroups(groupsAndCounts)

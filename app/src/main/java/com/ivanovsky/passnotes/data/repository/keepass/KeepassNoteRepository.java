@@ -26,8 +26,8 @@ public class KeepassNoteRepository implements NoteRepository {
 		OperationResult<Integer> result = new OperationResult<>();
 
 		OperationResult<List<Note>> getNotesResult = dao.getNotesByGroupUid(groupUid);
-		if (getNotesResult.getResult() != null) {
-			result.setResult(getNotesResult.getResult().size());
+		if (getNotesResult.getObj() != null) {
+			result.setObj(getNotesResult.getObj().size());
 		} else {
 			result.setError(getNotesResult.getError());
 		}
@@ -39,8 +39,8 @@ public class KeepassNoteRepository implements NoteRepository {
 	public OperationResult<UUID> insert(Note note) {
 		OperationResult<UUID> result = dao.insert(note);
 
-		if (result.getResult() != null) {
-			note.setUid(result.getResult());
+		if (result.getObj() != null) {
+			note.setUid(result.getObj());
 		}
 
 		return result;

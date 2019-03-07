@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.keepass;
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
+import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.file.RemoteFileOutputStream;
@@ -95,7 +96,9 @@ public class KeepassDatabase implements EncryptedDatabase {
 	}
 
 	@Override
-	public void commit() throws EncryptedDatabaseException {
+	public OperationResult<Boolean> commit() throws EncryptedDatabaseException {
+		OperationResult<Boolean> result = new OperationResult<>();
+
 		FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsType());
 
 		Credentials credentials = new KdbxCreds(key);
@@ -127,6 +130,8 @@ public class KeepassDatabase implements EncryptedDatabase {
 		} catch (FileSystemException e) {
 			throw new EncryptedDatabaseException(e);
 		}
+
+		return null;
 	}
 
 	public SimpleDatabase getKeepassDatabase() {

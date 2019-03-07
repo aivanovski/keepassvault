@@ -11,7 +11,6 @@ import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.ivanovsky.passnotes.App;
-import com.ivanovsky.passnotes.BuildConfig;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
@@ -61,7 +60,6 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 	private static final String ERROR_INCORRECT_FILE_PATH = "Incorrect file path";
 	private static final String ERROR_FAILED_TO_FIND_FILE = "Failed to find file: %s";
 
-
 	private final DropboxAuthenticator authenticator;
 	private final DropboxFileLinkRepository dropboxLinkRepository;
 	private DbxClientV2 client;
@@ -107,7 +105,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 							}
 						}
 
-						result.setResult(files);
+						result.setObj(files);
 					} else {
 						result.setError(newGenericIOError(OperationError.MESSAGE_FAILED_TO_LOAD_FILE));
 					}
@@ -184,12 +182,12 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 			String parentPath = getParentPath(file.getPath());
 			if (parentPath != null) {
 				if ("/".equals(parentPath)) {
-					result.setResult(makeRootDescriptor());
+					result.setObj(makeRootDescriptor());
 				} else {
 					try {
 						Metadata metadata = client.files().getMetadata(formatDropboxPath(parentPath));
 						if (metadata instanceof FolderMetadata) {
-							result.setResult(createDescriptorFromFolderMetadata((FolderMetadata) metadata));
+							result.setObj(createDescriptorFromFolderMetadata((FolderMetadata) metadata));
 						} else {
 							result.setError(newGenericIOError(OperationError.MESSAGE_FAILED_TO_LOAD_FILE));
 						}
@@ -226,7 +224,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 			try {
 				ListFolderResult remoteFiles = client.files().listFolder("");
 				if (remoteFiles != null) {
-					result.setResult(makeRootDescriptor());
+					result.setObj(makeRootDescriptor());
 				} else {
 					result.setError(newGenericIOError(OperationError.MESSAGE_FAILED_TO_LOAD_FILE));
 				}
@@ -578,5 +576,9 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		}
 
 		return result;
+	}
+
+	@Override
+	public void sync() {
 	}
 }

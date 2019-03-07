@@ -49,8 +49,8 @@ class NotePresenter(private var context: Context,
 	}
 
 	private fun onNoteLoaded(result: OperationResult<Note>) {
-		if (result.result != null) {
-			view.showNote(result.result)
+		if (result.isSucceededOrDeferred) {
+			view.showNote(result.obj)
 			view.setState(FragmentState.DISPLAYING_DATA)
 		} else {
 			view.showError(errorInteractor.processAndGetMessage(result.error))

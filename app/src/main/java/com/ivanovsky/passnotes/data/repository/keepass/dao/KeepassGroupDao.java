@@ -72,7 +72,7 @@ public class KeepassGroupDao implements GroupDao {
 			if (newGroup.getUuid() != null) {
 				try {
 					db.commit();
-					result.setResult(newGroup.getUuid());
+					result.setObj(newGroup.getUuid());
 				} catch (EncryptedDatabaseException e) {
 					Logger.printStackTrace(e);
 

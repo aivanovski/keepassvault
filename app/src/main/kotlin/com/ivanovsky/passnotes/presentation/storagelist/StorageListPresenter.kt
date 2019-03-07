@@ -123,8 +123,8 @@ class StorageListPresenter(private val action: Action) :
 	}
 
 	private fun onDropboxRootLoaded(result: OperationResult<FileDescriptor>) {
-		if (result.result != null) {
-			val rootFile = result.result
+		if (result.isSucceededOrDeferred) {
+			val rootFile = result.obj
 			showFilePickerScreenAction.call(FilePickerArgs(rootFile, action, true))
 
 		} else {

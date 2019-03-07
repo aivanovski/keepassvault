@@ -5,10 +5,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.presentation.Screen
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.group.GroupActivity
@@ -53,6 +55,9 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 		recyclerView.adapter = adapter
 
 		fab.setOnClickListener { showNewGroupScreen() }
+
+		presenter.globalSnackbarMessageAction.observe(this, Screen.GROUPS,
+				Observer { message -> showSnackbar(message) })
 
 		return view
 	}

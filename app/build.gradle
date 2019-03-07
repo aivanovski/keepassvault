@@ -140,8 +140,9 @@ dependencies {
 
 	// Kotlin
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$compiler.kotlin"
-	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutineVersion"
 	implementation "org.jetbrains.kotlin:kotlin-reflect:$compiler.kotlin"
+	implementation "org.jetbrains.anko:anko-coroutines:$ankoVersion"
+	implementation "org.jetbrains.anko:anko-commons:$ankoVersion"
 
 	// KeePassJava2
 	implementation project(':libs:KeePassJava2-database')

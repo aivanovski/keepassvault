@@ -16,6 +16,7 @@ public class OperationError {
 	public static final String MESSAGE_IO_ERROR = "IO error";
 	public static final String MESSAGE_RECORD_IS_ALREADY_EXISTS = "Record is already exists";
 	public static final String MESSAGE_FILE_IS_ALREADY_EXISTS = "File is already exists";
+	public static final String MESSAGE_FAILED_TO_OPEN_DB_FILE = "Failed to open DB file";
 
 	private Type type;
 	private String message;

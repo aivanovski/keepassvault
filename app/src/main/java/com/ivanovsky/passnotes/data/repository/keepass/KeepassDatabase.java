@@ -67,7 +67,9 @@ public class KeepassDatabase implements EncryptedDatabase {
 		try {
 			in = provider.openFileForRead(file);
 			result = SimpleDatabase.load(credentials, in);
-
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+			throw new EncryptedDatabaseException(e);
 		} catch (Exception e) {
 			Logger.printStackTrace(e);
 			throw new EncryptedDatabaseException(e);

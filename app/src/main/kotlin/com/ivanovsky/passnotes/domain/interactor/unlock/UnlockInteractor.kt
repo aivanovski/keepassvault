@@ -2,13 +2,16 @@ package com.ivanovsky.passnotes.domain.interactor.unlock
 
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.*
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
+import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.util.Logger
 
 class UnlockInteractor(private val fileRepository: UsedFileRepository,
                        private val dbRepository: EncryptedDatabaseRepository,
@@ -35,8 +38,26 @@ class UnlockInteractor(private val fileRepository: UsedFileRepository,
 	}
 
 	fun openDatabase(key: KeepassDatabaseKey, file: FileDescriptor): OperationResult<Boolean> {
-		val db = dbRepository.open(key, file)
+		val result = OperationResult<Boolean>()
 
+		try {
+			val db = dbRepository.open(key, file)
+
+			updateFileAccessTime(file)
+
+			Injector.getInstance().createEncryptedDatabaseComponent(db)
+
+			result.obj = true
+		} catch (e: EncryptedDatabaseException) {
+			Logger.printStackTrace(e)
+
+			result.error = newDbError(OperationError.MESSAGE_FAILED_TO_OPEN_DB_FILE)
+		}
+
+		return result
+	}
+
+	private fun updateFileAccessTime(file: FileDescriptor) {
 		val usedFile = fileRepository.findByUidAndFsType(file.uid, file.fsType)
 		if (usedFile != null) {
 			usedFile.lastAccessTime = System.currentTimeMillis()
@@ -44,11 +65,7 @@ class UnlockInteractor(private val fileRepository: UsedFileRepository,
 			fileRepository.update(usedFile)
 
 			observerBus.notifyUsedFileDataSetChanged()
-
-			Injector.getInstance().createEncryptedDatabaseComponent(db)
 		}
-
-		return OperationResult.success(true)
 	}
 
 	fun saveUsedFileWithoutAccessTime(file: UsedFile): OperationResult<Boolean> {

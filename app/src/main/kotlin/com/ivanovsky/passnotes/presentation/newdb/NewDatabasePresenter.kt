@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import android.content.Context
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -12,6 +11,7 @@ import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
+import com.ivanovsky.passnotes.util.COROUTINE_EXCEPTION_HANDLER
 import com.ivanovsky.passnotes.util.FileUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -34,8 +34,8 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 	override val showGroupsScreenAction = SingleLiveAction<Void>()
 	override val showStorageScreenAction = SingleLiveAction<Void>()
 	override val hideKeyboardAction = SingleLiveAction<Void>()
-	var selectedStorageDir: FileDescriptor? = null
-	private val scope = CoroutineScope(Dispatchers.IO)
+	private var selectedStorageDir: FileDescriptor? = null
+	private val scope = CoroutineScope(Dispatchers.Main + COROUTINE_EXCEPTION_HANDLER)
 
 	init {
 		Injector.getInstance().appComponent.inject(this)
@@ -57,33 +57,29 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 			val dbKey = KeepassDatabaseKey(password)
 			val dbFile = FileDescriptor.fromParent(selectedStorageDir, "$filename.kdbx")
 
-			scope.launch(Dispatchers.IO) {
-				val result = interactor.createNewDatabaseAndOpen(dbKey, dbFile)
+			scope.launch {
+				val result = withContext(Dispatchers.Default) {
+					interactor.createNewDatabaseAndOpen(dbKey, dbFile)
+				}
 
-				withContext(Dispatchers.Main) {
-					onCreateDatabaseResult(result)
+				if (result.isSucceededOrDeferred) {
+					val created = result.obj
+
+					if (created) {
+						showGroupsScreenAction.call()
+					} else {
+						screenState.value = ScreenState.dataWithError(context.getString(R.string.error_was_occurred))
+						doneButtonVisibility.value = true
+					}
+				} else {
+					val message = errorInteractor.processAndGetMessage(result.error)
+					screenState.value = ScreenState.dataWithError(message)
+					doneButtonVisibility.value = true
 				}
 			}
 
 		} else {
 			screenState.value = ScreenState.dataWithError(context.getString(R.string.storage_is_not_selected))
-		}
-	}
-
-	fun onCreateDatabaseResult(result: OperationResult<Boolean>) {
-		if (result.isSucceededOrDeferred) {
-			val created = result.obj
-
-			if (created) {
-				showGroupsScreenAction.call()
-			} else {
-				screenState.value = ScreenState.dataWithError(context.getString(R.string.error_was_occurred))
-				doneButtonVisibility.value = true
-			}
-		} else {
-			val message = errorInteractor.processAndGetMessage(result.error)
-			screenState.value = ScreenState.dataWithError(message)
-			doneButtonVisibility.value = true
 		}
 	}
 

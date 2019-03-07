@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
+import com.ivanovsky.passnotes.util.COROUTINE_EXCEPTION_HANDLER
 import com.ivanovsky.passnotes.util.formatAccordingSystemLocale
 import kotlinx.coroutines.*
 import java.util.*
@@ -46,7 +47,7 @@ class FilePickerPresenter(private val mode: Mode,
 	private var isPermissionRejected = false
 	private var currentDir = rootFile
 	private lateinit var files: List<FileDescriptor>
-	private val scope = CoroutineScope(Dispatchers.IO)
+	private val scope = CoroutineScope(Dispatchers.Main + COROUTINE_EXCEPTION_HANDLER)
 
 	companion object {
 		private const val SDCARD_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -71,12 +72,12 @@ class FilePickerPresenter(private val mode: Mode,
 
 		//TODO: app doesnt need permission for private storage and network storage
 		if (permissionHelper.isPermissionGranted(SDCARD_PERMISSION)) {
-			scope.launch(Dispatchers.IO) {
-				val files = interactor.getFileList(currentDir)
-
-				withContext(Dispatchers.Main) {
-					onFilesLoaded(currentDir, files)
+			scope.launch {
+				val files = withContext(Dispatchers.Default) {
+					interactor.getFileList(currentDir)
 				}
+
+				onFilesLoaded(currentDir, files)
 			}
 		} else {
 			requestPermissionAction.call(SDCARD_PERMISSION)
@@ -88,12 +89,12 @@ class FilePickerPresenter(private val mode: Mode,
 			val unsortedFiles = result.obj
 
 			if (!dir.isRoot && isBrowsingEnabled) {
-				scope.launch(Dispatchers.IO) {
-					val parent = interactor.getParent(currentDir)
-
-					withContext(Dispatchers.Main) {
-						onParentLoaded(unsortedFiles, parent)
+				scope.launch {
+					val parent = withContext(Dispatchers.Default) {
+						interactor.getParent(currentDir)
 					}
+
+					onParentLoaded(unsortedFiles, parent)
 				}
 
 			} else {

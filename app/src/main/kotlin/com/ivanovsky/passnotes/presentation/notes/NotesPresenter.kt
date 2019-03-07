@@ -1,10 +1,9 @@
 package com.ivanovsky.passnotes.presentation.notes
 
-import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor
 import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.util.COROUTINE_EXCEPTION_HANDLER
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,7 +20,7 @@ class NotesPresenter(private val groupUid: UUID,
 	@Inject
 	lateinit var errorInteractor: ErrorInteractor
 
-	private val scope = CoroutineScope(Dispatchers.IO)
+	private val scope = CoroutineScope(Dispatchers.Main + COROUTINE_EXCEPTION_HANDLER)
 
 	init {
 		Injector.getInstance().encryptedDatabaseComponent.inject(this)
@@ -35,26 +34,22 @@ class NotesPresenter(private val groupUid: UUID,
 	}
 
 	override fun loadData() {
-		scope.launch(Dispatchers.IO) {
-			val notes = interactor.getNotesByGroupUid(groupUid)
-
-			withContext(Dispatchers.Main) {
-				onNotesLoadedResult(notes)
+		scope.launch {
+			val result = withContext(Dispatchers.Main) {
+				interactor.getNotesByGroupUid(groupUid)
 			}
-		}
-	}
 
-	private fun onNotesLoadedResult(result: OperationResult<List<Note>>) {
-		if (result.isSucceededOrDeferred) {
-			val notes = result.obj
+			if (result.isSucceededOrDeferred) {
+				val notes = result.obj
 
-			if (notes.isNotEmpty()) {
-				view.showNotes(notes)
+				if (notes.isNotEmpty()) {
+					view.showNotes(notes)
+				} else {
+					view.showNotItems()
+				}
 			} else {
-				view.showNotItems()
+				view.showError(errorInteractor.processAndGetMessage(result.error))
 			}
-		} else {
-			view.showError(errorInteractor.processAndGetMessage(result.error))
 		}
 	}
 }

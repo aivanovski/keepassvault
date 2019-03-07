@@ -3,20 +3,16 @@ package com.ivanovsky.passnotes.presentation.group
 import androidx.lifecycle.MutableLiveData
 import android.content.Context
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.Group
-import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarMessageLiveAction
-import com.ivanovsky.passnotes.domain.globalsnackbar.SnackbarReceiverFilter.Companion.allExceptCurrentScreen
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
+import com.ivanovsky.passnotes.domain.interactor.ErrorResolution
 import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor
 import com.ivanovsky.passnotes.injection.Injector
-import com.ivanovsky.passnotes.presentation.Screen
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.SnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
-import com.ivanovsky.passnotes.util.COROUTINE_HANDLER
+import com.ivanovsky.passnotes.util.COROUTINE_EXCEPTION_HANDLER
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
@@ -39,7 +35,7 @@ class GroupPresenter(private val context: Context) : GroupContract.Presenter {
 	override val snackbarMessageAction = SingleLiveAction<String>()
 	override val globalSnackbarMessageAction: GlobalSnackbarMessageLiveAction
 
-	private val scope = CoroutineScope(Dispatchers.Main + COROUTINE_HANDLER)
+	private val scope = CoroutineScope(Dispatchers.Main + COROUTINE_EXCEPTION_HANDLER)
 
 	init {
 		Injector.getInstance().encryptedDatabaseComponent.inject(this)
@@ -68,30 +64,26 @@ class GroupPresenter(private val context: Context) : GroupContract.Presenter {
 			screenState.value = ScreenState.loading()
 
 			scope.launch {
-				val result = withContext(Dispatchers.IO) { interactor.createNewGroup(trimmedTitle) }
-				onCreateGroupResult(result)
+				val result = withContext(Dispatchers.Default) {
+					interactor.createNewGroup(trimmedTitle)
+				}
+
+				if (result.isSucceeded) {
+					finishScreenAction.call()
+				} else {
+					doneButtonVisibility.value = true
+
+					val processedError = errorInteractor.process(result.error)
+					if (processedError.resolution == ErrorResolution.RETRY) {
+						//TODO: implement retry state
+						screenState.value = ScreenState.dataWithError("Test")
+					} else {
+						screenState.value = ScreenState.dataWithError(processedError.message)
+					}
+				}
 			}
 		} else {
 			titleEditTextError.value = context.getString(R.string.empty_field)
-		}
-	}
-
-	private fun onCreateGroupResult(result: OperationResult<Group>) {
-		val message = SnackbarMessage("Hello from hell!", true)
-//		val filterableMessage = FilterableSnackbarMessage(message, allExceptCurrentScreen(Screen.GROUP))
-//		globalSnackbarMessageAction.call(filterableMessage)
-
-		globalSnackbarBus.send(message, allExceptCurrentScreen(Screen.GROUP))
-
-		if (result.isSucceeded) {
-			finishScreenAction.call()
-		} else if (result.isSucceeded) {
-			snackbarMessageAction.call(context.getString(R.string.offline_modification_message))
-			finishScreenAction.call()
-		} else {
-			val message = errorInteractor.processAndGetMessage(result.error)
-			doneButtonVisibility.value = true
-			screenState.value = ScreenState.dataWithError(message)
 		}
 	}
 }

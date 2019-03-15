@@ -1,12 +1,9 @@
 package com.ivanovsky.passnotes.data.repository.keepass.dao;
 
-import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
-import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
 import com.ivanovsky.passnotes.data.entity.Group;
-import com.ivanovsky.passnotes.util.Logger;
 
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
@@ -70,19 +67,21 @@ public class KeepassGroupDao implements GroupDao {
 			rootGroup.addGroup(newGroup);
 
 			if (newGroup.getUuid() != null) {
-				try {
-					db.commit();
-					result.setObj(newGroup.getUuid());
-				} catch (EncryptedDatabaseException e) {
-					Logger.printStackTrace(e);
+				OperationResult<Boolean> commitResult = db.commit();
 
-					keepassDb.deleteGroup(newGroup.getUuid());
-
-					if (e.getError() != null) {
-						result.setError(e.getError());
-					} else {
-						result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_COMMIT));
-					}
+				switch (commitResult.getStatus()) {
+					case DEFERRED:
+						result.setDeferredObj(newGroup.getUuid());
+						break;
+					case SUCCEEDED:
+						result.setObj(newGroup.getUuid());
+						break;
+					case FAILED:
+						keepassDb.deleteGroup(newGroup.getUuid());
+						result.setError(commitResult.getError());
+						break;
+					default:
+						throw new IllegalArgumentException("Status handling is not implementing");
 				}
 			}
 		}

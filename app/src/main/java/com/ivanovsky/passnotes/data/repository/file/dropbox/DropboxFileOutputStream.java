@@ -49,7 +49,7 @@ public class DropboxFileOutputStream extends RemoteFileOutputStream {
 			link.incrementRetryCount();
 			link.setLastRetryTimestamp(System.currentTimeMillis());
 
-			provider.onFileUploadFinished(link);
+//			provider.onFileUploadFinished(link); // TODO: uncomment
 
 			throw new IOException(e);
 		}
@@ -65,7 +65,7 @@ public class DropboxFileOutputStream extends RemoteFileOutputStream {
 			link.incrementRetryCount();
 			link.setLastRetryTimestamp(System.currentTimeMillis());
 
-			provider.onFileUploadFinished(link);
+//			provider.onFileUploadFinished(link); // TODO: uncomment
 
 			throw new IOException(e);
 		}
@@ -112,7 +112,7 @@ public class DropboxFileOutputStream extends RemoteFileOutputStream {
 			throw new IOException(e);
 
 		} finally {
-			provider.onFileUploadFinished(link);
+//			provider.onFileUploadFinished(link); // TODO: uncomment
 		}
 	}
 

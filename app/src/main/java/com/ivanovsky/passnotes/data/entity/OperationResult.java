@@ -39,12 +39,22 @@ public class OperationResult<T> {
 		this.obj = obj;
 	}
 
+	public void setDeferredObj(T obj) {
+		this.obj = obj;
+		deferred = true;
+	}
+
 	public void setError(OperationError error) {
 		this.error = error;
 	}
 
 	public T getObj() {
 		return obj;
+	}
+
+	public void copyObjFrom(OperationResult<T> src) {
+		this.obj = src.obj;
+		this.deferred = src.deferred;
 	}
 
 	public OperationError getError() {

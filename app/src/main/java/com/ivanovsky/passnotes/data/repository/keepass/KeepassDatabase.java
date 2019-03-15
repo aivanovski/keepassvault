@@ -2,11 +2,10 @@ package com.ivanovsky.passnotes.data.repository.keepass;
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.repository.encdb.exception.FailedToWriteDBException;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.file.RemoteFileOutputStream;
-import com.ivanovsky.passnotes.data.repository.file.exception.FileSystemException;
-import com.ivanovsky.passnotes.data.repository.file.exception.IOFileSystemException;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassGroupDao;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
@@ -38,16 +37,16 @@ public class KeepassDatabase implements EncryptedDatabase {
 	FileSystemResolver fileSystemResolver;
 
 	private final byte[] key;
+	private final FileDescriptor file;
 	private final KeepassGroupRepository groupRepository;
 	private final KeepassNoteRepository noteRepository;
 	private final SimpleDatabase db;
-	private final FileDescriptor file;
 
-	public KeepassDatabase(FileDescriptor file, byte[] key) throws EncryptedDatabaseException {
+	public KeepassDatabase(FileDescriptor file, InputStream in, byte[] key) throws EncryptedDatabaseException {
 		Injector.getInstance().getAppComponent().inject(this);
 
-		this.db = readDatabaseFile(file, key);
 		this.file = file;
+		this.db = readDatabaseFile(in, key);
 		this.key = key;
 		this.groupRepository = new KeepassGroupRepository(new KeepassGroupDao(this));
 		this.noteRepository = new KeepassNoteRepository(new KeepassNoteDao(this));
@@ -55,21 +54,20 @@ public class KeepassDatabase implements EncryptedDatabase {
 		db.enableRecycleBin(false);
 	}
 
-	private SimpleDatabase readDatabaseFile(FileDescriptor file, byte[] key) throws EncryptedDatabaseException {
+	private SimpleDatabase readDatabaseFile(InputStream in, byte[] key) throws EncryptedDatabaseException {
 		SimpleDatabase result;
 
 		Credentials credentials = new KdbxCreds(key);
 
-		FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsType());
-
-		InputStream in = null;
-
 		try {
-			in = provider.openFileForRead(file);
 			result = SimpleDatabase.load(credentials, in);
 		} catch (IllegalStateException e) {
-			e.printStackTrace();
+			Logger.printStackTrace(e);
 			throw new EncryptedDatabaseException(e);
+
+		} catch (IOException e) {
+			throw new FailedToWriteDBException();
+
 		} catch (Exception e) {
 			Logger.printStackTrace(e);
 			throw new EncryptedDatabaseException(e);
@@ -79,6 +77,7 @@ public class KeepassDatabase implements EncryptedDatabase {
 				try {
 					in.close();
 				} catch (IOException e) {
+					// TODO: should be handled or not?
 					Logger.printStackTrace(e);
 				}
 			}
@@ -98,7 +97,7 @@ public class KeepassDatabase implements EncryptedDatabase {
 	}
 
 	@Override
-	public OperationResult<Boolean> commit() throws EncryptedDatabaseException {
+	public OperationResult<Boolean> commit() {
 		OperationResult<Boolean> result = new OperationResult<>();
 
 		FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsType());
@@ -109,31 +108,41 @@ public class KeepassDatabase implements EncryptedDatabase {
 
 		OutputStream out;
 		try {
-			out = provider.openFileForWrite(file);
+			OperationResult<OutputStream> outResult = provider.openFileForWrite(file);
 
-			//method 'SimpleDatabase.save' closes output stream after work is done
-			if (out instanceof RemoteFileOutputStream) {
-				RemoteFileOutputStream remoteOut = (RemoteFileOutputStream) out;
+			if (outResult.isSucceededOrDeferred()) {
+				out = outResult.getObj();
 
-				File localFile = remoteOut.getOutputFile();
+				// method 'SimpleDatabase.save' closes output stream after work is done
+				if (out instanceof RemoteFileOutputStream) {
+					RemoteFileOutputStream remoteOut = (RemoteFileOutputStream) out;
 
-				BufferedOutputStream localOut = new BufferedOutputStream(new FileOutputStream(localFile));
-				db.save(credentials, localOut);
+					File localFile = remoteOut.getOutputFile();
 
-				InputOutputUtils.copy(new FileInputStream(localFile), out, false);
+					BufferedOutputStream localOut = new BufferedOutputStream(new FileOutputStream(localFile));
+					db.save(credentials, localOut);
 
-				out.close();
+					InputOutputUtils.copy(new FileInputStream(localFile), out, false);
+
+					out.close();
+				} else {
+					db.save(credentials, out);
+				}
+
+				if (outResult.isDeferred()) {
+					result.setDeferredObj(true);
+				} else {
+					result.setObj(true);
+				}
 			} else {
-				db.save(credentials, out);
+				result.setError(outResult.getError());
 			}
-		} catch (IOException | IOFileSystemException e) {
-			throw new EncryptedDatabaseException(newNetworkIOError());
 
-		} catch (FileSystemException e) {
-			throw new EncryptedDatabaseException(e);
+		} catch (IOException e) {
+			result.setError(newNetworkIOError());
 		}
 
-		return null;
+		return result;
 	}
 
 	public SimpleDatabase getKeepassDatabase() {

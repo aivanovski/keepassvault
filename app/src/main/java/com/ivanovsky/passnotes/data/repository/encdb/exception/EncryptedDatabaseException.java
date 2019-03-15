@@ -6,6 +6,10 @@ public class EncryptedDatabaseException extends Exception {
 
 	private OperationError error;
 
+	public EncryptedDatabaseException(String message) {
+		super(message);
+	}
+
 	public EncryptedDatabaseException(Exception reason) {
 		super(reason);
 	}

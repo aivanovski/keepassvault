@@ -17,6 +17,8 @@ public class OperationError {
 	public static final String MESSAGE_RECORD_IS_ALREADY_EXISTS = "Record is already exists";
 	public static final String MESSAGE_FILE_IS_ALREADY_EXISTS = "File is already exists";
 	public static final String MESSAGE_FAILED_TO_OPEN_DB_FILE = "Failed to open DB file";
+	public static final String MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE = "Local version conflicts with remote";
+	public static final String MESSAGE_FAILED_TO_FIND_FILE = "Failed to find file";
 
 	private Type type;
 	private String message;
@@ -24,6 +26,12 @@ public class OperationError {
 
 	public static OperationError newDbError(String message) {
 		OperationError error = new OperationError(Type.DB_ERROR);
+		error.message = message;
+		return error;
+	}
+
+	public static OperationError newDbVersionConflictError(String message) {
+		OperationError error = new OperationError(Type.DB_VERSION_CONFLICT_ERROR);
 		error.message = message;
 		return error;
 	}
@@ -83,6 +91,7 @@ public class OperationError {
 		GENERIC_ERROR,
 		DB_AUTH_ERROR,
 		DB_ERROR,
+		DB_VERSION_CONFLICT_ERROR,// if user modified db
 		FILE_ACCESS_ERROR,
 		GENERIC_IO_ERROR,
 		AUTH_ERROR,

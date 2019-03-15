@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.data.repository.keepass;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
+import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
@@ -21,6 +22,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
+
 public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
 	private static final String TEMPLATE_DB_PATH = "default.kdbx";
@@ -35,22 +38,43 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 	}
 
 	@Override
-	public EncryptedDatabase open(EncryptedDatabaseKey key, FileDescriptor file)
-			throws EncryptedDatabaseException {
-		synchronized (this) {
-			if (db != null) {
-				close();
-			}
+	public OperationResult<EncryptedDatabase> open(EncryptedDatabaseKey key, FileDescriptor file) {
+		OperationResult<EncryptedDatabase> result = new OperationResult<>();
 
-			db = new KeepassDatabase(file, key.getKey());
+		if (db != null) {
+			close();
 		}
 
-		return db;
+		FileSystemProvider fsProvider = fileSystemResolver.resolveProvider(file.getFsType());
+
+		OperationResult<InputStream> inResult = fsProvider.openFileForRead(file);
+		if (inResult.isSucceededOrDeferred()) {
+			synchronized (this) {
+				InputStream in = inResult.getObj();
+
+				try {
+					db = new KeepassDatabase(file, in, key.getKey());
+
+					if (inResult.isDeferred()) {
+						result.setDeferredObj(db);
+					} else {
+						result.setObj(db);
+					}
+				} catch (EncryptedDatabaseException e) {
+					Logger.printStackTrace(e);
+					result.setError(newDbError(e.getMessage()));
+				}
+			}
+		} else {
+			result.setError(inResult.getError());
+		}
+
+		return result;
 	}
 
 	@Override
-	public boolean createNew(EncryptedDatabaseKey key, FileDescriptor file) {
-		boolean result = false;
+	public OperationResult<Boolean> createNew(EncryptedDatabaseKey key, FileDescriptor file) {
+		OperationResult<Boolean> result = new OperationResult<>();
 
 		synchronized (this) {
 			Credentials defaultCredentials = new KdbxCreds("123".getBytes());
@@ -66,19 +90,25 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
 				Database keepassDb = SimpleDatabase.load(defaultCredentials, in);
 
-				out = provider.openFileForWrite(file);
-				keepassDb.save(newCredentials, out);
+				OperationResult<OutputStream> outResult = provider.openFileForWrite(file);
+				if (outResult.isSucceededOrDeferred()) {
+					out = outResult.getObj();
 
-				out.flush();
+					keepassDb.save(newCredentials, out);
 
-				result = true;
+					out.flush();
+				} else {
+					result.setError(outResult.getError());
+				}
 			} catch (Exception e) {
 				Logger.printStackTrace(e);
+
 			} finally {
 				if (in != null) {
 					try {
 						in.close();
 					} catch (IOException e) {
+						// TODO: should be handled or not?
 						Logger.printStackTrace(e);
 					}
 				}
@@ -86,7 +116,8 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 					try {
 						out.close();
 					} catch (IOException e) {
-						e.printStackTrace();
+						// TODO: should be handled or not?
+						Logger.printStackTrace(e);
 					}
 				}
 			}
@@ -96,11 +127,17 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 	}
 
 	@Override
-	public void close() {
+	public OperationResult<Boolean> close() {
+		OperationResult<Boolean> result = new OperationResult<>();
+
 		synchronized (this) {
 			if (db != null) {
 				db = null;
 			}
+
+			result.setObj(true);
 		}
+
+		return result;
 	}
 }

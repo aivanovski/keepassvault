@@ -9,5 +9,5 @@ public interface EncryptedDatabase {
 
 	GroupRepository getGroupRepository();
 	NoteRepository getNoteRepository();
-	OperationResult<Boolean> commit() throws EncryptedDatabaseException;
+	OperationResult<Boolean> commit();
 }

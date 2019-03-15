@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.exception.FileSystemException;
+import com.ivanovsky.passnotes.util.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -97,38 +98,38 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public InputStream openFileForRead(FileDescriptor file) throws FileSystemException {
-		InputStream in;
+	public OperationResult<InputStream> openFileForRead(FileDescriptor file) {
+		OperationResult<InputStream> result = new OperationResult<>();
 
 		try {
-			in = new BufferedInputStream(new FileInputStream(file.getPath()));
+			InputStream in = new BufferedInputStream(new FileInputStream(file.getPath()));
+			result.setObj(in);
 		} catch (FileNotFoundException e) {
-			throw new FileSystemException(e);
+			Logger.printStackTrace(e);
+			result.setError(newGenericIOError(e.getMessage()));
 		}
 
-		return in;
+		return result;
 	}
 
 	@Override
-	public OutputStream openFileForWrite(FileDescriptor file) throws FileSystemException {
-		OutputStream out;
+	public OperationResult<OutputStream> openFileForWrite(FileDescriptor file) {
+		OperationResult<OutputStream> result = new OperationResult<>();
 
 		try {
-			out = new BufferedOutputStream(new FileOutputStream(file.getPath()));
+			OutputStream out = new BufferedOutputStream(new FileOutputStream(file.getPath()));
+			result.setObj(out);
 		} catch (FileNotFoundException e) {
-			throw new FileSystemException(e);
+			Logger.printStackTrace(e);
+			result.setError(newGenericIOError(e.getMessage()));
 		}
 
-		return out;
+		return result;
 	}
 
 	@Override
-	public boolean exists(FileDescriptor file) throws FileSystemException {
-		return new File(file.getPath()).exists();
-	}
-
-	@Override
-	public void sync() {
-
+	public OperationResult<Boolean> exists(FileDescriptor file) {
+		boolean exists = new File(file.getPath()).exists();
+		return OperationResult.success(exists);
 	}
 }

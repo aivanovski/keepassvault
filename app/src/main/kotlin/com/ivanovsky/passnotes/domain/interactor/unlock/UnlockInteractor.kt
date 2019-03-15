@@ -2,16 +2,13 @@ package com.ivanovsky.passnotes.domain.interactor.unlock
 
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.*
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
-import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.injection.Injector
-import com.ivanovsky.passnotes.util.Logger
 
 class UnlockInteractor(private val fileRepository: UsedFileRepository,
                        private val dbRepository: EncryptedDatabaseRepository,
@@ -40,19 +37,18 @@ class UnlockInteractor(private val fileRepository: UsedFileRepository,
 	fun openDatabase(key: KeepassDatabaseKey, file: FileDescriptor): OperationResult<Boolean> {
 		val result = OperationResult<Boolean>()
 
-		try {
-			val db = dbRepository.open(key, file)
+		val openResult = dbRepository.open(key, file)
+        if (openResult.isSucceededOrDeferred) {
+            val db = openResult.obj
 
-			updateFileAccessTime(file)
+	        updateFileAccessTime(file)
 
-			Injector.getInstance().createEncryptedDatabaseComponent(db)
+	        Injector.getInstance().createEncryptedDatabaseComponent(db)
 
-			result.obj = true
-		} catch (e: EncryptedDatabaseException) {
-			Logger.printStackTrace(e)
-
-			result.error = newDbError(OperationError.MESSAGE_FAILED_TO_OPEN_DB_FILE)
-		}
+	        result.obj = true
+        } else {
+	        result.error = openResult.error
+        }
 
 		return result
 	}

@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.file;
 
-import com.ivanovsky.passnotes.data.repository.DropboxFileLinkRepository;
+import com.ivanovsky.passnotes.data.repository.DropboxFileRepository;
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.DropboxFileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.regular.RegularFileSystemProvider;
@@ -11,13 +11,13 @@ import java.util.Map;
 public class FileSystemResolver {
 
 	private final SettingsRepository settings;
-	private final DropboxFileLinkRepository dropboxLinkRepository;
+	private final DropboxFileRepository dropboxFileRepository;
 	private Map<FSType, FileSystemProvider> providers;
 
 	public FileSystemResolver(SettingsRepository settings,
-							  DropboxFileLinkRepository dropboxLinkRepository) {
+							  DropboxFileRepository dropboxFileRepository) {
 		this.settings = settings;
-		this.dropboxLinkRepository = dropboxLinkRepository;
+		this.dropboxFileRepository = dropboxFileRepository;
 		this.providers = new EnumMap<>(FSType.class);
 	}
 
@@ -38,7 +38,7 @@ public class FileSystemResolver {
 		if (type == FSType.REGULAR_FS) {
 			provider = new RegularFileSystemProvider();
 		} else if (type == FSType.DROPBOX) {
-			provider = new DropboxFileSystemProvider(settings, dropboxLinkRepository);
+			provider = new DropboxFileSystemProvider(settings, dropboxFileRepository);
 		} else {
 			throw new IllegalArgumentException("Specified provider is not implemented: " + type);
 		}

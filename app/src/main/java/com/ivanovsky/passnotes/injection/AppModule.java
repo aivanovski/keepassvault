@@ -4,7 +4,7 @@ import androidx.room.Room;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.data.ObserverBus;
-import com.ivanovsky.passnotes.data.repository.DropboxFileLinkRepository;
+import com.ivanovsky.passnotes.data.repository.DropboxFileRepository;
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository;
@@ -56,8 +56,8 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	DropboxFileLinkRepository provideRemoteFileLinkRepositoty(AppDatabase db) {
-		return new DropboxFileLinkRepository(db);
+	DropboxFileRepository provideDropboxFileRepository(AppDatabase db) {
+		return new DropboxFileRepository(db.getDropboxFileDao());
 	}
 
 	@Provides
@@ -75,8 +75,8 @@ public class AppModule {
 	@Provides
 	@Singleton
 	FileSystemResolver provideFilSystemResolver(SettingsRepository settings,
-												DropboxFileLinkRepository fileLinkRepository) {
-		return new FileSystemResolver(settings, fileLinkRepository);
+												DropboxFileRepository dropboxFileRepository) {
+		return new FileSystemResolver(settings, dropboxFileRepository);
 	}
 
 	@Provides

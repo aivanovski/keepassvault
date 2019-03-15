@@ -3,12 +3,10 @@ package com.ivanovsky.passnotes.data.repository.keepass.dao;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.PropertyType;
-import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.data.entity.Note;
 import com.ivanovsky.passnotes.data.entity.Property;
-import com.ivanovsky.passnotes.util.Logger;
 
 import org.linguafranca.pwdb.kdbx.simple.SimpleEntry;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
@@ -160,21 +158,21 @@ public class KeepassNoteDao implements NoteDao {
 			SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
 			if (newEntry != null) {
 
-				try {
-					db.commit();
-					result.setObj(newEntry.getUuid());
-				} catch (EncryptedDatabaseException e) {
-					Logger.printStackTrace(e);
-
-					rootGroup.removeEntry(newEntry);
-
-					if (e.getError() != null) {
-						result.setError(e.getError());
-					} else {
-						result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_COMMIT));
-					}
+				OperationResult<Boolean> commitResult = db.commit();
+				switch (commitResult.getStatus()) {
+					case DEFERRED:
+						result.setDeferredObj(newEntry.getUuid());
+						break;
+					case SUCCEEDED:
+						result.setObj(newEntry.getUuid());
+						break;
+					case FAILED:
+						rootGroup.removeEntry(newEntry);
+						result.setError(commitResult.getError());
+						break;
+					default:
+						throw new IllegalArgumentException("Status handling is not implementing");
 				}
-
 			} else {
 				result.setError(OperationError.newDbError(OperationError.MESSAGE_UNKNOWN_ERROR));
 			}

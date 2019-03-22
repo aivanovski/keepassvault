@@ -12,6 +12,12 @@ public class DropboxCache {
 	}
 
 	DropboxFile findByPath(String path) {
+		// TODO: implement
+		return null;
+	}
+
+	DropboxFile findByUid(String uid) {
+		// TODO: implement
 		return null;
 	}
 

@@ -10,11 +10,14 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = "dropbox_file")
 public class DropboxFile {
 
-	@ColumnInfo(name = "modified_locally")
-	private boolean modifiedLocally;
+	@ColumnInfo(name = "locally_modified")
+	private boolean locallyModified;
 
 	@ColumnInfo(name = "uploaded")
 	private boolean uploaded;
+
+	@ColumnInfo(name = "upload_failed")
+	private boolean uploadFailed;
 
 	@PrimaryKey(autoGenerate = true)
 	private Long id;
@@ -46,12 +49,12 @@ public class DropboxFile {
 	public DropboxFile() {
 	}
 
-	public boolean isModifiedLocally() {
-		return modifiedLocally;
+	public boolean isLocallyModified() {
+		return locallyModified;
 	}
 
-	public void setModifiedLocally(boolean modifiedLocally) {
-		this.modifiedLocally = modifiedLocally;
+	public void setLocallyModified(boolean locallyModified) {
+		this.locallyModified = locallyModified;
 	}
 
 	public boolean isUploaded() {
@@ -60,6 +63,14 @@ public class DropboxFile {
 
 	public void setUploaded(boolean uploaded) {
 		this.uploaded = uploaded;
+	}
+
+	public boolean isUploadFailed() {
+		return uploadFailed;
+	}
+
+	public void setUploadFailed(boolean uploadFailed) {
+		this.uploadFailed = uploadFailed;
 	}
 
 	public Long getId() {
@@ -76,6 +87,10 @@ public class DropboxFile {
 
 	public void setRetryCount(int retryCount) {
 		this.retryCount = retryCount;
+	}
+
+	public void incrementRetryCount() {
+		retryCount++;
 	}
 
 	public Long getLastRetryTimestamp() {
@@ -143,8 +158,9 @@ public class DropboxFile {
 		DropboxFile that = (DropboxFile) o;
 
 		return new EqualsBuilder()
-				.append(modifiedLocally, that.modifiedLocally)
+				.append(locallyModified, that.locallyModified)
 				.append(uploaded, that.uploaded)
+				.append(uploadFailed, that.uploadFailed)
 				.append(retryCount, that.retryCount)
 				.append(id, that.id)
 				.append(lastRetryTimestamp, that.lastRetryTimestamp)
@@ -160,8 +176,9 @@ public class DropboxFile {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-				.append(modifiedLocally)
+				.append(locallyModified)
 				.append(uploaded)
+				.append(uploadFailed)
 				.append(id)
 				.append(retryCount)
 				.append(lastRetryTimestamp)

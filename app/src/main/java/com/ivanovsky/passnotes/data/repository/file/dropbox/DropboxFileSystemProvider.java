@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.file.dropbox;
 
 import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.Metadata;
 import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.data.entity.DropboxFile;
@@ -27,6 +28,7 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_FILE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE;
@@ -42,16 +44,22 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 	private static final String TAG = DropboxFileSystemProvider.class.getSimpleName();
 
 	private static final String ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR = "Failed to find app private dir";
+	private static final String ERROR_FAILED_TO_FIND_FILE = "Failed to find file: %s";
+	private static final String ERROR_FAILED_TO_FIND_FILE_IN_CACHE = "Faile to find file in cache: %s";
 
 	private final DropboxAuthenticator authenticator;
 	private final DropboxClient dropboxClient;
 	private final DropboxCache cache;
+	private final List<DropboxFile> uploadingFiles;
+	private final List<DropboxFile> offlineFiles;
 
 	public DropboxFileSystemProvider(SettingsRepository settings,
 									 DropboxFileRepository dropboxFileRepository) {
 		this.authenticator = new DropboxAuthenticator(settings);
 		this.dropboxClient = new DropboxClient(authenticator);
 		this.cache = new DropboxCache(dropboxFileRepository);
+		this.uploadingFiles = new CopyOnWriteArrayList<>();
+		this.offlineFiles = new CopyOnWriteArrayList<>();
 	}
 
 	@Override
@@ -150,13 +158,15 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 					result.setObj(new FileInputStream(destinationPath));
 
 				} else if (isNotEquals(remoteRevision, cachedFile.getRevision())) {
-					if (!cachedFile.isModifiedLocally()) {
+					if (!cachedFile.isLocallyModified()) {
 						// server has new version of db
 						metadata = dropboxClient.downloadFileOrThrow(remotePath, cachedFile.getLocalPath());
 
 						cachedFile.setRemotePath(metadata.getPathLower());
 						cachedFile.setRevision(metadata.getRev());
 						cachedFile.setUploaded(true);
+						cachedFile.setUploadFailed(false);
+						cachedFile.setLocallyModified(false);
 						cachedFile.setLastModificationTimestamp(
 								anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
 						cachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
@@ -176,6 +186,9 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 					cachedFile.setRemotePath(metadata.getPathLower());
 					cachedFile.setLastModificationTimestamp(
 							anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
+					cachedFile.setUploaded(true);
+					cachedFile.setUploadFailed(false);
+					cachedFile.setLocallyModified(false);
 					cachedFile.setRetryCount(0);
 					cachedFile.setLastRetryTimestamp(null);
 
@@ -188,7 +201,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 
 			} catch (DropboxNetworkException e) {
 				// use cached file
-				DropboxFile cachedFile = cache.findByPath(file.getPath());
+				DropboxFile cachedFile = cache.findByPath(file.getPath());// TODO: maybe cachedFile should be found by uid
 				if (cachedFile != null) {
 					InputStream fileStream = newFileInputStreamOrNull(cachedFile.getLocalPath());
 					if (fileStream != null) {
@@ -228,145 +241,142 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 
 	@Override
 	public OperationResult<OutputStream> openFileForWrite(FileDescriptor file) {
-//		DropboxFileOutputStream result;
-//
-//		Metadata metadata;
-//		try {
-//			metadata = client.files().getMetadata(formatDropboxPath(file.getPath()));
-//		} catch (GetMetadataErrorException e) {
-//			if (e.getMessage().contains(PATH_NOT_FOUND_MESSAGE)) {
-//				metadata = null;
-//			} else {
-//				throw new FileSystemException(String.format(ERROR_FAILED_TO_GET_FILE_METADATA, file.getPath()));
-//			}
-//
-//		} catch (NetworkIOException e) {
-//			throw new IOFileSystemException(e);
-//
-//		} catch (DbxException e) {
-//			throw new FileSystemException(e);
-//		}
-//
-//		FileMetadata fileMetadata = (metadata instanceof FileMetadata) ? (FileMetadata) metadata : null;
-//
-//		File destinationDir = FileUtils.getRemoteFilesDir(App.getInstance());
-//		if (destinationDir == null) {
-//			throw new FileSystemException(ERROR_FAILED_TO_GET_FILE_METADATA);
-//		}
-//
-//		if (fileMetadata == null) {
-//			//upload new file
-//			String parentPath = getParentPath(file.getPath());
-//			if (parentPath == null) {
-//				throw new FileSystemException(ERROR_INCORRECT_FILE_PATH);
-//			}
-//
-//			if (!parentPath.equals("/")) {
-//				Metadata parentMetadata;
-//
-//				try {
-//					parentMetadata = client.files().getMetadata(formatDropboxPath(parentPath));
-//				} catch (GetMetadataErrorException e) {
-//					if (e.getMessage().contains(PATH_NOT_FOUND_MESSAGE)) {
-//						throw new FileSystemException(String.format(ERROR_FAILED_TO_GET_FILE_METADATA, parentPath));
-//					} else {
-//						throw new FileSystemException(e);
-//					}
-//				} catch (DbxException e) {
-//					Logger.printStackTrace(e);
-//					throw new FileSystemException(e);
-//				}
-//
-//				if (!(parentMetadata instanceof FolderMetadata)) {
-//					throw new FileSystemException(String.format(ERROR_SPECIFIED_FILE_HAS_INCORRECT_METADATA, parentPath));
-//				}
-//
-//				FolderMetadata parentFolderMetadata = (FolderMetadata) parentMetadata;
-//				parentPath = parentFolderMetadata.getPathLower();
-//			}
-//
-//			DropboxFileLink link = new DropboxFileLink();
-//
-//			link.setLastModificationTimestamp(file.getModified());
-//			link.setLocalPath(generateDestinationFilePath(destinationDir));
-//			link.setRemotePath(parentPath + "/" + file.getName());
-//
-//			dropboxLinkRepository.insert(link);
-//
-//			try {
-//				result = new DropboxFileOutputStream(this, client, link);
-//
-//				Logger.d(TAG, "Uploading file to Dropbox: from " + link.getLocalPath() +
-//						" to " + link.getRemotePath());
-//
-//				onFileUploadStarted(link);
-//			} catch (IOException e) {
-//				Logger.printStackTrace(e);
-//				throw new FileSystemException(String.format(ERROR_FAILED_TO_FIND_FILE, link.getLocalPath()));
-//			}
-//
-//		} else {
-//			//re-write existing file
-//			String uid = fileMetadata.getId();
-//			String revision = fileMetadata.getRev();
-//			String remotePath = fileMetadata.getPathLower();
-//			Date localModified = new Date(file.getModified());
-//			Date serverModified = fileMetadata.getClientModified();
-//			Date clientModified = fileMetadata.getClientModified();
-//
-//			DropboxFileLink link = dropboxLinkRepository.findByUid(uid);
-//
-//			if (!canResolveMergeConflict(localModified, serverModified, clientModified)) {
-//				if (link == null) {
-//					link = new DropboxFileLink();
-//
-//					link.setUid(uid);
-//					link.setRemotePath(remotePath);
-//					link.setLocalPath(generateDestinationFilePath(destinationDir));
-//					link.setRevision(revision);
-//					link.setLastModificationTimestamp(file.getModified());
-//
-//					dropboxLinkRepository.insert(link);
-//				}
-//
-//				throw new ModificationConflictException(link.getId(),
-//						file.getModified(),
-//						(serverModified != null) ? serverModified.getTime() : null,
-//						(clientModified != null) ? clientModified.getTime() : null);
-//			}
-//
-//			if (link == null) {
-//				link = new DropboxFileLink();
-//
-//				link.setUid(uid);
-//				link.setRemotePath(remotePath);
-//				link.setLocalPath(generateDestinationFilePath(destinationDir));
-//				link.setRevision(revision);
-//				link.setLastModificationTimestamp(file.getModified());
-//
-//				dropboxLinkRepository.insert(link);
-//
-//			} else {
-//				link.setRevision(revision);
-//				link.setLastModificationTimestamp(file.getModified());
-//			}
-//
-//			try {
-//				result = new DropboxFileOutputStream(this, client, link);
-//
-//				Logger.d(TAG, "Uploading file to Dropbox: from " + link.getLocalPath() +
-//						" to " + link.getRemotePath());
-//
-//				onFileUploadStarted(link);
-//			} catch (IOException e) {
-//				Logger.printStackTrace(e);
-//
-//				throw new FileSystemException(String.format(ERROR_FAILED_TO_FIND_FILE, link.getLocalPath()));
-//			}
-//		}
-//
-//		return OperationResult.success(result);
-		return OperationResult.success(null);
+		OperationResult<OutputStream> result = new OperationResult<>();
+
+		File destinationDir = FileUtils.getRemoteFilesDir(App.getInstance());
+		if (destinationDir != null) {
+			try {
+				FileMetadata metadata = dropboxClient.getFileMetadataOrNull(file);
+				if (metadata == null) {
+					// create and upload new file
+					String parentPath = FileUtils.getParentPath(file.getPath());
+					if (!"/".equals(parentPath)) {
+						FolderMetadata parentMetadata = dropboxClient.getFolderMetadataOrThrow(parentPath);
+						parentPath = parentMetadata.getPathLower();
+					}
+
+					DropboxFile cachedFile = new DropboxFile();
+
+					long timestamp = System.currentTimeMillis();
+
+					cachedFile.setRemotePath(parentPath + "/" + file.getName());
+					cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
+					cachedFile.setLastModificationTimestamp(timestamp);
+					cachedFile.setLastDownloadTimestamp(timestamp);
+					cachedFile.setLocallyModified(true);
+
+					try {
+						result.setObj(new DropboxFileOutputStream(this, dropboxClient, cachedFile));
+
+						cache.put(cachedFile);
+					} catch (FileNotFoundException e) {
+						result.setError(newGenericIOError(String.format(ERROR_FAILED_TO_FIND_FILE,
+								cachedFile.getLocalPath())));
+					}
+				} else {
+					// re-write existing file
+					String uid = metadata.getId();
+					String remotePath = metadata.getPathLower();
+					Date localModified = new Date(file.getModified());
+					Date serverModified = metadata.getServerModified();
+					Date clientModified = metadata.getClientModified();
+
+					DropboxFile cachedFile = cache.getByUid(uid);
+					if (canResolveMergeConflict(localModified, serverModified, clientModified)) {
+						if (cachedFile == null) {
+							cachedFile = new DropboxFile();
+
+							cachedFile.setRemotePath(remotePath);
+							cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
+							cachedFile.setLastModificationTimestamp(localModified.getTime());
+							cachedFile.setLastDownloadTimestamp(localModified.getTime());
+							cachedFile.setLocallyModified(true);
+
+							try {
+								result.setObj(new DropboxFileOutputStream(this, dropboxClient, cachedFile));
+
+								cache.put(cachedFile);
+							} catch (FileNotFoundException e) {
+								result.setError(newGenericIOError(String.format(ERROR_FAILED_TO_FIND_FILE,
+										cachedFile.getLocalPath())));
+							}
+						} else {
+							cachedFile.setRemotePath(remotePath);
+							cachedFile.setLastModificationTimestamp(localModified.getTime());
+							cachedFile.setLastDownloadTimestamp(localModified.getTime());
+							cachedFile.setLocallyModified(true);
+							cachedFile.setUploaded(false);
+
+							try {
+								result.setObj(new DropboxFileOutputStream(this, dropboxClient, cachedFile));
+
+								cache.update(cachedFile);
+							} catch (FileNotFoundException e) {
+								result.setError(newGenericIOError(String.format(ERROR_FAILED_TO_FIND_FILE,
+										cachedFile.getLocalPath())));
+							}
+						}
+					} else {
+						result.setError(newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
+					}
+				}
+			} catch (DropboxNetworkException e) {
+				// if device is offline, just write to the local file
+				DropboxFile cachedFile = cache.findByUid(file.getUid());
+				if (cachedFile != null) {
+
+					cachedFile.setLastModificationTimestamp(file.getModified());
+					cachedFile.setLocallyModified(true);
+					cachedFile.setUploaded(false);
+
+					try {
+						result.setObj(new OfflineFileOutputStream(this, cachedFile));
+
+						cache.update(cachedFile);
+					} catch (FileNotFoundException ee) {
+						result.setError(newGenericIOError(String.format(ERROR_FAILED_TO_FIND_FILE,
+								cachedFile.getLocalPath())));
+					}
+				} else {
+					// by some reason file is not in cache, return error
+					result.setError(newGenericIOError(String.format(ERROR_FAILED_TO_FIND_FILE_IN_CACHE,
+							file.toString())));
+				}
+			} catch (DropboxException e) {
+				result.setError(createOperationErrorFromDropboxException(e));
+			}
+		} else {
+			result.setError(newGenericIOError(ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR));
+		}
+
+		return result;
+	}
+
+	void onFileUploadFailed(DropboxFile file) {
+		// TODO
+		file.setUploadFailed(true);
+
+		cache.update(file);
+	}
+
+	void onFileUploadFinished(DropboxFile file, FileMetadata metadata) {
+		file.setLocallyModified(false);
+		file.setUploaded(true);
+		file.setLastModificationTimestamp(
+				anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
+		file.setLastDownloadTimestamp(System.currentTimeMillis());
+
+		cache.update(file);
+	}
+
+	void onOfflineWriteFailed(DropboxFile file) {
+		// TODO
+	}
+
+	void onOfflineWriteFinished(DropboxFile file) {
+		// TODO
+
+		cache.update(file);
 	}
 
 	private boolean canResolveMergeConflict(Date localModified,

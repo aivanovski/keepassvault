@@ -5,7 +5,6 @@ import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
-import com.ivanovsky.passnotes.data.repository.file.exception.FileSystemException;
 import com.ivanovsky.passnotes.util.Logger;
 
 import java.io.BufferedInputStream;

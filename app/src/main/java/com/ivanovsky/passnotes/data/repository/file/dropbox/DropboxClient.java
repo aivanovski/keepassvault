@@ -11,6 +11,7 @@ import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.GetMetadataErrorException;
 import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.files.WriteMode;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.repository.file.FSType;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxApiException;
@@ -20,7 +21,9 @@ import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxInt
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxNetworkException;
 import com.ivanovsky.passnotes.util.Logger;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -325,6 +328,63 @@ class DropboxClient {
 					Logger.printStackTrace(e);
 				}
 			}
+		}
+
+		return result;
+	}
+
+	@NonNull
+	FolderMetadata getFolderMetadataOrThrow(String path) throws DropboxException {
+		Metadata metadata;
+
+		try {
+			metadata = client.files().getMetadata(formatDropboxPath(path));
+
+			if (metadata == null) {
+				throw new DropboxApiException(String.format(ERROR_FAILED_TO_GET_FILE_METADATA, path));
+			}
+
+			if (!(metadata instanceof FolderMetadata)) {
+				throw new DropboxApiException(String.format(ERROR_SPECIFIED_FILE_HAS_INCORRECT_METADATA, path));
+			}
+		} catch (GetMetadataErrorException e) {
+			if (e.getMessage().contains(PATH_NOT_FOUND_MESSAGE)) {
+				throw new DropboxApiException(String.format(ERROR_FAILED_TO_GET_FILE_METADATA, path));
+			} else {
+				Logger.printStackTrace(e);
+				throw new DropboxApiException(e.errorValue.toString());
+			}
+		} catch (NetworkIOException e) {
+			Logger.printStackTrace(e);
+			throw new DropboxNetworkException();
+
+		} catch (DbxException e) {
+			Logger.printStackTrace(e);
+			throw new DropboxApiException(e.getMessage());
+		}
+
+		return (FolderMetadata) metadata;
+	}
+
+	@NonNull
+	FileMetadata uploadFileOrThrow(String remotePath, String destinationPath) throws DropboxException {
+		FileMetadata result;
+
+		try {
+			result = client.files().uploadBuilder(remotePath)
+					.withMode(WriteMode.OVERWRITE)
+					.uploadAndFinish(new BufferedInputStream(new FileInputStream(destinationPath)));
+		} catch (NetworkIOException e) {
+			Logger.printStackTrace(e);
+			throw new DropboxNetworkException();
+
+		} catch (DbxException e) {
+			Logger.printStackTrace(e);
+			throw new DropboxApiException(e.getMessage());
+
+		} catch (IOException e) {
+			Logger.printStackTrace(e);
+			throw new DropboxInternalCacheException();
 		}
 
 		return result;

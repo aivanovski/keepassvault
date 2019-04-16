@@ -11,14 +11,8 @@ public class DropboxCache {
 		this.repository = repository;
 	}
 
-	DropboxFile findByPath(String path) {
-		// TODO: implement
-		return null;
-	}
-
-	DropboxFile findByUid(String uid) {
-		// TODO: implement
-		return null;
+	DropboxFile getByRemotPath(String remotePath) {
+		return repository.findByRemotePath(remotePath);
 	}
 
 	DropboxFile getByUid(String uid) {

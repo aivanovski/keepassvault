@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
 
 public interface EncryptedDatabaseRepository {
 
+	EncryptedDatabase getOpenedDatabase();
 	OperationResult<EncryptedDatabase> open(EncryptedDatabaseKey key, FileDescriptor file);
 	OperationResult<Boolean> createNew(EncryptedDatabaseKey key, FileDescriptor file);
 	OperationResult<Boolean> close();

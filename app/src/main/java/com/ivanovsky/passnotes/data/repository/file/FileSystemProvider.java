@@ -16,4 +16,5 @@ public interface FileSystemProvider {
 	OperationResult<InputStream> openFileForRead(FileDescriptor file);
 	OperationResult<OutputStream> openFileForWrite(FileDescriptor file);
 	OperationResult<Boolean> exists(FileDescriptor file);
+	OperationResult<FileDescriptor> getFile(String path);
 }

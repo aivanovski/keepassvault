@@ -15,6 +15,7 @@ import com.ivanovsky.passnotes.domain.ClipboardHelper;
 import com.ivanovsky.passnotes.domain.PermissionHelper;
 import com.ivanovsky.passnotes.domain.ResourceHelper;
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus;
+import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor;
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor;
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor;
@@ -122,7 +123,14 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	PermissionHelper providerPermisionHelper() {
+	DebugMenuInteractor provideDebugMenuInteractor(FileSystemResolver fileSystemResolver,
+												   EncryptedDatabaseRepository dbRepository) {
+		return new DebugMenuInteractor(context, fileSystemResolver, dbRepository);
+	}
+
+	@Provides
+	@Singleton
+	PermissionHelper providerPermissionHelper() {
 		return new PermissionHelper(context);
 	}
 

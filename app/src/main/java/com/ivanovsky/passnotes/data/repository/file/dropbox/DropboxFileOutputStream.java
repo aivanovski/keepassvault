@@ -14,26 +14,30 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.UUID;
 
 class DropboxFileOutputStream extends RemoteFileOutputStream {
 
 	private static final String TAG = DropboxFileOutputStream.class.getSimpleName();
 
+	private boolean failed;
+	private final UUID processingUnitUid;
+	private final File outFile;
 	private final DropboxFileSystemProvider provider;
 	private final DropboxClient client;
 	private final OutputStream out;
 	private final DropboxFile file;
-	private final File outFile;
-	private boolean failed;
 
 	DropboxFileOutputStream(DropboxFileSystemProvider provider,
 							DropboxClient client,
-							DropboxFile file) throws FileNotFoundException {
+							DropboxFile file,
+							UUID processingUnitUid) throws FileNotFoundException {
 		this.provider = provider;
 		this.client = client;
 		this.file = file;
 		this.outFile = new File(file.getLocalPath());
 		this.out = new BufferedOutputStream(new FileOutputStream(outFile));
+		this.processingUnitUid = processingUnitUid;
 	}
 
 	@Override
@@ -45,7 +49,7 @@ class DropboxFileOutputStream extends RemoteFileOutputStream {
 
 			failed = true;
 
-			provider.onFileUploadFailed(file);
+			provider.onFileUploadFailed(file, processingUnitUid);
 
 			throw new IOException(e);
 		}
@@ -60,7 +64,7 @@ class DropboxFileOutputStream extends RemoteFileOutputStream {
 
 			failed = true;
 
-			provider.onFileUploadFailed(file);
+			provider.onFileUploadFailed(file, processingUnitUid);
 
 			throw new IOException(e);
 		}
@@ -79,19 +83,19 @@ class DropboxFileOutputStream extends RemoteFileOutputStream {
 		} catch (DropboxNetworkException e) {
 			Logger.printStackTrace(e);
 
-			provider.onOfflineWriteFinished(file);
+			provider.onOfflineWriteFinished(file, processingUnitUid);
 
 			throw new IOException(e);
 
 		} catch (DropboxException e) {
 			Logger.printStackTrace(e);
 
-			provider.onFileUploadFailed(file);
+			provider.onFileUploadFailed(file, processingUnitUid);
 
 			throw new IOException(e);
 		}
 
-		provider.onFileUploadFinished(file, metadata);
+		provider.onFileUploadFinished(file, metadata, processingUnitUid);
 	}
 
 	@Override

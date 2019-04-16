@@ -26,4 +26,7 @@ public interface DropboxFileDao {
 
 	@Query("SELECT * FROM dropbox_file WHERE uid = :uid")
 	DropboxFile findByUid(String uid);
+
+	@Query("SELECT * FROM dropbox_file WHERE remote_path = :remotePath")
+	DropboxFile findByRemotePath(String remotePath);
 }

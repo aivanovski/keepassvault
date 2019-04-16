@@ -38,6 +38,11 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 	}
 
 	@Override
+	public EncryptedDatabase getOpenedDatabase() {
+		return db;
+	}
+
+	@Override
 	public OperationResult<EncryptedDatabase> open(EncryptedDatabaseKey key, FileDescriptor file) {
 		OperationResult<EncryptedDatabase> result = new OperationResult<>();
 
@@ -97,6 +102,8 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 					keepassDb.save(newCredentials, out);
 
 					out.flush();
+
+					result.setObj(true);
 				} else {
 					result.setError(outResult.getError());
 				}

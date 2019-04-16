@@ -5,8 +5,33 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.io.File;
+import java.util.UUID;
 
 public class FileUtils {
+
+	@Nullable
+	public static File generateDestinationFileForRemoteFile(@NonNull Context context) {
+		File result = null;
+
+		String destination = generateDestinationForRemoteFile(context);
+		if (destination != null) {
+			result = new File(destination);
+		}
+
+		return result;
+	}
+
+	@Nullable
+	public static String generateDestinationForRemoteFile(@NonNull Context context) {
+		String result = null;
+
+		File dir = getRemoteFilesDir(context);
+		if (dir != null) {
+			result = dir.getPath() + "/" + UUID.randomUUID().toString();
+		}
+
+		return result;
+	}
 
 	@Nullable
 	public static File getRemoteFilesDir(@NonNull Context context) {
@@ -15,8 +40,6 @@ public class FileUtils {
 
 	@Nullable
 	private static File getPrivateDir(@NonNull Context context, @NonNull String name) {
-		if (name == null) return null;
-
 		File result = null;
 
 		File dbDir = context.getDir(name, Context.MODE_PRIVATE);

@@ -42,9 +42,12 @@
 	</style>
 
 	<!-- TODO: create style according to new material guideline-->
-	<style name="Material.FlatButton" parent="@style/Widget.AppCompat.Button.Borderless">
+	<style name="Material.ContainedButton" parent="@style/Widget.MaterialComponents.Button.UnelevatedButton">
 		<item name="android:layout_height">36dp</item>
 		<item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
+	</style>
+	
+	<style name="Material.OutlinedButton" parent="@style/Widget.MaterialComponents.Button.OutlinedButton">
 	</style>
 	
 	<style name="Material.ToggleButton">

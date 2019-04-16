@@ -38,7 +38,7 @@
 		</com.google.android.material.textfield.TextInputLayout>
 
 		<Button
-			style="@style/Material.FlatButton"
+			style="@style/Material.ContainedButton"
 			android:id="@+id/unlock_button"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"

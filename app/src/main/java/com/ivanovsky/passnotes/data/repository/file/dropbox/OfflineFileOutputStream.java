@@ -10,21 +10,25 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.UUID;
 
 class OfflineFileOutputStream extends RemoteFileOutputStream {
 
+	private boolean failed;
+	private final UUID processingUnitUid;
+	private final File outFile;
 	private final DropboxFileSystemProvider provider;
 	private final OutputStream out;
 	private final DropboxFile file;
-	private final File outFile;
-	private boolean failed;
 
 	OfflineFileOutputStream(DropboxFileSystemProvider provider,
-							DropboxFile file) throws FileNotFoundException {
+							DropboxFile file,
+							UUID processingUnitUid) throws FileNotFoundException {
 		this.provider = provider;
 		this.file = file;
 		this.outFile = new File(file.getLocalPath());
 		this.out = new BufferedOutputStream(new FileOutputStream(outFile));
+		this.processingUnitUid = processingUnitUid;
 	}
 
 	@Override
@@ -36,7 +40,7 @@ class OfflineFileOutputStream extends RemoteFileOutputStream {
 
 			failed = true;
 
-			provider.onOfflineWriteFailed(file);
+			provider.onOfflineWriteFailed(file, processingUnitUid);
 
 			throw new IOException(e);
 		}
@@ -51,7 +55,7 @@ class OfflineFileOutputStream extends RemoteFileOutputStream {
 
 			failed = true;
 
-			provider.onOfflineWriteFailed(file);
+			provider.onOfflineWriteFailed(file, processingUnitUid);
 
 			throw new IOException(e);
 		}
@@ -63,7 +67,7 @@ class OfflineFileOutputStream extends RemoteFileOutputStream {
 			return;
 		}
 
-		provider.onOfflineWriteFinished(file);
+		provider.onOfflineWriteFinished(file, processingUnitUid);
 	}
 
 	@Override

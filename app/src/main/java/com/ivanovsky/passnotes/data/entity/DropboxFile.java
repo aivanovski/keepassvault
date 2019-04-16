@@ -19,6 +19,12 @@ public class DropboxFile {
 	@ColumnInfo(name = "upload_failed")
 	private boolean uploadFailed;
 
+	@ColumnInfo(name = "uploading")
+	private boolean uploading;
+
+	@ColumnInfo(name = "downloading")
+	private boolean downloading;
+
 	@PrimaryKey(autoGenerate = true)
 	private Long id;
 
@@ -71,6 +77,22 @@ public class DropboxFile {
 
 	public void setUploadFailed(boolean uploadFailed) {
 		this.uploadFailed = uploadFailed;
+	}
+
+	public boolean isUploading() {
+		return uploading;
+	}
+
+	public void setUploading(boolean uploading) {
+		this.uploading = uploading;
+	}
+
+	public boolean isDownloading() {
+		return downloading;
+	}
+
+	public void setDownloading(boolean downloading) {
+		this.downloading = downloading;
 	}
 
 	public Long getId() {

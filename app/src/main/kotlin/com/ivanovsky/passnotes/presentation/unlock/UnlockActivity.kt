@@ -7,6 +7,7 @@ import android.view.MenuItem
 import com.google.android.material.navigation.NavigationView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import com.ivanovsky.passnotes.BuildConfig
 
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.BaseActivity
@@ -46,6 +47,10 @@ class UnlockActivity : BaseActivity() {
 		fragment.setPresenter(presenter)
 
 		navigationView.setNavigationItemSelectedListener { item -> onNavigationItemSelected(item)}
+
+		if (!BuildConfig.DEBUG) {
+			navigationView.menu.findItem(R.id.menu_debug_menu).isVisible = false
+		}
 	}
 
 	override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -74,6 +79,12 @@ class UnlockActivity : BaseActivity() {
 
 			R.id.menu_about -> {
 				presenter.onAboutMenuClicked()
+				true
+			}
+
+			R.id.menu_debug_menu -> {
+				drawer.closeDrawer(GravityCompat.START)
+				presenter.onDebugMenuClicked()
 				true
 			}
 

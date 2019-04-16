@@ -21,6 +21,10 @@ public class DropboxFileRepository {
 		return dao.findByUid(uid);
 	}
 
+	public DropboxFile findByRemotePath(String remotePath) {
+		return dao.findByRemotePath(remotePath);
+	}
+
 	public void insert(DropboxFile link) {
 		long id = dao.insert(link);
 		link.setId(id);

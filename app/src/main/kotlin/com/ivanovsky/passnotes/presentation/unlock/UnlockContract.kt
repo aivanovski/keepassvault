@@ -18,6 +18,7 @@ class UnlockContract {
 		fun showOpenFileScreen()
 		fun showSettingScreen()
 		fun showAboutScreen()
+		fun showDebugMenuScreen()
 	}
 
 	interface Presenter : BasePresenter {
@@ -30,6 +31,7 @@ class UnlockContract {
 		val showOpenFileScreenAction: SingleLiveAction<Void>
 		val showSettingsScreenAction: SingleLiveAction<Void>
 		val showAboutScreenAction: SingleLiveAction<Void>
+		val showDebugMenuScreenAction: SingleLiveAction<Void>
 		val snackbarMessageAction: SingleLiveAction<String>
 
 		fun loadData(selectedFile: FileDescriptor?)
@@ -38,6 +40,7 @@ class UnlockContract {
 		fun onOpenFileMenuClicked()
 		fun onSettingsMenuClicked()
 		fun onAboutMenuClicked()
+		fun onDebugMenuClicked()
 		fun onFilePicked(file: FileDescriptor)
 	}
 }

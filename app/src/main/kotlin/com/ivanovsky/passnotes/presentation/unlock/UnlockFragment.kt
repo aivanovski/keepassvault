@@ -18,6 +18,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
+import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuActivity
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity
 import com.ivanovsky.passnotes.presentation.storagelist.Action
@@ -119,6 +120,8 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 				Observer { showSettingScreen() })
 		presenter.showAboutScreenAction.observe(this,
 				Observer { showAboutScreen() })
+		presenter.showDebugMenuScreenAction.observe(this,
+				Observer { showDebugMenuScreen() })
 		presenter.snackbarMessageAction.observe(this,
 				Observer { message -> showSnackbar(message!!) })
 
@@ -246,6 +249,11 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 
 	override fun showAboutScreen() {
 		throw RuntimeException("Not implemented") //TODO: handle menu click
+	}
+
+	override fun showDebugMenuScreen() {
+		val intent = DebugMenuActivity.createStartIntent(context!!)
+		startActivity(intent)
 	}
 
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

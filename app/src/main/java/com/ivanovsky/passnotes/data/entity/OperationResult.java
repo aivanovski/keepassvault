@@ -57,6 +57,16 @@ public class OperationResult<T> {
 		this.deferred = src.deferred;
 	}
 
+	public void from(OperationResult<T> src) {
+		this.obj = src.obj;
+		this.deferred = src.deferred;
+		this.error = src.error;
+	}
+
+	public void errorFrom(OperationResult src) {
+		this.error = src.error;
+	}
+
 	public OperationError getError() {
 		return error;
 	}

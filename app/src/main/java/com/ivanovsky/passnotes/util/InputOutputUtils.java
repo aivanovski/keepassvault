@@ -1,6 +1,10 @@
 package com.ivanovsky.passnotes.util;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -8,6 +12,30 @@ import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class InputOutputUtils {
+
+	public static FileInputStream newFileInputStreamOrNull(File file) {
+		FileInputStream result = null;
+
+		try {
+			result = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			Logger.printStackTrace(e);
+		}
+
+		return result;
+	}
+
+	public static FileOutputStream newFileOutputStreamOrNull(File file) {
+		FileOutputStream result = null;
+
+		try {
+			result = new FileOutputStream(file);
+		} catch (FileNotFoundException e) {
+			Logger.printStackTrace(e);
+		}
+
+		return result;
+	}
 
 	public static String toString(InputStream is) {
 		String result = null;

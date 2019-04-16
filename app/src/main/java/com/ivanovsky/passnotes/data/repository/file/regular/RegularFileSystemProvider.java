@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_NOT_FOUND;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 
@@ -130,5 +131,19 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 	public OperationResult<Boolean> exists(FileDescriptor file) {
 		boolean exists = new File(file.getPath()).exists();
 		return OperationResult.success(exists);
+	}
+
+	@Override
+	public OperationResult<FileDescriptor> getFile(String path) {
+		OperationResult<FileDescriptor> result = new OperationResult<>();
+
+		File file = new File(path);
+		if (file.exists()) {
+			result.setObj(FileDescriptor.fromRegularFile(file));
+		} else {
+			result.setError(newGenericIOError(MESSAGE_FILE_NOT_FOUND));
+		}
+
+		return result;
 	}
 }

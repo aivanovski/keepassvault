@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteract
 import com.ivanovsky.passnotes.injection.encdb.EncryptedDatabaseComponent;
 import com.ivanovsky.passnotes.injection.encdb.EncryptedDatabaseModule;
 import com.ivanovsky.passnotes.presentation.StartActivity;
+import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuPresenter;
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment;
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerPresenter;
 import com.ivanovsky.passnotes.presentation.group.GroupPresenter;
@@ -37,4 +38,5 @@ public interface AppComponent {
 	void inject(@NotNull StorageListInteractor storageListInteractor);
 	void inject(@NotNull StorageListFragment storageListFragment);
 	void inject(KeepassDatabase keepassDatabase);
+	void inject(@NotNull DebugMenuPresenter debugMenuPresenter);
 }

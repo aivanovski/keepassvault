@@ -12,6 +12,11 @@
 		android:title="@string/settings"/>
 
 	<item
+		android:id="@+id/menu_debug_menu"
+		android:icon="@drawable/ic_developer_mode_grey_600_24dp"
+		android:title="@string/debug_menu"/>
+
+	<item
 		android:id="@+id/menu_about"
 		android:icon="@drawable/ic_info_grey_600_24dp"
 		android:title="@string/about"/>

@@ -69,4 +69,7 @@
 	<string name="application_requires_external_storage_permission">Application requires external storage permission</string>
 	<string name="please_select_any_file">Please select any file</string>
 
+	<!-- Debug menu screen -->
+	<string name="debug_menu">Debug menu</string>
+
 </resources>

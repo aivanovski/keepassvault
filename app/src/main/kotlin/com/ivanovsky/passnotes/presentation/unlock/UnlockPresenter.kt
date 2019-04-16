@@ -45,6 +45,7 @@ class UnlockPresenter(private val context: Context,
 	override val showOpenFileScreenAction = SingleLiveAction<Void>()
 	override val showSettingsScreenAction = SingleLiveAction<Void>()
 	override val showAboutScreenAction = SingleLiveAction<Void>()
+	override val showDebugMenuScreenAction = SingleLiveAction<Void>()
 	override val snackbarMessageAction = SingleLiveAction<String>()
 	private var selectedFile: FileDescriptor? = null
 	private val scope = CoroutineScope(Dispatchers.Main + COROUTINE_EXCEPTION_HANDLER)
@@ -131,6 +132,10 @@ class UnlockPresenter(private val context: Context,
 
 	override fun onAboutMenuClicked() {
 		showAboutScreenAction.call()
+	}
+
+	override fun onDebugMenuClicked() {
+		showDebugMenuScreenAction.call()
 	}
 
 	override fun onFilePicked(file: FileDescriptor) {

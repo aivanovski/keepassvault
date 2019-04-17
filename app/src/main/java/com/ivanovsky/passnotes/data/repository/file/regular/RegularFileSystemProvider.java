@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_NOT_FOUND;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError;
@@ -24,7 +26,10 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOErr
 
 public class RegularFileSystemProvider implements FileSystemProvider {
 
+	private final Lock lock;
+
 	public RegularFileSystemProvider() {
+		this.lock = new ReentrantLock();
 	}
 
 	@Override
@@ -101,12 +106,15 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 	public OperationResult<InputStream> openFileForRead(FileDescriptor file) {
 		OperationResult<InputStream> result = new OperationResult<>();
 
+		lock.lock();
 		try {
 			InputStream in = new BufferedInputStream(new FileInputStream(file.getPath()));
 			result.setObj(in);
 		} catch (FileNotFoundException e) {
 			Logger.printStackTrace(e);
 			result.setError(newGenericIOError(e.getMessage()));
+		} finally {
+			lock.unlock();
 		}
 
 		return result;
@@ -116,12 +124,15 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 	public OperationResult<OutputStream> openFileForWrite(FileDescriptor file) {
 		OperationResult<OutputStream> result = new OperationResult<>();
 
+		lock.lock();
 		try {
 			OutputStream out = new BufferedOutputStream(new FileOutputStream(file.getPath()));
 			result.setObj(out);
 		} catch (FileNotFoundException e) {
 			Logger.printStackTrace(e);
 			result.setError(newGenericIOError(e.getMessage()));
+		} finally {
+			lock.unlock();
 		}
 
 		return result;

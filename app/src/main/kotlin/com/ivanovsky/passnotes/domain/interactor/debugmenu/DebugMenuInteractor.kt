@@ -267,6 +267,7 @@ class DebugMenuInteractor(private val context: Context,
 	private fun extractIndexesFromGroups(groups: List<Group>): List<Int> {
 		return groups.filter { group -> group.title != null && group.title.startsWith("Group ")}
 				.mapNotNull { group -> extractIndexFromGroupTitle(group.title) }
+				.toSet()
 				.sorted()
 	}
 
@@ -274,7 +275,7 @@ class DebugMenuInteractor(private val context: Context,
 		var index: Int? = null
 
 		val spaceIdx = title.indexOf(" ")
-		if (spaceIdx + 2 < title.length) {
+		if (spaceIdx + 1 < title.length) {
 			val titleIndexStr = title.substring(spaceIdx + 1, title.length)
 			if (titleIndexStr.all { ch -> ch.isDigit() }) {
 				index = Integer.parseInt(titleIndexStr)

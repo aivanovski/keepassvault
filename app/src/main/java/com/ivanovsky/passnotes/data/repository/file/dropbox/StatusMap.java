@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository.file.dropbox;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 class StatusMap {
 
@@ -11,13 +12,13 @@ class StatusMap {
 		this.entries = new ArrayList<>();
 	}
 
-	ProcessingUnit getByUid(String uid) {
-		if (uid == null) return null;
+	ProcessingUnit getByFileUid(String fileUid) {
+		if (fileUid == null) return null;
 
 		ProcessingUnit result = null;
 
 		for (ProcessingUnit entry : entries) {
-			if (uid.equals(entry.fileUid)) {
+			if (fileUid.equals(entry.fileUid)) {
 				result = entry;
 				break;
 			}
@@ -43,5 +44,15 @@ class StatusMap {
 
 	void put(ProcessingUnit unit) {
 		entries.add(unit);
+	}
+
+	void remove(UUID processingUid) {
+		for (int idx = 0; idx < entries.size(); idx++) {
+			ProcessingUnit entry = entries.get(idx);
+			if (entry.processingUid.equals(processingUid)) {
+				entries.remove(idx);
+				break;
+			}
+		}
 	}
 }

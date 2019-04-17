@@ -481,7 +481,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		if (fileUid == null) {
 			entry = processingMap.getByRemotePath(remotePath);
 		} else {
-			entry = processingMap.getByUid(fileUid);
+			entry = processingMap.getByFileUid(fileUid);
 		}
 
 		return entry;
@@ -598,8 +598,25 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 	}
 
 	private void onFinishProcessingUnit(UUID processingUid) {
+		unitProcessingLock.lock();
+		try {
+			processingMap.remove(processingUid);
+
+			if (processingUidToLatch.containsKey(processingUid)) {
+
+			}
+
+		} finally {
+			unitProcessingLock.unlock();
+		}
+
+		// TODO: fix
+
+
 		if (processingUidToLatch.containsKey(processingUid)) {
 			CountDownLatch latch;
+
+
 
 			unitProcessingLock.lock();
 			try {

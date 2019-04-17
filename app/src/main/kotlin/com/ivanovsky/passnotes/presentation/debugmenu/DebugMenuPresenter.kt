@@ -115,7 +115,7 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 
 		scope.launch {
 			val result = withContext(Dispatchers.Default) {
-				interactor.newDbFile(password, outFile)
+				interactor.newDbFile(defaultPasswordIfEmpty(password), outFile)
 			}
 
 			if (result.isSucceededOrDeferred) {
@@ -129,13 +129,17 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 		}
 	}
 
+	private fun defaultPasswordIfEmpty(password: String): String {
+		return if (password.isNotEmpty()) password else "abc123"
+	}
+
 	override fun onOpenDbButtonClicked(password: String) {
 		screenState.value = ScreenState.data()
 
 		if (isFileSelected()) {
 			scope.launch {
 				val result = withContext(Dispatchers.Default) {
-					interactor.openDbFile(password, lastReadFile!!)
+					interactor.openDbFile(defaultPasswordIfEmpty(password), lastReadFile!!)
 				}
 
 				if (result.isSucceededOrDeferred) {

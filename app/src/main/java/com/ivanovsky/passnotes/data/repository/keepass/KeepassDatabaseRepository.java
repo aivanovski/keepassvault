@@ -101,7 +101,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
 					keepassDb.save(newCredentials, out);
 
-					out.flush();
+					//out.flush(); // TODO: is it really unnecessary?
 
 					result.setObj(true);
 				} else {

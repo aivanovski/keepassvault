@@ -598,39 +598,21 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 	}
 
 	private void onFinishProcessingUnit(UUID processingUid) {
+		CountDownLatch latch = null;
+
 		unitProcessingLock.lock();
 		try {
 			processingMap.remove(processingUid);
 
 			if (processingUidToLatch.containsKey(processingUid)) {
-
+				latch = processingUidToLatch.remove(processingUid);
 			}
-
 		} finally {
 			unitProcessingLock.unlock();
 		}
 
-		// TODO: fix
-
-
-		if (processingUidToLatch.containsKey(processingUid)) {
-			CountDownLatch latch;
-
-
-
-			unitProcessingLock.lock();
-			try {
-				latch = processingUidToLatch.get(processingUid);
-				if (latch != null) {
-					processingUidToLatch.remove(processingUid);
-				}
-			} finally {
-				unitProcessingLock.unlock();
-			}
-
-			if (latch != null) {
-				latch.countDown();
-			}
+		if (latch != null) {
+			latch.countDown();
 		}
 	}
 

@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.domain.interactor.debugmenu
 
-import android.content.Context
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.OperationError.*
@@ -9,8 +8,7 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.GroupRepository
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
-import com.ivanovsky.passnotes.util.FileUtils
-import com.ivanovsky.passnotes.util.FileUtils.generateDestinationFileForRemoteFile
+import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.util.InputOutputUtils
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileOutputStreamOrNull
@@ -19,9 +17,9 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 
-class DebugMenuInteractor(private val context: Context,
-						  private val fileSystemResolver: FileSystemResolver,
-						  private val dbRepository: EncryptedDatabaseRepository) {
+class DebugMenuInteractor(private val fileSystemResolver: FileSystemResolver,
+						  private val dbRepository: EncryptedDatabaseRepository,
+						  private val fileHelper: FileHelper) {
 
 	fun getFileContent(file: FileDescriptor): OperationResult<Pair<FileDescriptor, File>> {
 		val result = OperationResult<Pair<FileDescriptor, File>>()
@@ -63,7 +61,7 @@ class DebugMenuInteractor(private val context: Context,
 	private fun createNewLocalDestinationStream(): OperationResult<Pair<File, OutputStream>> {
 		val result = OperationResult<Pair<File, OutputStream>>()
 
-		val outFile = generateDestinationFileForRemoteFile(context)
+		val outFile = fileHelper.generateDestinationFileForRemoteFile()
 		if (outFile != null) {
 			val outStream = newFileOutputStreamOrNull(outFile)
 			if (outStream != null) {
@@ -130,7 +128,7 @@ class DebugMenuInteractor(private val context: Context,
 	private fun createNewDatabaseInPrivateStorage(password: String): OperationResult<Pair<File, InputStream>> {
 		val result = OperationResult<Pair<File, InputStream>>()
 
-		val dbFile = FileUtils.generateDestinationFileForRemoteFile(context)
+		val dbFile = fileHelper.generateDestinationFileForRemoteFile()
 		if (dbFile != null) {
 			val dbDescriptor = FileDescriptor.fromRegularFile(dbFile)
 			val key = KeepassDatabaseKey(password)

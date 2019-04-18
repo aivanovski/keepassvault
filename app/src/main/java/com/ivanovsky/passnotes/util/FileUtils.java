@@ -1,74 +1,8 @@
 package com.ivanovsky.passnotes.util;
 
-import android.content.Context;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.io.File;
-import java.util.UUID;
-
 public class FileUtils {
-
-	@Nullable
-	public static File generateDestinationFileForRemoteFile(@NonNull Context context) {
-		File result = null;
-
-		String destination = generateDestinationForRemoteFile(context);
-		if (destination != null) {
-			result = new File(destination);
-		}
-
-		return result;
-	}
-
-	@Nullable
-	public static String generateDestinationForRemoteFile(@NonNull Context context) {
-		String result = null;
-
-		File dir = getRemoteFilesDir(context);
-		if (dir != null) {
-			result = dir.getPath() + "/" + UUID.randomUUID().toString();
-		}
-
-		return result;
-	}
-
-	@Nullable
-	public static File getRemoteFilesDir(@NonNull Context context) {
-		return getPrivateDir(context, "remote-files");
-	}
-
-	@Nullable
-	private static File getPrivateDir(@NonNull Context context, @NonNull String name) {
-		File result = null;
-
-		File dbDir = context.getDir(name, Context.MODE_PRIVATE);
-		if (dbDir != null && dbDir.exists()) {
-			result = dbDir;
-		}
-
-		return result;
-	}
-
-	@Nullable
-	public static File getDatabaseDir(@NonNull Context context) {
-		File result = null;
-
-		File filesDir = context.getFilesDir();
-		if (filesDir != null && filesDir.getParentFile() != null) {
-
-			File dataDir = filesDir.getParentFile();
-			if (dataDir.exists()) {
-
-				File databaseDir = new File(dataDir.getPath() + File.separator + "databases");
-				if (databaseDir.exists()) {
-					result = databaseDir;
-				}
-			}
-		}
-
-		return result;
-	}
 
 	@Nullable
 	public static String getFileNameFromPath(@Nullable String filePath) {
@@ -120,22 +54,6 @@ public class FileUtils {
 		if (idx > 0
 				&& idx + 1 < fileName.length()) {
 			result = fileName.substring(0, idx);
-		}
-
-		return result;
-	}
-
-	public static boolean isLocatedInPrivateStorage(@NonNull File file, @NonNull Context context) {
-		boolean result = false;
-
-		File privateDir = context.getFilesDir();
-		if (privateDir != null) {
-			File dataDir = privateDir.getParentFile();
-			if (dataDir != null) {
-				String dataDirPath = dataDir.getPath();
-
-				result = file.getPath().startsWith(dataDirPath);
-			}
 		}
 
 		return result;

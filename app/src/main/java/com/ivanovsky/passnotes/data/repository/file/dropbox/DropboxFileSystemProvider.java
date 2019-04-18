@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.data.repository.file.dropbox;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.Metadata;
-import com.ivanovsky.passnotes.App;
 import com.ivanovsky.passnotes.data.entity.DropboxFile;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationError;
@@ -17,6 +16,7 @@ import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxApi
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxAuthException;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxException;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxNetworkException;
+import com.ivanovsky.passnotes.domain.FileHelper;
 import com.ivanovsky.passnotes.util.DateUtils;
 import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.Logger;
@@ -61,15 +61,18 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 	private final StatusMap processingMap;
 	private final Map<UUID, CountDownLatch> processingUidToLatch;
 	private final Lock unitProcessingLock;
+	private final FileHelper fileHelper;
 
 	public DropboxFileSystemProvider(SettingsRepository settings,
-									 DropboxFileRepository dropboxFileRepository) {
+									 DropboxFileRepository dropboxFileRepository,
+									 FileHelper fileHelper) {
 		this.authenticator = new DropboxAuthenticator(settings);
 		this.dropboxClient = new DropboxClient(authenticator);
 		this.cache = new DropboxCache(dropboxFileRepository);
 		this.processingMap = new StatusMap();
 		this.processingUidToLatch = new HashMap<>();
 		this.unitProcessingLock = new ReentrantLock();
+		this.fileHelper = fileHelper;
 	}
 
 	@Override
@@ -192,7 +195,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 	public OperationResult<InputStream> openFileForRead(FileDescriptor file) {
 		OperationResult<InputStream> result = new OperationResult<>();
 
-		File destinationDir = FileUtils.getRemoteFilesDir(App.getInstance());
+		File destinationDir = fileHelper.getRemoteFilesDir();
 		if (destinationDir != null) {
 			ProcessingUnit unit = null;
 			try {
@@ -345,7 +348,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 	public OperationResult<OutputStream> openFileForWrite(FileDescriptor file) {
 		OperationResult<OutputStream> result = new OperationResult<>();
 
-		File destinationDir = FileUtils.getRemoteFilesDir(App.getInstance());
+		File destinationDir = fileHelper.getRemoteFilesDir();
 		if (destinationDir != null) {
 			try {
 				FileMetadata metadata = dropboxClient.getFileMetadataOrNull(file);

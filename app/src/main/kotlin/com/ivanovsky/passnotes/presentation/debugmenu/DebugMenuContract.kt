@@ -14,6 +14,7 @@ interface DebugMenuContract {
 		fun setOpenDbButtonEnabled(isEnabled: Boolean)
 		fun setCloseDbButtonEnabled(isEnabled: Boolean)
 		fun setAddEntryButtonEnabled(isEnabled: Boolean)
+		fun setExternalStorageCheckBoxChecked(isChecked: Boolean)
 	}
 
 	interface Presenter : BasePresenter {
@@ -22,6 +23,7 @@ interface DebugMenuContract {
 		val openDbButtonEnabled: LiveData<Boolean>
 		val closeDbButtonEnabled: LiveData<Boolean>
 		val addEntryButtonEnabled: LiveData<Boolean>
+		val externalStorageCheckBoxChecked: LiveData<Boolean>
 		val snackbarMessageAction: SingleLiveAction<String>
 
 		fun onReadButtonClicked(inFile: FileDescriptor)
@@ -30,5 +32,6 @@ interface DebugMenuContract {
 		fun onOpenDbButtonClicked(password: String)
 		fun onCloseDbButtonClicked()
 		fun onAddEntryButtonClicked()
+		fun onExternalStorageCheckedChanged(isChecked: Boolean)
 	}
 }

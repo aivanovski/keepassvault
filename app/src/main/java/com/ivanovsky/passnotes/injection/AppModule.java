@@ -12,6 +12,7 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
 import com.ivanovsky.passnotes.domain.ClipboardHelper;
+import com.ivanovsky.passnotes.domain.FileHelper;
 import com.ivanovsky.passnotes.domain.PermissionHelper;
 import com.ivanovsky.passnotes.domain.ResourceHelper;
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus;
@@ -76,8 +77,9 @@ public class AppModule {
 	@Provides
 	@Singleton
 	FileSystemResolver provideFilSystemResolver(SettingsRepository settings,
-												DropboxFileRepository dropboxFileRepository) {
-		return new FileSystemResolver(settings, dropboxFileRepository);
+												DropboxFileRepository dropboxFileRepository,
+												FileHelper fileHelper) {
+		return new FileSystemResolver(settings, dropboxFileRepository, fileHelper);
 	}
 
 	@Provides
@@ -124,8 +126,9 @@ public class AppModule {
 	@Provides
 	@Singleton
 	DebugMenuInteractor provideDebugMenuInteractor(FileSystemResolver fileSystemResolver,
-												   EncryptedDatabaseRepository dbRepository) {
-		return new DebugMenuInteractor(context, fileSystemResolver, dbRepository);
+												   EncryptedDatabaseRepository dbRepository,
+												   FileHelper fileHelper) {
+		return new DebugMenuInteractor(fileSystemResolver, dbRepository, fileHelper);
 	}
 
 	@Provides
@@ -144,5 +147,11 @@ public class AppModule {
 	@Singleton
 	GlobalSnackbarBus provideGlobalSnackbarBus() {
 		return new GlobalSnackbarBus();
+	}
+
+	@Provides
+	@Singleton
+	FileHelper provideFileHelper(SettingsRepository settings) {
+		return new FileHelper(context, settings);
 	}
 }

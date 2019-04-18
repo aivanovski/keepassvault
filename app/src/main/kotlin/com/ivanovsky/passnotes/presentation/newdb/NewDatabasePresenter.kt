@@ -6,13 +6,13 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
 import com.ivanovsky.passnotes.util.COROUTINE_EXCEPTION_HANDLER
-import com.ivanovsky.passnotes.util.FileUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,6 +27,9 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 
 	@Inject
 	lateinit var errorInteractor: ErrorInteractor
+
+	@Inject
+	lateinit var fileHelper: FileHelper
 
 	override val screenState = MutableLiveData<ScreenState>()
 	override val storageTypeAndPath = MutableLiveData<Pair<String, String>>()
@@ -93,7 +96,7 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 		if (selectedFile.fsType == FSType.REGULAR_FS) {
 			val file = File(selectedFile.path)
 
-			if (FileUtils.isLocatedInPrivateStorage(file, context)) {
+			if (fileHelper.isLocatedInPrivateStorage(file)) {
 				storageTypeAndPath.value = Pair(context.getString(R.string.private_storage), selectedFile.path)
 			} else {
 				storageTypeAndPath.value = Pair(context.getString(R.string.public_storage), selectedFile.path)

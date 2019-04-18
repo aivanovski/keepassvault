@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.Spinner
 import androidx.lifecycle.Observer
@@ -24,6 +25,7 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 	private lateinit var openDbButton: View
 	private lateinit var closeDbButton: View
 	private lateinit var addEntryButton: View
+	private lateinit var externalStorageCheckBox: CheckBox
 	private lateinit var presenter: DebugMenuContract.Presenter
 
 	override fun onStart() {
@@ -50,6 +52,7 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 		openDbButton = view.findViewById(R.id.open_button)
 		closeDbButton = view.findViewById(R.id.close_button)
 		addEntryButton = view.findViewById(R.id.add_entry_button)
+		externalStorageCheckBox = view.findViewById(R.id.external_storage_check_box)
 
 		fileSystemSpinner.adapter = createSpinnerAdapter()
 
@@ -63,6 +66,8 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 				Observer { isEnabled -> setCloseDbButtonEnabled(isEnabled) })
 		presenter.addEntryButtonEnabled.observe(this,
 				Observer { isEnabled -> setAddEntryButtonEnabled(isEnabled) })
+		presenter.externalStorageCheckBoxChecked.observe(this,
+				Observer { isChecked -> setExternalStorageCheckBoxChecked(isChecked) })
 		presenter.snackbarMessageAction.observe(this,
 				Observer { message -> showSnackbar(message)} )
 
@@ -101,6 +106,16 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 
 	override fun setAddEntryButtonEnabled(isEnabled: Boolean) {
 		addEntryButton.isEnabled = isEnabled
+	}
+
+	override fun setExternalStorageCheckBoxChecked(isChecked: Boolean) {
+		externalStorageCheckBox.setOnCheckedChangeListener(null)
+
+		externalStorageCheckBox.isChecked = isChecked
+
+		externalStorageCheckBox.setOnCheckedChangeListener { _, checked ->
+			onExternalStorageCheckedChanged(checked)
+		}
 	}
 
 	private fun onReadButtonClicked() {
@@ -156,6 +171,10 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 
 	private fun getPassword(): String {
 		return passwordEditText.text.toString()
+	}
+
+	private fun onExternalStorageCheckedChanged(isChecked: Boolean) {
+		presenter.onExternalStorageCheckedChanged(isChecked)
 	}
 
 	companion object {

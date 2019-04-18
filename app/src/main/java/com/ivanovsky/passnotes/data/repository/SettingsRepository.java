@@ -12,6 +12,7 @@ public class SettingsRepository {
 	private static final Map<String, DefaultValue> DEFAULT_VALUES = createDefaultValuesMap();
 
 	private static final String DROPBOX_AUTH_TOKEN = "dropboxAuthToken";
+	private static final String IS_EXTERNAL_STORAGE_CACHE_ENABLED = "isExternalStorageCacheEnabled";
 
 	private SharedPreferences preferences;
 
@@ -19,6 +20,7 @@ public class SettingsRepository {
 		Map<String, DefaultValue> map = new HashMap<>();
 
 		map.put(DROPBOX_AUTH_TOKEN, new DefaultValue<>(null, String.class));
+		map.put(IS_EXTERNAL_STORAGE_CACHE_ENABLED, new DefaultValue<>(false, Boolean.class));
 
 		return map;
 	}
@@ -33,6 +35,14 @@ public class SettingsRepository {
 
 	public void setDropboxAuthToken(String value) {
 		putString(DROPBOX_AUTH_TOKEN, value);
+	}
+
+	public boolean isExternalStorageCacheEnabled() {
+		return getBoolean(IS_EXTERNAL_STORAGE_CACHE_ENABLED);
+	}
+
+	public void setExternalStorageCacheEnabled(boolean externalStorageCacheEnabled) {
+		putBoolean(IS_EXTERNAL_STORAGE_CACHE_ENABLED, externalStorageCacheEnabled);
 	}
 
 	public void clean() {

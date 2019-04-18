@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.debugmenu
 
 import androidx.lifecycle.MutableLiveData
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.repository.SettingsRepository
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
@@ -28,11 +29,15 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 	@Inject
 	lateinit var fileSystemResolver: FileSystemResolver
 
+	@Inject
+	lateinit var settings: SettingsRepository
+
 	override val screenState = MutableLiveData<ScreenState>()
 	override val writeButtonEnabled = MutableLiveData<Boolean>()
 	override val openDbButtonEnabled = MutableLiveData<Boolean>()
 	override val closeDbButtonEnabled = MutableLiveData<Boolean>()
 	override val addEntryButtonEnabled = MutableLiveData<Boolean>()
+	override val externalStorageCheckBoxChecked = MutableLiveData<Boolean>()
 	override val snackbarMessageAction = SingleLiveAction<String>()
 
 	private var lastReadDescriptor: FileDescriptor? = null
@@ -50,6 +55,7 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 		openDbButtonEnabled.value = false
 		closeDbButtonEnabled.value = false
 		addEntryButtonEnabled.value = false
+		externalStorageCheckBoxChecked.value = settings.isExternalStorageCacheEnabled
 	}
 
 	override fun stop() {
@@ -206,5 +212,9 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 				screenState.value = ScreenState.dataWithError(message)
 			}
 		}
+	}
+
+	override fun onExternalStorageCheckedChanged(isChecked: Boolean) {
+		settings.isExternalStorageCacheEnabled = isChecked
 	}
 }

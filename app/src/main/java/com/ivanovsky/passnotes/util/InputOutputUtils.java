@@ -42,7 +42,7 @@ public class InputOutputUtils {
 
 		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new InputStreamReader(is, "utf-8"));
+			reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
 			StringBuilder sb = new StringBuilder();
 			String line;
 
@@ -74,6 +74,8 @@ public class InputOutputUtils {
 			out.write(buf, 0, len);
 		}
 
+		out.flush();
+
 		if (close) {
 			in.close();
 			out.close();
@@ -87,6 +89,8 @@ public class InputOutputUtils {
 		while ((len = in.read(buf)) > 0 && !cancellation.get()) {
 			out.write(buf, 0, len);
 		}
+
+		out.flush();
 
 		if (close) {
 			in.close();

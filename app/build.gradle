@@ -149,9 +149,12 @@ dependencies {
 	implementation project(':libs:KeePassJava2-kdbx')
 	implementation project(':libs:KeePassJava2-simple')
 
-	//Dropbox
+	// Dropbox
 	implementation "com.dropbox.core:dropbox-core-sdk:$dropboxVersion"
 
-	//OkHttp
+	// OkHttp
 	implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
+
+	// Stetho
+	implementation 'com.facebook.stetho:stetho:1.5.1'
 }

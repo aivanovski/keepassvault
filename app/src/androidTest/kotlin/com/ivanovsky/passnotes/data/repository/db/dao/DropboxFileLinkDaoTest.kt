@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.db.dao
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.ivanovsky.passnotes.data.entity.DropboxFileLink
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
 import com.ivanovsky.passnotes.dateInMillis
 import com.ivanovsky.passnotes.initInMemoryDatabase

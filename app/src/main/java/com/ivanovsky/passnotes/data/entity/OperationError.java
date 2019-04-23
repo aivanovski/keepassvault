@@ -21,6 +21,7 @@ public class OperationError {
 	public static final String MESSAGE_FAILED_TO_FIND_FILE = "Failed to find file";
 	public static final String MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE = "Failed to access to private storage";
 	public static final String MESSAGE_DB_IS_NOT_OPENED = "Database is not opened";
+	public static final String MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED = "Deferred operations are not supported";
 
 	private Type type;
 	private String message;
@@ -55,6 +56,12 @@ public class OperationError {
 		OperationError error = new OperationError(Type.FILE_ACCESS_ERROR);
 		error.message = message;
 		error.throwable = throwable;
+		return error;
+	}
+
+	public static OperationError newFileAccessError(String message) {
+		OperationError error = new OperationError(Type.FILE_ACCESS_ERROR);
+		error.message = message;
 		return error;
 	}
 

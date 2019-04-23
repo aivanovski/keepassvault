@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
+import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.util.Logger;
 
 import java.io.BufferedInputStream;
@@ -121,7 +122,9 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public OperationResult<OutputStream> openFileForWrite(FileDescriptor file) {
+	public OperationResult<OutputStream> openFileForWrite(FileDescriptor file,
+														  OnConflictStrategy onConflictStrategy) {
+		// TODO: implement onConflictStrategy
 		OperationResult<OutputStream> result = new OperationResult<>();
 
 		lock.lock();

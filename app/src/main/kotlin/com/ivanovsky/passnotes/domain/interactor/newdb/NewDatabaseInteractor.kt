@@ -23,33 +23,47 @@ open class NewDatabaseInteractor(private val dbRepository: EncryptedDatabaseRepo
 
 		val existsResult = provider.exists(file)
 		if (existsResult.isSucceeded) {
-			val exists = existsResult.obj
+			val isExists = existsResult.obj
 
-			if (!exists) {
+			if (!isExists) {
 				val creationResult = dbRepository.createNew(key, file)
 
-				if (creationResult.isSucceededOrDeferred) {
-					val usedFile = UsedFile()
+				if (creationResult.isSucceeded) {
+					val getFileResult = getFile(file)
 
-					usedFile.filePath = file.path
-					usedFile.fileUid = file.uid
-					usedFile.fsType = file.fsType
-					usedFile.lastAccessTime = System.currentTimeMillis()
+					if (getFileResult.isSucceeded) {
+						val newFile = getFileResult.obj
 
-					usedFileRepository.insert(usedFile)
+						file.uid = newFile.uid
+						file.path = newFile.path
+						file.modified = newFile.modified
 
-					observerBus.notifyUsedFileDataSetChanged()
+						val usedFile = UsedFile()
 
-					val openResult = dbRepository.open(key, file)
-					if (openResult.isSucceededOrDeferred) {
-						val db = openResult.obj
+						usedFile.filePath = file.path
+						usedFile.fileUid = file.uid
+						usedFile.fsType = file.fsType
+						usedFile.lastAccessTime = System.currentTimeMillis()
 
-						Injector.getInstance().createEncryptedDatabaseComponent(db)
+						usedFileRepository.insert(usedFile)
 
-						result.obj = true
+						observerBus.notifyUsedFileDataSetChanged()
+
+						val openResult = dbRepository.open(key, file)
+						if (openResult.isSucceededOrDeferred) {
+							val db = openResult.obj
+
+							Injector.getInstance().createEncryptedDatabaseComponent(db)
+
+							result.obj = true
+						} else {
+							result.error = openResult.error
+						}
 					} else {
-						result.error = openResult.error
+						result.error = getFileResult.error
 					}
+				} else if (creationResult.isDeferred) {
+					result.error = newFileAccessError(MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED)
 				} else {
 					result.error = creationResult.error
 				}
@@ -58,6 +72,23 @@ open class NewDatabaseInteractor(private val dbRepository: EncryptedDatabaseRepo
 			}
 		} else {
 			result.error = existsResult.error
+		}
+
+		return result
+	}
+
+	private fun getFile(file: FileDescriptor): OperationResult<FileDescriptor> {
+		val result = OperationResult<FileDescriptor>()
+
+		val provider = fileSystemResolver.resolveProvider(file.fsType)
+		val getFileResult = provider.getFile(file.path)
+
+		if (getFileResult.isSucceeded) {
+			result.obj = getFileResult.obj
+		} else if (getFileResult.isDeferred) {
+			result.error = newFileAccessError(MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED)
+		} else {
+			result.error = getFileResult.error
 		}
 
 		return result

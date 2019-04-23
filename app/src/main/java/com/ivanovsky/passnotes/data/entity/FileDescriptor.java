@@ -38,7 +38,7 @@ public class FileDescriptor implements Parcelable {
 		result.directory = false;
 		result.modified = null;
 		result.root = false;
-		result.uid = result.path;
+		result.uid = null;
 
 		return result;
 	}

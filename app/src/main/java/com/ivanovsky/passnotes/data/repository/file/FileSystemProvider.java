@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
+import androidx.annotation.Nullable;
+
 public interface FileSystemProvider {
 
 	FileSystemAuthenticator getAuthenticator();
@@ -14,7 +16,8 @@ public interface FileSystemProvider {
 	OperationResult<FileDescriptor> getParent(FileDescriptor file);
 	OperationResult<FileDescriptor> getRootFile();
 	OperationResult<InputStream> openFileForRead(FileDescriptor file);
-	OperationResult<OutputStream> openFileForWrite(FileDescriptor file);
+	OperationResult<OutputStream> openFileForWrite(FileDescriptor file,
+												   @Nullable OnConflictStrategy onConflictStrategy);
 	OperationResult<Boolean> exists(FileDescriptor file);
 	OperationResult<FileDescriptor> getFile(String path);
 }

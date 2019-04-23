@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
+import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.util.Logger;
 
 import org.linguafranca.pwdb.Credentials;
@@ -95,7 +96,8 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
 				Database keepassDb = SimpleDatabase.load(defaultCredentials, in);
 
-				OperationResult<OutputStream> outResult = provider.openFileForWrite(file);
+				OperationResult<OutputStream> outResult = provider.openFileForWrite(file,
+						OnConflictStrategy.CANCEL);
 				if (outResult.isSucceededOrDeferred()) {
 					out = outResult.getObj();
 

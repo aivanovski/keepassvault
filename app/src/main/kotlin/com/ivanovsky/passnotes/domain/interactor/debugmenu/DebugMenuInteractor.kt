@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.GroupRepository
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
+import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.util.InputOutputUtils
@@ -89,7 +90,7 @@ class DebugMenuInteractor(private val fileSystemResolver: FileSystemResolver,
 				val creationResult = createNewDatabaseInPrivateStorage(password)
 
 				if (creationResult.isSucceededOrDeferred) {
-					val openResult = anyFsProvider.openFileForWrite(file)
+					val openResult = anyFsProvider.openFileForWrite(file, OnConflictStrategy.CANCEL)
 					if (openResult.isSucceededOrDeferred) {
 						val inputFile = creationResult.obj.first
 						val inputStream = creationResult.obj.second
@@ -171,7 +172,7 @@ class DebugMenuInteractor(private val fileSystemResolver: FileSystemResolver,
 
 		val provider = fileSystemResolver.resolveProvider(outFile.fsType)
 
-		val openResult = provider.openFileForWrite(outFile)
+		val openResult = provider.openFileForWrite(outFile, OnConflictStrategy.REWRITE)
 		if (openResult.isSucceededOrDeferred) {
 			val outStream = openResult.obj
 			val inStream = newFileInputStreamOrNull(inFile)

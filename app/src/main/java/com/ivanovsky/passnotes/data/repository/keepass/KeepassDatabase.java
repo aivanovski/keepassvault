@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.encdb.exception.FailedToWriteDBException;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
+import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.data.repository.file.RemoteFileOutputStream;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassGroupDao;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao;
@@ -108,7 +109,8 @@ public class KeepassDatabase implements EncryptedDatabase {
 
 		OutputStream out;
 		try {
-			OperationResult<OutputStream> outResult = provider.openFileForWrite(file);
+			OperationResult<OutputStream> outResult = provider.openFileForWrite(file,
+					OnConflictStrategy.CANCEL);
 
 			if (outResult.isSucceededOrDeferred()) {
 				out = outResult.getObj();

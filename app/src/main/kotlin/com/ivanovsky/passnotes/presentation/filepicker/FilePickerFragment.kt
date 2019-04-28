@@ -1,10 +1,9 @@
 package com.ivanovsky.passnotes.presentation.filepicker
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -75,8 +74,8 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 
 		data.putExtra(FilePickerActivity.EXTRA_RESULT, file)
 
-		activity.setResult(Activity.RESULT_OK, data)
-		activity.finish()
+		activity!!.setResult(Activity.RESULT_OK, data)
+		activity!!.finish()
 	}
 
 	override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -109,8 +108,8 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 				isDividerEnabled = true)
 	}
 
-	override fun onCreateListAdapter(): RecyclerView.Adapter<out RecyclerView.ViewHolder> {
-		adapter = FilePickerAdapter(context)
+	override fun onCreateListAdapter(): FilePickerAdapter {
+		adapter = FilePickerAdapter(context!!)
 		return adapter
 	}
 

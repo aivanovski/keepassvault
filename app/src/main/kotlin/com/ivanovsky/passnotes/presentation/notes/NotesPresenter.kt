@@ -1,11 +1,13 @@
 package com.ivanovsky.passnotes.presentation.notes
 
-import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor
 import com.ivanovsky.passnotes.injection.Injector
-import io.reactivex.disposables.CompositeDisposable
+import com.ivanovsky.passnotes.util.COROUTINE_EXCEPTION_HANDLER
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
@@ -18,7 +20,7 @@ class NotesPresenter(private val groupUid: UUID,
 	@Inject
 	lateinit var errorInteractor: ErrorInteractor
 
-	private var disposables = CompositeDisposable()
+	private val scope = CoroutineScope(Dispatchers.Main + COROUTINE_EXCEPTION_HANDLER)
 
 	init {
 		Injector.getInstance().encryptedDatabaseComponent.inject(this)
@@ -29,27 +31,25 @@ class NotesPresenter(private val groupUid: UUID,
 	}
 
 	override fun stop() {
-		disposables.clear()
 	}
 
 	override fun loadData() {
-		val disposable = interactor.getNotesByGroupUid(groupUid)
-				.subscribe({ result -> onNotesLoadedResult(result) })
-
-		disposables.add(disposable)
-	}
-
-	private fun onNotesLoadedResult(result: OperationResult<List<Note>>) {
-		if (result.result != null) {
-			val notes = result.result
-
-			if (notes.isNotEmpty()) {
-				view.showNotes(notes)
-			} else {
-				view.showNotItems()
+		scope.launch {
+			val result = withContext(Dispatchers.Main) {
+				interactor.getNotesByGroupUid(groupUid)
 			}
-		} else {
-			view.showError(errorInteractor.processAndGetMessage(result.error))
+
+			if (result.isSucceededOrDeferred) {
+				val notes = result.obj
+
+				if (notes.isNotEmpty()) {
+					view.showNotes(notes)
+				} else {
+					view.showNotItems()
+				}
+			} else {
+				view.showError(errorInteractor.processAndGetMessage(result.error))
+			}
 		}
 	}
 }

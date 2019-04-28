@@ -2,13 +2,15 @@ package com.ivanovsky.passnotes.presentation.note
 
 import android.content.Context
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.FragmentState
-import io.reactivex.disposables.CompositeDisposable
+import com.ivanovsky.passnotes.util.COROUTINE_EXCEPTION_HANDLER
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
@@ -22,7 +24,7 @@ class NotePresenter(private var context: Context,
 	@Inject
 	lateinit var errorInteractor: ErrorInteractor
 
-	private var disposables = CompositeDisposable()
+	private val scope = CoroutineScope(Dispatchers.Main + COROUTINE_EXCEPTION_HANDLER)
 
 	init {
 		Injector.getInstance().encryptedDatabaseComponent.inject(this)
@@ -33,22 +35,20 @@ class NotePresenter(private var context: Context,
 	}
 
 	override fun stop() {
-		disposables.clear()
 	}
 
 	override fun loadData() {
-		val disposable = interactor.getNoteByUid(noteUid!!)
-				.subscribe({ result -> onNoteLoaded(result)})
+		scope.launch {
+			val result = withContext(Dispatchers.Default) {
+				interactor.getNoteByUid(noteUid!!)// TODO: fix !!
+			}
 
-		disposables.add(disposable)
-	}
-
-	private fun onNoteLoaded(result: OperationResult<Note>) {
-		if (result.result != null) {
-			view.showNote(result.result)
-			view.setState(FragmentState.DISPLAYING_DATA)
-		} else {
-			view.showError(errorInteractor.processAndGetMessage(result.error))
+			if (result.isSucceededOrDeferred) {
+				view.showNote(result.obj)
+				view.setState(FragmentState.DISPLAYING_DATA)
+			} else {
+				view.showError(errorInteractor.processAndGetMessage(result.error))
+			}
 		}
 	}
 

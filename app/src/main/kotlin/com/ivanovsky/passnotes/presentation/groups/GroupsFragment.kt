@@ -1,17 +1,19 @@
 package com.ivanovsky.passnotes.presentation.groups
 
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.presentation.Screen
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
-import com.ivanovsky.passnotes.presentation.newgroup.NewGroupActivity
+import com.ivanovsky.passnotes.presentation.group.GroupActivity
 import com.ivanovsky.passnotes.presentation.notes.NotesActivity
 import com.ivanovsky.passnotes.presentation.unlock.UnlockActivity
 
@@ -47,12 +49,15 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 
 		val layoutManager = GridLayoutManager(context, 3)
 
-		adapter = GroupsAdapter(context)
+		adapter = GroupsAdapter(context!!)
 
 		recyclerView.layoutManager = layoutManager
 		recyclerView.adapter = adapter
 
 		fab.setOnClickListener { showNewGroupScreen() }
+
+		presenter.globalSnackbarMessageAction.observe(this, Screen.GROUPS,
+				Observer { message -> showSnackbar(message) })
 
 		return view
 	}
@@ -63,9 +68,11 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 
 	override fun onStateChanged(oldState: FragmentState?, newState: FragmentState) {
 		when (newState) {
-			FragmentState.EMPTY, FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL, FragmentState.DISPLAYING_DATA -> fab.visibility = View.VISIBLE
+			FragmentState.EMPTY,
+			FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL,
+			FragmentState.DISPLAYING_DATA -> fab.show()
 
-			FragmentState.LOADING, FragmentState.ERROR -> fab.visibility = View.GONE
+			FragmentState.LOADING, FragmentState.ERROR -> fab.hide()
 		}
 	}
 
@@ -110,17 +117,17 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 	}
 
 	override fun showNewGroupScreen() {
-		startActivity(NewGroupActivity.createStartIntent(context))
+		startActivity(GroupActivity.createStartIntent(context!!))
 	}
 
 	override fun showUnlockScreenAndFinish() {
-		startActivity(UnlockActivity.createStartIntent(context))
+		startActivity(UnlockActivity.createStartIntent(context!!))
 
-		activity.finish()
+		activity!!.finish()
 	}
 
 	override fun showNotesScreen(group: Group) {
-		startActivity(NotesActivity.createStartIntent(context, group))
+		startActivity(NotesActivity.createStartIntent(context!!, group))
 	}
 
 	override fun showError(message: String) {

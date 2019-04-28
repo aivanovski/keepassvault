@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes.domain
 
 import android.content.Context
-import android.support.annotation.StringRes
+import androidx.annotation.StringRes
 
 class ResourceHelper(private val context: Context) {
 

@@ -38,9 +38,9 @@ public class FragmentStateView extends FrameLayout {
 		LayoutInflater.from(getContext()).inflate(R.layout.core_fragment_state_view, this, true);
 
 		progressView = findViewById(R.id.progress_view);
-		emptyTextView = (TextView) findViewById(R.id.empty_text);
-		errorTextView = (TextView) findViewById(R.id.error_text);
-		errorTextLayout = (ViewGroup) findViewById(R.id.error_layout);
+		emptyTextView = findViewById(R.id.empty_text);
+		errorTextView = findViewById(R.id.error_text);
+		errorTextLayout = findViewById(R.id.error_layout);
 
 		setState(state != null ? state : State.LOADING);
 	}

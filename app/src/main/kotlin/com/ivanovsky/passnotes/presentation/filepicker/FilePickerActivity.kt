@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseActivity
 
 class FilePickerActivity : BaseActivity() {
 
+	private var isBrowsingEnabled: Boolean = false
 	private lateinit var mode: Mode
 	private lateinit var rootFile: FileDescriptor
 
@@ -18,11 +19,16 @@ class FilePickerActivity : BaseActivity() {
 		const val EXTRA_RESULT = "result"
 		private const val EXTRA_MODE = "mode"
 		private const val EXTRA_ROOT_FILE = "rootFile"
+		private const val EXTRA_IS_BROWSING_ENABLED = "isBrowsingEnabled"
 
-		fun createStartIntent(context: Context, mode: Mode, rootFile: FileDescriptor): Intent {
+		fun createStartIntent(context: Context, mode: Mode, rootFile: FileDescriptor,
+		                      isBrowsingEnabled: Boolean): Intent {
 			val result = Intent(context, FilePickerActivity::class.java)
+
 			result.putExtra(EXTRA_MODE, mode)
 			result.putExtra(EXTRA_ROOT_FILE, rootFile)
+			result.putExtra(EXTRA_IS_BROWSING_ENABLED, isBrowsingEnabled)
+
 			return result
 		}
 	}
@@ -33,6 +39,7 @@ class FilePickerActivity : BaseActivity() {
 
 		mode = intent.extras.getSerializable(EXTRA_MODE) as Mode
 		rootFile = intent.extras.getParcelable(EXTRA_ROOT_FILE)
+		isBrowsingEnabled = intent.extras.getBoolean(EXTRA_IS_BROWSING_ENABLED)
 
 		initCurrentActionBar(findViewById(R.id.tool_bar))
 		currentActionBar.title = getString(R.string.select_directory)
@@ -43,7 +50,7 @@ class FilePickerActivity : BaseActivity() {
 				.replace(R.id.fragment_container, fragment)
 				.commit()
 
-		val presenter = FilePickerPresenter(mode, rootFile, this)
+		val presenter = FilePickerPresenter(mode, rootFile, isBrowsingEnabled, this)
 		fragment.setPresenter(presenter)
 	}
 

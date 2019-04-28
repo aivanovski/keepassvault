@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
-	android:orientation="vertical">
+	android:orientation="horizontal"
+	android:gravity="center_horizontal">
 
 	<TextView
 		android:id="@+id/error_panel_text"
-		android:layout_width="match_parent"
+		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:padding="@dimen/group_margin"
 		android:gravity="center"
@@ -15,4 +16,11 @@
 		android:textColor="@color/accent"
 		android:textSize="@dimen/material_primary_text_size"/>
 
-</FrameLayout>
+	<com.google.android.material.button.MaterialButton
+		android:id="@+id/retry_button"
+		style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="@string/retry"/>
+
+</LinearLayout>

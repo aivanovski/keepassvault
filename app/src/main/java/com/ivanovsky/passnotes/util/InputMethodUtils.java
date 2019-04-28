@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.util;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 

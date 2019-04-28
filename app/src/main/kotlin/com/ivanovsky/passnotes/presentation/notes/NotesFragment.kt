@@ -1,18 +1,18 @@
 package com.ivanovsky.passnotes.presentation.notes
 
 import android.os.Bundle
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.core.adapter.SingleLineAdapter
-import com.ivanovsky.passnotes.presentation.newgroup.NewGroupActivity
+import com.ivanovsky.passnotes.presentation.group.GroupActivity
 import com.ivanovsky.passnotes.presentation.note.NoteActivity
 
 class NotesFragment: BaseFragment(), NotesContract.View {
@@ -44,10 +44,10 @@ class NotesFragment: BaseFragment(), NotesContract.View {
 
 		recyclerView = view.findViewById(R.id.recycler_view)
 
-		val layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+		val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
 		val dividerDecorator = DividerItemDecoration(context, layoutManager.orientation)
 
-		adapter = SingleLineAdapter(context)
+		adapter = SingleLineAdapter(context!!)
 
 		recyclerView.layoutManager = layoutManager
 		recyclerView.addItemDecoration(dividerDecorator)
@@ -77,9 +77,9 @@ class NotesFragment: BaseFragment(), NotesContract.View {
 	}
 
 	override fun showUnlockScreenAndFinish() {
-		startActivity(NewGroupActivity.createStartIntent(context))
+		startActivity(GroupActivity.createStartIntent(context!!))
 
-		activity.finish()
+		activity!!.finish()
 	}
 
 	override fun showError(message: String) {
@@ -88,6 +88,6 @@ class NotesFragment: BaseFragment(), NotesContract.View {
 	}
 
 	override fun showNoteScreen(note: Note) {
-		startActivity(NoteActivity.createStartIntent(activity, note))
+		startActivity(NoteActivity.createStartIntent(activity!!, note))
 	}
 }

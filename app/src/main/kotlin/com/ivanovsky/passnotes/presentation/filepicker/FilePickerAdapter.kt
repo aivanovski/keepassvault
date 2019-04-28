@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.presentation.filepicker
 
 import android.content.Context
-import android.support.annotation.DrawableRes
-import android.support.v7.widget.RecyclerView
+import androidx.annotation.DrawableRes
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.ivanovsky.passnotes.R
 
-class FilePickerAdapter(private val context: Context) :
+class FilePickerAdapter(context: Context) :
 		RecyclerView.Adapter<FilePickerAdapter.ViewHolder>() {
 
 	lateinit var onItemClickListener: (Int) -> Unit

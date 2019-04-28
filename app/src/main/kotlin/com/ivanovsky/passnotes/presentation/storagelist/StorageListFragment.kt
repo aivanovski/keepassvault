@@ -1,24 +1,30 @@
 package com.ivanovsky.passnotes.presentation.storagelist
 
 import android.app.Activity
-import android.arch.lifecycle.Observer
+import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.FSType
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.entity.StorageOption
+import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.adapter.SingleLineAdapter
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerActivity
+import javax.inject.Inject
 
 class StorageListFragment : BaseFragment(), StorageListContract.View {
+
+	@Inject
+	lateinit var fileSystemResolver: FileSystemResolver
 
 	private lateinit var presenter: StorageListContract.Presenter
 	private lateinit var adapter: SingleLineAdapter
@@ -30,6 +36,11 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 		fun newInstance(): StorageListFragment {
 			return StorageListFragment()
 		}
+	}
+
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		Injector.getInstance().appComponent.inject(this)
 	}
 
 	override fun setPresenter(presenter: StorageListContract.Presenter) {
@@ -51,10 +62,10 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 
 		val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
 
-		val layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+		val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
 		val dividerDecorator = DividerItemDecoration(context, layoutManager.orientation)
 
-		adapter = SingleLineAdapter(context)
+		adapter = SingleLineAdapter(context!!)
 
 		recyclerView.layoutManager = layoutManager
 		recyclerView.addItemDecoration(dividerDecorator)
@@ -65,9 +76,11 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 		presenter.storageOptions.observe(this,
 				Observer { options -> setStorageOptions(options!!)})
 		presenter.showFilePickerScreenAction.observe(this,
-				Observer { fileAndMode -> showFilePickerScreen(fileAndMode!!.first, fileAndMode.second) })
+				Observer { args -> showFilePickerScreen(args!!.root, args.action, args.isBrowsingEnabled) })
 		presenter.fileSelectedAction.observe(this,
 				Observer { file -> selectFileAndFinish(file!!) })
+		presenter.authActivityStartedAction.observe(this,
+				Observer { fsType -> showAuthActivity(fsType!!) })
 
 		return view
 	}
@@ -79,23 +92,19 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 		adapter.onItemClickListener = { pos -> presenter.onStorageOptionClicked(options[pos])}
 	}
 
-	override fun showFilePickerScreen(root: FileDescriptor, mode: Mode) {
-		if (root.fsType == FSType.REGULAR_FS) {
-			val intent = FilePickerActivity.createStartIntent(context,
-					convertModeForFilePicker(mode),
-					root)
+	override fun showFilePickerScreen(root: FileDescriptor, action: Action, isBrowsingEnabled: Boolean) {
+		val intent = FilePickerActivity.createStartIntent(context!!,
+				convertActionToFilePickerMode(action),
+				root,
+				isBrowsingEnabled)
 
-			startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
-
-		} else if (root.fsType == FSType.DROPBOX) {
-			throw RuntimeException("Not implemented")//TODO: implement
-		}
+		startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
 	}
 
-	private fun convertModeForFilePicker(mode: Mode): com.ivanovsky.passnotes.presentation.filepicker.Mode {
-		return when (mode) {
-			Mode.PICK_FILE -> com.ivanovsky.passnotes.presentation.filepicker.Mode.PICK_FILE
-			Mode.PICK_DIRECTORY -> com.ivanovsky.passnotes.presentation.filepicker.Mode.PICK_DIRECTORY
+	private fun convertActionToFilePickerMode(action: Action): com.ivanovsky.passnotes.presentation.filepicker.Mode {
+		return when (action) {
+			Action.PICK_FILE -> com.ivanovsky.passnotes.presentation.filepicker.Mode.PICK_FILE
+			Action.PICK_STORAGE -> com.ivanovsky.passnotes.presentation.filepicker.Mode.PICK_DIRECTORY
 		}
 	}
 
@@ -118,7 +127,12 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 
 		data.putExtra(StorageListActivity.EXTRA_RESULT, file)
 
-		activity.setResult(Activity.RESULT_OK, data)
-		activity.finish()
+		activity!!.setResult(Activity.RESULT_OK, data)
+		activity!!.finish()
+	}
+
+	override fun showAuthActivity(fsType: FSType) {
+		val authenticator = fileSystemResolver.resolveProvider(fsType).authenticator
+		authenticator?.startAuthActivity(context)
 	}
 }

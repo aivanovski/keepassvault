@@ -1,10 +1,11 @@
 package com.ivanovsky.passnotes.presentation.core.livedata;
 
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
-import android.support.annotation.MainThread;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
+import androidx.annotation.MainThread;
+import androidx.annotation.Nullable;
 import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,7 +27,8 @@ public class SingleLiveAction<T> extends MutableLiveData<T> {
 	private final AtomicBoolean mPending = new AtomicBoolean(false);
 
 	@MainThread
-	public void observe(LifecycleOwner owner, final Observer<T> observer) {
+	@Override
+	public void observe(@NonNull LifecycleOwner owner, @NonNull Observer<? super T> observer) {
 
 		if (hasActiveObservers()) {
 			Log.w(TAG, "Multiple observers registered but only one will be notified of changes.");

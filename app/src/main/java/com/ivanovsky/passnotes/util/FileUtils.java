@@ -1,44 +1,8 @@
 package com.ivanovsky.passnotes.util;
 
-import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
-import java.io.File;
+import androidx.annotation.Nullable;
 
 public class FileUtils {
-
-	@Nullable
-	public static File getDatabaseDir(@NonNull Context context) {
-		File result = null;
-
-		File filesDir = context.getFilesDir();
-		if (filesDir != null && filesDir.getParentFile() != null) {
-
-			File dataDir = filesDir.getParentFile();
-			if (dataDir.exists()) {
-
-				File databaseDir = new File(dataDir.getPath() + File.separator + "databases");
-				if (databaseDir.exists()) {
-					result = databaseDir;
-				}
-			}
-		}
-
-		return result;
-	}
-
-	@Nullable
-	public static File getKeepassDir(@NonNull Context context) {
-		File result = null;
-
-		File dbDir = context.getDir("keepass-databases", Context.MODE_PRIVATE);
-		if (dbDir != null && dbDir.exists()) {
-			result = dbDir;
-		}
-
-		return result;
-	}
 
 	@Nullable
 	public static String getFileNameFromPath(@Nullable String filePath) {
@@ -49,12 +13,32 @@ public class FileUtils {
 		String fileName = "";
 
 		int idx = filePath.lastIndexOf("/");
-		if (idx > 0
-				&& idx + 1 < filePath.length()) {
-			fileName = filePath.substring(idx + 1, filePath.length());
+		if (idx >= 0 && idx < filePath.length() - 1) {
+			fileName = filePath.substring(idx + 1);
+
+		} else if (idx == 0 && filePath.length() == 1) {
+			fileName = filePath;
 		}
 
 		return fileName;
+	}
+
+	@Nullable
+	public static String getParentPath(@Nullable String path) {
+		if (path == null) {
+			return null;
+		}
+
+		String parentPath = null;
+
+		int idx = path.lastIndexOf("/");
+		if (idx > 0) {
+			parentPath = path.substring(0, idx);
+		} else if (idx == 0) {
+			parentPath = "/";
+		}
+
+		return parentPath;
 	}
 
 	@Nullable
@@ -70,22 +54,6 @@ public class FileUtils {
 		if (idx > 0
 				&& idx + 1 < fileName.length()) {
 			result = fileName.substring(0, idx);
-		}
-
-		return result;
-	}
-
-	public static boolean isLocatedInPrivateStorage(@NonNull File file, @NonNull Context context) {
-		boolean result = false;
-
-		File privateDir = context.getFilesDir();
-		if (privateDir != null) {
-			File dataDir = privateDir.getParentFile();
-			if (dataDir != null) {
-				String dataDirPath = dataDir.getPath();
-
-				result = file.getPath().startsWith(dataDirPath);
-			}
 		}
 
 		return result;

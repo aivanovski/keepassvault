@@ -1,19 +1,23 @@
 package com.ivanovsky.passnotes.injection;
 
-import android.arch.persistence.room.Room;
+import androidx.room.Room;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.data.ObserverBus;
+import com.ivanovsky.passnotes.data.repository.DropboxFileRepository;
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
-import com.ivanovsky.passnotes.data.repository.file.FileResolver;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
 import com.ivanovsky.passnotes.domain.ClipboardHelper;
+import com.ivanovsky.passnotes.domain.FileHelper;
+import com.ivanovsky.passnotes.domain.FileSyncHelper;
 import com.ivanovsky.passnotes.domain.PermissionHelper;
 import com.ivanovsky.passnotes.domain.ResourceHelper;
+import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus;
+import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor;
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor;
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor;
@@ -29,14 +33,9 @@ import dagger.Provides;
 public class AppModule {
 
 	private final Context context;
-	private final AppDatabase db;
-	private final UsedFileRepository usedFileRepository;
 
 	public AppModule(Context context) {
 		this.context = context;
-		this.db = Room.databaseBuilder(context.getApplicationContext(),
-				AppDatabase.class, AppDatabase.FILE_NAME).build();
-		this.usedFileRepository = new UsedFileRepository(db);
 	}
 
 	@Provides
@@ -48,19 +47,26 @@ public class AppModule {
 	@Provides
 	@Singleton
 	AppDatabase provideAppDatabase() {
-		return db;
+		return Room.databaseBuilder(context.getApplicationContext(),
+				AppDatabase.class, AppDatabase.FILE_NAME).build();
 	}
 
 	@Provides
 	@Singleton
-	UsedFileRepository provideUsedFileRepository() {
-		return usedFileRepository;
+	UsedFileRepository provideUsedFileRepository(AppDatabase db) {
+		return new UsedFileRepository(db);
 	}
 
 	@Provides
 	@Singleton
-	EncryptedDatabaseRepository provideEncryptedDBProvider(FileResolver fileResolver) {
-		return new KeepassDatabaseRepository(context, fileResolver);
+	DropboxFileRepository provideDropboxFileRepository(AppDatabase db) {
+		return new DropboxFileRepository(db.getDropboxFileDao());
+	}
+
+	@Provides
+	@Singleton
+	EncryptedDatabaseRepository provideEncryptedDBProvider(FileSystemResolver fileSystemResolver) {
+		return new KeepassDatabaseRepository(context, fileSystemResolver);
 	}
 
 	@Provides
@@ -71,21 +77,25 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	FileResolver provideFileResolver() {
-		return new FileResolver();
+	FileSystemResolver provideFilSystemResolver(SettingsRepository settings,
+												DropboxFileRepository dropboxFileRepository,
+												FileHelper fileHelper) {
+		return new FileSystemResolver(settings, dropboxFileRepository, fileHelper);
 	}
 
 	@Provides
 	@Singleton
-	FileSystemResolver provideFilSystemResolver() {
-		return new FileSystemResolver();
+	FileSyncHelper provideFileSyncHelper(FileSystemResolver resolver) {
+		return new FileSyncHelper(resolver);
 	}
 
 	@Provides
 	@Singleton
 	UnlockInteractor provideUnlockInteractor(EncryptedDatabaseRepository dbRepository,
-											 UsedFileRepository usedFileRepository) {
-		return new UnlockInteractor(usedFileRepository, dbRepository);
+											 UsedFileRepository usedFileRepository,
+											 ObserverBus observerBus,
+											 FileSyncHelper fileSyncHelper) {
+		return new UnlockInteractor(usedFileRepository, dbRepository, observerBus, fileSyncHelper);
 	}
 
 	@Provides
@@ -98,8 +108,9 @@ public class AppModule {
 	@Singleton
 	NewDatabaseInteractor provideNewDatabaseInteractor(EncryptedDatabaseRepository dbRepository,
 													   UsedFileRepository usedFileRepository,
+													   FileSystemResolver fileSystemResolver,
 													   ObserverBus observerBus) {
-		return new NewDatabaseInteractor(context, dbRepository, usedFileRepository, observerBus);
+		return new NewDatabaseInteractor(dbRepository, usedFileRepository, fileSystemResolver, observerBus);
 	}
 
 	@Provides
@@ -122,7 +133,15 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	PermissionHelper providerPermisionHelper() {
+	DebugMenuInteractor provideDebugMenuInteractor(FileSystemResolver fileSystemResolver,
+												   EncryptedDatabaseRepository dbRepository,
+												   FileHelper fileHelper) {
+		return new DebugMenuInteractor(fileSystemResolver, dbRepository, fileHelper);
+	}
+
+	@Provides
+	@Singleton
+	PermissionHelper providerPermissionHelper() {
 		return new PermissionHelper(context);
 	}
 
@@ -130,5 +149,17 @@ public class AppModule {
 	@Singleton
 	ResourceHelper providerResourceHelper() {
 		return new ResourceHelper(context);
+	}
+
+	@Provides
+	@Singleton
+	GlobalSnackbarBus provideGlobalSnackbarBus() {
+		return new GlobalSnackbarBus();
+	}
+
+	@Provides
+	@Singleton
+	FileHelper provideFileHelper(SettingsRepository settings) {
+		return new FileHelper(context, settings);
 	}
 }

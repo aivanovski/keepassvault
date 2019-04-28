@@ -11,18 +11,38 @@ public class SettingsRepository {
 
 	private static final Map<String, DefaultValue> DEFAULT_VALUES = createDefaultValuesMap();
 
+	private static final String DROPBOX_AUTH_TOKEN = "dropboxAuthToken";
+	private static final String IS_EXTERNAL_STORAGE_CACHE_ENABLED = "isExternalStorageCacheEnabled";
+
 	private SharedPreferences preferences;
 
 	private static Map<String, DefaultValue> createDefaultValuesMap() {
 		Map<String, DefaultValue> map = new HashMap<>();
 
-//		map.put(IS_LOGGED_IN, new DefaultValue<>(false, Integer.class));
+		map.put(DROPBOX_AUTH_TOKEN, new DefaultValue<>(null, String.class));
+		map.put(IS_EXTERNAL_STORAGE_CACHE_ENABLED, new DefaultValue<>(false, Boolean.class));
 
 		return map;
 	}
 
 	public SettingsRepository(Context context) {
 		preferences = PreferenceManager.getDefaultSharedPreferences(context);
+	}
+
+	public String getDropboxAuthToken() {
+		return preferences.getString(DROPBOX_AUTH_TOKEN, getDefaultValue(DROPBOX_AUTH_TOKEN, String.class));
+	}
+
+	public void setDropboxAuthToken(String value) {
+		putString(DROPBOX_AUTH_TOKEN, value);
+	}
+
+	public boolean isExternalStorageCacheEnabled() {
+		return getBoolean(IS_EXTERNAL_STORAGE_CACHE_ENABLED);
+	}
+
+	public void setExternalStorageCacheEnabled(boolean externalStorageCacheEnabled) {
+		putBoolean(IS_EXTERNAL_STORAGE_CACHE_ENABLED, externalStorageCacheEnabled);
 	}
 
 	public void clean() {

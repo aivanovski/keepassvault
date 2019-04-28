@@ -66,8 +66,23 @@ public class KeepassGroupDao implements GroupDao {
 
 			rootGroup.addGroup(newGroup);
 
-			if (newGroup.getUuid() != null && db.commit()) {
-				result.setResult(newGroup.getUuid());
+			if (newGroup.getUuid() != null) {
+				OperationResult<Boolean> commitResult = db.commit();
+
+				switch (commitResult.getStatus()) {
+					case DEFERRED:
+						result.setDeferredObj(newGroup.getUuid());
+						break;
+					case SUCCEEDED:
+						result.setObj(newGroup.getUuid());
+						break;
+					case FAILED:
+						keepassDb.deleteGroup(newGroup.getUuid());
+						result.setError(commitResult.getError());
+						break;
+					default:
+						throw new IllegalArgumentException("Status handling is not implementing");
+				}
 			}
 		}
 

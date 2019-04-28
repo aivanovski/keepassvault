@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.presentation.filepicker
 
 import android.Manifest
-import android.arch.lifecycle.MutableLiveData
+import androidx.lifecycle.MutableLiveData
 import android.content.Context
-import android.support.annotation.DrawableRes
+import androidx.annotation.DrawableRes
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -14,12 +14,15 @@ import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
+import com.ivanovsky.passnotes.util.COROUTINE_EXCEPTION_HANDLER
 import com.ivanovsky.passnotes.util.formatAccordingSystemLocale
-import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.*
+import java.util.*
 import javax.inject.Inject
 
 class FilePickerPresenter(private val mode: Mode,
                           rootFile: FileDescriptor,
+                          private val isBrowsingEnabled: Boolean,
                           private val context: Context) : FilePickerContract.Presenter {
 
 	@Inject
@@ -41,10 +44,10 @@ class FilePickerPresenter(private val mode: Mode,
 	override val fileSelectedAction = SingleLiveAction<FileDescriptor>()
 	override val snackbarMessageAction = SingleLiveAction<String>()
 
-	private lateinit var files: List<FileDescriptor>
-	private val disposables = CompositeDisposable()
+	private var isPermissionRejected = false
 	private var currentDir = rootFile
-	private var isPermissionRejected  = false
+	private lateinit var files: List<FileDescriptor>
+	private val scope = CoroutineScope(Dispatchers.Main + COROUTINE_EXCEPTION_HANDLER)
 
 	companion object {
 		private const val SDCARD_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -61,35 +64,48 @@ class FilePickerPresenter(private val mode: Mode,
 	}
 
 	override fun stop() {
-		disposables.clear()
 	}
 
 	override fun loadData() {
 		screenState.value = ScreenState.loading()
 		doneButtonVisibility.value = false
 
+		//TODO: app doesnt need permission for private storage and network storage
 		if (permissionHelper.isPermissionGranted(SDCARD_PERMISSION)) {
-			val disposable = interactor.getFileList(currentDir)
-					.subscribe({ result -> onFilesLoaded(currentDir, result) })
+			scope.launch {
+				val files = withContext(Dispatchers.Default) {
+					interactor.getFileList(currentDir)
+				}
 
-			disposables.add(disposable)
+				onFilesLoaded(currentDir, files)
+			}
 		} else {
 			requestPermissionAction.call(SDCARD_PERMISSION)
 		}
 	}
 
 	private fun onFilesLoaded(dir: FileDescriptor, result: OperationResult<List<FileDescriptor>>) {
-		if (result.result != null) {
-			val unsortedFiles = result.result
+		if (result.isSucceededOrDeferred) {
+			val unsortedFiles = result.obj
 
-			if (!dir.isRoot) {
-				val disposable = interactor.getParent(currentDir)
-						.subscribe({ parentResult -> onParentLoaded(unsortedFiles, parentResult)})
+			if (!dir.isRoot && isBrowsingEnabled) {
+				scope.launch {
+					val parent = withContext(Dispatchers.Default) {
+						interactor.getParent(currentDir)
+					}
 
-				disposables.add(disposable)
+					onParentLoaded(unsortedFiles, parent)
+				}
+
 			} else {
+				val sortedFiles = sortFiles(unsortedFiles)
 
-				files = sortFiles(unsortedFiles)
+				if (isBrowsingEnabled) {
+					files = sortedFiles
+				} else {
+					//hide all directories
+					files = sortedFiles.filter { file -> !file.isDirectory }
+				}
 
 				items.value = createAdapterItems(files, null)
 				screenState.value = ScreenState.data()
@@ -103,8 +119,8 @@ class FilePickerPresenter(private val mode: Mode,
 	}
 
 	private fun onParentLoaded(unsortedFiles: List<FileDescriptor>, result: OperationResult<FileDescriptor>) {
-		if (result.result != null) {
-			val parent = result.result
+		if (result.isSucceededOrDeferred) {
+			val parent = result.obj
 
 			val sortedFiles = sortFiles(unsortedFiles).toMutableList()
 			sortedFiles.add(0, parent)
@@ -141,12 +157,16 @@ class FilePickerPresenter(private val mode: Mode,
 		for (file in files) {
 			val iconResId = getIconResId(file.isDirectory)
 			val title = if (file == parent) ".." else formatItemTitle(file)
-			val description = file.modified.formatAccordingSystemLocale(context)
+			val description = formatModifiedDate(file.modified)
 
 			items.add(FilePickerAdapter.Item(iconResId, title, description, false))
 		}
 
 		return items
+	}
+
+	private fun formatModifiedDate(modified: Long?): String {
+		return if (modified != null) Date(modified).formatAccordingSystemLocale(context) else ""
 	}
 
 	@DrawableRes

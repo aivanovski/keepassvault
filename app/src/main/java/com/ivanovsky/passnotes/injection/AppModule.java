@@ -13,6 +13,7 @@ import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
 import com.ivanovsky.passnotes.domain.ClipboardHelper;
 import com.ivanovsky.passnotes.domain.FileHelper;
+import com.ivanovsky.passnotes.domain.FileSyncHelper;
 import com.ivanovsky.passnotes.domain.PermissionHelper;
 import com.ivanovsky.passnotes.domain.ResourceHelper;
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus;
@@ -84,10 +85,17 @@ public class AppModule {
 
 	@Provides
 	@Singleton
+	FileSyncHelper provideFileSyncHelper(FileSystemResolver resolver) {
+		return new FileSyncHelper(resolver);
+	}
+
+	@Provides
+	@Singleton
 	UnlockInteractor provideUnlockInteractor(EncryptedDatabaseRepository dbRepository,
 											 UsedFileRepository usedFileRepository,
-											 ObserverBus observerBus) {
-		return new UnlockInteractor(usedFileRepository, dbRepository, observerBus);
+											 ObserverBus observerBus,
+											 FileSyncHelper fileSyncHelper) {
+		return new UnlockInteractor(usedFileRepository, dbRepository, observerBus, fileSyncHelper);
 	}
 
 	@Provides

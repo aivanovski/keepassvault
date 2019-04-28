@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
+import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.util.Logger;
 
@@ -35,6 +36,11 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 
 	@Override
 	public FileSystemAuthenticator getAuthenticator() {
+		return null;
+	}
+
+	@Override
+	public FileSystemSyncProcessor getSyncProcessor() {
 		return null;
 	}
 
@@ -104,7 +110,9 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public OperationResult<InputStream> openFileForRead(FileDescriptor file) {
+	public OperationResult<InputStream> openFileForRead(FileDescriptor file,
+														OnConflictStrategy onConflictStrategy,
+														boolean cacheOperationsEnabled) {
 		OperationResult<InputStream> result = new OperationResult<>();
 
 		lock.lock();
@@ -123,7 +131,8 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 
 	@Override
 	public OperationResult<OutputStream> openFileForWrite(FileDescriptor file,
-														  OnConflictStrategy onConflictStrategy) {
+														  OnConflictStrategy onConflictStrategy,
+														  boolean cacheOperationsEnabled) {
 		// TODO: implement onConflictStrategy
 		OperationResult<OutputStream> result = new OperationResult<>();
 
@@ -148,7 +157,7 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 	}
 
 	@Override
-	public OperationResult<FileDescriptor> getFile(String path) {
+	public OperationResult<FileDescriptor> getFile(String path, boolean cacheOperationsEnabled) {
 		OperationResult<FileDescriptor> result = new OperationResult<>();
 
 		File file = new File(path);

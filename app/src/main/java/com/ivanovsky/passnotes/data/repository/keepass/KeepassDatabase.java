@@ -110,7 +110,8 @@ public class KeepassDatabase implements EncryptedDatabase {
 		OutputStream out;
 		try {
 			OperationResult<OutputStream> outResult = provider.openFileForWrite(file,
-					OnConflictStrategy.CANCEL);
+					OnConflictStrategy.CANCEL,
+					true);
 
 			if (outResult.isSucceededOrDeferred()) {
 				out = outResult.getObj();

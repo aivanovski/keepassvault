@@ -20,8 +20,10 @@ public class OperationError {
 	public static final String MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE = "Local version conflicts with remote";
 	public static final String MESSAGE_FAILED_TO_FIND_FILE = "Failed to find file";
 	public static final String MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE = "Failed to access to private storage";
+	public static final String MESSAGE_FAILED_TO_ACCESS_TO_FILE = "Failed to access to file";
 	public static final String MESSAGE_DB_IS_NOT_OPENED = "Database is not opened";
 	public static final String MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED = "Deferred operations are not supported";
+	public static final String MESSAGE_FAILED_TO_FIND_CACHED_FILE = "Failed to find cached file";
 
 	private Type type;
 	private String message;
@@ -96,6 +98,12 @@ public class OperationError {
 		return error;
 	}
 
+	public static OperationError newCacheError(String message) {
+		OperationError error = new OperationError(Type.CACHE_ERROR);
+		error.message = message;
+		return error;
+	}
+
 	public enum Type {
 		GENERIC_ERROR,
 		DB_AUTH_ERROR,
@@ -105,7 +113,8 @@ public class OperationError {
 		GENERIC_IO_ERROR,
 		AUTH_ERROR,
 		NETWORK_IO_ERROR,
-		FILE_IS_ALREADY_EXISTS
+		FILE_IS_ALREADY_EXISTS,
+		CACHE_ERROR, // inconsistent cached data
 	}
 
 	//TODO: remove unnecessary constructors and refactor

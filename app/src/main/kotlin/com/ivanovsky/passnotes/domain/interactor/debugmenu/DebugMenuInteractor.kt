@@ -27,10 +27,11 @@ class DebugMenuInteractor(private val fileSystemResolver: FileSystemResolver,
 
 		val provider = fileSystemResolver.resolveProvider(file.fsType)
 
-		val descriptorResult = provider.getFile(file.path)
+		val descriptorResult = provider.getFile(file.path, true)
+
 		if (descriptorResult.isSucceededOrDeferred) {
 			val descriptor = descriptorResult.obj
-			val contentResult = provider.openFileForRead(descriptor)
+			val contentResult = provider.openFileForRead(descriptor, OnConflictStrategy.REWRITE, true)
 
 			if (contentResult.isSucceededOrDeferred) {
 				val destinationResult = createNewLocalDestinationStream()
@@ -90,7 +91,9 @@ class DebugMenuInteractor(private val fileSystemResolver: FileSystemResolver,
 				val creationResult = createNewDatabaseInPrivateStorage(password)
 
 				if (creationResult.isSucceededOrDeferred) {
-					val openResult = anyFsProvider.openFileForWrite(file, OnConflictStrategy.CANCEL)
+					val openResult = anyFsProvider.openFileForWrite(file,
+							OnConflictStrategy.CANCEL,
+							true)
 					if (openResult.isSucceededOrDeferred) {
 						val inputFile = creationResult.obj.first
 						val inputStream = creationResult.obj.second
@@ -98,7 +101,7 @@ class DebugMenuInteractor(private val fileSystemResolver: FileSystemResolver,
 						val copyResult = copyStreamToStream(inputStream, outStream)
 
 						if (copyResult.isSucceededOrDeferred) {
-							val fileResult = anyFsProvider.getFile(file.path)
+							val fileResult = anyFsProvider.getFile(file.path, true)
 
 							if (fileResult.isSucceededOrDeferred) {
 								val outDescriptor = fileResult.obj
@@ -172,7 +175,10 @@ class DebugMenuInteractor(private val fileSystemResolver: FileSystemResolver,
 
 		val provider = fileSystemResolver.resolveProvider(outFile.fsType)
 
-		val openResult = provider.openFileForWrite(outFile, OnConflictStrategy.REWRITE)
+		val openResult = provider.openFileForWrite(outFile,
+				OnConflictStrategy.REWRITE,
+				true)
+
 		if (openResult.isSucceededOrDeferred) {
 			val outStream = openResult.obj
 			val inStream = newFileInputStreamOrNull(inFile)

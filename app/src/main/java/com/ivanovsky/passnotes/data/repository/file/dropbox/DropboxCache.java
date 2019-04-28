@@ -1,7 +1,11 @@
 package com.ivanovsky.passnotes.data.repository.file.dropbox;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.data.entity.DropboxFile;
 import com.ivanovsky.passnotes.data.repository.DropboxFileRepository;
+
+import java.util.List;
 
 public class DropboxCache {
 
@@ -11,7 +15,7 @@ public class DropboxCache {
 		this.repository = repository;
 	}
 
-	DropboxFile getByRemotPath(String remotePath) {
+	DropboxFile getByRemotePath(String remotePath) {
 		return repository.findByRemotePath(remotePath);
 	}
 
@@ -21,10 +25,15 @@ public class DropboxCache {
 
 	void put(DropboxFile file) {
 		repository.insert(file);
-
 	}
 
 	void update(DropboxFile file) {
 		repository.update(file);
+	}
+
+	List<DropboxFile> getLocallyModifiedFiles() {
+		return Stream.of(repository.getAll())
+				.filter(DropboxFile::isLocallyModified)
+				.collect(Collectors.toList());
 	}
 }

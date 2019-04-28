@@ -70,15 +70,26 @@ public class InputOutputUtils {
 		byte[] buf = new byte[1024 * 4];
 		int len;
 
-		while ((len = in.read(buf)) > 0) {
-			out.write(buf, 0, len);
-		}
+		try {
+			while ((len = in.read(buf)) > 0) {
+				out.write(buf, 0, len);
+			}
 
-		out.flush();
+			out.flush();
+		} finally {
+			if (close) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					Logger.printStackTrace(e);
+				}
 
-		if (close) {
-			in.close();
-			out.close();
+				try {
+					out.close();
+				} catch (IOException e) {
+					Logger.printStackTrace(e);
+				}
+			}
 		}
 	}
 

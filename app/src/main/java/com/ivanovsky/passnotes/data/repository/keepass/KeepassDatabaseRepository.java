@@ -53,7 +53,9 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
 		FileSystemProvider fsProvider = fileSystemResolver.resolveProvider(file.getFsType());
 
-		OperationResult<InputStream> inResult = fsProvider.openFileForRead(file);
+		OperationResult<InputStream> inResult = fsProvider.openFileForRead(file,
+				OnConflictStrategy.CANCEL,
+				true);
 		if (inResult.isSucceededOrDeferred()) {
 			synchronized (this) {
 				InputStream in = inResult.getObj();
@@ -97,7 +99,8 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 				Database keepassDb = SimpleDatabase.load(defaultCredentials, in);
 
 				OperationResult<OutputStream> outResult = provider.openFileForWrite(file,
-						OnConflictStrategy.CANCEL);
+						OnConflictStrategy.CANCEL,
+						true);
 				if (outResult.isSucceededOrDeferred()) {
 					out = outResult.getObj();
 

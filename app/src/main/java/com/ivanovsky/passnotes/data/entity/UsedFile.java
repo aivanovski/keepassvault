@@ -7,7 +7,9 @@ import androidx.room.TypeConverter;
 
 import com.ivanovsky.passnotes.data.repository.file.FSType;
 
-@SuppressWarnings("WeakerAccess")
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 @Entity(tableName = "used_file")
 public class UsedFile {
 
@@ -83,30 +85,31 @@ public class UsedFile {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
+
 		if (o == null || getClass() != o.getClass()) return false;
 
 		UsedFile usedFile = (UsedFile) o;
 
-		if (id != usedFile.id) return false;
-		if (addedTime != usedFile.addedTime) return false;
-		if (lastAccessTime != null ? !lastAccessTime.equals(usedFile.lastAccessTime) : usedFile.lastAccessTime != null)
-			return false;
-		if (filePath != null ? !filePath.equals(usedFile.filePath) : usedFile.filePath != null)
-			return false;
-		if (fileUid != null ? !fileUid.equals(usedFile.fileUid) : usedFile.fileUid != null)
-			return false;
-		return fsType == usedFile.fsType;
+		return new EqualsBuilder()
+				.append(id, usedFile.id)
+				.append(addedTime, usedFile.addedTime)
+				.append(lastAccessTime, usedFile.lastAccessTime)
+				.append(filePath, usedFile.filePath)
+				.append(fileUid, usedFile.fileUid)
+				.append(fsType, usedFile.fsType)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		int result = id;
-		result = 31 * result + (int) (addedTime ^ (addedTime >>> 32));
-		result = 31 * result + (lastAccessTime != null ? lastAccessTime.hashCode() : 0);
-		result = 31 * result + (filePath != null ? filePath.hashCode() : 0);
-		result = 31 * result + (fileUid != null ? fileUid.hashCode() : 0);
-		result = 31 * result + (fsType != null ? fsType.hashCode() : 0);
-		return result;
+		return new HashCodeBuilder(17, 37)
+				.append(id)
+				.append(addedTime)
+				.append(lastAccessTime)
+				.append(filePath)
+				.append(fileUid)
+				.append(fsType)
+				.toHashCode();
 	}
 
 	public static class FSTypeConverter {

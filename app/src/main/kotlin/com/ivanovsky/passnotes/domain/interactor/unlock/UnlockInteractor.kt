@@ -2,17 +2,21 @@ package com.ivanovsky.passnotes.domain.interactor.unlock
 
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.*
+import com.ivanovsky.passnotes.data.entity.OperationError.Type.NETWORK_IO_ERROR
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.domain.FileSyncHelper
 import com.ivanovsky.passnotes.injection.Injector
 
 class UnlockInteractor(private val fileRepository: UsedFileRepository,
                        private val dbRepository: EncryptedDatabaseRepository,
-                       private val observerBus: ObserverBus) {
+                       private val observerBus: ObserverBus,
+					   private val fileSyncHelper: FileSyncHelper) {
 
 	fun getRecentlyOpenedFiles(): OperationResult<List<FileDescriptor>> {
 		return OperationResult.success(loadAndSortUsedFiles())
@@ -37,18 +41,31 @@ class UnlockInteractor(private val fileRepository: UsedFileRepository,
 	fun openDatabase(key: KeepassDatabaseKey, file: FileDescriptor): OperationResult<Boolean> {
 		val result = OperationResult<Boolean>()
 
-		val openResult = dbRepository.open(key, file)
-        if (openResult.isSucceededOrDeferred) {
-            val db = openResult.obj
+		var syncError: OperationError? = null
+		val locallyModifiedFile = fileSyncHelper.getModifiedFileByUid(file.uid, file.fsType)
+		if (locallyModifiedFile != null) {
+			val syncResult = fileSyncHelper.resolve(locallyModifiedFile)
+			if (syncResult.isFailed && syncResult.error.type != NETWORK_IO_ERROR) {
+				syncError = syncResult.error
+			}
+		}
 
-	        updateFileAccessTime(file)
+		if (syncError == null) {
+			val openResult = dbRepository.open(key, file)
+			if (openResult.isSucceededOrDeferred) {
+				val db = openResult.obj
 
-	        Injector.getInstance().createEncryptedDatabaseComponent(db)
+				updateFileAccessTime(file)
 
-	        result.obj = true
-        } else {
-	        result.error = openResult.error
-        }
+				Injector.getInstance().createEncryptedDatabaseComponent(db)
+
+				result.obj = true
+			} else {
+				result.error = openResult.error
+			}
+		} else {
+			result.error = syncError
+		}
 
 		return result
 	}

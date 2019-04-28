@@ -81,7 +81,7 @@ open class NewDatabaseInteractor(private val dbRepository: EncryptedDatabaseRepo
 		val result = OperationResult<FileDescriptor>()
 
 		val provider = fileSystemResolver.resolveProvider(file.fsType)
-		val getFileResult = provider.getFile(file.path)
+		val getFileResult = provider.getFile(file.path, true)
 
 		if (getFileResult.isSucceeded) {
 			result.obj = getFileResult.obj

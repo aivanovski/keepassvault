@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.file.dropbox;
 
 import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.sharing.FileMemberActionError;
 import com.ivanovsky.passnotes.data.entity.DropboxFile;
 import com.ivanovsky.passnotes.data.repository.file.RemoteFileOutputStream;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxException;
@@ -25,8 +24,10 @@ class DropboxFileOutputStream extends RemoteFileOutputStream {
 	private final File outFile;
 	private final DropboxFileSystemProvider provider;
 	private final DropboxClient client;
-	private final OutputStream out;
 	private final DropboxFile file;
+
+	// should be lazy initialized, because new FileOutputStream make file content empty
+	private OutputStream out;
 
 	DropboxFileOutputStream(DropboxFileSystemProvider provider,
 							DropboxClient client,
@@ -36,12 +37,19 @@ class DropboxFileOutputStream extends RemoteFileOutputStream {
 		this.client = client;
 		this.file = file;
 		this.outFile = new File(file.getLocalPath());
-		this.out = new BufferedOutputStream(new FileOutputStream(outFile));
 		this.processingUnitUid = processingUnitUid;
 	}
 
 	@Override
 	public void write(int b) throws IOException {
+		if (failed) {
+			return;
+		}
+
+		if (out == null) {
+			out = new BufferedOutputStream(new FileOutputStream(outFile));
+		}
+
 		try {
 			out.write(b);
 		} catch (IOException e) {
@@ -57,6 +65,13 @@ class DropboxFileOutputStream extends RemoteFileOutputStream {
 
 	@Override
 	public void flush() throws IOException {
+		if (failed) {
+			return;
+		}
+		if (out == null) {
+			return;
+		}
+
 		try {
 			out.flush();
 		} catch (IOException e) {

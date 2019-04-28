@@ -6,6 +6,9 @@ import android.os.Parcelable;
 import com.ivanovsky.passnotes.data.repository.file.FSType;
 import com.ivanovsky.passnotes.util.FileUtils;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import java.io.File;
 
 public class FileDescriptor implements Parcelable {
@@ -110,28 +113,31 @@ public class FileDescriptor implements Parcelable {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
+
 		if (o == null || getClass() != o.getClass()) return false;
 
 		FileDescriptor that = (FileDescriptor) o;
 
-		if (directory != that.directory) return false;
-		if (root != that.root) return false;
-		if (modified != null ? !modified.equals(that.modified) : that.modified != null)
-			return false;
-		if (fsType != that.fsType) return false;
-		if (path != null ? !path.equals(that.path) : that.path != null) return false;
-		return uid != null ? uid.equals(that.uid) : that.uid == null;
+		return new EqualsBuilder()
+				.append(directory, that.directory)
+				.append(root, that.root)
+				.append(modified, that.modified)
+				.append(fsType, that.fsType)
+				.append(path, that.path)
+				.append(uid, that.uid)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		int result = (directory ? 1 : 0);
-		result = 31 * result + (root ? 1 : 0);
-		result = 31 * result + (modified != null ? modified.hashCode() : 0);
-		result = 31 * result + (fsType != null ? fsType.hashCode() : 0);
-		result = 31 * result + (path != null ? path.hashCode() : 0);
-		result = 31 * result + (uid != null ? uid.hashCode() : 0);
-		return result;
+		return new HashCodeBuilder(17, 37)
+				.append(directory)
+				.append(root)
+				.append(modified)
+				.append(fsType)
+				.append(path)
+				.append(uid)
+				.toHashCode();
 	}
 
 	@Override

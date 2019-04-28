@@ -3,8 +3,16 @@ package com.ivanovsky.passnotes.domain;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
+import com.ivanovsky.passnotes.util.InputOutputUtils;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.UUID;
 
 import androidx.annotation.NonNull;
@@ -117,5 +125,14 @@ public class FileHelper {
 		}
 
 		return result;
+	}
+
+	@Nullable
+	public void duplicateFile(@NonNull File src, @NonNull File destination)
+			throws IOException {
+		InputStream in = new BufferedInputStream(new FileInputStream(src));
+		OutputStream out = new BufferedOutputStream(new FileOutputStream(destination));
+
+		InputOutputUtils.copy(in, out, true);
 	}
 }

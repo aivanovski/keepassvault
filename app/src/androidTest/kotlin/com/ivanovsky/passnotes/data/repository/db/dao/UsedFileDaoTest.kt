@@ -61,6 +61,7 @@ class UsedFileDaoTest {
 		file.fileUid = "uid"
 		file.lastAccessTime = dateInMillis(2018, 1, 1)
 		file.fsType = FSType.REGULAR_FS
+		file.lastModified = dateInMillis(2017, 1, 1)
 
 		return file
 	}
@@ -72,6 +73,7 @@ class UsedFileDaoTest {
 		file.fileUid = "modified-uid"
 		file.lastAccessTime = dateInMillis(2016, 1, 5)
 		file.fsType = FSType.DROPBOX
+		file.lastModified = dateInMillis(2015, 1, 5)
 
 		return file
 	}

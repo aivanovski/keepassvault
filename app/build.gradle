@@ -141,8 +141,6 @@ dependencies {
 	// Kotlin
 	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$compiler.kotlin"
 	implementation "org.jetbrains.kotlin:kotlin-reflect:$compiler.kotlin"
-	implementation "org.jetbrains.anko:anko-coroutines:$ankoVersion"
-	implementation "org.jetbrains.anko:anko-commons:$ankoVersion"
 
 	// KeePassJava2
 	implementation project(':libs:KeePassJava2-database')
@@ -156,5 +154,8 @@ dependencies {
 	implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
 
 	// Stetho
-	implementation 'com.facebook.stetho:stetho:1.5.1'
+	implementation "com.facebook.stetho:stetho:1.5.1"
+
+	// Completable Future
+	implementation "net.sourceforge.streamsupport:android-retrofuture:1.7.1"
 }

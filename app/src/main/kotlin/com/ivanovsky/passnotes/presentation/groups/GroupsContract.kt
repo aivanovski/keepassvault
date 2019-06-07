@@ -7,6 +7,8 @@ import com.ivanovsky.passnotes.presentation.core.GlobalSnackbarPresenter
 
 class GroupsContract {
 
+	// TODO: re-write with LiveData
+
 	interface View: BaseView<Presenter> {
 		fun showGroups(groupsAndCounts: List<Pair<Group, Int>>)
 		fun showNoItems()

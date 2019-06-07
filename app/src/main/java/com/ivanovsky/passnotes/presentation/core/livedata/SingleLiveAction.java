@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.core.livedata;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -62,6 +63,16 @@ public class SingleLiveAction<T> extends MutableLiveData<T> {
 	@MainThread
 	public void call(@Nullable T value) {
 		setValue(value);
+	}
+
+	@WorkerThread
+	public void postCall() {
+		postValue(null);
+	}
+
+	@WorkerThread
+	public void postCall(@Nullable T value) {
+		postValue(value);
 	}
 }
 

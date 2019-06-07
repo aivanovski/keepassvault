@@ -14,10 +14,11 @@ import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
-import com.ivanovsky.passnotes.util.COROUTINE_EXCEPTION_HANDLER
 import com.ivanovsky.passnotes.util.formatAccordingSystemLocale
-import kotlinx.coroutines.*
+import java9.util.concurrent.CompletableFuture
+import java9.util.function.Supplier
 import java.util.*
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 class FilePickerPresenter(private val mode: Mode,
@@ -37,17 +38,19 @@ class FilePickerPresenter(private val mode: Mode,
 	@Inject
 	lateinit var resourceHelper: ResourceHelper
 
+	@Inject
+	lateinit var executor: Executor
+
 	override val items = MutableLiveData<List<FilePickerAdapter.Item>>()
 	override val screenState = MutableLiveData<ScreenState>()
+	override val doneButtonVisibility = MutableLiveData<Boolean>()
 	override val requestPermissionAction = SingleLiveAction<String>()
-	override val doneButtonVisibility = SingleLiveAction<Boolean>()
 	override val fileSelectedAction = SingleLiveAction<FileDescriptor>()
 	override val snackbarMessageAction = SingleLiveAction<String>()
 
 	private var isPermissionRejected = false
 	private var currentDir = rootFile
-	private lateinit var files: List<FileDescriptor>
-	private val scope = CoroutineScope(Dispatchers.Main + COROUTINE_EXCEPTION_HANDLER)
+	@Volatile private lateinit var files: List<FileDescriptor>
 
 	companion object {
 		private const val SDCARD_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -72,31 +75,26 @@ class FilePickerPresenter(private val mode: Mode,
 
 		//TODO: app doesnt need permission for private storage and network storage
 		if (permissionHelper.isPermissionGranted(SDCARD_PERMISSION)) {
-			scope.launch {
-				val files = withContext(Dispatchers.Default) {
-					interactor.getFileList(currentDir)
-				}
-
-				onFilesLoaded(currentDir, files)
-			}
+            CompletableFuture.supplyAsync(Supplier {
+	            interactor.getFileList(currentDir)
+            }, executor)
+		            .thenAccept { result -> onGetFileListResult(result) }
 		} else {
 			requestPermissionAction.call(SDCARD_PERMISSION)
 		}
 	}
 
-	private fun onFilesLoaded(dir: FileDescriptor, result: OperationResult<List<FileDescriptor>>) {
+	private fun onGetFileListResult(result: OperationResult<List<FileDescriptor>>) {
+        val dir = currentDir
+
 		if (result.isSucceededOrDeferred) {
 			val unsortedFiles = result.obj
 
 			if (!dir.isRoot && isBrowsingEnabled) {
-				scope.launch {
-					val parent = withContext(Dispatchers.Default) {
-						interactor.getParent(currentDir)
-					}
-
-					onParentLoaded(unsortedFiles, parent)
-				}
-
+                CompletableFuture.supplyAsync(Supplier {
+	                interactor.getParent(currentDir)
+                }, executor)
+		                .thenAccept { getParentResult -> onGetParentResult(unsortedFiles, getParentResult) }
 			} else {
 				val sortedFiles = sortFiles(unsortedFiles)
 
@@ -107,18 +105,19 @@ class FilePickerPresenter(private val mode: Mode,
 					files = sortedFiles.filter { file -> !file.isDirectory }
 				}
 
-				items.value = createAdapterItems(files, null)
-				screenState.value = ScreenState.data()
-				doneButtonVisibility.value = true
+				items.postValue(createAdapterItems(files, null))
+				screenState.postValue(ScreenState.data())
+				doneButtonVisibility.postValue(true)
 			}
 		} else {
 			val message = errorInteractor.processAndGetMessage(result.error)
-			screenState.value = ScreenState.error(message)
-			doneButtonVisibility.value = false
+			screenState.postValue(ScreenState.error(message))
+			doneButtonVisibility.postValue(false)
 		}
 	}
 
-	private fun onParentLoaded(unsortedFiles: List<FileDescriptor>, result: OperationResult<FileDescriptor>) {
+	private fun onGetParentResult(unsortedFiles: List<FileDescriptor>,
+	                              result: OperationResult<FileDescriptor>) {
 		if (result.isSucceededOrDeferred) {
 			val parent = result.obj
 
@@ -127,13 +126,13 @@ class FilePickerPresenter(private val mode: Mode,
 
 			files = sortedFiles
 
-			items.value = createAdapterItems(sortedFiles, parent)
-			screenState.value = ScreenState.data()
-			doneButtonVisibility.value = true
+			items.postValue(createAdapterItems(sortedFiles, parent))
+			screenState.postValue(ScreenState.data())
+			doneButtonVisibility.postValue(true)
 		} else {
 			val message = errorInteractor.processAndGetMessage(result.error)
-			screenState.value = ScreenState.error(message)
-			doneButtonVisibility.value = false
+			screenState.postValue(ScreenState.error(message))
+			doneButtonVisibility.postValue(false)
 		}
 	}
 
@@ -151,7 +150,8 @@ class FilePickerPresenter(private val mode: Mode,
 		})
 	}
 
-	private fun createAdapterItems(files: List<FileDescriptor>, parent: FileDescriptor?): List<FilePickerAdapter.Item> {
+	private fun createAdapterItems(files: List<FileDescriptor>,
+	                               parent: FileDescriptor?): List<FilePickerAdapter.Item> {
 		val items = mutableListOf<FilePickerAdapter.Item>()
 
 		for (file in files) {

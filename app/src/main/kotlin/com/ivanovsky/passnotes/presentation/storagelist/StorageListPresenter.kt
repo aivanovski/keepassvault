@@ -15,11 +15,9 @@ import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListContract.FilePickerArgs
-import com.ivanovsky.passnotes.util.COROUTINE_EXCEPTION_HANDLER
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import java9.util.concurrent.CompletableFuture
+import java9.util.function.Supplier
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 class StorageListPresenter(private val action: Action) :
@@ -37,6 +35,9 @@ class StorageListPresenter(private val action: Action) :
 	@Inject
 	lateinit var resourceHelper: ResourceHelper
 
+	@Inject
+	lateinit var executor: Executor
+
 	override val storageOptions = MutableLiveData<List<StorageOption>>()
 	override val screenState = MutableLiveData<ScreenState>()
 	override val showFilePickerScreenAction = SingleLiveAction<FilePickerArgs>()
@@ -44,7 +45,6 @@ class StorageListPresenter(private val action: Action) :
 	override val authActivityStartedAction = SingleLiveAction<FSType>()
 
 	private var isDropboxAuthDisplayed = false
-	private val scope = CoroutineScope(Dispatchers.Main + COROUTINE_EXCEPTION_HANDLER)
 
 	init {
 		Injector.getInstance().appComponent.inject(this)
@@ -60,15 +60,11 @@ class StorageListPresenter(private val action: Action) :
 				screenState.value = ScreenState.dataWithError(
 						resourceHelper.getString(R.string.authentication_failed))
 			} else {
-				scope.launch {
-					val dropboxRoot = withContext(Dispatchers.Default) {
-						interactor.getDropboxRoot()
-					}
-
-					onDropboxRootLoaded(dropboxRoot)
-				}
+				CompletableFuture.supplyAsync(Supplier {
+					interactor.getDropboxRoot()
+				}, executor)
+						.thenAccept { result -> onGetDropboxRootResult(result) }
 			}
-
 		} else {
 			storageOptions.value = interactor.getAvailableStorageOptions()
 			screenState.value = ScreenState.data()
@@ -109,13 +105,10 @@ class StorageListPresenter(private val action: Action) :
 			authActivityStartedAction.call(FSType.DROPBOX)
 
 		} else {
-			scope.launch {
-				val dropboxRoot = withContext(Dispatchers.Default) {
-					interactor.getDropboxRoot()
-				}
-
-				onDropboxRootLoaded(dropboxRoot)
-			}
+			CompletableFuture.supplyAsync(Supplier {
+				interactor.getDropboxRoot()
+			}, executor)
+					.thenAccept { result -> onGetDropboxRootResult(result) }
 		}
 	}
 
@@ -123,14 +116,13 @@ class StorageListPresenter(private val action: Action) :
 		fileSelectedAction.call(file)
 	}
 
-	private fun onDropboxRootLoaded(result: OperationResult<FileDescriptor>) {
+	private fun onGetDropboxRootResult(result: OperationResult<FileDescriptor>) {
 		if (result.isSucceededOrDeferred) {
 			val rootFile = result.obj
-			showFilePickerScreenAction.call(FilePickerArgs(rootFile, action, true))
-
+			showFilePickerScreenAction.postCall(FilePickerArgs(rootFile, action, true))
 		} else {
 			val message = errorInteractor.processAndGetMessage(result.error)
-			screenState.value = ScreenState.error(message)
+			screenState.postValue(ScreenState.error(message))
 		}
 	}
 }

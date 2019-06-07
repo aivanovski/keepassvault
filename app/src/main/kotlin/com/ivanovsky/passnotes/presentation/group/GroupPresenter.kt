@@ -3,6 +3,8 @@ package com.ivanovsky.passnotes.presentation.group
 import androidx.lifecycle.MutableLiveData
 import android.content.Context
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarMessageLiveAction
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -12,8 +14,9 @@ import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
-import com.ivanovsky.passnotes.util.COROUTINE_EXCEPTION_HANDLER
-import kotlinx.coroutines.*
+import java9.util.concurrent.CompletableFuture
+import java9.util.function.Supplier
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 class GroupPresenter(private val context: Context) : GroupContract.Presenter {
@@ -27,6 +30,9 @@ class GroupPresenter(private val context: Context) : GroupContract.Presenter {
 	@Inject
 	lateinit var globalSnackbarBus: GlobalSnackbarBus
 
+	@Inject
+	lateinit var executor: Executor
+
 	override val screenState = MutableLiveData<ScreenState>()
 	override val doneButtonVisibility = MutableLiveData<Boolean>()
 	override val titleEditTextError = MutableLiveData<String>()
@@ -34,8 +40,6 @@ class GroupPresenter(private val context: Context) : GroupContract.Presenter {
 	override val finishScreenAction = SingleLiveAction<Void>()
 	override val snackbarMessageAction = SingleLiveAction<String>()
 	override val globalSnackbarMessageAction: GlobalSnackbarMessageLiveAction
-
-	private val scope = CoroutineScope(Dispatchers.Main + COROUTINE_EXCEPTION_HANDLER)
 
 	init {
 		Injector.getInstance().encryptedDatabaseComponent.inject(this)
@@ -63,27 +67,29 @@ class GroupPresenter(private val context: Context) : GroupContract.Presenter {
 			titleEditTextError.value = null
 			screenState.value = ScreenState.loading()
 
-			scope.launch {
-				val result = withContext(Dispatchers.Default) {
-					interactor.createNewGroup(trimmedTitle)
-				}
+			CompletableFuture.supplyAsync(Supplier {
+                interactor.createNewGroup(trimmedTitle)
+			}, executor)
+					.thenAccept { result -> onCreateNewGroupResult(result) }
 
-				if (result.isSucceeded) {
-					finishScreenAction.call()
-				} else {
-					doneButtonVisibility.value = true
-
-					val processedError = errorInteractor.process(result.error)
-					if (processedError.resolution == ErrorResolution.RETRY) {
-						//TODO: implement retry state
-						screenState.value = ScreenState.dataWithError("Test")
-					} else {
-						screenState.value = ScreenState.dataWithError(processedError.message)
-					}
-				}
-			}
 		} else {
 			titleEditTextError.value = context.getString(R.string.empty_field)
+		}
+	}
+
+	private fun onCreateNewGroupResult(result: OperationResult<Group>) {
+		if (result.isSucceeded) {
+			finishScreenAction.postCall()
+		} else {
+			doneButtonVisibility.postValue(true)
+
+			val processedError = errorInteractor.process(result.error)
+			if (processedError.resolution == ErrorResolution.RETRY) {
+				//TODO: implement retry state
+				screenState.postValue(ScreenState.dataWithError("Test"))
+			} else {
+                screenState.postValue(ScreenState.dataWithError(processedError.message))
+			}
 		}
 	}
 }

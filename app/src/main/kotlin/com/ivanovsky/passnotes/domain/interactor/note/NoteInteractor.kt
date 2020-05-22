@@ -9,21 +9,23 @@ import com.ivanovsky.passnotes.domain.ClipboardHelper
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-class NoteInteractor(private val noteRepository: NoteRepository,
-                     private val clipboardHelper: ClipboardHelper) {
+class NoteInteractor(
+    private val noteRepository: NoteRepository,
+    private val clipboardHelper: ClipboardHelper
+) {
 
-	fun getNoteByUid(noteUid: UUID): OperationResult<Note> {
-		return noteRepository.getNoteByUid(noteUid)
-	}
+    fun getNoteByUid(noteUid: UUID): OperationResult<Note> {
+        return noteRepository.getNoteByUid(noteUid)
+    }
 
-	fun copyToClipboardWithTimeout(text: String) {
-		clipboardHelper.copy(text)
+    fun copyToClipboardWithTimeout(text: String) {
+        clipboardHelper.copy(text)
 
-		val handler = Handler(Looper.getMainLooper())
-		handler.postDelayed({ clipboardHelper.clear() }, TimeUnit.SECONDS.toMillis(30))
-	}
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed({ clipboardHelper.clear() }, TimeUnit.SECONDS.toMillis(30))
+    }
 
-	fun getTimeoutValueInMillis(): Long {
-		return TimeUnit.SECONDS.toMillis(30)
-	}
+    fun getTimeoutValueInMillis(): Long {
+        return TimeUnit.SECONDS.toMillis(30)
+    }
 }

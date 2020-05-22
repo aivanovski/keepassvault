@@ -18,73 +18,73 @@ class GroupPresenter(
     private val view: GroupContract.View
 ) : GroupContract.Presenter {
 
-	@Inject
-	lateinit var interactor: GroupInteractor
+    @Inject
+    lateinit var interactor: GroupInteractor
 
-	@Inject
-	lateinit var errorInteractor: ErrorInteractor
+    @Inject
+    lateinit var errorInteractor: ErrorInteractor
 
-	@Inject
-	lateinit var globalSnackbarBus: GlobalSnackbarBus
+    @Inject
+    lateinit var globalSnackbarBus: GlobalSnackbarBus
 
-	@Inject
-	lateinit var resourceHelper: ResourceHelper
+    @Inject
+    lateinit var resourceHelper: ResourceHelper
 
-	override val doneButtonVisibility = MutableLiveData<Boolean>()
-	override val titleEditTextError = MutableLiveData<String>()
-	override val hideKeyboardEvent = SingleLiveEvent<Void>()
-	override val finishScreenEvent = SingleLiveEvent<Void>()
-	override val globalSnackbarMessageAction: GlobalSnackbarMessageLiveAction
+    override val doneButtonVisibility = MutableLiveData<Boolean>()
+    override val titleEditTextError = MutableLiveData<String>()
+    override val hideKeyboardEvent = SingleLiveEvent<Void>()
+    override val finishScreenEvent = SingleLiveEvent<Void>()
+    override val globalSnackbarMessageAction: GlobalSnackbarMessageLiveAction
 
-	private val job = Job()
-	private val scope = CoroutineScope(Dispatchers.Main + job)
+    private val job = Job()
+    private val scope = CoroutineScope(Dispatchers.Main + job)
 
-	init {
-		Injector.getInstance().encryptedDatabaseComponent.inject(this)
+    init {
+        Injector.getInstance().encryptedDatabaseComponent.inject(this)
 
-		globalSnackbarMessageAction = globalSnackbarBus.messageAction
-	}
+        globalSnackbarMessageAction = globalSnackbarBus.messageAction
+    }
 
-	override fun start() {
-		if (view.screenState.isNotInitialized) {
-			view.screenState = ScreenState.data()
-		}
-	}
+    override fun start() {
+        if (view.screenState.isNotInitialized) {
+            view.screenState = ScreenState.data()
+        }
+    }
 
-	override fun destroy() {
-		job.cancel()
-	}
+    override fun destroy() {
+        job.cancel()
+    }
 
-	override fun createNewGroup(title: String) {
-		val trimmedTitle = title.trim()
+    override fun createNewGroup(title: String) {
+        val trimmedTitle = title.trim()
 
-		if (trimmedTitle.isNotEmpty()) {
-			hideKeyboardEvent.call()
-			doneButtonVisibility.value = false
-			titleEditTextError.value = null
-			view.screenState = ScreenState.loading()
+        if (trimmedTitle.isNotEmpty()) {
+            hideKeyboardEvent.call()
+            doneButtonVisibility.value = false
+            titleEditTextError.value = null
+            view.screenState = ScreenState.loading()
 
-			scope.launch {
-				val result = withContext(Dispatchers.Default) {
-					interactor.createNewGroup(trimmedTitle)
-				}
+            scope.launch {
+                val result = withContext(Dispatchers.Default) {
+                    interactor.createNewGroup(trimmedTitle)
+                }
 
-				if (result.isSucceeded) {
-					finishScreenEvent.call()
-				} else {
-					doneButtonVisibility.value = true
+                if (result.isSucceeded) {
+                    finishScreenEvent.call()
+                } else {
+                    doneButtonVisibility.value = true
 
-					val processedError = errorInteractor.process(result.error)
-					if (processedError.resolution == ErrorResolution.RETRY) {
-						//TODO: implement retry state
-						view.screenState = ScreenState.dataWithError("Test")
-					} else {
-						view.screenState = ScreenState.dataWithError(processedError.message)
-					}
-				}
-			}
-		} else {
-			titleEditTextError.value = resourceHelper.getString(R.string.empty_field)
-		}
-	}
+                    val processedError = errorInteractor.process(result.error)
+                    if (processedError.resolution == ErrorResolution.RETRY) {
+                        //TODO: implement retry state
+                        view.screenState = ScreenState.dataWithError("Test")
+                    } else {
+                        view.screenState = ScreenState.dataWithError(processedError.message)
+                    }
+                }
+            }
+        } else {
+            titleEditTextError.value = resourceHelper.getString(R.string.empty_field)
+        }
+    }
 }

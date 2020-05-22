@@ -9,48 +9,48 @@ import com.ivanovsky.passnotes.presentation.core.BaseActivity
 
 class StorageListActivity : BaseActivity() {
 
-	private lateinit var action: Action
+    private lateinit var action: Action
 
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-		setContentView(R.layout.core_base_activity)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.core_base_activity)
 
-		action = intent.extras?.getSerializable(EXTRA_MODE) as Action
+        action = intent.extras?.getSerializable(EXTRA_MODE) as Action
 
-		setSupportActionBar(findViewById(R.id.tool_bar))
-		currentActionBar.title = getString(R.string.select_storage)
-		currentActionBar.setDisplayHomeAsUpEnabled(true)
+        setSupportActionBar(findViewById(R.id.tool_bar))
+        currentActionBar.title = getString(R.string.select_storage)
+        currentActionBar.setDisplayHomeAsUpEnabled(true)
 
-		val fragment = StorageListFragment.newInstance()
-		supportFragmentManager.beginTransaction()
-				.replace(R.id.fragment_container, fragment)
-				.commit()
+        val fragment = StorageListFragment.newInstance()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
 
-		val presenter = StorageListPresenter(fragment, action)
-		fragment.presenter = presenter
-	}
+        val presenter = StorageListPresenter(fragment, action)
+        fragment.presenter = presenter
+    }
 
-	override fun onOptionsItemSelected(item: MenuItem): Boolean {
-		return if (item.itemId == android.R.id.home) {
-			finish()
-			true
-		} else {
-			super.onOptionsItemSelected(item)
-		}
-	}
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return if (item.itemId == android.R.id.home) {
+            finish()
+            true
+        } else {
+            super.onOptionsItemSelected(item)
+        }
+    }
 
-	companion object {
+    companion object {
 
-		const val EXTRA_RESULT: String = "result"
+        const val EXTRA_RESULT: String = "result"
 
-		private const val EXTRA_MODE = "action"
+        private const val EXTRA_MODE = "action"
 
-		fun createStartIntent(context: Context, action: Action): Intent {
-			val intent = Intent(context, StorageListActivity::class.java)
+        fun createStartIntent(context: Context, action: Action): Intent {
+            val intent = Intent(context, StorageListActivity::class.java)
 
-			intent.putExtra(EXTRA_MODE, action)
+            intent.putExtra(EXTRA_MODE, action)
 
-			return intent
-		}
-	}
+            return intent
+        }
+    }
 }

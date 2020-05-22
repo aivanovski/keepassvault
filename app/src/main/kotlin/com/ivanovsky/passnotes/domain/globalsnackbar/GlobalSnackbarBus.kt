@@ -4,9 +4,9 @@ import com.ivanovsky.passnotes.presentation.core.SnackbarMessage
 
 class GlobalSnackbarBus {
 
-	val messageAction = GlobalSnackbarMessageLiveAction()
+    val messageAction = GlobalSnackbarMessageLiveAction()
 
-	fun send(message: SnackbarMessage, filter: SnackbarReceiverFilter) {
-		messageAction.value = FilterableSnackbarMessage(message, filter)
-	}
+    fun send(message: SnackbarMessage, filter: SnackbarReceiverFilter) {
+        messageAction.value = FilterableSnackbarMessage(message, filter)
+    }
 }

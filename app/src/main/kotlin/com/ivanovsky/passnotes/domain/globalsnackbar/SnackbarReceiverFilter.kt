@@ -4,14 +4,14 @@ import com.ivanovsky.passnotes.presentation.Screen
 
 class SnackbarReceiverFilter private constructor(private val exclude: List<Screen>) {
 
-	fun isAcceptable(screen: Screen): Boolean {
-		return !exclude.contains(screen)
-	}
+    fun isAcceptable(screen: Screen): Boolean {
+        return !exclude.contains(screen)
+    }
 
-	companion object {
+    companion object {
 
-		fun allExceptCurrentScreen(current: Screen): SnackbarReceiverFilter {
-			return SnackbarReceiverFilter(listOf(current))
-		}
-	}
+        fun allExceptCurrentScreen(current: Screen): SnackbarReceiverFilter {
+            return SnackbarReceiverFilter(listOf(current))
+        }
+    }
 }

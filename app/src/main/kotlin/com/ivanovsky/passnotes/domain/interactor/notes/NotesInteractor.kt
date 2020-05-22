@@ -7,7 +7,7 @@ import java.util.*
 
 class NotesInteractor(private val noteRepository: NoteRepository) {
 
-	fun getNotesByGroupUid(groupUid: UUID): OperationResult<List<Note>> {
-		return noteRepository.getNotesByGroupUid(groupUid)
-	}
+    fun getNotesByGroupUid(groupUid: UUID): OperationResult<List<Note>> {
+        return noteRepository.getNotesByGroupUid(groupUid)
+    }
 }

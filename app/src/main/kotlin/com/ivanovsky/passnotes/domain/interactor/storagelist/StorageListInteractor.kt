@@ -14,59 +14,67 @@ import javax.inject.Inject
 
 class StorageListInteractor(private val context: Context) {
 
-	@Inject
-	lateinit var fileSystemResolver: FileSystemResolver
+    @Inject
+    lateinit var fileSystemResolver: FileSystemResolver
 
-	init {
-		Injector.getInstance().appComponent.inject(this)
-	}
+    init {
+        Injector.getInstance().appComponent.inject(this)
+    }
 
-	fun getAvailableStorageOptions(): List<StorageOption> {
-		return listOf(createPrivateStorageOption(),
-				createExternalStorageOption(),
-				createDropboxOption())
-	}
+    fun getAvailableStorageOptions(): List<StorageOption> {
+        return listOf(
+            createPrivateStorageOption(),
+            createExternalStorageOption(),
+            createDropboxOption()
+        )
+    }
 
-	private fun createPrivateStorageOption(): StorageOption {
-		return StorageOption(PRIVATE_STORAGE,
-				context.getString(R.string.private_app_storage),
-				createPrivateStorageDir())
-	}
+    private fun createPrivateStorageOption(): StorageOption {
+        return StorageOption(
+            PRIVATE_STORAGE,
+            context.getString(R.string.private_app_storage),
+            createPrivateStorageDir()
+        )
+    }
 
-	private fun createExternalStorageOption(): StorageOption {
-		return StorageOption(EXTERNAL_STORAGE,
-				context.getString(R.string.external_storage),
-				createExternalStorageDir())
-	}
+    private fun createExternalStorageOption(): StorageOption {
+        return StorageOption(
+            EXTERNAL_STORAGE,
+            context.getString(R.string.external_storage),
+            createExternalStorageDir()
+        )
+    }
 
-	private fun createDropboxOption(): StorageOption {
-		return StorageOption(DROPBOX,
-				context.getString(R.string.dropbox),
-				createDropboxStorageDir())
-	}
+    private fun createDropboxOption(): StorageOption {
+        return StorageOption(
+            DROPBOX,
+            context.getString(R.string.dropbox),
+            createDropboxStorageDir()
+        )
+    }
 
-	private fun createPrivateStorageDir(): FileDescriptor {
-		return FileDescriptor.fromRegularFile(context.filesDir)
-	}
+    private fun createPrivateStorageDir(): FileDescriptor {
+        return FileDescriptor.fromRegularFile(context.filesDir)
+    }
 
-	private fun createExternalStorageDir(): FileDescriptor {
-		return FileDescriptor.fromRegularFile(Environment.getExternalStorageDirectory())
-	}
+    private fun createExternalStorageDir(): FileDescriptor {
+        return FileDescriptor.fromRegularFile(Environment.getExternalStorageDirectory())
+    }
 
-	private fun createDropboxStorageDir(): FileDescriptor {
-		val file = FileDescriptor()
+    private fun createDropboxStorageDir(): FileDescriptor {
+        val file = FileDescriptor()
 
-		file.fsType = FSType.DROPBOX
-		file.path = "/"
-		file.isDirectory = true
-		file.isRoot = true
+        file.fsType = FSType.DROPBOX
+        file.path = "/"
+        file.isDirectory = true
+        file.isRoot = true
 
-		return file
-	}
+        return file
+    }
 
-	fun getDropboxRoot(): OperationResult<FileDescriptor> {
-		val provider = fileSystemResolver.resolveProvider(FSType.DROPBOX)
-		return provider.rootFile
+    fun getDropboxRoot(): OperationResult<FileDescriptor> {
+        val provider = fileSystemResolver.resolveProvider(FSType.DROPBOX)
+        return provider.rootFile
 
-	}
+    }
 }

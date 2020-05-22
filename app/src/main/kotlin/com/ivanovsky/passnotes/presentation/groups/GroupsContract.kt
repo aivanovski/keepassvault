@@ -7,15 +7,15 @@ import com.ivanovsky.passnotes.presentation.core.GlobalSnackbarPresenter
 
 class GroupsContract {
 
-	interface View : BaseView<Presenter> {
-		fun showGroups(groupsAndCounts: List<Pair<Group, Int>>)
-		fun showNewGroupScreen()
-		fun showUnlockScreenAndFinish()
-		fun showNotesScreen(group: Group)
-	}
+    interface View : BaseView<Presenter> {
+        fun showGroups(groupsAndCounts: List<Pair<Group, Int>>)
+        fun showNewGroupScreen()
+        fun showUnlockScreenAndFinish()
+        fun showNotesScreen(group: Group)
+    }
 
-	interface Presenter : BasePresenter, GlobalSnackbarPresenter {
-		fun loadData()
-		fun onGroupClicked(group: Group)
-	}
+    interface Presenter : BasePresenter, GlobalSnackbarPresenter {
+        fun loadData()
+        fun onGroupClicked(group: Group)
+    }
 }

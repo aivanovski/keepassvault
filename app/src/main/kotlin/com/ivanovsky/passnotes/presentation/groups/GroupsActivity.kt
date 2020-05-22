@@ -10,42 +10,42 @@ import com.ivanovsky.passnotes.presentation.core.BaseActivity
 
 class GroupsActivity : BaseActivity() {
 
-	companion object {
+    companion object {
 
-		fun createStartIntent(context: Context): Intent {
-			return Intent(context, GroupsActivity::class.java)
-		}
-	}
+        fun createStartIntent(context: Context): Intent {
+            return Intent(context, GroupsActivity::class.java)
+        }
+    }
 
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-		Injector.getInstance().appComponent.inject(this)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Injector.getInstance().appComponent.inject(this)
 
-		setContentView(R.layout.core_base_activity)
+        setContentView(R.layout.core_base_activity)
 
-		setSupportActionBar(findViewById(R.id.tool_bar))
-		currentActionBar.title = getString(R.string.groups)
-		currentActionBar.setDisplayHomeAsUpEnabled(true)
+        setSupportActionBar(findViewById(R.id.tool_bar))
+        currentActionBar.title = getString(R.string.groups)
+        currentActionBar.setDisplayHomeAsUpEnabled(true)
 
-		val fragment = GroupsFragment.newInstance()
+        val fragment = GroupsFragment.newInstance()
 
-		supportFragmentManager.beginTransaction()
-				.replace(R.id.fragment_container, fragment)
-				.commit()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
 
-		val presenter = GroupsPresenter(fragment)
-		fragment.presenter = presenter
-	}
+        val presenter = GroupsPresenter(fragment)
+        fragment.presenter = presenter
+    }
 
-	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-		if (item?.itemId == android.R.id.home) {
-			Injector.getInstance().releaseEncryptedDatabaseComponent()
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item?.itemId == android.R.id.home) {
+            Injector.getInstance().releaseEncryptedDatabaseComponent()
 
-			finish()
+            finish()
 
-			return true
-		} else {
-			return super.onOptionsItemSelected(item)
-		}
-	}
+            return true
+        } else {
+            return super.onOptionsItemSelected(item)
+        }
+    }
 }

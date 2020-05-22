@@ -14,8 +14,8 @@ import kotlinx.coroutines.*
 import javax.inject.Inject
 
 class GroupsPresenter(val view: GroupsContract.View) :
-        GroupsContract.Presenter,
-        ObserverBus.GroupDataSetObserver {
+    GroupsContract.Presenter,
+    ObserverBus.GroupDataSetObserver {
 
     @Inject
     lateinit var interactor: GroupsInteractor
@@ -69,7 +69,8 @@ class GroupsPresenter(val view: GroupsContract.View) :
                     view.showGroups(groupsAndCounts)
                     view.screenState = ScreenState.data()
                 } else {
-                    view.screenState = ScreenState.empty(resourceHelper.getString(R.string.no_items))
+                    view.screenState =
+                        ScreenState.empty(resourceHelper.getString(R.string.no_items))
                 }
             } else {
                 val message = errorInteractor.processAndGetMessage(result.error)

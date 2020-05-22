@@ -11,51 +11,51 @@ import java.util.*
 
 class NoteActivity : BaseActivity() {
 
-	private var noteUid: UUID? = null
-	private lateinit var noteTitle: String
+    private var noteUid: UUID? = null
+    private lateinit var noteTitle: String
 
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-		setContentView(R.layout.core_base_activity)
+        setContentView(R.layout.core_base_activity)
 
-		noteUid = intent.extras?.getSerializable(EXTRA_NOTE_UID) as UUID
-		noteTitle = intent.extras?.getString(EXTRA_NOTE_TITLE) ?: ""
+        noteUid = intent.extras?.getSerializable(EXTRA_NOTE_UID) as UUID
+        noteTitle = intent.extras?.getString(EXTRA_NOTE_TITLE) ?: ""
 
-		setSupportActionBar(findViewById(R.id.tool_bar))
-		currentActionBar.title = noteTitle
-		currentActionBar.setDisplayHomeAsUpEnabled(true)
+        setSupportActionBar(findViewById(R.id.tool_bar))
+        currentActionBar.title = noteTitle
+        currentActionBar.setDisplayHomeAsUpEnabled(true)
 
-		val fragment = NoteFragment()
-		supportFragmentManager.beginTransaction()
-				.replace(R.id.fragment_container, fragment)
-				.commit()
+        val fragment = NoteFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
 
-		val presenter = NotePresenter(noteUid, fragment)
+        val presenter = NotePresenter(noteUid, fragment)
         fragment.presenter = presenter
-	}
+    }
 
-	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-		if (item?.itemId == android.R.id.home) {
-			finish()
-			return true
-		} else {
-			return super.onOptionsItemSelected(item)
-		}
-	}
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item?.itemId == android.R.id.home) {
+            finish()
+            return true
+        } else {
+            return super.onOptionsItemSelected(item)
+        }
+    }
 
-	companion object {
+    companion object {
 
-		private const val EXTRA_NOTE_UID = "noteUid"
-		private const val EXTRA_NOTE_TITLE = "noteTitle"
+        private const val EXTRA_NOTE_UID = "noteUid"
+        private const val EXTRA_NOTE_TITLE = "noteTitle"
 
-		fun createStartIntent(context: Context, note: Note): Intent {
-			val result = Intent(context, NoteActivity::class.java)
+        fun createStartIntent(context: Context, note: Note): Intent {
+            val result = Intent(context, NoteActivity::class.java)
 
-			result.putExtra(EXTRA_NOTE_UID, note.uid)
-			result.putExtra(EXTRA_NOTE_TITLE, note.title)
+            result.putExtra(EXTRA_NOTE_UID, note.uid)
+            result.putExtra(EXTRA_NOTE_TITLE, note.title)
 
-			return result
-		}
-	}
+            return result
+        }
+    }
 }

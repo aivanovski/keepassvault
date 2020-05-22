@@ -51,40 +51,14 @@ ext {
 	dropboxAppKey = propertiesMap[PROPERTY_DROPBOX_APP_KEY]
 	dropboxAppSecret = propertiesMap[PROPERTY_DROPBOX_APP_SECRET]
 
-	compiler = [
-			kotlin: '1.3.21'
-	]
-
 	android = [
 			minSdk    : 15,
-			targetSdk : 28,
-			compileSdk: 28,
-			buildTools: '28.0.3'
+			targetSdk : 29,
+			compileSdk: 29,
+			buildTools: '29.0.2'
 	]
 
-	// Libraries
-	androidXVersion = '1.0.0'
-	daggerVersion = '2.16'
-	supportLibraryVersion = '26.1.0'
-	lifecycleVersion = '1.1.1'
-	roomVersion = '1.1.1'
-	constraintLayoutVersion = '1.1.2'
-	annimonStreamApiVersion = '1.1.4'
-	rxJavaVersion = '2.1.0'
-	rxAndroidVersion = '2.0.1'
-	multidexVersion = '1.0.3'
-	dropboxVersion = '3.0.11'
-	okHttpVersion = '3.10.0'
-	apacheCommonsLangVersion = '3.0'
-	ankoVersion = '0.10.8'
-
-	// Test
-	jUnitVersion = '4.12'
-	mockitoVersion = '2.19.1'
-	robolectricVersion = '3.5.1'
-
-	// Android test
-	androidTestVersion = '1.0.1'
+	kotlinVersion = '1.2.71'
 
 	// KeePassJava 2 dependencies
 	jetbrainsAnnotationsVersion = '15.0'

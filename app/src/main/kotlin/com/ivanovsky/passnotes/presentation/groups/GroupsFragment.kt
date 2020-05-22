@@ -41,6 +41,11 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 		presenter.stop()
 	}
 
+	override fun onDestroy() {
+		super.onDestroy()
+		presenter.destroy()
+	}
+
 	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
 		val view = inflater.inflate(R.layout.groups_fragment, container, false)
 

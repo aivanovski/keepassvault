@@ -15,9 +15,7 @@ import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListContract.FilePickerArgs
-import java9.util.concurrent.CompletableFuture
-import java9.util.function.Supplier
-import java.util.concurrent.Executor
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 class StorageListPresenter(private val action: Action) :
@@ -35,9 +33,6 @@ class StorageListPresenter(private val action: Action) :
 	@Inject
 	lateinit var resourceHelper: ResourceHelper
 
-	@Inject
-	lateinit var executor: Executor
-
 	override val storageOptions = MutableLiveData<List<StorageOption>>()
 	override val screenState = MutableLiveData<ScreenState>()
 	override val showFilePickerScreenAction = SingleLiveAction<FilePickerArgs>()
@@ -45,6 +40,8 @@ class StorageListPresenter(private val action: Action) :
 	override val authActivityStartedAction = SingleLiveAction<FSType>()
 
 	private var isDropboxAuthDisplayed = false
+    private val job = Job()
+	private val scope = CoroutineScope(Dispatchers.Main + job)
 
 	init {
 		Injector.getInstance().appComponent.inject(this)
@@ -60,11 +57,15 @@ class StorageListPresenter(private val action: Action) :
 				screenState.value = ScreenState.dataWithError(
 						resourceHelper.getString(R.string.authentication_failed))
 			} else {
-				CompletableFuture.supplyAsync(Supplier {
-					interactor.getDropboxRoot()
-				}, executor)
-						.thenAccept { result -> onGetDropboxRootResult(result) }
+				scope.launch {
+					val dropboxRoot = withContext(Dispatchers.Default) {
+						interactor.getDropboxRoot()
+					}
+
+					onDropboxRootLoaded(dropboxRoot)
+				}
 			}
+
 		} else {
 			storageOptions.value = interactor.getAvailableStorageOptions()
 			screenState.value = ScreenState.data()
@@ -72,6 +73,10 @@ class StorageListPresenter(private val action: Action) :
 	}
 
 	override fun stop() {
+	}
+
+	override fun destroy() {
+		job.cancel()
 	}
 
 	override fun onStorageOptionClicked(option: StorageOption) {
@@ -105,10 +110,13 @@ class StorageListPresenter(private val action: Action) :
 			authActivityStartedAction.call(FSType.DROPBOX)
 
 		} else {
-			CompletableFuture.supplyAsync(Supplier {
-				interactor.getDropboxRoot()
-			}, executor)
-					.thenAccept { result -> onGetDropboxRootResult(result) }
+			scope.launch {
+				val dropboxRoot = withContext(Dispatchers.Default) {
+					interactor.getDropboxRoot()
+				}
+
+				onDropboxRootLoaded(dropboxRoot)
+			}
 		}
 	}
 
@@ -116,13 +124,14 @@ class StorageListPresenter(private val action: Action) :
 		fileSelectedAction.call(file)
 	}
 
-	private fun onGetDropboxRootResult(result: OperationResult<FileDescriptor>) {
+	private fun onDropboxRootLoaded(result: OperationResult<FileDescriptor>) {
 		if (result.isSucceededOrDeferred) {
 			val rootFile = result.obj
-			showFilePickerScreenAction.postCall(FilePickerArgs(rootFile, action, true))
+			showFilePickerScreenAction.call(FilePickerArgs(rootFile, action, true))
+
 		} else {
 			val message = errorInteractor.processAndGetMessage(result.error)
-			screenState.postValue(ScreenState.error(message))
+			screenState.value = ScreenState.error(message)
 		}
 	}
 }

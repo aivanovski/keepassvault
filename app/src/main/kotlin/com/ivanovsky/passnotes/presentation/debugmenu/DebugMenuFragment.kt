@@ -38,6 +38,11 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 		presenter.stop()
 	}
 
+	override fun onDestroy() {
+		super.onDestroy()
+		presenter.destroy()
+	}
+
 	override fun onCreateContentView(inflater: LayoutInflater,
 									 container: ViewGroup?,
 									 savedInstanceState: Bundle?): View {

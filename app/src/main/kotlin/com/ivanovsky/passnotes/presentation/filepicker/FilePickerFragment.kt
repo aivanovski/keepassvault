@@ -101,6 +101,11 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 		presenter.stop()
 	}
 
+	override fun onDestroy() {
+		super.onDestroy()
+		presenter.destroy()
+	}
+
 	override fun onCreateConfig(): Config {
 		return Config(layout = Layout.VERTICAL_LIST,
 				isFloatingActionButtonEnabled = false,

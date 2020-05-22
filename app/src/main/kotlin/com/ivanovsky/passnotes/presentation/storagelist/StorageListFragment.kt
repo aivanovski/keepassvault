@@ -57,6 +57,11 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 		presenter.stop()
 	}
 
+	override fun onDestroy() {
+		super.onDestroy()
+		presenter.destroy()
+	}
+
 	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
 		val view = inflater.inflate(R.layout.storage_fragment, container, false)
 
@@ -114,11 +119,11 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 		if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_PICK_FILE) {
-			val extras = data?.extras
-			if (extras != null) {
-				val file = extras.getParcelable<FileDescriptor>(FilePickerActivity.EXTRA_RESULT)
-				presenter.onFilePicked(file)
-			}
+			val extras = data?.extras ?: return
+
+			val file = extras.getParcelable<FileDescriptor>(FilePickerActivity.EXTRA_RESULT) ?: return
+
+			presenter.onFilePicked(file)
 		}
 	}
 

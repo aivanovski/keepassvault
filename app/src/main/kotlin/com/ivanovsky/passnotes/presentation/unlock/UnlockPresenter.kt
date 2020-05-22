@@ -6,7 +6,6 @@ import android.content.Context
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
@@ -15,9 +14,7 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
-import java9.util.concurrent.CompletableFuture.supplyAsync
-import java9.util.function.Supplier
-import java.util.concurrent.Executor
+import kotlinx.coroutines.*
 
 import javax.inject.Inject
 
@@ -35,9 +32,6 @@ class UnlockPresenter(private val context: Context,
 	@Inject
 	lateinit var observerBus: ObserverBus
 
-	@Inject
-	lateinit var executor: Executor
-
 	override val recentlyUsedFiles = MutableLiveData<List<FileDescriptor>>()
 	override val selectedRecentlyUsedFile = MutableLiveData<FileDescriptor>()
 	override val screenState = MutableLiveData<ScreenState>()
@@ -50,6 +44,8 @@ class UnlockPresenter(private val context: Context,
 	override val showDebugMenuScreenAction = SingleLiveAction<Void>()
 	override val snackbarMessageAction = SingleLiveAction<String>()
 	private var selectedFile: FileDescriptor? = null
+    private val job = Job()
+	private val scope = CoroutineScope(Dispatchers.Main + job)
 
 	init {
 		Injector.getInstance().appComponent.inject(this)
@@ -65,31 +61,36 @@ class UnlockPresenter(private val context: Context,
 		observerBus.unregister(this)
 	}
 
-	override fun loadData(selectedFile: FileDescriptor?) {
-		supplyAsync(Supplier { interactor.getRecentlyOpenedFiles() }, executor)
-				.thenAccept { data -> onLoadRecentlyOpenedFilesResult(selectedFile, data) }
+	override fun destroy() {
+		job.cancel()
 	}
 
-	private fun onLoadRecentlyOpenedFilesResult(selectedFile: FileDescriptor?, result: OperationResult<List<FileDescriptor>>) {
-		if (result.isSucceededOrDeferred) {
-			val files = result.obj
-			if (files.isNotEmpty()) {
-				recentlyUsedFiles.postValue(files)
-
-				if (selectedFile != null) {
-					val selectedPosition = files.indexOfFirst { f -> isFileEqualsByUidAndFsType(f, selectedFile) }
-					if (selectedPosition != -1) {
-						selectedRecentlyUsedFile.postValue(selectedFile)
-					}
-				}
-
-				screenState.postValue(ScreenState.data())
-			} else {
-				screenState.postValue(ScreenState.empty(context.getString(R.string.no_files_to_open)))
+	override fun loadData(selectedFile: FileDescriptor?) {
+		scope.launch {
+			val result = withContext(Dispatchers.Default) {
+				interactor.getRecentlyOpenedFiles()
 			}
-		} else {
-			val message = errorInteractor.processAndGetMessage(result.error)
-			screenState.postValue(ScreenState.error(message))
+
+			if (result.isSucceededOrDeferred) {
+				val files = result.obj
+				if (files.isNotEmpty()) {
+					recentlyUsedFiles.value = files
+
+					if (selectedFile != null) {
+						val selectedPosition = files.indexOfFirst { f -> isFileEqualsByUidAndFsType(f, selectedFile) }
+						if (selectedPosition != -1) {
+							selectedRecentlyUsedFile.value = selectedFile
+						}
+					}
+
+					screenState.value = ScreenState.data()
+				} else {
+					screenState.value = ScreenState.empty(context.getString(R.string.no_files_to_open))
+				}
+			} else {
+				val message = errorInteractor.processAndGetMessage(result.error)
+				screenState.setValue(ScreenState.error(message))
+			}
 		}
 	}
 
@@ -103,17 +104,18 @@ class UnlockPresenter(private val context: Context,
 
 		val key = KeepassDatabaseKey(password)
 
-		supplyAsync(Supplier { interactor.openDatabase(key, file) }, executor)
-				.thenAccept { result -> onOpenDatabaseResult(result) }
-	}
+		scope.launch {
+			val result = withContext(Dispatchers.Default) {
+				interactor.openDatabase(key, file)
+			}
 
-	private fun onOpenDatabaseResult(result: OperationResult<Boolean>) {
-		if (result.isSucceededOrDeferred) {
-			showGroupsScreenAction.postCall()
-			screenState.postValue(ScreenState.data())
-		} else {
-			val message = errorInteractor.processAndGetMessage(result.error)
-			screenState.postValue(ScreenState.error(message))
+			if (result.isSucceededOrDeferred) {
+				showGroupsScreenAction.call()
+				screenState.value = ScreenState.data()
+			} else {
+				val message = errorInteractor.processAndGetMessage(result.error)
+				screenState.value = ScreenState.error(message)
+			}
 		}
 	}
 
@@ -147,19 +149,20 @@ class UnlockPresenter(private val context: Context,
 		usedFile.fileUid = file.uid
 		usedFile.fsType = file.fsType
 
-		supplyAsync(Supplier { interactor.saveUsedFileWithoutAccessTime(usedFile) }, executor)
-				.thenAccept { result -> onSaveUsedFileResult(file, result) }
-	}
+		scope.launch {
+			val result = withContext(Dispatchers.Default) {
+				interactor.saveUsedFileWithoutAccessTime(usedFile)
+			}
 
-	private fun onSaveUsedFileResult(selectedFile: FileDescriptor, result: OperationResult<Boolean>) {
-		if (result.isSucceededOrDeferred) {
-			loadData(selectedFile)
+			if (result.isSucceededOrDeferred) {
+				loadData(file)
 
-		} else {
-			screenState.postValue(ScreenState.data())
+			} else {
+				screenState.value = ScreenState.data()
 
-			val message = errorInteractor.processAndGetMessage(result.error)
-			snackbarMessageAction.postCall(message)
+				val message = errorInteractor.processAndGetMessage(result.error)
+				snackbarMessageAction.call(message)
+			}
 		}
 	}
 

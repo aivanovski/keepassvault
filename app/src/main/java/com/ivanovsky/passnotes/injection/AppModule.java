@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.injection;
 
-import androidx.annotation.NonNull;
 import androidx.room.Room;
 import android.content.Context;
 
@@ -24,14 +23,6 @@ import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor;
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor;
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
 
@@ -170,11 +161,5 @@ public class AppModule {
 	@Singleton
 	FileHelper provideFileHelper(SettingsRepository settings) {
 		return new FileHelper(context, settings);
-	}
-
-	@Provides
-	@Singleton
-	Executor provideBackgroundExecutor() {
-		return new ThreadPoolExecutor(1, 2, 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
 	}
 }

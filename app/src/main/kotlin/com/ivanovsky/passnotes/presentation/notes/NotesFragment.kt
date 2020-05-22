@@ -38,6 +38,11 @@ class NotesFragment: BaseFragment(), NotesContract.View {
 		presenter.stop()
 	}
 
+	override fun onDestroy() {
+		super.onDestroy()
+		presenter.destroy()
+	}
+
 	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup,
 	                                 savedInstanceState: Bundle?): View {
 		val view = inflater.inflate(R.layout.notes_fragment, container, false)

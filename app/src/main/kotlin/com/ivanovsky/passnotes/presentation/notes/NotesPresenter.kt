@@ -1,15 +1,10 @@
 package com.ivanovsky.passnotes.presentation.notes
 
-import android.os.Handler
-import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor
 import com.ivanovsky.passnotes.injection.Injector
-import java9.util.concurrent.CompletableFuture
-import java9.util.function.Supplier
+import kotlinx.coroutines.*
 import java.util.*
-import java.util.concurrent.Executor
 import javax.inject.Inject
 
 class NotesPresenter(private val groupUid: UUID,
@@ -21,10 +16,8 @@ class NotesPresenter(private val groupUid: UUID,
 	@Inject
 	lateinit var errorInteractor: ErrorInteractor
 
-	@Inject
-	lateinit var executor: Executor
-
-	private val handler = Handler()
+    private val job = Job()
+	private val scope = CoroutineScope(Dispatchers.Main + job)
 
 	init {
 		Injector.getInstance().encryptedDatabaseComponent.inject(this)
@@ -37,15 +30,16 @@ class NotesPresenter(private val groupUid: UUID,
 	override fun stop() {
 	}
 
-	override fun loadData() {
-        CompletableFuture.supplyAsync(Supplier {
-	        interactor.getNotesByGroupUid(groupUid)
-        }, executor)
-		        .thenAccept { result -> onGetNotesResult(result) }
+	override fun destroy() {
+		job.cancel()
 	}
 
-	private fun onGetNotesResult(result: OperationResult<List<Note>>) {
-		handler.post {
+	override fun loadData() {
+		scope.launch {
+			val result = withContext(Dispatchers.Main) {
+				interactor.getNotesByGroupUid(groupUid)
+			}
+
 			if (result.isSucceededOrDeferred) {
 				val notes = result.obj
 

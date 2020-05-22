@@ -55,6 +55,11 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 		presenter.stop()
 	}
 
+	override fun onDestroy() {
+		super.onDestroy()
+		presenter.destroy()
+	}
+
 	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 		val view = inflater.inflate(R.layout.new_database_fragment, container, false)
 
@@ -161,11 +166,11 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 		super.onActivityResult(requestCode, resultCode, data)
 
+		val extras = data?.extras
 		if (resultCode == Activity.RESULT_OK &&
 				requestCode == REQUEST_CODE_PICK_STORAGE &&
-				data != null &&
-				data.extras != null) {
-			val file = data.extras.getParcelable<FileDescriptor>(StorageListActivity.EXTRA_RESULT)
+				extras != null) {
+			val file = extras.getParcelable<FileDescriptor>(StorageListActivity.EXTRA_RESULT)
 			if (file != null) {
 				presenter.onStorageSelected(file)
 			}

@@ -11,12 +11,15 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
+import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import kotlinx.coroutines.*
 import java.io.File
 import javax.inject.Inject
 
-class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.Presenter {
+class NewDatabasePresenter(
+    private val view: NewDatabaseContract.View,
+	private val context: Context
+) : NewDatabaseContract.Presenter {
 
 	@Inject
 	lateinit var interactor: NewDatabaseInteractor
@@ -27,12 +30,11 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 	@Inject
 	lateinit var fileHelper: FileHelper
 
-	override val screenState = MutableLiveData<ScreenState>()
 	override val storageTypeAndPath = MutableLiveData<Pair<String, String>>()
 	override val doneButtonVisibility = MutableLiveData<Boolean>()
-	override val showGroupsScreenAction = SingleLiveAction<Void>()
-	override val showStorageScreenAction = SingleLiveAction<Void>()
-	override val hideKeyboardAction = SingleLiveAction<Void>()
+	override val showGroupsScreenEvent = SingleLiveEvent<Void>()
+	override val showStorageScreenEvent = SingleLiveEvent<Void>()
+	override val hideKeyboardEvent = SingleLiveEvent<Void>()
 	private var selectedStorageDir: FileDescriptor? = null
     private val job = Job()
 	private val scope = CoroutineScope(Dispatchers.Main + job)
@@ -42,10 +44,9 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 	}
 
 	override fun start() {
-		screenState.value = ScreenState.data()
-	}
-
-	override fun stop() {
+        if (view.screenState.isNotInitialized) {
+			view.screenState = ScreenState.data()
+		}
 	}
 
 	override fun destroy() {
@@ -54,9 +55,9 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 
 	override fun createNewDatabaseFile(filename: String, password: String) {
 		if (selectedStorageDir != null) {
-			hideKeyboardAction.call()
+			hideKeyboardEvent.call()
 			doneButtonVisibility.value = false
-			screenState.value = ScreenState.loading()
+			view.screenState = ScreenState.loading()
 
 			val dbKey = KeepassDatabaseKey(password)
 			val dbFile = FileDescriptor.fromParent(selectedStorageDir, "$filename.kdbx")
@@ -70,25 +71,25 @@ class NewDatabasePresenter(private val context: Context) : NewDatabaseContract.P
 					val created = result.obj
 
 					if (created) {
-						showGroupsScreenAction.call()
+						showGroupsScreenEvent.call()
 					} else {
-						screenState.value = ScreenState.dataWithError(context.getString(R.string.error_was_occurred))
+						view.screenState = ScreenState.dataWithError(context.getString(R.string.error_was_occurred))
 						doneButtonVisibility.value = true
 					}
 				} else {
 					val message = errorInteractor.processAndGetMessage(result.error)
-					screenState.value = ScreenState.dataWithError(message)
+					view.screenState = ScreenState.dataWithError(message)
 					doneButtonVisibility.value = true
 				}
 			}
 
 		} else {
-			screenState.value = ScreenState.dataWithError(context.getString(R.string.storage_is_not_selected))
+			view.screenState = ScreenState.dataWithError(context.getString(R.string.storage_is_not_selected))
 		}
 	}
 
 	override fun selectStorage() {
-		showStorageScreenAction.call()
+		showStorageScreenEvent.call()
 	}
 
 	override fun onStorageSelected(selectedFile: FileDescriptor) {

@@ -17,11 +17,9 @@ import com.ivanovsky.passnotes.presentation.storagelist.StorageListActivity
 import com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput
 import java.util.regex.Pattern
 
-private const val REQUEST_CODE_PICK_STORAGE = 100
-
 class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 
-	private lateinit var presenter: NewDatabaseContract.Presenter
+	override lateinit var presenter: NewDatabaseContract.Presenter
 	private lateinit var menu: Menu
 	private lateinit var storageLayout: View
 	private lateinit var storageTypeTextView: TextView
@@ -30,29 +28,14 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 	private lateinit var passwordEditText: EditText
 	private lateinit var confirmationEditText: EditText
 
-	companion object {
-
-		private val FILE_NAME_PATTERN = Pattern.compile("[\\w]{1,50}")
-		private val PASSWORD_PATTERN = Pattern.compile("[\\w@#$!%^&+=]{4,20}")
-
-		fun newInstance(): NewDatabaseFragment {
-			return NewDatabaseFragment()
-		}
-	}
-
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setHasOptionsMenu(true)
 	}
 
-	override fun onResume() {
-		super.onResume()
+	override fun onStart() {
+		super.onStart()
 		presenter.start()
-	}
-
-	override fun onPause() {
-		super.onPause()
-		presenter.stop()
 	}
 
 	override fun onDestroy() {
@@ -72,17 +55,15 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 
 		storageLayout.setOnClickListener { presenter.selectStorage() }
 
-		presenter.screenState.observe(this,
-				Observer { screenState -> setScreenState(screenState) })
 		presenter.storageTypeAndPath.observe(this,
 				Observer { typeAndPath -> setStorageTypeAndPath(typeAndPath!!.first, typeAndPath.second) })
 		presenter.doneButtonVisibility.observe(this,
 				Observer { isVisible -> setDoneButtonVisibility(isVisible!!) })
-		presenter.showGroupsScreenAction.observe(this,
+		presenter.showGroupsScreenEvent.observe(this,
 				Observer { showGroupsScreen() })
-		presenter.showStorageScreenAction.observe(this,
+		presenter.showStorageScreenEvent.observe(this,
 				Observer { showStorageScreen() })
-		presenter.hideKeyboardAction.observe(this,
+		presenter.hideKeyboardEvent.observe(this,
 				Observer { hideKeyboard() })
 
 		return view
@@ -92,10 +73,6 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 		this.menu = menu
 
 		inflater.inflate(R.menu.base_done, menu)
-	}
-
-	override fun setPresenter(presenter: NewDatabaseContract.Presenter) {
-		this.presenter = presenter
 	}
 
 	override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -179,5 +156,17 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 
 	override fun hideKeyboard() {
 		hideSoftInput(activity)
+	}
+
+	companion object {
+
+		private const val REQUEST_CODE_PICK_STORAGE = 100
+
+		private val FILE_NAME_PATTERN = Pattern.compile("[\\w]{1,50}")
+		private val PASSWORD_PATTERN = Pattern.compile("[\\w@#$!%^&+=]{4,20}")
+
+		fun newInstance(): NewDatabaseFragment {
+			return NewDatabaseFragment()
+		}
 	}
 }

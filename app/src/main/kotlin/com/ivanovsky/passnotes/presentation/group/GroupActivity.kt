@@ -9,13 +9,6 @@ import com.ivanovsky.passnotes.presentation.core.BaseActivity
 
 class GroupActivity : BaseActivity() {
 
-	companion object {
-
-		fun createStartIntent(context: Context): Intent {
-			return Intent(context, GroupActivity::class.java)
-		}
-	}
-
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
@@ -30,8 +23,8 @@ class GroupActivity : BaseActivity() {
 				.replace(R.id.fragment_container, fragment)
 				.commit()
 
-		val presenter = GroupPresenter(this)
-		fragment.setPresenter(presenter)
+		val presenter = GroupPresenter(fragment, this)
+		fragment.presenter = presenter
 	}
 
 	override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -40,6 +33,13 @@ class GroupActivity : BaseActivity() {
 			true
 		} else {
 			super.onOptionsItemSelected(item)
+		}
+	}
+
+	companion object {
+
+		fun createStartIntent(context: Context): Intent {
+			return Intent(context, GroupActivity::class.java)
 		}
 	}
 }

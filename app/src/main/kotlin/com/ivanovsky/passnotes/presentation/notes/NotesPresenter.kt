@@ -1,8 +1,11 @@
 package com.ivanovsky.passnotes.presentation.notes
 
+import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor
 import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.presentation.core.ScreenState
 import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
@@ -16,6 +19,9 @@ class NotesPresenter(private val groupUid: UUID,
 	@Inject
 	lateinit var errorInteractor: ErrorInteractor
 
+	@Inject
+	lateinit var resourceHelper: ResourceHelper
+
     private val job = Job()
 	private val scope = CoroutineScope(Dispatchers.Main + job)
 
@@ -25,9 +31,6 @@ class NotesPresenter(private val groupUid: UUID,
 
 	override fun start() {
 		loadData()
-	}
-
-	override fun stop() {
 	}
 
 	override fun destroy() {
@@ -45,11 +48,14 @@ class NotesPresenter(private val groupUid: UUID,
 
 				if (notes.isNotEmpty()) {
 					view.showNotes(notes)
+					view.screenState = ScreenState.data()
 				} else {
-					view.showNotItems()
+					val emptyText = resourceHelper.getString(R.string.no_items)
+					view.screenState = ScreenState.empty(emptyText)
 				}
 			} else {
-				view.showError(errorInteractor.processAndGetMessage(result.error))
+                val errorMessage = errorInteractor.processAndGetMessage(result.error)
+				view.screenState = ScreenState.error(errorMessage)
 			}
 		}
 	}

@@ -6,8 +6,7 @@ import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.presentation.core.BasePresenter
 import com.ivanovsky.passnotes.presentation.core.BaseView
-import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
+import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 
 class StorageListContract {
 
@@ -20,10 +19,9 @@ class StorageListContract {
 
 	interface Presenter: BasePresenter {
 		val storageOptions: LiveData<List<StorageOption>>
-		val screenState: LiveData<ScreenState>
-		val showFilePickerScreenAction: SingleLiveAction<FilePickerArgs>
-		val fileSelectedAction: SingleLiveAction<FileDescriptor>
-		val authActivityStartedAction: SingleLiveAction<FSType>
+		val showFilePickerScreenEvent: SingleLiveEvent<FilePickerArgs>
+		val fileSelectedEvent: SingleLiveEvent<FileDescriptor>
+		val authActivityStartedEvent: SingleLiveEvent<FSType>
 
 		fun onStorageOptionClicked(option: StorageOption)
 		fun onFilePicked(file: FileDescriptor)

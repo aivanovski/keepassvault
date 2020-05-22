@@ -12,14 +12,15 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.presentation.Screen
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
-import com.ivanovsky.passnotes.presentation.core.FragmentState
+import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingMode
+import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.group.GroupActivity
 import com.ivanovsky.passnotes.presentation.notes.NotesActivity
 import com.ivanovsky.passnotes.presentation.unlock.UnlockActivity
 
 class GroupsFragment : BaseFragment(), GroupsContract.View {
 
-	private lateinit var presenter: GroupsContract.Presenter
+	override lateinit var presenter: GroupsContract.Presenter
 	private lateinit var adapter: GroupsAdapter
 	private lateinit var recyclerView: RecyclerView
 	private lateinit var fab: FloatingActionButton
@@ -31,14 +32,9 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 		}
 	}
 
-	override fun onResume() {
-		super.onResume()
+	override fun onStart() {
+		super.onStart()
 		presenter.start()
-	}
-
-	override fun onPause() {
-		super.onPause()
-		presenter.stop()
 	}
 
 	override fun onDestroy() {
@@ -46,7 +42,7 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 		presenter.destroy()
 	}
 
-	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
+	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 		val view = inflater.inflate(R.layout.groups_fragment, container, false)
 
 		recyclerView =  view.findViewById(R.id.recycler_view)
@@ -71,26 +67,20 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 		return R.id.recycler_view
 	}
 
-	override fun onStateChanged(oldState: FragmentState?, newState: FragmentState) {
-		when (newState) {
-			FragmentState.EMPTY,
-			FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL,
-			FragmentState.DISPLAYING_DATA -> fab.show()
+	override fun onScreenStateChanged(screenState: ScreenState) {
+		when (screenState.displayingMode) {
+			ScreenDisplayingMode.EMPTY,
+			ScreenDisplayingMode.DISPLAYING_DATA_WITH_ERROR_PANEL,
+			ScreenDisplayingMode.DISPLAYING_DATA -> fab.show()
 
-			FragmentState.LOADING, FragmentState.ERROR -> fab.hide()
+			ScreenDisplayingMode.LOADING, ScreenDisplayingMode.ERROR -> fab.hide()
 		}
-	}
-
-	override fun setPresenter(presenter: GroupsContract.Presenter) {
-		this.presenter = presenter
 	}
 
 	override fun showGroups(groupsAndCounts: List<Pair<Group, Int>>) {
 		adapter.setItems(createAdapterItems(groupsAndCounts))
 		adapter.onGroupItemClickListener = { position -> onGroupClicked(groupsAndCounts[position].first)}
 		adapter.onButtonItemClickListener = { onNewGroupClicked() }
-
-		state = FragmentState.DISPLAYING_DATA
 	}
 
 	private fun createAdapterItems(groupsAndCounts: List<Pair<Group, Int>>): List<GroupsAdapter.ListItem> {
@@ -116,11 +106,6 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 		showNewGroupScreen()
 	}
 
-	override fun showNoItems() {
-		setEmptyText(getString(R.string.no_items_to_show))
-		state = FragmentState.EMPTY
-	}
-
 	override fun showNewGroupScreen() {
 		startActivity(GroupActivity.createStartIntent(context!!))
 	}
@@ -133,10 +118,5 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
 
 	override fun showNotesScreen(group: Group) {
 		startActivity(NotesActivity.createStartIntent(context!!, group))
-	}
-
-	override fun showError(message: String) {
-		setErrorText(message)
-		state = FragmentState.ERROR
 	}
 }

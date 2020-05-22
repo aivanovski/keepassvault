@@ -10,7 +10,6 @@ class NoteContract {
 
 	interface View: BaseView<Presenter> {
 		fun showNote(note: Note)
-		fun showError(message: String)
 	}
 
 	interface Presenter: BasePresenter {

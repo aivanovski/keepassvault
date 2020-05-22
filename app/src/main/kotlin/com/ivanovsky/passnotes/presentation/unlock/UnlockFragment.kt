@@ -17,7 +17,8 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
-import com.ivanovsky.passnotes.presentation.core.FragmentState
+import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingMode
+import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuActivity
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity
@@ -38,8 +39,8 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 	private var selectedFile: FileDescriptor? = null
 	private var files: List<FileDescriptor>? = null
 
+	override lateinit var presenter: UnlockContract.Presenter
 	private lateinit var fileAdapter: FileSpinnerAdapter
-	private lateinit var presenter: UnlockContract.Presenter
 	private lateinit var passwordRules: List<PasswordRule>
 	private lateinit var fileSpinner: Spinner
 	private lateinit var fab: FloatingActionButton
@@ -77,14 +78,9 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 		return rules
 	}
 
-	override fun onResume() {
-		super.onResume()
+	override fun onStart() {
+		super.onStart()
 		presenter.start()
-	}
-
-	override fun onPause() {
-		super.onPause()
-		presenter.stop()
 	}
 
 	override fun onDestroy() {
@@ -92,7 +88,7 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 		presenter.destroy()
 	}
 
-	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
+	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 		val view = inflater.inflate(R.layout.unlock_fragment, container, false)
 
 		fileSpinner = view.findViewById(R.id.file_spinner)
@@ -111,24 +107,20 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 				Observer { files -> setRecentlyUsedFiles(files!!) })
 		presenter.selectedRecentlyUsedFile.observe(this,
 				Observer { selectedFile -> setSelectedFile(selectedFile!!)})
-		presenter.screenState.observe(this,
-				Observer { state -> setScreenState(state) })
-		presenter.showGroupsScreenAction.observe(this,
+		presenter.showGroupsScreenEvent.observe(this,
 				Observer { showGroupsScreen() })
-		presenter.showNewDatabaseScreenAction.observe(this,
+		presenter.showNewDatabaseScreenEvent.observe(this,
 				Observer { showNewDatabaseScreen() })
-		presenter.hideKeyboardAction.observe(this,
+		presenter.hideKeyboardEvent.observe(this,
 				Observer { hideKeyboard() })
-		presenter.showOpenFileScreenAction.observe(this,
+		presenter.showOpenFileScreenEvent.observe(this,
 				Observer { showOpenFileScreen() })
-		presenter.showSettingsScreenAction.observe(this,
+		presenter.showSettingsScreenEvent.observe(this,
 				Observer { showSettingScreen() })
-		presenter.showAboutScreenAction.observe(this,
+		presenter.showAboutScreenEvent.observe(this,
 				Observer { showAboutScreen() })
-		presenter.showDebugMenuScreenAction.observe(this,
+		presenter.showDebugMenuScreenEvent.observe(this,
 				Observer { showDebugMenuScreen() })
-		presenter.snackbarMessageAction.observe(this,
-				Observer { message -> showSnackbar(message!!) })
 
 		return view
 	}
@@ -146,18 +138,14 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 		return R.id.content
 	}
 
-	override fun onStateChanged(oldState: FragmentState?, newState: FragmentState) {
-		when (newState) {
-			FragmentState.EMPTY,
-			FragmentState.DISPLAYING_DATA_WITH_ERROR_PANEL,
-			FragmentState.DISPLAYING_DATA -> fab.show()
+	override fun onScreenStateChanged(screenState: ScreenState) {
+		when (screenState.displayingMode) {
+			ScreenDisplayingMode.EMPTY,
+			ScreenDisplayingMode.DISPLAYING_DATA_WITH_ERROR_PANEL,
+			ScreenDisplayingMode.DISPLAYING_DATA -> fab.show()
 
-			FragmentState.LOADING, FragmentState.ERROR -> fab.hide()
+			ScreenDisplayingMode.LOADING, ScreenDisplayingMode.ERROR -> fab.hide()
 		}
-	}
-
-	override fun setPresenter(presenter: UnlockContract.Presenter) {
-		this.presenter = presenter
 	}
 
 	private fun createAdapterItems(files: List<FileDescriptor>): List<FileSpinnerAdapter.Item> {

@@ -11,6 +11,34 @@ class StorageListActivity : BaseActivity() {
 
 	private lateinit var action: Action
 
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		setContentView(R.layout.core_base_activity)
+
+		action = intent.extras?.getSerializable(EXTRA_MODE) as Action
+
+		setSupportActionBar(findViewById(R.id.tool_bar))
+		currentActionBar.title = getString(R.string.select_storage)
+		currentActionBar.setDisplayHomeAsUpEnabled(true)
+
+		val fragment = StorageListFragment.newInstance()
+		supportFragmentManager.beginTransaction()
+				.replace(R.id.fragment_container, fragment)
+				.commit()
+
+		val presenter = StorageListPresenter(fragment, action)
+		fragment.presenter = presenter
+	}
+
+	override fun onOptionsItemSelected(item: MenuItem): Boolean {
+		return if (item.itemId == android.R.id.home) {
+			finish()
+			true
+		} else {
+			super.onOptionsItemSelected(item)
+		}
+	}
+
 	companion object {
 
 		const val EXTRA_RESULT: String = "result"
@@ -23,34 +51,6 @@ class StorageListActivity : BaseActivity() {
 			intent.putExtra(EXTRA_MODE, action)
 
 			return intent
-		}
-	}
-
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-		setContentView(R.layout.core_base_activity)
-
-		action = intent.extras.getSerializable(EXTRA_MODE) as Action
-
-		setSupportActionBar(findViewById(R.id.tool_bar))
-		currentActionBar.title = getString(R.string.select_storage)
-		currentActionBar.setDisplayHomeAsUpEnabled(true)
-
-		val fragment = StorageListFragment.newInstance()
-		supportFragmentManager.beginTransaction()
-				.replace(R.id.fragment_container, fragment)
-				.commit()
-
-		val presenter = StorageListPresenter(action)
-		fragment.setPresenter(presenter)
-	}
-
-	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-		if (item?.itemId == android.R.id.home) {
-			finish()
-			return true
-		} else {
-			return super.onOptionsItemSelected(item)
 		}
 	}
 }

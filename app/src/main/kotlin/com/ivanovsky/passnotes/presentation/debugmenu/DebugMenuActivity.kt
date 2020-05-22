@@ -24,7 +24,7 @@ class DebugMenuActivity : BaseActivity() {
 				.commit()
 
 		val presenter = DebugMenuPresenter(fragment)
-		fragment.setPresenter(presenter)
+		fragment.presenter = presenter
 	}
 
 	override fun onOptionsItemSelected(item: MenuItem?): Boolean {

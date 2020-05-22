@@ -21,12 +21,12 @@ class NewDatabaseActivity : BaseActivity() {
 				.replace(R.id.fragment_container, fragment)
 				.commit()
 
-		val presenter = NewDatabasePresenter(this)
-		fragment.setPresenter(presenter)
+		val presenter = NewDatabasePresenter(fragment, this)
+		fragment.presenter = presenter
 	}
 
-	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-		return if (item?.itemId == android.R.id.home) {
+	override fun onOptionsItemSelected(item: MenuItem): Boolean {
+		return if (item.itemId == android.R.id.home) {
 			onBackPressed()
 			true
 		} else {

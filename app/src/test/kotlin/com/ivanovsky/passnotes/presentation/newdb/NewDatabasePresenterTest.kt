@@ -5,17 +5,13 @@ import androidx.lifecycle.Observer
 import android.content.Context
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSType
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
-import com.ivanovsky.passnotes.presentation.core.FragmentState
+import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingMode
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
@@ -43,7 +39,7 @@ class NewDatabasePresenterTest {
 
 		presenter.start()
 
-		assertEquals(FragmentState.DISPLAYING_DATA, presenter.screenState.value?.state)
+		assertEquals(ScreenDisplayingMode.DISPLAYING_DATA, presenter.screenState.value?.displayingMode)
 	}
 
 	@Test
@@ -108,7 +104,7 @@ class NewDatabasePresenterTest {
 	fun selectStorage_shouldCreateShowStorageScreenAction() {
 		val presenter = NewDatabasePresenter(mock(Context::class.java))
 		val observer = mockedObserver<Void?>()
-		presenter.showStorageScreenAction.observeForever(observer)
+		presenter.showStorageScreenEvent.observeForever(observer)
 
 		presenter.selectStorage()
 

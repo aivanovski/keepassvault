@@ -5,7 +5,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.presentation.core.BasePresenter
 import com.ivanovsky.passnotes.presentation.core.BaseView
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
+import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 
 interface DebugMenuContract {
 
@@ -18,13 +18,11 @@ interface DebugMenuContract {
 	}
 
 	interface Presenter : BasePresenter {
-		val screenState: LiveData<ScreenState>
 		val writeButtonEnabled: LiveData<Boolean>
 		val openDbButtonEnabled: LiveData<Boolean>
 		val closeDbButtonEnabled: LiveData<Boolean>
 		val addEntryButtonEnabled: LiveData<Boolean>
 		val externalStorageCheckBoxChecked: LiveData<Boolean>
-		val snackbarMessageAction: SingleLiveAction<String>
 
 		fun onReadButtonClicked(inFile: FileDescriptor)
 		fun onWriteButtonClicked()

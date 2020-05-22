@@ -13,13 +13,15 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
+import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListContract.FilePickerArgs
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
-class StorageListPresenter(private val action: Action) :
-		StorageListContract.Presenter {
+class StorageListPresenter(
+	private val view: StorageListContract.View,
+	private val action: Action
+) : StorageListContract.Presenter {
 
 	@Inject
 	lateinit var interactor: StorageListInteractor
@@ -34,10 +36,9 @@ class StorageListPresenter(private val action: Action) :
 	lateinit var resourceHelper: ResourceHelper
 
 	override val storageOptions = MutableLiveData<List<StorageOption>>()
-	override val screenState = MutableLiveData<ScreenState>()
-	override val showFilePickerScreenAction = SingleLiveAction<FilePickerArgs>()
-	override val fileSelectedAction = SingleLiveAction<FileDescriptor>()
-	override val authActivityStartedAction = SingleLiveAction<FSType>()
+	override val showFilePickerScreenEvent = SingleLiveEvent<FilePickerArgs>()
+	override val fileSelectedEvent = SingleLiveEvent<FileDescriptor>()
+	override val authActivityStartedEvent = SingleLiveEvent<FSType>()
 
 	private var isDropboxAuthDisplayed = false
     private val job = Job()
@@ -54,8 +55,8 @@ class StorageListPresenter(private val action: Action) :
 
 			val provider = fileSystemResolver.resolveProvider(FSType.DROPBOX)
 			if (provider.authenticator.isAuthenticationRequired) {
-				screenState.value = ScreenState.dataWithError(
-						resourceHelper.getString(R.string.authentication_failed))
+				val errorMessage = resourceHelper.getString(R.string.authentication_failed)
+				view.screenState = ScreenState.dataWithError(errorMessage)
 			} else {
 				scope.launch {
 					val dropboxRoot = withContext(Dispatchers.Default) {
@@ -68,11 +69,8 @@ class StorageListPresenter(private val action: Action) :
 
 		} else {
 			storageOptions.value = interactor.getAvailableStorageOptions()
-			screenState.value = ScreenState.data()
+            view.screenState = ScreenState.data()
 		}
-	}
-
-	override fun stop() {
 	}
 
 	override fun destroy() {
@@ -89,25 +87,25 @@ class StorageListPresenter(private val action: Action) :
 
 	private fun onPrivateStorageSelected(root: FileDescriptor) {
 		if (action == Action.PICK_FILE) {
-			showFilePickerScreenAction.call(FilePickerArgs(root, action, false))
+			showFilePickerScreenEvent.call(FilePickerArgs(root, action, false))
 
 		} else if (action == Action.PICK_STORAGE) {
-			fileSelectedAction.call(root)
+			fileSelectedEvent.call(root)
 		}
 	}
 
 	private fun onExternalStorageSelected(root: FileDescriptor) {
-		showFilePickerScreenAction.call(FilePickerArgs(root, action, true))
+		showFilePickerScreenEvent.call(FilePickerArgs(root, action, true))
 	}
 
 	private fun onDropboxStorageSelected() {
 		val provider = fileSystemResolver.resolveProvider(FSType.DROPBOX)
 
-		screenState.value = ScreenState.loading()
+		view.screenState = ScreenState.loading()
 
 		if (provider.authenticator.isAuthenticationRequired) {
 			isDropboxAuthDisplayed = true
-			authActivityStartedAction.call(FSType.DROPBOX)
+			authActivityStartedEvent.call(FSType.DROPBOX)
 
 		} else {
 			scope.launch {
@@ -121,17 +119,17 @@ class StorageListPresenter(private val action: Action) :
 	}
 
 	override fun onFilePicked(file: FileDescriptor) {
-		fileSelectedAction.call(file)
+		fileSelectedEvent.call(file)
 	}
 
 	private fun onDropboxRootLoaded(result: OperationResult<FileDescriptor>) {
 		if (result.isSucceededOrDeferred) {
 			val rootFile = result.obj
-			showFilePickerScreenAction.call(FilePickerArgs(rootFile, action, true))
+			showFilePickerScreenEvent.call(FilePickerArgs(rootFile, action, true))
 
 		} else {
 			val message = errorInteractor.processAndGetMessage(result.error)
-			screenState.value = ScreenState.error(message)
+			view.screenState = ScreenState.error(message)
 		}
 	}
 }

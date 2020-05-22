@@ -13,16 +13,19 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
+import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import com.ivanovsky.passnotes.util.formatAccordingSystemLocale
 import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
 
-class FilePickerPresenter(private val mode: Mode,
-                          rootFile: FileDescriptor,
-                          private val isBrowsingEnabled: Boolean,
-                          private val context: Context) : FilePickerContract.Presenter {
+class FilePickerPresenter(
+    private val view: FilePickerContract.View,
+	private val mode: Mode,
+	rootFile: FileDescriptor,
+	private val isBrowsingEnabled: Boolean,
+	private val context: Context
+) : FilePickerContract.Presenter {
 
 	@Inject
 	lateinit var interactor: FilePickerInteractor
@@ -37,11 +40,9 @@ class FilePickerPresenter(private val mode: Mode,
 	lateinit var resourceHelper: ResourceHelper
 
 	override val items = MutableLiveData<List<FilePickerAdapter.Item>>()
-	override val screenState = MutableLiveData<ScreenState>()
 	override val doneButtonVisibility = MutableLiveData<Boolean>()
-	override val requestPermissionAction = SingleLiveAction<String>()
-	override val fileSelectedAction = SingleLiveAction<FileDescriptor>()
-	override val snackbarMessageAction = SingleLiveAction<String>()
+	override val requestPermissionEvent = SingleLiveEvent<String>()
+	override val fileSelectedEvent = SingleLiveEvent<FileDescriptor>()
 
 	private var isPermissionRejected = false
 	private var currentDir = rootFile
@@ -63,15 +64,12 @@ class FilePickerPresenter(private val mode: Mode,
 		}
 	}
 
-	override fun stop() {
-	}
-
 	override fun destroy() {
 		job.cancel()
 	}
 
 	override fun loadData() {
-		screenState.value = ScreenState.loading()
+		view.screenState = ScreenState.loading()
 		doneButtonVisibility.value = false
 
 		//TODO: app doesnt need permission for private storage and network storage
@@ -84,7 +82,7 @@ class FilePickerPresenter(private val mode: Mode,
 				onFilesLoaded(currentDir, files)
 			}
 		} else {
-			requestPermissionAction.call(SDCARD_PERMISSION)
+			requestPermissionEvent.call(SDCARD_PERMISSION)
 		}
 	}
 
@@ -112,12 +110,12 @@ class FilePickerPresenter(private val mode: Mode,
 				}
 
 				items.value = createAdapterItems(files, null)
-				screenState.value = ScreenState.data()
+				view.screenState = ScreenState.data()
 				doneButtonVisibility.value = true
 			}
 		} else {
 			val message = errorInteractor.processAndGetMessage(result.error)
-			screenState.value = ScreenState.error(message)
+			view.screenState = ScreenState.error(message)
 			doneButtonVisibility.value = false
 		}
 	}
@@ -132,11 +130,11 @@ class FilePickerPresenter(private val mode: Mode,
 			files = sortedFiles
 
 			items.value = createAdapterItems(sortedFiles, parent)
-			screenState.value = ScreenState.data()
+			view.screenState = ScreenState.data()
 			doneButtonVisibility.value = true
 		} else {
 			val message = errorInteractor.processAndGetMessage(result.error)
-			screenState.value = ScreenState.error(message)
+			view.screenState = ScreenState.error(message)
 			doneButtonVisibility.value = false
 		}
 	}
@@ -189,7 +187,7 @@ class FilePickerPresenter(private val mode: Mode,
 		} else {
 			//TODO: somehow user should see retry button
 			isPermissionRejected = true
-			screenState.value = ScreenState.error(
+			view.screenState = ScreenState.error(
 					resourceHelper.getString(R.string.application_requires_external_storage_permission))
 			doneButtonVisibility.value = false
 		}
@@ -218,13 +216,13 @@ class FilePickerPresenter(private val mode: Mode,
 
 	override fun onDoneButtonClicked() {
 		if (mode == Mode.PICK_DIRECTORY) {
-			fileSelectedAction.call(currentDir)
+			fileSelectedEvent.call(currentDir)
 
 		} else if (mode == Mode.PICK_FILE) {
 			if (isAnyFileSelected()) {
-				fileSelectedAction.call(getSelectedFile())
+				fileSelectedEvent.call(getSelectedFile())
 			} else {
-				snackbarMessageAction.call(context.getString(R.string.please_select_any_file))
+				view.showSnackbarMessage(context.getString(R.string.please_select_any_file))
 			}
 		}
 	}

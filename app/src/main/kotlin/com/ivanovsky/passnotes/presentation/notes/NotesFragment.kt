@@ -10,14 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
-import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.presentation.core.adapter.SingleLineAdapter
 import com.ivanovsky.passnotes.presentation.group.GroupActivity
 import com.ivanovsky.passnotes.presentation.note.NoteActivity
 
 class NotesFragment: BaseFragment(), NotesContract.View {
 
-	private lateinit var presenter: NotesContract.Presenter
+	override lateinit var presenter: NotesContract.Presenter
 	private lateinit var adapter: SingleLineAdapter
 	private lateinit var recyclerView: RecyclerView
 
@@ -28,14 +27,9 @@ class NotesFragment: BaseFragment(), NotesContract.View {
 		}
 	}
 
-	override fun onResume() {
-		super.onResume()
+	override fun onStart() {
+		super.onStart()
 		presenter.start()
-	}
-
-	override fun onPause() {
-		super.onPause()
-		presenter.stop()
 	}
 
 	override fun onDestroy() {
@@ -43,7 +37,7 @@ class NotesFragment: BaseFragment(), NotesContract.View {
 		presenter.destroy()
 	}
 
-	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup,
+	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup?,
 	                                 savedInstanceState: Bundle?): View {
 		val view = inflater.inflate(R.layout.notes_fragment, container, false)
 
@@ -61,35 +55,20 @@ class NotesFragment: BaseFragment(), NotesContract.View {
 		return view
 	}
 
-	override fun setPresenter(presenter: NotesContract.Presenter?) {
-		this.presenter = presenter!!
-	}
-
 	override fun showNotes(notes: List<Note>) {
 		adapter.setItems(createAdapterItems(notes))
 		adapter.notifyDataSetChanged()
 		adapter.onItemClickListener = { position -> showNoteScreen(notes[position]) }
-		state = FragmentState.DISPLAYING_DATA
 	}
 
 	private fun createAdapterItems(notes: List<Note>): List<SingleLineAdapter.Item> {
 		return notes.map { note -> SingleLineAdapter.Item(note.title) }
 	}
 
-	override fun showNotItems() {
-		setEmptyText(getString(R.string.no_items_to_show))
-		state = FragmentState.EMPTY
-	}
-
 	override fun showUnlockScreenAndFinish() {
 		startActivity(GroupActivity.createStartIntent(context!!))
 
 		activity!!.finish()
-	}
-
-	override fun showError(message: String) {
-		setErrorText(message)
-		state = FragmentState.ERROR
 	}
 
 	override fun showNoteScreen(note: Note) {

@@ -4,9 +4,7 @@ import android.app.Activity
 import androidx.lifecycle.Observer
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
+import android.view.*
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.domain.PermissionHelper
@@ -19,19 +17,10 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 	@Inject
 	lateinit var permissionHelper: PermissionHelper
 
-	private lateinit var presenter: FilePickerContract.Presenter
+	override lateinit var presenter: FilePickerContract.Presenter
 	private lateinit var adapter: FilePickerAdapter
 
 	private var menu: Menu? = null
-
-	companion object {
-
-		private const val REQUEST_CODE_PERMISSION = 100
-
-		fun newInstance(): FilePickerFragment {
-			return FilePickerFragment()
-		}
-	}
 
 	init {
 		Injector.getInstance().appComponent.inject(this)
@@ -40,20 +29,20 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
-		presenter.items.observe(this,
-				Observer { files -> setItems(files!!) })
-		presenter.screenState.observe(this,
-				Observer { state -> setScreenState(state) })
-		presenter.requestPermissionAction.observe(this,
-				Observer { permission -> requestPermission(permission!!) })
-		presenter.doneButtonVisibility.observe(this,
-				Observer { isVisible -> setDoneButtonVisibility(isVisible!!) })
-		presenter.fileSelectedAction.observe(this,
-				Observer { file -> selectFileAndFinish(file!!) })
-		presenter.snackbarMessageAction.observe(this,
-				Observer { message -> showSnackbar(message!!) })
-
 		setHasOptionsMenu(true)
+	}
+
+	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+		super.onViewCreated(view, savedInstanceState)
+
+		presenter.items.observe(viewLifecycleOwner,
+			Observer { files -> setItems(files) })
+		presenter.requestPermissionEvent.observe(viewLifecycleOwner,
+			Observer { permission -> requestPermission(permission) })
+		presenter.doneButtonVisibility.observe(viewLifecycleOwner,
+			Observer { isVisible -> setDoneButtonVisibility(isVisible) })
+		presenter.fileSelectedEvent.observe(viewLifecycleOwner,
+			Observer { file -> selectFileAndFinish(file) })
 	}
 
 	override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -87,18 +76,9 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 		}
 	}
 
-	override fun setPresenter(presenter: FilePickerContract.Presenter) {
-		this.presenter = presenter
-	}
-
-	override fun onResume() {
-		super.onResume()
+	override fun onStart() {
+		super.onStart()
 		presenter.start()
-	}
-
-	override fun onPause() {
-		super.onPause()
-		presenter.stop()
 	}
 
 	override fun onDestroy() {
@@ -134,6 +114,14 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 
 		if (requestCode == REQUEST_CODE_PERMISSION) {
 			presenter.onPermissionResult(permissionHelper.isAllGranted(grantResults))
+		}
+	}
+
+	companion object {
+		private const val REQUEST_CODE_PERMISSION = 100
+
+		fun newInstance(): FilePickerFragment {
+			return FilePickerFragment()
 		}
 	}
 }

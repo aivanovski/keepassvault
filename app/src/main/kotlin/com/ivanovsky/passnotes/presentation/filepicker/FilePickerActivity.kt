@@ -14,25 +14,6 @@ class FilePickerActivity : BaseActivity() {
 	private lateinit var mode: Mode
 	private lateinit var rootFile: FileDescriptor
 
-	companion object {
-
-		const val EXTRA_RESULT = "result"
-		private const val EXTRA_MODE = "mode"
-		private const val EXTRA_ROOT_FILE = "rootFile"
-		private const val EXTRA_IS_BROWSING_ENABLED = "isBrowsingEnabled"
-
-		fun createStartIntent(context: Context, mode: Mode, rootFile: FileDescriptor,
-		                      isBrowsingEnabled: Boolean): Intent {
-			val result = Intent(context, FilePickerActivity::class.java)
-
-			result.putExtra(EXTRA_MODE, mode)
-			result.putExtra(EXTRA_ROOT_FILE, rootFile)
-			result.putExtra(EXTRA_IS_BROWSING_ENABLED, isBrowsingEnabled)
-
-			return result
-		}
-	}
-
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.core_base_activity)
@@ -50,8 +31,8 @@ class FilePickerActivity : BaseActivity() {
 				.replace(R.id.fragment_container, fragment)
 				.commit()
 
-		val presenter = FilePickerPresenter(mode, rootFile, isBrowsingEnabled, this)
-		fragment.setPresenter(presenter)
+		val presenter = FilePickerPresenter(fragment, mode, rootFile, isBrowsingEnabled, this)
+		fragment.presenter = presenter
 	}
 
 	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
@@ -60,6 +41,25 @@ class FilePickerActivity : BaseActivity() {
 			return true
 		} else {
 			return super.onOptionsItemSelected(item)
+		}
+	}
+
+	companion object {
+
+		const val EXTRA_RESULT = "result"
+		private const val EXTRA_MODE = "mode"
+		private const val EXTRA_ROOT_FILE = "rootFile"
+		private const val EXTRA_IS_BROWSING_ENABLED = "isBrowsingEnabled"
+
+		fun createStartIntent(context: Context, mode: Mode, rootFile: FileDescriptor,
+							  isBrowsingEnabled: Boolean): Intent {
+			val result = Intent(context, FilePickerActivity::class.java)
+
+			result.putExtra(EXTRA_MODE, mode)
+			result.putExtra(EXTRA_ROOT_FILE, rootFile)
+			result.putExtra(EXTRA_IS_BROWSING_ENABLED, isBrowsingEnabled)
+
+			return result
 		}
 	}
 }

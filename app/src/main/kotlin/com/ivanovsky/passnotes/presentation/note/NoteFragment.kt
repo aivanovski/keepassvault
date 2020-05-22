@@ -13,100 +13,84 @@ import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.entity.PropertySpreader
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
-import com.ivanovsky.passnotes.presentation.core.FragmentState
 import com.ivanovsky.passnotes.util.formatAccordingSystemLocale
 import java.util.*
 
 class NoteFragment : BaseFragment(),
-		NoteContract.View {
+    NoteContract.View {
 
-	private lateinit var presenter: NoteContract.Presenter
-	private lateinit var adapter: NoteAdapter
-	private lateinit var recyclerView: RecyclerView
-	private lateinit var modifiedTextView: TextView
+    override lateinit var presenter: NoteContract.Presenter
+    private lateinit var adapter: NoteAdapter
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var modifiedTextView: TextView
 
-	companion object {
+    override fun onStart() {
+        super.onStart()
+        presenter.start()
+    }
 
-		fun newInstance(): NoteFragment {
-			return NoteFragment()
-		}
-	}
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter.destroy()
+    }
 
-	override fun onResume() {
-		super.onResume()
-		presenter.start()
-	}
+    override fun onCreateContentView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val view = inflater.inflate(R.layout.note_fragment, container, false)
 
-	override fun onPause() {
-		super.onPause()
-		presenter.stop()
-	}
+        recyclerView = view.findViewById(R.id.recycler_view)
+        modifiedTextView = view.findViewById(R.id.modified_date)
 
-	override fun onDestroy() {
-		super.onDestroy()
-		presenter.destroy()
-	}
+        val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
 
-	override fun onCreateContentView(inflater: LayoutInflater,
-									 container: ViewGroup,
-									 savedInstanceState: Bundle?): View {
-		val view = inflater.inflate(R.layout.note_fragment, container, false)
+        adapter = NoteAdapter(context!!)
 
-		recyclerView = view.findViewById(R.id.recycler_view)
-		modifiedTextView = view.findViewById(R.id.modified_date)
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = adapter
 
-		val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+        return view
+    }
 
-		adapter = NoteAdapter(context!!)
+    override fun showNote(note: Note) {
+        val propertySpreader = PropertySpreader(note.properties)
+        val adapterItems = createAdapterItemsFromProperties(propertySpreader.visibleProperties)
 
-		recyclerView.layoutManager = layoutManager
-		recyclerView.adapter = adapter
+        adapter.setItems(adapterItems)
+        adapter.notifyDataSetChanged()
 
-		return view
-	}
+        adapter.onCopyButtonClickListener =
+            { position -> onCopyButtonClicked(propertySpreader.visibleProperties[position]) }
 
-	override fun setPresenter(presenter: NoteContract.Presenter?) {
-		this.presenter = presenter!!
-	}
+        modifiedTextView.text = formatModifiedDate(note.modified)
+    }
 
-	override fun showNote(note: Note) {
-		val propertySpreader = PropertySpreader(note.properties)
-		val adapterItems = createAdapterItemsFromProperties(propertySpreader.visibleProperties)
+    private fun formatModifiedDate(edited: Date): String {
+        return getString(R.string.edited_at, edited.formatAccordingSystemLocale(context!!))
+    }
 
-		adapter.setItems(adapterItems)
-		adapter.notifyDataSetChanged()
+    private fun createAdapterItemsFromProperties(properties: List<Property>): List<NoteAdapter.Item> {
+        val items = mutableListOf<NoteAdapter.Item>()
 
-		adapter.onCopyButtonClickListener = {
-			position -> onCopyButtonClicked(propertySpreader.visibleProperties[position]) }
+        for (property in properties) {
+            val isVisibilityButtonVisible = (property.type == PropertyType.PASSWORD)
 
-		modifiedTextView.text = formatModifiedDate(note.modified)
-	}
+            items.add(
+                NoteAdapter.NotePropertyItem(
+                    property.name,
+                    property.value,
+                    isVisibilityButtonVisible,
+                    isVisibilityButtonVisible
+                )
+            )
+        }
 
-	private fun formatModifiedDate(edited: Date): String {
-		return getString(R.string.edited_at, edited.formatAccordingSystemLocale(context!!))
-	}
+        return items
+    }
 
-	private fun createAdapterItemsFromProperties(properties: List<Property>): List<NoteAdapter.Item> {
-		val items = mutableListOf<NoteAdapter.Item>()
-
-		for (property in properties) {
-			val isVisibilityButtonVisible = (property.type == PropertyType.PASSWORD)
-
-			items.add(NoteAdapter.NotePropertyItem(property.name,
-					property.value,
-					isVisibilityButtonVisible,
-					isVisibilityButtonVisible))
-		}
-
-		return items
-	}
-
-	private fun onCopyButtonClicked(property: Property) {
-		presenter.onCopyToClipboardClicked(property.value)
-	}
-
-	override fun showError(message: String) {
-		setErrorText(message)
-		state = FragmentState.ERROR
-	}
+    private fun onCopyButtonClicked(property: Property) {
+        presenter.onCopyToClipboardClicked(property.value)
+    }
 }

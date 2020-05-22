@@ -7,12 +7,11 @@ import android.widget.EditText
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.Screen
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
-import com.ivanovsky.passnotes.presentation.core.SnackbarMessage
 import com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput
 
 class GroupFragment: BaseFragment(), GroupContract.View {
 
-	private lateinit var presenter: GroupContract.Presenter
+	override lateinit var presenter: GroupContract.Presenter
 	private lateinit var menu: Menu
 	private lateinit var titleEditText: EditText
 
@@ -28,14 +27,9 @@ class GroupFragment: BaseFragment(), GroupContract.View {
 		setHasOptionsMenu(true)
 	}
 
-	override fun onResume() {
-		super.onResume()
+	override fun onStart() {
+		super.onStart()
 		presenter.start()
-	}
-
-	override fun onPause() {
-		super.onPause()
-		presenter.stop()
 	}
 
 	override fun onDestroy() {
@@ -48,18 +42,14 @@ class GroupFragment: BaseFragment(), GroupContract.View {
 
 		titleEditText = view.findViewById(R.id.group_title)
 
-		presenter.screenState.observe(this,
-				Observer { state -> setScreenState(state) })
 		presenter.doneButtonVisibility.observe(this,
 				Observer { visibility -> setDoneButtonVisibility(visibility!!)})
 		presenter.titleEditTextError.observe(this,
 				Observer { error -> setTitleEditTextError(error)})
-		presenter.finishScreenAction.observe(this,
+		presenter.finishScreenEvent.observe(this,
 				Observer { finishScreen() })
-		presenter.hideKeyboardAction.observe(this,
+		presenter.hideKeyboardEvent.observe(this,
 				Observer { hideKeyboard() })
-		presenter.snackbarMessageAction.observe(this,
-				Observer { message -> showSnackbar(SnackbarMessage(message))})
 		presenter.globalSnackbarMessageAction.observe(this, Screen.GROUP,
 				Observer { message -> showSnackbar(message) })
 
@@ -84,10 +74,6 @@ class GroupFragment: BaseFragment(), GroupContract.View {
 	private fun onDoneMenuClicked() {
 		val title = titleEditText.text.toString()
 		presenter.createNewGroup(title)
-	}
-
-	override fun setPresenter(presenter: GroupContract.Presenter) {
-		this.presenter = presenter
 	}
 
 	override fun setTitleEditTextError(error: String?) {

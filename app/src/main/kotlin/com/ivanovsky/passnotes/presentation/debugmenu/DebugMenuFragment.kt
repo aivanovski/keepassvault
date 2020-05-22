@@ -16,6 +16,8 @@ import com.ivanovsky.passnotes.presentation.core.BaseFragment
 
 class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 
+	override lateinit var presenter: DebugMenuContract.Presenter
+
 	private lateinit var fileSystemSpinner: Spinner
 	private lateinit var filePathEditText: EditText
 	private lateinit var passwordEditText: EditText
@@ -26,16 +28,10 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 	private lateinit var closeDbButton: View
 	private lateinit var addEntryButton: View
 	private lateinit var externalStorageCheckBox: CheckBox
-	private lateinit var presenter: DebugMenuContract.Presenter
 
 	override fun onStart() {
 		super.onStart()
 		presenter.start()
-	}
-
-	override fun onStop() {
-		super.onStop()
-		presenter.stop()
 	}
 
 	override fun onDestroy() {
@@ -61,8 +57,6 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 
 		fileSystemSpinner.adapter = createSpinnerAdapter()
 
-		presenter.screenState.observe(this,
-				Observer { screenState -> setScreenState(screenState)})
 		presenter.writeButtonEnabled.observe(this,
 				Observer { isEnabled -> setWriteButtonEnabled(isEnabled) })
 		presenter.openDbButtonEnabled.observe(this,
@@ -73,8 +67,6 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 				Observer { isEnabled -> setAddEntryButtonEnabled(isEnabled) })
 		presenter.externalStorageCheckBoxChecked.observe(this,
 				Observer { isChecked -> setExternalStorageCheckBoxChecked(isChecked) })
-		presenter.snackbarMessageAction.observe(this,
-				Observer { message -> showSnackbar(message)} )
 
 		readButton.setOnClickListener { onReadButtonClicked() }
 		writeButton.setOnClickListener { onWriteButtonClicked() }
@@ -88,13 +80,9 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 
 	private fun createSpinnerAdapter(): ArrayAdapter<String> {
 		val items = arrayListOf("Device file system", "Dropbox")
-		val adapter = ArrayAdapter<String>(context!!, android.R.layout.simple_spinner_item, items)
+		val adapter = ArrayAdapter(context!!, android.R.layout.simple_spinner_item, items)
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 		return adapter
-	}
-
-	override fun setPresenter(presenter: DebugMenuContract.Presenter) {
-		this.presenter = presenter
 	}
 
 	override fun setWriteButtonEnabled(isEnabled: Boolean) {
@@ -183,7 +171,6 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 	}
 
 	companion object {
-
 		fun newInstance(): DebugMenuFragment {
 			return DebugMenuFragment()
 		}

@@ -34,7 +34,7 @@ class GroupsActivity : BaseActivity() {
 				.commit()
 
 		val presenter = GroupsPresenter(this, fragment)
-		fragment.setPresenter(presenter)
+		fragment.presenter = presenter
 	}
 
 	override fun onOptionsItemSelected(item: MenuItem?): Boolean {

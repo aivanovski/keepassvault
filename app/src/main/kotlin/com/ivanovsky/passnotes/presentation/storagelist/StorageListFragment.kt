@@ -26,35 +26,16 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 	@Inject
 	lateinit var fileSystemResolver: FileSystemResolver
 
-	private lateinit var presenter: StorageListContract.Presenter
+	override lateinit var presenter: StorageListContract.Presenter
 	private lateinit var adapter: SingleLineAdapter
 
-	companion object {
-
-		private const val REQUEST_CODE_PICK_FILE = 100
-
-		fun newInstance(): StorageListFragment {
-			return StorageListFragment()
-		}
-	}
-
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
+	init {
 		Injector.getInstance().appComponent.inject(this)
 	}
 
-	override fun setPresenter(presenter: StorageListContract.Presenter) {
-		this.presenter = presenter
-	}
-
-	override fun onResume() {
-		super.onResume()
+	override fun onStart() {
+		super.onStart()
 		presenter.start()
-	}
-
-	override fun onPause() {
-		super.onPause()
-		presenter.stop()
 	}
 
 	override fun onDestroy() {
@@ -62,7 +43,7 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 		presenter.destroy()
 	}
 
-	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
+	override fun onCreateContentView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
 		val view = inflater.inflate(R.layout.storage_fragment, container, false)
 
 		val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view)
@@ -76,15 +57,13 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 		recyclerView.addItemDecoration(dividerDecorator)
 		recyclerView.adapter = adapter
 
-		presenter.screenState.observe(this,
-				Observer { screenState -> setScreenState(screenState)})
 		presenter.storageOptions.observe(this,
 				Observer { options -> setStorageOptions(options!!)})
-		presenter.showFilePickerScreenAction.observe(this,
+		presenter.showFilePickerScreenEvent.observe(this,
 				Observer { args -> showFilePickerScreen(args!!.root, args.action, args.isBrowsingEnabled) })
-		presenter.fileSelectedAction.observe(this,
+		presenter.fileSelectedEvent.observe(this,
 				Observer { file -> selectFileAndFinish(file!!) })
-		presenter.authActivityStartedAction.observe(this,
+		presenter.authActivityStartedEvent.observe(this,
 				Observer { fsType -> showAuthActivity(fsType!!) })
 
 		return view
@@ -139,5 +118,14 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 	override fun showAuthActivity(fsType: FSType) {
 		val authenticator = fileSystemResolver.resolveProvider(fsType).authenticator
 		authenticator?.startAuthActivity(context)
+	}
+
+	companion object {
+
+		private const val REQUEST_CODE_PICK_FILE = 100
+
+		fun newInstance(): StorageListFragment {
+			return StorageListFragment()
+		}
 	}
 }

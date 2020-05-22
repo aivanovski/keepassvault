@@ -8,9 +8,7 @@ class NotesContract {
 
 	interface View: BaseView<Presenter> {
 		fun showNotes(notes: List<Note>)
-		fun showNotItems()
 		fun showUnlockScreenAndFinish()
-		fun showError(message: String)
 		fun showNoteScreen(note: Note)
 	}
 

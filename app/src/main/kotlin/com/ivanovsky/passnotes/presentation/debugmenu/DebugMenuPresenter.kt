@@ -8,7 +8,6 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
 import kotlinx.coroutines.*
 import java.io.File
 import javax.inject.Inject
@@ -28,13 +27,11 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 	@Inject
 	lateinit var settings: SettingsRepository
 
-	override val screenState = MutableLiveData<ScreenState>()
 	override val writeButtonEnabled = MutableLiveData<Boolean>()
 	override val openDbButtonEnabled = MutableLiveData<Boolean>()
 	override val closeDbButtonEnabled = MutableLiveData<Boolean>()
 	override val addEntryButtonEnabled = MutableLiveData<Boolean>()
 	override val externalStorageCheckBoxChecked = MutableLiveData<Boolean>()
-	override val snackbarMessageAction = SingleLiveAction<String>()
 
 	private var lastReadDescriptor: FileDescriptor? = null
 	private var lastReadFile: File? = null
@@ -46,16 +43,15 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 	}
 
 	override fun start() {
-		screenState.value = ScreenState.data()
+		if (view.screenState.isNotInitialized) {
+			view.screenState = ScreenState.data()
 
-		writeButtonEnabled.value = false
-		openDbButtonEnabled.value = false
-		closeDbButtonEnabled.value = false
-		addEntryButtonEnabled.value = false
-		externalStorageCheckBoxChecked.value = settings.isExternalStorageCacheEnabled
-	}
-
-	override fun stop() {
+			writeButtonEnabled.value = false
+			openDbButtonEnabled.value = false
+			closeDbButtonEnabled.value = false
+			addEntryButtonEnabled.value = false
+			externalStorageCheckBoxChecked.value = settings.isExternalStorageCacheEnabled
+		}
 	}
 
 	override fun destroy() {
@@ -63,7 +59,7 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 	}
 
 	override fun onReadButtonClicked(inFile: FileDescriptor) {
-		screenState.value = ScreenState.data()
+		view.screenState = ScreenState.data()
 
 		scope.launch {
 			val result = withContext(Dispatchers.Default) {
@@ -73,10 +69,10 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 			if (result.isSucceededOrDeferred) {
 				onDbFileAvailable(result.obj.first, result.obj.second)
 
-				snackbarMessageAction.call("File read")
+                view.showSnackbarMessage("File read")
 			} else {
 				val message = errorInteractor.processAndGetMessage(result.error)
-				screenState.value = ScreenState.dataWithError(message)
+				view.screenState = ScreenState.dataWithError(message)
 			}
 		}
 	}
@@ -90,7 +86,7 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 	}
 
 	override fun onWriteButtonClicked() {
-		screenState.value = ScreenState.data()
+		view.screenState = ScreenState.data()
 
 		if (isFileSelected()) {
 			scope.launch {
@@ -106,19 +102,19 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 				if (result.isSucceededOrDeferred) {
 					onDbFileAvailable(result.obj.first, result.obj.second)
 
-					snackbarMessageAction.call("File wrote")
+					view.showSnackbarMessage("File wrote")
 				} else {
 					val message = errorInteractor.processAndGetMessage(result.error)
-					screenState.value = ScreenState.dataWithError(message)
+					view.screenState = ScreenState.dataWithError(message)
 				}
 			}
 		} else {
-			screenState.value = ScreenState.dataWithError("File is not loaded")
+			view.screenState = ScreenState.dataWithError("File is not loaded")
 		}
 	}
 
 	override fun onNewButtonClicked(password: String, outFile: FileDescriptor) {
-		screenState.value = ScreenState.data()
+		view.screenState = ScreenState.data()
 
 		scope.launch {
 			val result = withContext(Dispatchers.Default) {
@@ -128,10 +124,10 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 			if (result.isSucceededOrDeferred) {
 				onDbFileAvailable(result.obj.first, result.obj.second)
 
-				snackbarMessageAction.call("New file created")
+				view.showSnackbarMessage("New file created")
 			} else {
 				val message = errorInteractor.processAndGetMessage(result.error)
-				screenState.value = ScreenState.dataWithError(message)
+				view.screenState = ScreenState.dataWithError(message)
 			}
 		}
 	}
@@ -141,7 +137,7 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 	}
 
 	override fun onOpenDbButtonClicked(password: String) {
-		screenState.value = ScreenState.data()
+		view.screenState = ScreenState.data()
 
 		if (isFileSelected()) {
 			scope.launch {
@@ -152,14 +148,14 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 				if (result.isSucceededOrDeferred) {
 					onDbOpened()
 
-					snackbarMessageAction.call("DB opened")
+					view.showSnackbarMessage("DB opened")
 				} else {
 					val message = errorInteractor.processAndGetMessage(result.error)
-					screenState.value = ScreenState.dataWithError(message)
+					view.screenState = ScreenState.dataWithError(message)
 				}
 			}
 		} else {
-			screenState.value = ScreenState.dataWithError("File is not loaded")
+			view.screenState = ScreenState.dataWithError("File is not loaded")
 		}
 	}
 
@@ -174,7 +170,7 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 	}
 
 	override fun onCloseDbButtonClicked() {
-		screenState.value = ScreenState.data()
+		view.screenState = ScreenState.data()
 
 		scope.launch {
 			val result = withContext(Dispatchers.Default) {
@@ -184,10 +180,10 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 			if (result.isSucceededOrDeferred) {
 				onDbClosed()
 
-				snackbarMessageAction.call("DB closed")
+				view.showSnackbarMessage("DB closed")
 			} else {
 				val message = errorInteractor.processAndGetMessage(result.error)
-				screenState.value = ScreenState.dataWithError(message)
+				view.screenState = ScreenState.dataWithError(message)
 			}
 		}
 	}
@@ -199,7 +195,7 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 	}
 
 	override fun onAddEntryButtonClicked() {
-		screenState.value = ScreenState.data()
+		view.screenState = ScreenState.data()
 
 		scope.launch {
 			val result = withContext(Dispatchers.Default) {
@@ -207,10 +203,10 @@ class DebugMenuPresenter(private val view: DebugMenuContract.View) :
 			}
 
 			if (result.isSucceededOrDeferred) {
-				snackbarMessageAction.call("Entry added")
+				view.showSnackbarMessage("Entry added")
 			} else {
 				val message = errorInteractor.processAndGetMessage(result.error)
-				screenState.value = ScreenState.dataWithError(message)
+				view.screenState = ScreenState.dataWithError(message)
 			}
 		}
 	}

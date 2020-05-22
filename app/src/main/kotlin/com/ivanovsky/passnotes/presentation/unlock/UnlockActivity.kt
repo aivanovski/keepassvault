@@ -18,13 +18,6 @@ class UnlockActivity : BaseActivity() {
 	private lateinit var navigationView: NavigationView
 	private lateinit var presenter: UnlockPresenter
 
-	companion object {
-
-		fun createStartIntent(context: Context): Intent {
-			return Intent(context, UnlockActivity::class.java)
-		}
-	}
-
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
@@ -44,7 +37,7 @@ class UnlockActivity : BaseActivity() {
 				.commit()
 
 		presenter = UnlockPresenter(this, fragment)
-		fragment.setPresenter(presenter)
+        fragment.presenter = presenter
 
 		navigationView.setNavigationItemSelectedListener { item -> onNavigationItemSelected(item)}
 
@@ -89,6 +82,13 @@ class UnlockActivity : BaseActivity() {
 			}
 
 			else -> false
+		}
+	}
+
+	companion object {
+
+		fun createStartIntent(context: Context): Intent {
+			return Intent(context, UnlockActivity::class.java)
 		}
 	}
 }

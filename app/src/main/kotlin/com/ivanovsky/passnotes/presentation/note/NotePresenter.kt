@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes.presentation.note
 
-import android.content.Context
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.injection.Injector
@@ -11,7 +11,6 @@ import java.util.*
 import javax.inject.Inject
 
 class NotePresenter(
-    private var context: Context,
     private var noteUid: UUID?,
     private val view: NoteContract.View
 ) : NoteContract.Presenter {
@@ -21,6 +20,9 @@ class NotePresenter(
 
     @Inject
     lateinit var errorInteractor: ErrorInteractor
+
+    @Inject
+    lateinit var resourceHelper: ResourceHelper
 
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.Main + job)
@@ -62,7 +64,7 @@ class NotePresenter(
 
         val delayInSeconds = interactor.getTimeoutValueInMillis() / 1000L
 
-        val message = context.getString(
+        val message = resourceHelper.getString(
             R.string.copied_clipboard_will_be_cleared_in_seconds,
             delayInSeconds
         )

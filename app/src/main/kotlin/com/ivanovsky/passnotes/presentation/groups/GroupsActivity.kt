@@ -33,7 +33,7 @@ class GroupsActivity : BaseActivity() {
 				.replace(R.id.fragment_container, fragment)
 				.commit()
 
-		val presenter = GroupsPresenter(this, fragment)
+		val presenter = GroupsPresenter(fragment)
 		fragment.presenter = presenter
 	}
 

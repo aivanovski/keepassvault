@@ -1,13 +1,13 @@
 package com.ivanovsky.passnotes.presentation.unlock
 
 import androidx.lifecycle.MutableLiveData
-import android.content.Context
 
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -17,8 +17,7 @@ import kotlinx.coroutines.*
 
 import javax.inject.Inject
 
-class UnlockPresenter(private val context: Context,
-                       private val view: UnlockContract.View) :
+class UnlockPresenter(private val view: UnlockContract.View) :
 		UnlockContract.Presenter,
 		ObserverBus.UsedFileDataSetObserver {
 
@@ -30,6 +29,9 @@ class UnlockPresenter(private val context: Context,
 
 	@Inject
 	lateinit var observerBus: ObserverBus
+
+	@Inject
+	lateinit var resourceHelper: ResourceHelper
 
 	override val recentlyUsedFiles = MutableLiveData<List<FileDescriptor>>()
 	override val selectedRecentlyUsedFile = MutableLiveData<FileDescriptor>()
@@ -81,7 +83,8 @@ class UnlockPresenter(private val context: Context,
 
 					view.screenState = ScreenState.data()
 				} else {
-					view.screenState = ScreenState.empty(context.getString(R.string.no_files_to_open))
+					val emptyText = resourceHelper.getString(R.string.no_files_to_open)
+					view.screenState = ScreenState.empty(emptyText)
 				}
 			} else {
 				val message = errorInteractor.processAndGetMessage(result.error)

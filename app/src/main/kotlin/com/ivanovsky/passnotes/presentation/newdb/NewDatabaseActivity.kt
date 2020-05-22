@@ -21,7 +21,7 @@ class NewDatabaseActivity : BaseActivity() {
 				.replace(R.id.fragment_container, fragment)
 				.commit()
 
-		val presenter = NewDatabasePresenter(fragment, this)
+		val presenter = NewDatabasePresenter(fragment)
 		fragment.presenter = presenter
 	}
 

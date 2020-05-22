@@ -1,12 +1,12 @@
 package com.ivanovsky.passnotes.presentation.newdb
 
 import androidx.lifecycle.MutableLiveData
-import android.content.Context
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.FileHelper
+import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.injection.Injector
@@ -17,8 +17,7 @@ import java.io.File
 import javax.inject.Inject
 
 class NewDatabasePresenter(
-    private val view: NewDatabaseContract.View,
-	private val context: Context
+    private val view: NewDatabaseContract.View
 ) : NewDatabaseContract.Presenter {
 
 	@Inject
@@ -29,6 +28,9 @@ class NewDatabasePresenter(
 
 	@Inject
 	lateinit var fileHelper: FileHelper
+
+	@Inject
+	lateinit var resourceHelper: ResourceHelper
 
 	override val storageTypeAndPath = MutableLiveData<Pair<String, String>>()
 	override val doneButtonVisibility = MutableLiveData<Boolean>()
@@ -73,7 +75,8 @@ class NewDatabasePresenter(
 					if (created) {
 						showGroupsScreenEvent.call()
 					} else {
-						view.screenState = ScreenState.dataWithError(context.getString(R.string.error_was_occurred))
+                        val errorText = resourceHelper.getString(R.string.error_was_occurred)
+						view.screenState = ScreenState.dataWithError(errorText)
 						doneButtonVisibility.value = true
 					}
 				} else {
@@ -84,7 +87,8 @@ class NewDatabasePresenter(
 			}
 
 		} else {
-			view.screenState = ScreenState.dataWithError(context.getString(R.string.storage_is_not_selected))
+			val errorText = resourceHelper.getString(R.string.storage_is_not_selected)
+			view.screenState = ScreenState.dataWithError(errorText)
 		}
 	}
 
@@ -99,12 +103,12 @@ class NewDatabasePresenter(
 			val file = File(selectedFile.path)
 
 			if (fileHelper.isLocatedInPrivateStorage(file)) {
-				storageTypeAndPath.value = Pair(context.getString(R.string.private_storage), selectedFile.path)
+				storageTypeAndPath.value = Pair(resourceHelper.getString(R.string.private_storage), selectedFile.path)
 			} else {
-				storageTypeAndPath.value = Pair(context.getString(R.string.public_storage), selectedFile.path)
+				storageTypeAndPath.value = Pair(resourceHelper.getString(R.string.public_storage), selectedFile.path)
 			}
 		} else if (selectedFile.fsType == FSType.DROPBOX) {
-			storageTypeAndPath.value = Pair(context.getString(R.string.dropbox), selectedFile.path)
+			storageTypeAndPath.value = Pair(resourceHelper.getString(R.string.dropbox), selectedFile.path)
 		}
 	}
 }

@@ -31,7 +31,7 @@ class NoteActivity : BaseActivity() {
 				.replace(R.id.fragment_container, fragment)
 				.commit()
 
-		val presenter = NotePresenter(this, noteUid, fragment)
+		val presenter = NotePresenter(noteUid, fragment)
         fragment.presenter = presenter
 	}
 

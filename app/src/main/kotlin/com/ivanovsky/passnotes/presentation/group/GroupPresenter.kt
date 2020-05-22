@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.presentation.group
 
 import androidx.lifecycle.MutableLiveData
-import android.content.Context
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarMessageLiveAction
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -15,8 +15,7 @@ import kotlinx.coroutines.*
 import javax.inject.Inject
 
 class GroupPresenter(
-    private val view: GroupContract.View,
-	private val context: Context
+    private val view: GroupContract.View
 ) : GroupContract.Presenter {
 
 	@Inject
@@ -27,6 +26,9 @@ class GroupPresenter(
 
 	@Inject
 	lateinit var globalSnackbarBus: GlobalSnackbarBus
+
+	@Inject
+	lateinit var resourceHelper: ResourceHelper
 
 	override val doneButtonVisibility = MutableLiveData<Boolean>()
 	override val titleEditTextError = MutableLiveData<String>()
@@ -82,7 +84,7 @@ class GroupPresenter(
 				}
 			}
 		} else {
-			titleEditTextError.value = context.getString(R.string.empty_field)
+			titleEditTextError.value = resourceHelper.getString(R.string.empty_field)
 		}
 	}
 }

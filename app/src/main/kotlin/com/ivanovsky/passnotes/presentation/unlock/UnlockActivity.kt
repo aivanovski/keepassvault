@@ -36,7 +36,7 @@ class UnlockActivity : BaseActivity() {
 				.replace(R.id.fragment_container, fragment)
 				.commit()
 
-		presenter = UnlockPresenter(this, fragment)
+		presenter = UnlockPresenter(fragment)
         fragment.presenter = presenter
 
 		navigationView.setNavigationItemSelectedListener { item -> onNavigationItemSelected(item)}

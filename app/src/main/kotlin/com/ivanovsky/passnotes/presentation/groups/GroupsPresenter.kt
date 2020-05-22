@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.presentation.groups
 
-import android.content.Context
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarMessageLiveAction
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -13,7 +13,7 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
-class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
+class GroupsPresenter(val view: GroupsContract.View) :
         GroupsContract.Presenter,
         ObserverBus.GroupDataSetObserver {
 
@@ -28,6 +28,9 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 
     @Inject
     lateinit var globalSnackbarBus: GlobalSnackbarBus
+
+    @Inject
+    lateinit var resourceHelper: ResourceHelper
 
     override val globalSnackbarMessageAction: GlobalSnackbarMessageLiveAction
 
@@ -66,7 +69,7 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
                     view.showGroups(groupsAndCounts)
                     view.screenState = ScreenState.data()
                 } else {
-                    view.screenState = ScreenState.empty(context.getString(R.string.no_items))
+                    view.screenState = ScreenState.empty(resourceHelper.getString(R.string.no_items))
                 }
             } else {
                 val message = errorInteractor.processAndGetMessage(result.error)

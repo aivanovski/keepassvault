@@ -2,10 +2,6 @@ package com.ivanovsky.passnotes.data.entity;
 
 import androidx.annotation.NonNull;
 
-import com.ivanovsky.passnotes.R;
-
-import java.sql.PreparedStatement;
-
 import static com.ivanovsky.passnotes.data.entity.OperationStatus.DEFERRED;
 import static com.ivanovsky.passnotes.data.entity.OperationStatus.FAILED;
 import static com.ivanovsky.passnotes.data.entity.OperationStatus.SUCCEEDED;
@@ -28,7 +24,7 @@ public class OperationResult<T> {
 		return result;
 	}
 
-	public static <T> OperationResult<T> defer(T obj, OperationError error) {
+	public static <T> OperationResult<T> deferred(T obj, OperationError error) {
 		OperationResult<T> result = new OperationResult<>();
 		result.deferred = true;
 		result.setObj(obj);
@@ -56,18 +52,9 @@ public class OperationResult<T> {
 		return obj;
 	}
 
-	public void copyObjFrom(OperationResult<T> src) {
-		this.obj = src.obj;
-		this.deferred = src.deferred;
-	}
-
 	public void from(OperationResult<T> src) {
 		this.obj = src.obj;
 		this.deferred = src.deferred;
-		this.error = src.error;
-	}
-
-	public void errorFrom(OperationResult src) {
 		this.error = src.error;
 	}
 
@@ -77,8 +64,8 @@ public class OperationResult<T> {
 		return newResult;
 	}
 
-	public <E> OperationResult<E> takeStatus(E newObj) {
-		OperationResult newResult = new OperationResult<>();
+	public <E> OperationResult<E> takeStatusWith(E newObj) {
+		OperationResult<E> newResult = new OperationResult<>();
 		newResult.obj = newObj;
 		newResult.deferred = deferred;
 		return newResult;

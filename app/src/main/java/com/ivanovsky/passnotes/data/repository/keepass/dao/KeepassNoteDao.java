@@ -132,30 +132,18 @@ public class KeepassNoteDao implements NoteDao {
 			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
 		}
 
-		OperationResult<UUID> result = new OperationResult<>();
-
 		SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
-		if (newEntry != null) {
-			OperationResult<Boolean> commitResult = db.commit();
-			switch (commitResult.getStatus()) {
-				case DEFERRED:
-					result.setDeferredObj(newEntry.getUuid());
-					break;
-				case SUCCEEDED:
-					result.setObj(newEntry.getUuid());
-					break;
-				case FAILED:
-					group.removeEntry(newEntry);
-					result.setError(commitResult.getError());
-					break;
-				default:
-					throw new IllegalArgumentException("Status handling is not implementing");
-			}
-		} else {
-			result.setError(newDbError(OperationError.MESSAGE_UNKNOWN_ERROR));
+		if (newEntry == null) {
+			return OperationResult.error(newDbError(OperationError.MESSAGE_UNKNOWN_ERROR));
 		}
 
-		return result;
+		OperationResult<Boolean> commitResult = db.commit();
+		if (commitResult.isFailed()) {
+			group.removeEntry(newEntry);
+			return commitResult.takeError();
+		}
+
+		return commitResult.takeStatusWith(newEntry.getUuid());
 	}
 
 	private SimpleEntry createEntryFromNote(Note note) {

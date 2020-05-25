@@ -128,6 +128,6 @@ public class KeepassGroupDao implements GroupDao {
 			return commitResult.takeError();
 		}
 
-		return commitResult.takeStatus(newGroup.getUuid());
+		return commitResult.takeStatusWith(newGroup.getUuid());
 	}
 }

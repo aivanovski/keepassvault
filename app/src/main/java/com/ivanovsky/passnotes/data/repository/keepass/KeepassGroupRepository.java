@@ -39,7 +39,7 @@ public class KeepassGroupRepository implements GroupRepository {
 		}
 
 		List<Group> groups = childGroupsResult.getObj();
-		return childGroupsResult.takeStatus(groups.size());
+		return childGroupsResult.takeStatusWith(groups.size());
 	}
 
 	@Override

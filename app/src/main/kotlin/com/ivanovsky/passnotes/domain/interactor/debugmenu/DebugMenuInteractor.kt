@@ -272,7 +272,7 @@ class DebugMenuInteractor(
             return insertResult.takeError()
         }
 
-        return insertResult.takeStatus(true)
+        return insertResult.takeStatusWith(true)
     }
 
     private fun generateNewGroupTitle(groupRepository: GroupRepository): String? {

@@ -22,7 +22,7 @@ class GroupInteractor(
         }
 
         val rootUid = rootGroupResult.obj.uid
-        return rootGroupResult.takeStatus(rootUid)
+        return rootGroupResult.takeStatusWith(rootUid)
     }
 
     fun createNewGroup(title: String, parentUid: UUID): OperationResult<Group> {
@@ -41,7 +41,7 @@ class GroupInteractor(
         }
 
         observerBus.notifyGroupDataSetChanged()
-        return insertResult.takeStatus(group)
+        return insertResult.takeStatusWith(group)
     }
 
     private fun isTitleFree(title: String): Boolean {

@@ -13,7 +13,6 @@ class UnlockContract {
         fun selectFileInSpinner(file: FileDescriptor)
         fun showGroupsScreen()
         fun showNewDatabaseScreen()
-        fun hideKeyboard()
         fun showOpenFileScreen()
         fun showSettingScreen()
         fun showAboutScreen()
@@ -25,7 +24,6 @@ class UnlockContract {
         val selectedRecentlyUsedFile: LiveData<FileDescriptor>
         val showGroupsScreenEvent: SingleLiveEvent<Void>
         val showNewDatabaseScreenEvent: SingleLiveEvent<Void>
-        val hideKeyboardEvent: SingleLiveEvent<Void>
         val showOpenFileScreenEvent: SingleLiveEvent<Void>
         val showSettingsScreenEvent: SingleLiveEvent<Void>
         val showAboutScreenEvent: SingleLiveEvent<Void>

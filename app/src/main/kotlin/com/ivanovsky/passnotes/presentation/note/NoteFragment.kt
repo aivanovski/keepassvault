@@ -19,19 +19,19 @@ import java.util.*
 class NoteFragment : BaseFragment(),
     NoteContract.View {
 
-    override lateinit var presenter: NoteContract.Presenter
+    override var presenter: NoteContract.Presenter? = null
     private lateinit var adapter: NoteAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var modifiedTextView: TextView
 
     override fun onStart() {
         super.onStart()
-        presenter.start()
+        presenter?.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        presenter.destroy()
+        presenter?.destroy()
     }
 
     override fun onCreateContentView(
@@ -91,6 +91,6 @@ class NoteFragment : BaseFragment(),
     }
 
     private fun onCopyButtonClicked(property: Property) {
-        presenter.onCopyToClipboardClicked(property.value)
+        presenter?.onCopyToClipboardClicked(property.value)
     }
 }

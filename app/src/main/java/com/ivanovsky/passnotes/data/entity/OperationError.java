@@ -24,6 +24,7 @@ public class OperationError {
 	public static final String MESSAGE_DB_IS_NOT_OPENED = "Database is not opened";
 	public static final String MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED = "Deferred operations are not supported";
 	public static final String MESSAGE_FAILED_TO_FIND_CACHED_FILE = "Failed to find cached file";
+	public static final String MESSAGE_FAILED_TO_FIND_ROOT_GROUP = "Failed to find root group";
 
 	private Type type;
 	private String message;

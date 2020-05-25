@@ -48,6 +48,9 @@
 	<!-- Groups screen -->
 	<string name="groups">Groups</string>
 	<string name="no_items_to_show">No items to show</string>
+	<string name="notes_with_count">Notes: %d</string>
+	<string name="groups_with_count">Groups: %d</string>
+	<string name="groups_and_notes_with_count">Groups: %1$d  Notes: %2$d</string>
 
 	<!-- New group screen -->
 	<string name="new_group">New group</string>

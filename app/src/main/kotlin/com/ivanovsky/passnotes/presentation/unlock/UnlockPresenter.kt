@@ -35,7 +35,6 @@ class UnlockPresenter(private val view: UnlockContract.View) :
     override val selectedRecentlyUsedFile = MutableLiveData<FileDescriptor>()
     override val showGroupsScreenEvent = SingleLiveEvent<Void>()
     override val showNewDatabaseScreenEvent = SingleLiveEvent<Void>()
-    override val hideKeyboardEvent = SingleLiveEvent<Void>()
     override val showOpenFileScreenEvent = SingleLiveEvent<Void>()
     override val showSettingsScreenEvent = SingleLiveEvent<Void>()
     override val showAboutScreenEvent = SingleLiveEvent<Void>()
@@ -97,7 +96,7 @@ class UnlockPresenter(private val view: UnlockContract.View) :
     }
 
     override fun onUnlockButtonClicked(password: String, file: FileDescriptor) {
-        hideKeyboardEvent.call()
+        view.hideKeyboard()
         view.screenState = ScreenState.loading()
 
         val key = KeepassDatabaseKey(password)

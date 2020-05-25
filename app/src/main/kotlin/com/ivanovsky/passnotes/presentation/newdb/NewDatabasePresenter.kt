@@ -36,7 +36,6 @@ class NewDatabasePresenter(
     override val doneButtonVisibility = MutableLiveData<Boolean>()
     override val showGroupsScreenEvent = SingleLiveEvent<Void>()
     override val showStorageScreenEvent = SingleLiveEvent<Void>()
-    override val hideKeyboardEvent = SingleLiveEvent<Void>()
     private var selectedStorageDir: FileDescriptor? = null
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.Main + job)
@@ -57,7 +56,7 @@ class NewDatabasePresenter(
 
     override fun createNewDatabaseFile(filename: String, password: String) {
         if (selectedStorageDir != null) {
-            hideKeyboardEvent.call()
+            view.hideKeyboard()
             doneButtonVisibility.value = false
             view.screenState = ScreenState.loading()
 

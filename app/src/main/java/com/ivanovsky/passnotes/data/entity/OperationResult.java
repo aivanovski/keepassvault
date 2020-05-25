@@ -2,6 +2,10 @@ package com.ivanovsky.passnotes.data.entity;
 
 import androidx.annotation.NonNull;
 
+import com.ivanovsky.passnotes.R;
+
+import java.sql.PreparedStatement;
+
 import static com.ivanovsky.passnotes.data.entity.OperationStatus.DEFERRED;
 import static com.ivanovsky.passnotes.data.entity.OperationStatus.FAILED;
 import static com.ivanovsky.passnotes.data.entity.OperationStatus.SUCCEEDED;
@@ -65,6 +69,19 @@ public class OperationResult<T> {
 
 	public void errorFrom(OperationResult src) {
 		this.error = src.error;
+	}
+
+	public <E> OperationResult<E> takeError() {
+		OperationResult<E> newResult = new OperationResult<>();
+		newResult.error = error;
+		return newResult;
+	}
+
+	public <E> OperationResult<E> takeStatus(E newObj) {
+		OperationResult newResult = new OperationResult<>();
+		newResult.obj = newObj;
+		newResult.deferred = deferred;
+		return newResult;
 	}
 
 	public OperationError getError() {

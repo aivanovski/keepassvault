@@ -20,7 +20,7 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
     @Inject
     lateinit var permissionHelper: PermissionHelper
 
-    override lateinit var presenter: FilePickerContract.Presenter
+    override var presenter: FilePickerContract.Presenter? = null
     private lateinit var adapter: FilePickerAdapter
 
     private var menu: Menu? = null
@@ -38,13 +38,13 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        presenter.items.observe(viewLifecycleOwner,
+        presenter?.items?.observe(viewLifecycleOwner,
             Observer { files -> setItems(files) })
-        presenter.requestPermissionEvent.observe(viewLifecycleOwner,
+        presenter?.requestPermissionEvent?.observe(viewLifecycleOwner,
             Observer { permission -> requestPermission(permission) })
-        presenter.doneButtonVisibility.observe(viewLifecycleOwner,
+        presenter?.doneButtonVisibility?.observe(viewLifecycleOwner,
             Observer { isVisible -> setDoneButtonVisibility(isVisible) })
-        presenter.fileSelectedEvent.observe(viewLifecycleOwner,
+        presenter?.fileSelectedEvent?.observe(viewLifecycleOwner,
             Observer { file -> selectFileAndFinish(file) })
     }
 
@@ -72,7 +72,7 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_done) {
-            presenter.onDoneButtonClicked()
+            presenter?.onDoneButtonClicked()
             return true
         } else {
             return super.onOptionsItemSelected(item)
@@ -81,12 +81,12 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 
     override fun onStart() {
         super.onStart()
-        presenter.start()
+        presenter?.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        presenter.destroy()
+        presenter?.destroy()
     }
 
     override fun onCreateConfig(): Config {
@@ -107,7 +107,7 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
         adapter.setItems(items)
         adapter.notifyDataSetChanged()
 
-        adapter.onItemClickListener = { position -> presenter.onItemClicked(position) }
+        adapter.onItemClickListener = { position -> presenter?.onItemClicked(position) }
     }
 
     override fun requestPermission(permission: String) {
@@ -122,7 +122,7 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == REQUEST_CODE_PERMISSION) {
-            presenter.onPermissionResult(permissionHelper.isAllGranted(grantResults))
+            presenter?.onPermissionResult(permissionHelper.isAllGranted(grantResults))
         }
     }
 

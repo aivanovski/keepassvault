@@ -20,7 +20,7 @@
 
 	<TextView
 		android:id="@+id/title"
-		style="@style/Groups.TitleText"
+		style="@style/Groups.NotTitleText"
 		android:layout_gravity="center"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
@@ -28,22 +28,8 @@
 		android:paddingRight="8dp"
 		android:paddingTop="4dp"
 		android:paddingBottom="4dp"
-		android:gravity="left"
-		android:background="@color/primary"
+		android:gravity="center"
+		android:layout_centerInParent="true"
 		tools:text="Title"/>
-
-	<TextView
-		android:id="@+id/count"
-		style="@style/Groups.CountText"
-		android:layout_gravity="center"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:paddingLeft="4dp"
-		android:paddingRight="4dp"
-		android:paddingTop="4dp"
-		android:paddingBottom="4dp"
-		android:layout_alignParentRight="true"
-		android:layout_alignParentBottom="true"
-		tools:text="13"/>
 
 </com.ivanovsky.passnotes.presentation.core.widget.SquareLayout>

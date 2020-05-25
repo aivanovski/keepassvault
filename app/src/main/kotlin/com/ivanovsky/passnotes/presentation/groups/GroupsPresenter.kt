@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.presentation.groups
 
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
-import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarMessageLiveAction
@@ -11,10 +10,13 @@ import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import kotlinx.coroutines.*
+import java.util.*
 import javax.inject.Inject
 
-class GroupsPresenter(val view: GroupsContract.View) :
-    GroupsContract.Presenter,
+class GroupsPresenter(
+    private val view: GroupsContract.View,
+    private val groupUid: UUID?
+) : GroupsContract.Presenter,
     ObserverBus.GroupDataSetObserver {
 
     @Inject
@@ -36,6 +38,8 @@ class GroupsPresenter(val view: GroupsContract.View) :
 
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.Main + job)
+    private var currentDataItems: List<GroupsInteractor.Item>? = null
+    private var rootGroupUid: UUID? = null
 
     init {
         Injector.getInstance().encryptedDatabaseComponent.inject(this)
@@ -58,22 +62,34 @@ class GroupsPresenter(val view: GroupsContract.View) :
 
     override fun loadData() {
         scope.launch {
-            val result = withContext(Dispatchers.Default) {
-                interactor.getAllGroupsWithNoteCount()
+            val data = withContext(Dispatchers.Default) {
+                if (groupUid == null) {
+                    interactor.getRootGroupData()
+                } else {
+                    interactor.getGroupData(groupUid)
+                }
             }
 
-            if (result.isSucceededOrDeferred) {
-                val groupsAndCounts = result.obj
+            if (groupUid == null && rootGroupUid == null) {
+                rootGroupUid = withContext(Dispatchers.Default) {
+                    interactor.getRootUid()
+                }
+            }
 
-                if (groupsAndCounts.isNotEmpty()) {
-                    view.showGroups(groupsAndCounts)
+            if (data.isSucceededOrDeferred) {
+                val dataItems = data.obj
+                currentDataItems = dataItems
+
+
+                if (dataItems.isNotEmpty()) {
+                    view.setItems(createAdapterItems(dataItems))
                     view.screenState = ScreenState.data()
                 } else {
-                    view.screenState =
-                        ScreenState.empty(resourceHelper.getString(R.string.no_items))
+                    val emptyText = resourceHelper.getString(R.string.no_items)
+                    view.screenState = ScreenState.empty(emptyText)
                 }
             } else {
-                val message = errorInteractor.processAndGetMessage(result.error)
+                val message = errorInteractor.processAndGetMessage(data.error)
                 view.screenState = ScreenState.error(message)
             }
         }
@@ -83,7 +99,55 @@ class GroupsPresenter(val view: GroupsContract.View) :
         loadData()
     }
 
-    override fun onGroupClicked(group: Group) {
-        view.showNotesScreen(group)
+    override fun onListItemClicked(position: Int) {
+        val dataItems = currentDataItems ?: return
+
+        if (position == dataItems.size) {
+            val currentGroupUid = getCurrentGroupUid() ?: return
+
+            view.showNewGroupScreen(currentGroupUid)
+        } else {
+            val dataItem = dataItems[position]
+
+            if (dataItem is GroupsInteractor.GroupItem) {
+                view.showNoteListScreen(dataItem.group)
+            } else if (dataItem is GroupsInteractor.NoteItem) {
+                view.showNoteScreen(dataItem.note)
+            }
+        }
+    }
+
+    private fun createAdapterItems(dataItems: List<GroupsInteractor.Item>): List<GroupsAdapter.ListItem> {
+        val result = mutableListOf<GroupsAdapter.ListItem>()
+
+        for (dataItem in dataItems) {
+            if (dataItem is GroupsInteractor.GroupItem) {
+                result.add(
+                    GroupsAdapter.GroupListItem(
+                        dataItem.group.title, dataItem.noteCount, dataItem.childGroupCount
+                    )
+                )
+            } else if (dataItem is GroupsInteractor.NoteItem) {
+                result.add(GroupsAdapter.NoteListItem(dataItem.note.title))
+            }
+        }
+
+        result.add(GroupsAdapter.ButtonListItem())
+
+        return result
+    }
+
+    override fun onAddButtonClicked() {
+        val currentGroupUid = getCurrentGroupUid() ?: return
+
+        view.showNewGroupScreen(currentGroupUid)
+    }
+
+    private fun getCurrentGroupUid(): UUID? {
+        return when {
+            groupUid != null -> groupUid
+            rootGroupUid != null -> rootGroupUid
+            else -> null
+        }
     }
 }

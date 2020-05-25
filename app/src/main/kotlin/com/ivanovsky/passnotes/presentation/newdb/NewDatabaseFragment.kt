@@ -19,7 +19,7 @@ import java.util.regex.Pattern
 
 class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 
-    override lateinit var presenter: NewDatabaseContract.Presenter
+    override var presenter: NewDatabaseContract.Presenter? = null
     private lateinit var menu: Menu
     private lateinit var storageLayout: View
     private lateinit var storageTypeTextView: TextView
@@ -35,12 +35,12 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 
     override fun onStart() {
         super.onStart()
-        presenter.start()
+        presenter?.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        presenter.destroy()
+        presenter?.destroy()
     }
 
     override fun onCreateContentView(
@@ -57,23 +57,21 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
         passwordEditText = view.findViewById(R.id.password)
         confirmationEditText = view.findViewById(R.id.password_confirmation)
 
-        storageLayout.setOnClickListener { presenter.selectStorage() }
+        storageLayout.setOnClickListener { presenter?.selectStorage() }
 
-        presenter.storageTypeAndPath.observe(this,
+        presenter?.storageTypeAndPath?.observe(this,
             Observer { typeAndPath ->
                 setStorageTypeAndPath(
                     typeAndPath!!.first,
                     typeAndPath.second
                 )
             })
-        presenter.doneButtonVisibility.observe(this,
+        presenter?.doneButtonVisibility?.observe(this,
             Observer { isVisible -> setDoneButtonVisibility(isVisible!!) })
-        presenter.showGroupsScreenEvent.observe(this,
+        presenter?.showGroupsScreenEvent?.observe(this,
             Observer { showGroupsScreen() })
-        presenter.showStorageScreenEvent.observe(this,
+        presenter?.showStorageScreenEvent?.observe(this,
             Observer { showStorageScreen() })
-        presenter.hideKeyboardEvent.observe(this,
-            Observer { hideKeyboard() })
 
         return view
     }
@@ -131,7 +129,7 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
         if (validator.validateAll()) {
             val filename = filenameEditText.text.toString().trim()
             val password = passwordEditText.text.toString().trim()
-            presenter.createNewDatabaseFile(filename, password)
+            presenter?.createNewDatabaseFile(filename, password)
         }
     }
 
@@ -149,7 +147,7 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
     override fun showGroupsScreen() {
         activity!!.finish()
 
-        startActivity(GroupsActivity.createStartIntent(context!!))
+        startActivity(GroupsActivity.startForRootGroup(context!!))
     }
 
     override fun showStorageScreen() {
@@ -169,13 +167,9 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
         ) {
             val file = extras.getParcelable<FileDescriptor>(StorageListActivity.EXTRA_RESULT)
             if (file != null) {
-                presenter.onStorageSelected(file)
+                presenter?.onStorageSelected(file)
             }
         }
-    }
-
-    override fun hideKeyboard() {
-        hideSoftInput(activity)
     }
 
     companion object {

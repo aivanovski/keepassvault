@@ -4,42 +4,43 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.presentation.Screen
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingMode
 import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.group.GroupActivity
-import com.ivanovsky.passnotes.presentation.notes.NotesActivity
-import com.ivanovsky.passnotes.presentation.unlock.UnlockActivity
+import com.ivanovsky.passnotes.presentation.note.NoteActivity
+import java.util.*
 
 class GroupsFragment : BaseFragment(), GroupsContract.View {
 
-    override lateinit var presenter: GroupsContract.Presenter
+    override var presenter: GroupsContract.Presenter? = null
+
     private lateinit var adapter: GroupsAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var fab: FloatingActionButton
-
-    companion object {
-
-        fun newInstance(): GroupsFragment {
-            return GroupsFragment()
-        }
-    }
+    private val itemsData = MutableLiveData<List<GroupsAdapter.ListItem>>()
+    private val showNoteScreenEvent = SingleLiveEvent<Note>()
+    private val showNoteListScreenEvent = SingleLiveEvent<Group>()
+    private val showNewGroupScreenEvent = SingleLiveEvent<UUID>()
 
     override fun onStart() {
         super.onStart()
-        presenter.start()
+        presenter?.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        presenter.destroy()
+        presenter?.destroy()
     }
 
     override fun onCreateContentView(
@@ -49,20 +50,32 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
     ): View {
         val view = inflater.inflate(R.layout.groups_fragment, container, false)
 
+        val context = view.context
+
         recyclerView = view.findViewById(R.id.recycler_view)
         fab = view.findViewById(R.id.fab)
 
         val layoutManager = GridLayoutManager(context, 3)
-
-        adapter = GroupsAdapter(context!!)
-
         recyclerView.layoutManager = layoutManager
+
+        adapter = GroupsAdapter(context)
+        adapter.onListItemClickListener = { position -> presenter?.onListItemClicked(position) }
+
         recyclerView.adapter = adapter
 
-        fab.setOnClickListener { showNewGroupScreen() }
+        fab.setOnClickListener { presenter?.onAddButtonClicked() }
 
-        presenter.globalSnackbarMessageAction.observe(this, Screen.GROUPS,
+        presenter?.globalSnackbarMessageAction?.observe(viewLifecycleOwner, Screen.GROUPS,
             Observer { message -> showSnackbar(message) })
+
+        itemsData.observe(viewLifecycleOwner,
+            Observer { items -> setItemsInternal(items) })
+        showNoteListScreenEvent.observe(viewLifecycleOwner,
+            Observer { group ->  showNoteListScreenInternal(group) })
+        showNoteScreenEvent.observe(viewLifecycleOwner,
+            Observer { note -> showNoteScreenInternal(note)})
+        showNewGroupScreenEvent.observe(viewLifecycleOwner,
+            Observer { parentGroupUid -> showNewGroupScreenInternal(parentGroupUid) })
 
         return view
     }
@@ -81,47 +94,42 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
         }
     }
 
-    override fun showGroups(groupsAndCounts: List<Pair<Group, Int>>) {
-        adapter.setItems(createAdapterItems(groupsAndCounts))
-        adapter.onGroupItemClickListener =
-            { position -> onGroupClicked(groupsAndCounts[position].first) }
-        adapter.onButtonItemClickListener = { onNewGroupClicked() }
+    override fun setItems(items: List<GroupsAdapter.ListItem>) {
+        itemsData.value = items
     }
 
-    private fun createAdapterItems(groupsAndCounts: List<Pair<Group, Int>>): List<GroupsAdapter.ListItem> {
-        val result = mutableListOf<GroupsAdapter.ListItem>()
-
-        for (groupAndCount in groupsAndCounts) {
-            val group = groupAndCount.first
-            val noteCount = groupAndCount.second
-
-            result.add(GroupsAdapter.GroupListItem(group.title, noteCount))
-        }
-
-        result.add(GroupsAdapter.ButtonListItem())
-
-        return result
+    private fun setItemsInternal(items: List<GroupsAdapter.ListItem>) {
+        adapter.setItems(items)
+        adapter.notifyDataSetChanged()
     }
 
-    private fun onGroupClicked(group: Group) {
-        presenter.onGroupClicked(group)
+    override fun showNoteListScreen(group: Group) {
+        showNoteListScreenEvent.call(group)
     }
 
-    private fun onNewGroupClicked() {
-        showNewGroupScreen()
+    private fun showNoteListScreenInternal(group: Group) {
+        val context = this.context ?: return
+
+        startActivity(GroupsActivity.intentFroGroup(context, group))
     }
 
-    override fun showNewGroupScreen() {
-        startActivity(GroupActivity.createStartIntent(context!!))
+    override fun showNoteScreen(note: Note) {
+        showNoteScreenEvent.call(note)
     }
 
-    override fun showUnlockScreenAndFinish() {
-        startActivity(UnlockActivity.createStartIntent(context!!))
+    private fun showNoteScreenInternal(note: Note) {
+        val context = this.context ?: return
 
-        activity!!.finish()
+        startActivity(NoteActivity.createStartIntent(context, note))
     }
 
-    override fun showNotesScreen(group: Group) {
-        startActivity(NotesActivity.createStartIntent(context!!, group))
+    override fun showNewGroupScreen(parentGroupUid: UUID) {
+        showNewGroupScreenEvent.call(parentGroupUid)
+    }
+
+    private fun showNewGroupScreenInternal(parentGroupUid: UUID) {
+        val context = this.context ?: return
+
+        startActivity(GroupActivity.createChildGroup(context, parentGroupUid))
     }
 }

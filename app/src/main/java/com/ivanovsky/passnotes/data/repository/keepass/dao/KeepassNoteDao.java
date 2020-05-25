@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
+
 public class KeepassNoteDao implements NoteDao {
 
 	private static final String PROPERTY_TITLE = "Title";
@@ -31,12 +34,15 @@ public class KeepassNoteDao implements NoteDao {
 
 	@Override
 	public OperationResult<List<Note>> getNotesByGroupUid(UUID groupUid) {
+		SimpleGroup group = db.getKeepassDatabase().findGroup(groupUid);
+		if (group == null) {
+			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+		}
+
 		List<Note> notes = new ArrayList<>();
 
-		SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
-
-		SimpleGroup group = findGroupByUidRecursively(rootGroup, groupUid);
-		if (group != null) {
+		List<SimpleEntry> entries = group.getEntries();
+		if (entries != null) {
 			notes.addAll(createNotesFromEntries(group.getEntries()));
 
 			for (Note note : notes) {
@@ -45,33 +51,6 @@ public class KeepassNoteDao implements NoteDao {
 		}
 
 		return OperationResult.success(notes);
-	}
-
-	private SimpleGroup findGroupByUidRecursively(SimpleGroup group, UUID uid) {
-		if (group == null) return null;
-
-		SimpleGroup result = null;
-
-		if (uid != null) {
-			if (uid.equals(group.getUuid())) {
-				result = group;
-
-			} else {
-				List<SimpleGroup> childGroups = group.getGroups();
-				if (childGroups != null) {
-
-					for (SimpleGroup childGroup : childGroups) {
-						SimpleGroup matchedGroup = findGroupByUidRecursively(childGroup, uid);
-						if (matchedGroup != null) {
-							result = matchedGroup;
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		return result;
 	}
 
 	private List<Note> createNotesFromEntries(List<SimpleEntry> entries) {
@@ -148,37 +127,32 @@ public class KeepassNoteDao implements NoteDao {
 
 	@Override
 	public OperationResult<UUID> insert(Note note) {
+		SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
+		if (group == null) {
+			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+		}
+
 		OperationResult<UUID> result = new OperationResult<>();
 
-		SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
-
-		SimpleGroup group = findGroupByUidRecursively(rootGroup, note.getGroupUid());
-		if (group != null) {
-
-			SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
-			if (newEntry != null) {
-
-				OperationResult<Boolean> commitResult = db.commit();
-				switch (commitResult.getStatus()) {
-					case DEFERRED:
-						result.setDeferredObj(newEntry.getUuid());
-						break;
-					case SUCCEEDED:
-						result.setObj(newEntry.getUuid());
-						break;
-					case FAILED:
-						rootGroup.removeEntry(newEntry);
-						result.setError(commitResult.getError());
-						break;
-					default:
-						throw new IllegalArgumentException("Status handling is not implementing");
-				}
-			} else {
-				result.setError(OperationError.newDbError(OperationError.MESSAGE_UNKNOWN_ERROR));
+		SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
+		if (newEntry != null) {
+			OperationResult<Boolean> commitResult = db.commit();
+			switch (commitResult.getStatus()) {
+				case DEFERRED:
+					result.setDeferredObj(newEntry.getUuid());
+					break;
+				case SUCCEEDED:
+					result.setObj(newEntry.getUuid());
+					break;
+				case FAILED:
+					group.removeEntry(newEntry);
+					result.setError(commitResult.getError());
+					break;
+				default:
+					throw new IllegalArgumentException("Status handling is not implementing");
 			}
-
 		} else {
-			result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_FIND_GROUP));
+			result.setError(newDbError(OperationError.MESSAGE_UNKNOWN_ERROR));
 		}
 
 		return result;
@@ -208,7 +182,7 @@ public class KeepassNoteDao implements NoteDao {
 		if (entries.size() != 0) {
 			result.setObj(createNoteFromEntry(entries.get(0)));
 		} else {
-			result.setError(OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_FIND_NOTE));
+			result.setError(newDbError(OperationError.MESSAGE_FAILED_TO_FIND_NOTE));
 		}
 
 		return result;

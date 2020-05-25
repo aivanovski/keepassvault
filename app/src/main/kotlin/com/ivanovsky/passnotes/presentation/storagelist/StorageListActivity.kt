@@ -9,48 +9,48 @@ import com.ivanovsky.passnotes.presentation.core.BaseActivity
 
 class StorageListActivity : BaseActivity() {
 
-	private lateinit var action: Action
+    private lateinit var action: Action
 
-	companion object {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.core_base_activity)
 
-		const val EXTRA_RESULT: String = "result"
+        action = intent.extras?.getSerializable(EXTRA_MODE) as Action
 
-		private const val EXTRA_MODE = "action"
+        setSupportActionBar(findViewById(R.id.tool_bar))
+        currentActionBar.title = getString(R.string.select_storage)
+        currentActionBar.setDisplayHomeAsUpEnabled(true)
 
-		fun createStartIntent(context: Context, action: Action): Intent {
-			val intent = Intent(context, StorageListActivity::class.java)
+        val fragment = StorageListFragment.newInstance()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
 
-			intent.putExtra(EXTRA_MODE, action)
+        val presenter = StorageListPresenter(fragment, action)
+        fragment.presenter = presenter
+    }
 
-			return intent
-		}
-	}
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return if (item.itemId == android.R.id.home) {
+            finish()
+            true
+        } else {
+            super.onOptionsItemSelected(item)
+        }
+    }
 
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-		setContentView(R.layout.core_base_activity)
+    companion object {
 
-		action = intent.extras.getSerializable(EXTRA_MODE) as Action
+        const val EXTRA_RESULT: String = "result"
 
-		setSupportActionBar(findViewById(R.id.tool_bar))
-		currentActionBar.title = getString(R.string.select_storage)
-		currentActionBar.setDisplayHomeAsUpEnabled(true)
+        private const val EXTRA_MODE = "action"
 
-		val fragment = StorageListFragment.newInstance()
-		supportFragmentManager.beginTransaction()
-				.replace(R.id.fragment_container, fragment)
-				.commit()
+        fun createStartIntent(context: Context, action: Action): Intent {
+            val intent = Intent(context, StorageListActivity::class.java)
 
-		val presenter = StorageListPresenter(action)
-		fragment.setPresenter(presenter)
-	}
+            intent.putExtra(EXTRA_MODE, action)
 
-	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-		if (item?.itemId == android.R.id.home) {
-			finish()
-			return true
-		} else {
-			return super.onOptionsItemSelected(item)
-		}
-	}
+            return intent
+        }
+    }
 }

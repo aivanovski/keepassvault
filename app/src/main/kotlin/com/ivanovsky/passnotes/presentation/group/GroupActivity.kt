@@ -9,37 +9,37 @@ import com.ivanovsky.passnotes.presentation.core.BaseActivity
 
 class GroupActivity : BaseActivity() {
 
-	companion object {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-		fun createStartIntent(context: Context): Intent {
-			return Intent(context, GroupActivity::class.java)
-		}
-	}
+        setContentView(R.layout.core_base_activity)
 
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
+        setSupportActionBar(findViewById(R.id.tool_bar))
+        currentActionBar.title = getString(R.string.new_group)
+        currentActionBar.setDisplayHomeAsUpEnabled(true)
 
-		setContentView(R.layout.core_base_activity)
+        val fragment = GroupFragment.newInstance()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
 
-		setSupportActionBar(findViewById(R.id.tool_bar))
-		currentActionBar.title = getString(R.string.new_group)
-		currentActionBar.setDisplayHomeAsUpEnabled(true)
+        val presenter = GroupPresenter(fragment)
+        fragment.presenter = presenter
+    }
 
-		val fragment = GroupFragment.newInstance()
-		supportFragmentManager.beginTransaction()
-				.replace(R.id.fragment_container, fragment)
-				.commit()
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return if (item.itemId == android.R.id.home) {
+            finish()
+            true
+        } else {
+            super.onOptionsItemSelected(item)
+        }
+    }
 
-		val presenter = GroupPresenter(this)
-		fragment.setPresenter(presenter)
-	}
+    companion object {
 
-	override fun onOptionsItemSelected(item: MenuItem): Boolean {
-		return if (item.itemId == android.R.id.home) {
-			finish()
-			true
-		} else {
-			super.onOptionsItemSelected(item)
-		}
-	}
+        fun createStartIntent(context: Context): Intent {
+            return Intent(context, GroupActivity::class.java)
+        }
+    }
 }

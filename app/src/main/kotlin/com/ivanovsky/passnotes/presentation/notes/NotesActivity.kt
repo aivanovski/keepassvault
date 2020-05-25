@@ -11,51 +11,51 @@ import java.util.*
 
 class NotesActivity : BaseActivity() {
 
-	private lateinit var groupTitle: String
-	private lateinit var groupUid: UUID
+    private lateinit var groupTitle: String
+    private lateinit var groupUid: UUID
 
-	companion object {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-		private const val EXTRA_GROUP_UID = "groupUid"
-		private const val EXTRA_GROUP_TITLE = "groupTitle"
+        setContentView(R.layout.core_base_activity)
 
-		fun createStartIntent(context: Context, group: Group): Intent {
-			val result = Intent(context, NotesActivity::class.java)
+        groupUid = intent.extras?.getSerializable(EXTRA_GROUP_UID) as UUID
+        groupTitle = intent.extras?.getString(EXTRA_GROUP_TITLE) ?: ""
 
-			result.putExtra(EXTRA_GROUP_UID, group.uid)
-			result.putExtra(EXTRA_GROUP_TITLE, group.title)
+        setSupportActionBar(findViewById(R.id.tool_bar))
+        currentActionBar.title = groupTitle
+        currentActionBar.setDisplayHomeAsUpEnabled(true)
 
-			return result
-		}
-	}
+        val fragment = NotesFragment.newInstance()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
 
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
+        val presenter = NotesPresenter(groupUid, fragment)
+        fragment.presenter = presenter
+    }
 
-		setContentView(R.layout.core_base_activity)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return if (item.itemId == android.R.id.home) {
+            finish()
+            true
+        } else {
+            super.onOptionsItemSelected(item)
+        }
+    }
 
-		groupUid = intent.extras.getSerializable(EXTRA_GROUP_UID) as UUID
-		groupTitle = intent.extras.getString(EXTRA_GROUP_TITLE)
+    companion object {
 
-		setSupportActionBar(findViewById(R.id.tool_bar))
-		currentActionBar.title = groupTitle
-		currentActionBar.setDisplayHomeAsUpEnabled(true)
+        private const val EXTRA_GROUP_UID = "groupUid"
+        private const val EXTRA_GROUP_TITLE = "groupTitle"
 
-		val fragment = NotesFragment.newInstance()
-		supportFragmentManager.beginTransaction()
-				.replace(R.id.fragment_container, fragment)
-				.commit()
+        fun createStartIntent(context: Context, group: Group): Intent {
+            val result = Intent(context, NotesActivity::class.java)
 
-		val presenter = NotesPresenter(groupUid, fragment)
-		fragment.setPresenter(presenter)
-}
+            result.putExtra(EXTRA_GROUP_UID, group.uid)
+            result.putExtra(EXTRA_GROUP_TITLE, group.title)
 
-	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-		if (item?.itemId == android.R.id.home) {
-			finish()
-			return true
-		} else {
-			return super.onOptionsItemSelected(item)
-		}
-	}
+            return result
+        }
+    }
 }

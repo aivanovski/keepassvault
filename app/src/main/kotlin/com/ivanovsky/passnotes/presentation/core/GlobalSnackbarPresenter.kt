@@ -4,5 +4,5 @@ import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarMessageLiveAc
 
 interface GlobalSnackbarPresenter {
 
-	val globalSnackbarMessageAction: GlobalSnackbarMessageLiveAction
+    val globalSnackbarMessageAction: GlobalSnackbarMessageLiveAction
 }

@@ -4,6 +4,7 @@
 
 	<!-- Common for all screens -->
 	<string name="dropbox">Dropbox</string>
+	<string name="no_items">No items</string>
 
 	<!-- Menu and buttons -->
 	<string name="retry">retry</string>

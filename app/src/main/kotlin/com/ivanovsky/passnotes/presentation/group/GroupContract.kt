@@ -4,26 +4,23 @@ import androidx.lifecycle.LiveData
 import com.ivanovsky.passnotes.presentation.core.BasePresenter
 import com.ivanovsky.passnotes.presentation.core.BaseView
 import com.ivanovsky.passnotes.presentation.core.GlobalSnackbarPresenter
-import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveAction
+import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 
 class GroupContract {
 
-	interface View : BaseView<Presenter> {
-		fun setTitleEditTextError(error: String?)
-		fun setDoneButtonVisibility(isVisible: Boolean)
-		fun finishScreen()
-		fun hideKeyboard()
-	}
+    interface View : BaseView<Presenter> {
+        fun setTitleEditTextError(error: String?)
+        fun setDoneButtonVisibility(isVisible: Boolean)
+        fun finishScreen()
+        fun hideKeyboard()
+    }
 
-	interface Presenter : BasePresenter, GlobalSnackbarPresenter {
-		val screenState: LiveData<ScreenState>
-		val doneButtonVisibility: LiveData<Boolean>
-		val titleEditTextError: LiveData<String?>
-		val hideKeyboardAction: SingleLiveAction<Void>
-		val finishScreenAction: SingleLiveAction<Void>
-		val snackbarMessageAction: SingleLiveAction<String>
+    interface Presenter : BasePresenter, GlobalSnackbarPresenter {
+        val doneButtonVisibility: LiveData<Boolean>
+        val titleEditTextError: LiveData<String?>
+        val hideKeyboardEvent: SingleLiveEvent<Void>
+        val finishScreenEvent: SingleLiveEvent<Void>
 
-		fun createNewGroup(title: String)
-	}
+        fun createNewGroup(title: String)
+    }
 }

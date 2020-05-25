@@ -6,15 +6,13 @@ import com.ivanovsky.passnotes.presentation.core.BaseView
 
 class NotesContract {
 
-	interface View: BaseView<Presenter> {
-		fun showNotes(notes: List<Note>)
-		fun showNotItems()
-		fun showUnlockScreenAndFinish()
-		fun showError(message: String)
-		fun showNoteScreen(note: Note)
-	}
+    interface View : BaseView<Presenter> {
+        fun showNotes(notes: List<Note>)
+        fun showUnlockScreenAndFinish()
+        fun showNoteScreen(note: Note)
+    }
 
-	interface Presenter: BasePresenter {
-		fun loadData()
-	}
+    interface Presenter : BasePresenter {
+        fun loadData()
+    }
 }

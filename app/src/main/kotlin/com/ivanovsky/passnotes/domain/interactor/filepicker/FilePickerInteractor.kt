@@ -6,11 +6,11 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 
 class FilePickerInteractor(private val fileSystemResolver: FileSystemResolver) {
 
-	fun getFileList(dir: FileDescriptor): OperationResult<List<FileDescriptor>> {
-		return fileSystemResolver.resolveProvider(dir.fsType).listFiles(dir)
-	}
+    fun getFileList(dir: FileDescriptor): OperationResult<List<FileDescriptor>> {
+        return fileSystemResolver.resolveProvider(dir.fsType).listFiles(dir)
+    }
 
-	fun getParent(file: FileDescriptor): OperationResult<FileDescriptor> {
-		return fileSystemResolver.resolveProvider(file.fsType).getParent(file)
-	}
+    fun getParent(file: FileDescriptor): OperationResult<FileDescriptor> {
+        return fileSystemResolver.resolveProvider(file.fsType).getParent(file)
+    }
 }

@@ -9,19 +9,21 @@ import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
 
 class FileSyncHelper(private val fileSystemResolver: FileSystemResolver) {
 
-	fun getModifiedFileByUid(uid: String, fsType: FSType): FileDescriptor? {
-		val provider = fileSystemResolver.resolveProvider(fsType)
+    fun getModifiedFileByUid(uid: String, fsType: FSType): FileDescriptor? {
+        val provider = fileSystemResolver.resolveProvider(fsType)
 
-		val modifiedFiles = provider.syncProcessor?.locallyModifiedFiles
+        val modifiedFiles = provider.syncProcessor?.locallyModifiedFiles
 
-		return modifiedFiles?.find { file -> file.uid == uid }
-	}
+        return modifiedFiles?.find { file -> file.uid == uid }
+    }
 
-	fun resolve(file: FileDescriptor): OperationResult<FileDescriptor> {
-		val provider = fileSystemResolver.resolveProvider(file.fsType)
+    fun resolve(file: FileDescriptor): OperationResult<FileDescriptor> {
+        val provider = fileSystemResolver.resolveProvider(file.fsType)
 
-		return provider.syncProcessor.process(file,
-				SyncStrategy.LAST_MODIFICATION_WINS,
-				OnConflictStrategy.CANCEL)
-	}
+        return provider.syncProcessor.process(
+            file,
+            SyncStrategy.LAST_MODIFICATION_WINS,
+            OnConflictStrategy.CANCEL
+        )
+    }
 }

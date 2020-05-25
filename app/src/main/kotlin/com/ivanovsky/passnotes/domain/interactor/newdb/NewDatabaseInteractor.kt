@@ -11,86 +11,91 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.injection.Injector
 
-open class NewDatabaseInteractor(private val dbRepository: EncryptedDatabaseRepository,
-                            private val usedFileRepository: UsedFileRepository,
-                            private val fileSystemResolver: FileSystemResolver,
-                            private val observerBus: ObserverBus) {
+open class NewDatabaseInteractor(
+    private val dbRepository: EncryptedDatabaseRepository,
+    private val usedFileRepository: UsedFileRepository,
+    private val fileSystemResolver: FileSystemResolver,
+    private val observerBus: ObserverBus
+) {
 
-	fun createNewDatabaseAndOpen(key: KeepassDatabaseKey, file: FileDescriptor): OperationResult<Boolean> {
-		val result = OperationResult<Boolean>()
+    fun createNewDatabaseAndOpen(
+        key: KeepassDatabaseKey,
+        file: FileDescriptor
+    ): OperationResult<Boolean> {
+        val result = OperationResult<Boolean>()
 
-		val provider = fileSystemResolver.resolveProvider(file.fsType)
+        val provider = fileSystemResolver.resolveProvider(file.fsType)
 
-		val existsResult = provider.exists(file)
-		if (existsResult.isSucceeded) {
-			val isExists = existsResult.obj
+        val existsResult = provider.exists(file)
+        if (existsResult.isSucceeded) {
+            val isExists = existsResult.obj
 
-			if (!isExists) {
-				val creationResult = dbRepository.createNew(key, file)
+            if (!isExists) {
+                val creationResult = dbRepository.createNew(key, file)
 
-				if (creationResult.isSucceeded) {
-					val getFileResult = getFile(file)
+                if (creationResult.isSucceeded) {
+                    val getFileResult = getFile(file)
 
-					if (getFileResult.isSucceeded) {
-						val newFile = getFileResult.obj
+                    if (getFileResult.isSucceeded) {
+                        val newFile = getFileResult.obj
 
-						file.uid = newFile.uid
-						file.path = newFile.path
-						file.modified = newFile.modified
+                        file.uid = newFile.uid
+                        file.path = newFile.path
+                        file.modified = newFile.modified
 
-						val usedFile = UsedFile()
+                        val usedFile = UsedFile()
 
-						usedFile.filePath = file.path
-						usedFile.fileUid = file.uid
-						usedFile.fsType = file.fsType
-						usedFile.lastAccessTime = System.currentTimeMillis()
+                        usedFile.filePath = file.path
+                        usedFile.fileUid = file.uid
+                        usedFile.fsType = file.fsType
+                        usedFile.lastAccessTime = System.currentTimeMillis()
 
-						usedFileRepository.insert(usedFile)
+                        usedFileRepository.insert(usedFile)
 
-						observerBus.notifyUsedFileDataSetChanged()
+                        observerBus.notifyUsedFileDataSetChanged()
 
-						val openResult = dbRepository.open(key, file)
-						if (openResult.isSucceededOrDeferred) {
-							val db = openResult.obj
+                        val openResult = dbRepository.open(key, file)
+                        if (openResult.isSucceededOrDeferred) {
+                            val db = openResult.obj
 
-							Injector.getInstance().createEncryptedDatabaseComponent(db)
+                            Injector.getInstance().createEncryptedDatabaseComponent(db)
 
-							result.obj = true
-						} else {
-							result.error = openResult.error
-						}
-					} else {
-						result.error = getFileResult.error
-					}
-				} else if (creationResult.isDeferred) {
-					result.error = newFileAccessError(MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED)
-				} else {
-					result.error = creationResult.error
-				}
-			} else {
-				result.error = newFileIsAlreadyExistsError()
-			}
-		} else {
-			result.error = existsResult.error
-		}
+                            result.obj = true
+                        } else {
+                            result.error = openResult.error
+                        }
+                    } else {
+                        result.error = getFileResult.error
+                    }
+                } else if (creationResult.isDeferred) {
+                    result.error = newFileAccessError(MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED)
+                } else {
+                    result.error = creationResult.error
+                }
+            } else {
+                result.error = newFileIsAlreadyExistsError()
+            }
+        } else {
+            result.error = existsResult.error
+        }
 
-		return result
-	}
+        return result
+    }
 
-	private fun getFile(file: FileDescriptor): OperationResult<FileDescriptor> {
-		val result = OperationResult<FileDescriptor>()
+    private fun getFile(file: FileDescriptor): OperationResult<FileDescriptor> {
+        val result = OperationResult<FileDescriptor>()
 
-		val provider = fileSystemResolver.resolveProvider(file.fsType)
-		val getFileResult = provider.getFile(file.path, true)
+        val provider = fileSystemResolver.resolveProvider(file.fsType)
+        val getFileResult = provider.getFile(file.path, true)
 
-		if (getFileResult.isSucceeded) {
-			result.obj = getFileResult.obj
-		} else if (getFileResult.isDeferred) {
-			result.error = newFileAccessError(MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED)
-		} else {
-			result.error = getFileResult.error
-		}
+        if (getFileResult.isSucceeded) {
+            result.obj = getFileResult.obj
+        } else if (getFileResult.isDeferred) {
+            result.error = newFileAccessError(MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED)
+        } else {
+            result.error = getFileResult.error
+        }
 
-		return result
-	}
+        return result
+    }
 }

@@ -1,20 +1,21 @@
 package com.ivanovsky.passnotes.presentation.groups
 
-import android.content.Context
+import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarMessageLiveAction
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.injection.Injector
-import com.ivanovsky.passnotes.presentation.core.FragmentState
+import com.ivanovsky.passnotes.presentation.core.ScreenState
 import kotlinx.coroutines.*
 import javax.inject.Inject
 
-class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
-        GroupsContract.Presenter,
-        ObserverBus.GroupDataSetObserver {
+class GroupsPresenter(val view: GroupsContract.View) :
+    GroupsContract.Presenter,
+    ObserverBus.GroupDataSetObserver {
 
     @Inject
     lateinit var interactor: GroupsInteractor
@@ -28,6 +29,9 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
     @Inject
     lateinit var globalSnackbarBus: GlobalSnackbarBus
 
+    @Inject
+    lateinit var resourceHelper: ResourceHelper
+
     override val globalSnackbarMessageAction: GlobalSnackbarMessageLiveAction
 
     private val job = Job()
@@ -39,16 +43,16 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
     }
 
     override fun start() {
-        view.setState(FragmentState.LOADING)
-        observerBus.register(this)
-        loadData()
-    }
+        if (view.screenState.isNotInitialized) {
+            view.screenState = ScreenState.loading()
 
-    override fun stop() {
-        observerBus.unregister(this)
+            loadData()
+            observerBus.register(this)
+        }
     }
 
     override fun destroy() {
+        observerBus.unregister(this)
         job.cancel()
     }
 
@@ -63,11 +67,14 @@ class GroupsPresenter(val context: Context, val view: GroupsContract.View) :
 
                 if (groupsAndCounts.isNotEmpty()) {
                     view.showGroups(groupsAndCounts)
+                    view.screenState = ScreenState.data()
                 } else {
-                    view.showNoItems()
+                    view.screenState =
+                        ScreenState.empty(resourceHelper.getString(R.string.no_items))
                 }
             } else {
-                view.showError(errorInteractor.processAndGetMessage(result.error))
+                val message = errorInteractor.processAndGetMessage(result.error)
+                view.screenState = ScreenState.error(message)
             }
         }
     }

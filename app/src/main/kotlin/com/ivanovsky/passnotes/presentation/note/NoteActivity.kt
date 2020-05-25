@@ -11,51 +11,51 @@ import java.util.*
 
 class NoteActivity : BaseActivity() {
 
-	private var noteUid: UUID? = null
-	private lateinit var noteTitle: String
+    private var noteUid: UUID? = null
+    private lateinit var noteTitle: String
 
-	companion object {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-		private const val EXTRA_NOTE_UID = "noteUid"
-		private const val EXTRA_NOTE_TITLE = "noteTitle"
+        setContentView(R.layout.core_base_activity)
 
-		fun createStartIntent(context: Context, note: Note): Intent {
-			val result = Intent(context, NoteActivity::class.java)
+        noteUid = intent.extras?.getSerializable(EXTRA_NOTE_UID) as UUID
+        noteTitle = intent.extras?.getString(EXTRA_NOTE_TITLE) ?: ""
 
-			result.putExtra(EXTRA_NOTE_UID, note.uid)
-			result.putExtra(EXTRA_NOTE_TITLE, note.title)
+        setSupportActionBar(findViewById(R.id.tool_bar))
+        currentActionBar.title = noteTitle
+        currentActionBar.setDisplayHomeAsUpEnabled(true)
 
-			return result
-		}
-	}
+        val fragment = NoteFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
 
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
+        val presenter = NotePresenter(noteUid, fragment)
+        fragment.presenter = presenter
+    }
 
-		setContentView(R.layout.core_base_activity)
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item?.itemId == android.R.id.home) {
+            finish()
+            return true
+        } else {
+            return super.onOptionsItemSelected(item)
+        }
+    }
 
-		noteUid = intent.extras.getSerializable(EXTRA_NOTE_UID) as UUID
-		noteTitle = intent.extras.getString(EXTRA_NOTE_TITLE)
+    companion object {
 
-		setSupportActionBar(findViewById(R.id.tool_bar))
-		currentActionBar.title = noteTitle
-		currentActionBar.setDisplayHomeAsUpEnabled(true)
+        private const val EXTRA_NOTE_UID = "noteUid"
+        private const val EXTRA_NOTE_TITLE = "noteTitle"
 
-		val fragment = NoteFragment.newInstance()
-		supportFragmentManager.beginTransaction()
-				.replace(R.id.fragment_container, fragment)
-				.commit()
+        fun createStartIntent(context: Context, note: Note): Intent {
+            val result = Intent(context, NoteActivity::class.java)
 
-		val presenter = NotePresenter(this, noteUid, fragment)
-		fragment.setPresenter(presenter)
-	}
+            result.putExtra(EXTRA_NOTE_UID, note.uid)
+            result.putExtra(EXTRA_NOTE_TITLE, note.title)
 
-	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-		if (item?.itemId == android.R.id.home) {
-			finish()
-			return true
-		} else {
-			return super.onOptionsItemSelected(item)
-		}
-	}
+            return result
+        }
+    }
 }

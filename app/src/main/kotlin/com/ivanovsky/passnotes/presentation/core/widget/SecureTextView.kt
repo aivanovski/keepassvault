@@ -5,19 +5,23 @@ import android.text.InputType
 import android.util.AttributeSet
 import android.widget.TextView
 
-class SecureTextView: TextView {
+class SecureTextView : TextView {
 
-	constructor(context: Context, attrs: AttributeSet): super(context, attrs)
-	constructor(context: Context, attrs: AttributeSet, defStyle: Int): super(context, attrs, defStyle)
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(
+        context,
+        attrs,
+        defStyle
+    )
 
-	init {
-	}
+    init {
+    }
 
-	fun hideText() {
-		inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-	}
+    fun hideText() {
+        inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+    }
 
-	fun showText() {
-		inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_NORMAL
-	}
+    fun showText() {
+        inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_NORMAL
+    }
 }

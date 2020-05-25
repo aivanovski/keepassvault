@@ -24,7 +24,7 @@ public class OperationResult<T> {
 		return result;
 	}
 
-	public static <T> OperationResult<T> defer(T obj, OperationError error) {
+	public static <T> OperationResult<T> deferred(T obj, OperationError error) {
 		OperationResult<T> result = new OperationResult<>();
 		result.deferred = true;
 		result.setObj(obj);
@@ -52,19 +52,23 @@ public class OperationResult<T> {
 		return obj;
 	}
 
-	public void copyObjFrom(OperationResult<T> src) {
-		this.obj = src.obj;
-		this.deferred = src.deferred;
-	}
-
 	public void from(OperationResult<T> src) {
 		this.obj = src.obj;
 		this.deferred = src.deferred;
 		this.error = src.error;
 	}
 
-	public void errorFrom(OperationResult src) {
-		this.error = src.error;
+	public <E> OperationResult<E> takeError() {
+		OperationResult<E> newResult = new OperationResult<>();
+		newResult.error = error;
+		return newResult;
+	}
+
+	public <E> OperationResult<E> takeStatusWith(E newObj) {
+		OperationResult<E> newResult = new OperationResult<>();
+		newResult.obj = newObj;
+		newResult.deferred = deferred;
+		return newResult;
 	}
 
 	public OperationError getError() {

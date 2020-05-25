@@ -13,7 +13,6 @@ class NewDatabaseContract {
         fun setDoneButtonVisibility(isVisible: Boolean)
         fun showGroupsScreen()
         fun showStorageScreen()
-        fun hideKeyboard()
     }
 
     interface Presenter : BasePresenter {
@@ -21,7 +20,6 @@ class NewDatabaseContract {
         val doneButtonVisibility: LiveData<Boolean>
         val showGroupsScreenEvent: SingleLiveEvent<Void>
         val showStorageScreenEvent: SingleLiveEvent<Void>
-        val hideKeyboardEvent: SingleLiveEvent<Void>
 
         fun createNewDatabaseFile(filename: String, password: String)
         fun selectStorage()

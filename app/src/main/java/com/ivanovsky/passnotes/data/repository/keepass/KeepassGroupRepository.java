@@ -22,10 +22,31 @@ public class KeepassGroupRepository implements GroupRepository {
 	}
 
 	@Override
-	public OperationResult<Boolean> insert(Group group) {
+	public OperationResult<Group> getRootGroup() {
+		return dao.getRootGroup();
+	}
+
+	@Override
+	public OperationResult<List<Group>> getChildGroups(UUID parentGroupUid) {
+		return dao.getChildGroups(parentGroupUid);
+	}
+
+	@Override
+	public OperationResult<Integer> getChildGroupsCount(UUID parentGroupUid) {
+		OperationResult<List<Group>> childGroupsResult = getChildGroups(parentGroupUid);
+		if (childGroupsResult.isFailed()) {
+			return childGroupsResult.takeError();
+		}
+
+		List<Group> groups = childGroupsResult.getObj();
+		return childGroupsResult.takeStatusWith(groups.size());
+	}
+
+	@Override
+	public OperationResult<Boolean> insert(Group group, UUID parentGroupUid) {
 		OperationResult<Boolean> result = new OperationResult<>();
 
-		OperationResult<UUID> insertResult = dao.insert(group);
+		OperationResult<UUID> insertResult = dao.insert(group, parentGroupUid);
 		if (insertResult.getObj() != null) {
 			group.setUid(insertResult.getObj());
 			result.setObj(true);

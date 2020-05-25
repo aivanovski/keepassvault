@@ -26,7 +26,7 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
     @Inject
     lateinit var fileSystemResolver: FileSystemResolver
 
-    override lateinit var presenter: StorageListContract.Presenter
+    override var presenter: StorageListContract.Presenter? = null
     private lateinit var adapter: SingleLineAdapter
 
     init {
@@ -35,12 +35,12 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
 
     override fun onStart() {
         super.onStart()
-        presenter.start()
+        presenter?.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        presenter.destroy()
+        presenter?.destroy()
     }
 
     override fun onCreateContentView(
@@ -61,9 +61,9 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
         recyclerView.addItemDecoration(dividerDecorator)
         recyclerView.adapter = adapter
 
-        presenter.storageOptions.observe(this,
+        presenter?.storageOptions?.observe(this,
             Observer { options -> setStorageOptions(options!!) })
-        presenter.showFilePickerScreenEvent.observe(this,
+        presenter?.showFilePickerScreenEvent?.observe(this,
             Observer { args ->
                 showFilePickerScreen(
                     args!!.root,
@@ -71,9 +71,9 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
                     args.isBrowsingEnabled
                 )
             })
-        presenter.fileSelectedEvent.observe(this,
+        presenter?.fileSelectedEvent?.observe(this,
             Observer { file -> selectFileAndFinish(file!!) })
-        presenter.authActivityStartedEvent.observe(this,
+        presenter?.authActivityStartedEvent?.observe(this,
             Observer { fsType -> showAuthActivity(fsType!!) })
 
         return view
@@ -83,7 +83,7 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
         adapter.setItems(createAdapterItems(options))
         adapter.notifyDataSetChanged()
 
-        adapter.onItemClickListener = { pos -> presenter.onStorageOptionClicked(options[pos]) }
+        adapter.onItemClickListener = { pos -> presenter?.onStorageOptionClicked(options[pos]) }
     }
 
     override fun showFilePickerScreen(
@@ -119,7 +119,7 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
             val file =
                 extras.getParcelable<FileDescriptor>(FilePickerActivity.EXTRA_RESULT) ?: return
 
-            presenter.onFilePicked(file)
+            presenter?.onFilePicked(file)
         }
     }
 

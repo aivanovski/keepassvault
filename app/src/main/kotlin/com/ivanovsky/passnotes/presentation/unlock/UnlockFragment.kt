@@ -36,7 +36,7 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
     private var selectedFile: FileDescriptor? = null
     private var files: List<FileDescriptor>? = null
 
-    override lateinit var presenter: UnlockContract.Presenter
+    override var presenter: UnlockContract.Presenter? = null
     private lateinit var fileAdapter: FileSpinnerAdapter
     private lateinit var passwordRules: List<PasswordRule>
     private lateinit var fileSpinner: Spinner
@@ -77,12 +77,12 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 
     override fun onStart() {
         super.onStart()
-        presenter.start()
+        presenter?.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        presenter.destroy()
+        presenter?.destroy()
     }
 
     override fun onCreateContentView(
@@ -104,23 +104,21 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
         fab.setOnClickListener { showNewDatabaseScreen() }
         unlockButton.setOnClickListener { onUnlockButtonClicked() }
 
-        presenter.recentlyUsedFiles.observe(this,
+        presenter?.recentlyUsedFiles?.observe(this,
             Observer { files -> setRecentlyUsedFiles(files!!) })
-        presenter.selectedRecentlyUsedFile.observe(this,
+        presenter?.selectedRecentlyUsedFile?.observe(this,
             Observer { selectedFile -> setSelectedFile(selectedFile!!) })
-        presenter.showGroupsScreenEvent.observe(this,
+        presenter?.showGroupsScreenEvent?.observe(this,
             Observer { showGroupsScreen() })
-        presenter.showNewDatabaseScreenEvent.observe(this,
+        presenter?.showNewDatabaseScreenEvent?.observe(this,
             Observer { showNewDatabaseScreen() })
-        presenter.hideKeyboardEvent.observe(this,
-            Observer { hideKeyboard() })
-        presenter.showOpenFileScreenEvent.observe(this,
+        presenter?.showOpenFileScreenEvent?.observe(this,
             Observer { showOpenFileScreen() })
-        presenter.showSettingsScreenEvent.observe(this,
+        presenter?.showSettingsScreenEvent?.observe(this,
             Observer { showSettingScreen() })
-        presenter.showAboutScreenEvent.observe(this,
+        presenter?.showAboutScreenEvent?.observe(this,
             Observer { showAboutScreen() })
-        presenter.showDebugMenuScreenEvent.observe(this,
+        presenter?.showDebugMenuScreenEvent?.observe(this,
             Observer { showDebugMenuScreen() })
 
         return view
@@ -131,7 +129,7 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 
         val file = selectedFile
         if (file != null) {
-            presenter.onUnlockButtonClicked(password, file)
+            presenter?.onUnlockButtonClicked(password, file)
         }
     }
 
@@ -203,7 +201,7 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
                 position: Int,
                 id: Long
             ) {
-                presenter.onFileSelectedByUser(files[position])
+                presenter?.onFileSelectedByUser(files[position])
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -226,7 +224,7 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
     }
 
     override fun showGroupsScreen() {
-        startActivity(GroupsActivity.createStartIntent(context!!))
+        startActivity(GroupsActivity.startForRootGroup(context!!))
     }
 
     override fun showNewDatabaseScreen() {
@@ -261,7 +259,7 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
             if (extras != null) {
                 val file = extras.getParcelable<FileDescriptor>(StorageListActivity.EXTRA_RESULT)
                 if (file != null) {
-                    presenter.onFilePicked(file)
+                    presenter?.onFilePicked(file)
                 }
             }
         }

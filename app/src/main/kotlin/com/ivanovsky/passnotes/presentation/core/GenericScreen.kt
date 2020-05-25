@@ -5,4 +5,5 @@ interface GenericScreen {
     var screenState: ScreenState
     fun showSnackbarMessage(message: String)
     fun showToastMessage(message: String)
+    fun hideKeyboard()
 }

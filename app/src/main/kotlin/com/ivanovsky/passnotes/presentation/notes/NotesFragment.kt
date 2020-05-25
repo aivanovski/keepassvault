@@ -16,18 +16,18 @@ import com.ivanovsky.passnotes.presentation.note.NoteActivity
 
 class NotesFragment : BaseFragment(), NotesContract.View {
 
-    override lateinit var presenter: NotesContract.Presenter
+    override var presenter: NotesContract.Presenter? = null
     private lateinit var adapter: SingleLineAdapter
     private lateinit var recyclerView: RecyclerView
 
     override fun onStart() {
         super.onStart()
-        presenter.start()
+        presenter?.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        presenter.destroy()
+        presenter?.destroy()
     }
 
     override fun onCreateContentView(
@@ -61,7 +61,7 @@ class NotesFragment : BaseFragment(), NotesContract.View {
     }
 
     override fun showUnlockScreenAndFinish() {
-        startActivity(GroupActivity.createStartIntent(context!!))
+        startActivity(GroupActivity.createGroupInRoot(context!!))
 
         activity!!.finish()
     }

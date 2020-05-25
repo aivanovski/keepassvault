@@ -16,7 +16,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseFragment
 
 class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 
-    override lateinit var presenter: DebugMenuContract.Presenter
+    override var presenter: DebugMenuContract.Presenter? = null
 
     private lateinit var fileSystemSpinner: Spinner
     private lateinit var filePathEditText: EditText
@@ -31,12 +31,12 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 
     override fun onStart() {
         super.onStart()
-        presenter.start()
+        presenter?.start()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        presenter.destroy()
+        presenter?.destroy()
     }
 
     override fun onCreateContentView(
@@ -59,15 +59,15 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
 
         fileSystemSpinner.adapter = createSpinnerAdapter()
 
-        presenter.writeButtonEnabled.observe(this,
+        presenter?.writeButtonEnabled?.observe(this,
             Observer { isEnabled -> setWriteButtonEnabled(isEnabled) })
-        presenter.openDbButtonEnabled.observe(this,
+        presenter?.openDbButtonEnabled?.observe(this,
             Observer { isEnabled -> setOpenDbButtonEnabled(isEnabled) })
-        presenter.closeDbButtonEnabled.observe(this,
+        presenter?.closeDbButtonEnabled?.observe(this,
             Observer { isEnabled -> setCloseDbButtonEnabled(isEnabled) })
-        presenter.addEntryButtonEnabled.observe(this,
+        presenter?.addEntryButtonEnabled?.observe(this,
             Observer { isEnabled -> setAddEntryButtonEnabled(isEnabled) })
-        presenter.externalStorageCheckBoxChecked.observe(this,
+        presenter?.externalStorageCheckBoxChecked?.observe(this,
             Observer { isChecked -> setExternalStorageCheckBoxChecked(isChecked) })
 
         readButton.setOnClickListener { onReadButtonClicked() }
@@ -114,27 +114,27 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
     }
 
     private fun onReadButtonClicked() {
-        presenter.onReadButtonClicked(getSelectedFile())
+        presenter?.onReadButtonClicked(getSelectedFile())
     }
 
     private fun onWriteButtonClicked() {
-        presenter.onWriteButtonClicked()
+        presenter?.onWriteButtonClicked()
     }
 
     private fun onNewButtonClicked() {
-        presenter.onNewButtonClicked(getPassword(), getSelectedFile())
+        presenter?.onNewButtonClicked(getPassword(), getSelectedFile())
     }
 
     private fun onOpenDbButtonClicked() {
-        presenter.onOpenDbButtonClicked(getPassword())
+        presenter?.onOpenDbButtonClicked(getPassword())
     }
 
     private fun onCloseDbButtonClicked() {
-        presenter.onCloseDbButtonClicked()
+        presenter?.onCloseDbButtonClicked()
     }
 
     private fun onAddEntryButtonClicked() {
-        presenter.onAddEntryButtonClicked()
+        presenter?.onAddEntryButtonClicked()
     }
 
     private fun getSelectedFile(): FileDescriptor {
@@ -169,7 +169,7 @@ class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
     }
 
     private fun onExternalStorageCheckedChanged(isChecked: Boolean) {
-        presenter.onExternalStorageCheckedChanged(isChecked)
+        presenter?.onExternalStorageCheckedChanged(isChecked)
     }
 
     companion object {

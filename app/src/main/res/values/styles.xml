@@ -144,6 +144,13 @@
 		<item name="android:lines">1</item>
 	</style>
 
+	<style name="Groups.NotTitleText">
+		<item name="android:textSize">@dimen/material_primary_text_size</item>
+		<item name="android:textColor">@color/primary_text</item>
+		<item name="android:maxLines">3</item>
+		<item name="android:ellipsize">end</item>
+	</style>
+
 	<style name="Groups.CountText">
 		<item name="android:textSize">@dimen/material_secondary_text_size</item>
 		<item name="android:textColor">@color/primary_text</item>

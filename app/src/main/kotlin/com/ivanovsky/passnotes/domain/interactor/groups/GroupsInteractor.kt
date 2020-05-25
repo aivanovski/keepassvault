@@ -1,44 +1,77 @@
 package com.ivanovsky.passnotes.domain.interactor.groups
 
 import com.ivanovsky.passnotes.data.entity.Group
-import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.GroupRepository
 import com.ivanovsky.passnotes.data.repository.NoteRepository
+import java.util.*
 
 class GroupsInteractor(
     private val groupRepository: GroupRepository,
     private val noteRepository: NoteRepository
 ) {
 
-    fun getAllGroupsWithNoteCount(): OperationResult<List<Pair<Group, Int>>> {
-        val result: OperationResult<List<Pair<Group, Int>>>
-
-        val groupsResult = groupRepository.allGroup
-        if (groupsResult.isSucceededOrDeferred) {
-            result = createGroupToNoteCountPairs(groupsResult.obj)
-        } else {
-            result = OperationResult.error(groupsResult.error)
+    fun getRootUid(): UUID? {
+        val rootResult = groupRepository.rootGroup
+        if (rootResult.isFailed) {
+            return null
         }
 
-        return result
+        return rootResult.obj.uid
     }
 
-    private fun createGroupToNoteCountPairs(groups: List<Group>): OperationResult<List<Pair<Group, Int>>> {
-        val pairs = mutableListOf<Pair<Group, Int>>()
-        var error: OperationError? = null
+    fun getRootGroupData(): OperationResult<List<Item>> {
+        val rootGroupResult = groupRepository.rootGroup
+        if (rootGroupResult.isFailed) {
+            return rootGroupResult.takeError()
+        }
 
+        val groupUid = rootGroupResult.obj.uid
+
+        return getGroupData(groupUid)
+    }
+
+    fun getGroupData(groupUid: UUID): OperationResult<List<Item>> {
+        val groupsResult = groupRepository.getChildGroups(groupUid)
+        if (groupsResult.isFailed) {
+            return groupsResult.takeError()
+        }
+
+        val notesResult = noteRepository.getNotesByGroupUid(groupUid)
+        if (notesResult.isFailed) {
+            return groupsResult.takeError()
+        }
+
+        val groups = groupsResult.obj
+        val notes = notesResult.obj
+
+        val items = mutableListOf<Item>()
         for (group in groups) {
             val noteCountResult = noteRepository.getNoteCountByGroupUid(group.uid)
-
-            if (noteCountResult.isSucceededOrDeferred) {
-                pairs.add(Pair(group, noteCountResult.obj))
-            } else {
-                error = noteCountResult.error
-                break
+            if (noteCountResult.isFailed) {
+                return noteCountResult.takeError()
             }
+
+            val childGroupCountResult = groupRepository.getChildGroupsCount(group.uid)
+            if (childGroupCountResult.isFailed) {
+                return childGroupCountResult.takeError()
+            }
+
+            val noteCount = noteCountResult.obj
+            val childGroupCount = childGroupCountResult.obj
+
+            items.add(GroupItem(group, noteCount, childGroupCount))
         }
 
-        return if (error == null) OperationResult.success(pairs) else OperationResult.error(error)
+        for (note in notes) {
+            items.add(NoteItem(note))
+        }
+
+        return OperationResult.success(items)
     }
+
+    abstract class Item
+    data class GroupItem(val group: Group, val noteCount: Int, val childGroupCount: Int) : Item()
+    data class NoteItem(val note: Note) : Item()
 }

@@ -245,30 +245,34 @@ class DebugMenuInteractor(
         return result
     }
 
+    @Suppress("FoldInitializerAndIfToElvis")
     fun addEntryToDb(): OperationResult<Boolean> {
-        val result = OperationResult<Boolean>()
-
         val db = dbRepository.openedDatabase
-        if (db != null) {
-            val newGroupTitle = generateNewGroupTitle(db.groupRepository)
-            if (newGroupTitle != null) {
-                val newGroup = Group()
-                newGroup.title = newGroupTitle
-
-                val insertResult = db.groupRepository.insert(newGroup)
-                if (insertResult.isSucceededOrDeferred) {
-                    result.obj = true
-                } else {
-                    result.error = insertResult.error
-                }
-            } else {
-                result.error = newDbError(MESSAGE_UNKNOWN_ERROR)
-            }
-        } else {
-            result.error = newDbError(MESSAGE_DB_IS_NOT_OPENED)
+        if (db == null) {
+            return OperationResult.error(newDbError(MESSAGE_DB_IS_NOT_OPENED))
         }
 
-        return result
+        val newGroupTitle = generateNewGroupTitle(db.groupRepository)
+        if (newGroupTitle == null) {
+            return OperationResult.error(newDbError(MESSAGE_UNKNOWN_ERROR))
+        }
+
+        val rootGroupResult = db.groupRepository.rootGroup
+        if (rootGroupResult.isFailed) {
+            return rootGroupResult.takeError()
+        }
+
+        val rootGroupUid = rootGroupResult.obj.uid
+        val newGroup = Group()
+
+        newGroup.title = newGroupTitle
+
+        val insertResult = db.groupRepository.insert(newGroup, rootGroupUid)
+        if (insertResult.isFailed) {
+            return insertResult.takeError()
+        }
+
+        return insertResult.takeStatusWith(true)
     }
 
     private fun generateNewGroupTitle(groupRepository: GroupRepository): String? {

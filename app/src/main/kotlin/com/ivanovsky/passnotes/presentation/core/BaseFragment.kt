@@ -13,6 +13,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
 import com.ivanovsky.passnotes.presentation.core.widget.FragmentStateView
+import com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput
 
 abstract class BaseFragment : Fragment(), GenericScreen {
 
@@ -24,6 +25,7 @@ abstract class BaseFragment : Fragment(), GenericScreen {
     private val screenStateData = MutableLiveData<ScreenState>()
     private val showToastMessageEvent = SingleLiveEvent<String>()
     private val showSnackbarMessageEvent = SingleLiveEvent<String>()
+    private val hideKeyboardEvent = SingleLiveEvent<String>()
 
     override var screenState: ScreenState
         get() = screenStateData.value ?: ScreenState.notInitialized()
@@ -53,15 +55,17 @@ abstract class BaseFragment : Fragment(), GenericScreen {
         contentContainer.addView(contentView)
 
         if (getContentContainerId() != -1) {
-            contentContainer = contentView!!.findViewById(getContentContainerId())
+            contentContainer = contentView.findViewById(getContentContainerId())
         }
 
         screenStateData.observe(viewLifecycleOwner,
-                Observer { screenState -> setScreenStateInternal(screenState) })
+            Observer { screenState -> setScreenStateInternal(screenState) })
         showSnackbarMessageEvent.observe(viewLifecycleOwner,
-                Observer { message -> showSnackbarMessageInternal(message) })
+            Observer { message -> showSnackbarMessageInternal(message) })
         showToastMessageEvent.observe(viewLifecycleOwner,
-                Observer { message -> showToastMessageInternal(message) })
+            Observer { message -> showToastMessageInternal(message) })
+        hideKeyboardEvent.observe(viewLifecycleOwner,
+            Observer { hideKeyboardInternal() })
 
         return view
     }
@@ -154,5 +158,15 @@ abstract class BaseFragment : Fragment(), GenericScreen {
     private fun showToastMessageInternal(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT)
                 .show()
+    }
+
+    override fun hideKeyboard() {
+        hideKeyboardEvent.call()
+    }
+
+    private fun hideKeyboardInternal() {
+        val activity = this.activity ?: return
+
+        hideSoftInput(activity)
     }
 }

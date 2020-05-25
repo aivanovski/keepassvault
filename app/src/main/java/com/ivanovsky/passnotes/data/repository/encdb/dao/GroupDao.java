@@ -9,5 +9,7 @@ import java.util.UUID;
 public interface GroupDao {
 
 	OperationResult<List<Group>> getAll();
-	OperationResult<UUID> insert(Group group);
+	OperationResult<Group> getRootGroup();
+	OperationResult<List<Group>> getChildGroups(UUID parentGroupUid);
+	OperationResult<UUID> insert(Group group, UUID parentGroupUid);
 }

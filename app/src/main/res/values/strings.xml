@@ -51,6 +51,8 @@
 	<string name="notes_with_count">Notes: %d</string>
 	<string name="groups_with_count">Groups: %d</string>
 	<string name="groups_and_notes_with_count">Groups: %1$d  Notes: %2$d</string>
+    <string name="new_item_entry_new_note">New Note</string>
+	<string name="new_item_entry_new_group">New Group</string>
 
 	<!-- New group screen -->
 	<string name="new_group">New group</string>
@@ -60,6 +62,10 @@
 	<!-- Note screen -->
 	<string name="copied_clipboard_will_be_cleared_in_seconds">Copied! Clipboard will be cleared in %d seconds</string>
 	<string name="edited_at">Edited %s</string>
+
+	<!-- Note editor screen -->
+	<string name="new_note">New note</string>
+	<string name="name">Name</string>
 
 	<!-- Storage screen -->
 	<string name="select_storage">Select storage</string>

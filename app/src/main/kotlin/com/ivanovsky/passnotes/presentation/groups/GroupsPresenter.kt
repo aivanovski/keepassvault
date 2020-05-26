@@ -132,15 +132,11 @@ class GroupsPresenter(
             }
         }
 
-        result.add(GroupsAdapter.ButtonListItem())
-
         return result
     }
 
     override fun onAddButtonClicked() {
-        val currentGroupUid = getCurrentGroupUid() ?: return
-
-        view.showNewGroupScreen(currentGroupUid)
+        view.showNewEntryDialog()
     }
 
     private fun getCurrentGroupUid(): UUID? {
@@ -149,5 +145,18 @@ class GroupsPresenter(
             rootGroupUid != null -> rootGroupUid
             else -> null
         }
+    }
+
+    override fun onCreateNewGroupClicked() {
+        val currentGroupUid = getCurrentGroupUid() ?: return
+
+        view.showNewGroupScreen(currentGroupUid)
+
+    }
+
+    override fun onCreateNewNoteClicked() {
+        val currentGroupUid = getCurrentGroupUid() ?: return
+
+        view.showNewNoteScreen(currentGroupUid)
     }
 }

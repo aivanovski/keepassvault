@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" >
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/element_margin"
+        android:layout_marginTop="@dimen/group_margin"
+        android:layout_marginRight="@dimen/element_margin">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_text"
+            style="@style/Material.EditText.PrimarySingleLine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:hint="Text" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</merge>

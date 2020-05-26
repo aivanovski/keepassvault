@@ -26,6 +26,7 @@ abstract class BaseFragment : Fragment(), GenericScreen {
     private val showToastMessageEvent = SingleLiveEvent<String>()
     private val showSnackbarMessageEvent = SingleLiveEvent<String>()
     private val hideKeyboardEvent = SingleLiveEvent<String>()
+    private val finishScreenEvent = SingleLiveEvent<Unit>()
 
     override var screenState: ScreenState
         get() = screenStateData.value ?: ScreenState.notInitialized()
@@ -66,6 +67,8 @@ abstract class BaseFragment : Fragment(), GenericScreen {
             Observer { message -> showToastMessageInternal(message) })
         hideKeyboardEvent.observe(viewLifecycleOwner,
             Observer { hideKeyboardInternal() })
+        finishScreenEvent.observe(viewLifecycleOwner,
+            Observer { finishScreenInternal() })
 
         return view
     }
@@ -168,5 +171,13 @@ abstract class BaseFragment : Fragment(), GenericScreen {
         val activity = this.activity ?: return
 
         hideSoftInput(activity)
+    }
+
+    override fun finishScreen() {
+        finishScreenEvent.call()
+    }
+
+    private fun finishScreenInternal() {
+        activity?.finish()
     }
 }

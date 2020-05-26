@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment;
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerPresenter;
 import com.ivanovsky.passnotes.presentation.group.GroupPresenter;
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
+import com.ivanovsky.passnotes.presentation.groups.NewEntryDialog;
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity;
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabasePresenter;
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListFragment;
@@ -39,4 +40,5 @@ public interface AppComponent {
 	void inject(@NotNull StorageListFragment storageListFragment);
 	void inject(KeepassDatabase keepassDatabase);
 	void inject(@NotNull DebugMenuPresenter debugMenuPresenter);
+    void inject(@NotNull NewEntryDialog newEntryDialog);
 }

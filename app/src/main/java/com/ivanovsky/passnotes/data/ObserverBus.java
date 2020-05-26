@@ -8,6 +8,7 @@ import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.util.ReflectionUtils;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ObserverBus {
@@ -24,6 +25,10 @@ public class ObserverBus {
 
 	public interface UsedFileDataSetObserver extends Observer {
 		void onUsedFileDataSetChanged();
+	}
+
+	public interface NoteDataSetChanged extends Observer {
+		void onNoteDataSetChanged(UUID groupUid);
 	}
 
 	public ObserverBus() {
@@ -52,6 +57,12 @@ public class ObserverBus {
 	public void notifyUsedFileDataSetChanged() {
 		for (UsedFileDataSetObserver observer : filterObservers(UsedFileDataSetObserver.class)) {
 			handler.post(observer::onUsedFileDataSetChanged);
+		}
+	}
+
+	public void notifyNoteDataSetChanged(UUID groupUid) {
+		for (NoteDataSetChanged observer : filterObservers(NoteDataSetChanged.class)) {
+			handler.post(() -> observer.onNoteDataSetChanged(groupUid));
 		}
 	}
 

@@ -9,7 +9,6 @@ class GroupContract {
     interface View : BaseView<Presenter> {
         fun setTitleEditTextError(error: String?)
         fun setDoneButtonVisibility(isVisible: Boolean)
-        fun finishScreen()
     }
 
     interface Presenter : BasePresenter, GlobalSnackbarPresenter {

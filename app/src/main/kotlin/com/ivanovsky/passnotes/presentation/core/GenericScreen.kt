@@ -6,4 +6,5 @@ interface GenericScreen {
     fun showSnackbarMessage(message: String)
     fun showToastMessage(message: String)
     fun hideKeyboard()
+    fun finishScreen()
 }

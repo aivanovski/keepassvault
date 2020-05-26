@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.domain.ClipboardHelper;
 import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor;
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor;
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor;
+import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor;
 import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor;
 
 import dagger.Module;
@@ -62,5 +63,11 @@ public class EncryptedDatabaseModule {
 	@EncryptedDatabaseScope
 	NoteInteractor provideAddEditNoteInteractor(NoteRepository noteRepository, ClipboardHelper clipboardHelper) {
 		return new NoteInteractor(noteRepository, clipboardHelper);
+	}
+
+	@Provides
+	@EncryptedDatabaseScope
+	NoteEditorInteractor providerNoteEditorInteractor(NoteRepository noteRepository, ObserverBus observerBus) {
+		return new NoteEditorInteractor(noteRepository, observerBus);
 	}
 }

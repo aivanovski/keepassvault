@@ -13,6 +13,6 @@ abstract class BaseDataItem(
         const val ITEM_ID_EMAIL = 4
         const val ITEM_ID_NOTES = 5
         const val ITEM_ID_PASSWORD = 6
-        const val ITEM_ID_EXTENDED = 7
+        const val ITEM_ID_CUSTOM = 7
     }
 }

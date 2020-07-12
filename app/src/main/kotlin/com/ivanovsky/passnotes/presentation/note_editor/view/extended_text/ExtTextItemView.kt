@@ -55,7 +55,7 @@ class ExtTextItemView(
 
         isCollapsed = isCollapsed.not()
 
-        setVisibilityStateToViews(isCollapsed)
+        setVisibilityStateToViews(isCollapsed, protectionSwitch.isChecked)
         setTextToViews(fieldName, fieldValue)
         applyEditTextInputType(item.textInputType)
     }
@@ -88,7 +88,7 @@ class ExtTextItemView(
 
         isCollapsed = item.isCollapsed
 
-        setVisibilityStateToViews(item.isCollapsed)
+        setVisibilityStateToViews(item.isCollapsed, item.isProtected)
         setTextToViews(item.name, item.value)
         applyEditTextInputType(item.textInputType)
 
@@ -117,11 +117,11 @@ class ExtTextItemView(
         }
     }
 
-    private fun setVisibilityStateToViews(isCollapsed: Boolean) {
+    private fun setVisibilityStateToViews(isCollapsed: Boolean, isProtected: Boolean) {
         if (isCollapsed) {
             expandButton.setImageResource(R.drawable.ic_expand_more_grey_600_24dp)
 
-            if (protectionSwitch.isChecked) {
+            if (isProtected) {
                 primaryEditText.setCompoundDrawablesWithIntrinsicBounds(
                     0,
                     0,

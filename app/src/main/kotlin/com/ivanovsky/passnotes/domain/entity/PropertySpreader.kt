@@ -6,9 +6,15 @@ import java.util.*
 
 class PropertySpreader(properties: List<Property>) {
 
-    val visibleProperties = properties.filter { property -> isPropertyVisible(property) }
+    private val visibleProperties = properties.filter { property -> isPropertyVisible(property) }
         .toList()
-        .sortedBy { property -> PROPERTY_TYPE_ORDER[property.type] }
+        .sortedBy { property ->
+            if (property.type == null) {
+                Integer.MAX_VALUE
+            } else {
+                PROPERTY_TYPE_ORDER[property.type]
+            }
+        }
 
     val hiddenProperties = properties.filter { property -> !isPropertyVisible(property) }
         .toList()
@@ -18,20 +24,31 @@ class PropertySpreader(properties: List<Property>) {
             ?.value
     }
 
+    fun getCustomProperties(): List<Property> {
+        return visibleProperties.filter { property ->
+            !property.name.isNullOrEmpty() &&
+                    (property.type == null || !DEFAULT_PROPERTIES.contains(property.type))
+        }
+    }
+
+    fun getVisibleNotEmptyWithoutTitle(): List<Property> {
+        return visibleProperties.filter { property ->
+            property.type != PropertyType.TITLE && !property.name.isNullOrEmpty() && !property.value.isNullOrEmpty()
+        }
+    }
+
     private fun isPropertyVisible(property: Property): Boolean {
-        return !property.name.isNullOrEmpty() &&
-                !property.value.isNullOrEmpty() &&
-                property.type != null &&
-                property.type in VISIBLE_PROPERTY_TYPES
+        return true
     }
 
     companion object {
 
-        private val VISIBLE_PROPERTY_TYPES = EnumSet.of(
+        private val DEFAULT_PROPERTIES = EnumSet.of(
             PropertyType.PASSWORD,
             PropertyType.USER_NAME,
             PropertyType.NOTES,
-            PropertyType.URL
+            PropertyType.URL,
+            PropertyType.TITLE
         )
 
         private val PROPERTY_TYPE_ORDER = createPropertyTypeOrderMap()

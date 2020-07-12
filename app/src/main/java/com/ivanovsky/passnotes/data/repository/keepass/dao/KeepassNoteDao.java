@@ -154,7 +154,7 @@ public class KeepassNoteDao implements NoteDao {
 		// TODO: add protected properties
 
 		for (Property property : note.getProperties()) {
-			entry.setProperty(property.getName(), property.getValue());
+			entry.setProperty(property.getName(), property.getValue(), property.isProtected());
 		}
 
 		entry.setTitle(note.getTitle());

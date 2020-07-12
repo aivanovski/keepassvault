@@ -234,7 +234,7 @@ class NoteEditorPresenter(
     override fun onAddButtonClicked() {
         view.addEditorItem(
             ExtTextDataItem(
-                BaseDataItem.ITEM_ID_EXTENDED,
+                BaseDataItem.ITEM_ID_CUSTOM,
                 "",
                 "",
                 isProtected = false,

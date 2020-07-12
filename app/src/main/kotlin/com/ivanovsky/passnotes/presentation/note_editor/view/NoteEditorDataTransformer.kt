@@ -7,11 +7,13 @@ import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.entity.PropertySpreader
 import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_CUSTOM
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_NOTES
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_PASSWORD
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_TITLE
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_URL
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_USER_NAME
+import com.ivanovsky.passnotes.presentation.note_editor.view.extended_text.ExtTextDataItem
 import com.ivanovsky.passnotes.presentation.note_editor.view.secret.SecretDataItem
 import com.ivanovsky.passnotes.presentation.note_editor.view.secret.SecretInputType
 import com.ivanovsky.passnotes.presentation.note_editor.view.text.InputLines.MULTIPLE_LINES
@@ -37,6 +39,7 @@ class NoteEditorDataTransformer {
         val url = propSpreader.getVisiblePropertyValueByType(PropertyType.URL)
         val notes = propSpreader.getVisiblePropertyValueByType(PropertyType.NOTES)
         val password = propSpreader.getVisiblePropertyValueByType(PropertyType.PASSWORD)
+        val otherProperties = propSpreader.getCustomProperties()
 
         items.add(
             TextDataItem(
@@ -88,6 +91,17 @@ class NoteEditorDataTransformer {
             )
         )
 
+        for (property in otherProperties) {
+            items.add(ExtTextDataItem(
+                ITEM_ID_CUSTOM,
+                property.name ?: "",
+                property.value ?: "",
+                isProtected = property.isProtected,
+                isCollapsed = true,
+                textInputType = TextInputType.TEXT
+            ))
+        }
+
         return items
     }
 
@@ -98,6 +112,15 @@ class NoteEditorDataTransformer {
         val url = getValueByItemId(ITEM_ID_URL, items)
         val notes = getValueByItemId(ITEM_ID_NOTES, items)
         val password = getValueByItemId(ITEM_ID_PASSWORD, items)
+
+        val excludedItemIds = setOf(
+            ITEM_ID_TITLE,
+            ITEM_ID_USER_NAME,
+            ITEM_ID_PASSWORD,
+            ITEM_ID_NOTES,
+            ITEM_ID_URL
+        )
+        val otherItems = excludeItemsById(items, excludedItemIds)
 
         if (!userName.isNullOrEmpty()) {
             val userNameProperty = Property(
@@ -129,6 +152,20 @@ class NoteEditorDataTransformer {
             properties.add(property)
         }
 
+        if (otherItems.isNotEmpty()) {
+            for (item in otherItems) {
+                if (item is ExtTextDataItem) {
+                    val property = Property(
+                        null,
+                        item.name,
+                        item.value,
+                        isProtected = item.isProtected
+                    )
+                    properties.add(property)
+                }
+            }
+        }
+
         return properties
     }
 
@@ -143,5 +180,12 @@ class NoteEditorDataTransformer {
 
     fun filterNotEmptyItems(items: List<BaseDataItem>): List<BaseDataItem> {
         return items.filter { item -> !item.isEmpty }
+    }
+
+    private fun excludeItemsById(
+        items: List<BaseDataItem>,
+        excludeIds: Set<Int>
+    ): List<BaseDataItem> {
+        return items.filter { item -> !excludeIds.contains(item.id) }
     }
 }

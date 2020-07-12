@@ -70,14 +70,16 @@ class NoteFragment : BaseFragment(),
     }
 
     override fun showNote(note: Note) {
-        val propertySpreader = PropertySpreader(note.properties ?: emptyList())
-        val adapterItems = createAdapterItemsFromProperties(propertySpreader.visibleProperties)
+        val propertySpreader = PropertySpreader(note.properties)
+        val properties = propertySpreader.getVisibleNotEmptyWithoutTitle()
+        val adapterItems = createAdapterItemsFromProperties(properties)
 
         adapter.setItems(adapterItems)
         adapter.notifyDataSetChanged()
 
-        adapter.onCopyButtonClickListener =
-            { position -> onCopyButtonClicked(propertySpreader.visibleProperties[position]) }
+        adapter.onCopyButtonClickListener = { position ->
+            onCopyButtonClicked(properties[position])
+        }
 
         modifiedTextView.text = formatModifiedDate(note.modified)
     }
@@ -90,7 +92,7 @@ class NoteFragment : BaseFragment(),
         val items = mutableListOf<NoteAdapter.Item>()
 
         for (property in properties) {
-            val isVisibilityButtonVisible = (property.type == PropertyType.PASSWORD)
+            val isVisibilityButtonVisible = (property.type == PropertyType.PASSWORD || property.isProtected)
 
             items.add(
                 NoteAdapter.NotePropertyItem(

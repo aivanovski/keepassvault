@@ -120,7 +120,12 @@ class NoteEditorDataTransformer {
         }
 
         if (!password.isNullOrEmpty()) {
-            val property = Property(PropertyType.PASSWORD, PropertyType.PASSWORD.propertyName, password)
+            val property = Property(
+                PropertyType.PASSWORD,
+                PropertyType.PASSWORD.propertyName,
+                password,
+                isProtected = true
+            )
             properties.add(property)
         }
 

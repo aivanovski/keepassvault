@@ -294,7 +294,7 @@ public class SimpleDatabase extends AbstractDatabase<SimpleDatabase, SimpleGroup
         }
         for (SimpleEntry entry: parent.entry) {
             for (EntryClasses.StringProperty property : entry.string) {
-                boolean shouldProtect = parent.database.shouldProtect(property.getKey());
+                boolean shouldProtect = parent.database.shouldProtect(property.getKey()) || property.getValue().isProtected();
                 property.getValue().setProtected(shouldProtect);
             }
         }

@@ -119,6 +119,15 @@ public class SimpleEntry extends AbstractEntry<SimpleDatabase, SimpleGroup, Simp
         touch();
     }
 
+    public void setProperty(String s, String s1, boolean isProtected) {
+        EntryClasses.StringProperty sp;
+        if ((sp = getStringProperty(s, string)) != null) {
+            this.string.remove(sp);
+        }
+        this.string.add(new EntryClasses.StringProperty(s, new EntryClasses.StringProperty.Value(s1, isProtected)));
+        touch();
+    }
+
     @Override
     public boolean removeProperty(String name) throws IllegalArgumentException {
         if (STANDARD_PROPERTY_NAMES.contains(name)) throw new IllegalArgumentException("may not remove property: " + name);

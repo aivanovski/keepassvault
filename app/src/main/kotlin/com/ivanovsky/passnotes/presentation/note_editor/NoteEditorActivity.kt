@@ -15,6 +15,7 @@ class NoteEditorActivity : BaseActivity() {
     private var groupUid: UUID? = null
     private lateinit var noteTitle: String
     private lateinit var launchMode: LaunchMode
+    private lateinit var presenter: NoteEditorContract.Presenter
 
     object ExtraKeys {
         const val GROUP_UID = "groupUid"
@@ -34,7 +35,7 @@ class NoteEditorActivity : BaseActivity() {
         currentActionBar.setDisplayHomeAsUpEnabled(true)
 
         val fragment = NoteEditorFragment()
-        val presenter = NoteEditorPresenter(fragment, launchMode, groupUid, noteUid)
+        presenter = NoteEditorPresenter(fragment, launchMode, groupUid, noteUid)
         fragment.presenter = presenter
 
         supportFragmentManager.beginTransaction()
@@ -58,11 +59,15 @@ class NoteEditorActivity : BaseActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return if (item.itemId == android.R.id.home) {
-            finish()
+            presenter.onBackPressed()
             true
         } else {
             super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onBackPressed() {
+        presenter.onBackPressed()
     }
 
     companion object {

@@ -7,6 +7,8 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.util.ReflectionUtils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -28,7 +30,13 @@ public class ObserverBus {
 	}
 
 	public interface NoteDataSetChanged extends Observer {
-		void onNoteDataSetChanged(UUID groupUid);
+		void onNoteDataSetChanged(@NotNull UUID groupUid);
+	}
+
+	public interface NoteContentChangedObserver extends Observer {
+		void onNoteContentChanged(@NotNull UUID groupUid,
+								  @NotNull UUID oldNoteUid,
+								  @NotNull UUID newNoteUid);
 	}
 
 	public ObserverBus() {
@@ -63,6 +71,12 @@ public class ObserverBus {
 	public void notifyNoteDataSetChanged(UUID groupUid) {
 		for (NoteDataSetChanged observer : filterObservers(NoteDataSetChanged.class)) {
 			handler.post(() -> observer.onNoteDataSetChanged(groupUid));
+		}
+	}
+
+	public void notifyNoteContentChanged(UUID groupUid, UUID oldNoteUid, UUID newNoteUid) {
+		for (NoteContentChangedObserver observer : filterObservers(NoteContentChangedObserver.class)) {
+			handler.post(() -> observer.onNoteContentChanged(groupUid, oldNoteUid, newNoteUid));
 		}
 	}
 

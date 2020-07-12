@@ -68,6 +68,7 @@ public class OperationResult<T> {
 		OperationResult<E> newResult = new OperationResult<>();
 		newResult.obj = newObj;
 		newResult.deferred = deferred;
+		newResult.error = error;
 		return newResult;
 	}
 

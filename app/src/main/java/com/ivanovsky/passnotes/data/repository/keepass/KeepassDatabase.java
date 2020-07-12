@@ -55,7 +55,7 @@ public class KeepassDatabase implements EncryptedDatabase {
 		db.enableRecycleBin(false);
 	}
 
-	private SimpleDatabase readDatabaseFile(InputStream in, byte[] key) throws EncryptedDatabaseException {
+	private synchronized SimpleDatabase readDatabaseFile(InputStream in, byte[] key) throws EncryptedDatabaseException {
 		SimpleDatabase result;
 
 		Credentials credentials = new KdbxCreds(key);
@@ -98,7 +98,7 @@ public class KeepassDatabase implements EncryptedDatabase {
 	}
 
 	@Override
-	public OperationResult<Boolean> commit() {
+	public synchronized OperationResult<Boolean> commit() {
 		OperationResult<Boolean> result = new OperationResult<>();
 
 		FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsType());

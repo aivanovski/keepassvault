@@ -37,7 +37,7 @@ class GroupPresenter(
     private var rootUid: UUID? = null
 
     init {
-        Injector.getInstance().encryptedDatabaseComponent.inject(this)
+        Injector.getInstance().appComponent.inject(this)
 
         globalSnackbarMessageAction = globalSnackbarBus.messageAction
     }

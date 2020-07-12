@@ -1,10 +1,20 @@
 package com.ivanovsky.passnotes.data.entity;
 
-public enum  PropertyType {
+public enum PropertyType {
 
-	TITLE,
-	PASSWORD,
-	USER_NAME,
-	URL,
-	NOTES
+	TITLE("Title"),
+	PASSWORD("Password"),
+	USER_NAME("UserName"),
+	URL("URL"),
+	NOTES("Notes");
+
+	private final String propertyName;
+
+	PropertyType(String propertyName) {
+		this.propertyName = propertyName;
+	}
+
+	public String getPropertyName() {
+		return propertyName;
+	}
 }

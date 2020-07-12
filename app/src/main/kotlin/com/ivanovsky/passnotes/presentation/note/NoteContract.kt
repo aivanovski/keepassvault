@@ -9,7 +9,9 @@ class NoteContract {
     //TODO: rewrite with LiveData
 
     interface View : BaseView<Presenter> {
+        fun setActionBarTitle(title: String)
         fun showNote(note: Note)
+        fun showEditNoteScreen(note: Note)
     }
 
     interface Presenter : BasePresenter {

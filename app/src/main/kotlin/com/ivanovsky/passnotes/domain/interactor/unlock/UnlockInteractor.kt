@@ -12,7 +12,6 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.FileSyncHelper
-import com.ivanovsky.passnotes.injection.Injector
 
 class UnlockInteractor(
     private val fileRepository: UsedFileRepository,
@@ -20,6 +19,19 @@ class UnlockInteractor(
     private val observerBus: ObserverBus,
     private val fileSyncHelper: FileSyncHelper
 ) {
+
+    fun hasActiveDatabase(): Boolean {
+        return dbRepository.isOpened
+    }
+
+    fun closeActiveDatabase(): OperationResult<Unit> {
+        if (!dbRepository.isOpened) {
+            return OperationResult.success(Unit)
+        }
+
+        val closeResult = dbRepository.close()
+        return closeResult.takeStatusWith(Unit)
+    }
 
     fun getRecentlyOpenedFiles(): OperationResult<List<FileDescriptor>> {
         return OperationResult.success(loadAndSortUsedFiles())
@@ -56,12 +68,7 @@ class UnlockInteractor(
         if (syncError == null) {
             val openResult = dbRepository.open(key, file)
             if (openResult.isSucceededOrDeferred) {
-                val db = openResult.obj
-
                 updateFileAccessTime(file)
-
-                Injector.getInstance().createEncryptedDatabaseComponent(db)
-
                 result.obj = true
             } else {
                 result.error = openResult.error

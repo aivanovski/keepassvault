@@ -17,7 +17,9 @@ class GroupsPresenter(
     private val view: GroupsContract.View,
     private val groupUid: UUID?
 ) : GroupsContract.Presenter,
-    ObserverBus.GroupDataSetObserver {
+    ObserverBus.GroupDataSetObserver,
+    ObserverBus.NoteDataSetChanged,
+    ObserverBus.NoteContentChangedObserver {
 
     @Inject
     lateinit var interactor: GroupsInteractor
@@ -42,7 +44,7 @@ class GroupsPresenter(
     private var rootGroupUid: UUID? = null
 
     init {
-        Injector.getInstance().encryptedDatabaseComponent.inject(this)
+        Injector.getInstance().appComponent.inject(this)
         globalSnackbarMessageAction = globalSnackbarBus.messageAction
     }
 
@@ -97,6 +99,18 @@ class GroupsPresenter(
 
     override fun onGroupDataSetChanged() {
         loadData()
+    }
+
+    override fun onNoteDataSetChanged(groupUid: UUID) {
+        if (groupUid == getCurrentGroupUid()) {
+            loadData()
+        }
+    }
+
+    override fun onNoteContentChanged(groupUid: UUID, oldNoteUid: UUID, newNoteUid: UUID) {
+        if (groupUid == getCurrentGroupUid()) {
+            loadData()
+        }
     }
 
     override fun onListItemClicked(position: Int) {

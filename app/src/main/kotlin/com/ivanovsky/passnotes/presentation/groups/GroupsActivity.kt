@@ -51,10 +51,6 @@ class GroupsActivity : BaseActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return if (item.itemId == android.R.id.home) {
-            if (groupUid == null) {
-                Injector.getInstance().releaseEncryptedDatabaseComponent()
-            }
-
             finish()
             true
         } else {

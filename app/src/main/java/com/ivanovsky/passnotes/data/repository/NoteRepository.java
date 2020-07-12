@@ -12,4 +12,5 @@ public interface NoteRepository {
 	OperationResult<Integer> getNoteCountByGroupUid(UUID groupUid);
 	OperationResult<UUID> insert(Note note);
 	OperationResult<Note> getNoteByUid(UUID uid);
+	OperationResult<UUID> update(Note note);
 }

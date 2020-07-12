@@ -7,18 +7,20 @@ import androidx.lifecycle.Observer
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
+import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem
 import com.ivanovsky.passnotes.presentation.note_editor.view.NoteEditorView
-import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextDataItem
 
 class NoteEditorFragment : BaseFragment(), NoteEditorContract.View {
 
     override var presenter: NoteEditorContract.Presenter? = null
-    private var editorItemsData = MutableLiveData<List<BaseDataItem>>()
-    private val doneButtonVisibilityData = MutableLiveData<Boolean>()
-    private var menu: Menu? = null
     private lateinit var fab: FloatingActionButton
     private lateinit var editorView: NoteEditorView
+    private var menu: Menu? = null
+    private var editorItemsData = MutableLiveData<List<BaseDataItem>>()
+    private val doneButtonVisibilityData = MutableLiveData<Boolean>()
+    private val showDiscardDialogEvent = SingleLiveEvent<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,10 +47,14 @@ class NoteEditorFragment : BaseFragment(), NoteEditorContract.View {
         editorView = view.findViewById(R.id.note_editor_view)
         fab = view.findViewById(R.id.fab)
 
+        fab.setOnClickListener { presenter?.onAddButtonClicked() }
+
         editorItemsData.observe(viewLifecycleOwner,
             Observer { items -> setEditorItemsInternal(items) })
         doneButtonVisibilityData.observe(viewLifecycleOwner,
             Observer { isVisible -> setDoneButtonVisibilityInternal(isVisible) })
+        showDiscardDialogEvent.observe(viewLifecycleOwner,
+            Observer { message -> showDiscardDialogInternal(message) })
 
         return view
     }
@@ -89,6 +95,36 @@ class NoteEditorFragment : BaseFragment(), NoteEditorContract.View {
     }
 
     private fun onDoneMenuClicked() {
-        presenter?.onDoneButtonClicked(editorView.getItems())
+        if (editorView.isAllDataValid()) {
+            presenter?.onDoneButtonClicked(editorView.getItems())
+        } else {
+            editorView.displayErrors()
+        }
+    }
+
+    override fun addEditorItem(item: BaseDataItem) {
+        editorView.addItem(item)
+    }
+
+    override fun showDiscardDialog(message: String) {
+        showDiscardDialogEvent.call(message)
+    }
+
+    private fun showDiscardDialogInternal(message: String) {
+        val dialog = ConfirmationDialog.newInstance(
+            message,
+            getString(R.string.discard),
+            getString(R.string.cancel)
+        )
+
+        dialog.onConfirmationLister = {
+            presenter?.onDiscardConfirmed()
+        }
+
+        dialog.show(childFragmentManager, ConfirmationDialog.TAG)
+    }
+
+    override fun getEditorItems(): List<BaseDataItem> {
+        return editorView.getItems()
     }
 }

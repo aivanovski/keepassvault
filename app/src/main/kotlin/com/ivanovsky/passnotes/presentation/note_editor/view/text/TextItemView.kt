@@ -1,13 +1,16 @@
 package com.ivanovsky.passnotes.presentation.note_editor.view.text
 
 import android.content.Context
+import android.text.InputType
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
 import com.google.android.material.textfield.TextInputLayout
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseItemView
+import com.ivanovsky.passnotes.presentation.note_editor.view.text.InputLines.MULTIPLE_LINES
+import com.ivanovsky.passnotes.presentation.note_editor.view.text.InputLines.SINGLE_LINE
+import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextInputType.*
 
 class TextItemView(
     context: Context
@@ -24,15 +27,9 @@ class TextItemView(
         textInputLayout = view.findViewById(R.id.text_input_layout)
     }
 
-    override fun getContentView(): View {
-        return View(context!!)
-    }
-
     override fun getDataItem(): TextDataItem {
-        return TextDataItem(
-            item.id,
-            item.name,
-            editText.text.toString().trim()
+        return item.copy(
+            value = editText.text.toString().trim()
         )
     }
 
@@ -41,5 +38,47 @@ class TextItemView(
 
         textInputLayout.hint = item.name
         editText.setText(item.value)
+
+        applyEditTextInputType(item.textInputType)
+        applyInputLines(item.inputLines)
+    }
+
+    private fun applyEditTextInputType(textInputType: TextInputType) {
+        val inputType = when (textInputType) {
+            URL -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_URI
+            TEXT -> InputType.TYPE_CLASS_TEXT
+            EMAIL -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+            TEXT_CAP_SENTENCES -> {
+                InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            }
+        }
+        editText.setRawInputType(inputType)
+    }
+
+    private fun applyInputLines(inputLines: InputLines) {
+        when (inputLines) {
+            SINGLE_LINE -> {
+                editText.minLines = 1
+                editText.maxLines = 1
+            }
+            MULTIPLE_LINES -> {
+                editText.minLines = 1
+                editText.maxLines = 5
+            }
+        }
+    }
+
+    override fun isDataValid(): Boolean {
+        return !item.isShouldNotBeEmpty || getText().isNotEmpty()
+    }
+
+    override fun displayError() {
+        if (item.isShouldNotBeEmpty && getText().isEmpty()) {
+            editText.error = context.getString(R.string.should_not_be_empty)
+        }
+    }
+
+    private fun getText(): String {
+        return editText.text.toString().trim()
     }
 }

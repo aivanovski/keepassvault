@@ -13,11 +13,17 @@ object NoteEditorContract {
 
     interface View : BaseView<Presenter> {
         fun setEditorItems(items: List<BaseDataItem>)
+        fun getEditorItems(): List<BaseDataItem>
         fun setDoneButtonVisibility(isVisible: Boolean)
+        fun addEditorItem(item: BaseDataItem)
+        fun showDiscardDialog(message: String) // TODO: remove message
     }
 
     interface Presenter : BasePresenter {
         fun loadData()
         fun onDoneButtonClicked(items: List<BaseDataItem>)
+        fun onAddButtonClicked()
+        fun onBackPressed()
+        fun onDiscardConfirmed()
     }
 }

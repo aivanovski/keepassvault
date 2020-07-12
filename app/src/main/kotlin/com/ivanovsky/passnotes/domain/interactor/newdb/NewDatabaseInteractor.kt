@@ -26,6 +26,7 @@ open class NewDatabaseInteractor(
 
         val provider = fileSystemResolver.resolveProvider(file.fsType)
 
+        // TODO: refactor
         val existsResult = provider.exists(file)
         if (existsResult.isSucceeded) {
             val isExists = existsResult.obj
@@ -56,10 +57,6 @@ open class NewDatabaseInteractor(
 
                         val openResult = dbRepository.open(key, file)
                         if (openResult.isSucceededOrDeferred) {
-                            val db = openResult.obj
-
-                            Injector.getInstance().createEncryptedDatabaseComponent(db)
-
                             result.obj = true
                         } else {
                             result.error = openResult.error

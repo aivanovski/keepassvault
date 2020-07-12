@@ -17,7 +17,9 @@ class GroupsPresenter(
     private val view: GroupsContract.View,
     private val groupUid: UUID?
 ) : GroupsContract.Presenter,
-    ObserverBus.GroupDataSetObserver {
+    ObserverBus.GroupDataSetObserver,
+    ObserverBus.NoteDataSetChanged,
+    ObserverBus.NoteContentChangedObserver {
 
     @Inject
     lateinit var interactor: GroupsInteractor
@@ -42,7 +44,7 @@ class GroupsPresenter(
     private var rootGroupUid: UUID? = null
 
     init {
-        Injector.getInstance().encryptedDatabaseComponent.inject(this)
+        Injector.getInstance().appComponent.inject(this)
         globalSnackbarMessageAction = globalSnackbarBus.messageAction
     }
 
@@ -99,6 +101,18 @@ class GroupsPresenter(
         loadData()
     }
 
+    override fun onNoteDataSetChanged(groupUid: UUID) {
+        if (groupUid == getCurrentGroupUid()) {
+            loadData()
+        }
+    }
+
+    override fun onNoteContentChanged(groupUid: UUID, oldNoteUid: UUID, newNoteUid: UUID) {
+        if (groupUid == getCurrentGroupUid()) {
+            loadData()
+        }
+    }
+
     override fun onListItemClicked(position: Int) {
         val dataItems = currentDataItems ?: return
 
@@ -132,15 +146,11 @@ class GroupsPresenter(
             }
         }
 
-        result.add(GroupsAdapter.ButtonListItem())
-
         return result
     }
 
     override fun onAddButtonClicked() {
-        val currentGroupUid = getCurrentGroupUid() ?: return
-
-        view.showNewGroupScreen(currentGroupUid)
+        view.showNewEntryDialog()
     }
 
     private fun getCurrentGroupUid(): UUID? {
@@ -149,5 +159,18 @@ class GroupsPresenter(
             rootGroupUid != null -> rootGroupUid
             else -> null
         }
+    }
+
+    override fun onCreateNewGroupClicked() {
+        val currentGroupUid = getCurrentGroupUid() ?: return
+
+        view.showNewGroupScreen(currentGroupUid)
+
+    }
+
+    override fun onCreateNewNoteClicked() {
+        val currentGroupUid = getCurrentGroupUid() ?: return
+
+        view.showNewNoteScreen(currentGroupUid)
     }
 }

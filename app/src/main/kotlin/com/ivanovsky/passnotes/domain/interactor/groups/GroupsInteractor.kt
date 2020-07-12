@@ -3,14 +3,13 @@ package com.ivanovsky.passnotes.domain.interactor.groups
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.repository.GroupRepository
-import com.ivanovsky.passnotes.data.repository.NoteRepository
+import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import java.util.*
 
-class GroupsInteractor(
-    private val groupRepository: GroupRepository,
-    private val noteRepository: NoteRepository
-) {
+class GroupsInteractor(dbRepo: EncryptedDatabaseRepository) {
+
+    private val groupRepository = dbRepo.groupRepository
+    private val noteRepository = dbRepo.noteRepository
 
     fun getRootUid(): UUID? {
         val rootResult = groupRepository.rootGroup

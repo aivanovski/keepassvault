@@ -14,12 +14,18 @@ import com.ivanovsky.passnotes.data.repository.SettingsRepository;
 import com.ivanovsky.passnotes.domain.ClipboardHelper;
 import com.ivanovsky.passnotes.domain.FileHelper;
 import com.ivanovsky.passnotes.domain.FileSyncHelper;
+import com.ivanovsky.passnotes.domain.NoteDiffer;
 import com.ivanovsky.passnotes.domain.PermissionHelper;
 import com.ivanovsky.passnotes.domain.ResourceHelper;
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus;
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor;
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor;
+import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor;
+import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor;
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
+import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor;
+import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor;
+import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor;
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor;
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor;
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
@@ -65,7 +71,7 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	EncryptedDatabaseRepository provideEncryptedDBProvider(FileSystemResolver fileSystemResolver) {
+	EncryptedDatabaseRepository provideEncryptedDatabaseRepository(FileSystemResolver fileSystemResolver) {
 		return new KeepassDatabaseRepository(context, fileSystemResolver);
 	}
 
@@ -161,5 +167,45 @@ public class AppModule {
 	@Singleton
 	FileHelper provideFileHelper(SettingsRepository settings) {
 		return new FileHelper(context, settings);
+	}
+
+	@Provides
+	@Singleton
+	GroupsInteractor provideGroupsInteractor(EncryptedDatabaseRepository dbRepo) {
+		return new GroupsInteractor(dbRepo);
+	}
+
+	@Provides
+	@Singleton
+	NotesInteractor provideNotesInteractor(EncryptedDatabaseRepository dbRepo) {
+		return new NotesInteractor(dbRepo);
+	}
+
+	@Provides
+	@Singleton
+	GroupInteractor provideNewGroupInteractor(EncryptedDatabaseRepository dbRepo,
+											  ResourceHelper resourceHelper,
+											  ObserverBus observerBus) {
+		return new GroupInteractor(dbRepo, resourceHelper, observerBus);
+	}
+
+	@Provides
+	@Singleton
+	NoteInteractor provideAddEditNoteInteractor(EncryptedDatabaseRepository dbRepo,
+												ClipboardHelper clipboardHelper) {
+		return new NoteInteractor(dbRepo, clipboardHelper);
+	}
+
+	@Provides
+	@Singleton
+	NoteEditorInteractor providerNoteEditorInteractor(EncryptedDatabaseRepository dbRepo,
+													  ObserverBus observerBus) {
+		return new NoteEditorInteractor(dbRepo, observerBus);
+	}
+
+	@Provides
+	@Singleton
+	NoteDiffer provideNoteDiffer() {
+		return new NoteDiffer();
 	}
 }

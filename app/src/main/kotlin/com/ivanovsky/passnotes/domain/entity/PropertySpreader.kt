@@ -13,9 +13,14 @@ class PropertySpreader(properties: List<Property>) {
     val hiddenProperties = properties.filter { property -> !isPropertyVisible(property) }
         .toList()
 
+    fun getVisiblePropertyValueByType(propertyType: PropertyType): String? {
+        return visibleProperties.firstOrNull { property -> property.type == propertyType }
+            ?.value
+    }
+
     private fun isPropertyVisible(property: Property): Boolean {
-        return property.name.isNotEmpty() &&
-                property.value.isNotEmpty() &&
+        return !property.name.isNullOrEmpty() &&
+                !property.value.isNullOrEmpty() &&
                 property.type != null &&
                 property.type in VISIBLE_PROPERTY_TYPES
     }

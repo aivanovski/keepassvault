@@ -43,7 +43,7 @@ public class KeepassGroupRepository implements GroupRepository {
 	}
 
 	@Override
-	public OperationResult<Boolean> insert(Group group, UUID parentGroupUid) {
+	public synchronized OperationResult<Boolean> insert(Group group, UUID parentGroupUid) {
 		OperationResult<Boolean> result = new OperationResult<>();
 
 		OperationResult<UUID> insertResult = dao.insert(group, parentGroupUid);

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<ScrollView
+		android:id="@+id/scroll_view"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent">
+
+		<com.ivanovsky.passnotes.presentation.note_editor.view.NoteEditorView
+			android:id="@+id/note_editor_view"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"/>
+
+	</ScrollView>
+
+	<com.google.android.material.floatingactionbutton.FloatingActionButton
+		android:id="@+id/fab"
+		style="@style/Material.FloatingActionButton"
+		android:layout_marginBottom="@dimen/material_fab_margin"
+		android:layout_marginRight="@dimen/material_fab_margin"
+		android:layout_marginEnd="@dimen/material_fab_margin"
+		app:layout_constraintBottom_toBottomOf="@id/scroll_view"
+		app:layout_constraintRight_toRightOf="@id/scroll_view"
+		app:srcCompat="@drawable/ic_add_white_24dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

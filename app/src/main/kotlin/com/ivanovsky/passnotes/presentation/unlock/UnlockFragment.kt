@@ -231,10 +231,6 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
         startActivity(Intent(context, NewDatabaseActivity::class.java))
     }
 
-    override fun hideKeyboard() {
-        hideSoftInput(activity)
-    }
-
     override fun showOpenFileScreen() {
         val intent = StorageListActivity.createStartIntent(context!!, Action.PICK_FILE)
         startActivityForResult(intent, REQUEST_CODE_PICK_FILE)

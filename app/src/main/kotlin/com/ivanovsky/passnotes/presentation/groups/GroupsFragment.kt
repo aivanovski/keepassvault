@@ -19,6 +19,7 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.group.GroupActivity
 import com.ivanovsky.passnotes.presentation.note.NoteActivity
+import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorActivity
 import java.util.*
 
 class GroupsFragment : BaseFragment(), GroupsContract.View {
@@ -32,6 +33,8 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
     private val showNoteScreenEvent = SingleLiveEvent<Note>()
     private val showNoteListScreenEvent = SingleLiveEvent<Group>()
     private val showNewGroupScreenEvent = SingleLiveEvent<UUID>()
+    private val showNewNoteScreenEvent = SingleLiveEvent<UUID>()
+    private val showNewEntryDialogEvent = SingleLiveEvent<Unit>()
 
     override fun onStart() {
         super.onStart()
@@ -76,6 +79,10 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
             Observer { note -> showNoteScreenInternal(note)})
         showNewGroupScreenEvent.observe(viewLifecycleOwner,
             Observer { parentGroupUid -> showNewGroupScreenInternal(parentGroupUid) })
+        showNewNoteScreenEvent.observe(viewLifecycleOwner,
+            Observer { parentGroupUid -> showNewNoteScreenInternal(parentGroupUid) })
+        showNewEntryDialogEvent.observe(viewLifecycleOwner,
+            Observer { showNewEntryDialogInternal() })
 
         return view
     }
@@ -131,5 +138,32 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
         val context = this.context ?: return
 
         startActivity(GroupActivity.createChildGroup(context, parentGroupUid))
+    }
+
+    override fun showNewNoteScreen(parentGroupUid: UUID) {
+        showNewNoteScreenEvent.call(parentGroupUid)
+    }
+
+    private fun showNewNoteScreenInternal(parentGroupUid: UUID) {
+        val context = this.context ?: return
+
+        startActivity(NoteEditorActivity.intentForNewNote(context, parentGroupUid))
+    }
+
+    override fun showNewEntryDialog() {
+        showNewEntryDialogEvent.call()
+    }
+
+    private fun showNewEntryDialogInternal() {
+        val dialog = NewEntryDialog()
+        dialog.onItemClickListener = { itemIdx ->
+            // TODO: create constants for buttons
+            if (itemIdx == 0) {
+                presenter?.onCreateNewGroupClicked()
+            } else if (itemIdx == 1) {
+                presenter?.onCreateNewNoteClicked()
+            }
+        }
+        dialog.show(parentFragmentManager, NewEntryDialog.TAG)
     }
 }

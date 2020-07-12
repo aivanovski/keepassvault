@@ -7,18 +7,22 @@ import com.ivanovsky.passnotes.presentation.core.BaseView
 import com.ivanovsky.passnotes.presentation.core.GlobalSnackbarPresenter
 import java.util.*
 
-class GroupsContract {
+object GroupsContract {
 
     interface View : BaseView<Presenter> {
         fun setItems(items: List<GroupsAdapter.ListItem>)
         fun showNewGroupScreen(parentGroupUid: UUID)
+        fun showNewNoteScreen(parentGroupUid: UUID)
         fun showNoteListScreen(group: Group)
         fun showNoteScreen(note: Note)
+        fun showNewEntryDialog()
     }
 
     interface Presenter : BasePresenter, GlobalSnackbarPresenter {
         fun loadData()
         fun onListItemClicked(position: Int)
         fun onAddButtonClicked()
+        fun onCreateNewNoteClicked()
+        fun onCreateNewGroupClicked()
     }
 }

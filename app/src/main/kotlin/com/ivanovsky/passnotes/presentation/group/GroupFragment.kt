@@ -8,7 +8,6 @@ import androidx.lifecycle.Observer
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.Screen
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 
 class GroupFragment : BaseFragment(), GroupContract.View {
 
@@ -17,7 +16,6 @@ class GroupFragment : BaseFragment(), GroupContract.View {
     private lateinit var titleEditText: EditText
     private val doneButtonVisibilityData = MutableLiveData<Boolean>()
     private val titleEditTextErrorData = MutableLiveData<String?>()
-    private val finishScreenEvent = SingleLiveEvent<Void>()
 
     companion object {
 
@@ -54,8 +52,6 @@ class GroupFragment : BaseFragment(), GroupContract.View {
             Observer { visibility -> setDoneButtonVisibilityInternal(visibility) })
         titleEditTextErrorData.observe(this,
             Observer { error -> setTitleEditTextErrorInternal(error) })
-        finishScreenEvent.observe(this,
-            Observer { finishScreenInternal() })
 
         presenter?.globalSnackbarMessageAction?.observe(this, Screen.GROUP,
             Observer { message -> showSnackbar(message) })
@@ -100,13 +96,5 @@ class GroupFragment : BaseFragment(), GroupContract.View {
         if (item != null) {
             item.isVisible = isVisible
         }
-    }
-
-    override fun finishScreen() {
-        finishScreenEvent.call()
-    }
-
-    private fun finishScreenInternal() {
-        activity?.finish()
     }
 }

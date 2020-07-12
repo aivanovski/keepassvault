@@ -1,22 +1,28 @@
 package com.ivanovsky.passnotes.data.repository.keepass.dao;
 
+import com.ivanovsky.passnotes.data.entity.Note;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
-import com.ivanovsky.passnotes.data.entity.PropertyType;
-import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
-import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
-import com.ivanovsky.passnotes.data.entity.Note;
 import com.ivanovsky.passnotes.data.entity.Property;
+import com.ivanovsky.passnotes.data.entity.PropertyType;
+import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 
 import org.linguafranca.pwdb.kdbx.simple.SimpleEntry;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_DUPLICATED_NOTE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ADD_ENTRY;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_NOTE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericError;
 
 public class KeepassNoteDao implements NoteDao {
 
@@ -44,10 +50,6 @@ public class KeepassNoteDao implements NoteDao {
 		List<SimpleEntry> entries = group.getEntries();
 		if (entries != null) {
 			notes.addAll(createNotesFromEntries(group.getEntries()));
-
-			for (Note note : notes) {
-				note.setGroupUid(groupUid);
-			}
 		}
 
 		return OperationResult.success(notes);
@@ -66,16 +68,23 @@ public class KeepassNoteDao implements NoteDao {
 	}
 
 	private Note createNoteFromEntry(SimpleEntry entry) {
-		Note note = new Note();
+		UUID uid;
+		UUID groupUid;
+		String title;
+		Date created;
+		Date modified;
 
-		note.setUid(entry.getUuid());
-		note.setTitle(entry.getTitle());
-		note.setCreated(entry.getCreationTime());
+		// TODO: add field validation
+
+		uid = entry.getUuid();
+		groupUid = entry.getParent().getUuid();
+		title = entry.getTitle();
+		created = entry.getCreationTime();
 
 		if (entry.getLastModificationTime() != null) {
-			note.setModified(entry.getLastModificationTime());
+			modified = entry.getLastModificationTime();
 		} else {
-			note.setModified(entry.getCreationTime());
+			modified = entry.getCreationTime();
 		}
 
 		List<Property> properties = new ArrayList<>();
@@ -83,29 +92,22 @@ public class KeepassNoteDao implements NoteDao {
 		if (propertyNames != null) {
 			for (String propertyName : propertyNames) {
 				String propertyValue = entry.getProperty(propertyName);
+				boolean isProtected = entry.isPropertyProtected(propertyName);
 
-				Property property = createProperty(propertyName, propertyValue);
+				Property property = createProperty(propertyName, propertyValue, isProtected);
 				if (property != null) {
 					properties.add(property);
 				}
 			}
 		}
 
-		note.setProperties(properties);
-
-		return note;
+		return new Note(uid, groupUid, created, modified, title, properties);
 	}
 
-	private Property createProperty(String name, String value) {
+	private Property createProperty(String name, String value, boolean isProtected) {
 		if (name == null) return null;
 
-		Property property = new Property();
-
-		property.setName(name);
-		property.setValue(value);
-		property.setType(parsePropertyType(name));
-
-		return property;
+		return new Property(parsePropertyType(name), name, value, isProtected);
 	}
 
 	private PropertyType parsePropertyType(String type) {
@@ -134,7 +136,7 @@ public class KeepassNoteDao implements NoteDao {
 
 		SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
 		if (newEntry == null) {
-			return OperationResult.error(newDbError(OperationError.MESSAGE_UNKNOWN_ERROR));
+			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
 		}
 
 		OperationResult<Boolean> commitResult = db.commit();
@@ -148,6 +150,8 @@ public class KeepassNoteDao implements NoteDao {
 
 	private SimpleEntry createEntryFromNote(Note note) {
 		SimpleEntry entry = SimpleEntry.createEntry(db.getKeepassDatabase());
+
+		// TODO: add protected properties
 
 		for (Property property : note.getProperties()) {
 			entry.setProperty(property.getName(), property.getValue());
@@ -174,5 +178,46 @@ public class KeepassNoteDao implements NoteDao {
 		}
 
 		return result;
+	}
+
+	@Override
+	public OperationResult<UUID> update(Note note) {
+		UUID noteUid = note.getUid();
+		if (noteUid == null) {
+			return OperationResult.error(newGenericError(MESSAGE_UID_IS_NULL));
+		}
+
+		SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
+		if (group == null) {
+			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+		}
+
+		List<? extends SimpleEntry> entries =
+				group.findEntries(entry -> noteUid.equals(entry.getUuid()), false);
+		if (entries.size() == 0) {
+			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
+		} else if (entries.size() > 1) {
+			return OperationResult.error(newDbError(MESSAGE_DUPLICATED_NOTE));
+		}
+
+		SimpleEntry oldEntry = entries.get(0);
+		group.removeEntry(oldEntry);
+
+		// TODO: entry insertion can be reused from insert() method
+
+		SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
+		if (newEntry == null) {
+			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
+		}
+
+		UUID newUid = newEntry.getUuid();
+
+		OperationResult<Boolean> commitResult = db.commit();
+		if (commitResult.isFailed()) {
+			group.removeEntry(newEntry);
+			return commitResult.takeError();
+		}
+
+		return commitResult.takeStatusWith(newUid);
 	}
 }

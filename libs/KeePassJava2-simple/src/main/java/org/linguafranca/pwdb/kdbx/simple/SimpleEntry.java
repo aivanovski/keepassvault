@@ -104,6 +104,11 @@ public class SimpleEntry extends AbstractEntry<SimpleDatabase, SimpleGroup, Simp
         return getStringContent(getStringProperty(s, string));
     }
 
+    public boolean isPropertyProtected(String name) {
+        StringProperty property = getStringProperty(name, string);
+        return property != null && property.getValue() != null && property.getValue().isProtected();
+    }
+
     @Override
     public void setProperty(String s, String s1) {
         EntryClasses.StringProperty sp;

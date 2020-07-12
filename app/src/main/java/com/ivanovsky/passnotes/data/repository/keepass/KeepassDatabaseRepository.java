@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.repository.GroupRepository;
+import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
@@ -39,8 +41,25 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 	}
 
 	@Override
-	public EncryptedDatabase getOpenedDatabase() {
+	public boolean isOpened() {
+		return db != null;
+	}
+
+	@Override
+	public EncryptedDatabase getDatabase() {
 		return db;
+	}
+
+	@Override
+	public NoteRepository getNoteRepository() {
+		// TODO: should be rewritten with wrapper
+		return db.getNoteRepository();
+	}
+
+	@Override
+	public GroupRepository getGroupRepository() {
+		// TODO: should be rewritten with wrapper
+		return db.getGroupRepository();
 	}
 
 	@Override

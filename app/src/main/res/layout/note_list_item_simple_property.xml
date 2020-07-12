@@ -47,14 +47,18 @@
 
 		<ImageButton
 			android:id="@+id/visibility_button"
-			style="@style/Material.ToggleButton"
+			style="@style/Material.BorderlessButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
 			android:background="@drawable/material_selector"
 			android:layout_marginRight="8dp"
 			app:srcCompat="@drawable/ic_eye_grey_600_24dp"/>
 
 		<ImageButton
 			android:id="@+id/copy_button"
-			style="@style/Material.ToggleButton"
+			style="@style/Material.BorderlessButton"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
 			android:background="@drawable/material_selector"
 			app:srcCompat="@drawable/ic_copy_grey_600_24dp"/>
 

@@ -53,11 +53,27 @@ class UnlockPresenter(private val view: UnlockContract.View) :
             observerBus.register(this)
             loadData(null)
         }
+        closeActiveDatabaseIfNeed()
     }
 
     override fun destroy() {
         observerBus.unregister(this)
         job.cancel()
+    }
+
+    override fun closeActiveDatabaseIfNeed() {
+        if (interactor.hasActiveDatabase()) {
+            scope.launch {
+                val closeResult = withContext(Dispatchers.Default) {
+                    interactor.closeActiveDatabase()
+                }
+
+                if (closeResult.isFailed) {
+                    val message = errorInteractor.processAndGetMessage(closeResult.error)
+                    view.screenState = ScreenState.error(message)
+                }
+            }
+        }
     }
 
     override fun loadData(selectedFile: FileDescriptor?) {

@@ -36,18 +36,17 @@ public class KeepassNoteRepository implements NoteRepository {
 	}
 
 	@Override
-	public OperationResult<UUID> insert(Note note) {
-		OperationResult<UUID> result = dao.insert(note);
-
-		if (result.getObj() != null) {
-			note.setUid(result.getObj());
-		}
-
-		return result;
+	public synchronized OperationResult<UUID> insert(Note note) {
+		return dao.insert(note);
 	}
 
 	@Override
 	public OperationResult<Note> getNoteByUid(UUID uid) {
 		return dao.getNoteByUid(uid);
+	}
+
+	@Override
+	public synchronized OperationResult<UUID> update(Note note) {
+		return dao.update(note);
 	}
 }

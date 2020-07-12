@@ -28,12 +28,12 @@ class GroupActivity : BaseActivity() {
         currentActionBar.setDisplayHomeAsUpEnabled(true)
 
         val fragment = GroupFragment.newInstance()
+        val presenter = GroupPresenter(fragment, parentGroupUid)
+        fragment.presenter = presenter
+
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
-
-        val presenter = GroupPresenter(fragment, parentGroupUid)
-        fragment.presenter = presenter
     }
 
     private fun readExtraArgs() {

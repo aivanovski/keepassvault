@@ -28,7 +28,7 @@ class NotesPresenter(
     private val scope = CoroutineScope(Dispatchers.Main + job)
 
     init {
-        Injector.getInstance().encryptedDatabaseComponent.inject(this)
+        Injector.getInstance().appComponent.inject(this)
     }
 
     override fun start() {

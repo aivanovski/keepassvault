@@ -11,6 +11,7 @@ public interface EncryptedDatabaseRepository {
 	EncryptedDatabase getDatabase();
 	NoteRepository getNoteRepository();
 	GroupRepository getGroupRepository();
+	TemplateRepository getTemplateRepository();
 	OperationResult<EncryptedDatabase> open(EncryptedDatabaseKey key, FileDescriptor file);
 	OperationResult<Boolean> createNew(EncryptedDatabaseKey key, FileDescriptor file);
 	OperationResult<Boolean> close();

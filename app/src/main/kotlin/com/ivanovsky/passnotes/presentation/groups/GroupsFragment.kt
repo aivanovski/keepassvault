@@ -12,6 +12,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.presentation.Screen
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingMode
@@ -33,8 +34,8 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
     private val showNoteScreenEvent = SingleLiveEvent<Note>()
     private val showNoteListScreenEvent = SingleLiveEvent<Group>()
     private val showNewGroupScreenEvent = SingleLiveEvent<UUID>()
-    private val showNewNoteScreenEvent = SingleLiveEvent<UUID>()
-    private val showNewEntryDialogEvent = SingleLiveEvent<Unit>()
+    private val showNewNoteScreenEvent = SingleLiveEvent<Pair<UUID, Template?>>()
+    private val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
 
     override fun onStart() {
         super.onStart()
@@ -80,9 +81,9 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
         showNewGroupScreenEvent.observe(viewLifecycleOwner,
             Observer { parentGroupUid -> showNewGroupScreenInternal(parentGroupUid) })
         showNewNoteScreenEvent.observe(viewLifecycleOwner,
-            Observer { parentGroupUid -> showNewNoteScreenInternal(parentGroupUid) })
+            Observer { (groupUid, template) -> showNewNoteScreenInternal(groupUid, template) })
         showNewEntryDialogEvent.observe(viewLifecycleOwner,
-            Observer { showNewEntryDialogInternal() })
+            Observer { templates -> showNewEntryDialogInternal(templates) })
 
         return view
     }
@@ -140,28 +141,37 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
         startActivity(GroupActivity.createChildGroup(context, parentGroupUid))
     }
 
-    override fun showNewNoteScreen(parentGroupUid: UUID) {
-        showNewNoteScreenEvent.call(parentGroupUid)
+    override fun showNewNoteScreen(parentGroupUid: UUID, template: Template?) {
+        showNewNoteScreenEvent.call(Pair(parentGroupUid, template))
     }
 
-    private fun showNewNoteScreenInternal(parentGroupUid: UUID) {
+    private fun showNewNoteScreenInternal(parentGroupUid: UUID, template: Template?) {
         val context = this.context ?: return
 
-        startActivity(NoteEditorActivity.intentForNewNote(context, parentGroupUid))
+        startActivity(NoteEditorActivity.intentForNewNote(context, parentGroupUid, template))
     }
 
-    override fun showNewEntryDialog() {
-        showNewEntryDialogEvent.call()
+    override fun showNewEntryDialog(templates: List<Template>) {
+        showNewEntryDialogEvent.call(templates)
     }
 
-    private fun showNewEntryDialogInternal() {
-        val dialog = NewEntryDialog()
+    private fun showNewEntryDialogInternal(templates: List<Template>) {
+        val templateEntries = templates.map { template -> template.title }
+
+        val entries = listOf(getString(R.string.new_item_entry_standard_note)) +
+                templateEntries +
+                listOf(getString(R.string.new_item_entry_new_group))
+
+        val dialog = NewEntryDialog.newInstance(entries)
+
         dialog.onItemClickListener = { itemIdx ->
             // TODO: create constants for buttons
             if (itemIdx == 0) {
-                presenter?.onCreateNewGroupClicked()
-            } else if (itemIdx == 1) {
                 presenter?.onCreateNewNoteClicked()
+            } else if (itemIdx == entries.size - 1) {
+                presenter?.onCreateNewGroupClicked()
+            } else {
+                presenter?.onCreateNewNoteFromTemplateClicked(templates[itemIdx - 1])
             }
         }
         dialog.show(parentFragmentManager, NewEntryDialog.TAG)

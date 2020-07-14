@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.presentation.note_editor
 
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.Property
+import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.domain.NoteDiffer
 import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.entity.PropertySpreader
@@ -13,18 +15,11 @@ import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorContract.Launc
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorContract.LaunchMode.EDIT
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorContract.LaunchMode.NEW
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem
-import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_NOTES
-import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_PASSWORD
-import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_TITLE
-import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_URL
-import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_USER_NAME
 import com.ivanovsky.passnotes.presentation.note_editor.view.NoteEditorDataTransformer
 import com.ivanovsky.passnotes.presentation.note_editor.view.extended_text.ExtTextDataItem
-import com.ivanovsky.passnotes.presentation.note_editor.view.secret.SecretDataItem
-import com.ivanovsky.passnotes.presentation.note_editor.view.secret.SecretInputType
-import com.ivanovsky.passnotes.presentation.note_editor.view.text.InputLines
-import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextDataItem
 import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextInputType
+import com.ivanovsky.passnotes.util.toCleanString
+import com.ivanovsky.passnotes.util.toUUID
 import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
@@ -33,7 +28,8 @@ class NoteEditorPresenter(
     private val view: NoteEditorContract.View,
     private val launchMode: LaunchMode,
     private val groupUid: UUID?,
-    private val noteUid: UUID?
+    private val noteUid: UUID?,
+    private val template: Template?
 ) : NoteEditorContract.Presenter {
 
     @Inject
@@ -50,10 +46,10 @@ class NoteEditorPresenter(
 
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.Main + job)
-    private val editorDataTransformer =
-        NoteEditorDataTransformer()
+    private lateinit var editorDataTransformer: NoteEditorDataTransformer
 
-    private var note: Note? = null
+    private var loadedNote: Note? = null
+    private var loadedTemplate: Template? = null
 
     init {
         Injector.getInstance().appComponent.inject(this)
@@ -62,7 +58,9 @@ class NoteEditorPresenter(
     override fun start() {
         if (view.screenState.isNotInitialized) {
             if (launchMode == NEW) {
-                view.setEditorItems(createDefaultEditorItems())
+                editorDataTransformer = NoteEditorDataTransformer(template)
+
+                view.setEditorItems(editorDataTransformer.createEditorItemsForNewNote())
                 view.setDoneButtonVisibility(true)
                 view.screenState = ScreenState.data()
 
@@ -79,46 +77,6 @@ class NoteEditorPresenter(
         job.cancel()
     }
 
-    private fun createDefaultEditorItems(): List<BaseDataItem> {
-        return listOf(
-            TextDataItem(
-                ITEM_ID_TITLE,
-                resources.getString(R.string.title),
-                "",
-                TextInputType.TEXT,
-                InputLines.SINGLE_LINE,
-                isShouldNotBeEmpty = true
-            ),
-            TextDataItem(
-                ITEM_ID_USER_NAME,
-                resources.getString(R.string.username),
-                "",
-                TextInputType.TEXT,
-                InputLines.SINGLE_LINE
-            ),
-            SecretDataItem(
-                ITEM_ID_PASSWORD,
-                resources.getString(R.string.password),
-                "",
-                SecretInputType.TEXT
-            ),
-            TextDataItem(
-                ITEM_ID_URL,
-                resources.getString(R.string.url_cap),
-                "",
-                TextInputType.URL,
-                InputLines.SINGLE_LINE
-            ),
-            TextDataItem(
-                ITEM_ID_NOTES,
-                resources.getString(R.string.notes),
-                "",
-                TextInputType.TEXT_CAP_SENTENCES,
-                InputLines.MULTIPLE_LINES
-            )
-        )
-    }
-
     override fun loadData() {
         val uid = noteUid ?: return
 
@@ -130,9 +88,16 @@ class NoteEditorPresenter(
             }
 
             if (noteResult.isSucceededOrDeferred) {
-                note = noteResult.obj
+                val note = noteResult.obj
 
-                view.setEditorItems(editorDataTransformer.createNoteToEditorItems(noteResult.obj))
+                loadedTemplate = withContext(Dispatchers.Default) {
+                    loadTemplate(note)
+                }
+
+                editorDataTransformer = NoteEditorDataTransformer(loadedTemplate)
+                loadedNote = note
+
+                view.setEditorItems(editorDataTransformer.createNoteToEditorItems(note))
                 view.setDoneButtonVisibility(true)
                 view.screenState = ScreenState.data()
             } else {
@@ -142,13 +107,24 @@ class NoteEditorPresenter(
         }
     }
 
+    private fun loadTemplate(note: Note): Template? {
+        val propertySpreader = PropertySpreader(note.properties)
+        val templateUid = propertySpreader.findTemplateUid()?.toUUID()
+
+        return if (templateUid != null) {
+            interactor.loadTemplate(templateUid)
+        } else {
+            null
+        }
+    }
+
     override fun onDoneButtonClicked(items: List<BaseDataItem>) {
         val filteredItems = editorDataTransformer.filterNotEmptyItems(items)
 
         if (launchMode == NEW) {
             val groupUid = this.groupUid ?: return
 
-            val note = createNewNoteFromEditorItems(filteredItems, groupUid)
+            val note = createNewNoteFromEditorItems(filteredItems, groupUid, template)
             view.setDoneButtonVisibility(false)
             view.hideKeyboard()
             view.screenState = ScreenState.loading()
@@ -167,13 +143,14 @@ class NoteEditorPresenter(
                 }
             }
         } else if (launchMode == EDIT) {
-            val existingNote = note ?: return
+            val existingNote = loadedNote ?: return
+            val existingTemplate = loadedTemplate
 
             view.setDoneButtonVisibility(false)
             view.hideKeyboard()
             view.screenState = ScreenState.loading()
 
-            val modifiedNote = createModifiedNoteFromEditorItems(filteredItems, existingNote)
+            val modifiedNote = createModifiedNoteFromEditorItems(filteredItems, existingNote, existingTemplate)
             if (isNoteChanged(existingNote, modifiedNote)) {
                 scope.launch {
                     val updateNoteResult = withContext(Dispatchers.Default) {
@@ -195,23 +172,51 @@ class NoteEditorPresenter(
         }
     }
 
-    private fun createNewNoteFromEditorItems(items: List<BaseDataItem>, groupUid: UUID): Note {
+    private fun createNewNoteFromEditorItems(
+        items: List<BaseDataItem>,
+        groupUid: UUID,
+        template: Template?
+    ): Note {
         val title = editorDataTransformer.getTitleFromItems(items) ?: ""
         val created = Date(System.currentTimeMillis())
-        val properties = editorDataTransformer.createPropertiesFromItems(items)
+        val properties = editorDataTransformer.createPropertiesFromItems(items).toMutableList()
+
+        if (template != null) {
+            properties.add(
+                Property(
+                    null,
+                    Property.PROPERTY_NAME_TEMPLATE_UID,
+                    template.uid.toCleanString()
+                )
+            )
+        }
+
         return Note(null, groupUid, created, created, title, properties)
     }
 
     private fun createModifiedNoteFromEditorItems(
         items: List<BaseDataItem>,
-        existingNote: Note
+        existingNote: Note,
+        existingTemplate: Template?
     ): Note {
         val title = editorDataTransformer.getTitleFromItems(items) ?: ""
         val modified = Date(System.currentTimeMillis())
 
-        val hiddenProperties = PropertySpreader(existingNote.properties).hiddenProperties
+        val propertySpreader = PropertySpreader(existingNote.properties)
+
+        val hiddenProperties = propertySpreader.getHiddenProperties()
         val modifiedProperties = editorDataTransformer.createPropertiesFromItems(items)
-        val properties = hiddenProperties + modifiedProperties
+        val properties = (hiddenProperties + modifiedProperties).toMutableList()
+
+        if (existingTemplate != null && !propertySpreader.hasTemplateUidProperty()) {
+            properties.add(
+                Property(
+                    null,
+                    Property.PROPERTY_NAME_TEMPLATE_UID,
+                    existingTemplate.uid.toCleanString()
+                )
+            )
+        }
 
         return Note(
             existingNote.uid,
@@ -256,9 +261,9 @@ class NoteEditorPresenter(
                 }
             }
             EDIT -> {
-                val existingNote = note ?: return
+                val existingNote = loadedNote ?: return
 
-                val modifiedNote = createModifiedNoteFromEditorItems(items, existingNote)
+                val modifiedNote = createModifiedNoteFromEditorItems(items, existingNote, template)
                 if (isNoteChanged(existingNote, modifiedNote)) {
                     view.showDiscardDialog(resources.getString(R.string.discard_changes))
                 } else {

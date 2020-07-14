@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.presentation.core.BaseActivity
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorContract.LaunchMode
 import java.util.*
@@ -16,12 +17,14 @@ class NoteEditorActivity : BaseActivity() {
     private lateinit var noteTitle: String
     private lateinit var launchMode: LaunchMode
     private lateinit var presenter: NoteEditorContract.Presenter
+    private var noteTemplate: Template? = null
 
     object ExtraKeys {
         const val GROUP_UID = "groupUid"
         const val NOTE_UID = "noteUid"
         const val NOTE_TITLE = "noteTitle"
         const val LAUNCH_MODE = "launchMode"
+        const val NOTE_TEMPLATE = "noteTemplate"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +38,7 @@ class NoteEditorActivity : BaseActivity() {
         currentActionBar.setDisplayHomeAsUpEnabled(true)
 
         val fragment = NoteEditorFragment()
-        presenter = NoteEditorPresenter(fragment, launchMode, groupUid, noteUid)
+        presenter = NoteEditorPresenter(fragment, launchMode, groupUid, noteUid, noteTemplate)
         fragment.presenter = presenter
 
         supportFragmentManager.beginTransaction()
@@ -55,6 +58,8 @@ class NoteEditorActivity : BaseActivity() {
         noteUid = extras.getSerializable(ExtraKeys.NOTE_UID) as? UUID
         groupUid = extras.getSerializable(ExtraKeys.GROUP_UID) as? UUID
         launchMode = LaunchMode.valueOf(launchModeValue)
+
+        noteTemplate = extras.getParcelable(ExtraKeys.NOTE_TEMPLATE)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -80,10 +85,11 @@ class NoteEditorActivity : BaseActivity() {
             return intent
         }
 
-        fun intentForNewNote(context: Context, groupUid: UUID): Intent {
+        fun intentForNewNote(context: Context, groupUid: UUID, template: Template?): Intent {
             val intent = Intent(context, NoteEditorActivity::class.java)
             intent.putExtra(ExtraKeys.NOTE_TITLE, context.getString(R.string.new_note))
             intent.putExtra(ExtraKeys.GROUP_UID, groupUid)
+            intent.putExtra(ExtraKeys.NOTE_TEMPLATE, template)
             intent.putExtra(ExtraKeys.LAUNCH_MODE, LaunchMode.NEW.name)
             return intent
         }

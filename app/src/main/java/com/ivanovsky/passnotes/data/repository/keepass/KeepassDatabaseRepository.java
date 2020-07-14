@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
+import com.ivanovsky.passnotes.data.repository.TemplateRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
@@ -29,7 +30,7 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 
 public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
-	private static final String TEMPLATE_DB_PATH = "default.kdbx";
+	private static final String DEFAULT_DB_PATH = "default.kdbx";
 
 	private volatile KeepassDatabase db;
 	private final Context context;
@@ -60,6 +61,11 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 	public GroupRepository getGroupRepository() {
 		// TODO: should be rewritten with wrapper
 		return db.getGroupRepository();
+	}
+
+	@Override
+	public TemplateRepository getTemplateRepository() {
+		return db.getTemplateRepository();
 	}
 
 	@Override
@@ -113,7 +119,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 			FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsType());
 
 			try {
-				in = new BufferedInputStream(context.getAssets().open(TEMPLATE_DB_PATH));
+				in = new BufferedInputStream(context.getAssets().open(DEFAULT_DB_PATH));
 
 				Database keepassDb = SimpleDatabase.load(defaultCredentials, in);
 

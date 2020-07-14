@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.groups
 
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarMessageLiveAction
@@ -42,6 +43,7 @@ class GroupsPresenter(
     private val scope = CoroutineScope(Dispatchers.Main + job)
     private var currentDataItems: List<GroupsInteractor.Item>? = null
     private var rootGroupUid: UUID? = null
+    private var templates: List<Template>? = null
 
     init {
         Injector.getInstance().appComponent.inject(this)
@@ -64,6 +66,8 @@ class GroupsPresenter(
 
     override fun loadData() {
         scope.launch {
+            templates = interactor.getTemplates()
+
             val data = withContext(Dispatchers.Default) {
                 if (groupUid == null) {
                     interactor.getRootGroupData()
@@ -150,7 +154,7 @@ class GroupsPresenter(
     }
 
     override fun onAddButtonClicked() {
-        view.showNewEntryDialog()
+        view.showNewEntryDialog(templates ?: emptyList())
     }
 
     private fun getCurrentGroupUid(): UUID? {
@@ -171,6 +175,12 @@ class GroupsPresenter(
     override fun onCreateNewNoteClicked() {
         val currentGroupUid = getCurrentGroupUid() ?: return
 
-        view.showNewNoteScreen(currentGroupUid)
+        view.showNewNoteScreen(currentGroupUid, null)
+    }
+
+    override fun onCreateNewNoteFromTemplateClicked(template: Template) {
+        val currentGroupUid = getCurrentGroupUid() ?: return
+
+        view.showNewNoteScreen(currentGroupUid, template)
     }
 }

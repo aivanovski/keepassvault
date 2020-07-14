@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository.keepass;
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.repository.TemplateRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.exception.FailedToWriteDBException;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
@@ -34,6 +35,8 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOErr
 
 public class KeepassDatabase implements EncryptedDatabase {
 
+	// TODO: add lock
+
 	@Inject
 	FileSystemResolver fileSystemResolver;
 
@@ -41,6 +44,7 @@ public class KeepassDatabase implements EncryptedDatabase {
 	private final FileDescriptor file;
 	private final KeepassGroupRepository groupRepository;
 	private final KeepassNoteRepository noteRepository;
+	private final KeepassTemplateRepository templateRepository;
 	private final SimpleDatabase db;
 
 	public KeepassDatabase(FileDescriptor file, InputStream in, byte[] key) throws EncryptedDatabaseException {
@@ -49,10 +53,17 @@ public class KeepassDatabase implements EncryptedDatabase {
 		this.file = file;
 		this.db = readDatabaseFile(in, key);
 		this.key = key;
-		this.groupRepository = new KeepassGroupRepository(new KeepassGroupDao(this));
-		this.noteRepository = new KeepassNoteRepository(new KeepassNoteDao(this));
+
+		KeepassNoteDao noteDao = new KeepassNoteDao(this);
+		KeepassGroupDao groupDao = new KeepassGroupDao(this);
+
+		this.groupRepository = new KeepassGroupRepository(groupDao);
+		this.noteRepository = new KeepassNoteRepository(noteDao);
+		this.templateRepository = new KeepassTemplateRepository(groupDao, noteDao);
 
 		db.enableRecycleBin(false);
+
+		templateRepository.findTemplateNotes();
 	}
 
 	private synchronized SimpleDatabase readDatabaseFile(InputStream in, byte[] key) throws EncryptedDatabaseException {
@@ -95,6 +106,11 @@ public class KeepassDatabase implements EncryptedDatabase {
 	@Override
 	public NoteRepository getNoteRepository() {
 		return noteRepository;
+	}
+
+	@Override
+	public TemplateRepository getTemplateRepository() {
+		return templateRepository;
 	}
 
 	@Override

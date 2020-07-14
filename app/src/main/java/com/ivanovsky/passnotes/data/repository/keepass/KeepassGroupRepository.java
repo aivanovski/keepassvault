@@ -56,4 +56,9 @@ public class KeepassGroupRepository implements GroupRepository {
 
 		return result;
 	}
+
+	@Override
+	public synchronized OperationResult<Boolean> remove(UUID groupUid) {
+		return dao.remove(groupUid);
+	}
 }

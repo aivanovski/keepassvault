@@ -12,4 +12,5 @@ public interface NoteDao {
 	OperationResult<Note> getNoteByUid(UUID noteUid);
 	OperationResult<UUID> insert(Note note);
 	OperationResult<UUID> update(Note note);
+	OperationResult<Boolean> remove(UUID noteUid);
 }

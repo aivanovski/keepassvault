@@ -13,6 +13,7 @@ class GroupsAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     lateinit var onListItemClickListener: (Int) -> Unit
+    lateinit var onListItemLongClickListener: (Int) -> Unit
 
     private val items: MutableList<ListItem> = mutableListOf()
     private val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -61,11 +62,13 @@ class GroupsAdapter(
             viewHolder.count.text = formatCountsForGroup(item)
 
             viewHolder.rootLayout.setOnClickListener { onListItemClicked(position) }
+            viewHolder.rootLayout.setOnLongClickListener { onListItemLongClicked(position) }
 
         } else if (viewType == VIEW_TYPE_BUTTON) {
             val viewHolder = holder as ButtonItemViewHolder
 
             viewHolder.rootLayout.setOnClickListener { onListItemClicked(position) }
+            viewHolder.rootLayout.setOnLongClickListener { onListItemLongClicked(position) }
 
         } else if (viewType == VIEW_TYPE_NOTE) {
             val viewHolder = holder as NoteItemViewHolder
@@ -74,6 +77,7 @@ class GroupsAdapter(
             viewHolder.title.text = item.title
 
             viewHolder.rootLayout.setOnClickListener { onListItemClicked(position) }
+            viewHolder.rootLayout.setOnLongClickListener { onListItemLongClicked(position) }
         }
     }
 
@@ -94,6 +98,11 @@ class GroupsAdapter(
 
     private fun onListItemClicked(position: Int) {
         onListItemClickListener.invoke(position)
+    }
+
+    private fun onListItemLongClicked(position: Int): Boolean {
+        onListItemLongClickListener.invoke(position)
+        return true
     }
 
     private class GroupItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {

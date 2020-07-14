@@ -66,9 +66,14 @@ public class OperationResult<T> {
 
 	public <E> OperationResult<E> takeStatusWith(E newObj) {
 		OperationResult<E> newResult = new OperationResult<>();
-		newResult.obj = newObj;
-		newResult.deferred = deferred;
-		newResult.error = error;
+
+		if (isSucceededOrDeferred()) {
+			newResult.obj = newObj;
+			newResult.deferred = deferred;
+		} else {
+			newResult.error = error;
+		}
+
 		return newResult;
 	}
 

@@ -17,14 +17,25 @@ object GroupsContract {
         fun showNoteListScreen(group: Group)
         fun showNoteScreen(note: Note)
         fun showNewEntryDialog(templates: List<Template>)
+        fun showGroupActionsDialog(group: Group)
+        fun showNoteActionsDialog(note: Note)
+        fun showRemoveConfirmationDialog(group: Group?, note: Note?)
+        fun showEditNoteScreen(note: Note)
+        fun showEditGroupScreen(group: Group)
     }
 
     interface Presenter : BasePresenter, GlobalSnackbarPresenter {
         fun loadData()
         fun onListItemClicked(position: Int)
+        fun onListItemLongClicked(position: Int)
         fun onAddButtonClicked()
         fun onCreateNewNoteClicked()
         fun onCreateNewGroupClicked()
         fun onCreateNewNoteFromTemplateClicked(template: Template)
+        fun onEditGroupClicked(group: Group)
+        fun onRemoveGroupClicked(group: Group)
+        fun onEditNoteClicked(note: Note)
+        fun onRemoveNoteClicked(note: Note)
+        fun onRemoveConfirmed(group: Group?, note: Note?)
     }
 }

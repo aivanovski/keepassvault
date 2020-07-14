@@ -49,4 +49,9 @@ public class KeepassNoteRepository implements NoteRepository {
 	public synchronized OperationResult<UUID> update(Note note) {
 		return dao.update(note);
 	}
+
+	@Override
+	public synchronized OperationResult<Boolean> remove(UUID noteUid) {
+		return dao.remove(noteUid);
+	}
 }

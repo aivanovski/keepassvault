@@ -13,4 +13,5 @@ public interface GroupRepository {
 	OperationResult<List<Group>> getChildGroups(UUID parentGroupUid);
 	OperationResult<Integer> getChildGroupsCount(UUID parentGroupUid);
 	OperationResult<Boolean> insert(Group group, UUID parentGroupUid);
+	OperationResult<Boolean> remove(UUID groupUid);
 }

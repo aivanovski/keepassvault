@@ -171,8 +171,8 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	GroupsInteractor provideGroupsInteractor(EncryptedDatabaseRepository dbRepo) {
-		return new GroupsInteractor(dbRepo);
+	GroupsInteractor provideGroupsInteractor(EncryptedDatabaseRepository dbRepo, ObserverBus observerBus) {
+		return new GroupsInteractor(dbRepo, observerBus);
 	}
 
 	@Provides

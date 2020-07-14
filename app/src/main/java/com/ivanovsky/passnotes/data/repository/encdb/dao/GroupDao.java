@@ -12,4 +12,5 @@ public interface GroupDao {
 	OperationResult<Group> getRootGroup();
 	OperationResult<List<Group>> getChildGroups(UUID parentGroupUid);
 	OperationResult<UUID> insert(Group group, UUID parentGroupUid);
+	OperationResult<Boolean> remove(UUID groupUid);
 }

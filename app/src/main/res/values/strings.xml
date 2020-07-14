@@ -55,6 +55,13 @@
 	<string name="groups_and_notes_with_count">Groups: %1$d  Notes: %2$d</string>
     <string name="new_item_entry_standard_note">Standard Note</string>
 	<string name="new_item_entry_new_group">New Group</string>
+	<string name="note_remove_confirmation_message">Are you sure want to remove note "%s" ?</string>
+	<string name="group_remove_confirmation_message">Are you sure want to remove this group?</string>
+	<string name="successfully_removed">Successfully removed</string>
+	<string-array name="item_actions_entries">
+		<item>Edit</item>
+		<item>Remove</item>
+	</string-array>
 
 	<!-- New group screen -->
 	<string name="new_group">New group</string>

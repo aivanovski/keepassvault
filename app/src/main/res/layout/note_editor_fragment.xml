@@ -13,7 +13,8 @@
 		<com.ivanovsky.passnotes.presentation.note_editor.view.NoteEditorView
 			android:id="@+id/note_editor_view"
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content"/>
+			android:layout_height="wrap_content"
+			android:paddingBottom="72dp"/>
 
 	</ScrollView>
 

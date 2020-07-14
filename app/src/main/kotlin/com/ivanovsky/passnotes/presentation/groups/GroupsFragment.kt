@@ -17,8 +17,10 @@ import com.ivanovsky.passnotes.presentation.Screen
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingMode
 import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.group.GroupActivity
+import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.note.NoteActivity
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorActivity
 import java.util.*
@@ -36,6 +38,11 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
     private val showNewGroupScreenEvent = SingleLiveEvent<UUID>()
     private val showNewNoteScreenEvent = SingleLiveEvent<Pair<UUID, Template?>>()
     private val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
+    private val showGroupActionsDialogEvent = SingleLiveEvent<Group>()
+    private val showNoteActionsDialogEvent = SingleLiveEvent<Note>()
+    private val showRemoveConfirmationDialogEvent = SingleLiveEvent<Pair<Group?, Note?>>()
+    private val showEditNoteScreenEvent = SingleLiveEvent<Note>()
+    private val showEditGroupScreenEvent = SingleLiveEvent<Group>()
 
     override fun onStart() {
         super.onStart()
@@ -63,7 +70,12 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
         recyclerView.layoutManager = layoutManager
 
         adapter = GroupsAdapter(context)
-        adapter.onListItemClickListener = { position -> presenter?.onListItemClicked(position) }
+        adapter.onListItemClickListener = { position ->
+            presenter?.onListItemClicked(position)
+        }
+        adapter.onListItemLongClickListener = { position ->
+            presenter?.onListItemLongClicked(position)
+        }
 
         recyclerView.adapter = adapter
 
@@ -84,6 +96,16 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
             Observer { (groupUid, template) -> showNewNoteScreenInternal(groupUid, template) })
         showNewEntryDialogEvent.observe(viewLifecycleOwner,
             Observer { templates -> showNewEntryDialogInternal(templates) })
+        showGroupActionsDialogEvent.observe(viewLifecycleOwner,
+            Observer { group -> showGroupActionsDialogInternal(group) })
+        showNoteActionsDialogEvent.observe(viewLifecycleOwner,
+            Observer { note -> showNoteActionsDialogInternal(note) })
+        showRemoveConfirmationDialogEvent.observe(viewLifecycleOwner,
+            Observer { (group, note) -> showRemoveConfirmationDialogInternal(group, note)})
+        showEditNoteScreenEvent.observe(viewLifecycleOwner,
+            Observer { note -> showEditNoteScreenInternal(note) })
+        showEditGroupScreenEvent.observe(viewLifecycleOwner,
+            Observer { group -> showEditGroupScreenInternal(group) })
 
         return view
     }
@@ -162,18 +184,90 @@ class GroupsFragment : BaseFragment(), GroupsContract.View {
                 templateEntries +
                 listOf(getString(R.string.new_item_entry_new_group))
 
-        val dialog = NewEntryDialog.newInstance(entries)
+        val dialog = ChooseOptionDialog.newInstance(getString(R.string.create), entries)
 
         dialog.onItemClickListener = { itemIdx ->
-            // TODO: create constants for buttons
-            if (itemIdx == 0) {
-                presenter?.onCreateNewNoteClicked()
-            } else if (itemIdx == entries.size - 1) {
-                presenter?.onCreateNewGroupClicked()
-            } else {
-                presenter?.onCreateNewNoteFromTemplateClicked(templates[itemIdx - 1])
+            when (itemIdx) {
+                0 -> presenter?.onCreateNewNoteClicked()
+                entries.size - 1 -> presenter?.onCreateNewGroupClicked()
+                else -> presenter?.onCreateNewNoteFromTemplateClicked(templates[itemIdx - 1])
             }
         }
-        dialog.show(parentFragmentManager, NewEntryDialog.TAG)
+
+        dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
+    }
+
+    override fun showGroupActionsDialog(group: Group) {
+        showGroupActionsDialogEvent.call(group)
+    }
+
+    private fun showGroupActionsDialogInternal(group: Group) {
+        val entries = resources.getStringArray(R.array.item_actions_entries)
+
+        val dialog = ChooseOptionDialog.newInstance(null, entries.toList())
+        dialog.onItemClickListener = { itemIdx ->
+            when (itemIdx) {
+                0 -> presenter?.onEditGroupClicked(group)
+                1 -> presenter?.onRemoveGroupClicked(group)
+            }
+        }
+        dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
+    }
+
+    override fun showNoteActionsDialog(note: Note) {
+        showNoteActionsDialogEvent.call(note)
+    }
+
+    private fun showNoteActionsDialogInternal(note: Note) {
+        val entries = resources.getStringArray(R.array.item_actions_entries)
+
+        val dialog = ChooseOptionDialog.newInstance(null, entries.toList())
+        dialog.onItemClickListener = { itemIdx ->
+            when (itemIdx) {
+                0 -> presenter?.onEditNoteClicked(note)
+                1 -> presenter?.onRemoveNoteClicked(note)
+            }
+        }
+        dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
+    }
+
+    override fun showRemoveConfirmationDialog(group: Group?, note: Note?) {
+        showRemoveConfirmationDialogEvent.call(Pair(group, note))
+    }
+
+    private fun showRemoveConfirmationDialogInternal(group: Group?, note: Note?) {
+        val message = if (note != null) {
+            getString(R.string.note_remove_confirmation_message, note.title)
+        } else {
+            getString(R.string.group_remove_confirmation_message)
+        }
+
+        val dialog = ConfirmationDialog.newInstance(
+            message,
+            getString(R.string.yes),
+            getString(R.string.no)
+        )
+        dialog.onConfirmationLister = {
+            presenter?.onRemoveConfirmed(group, note)
+        }
+        dialog.show(childFragmentManager, ConfirmationDialog.TAG)
+    }
+
+    override fun showEditNoteScreen(note: Note) {
+        showEditNoteScreenEvent.call(note)
+    }
+
+    private fun showEditNoteScreenInternal(note: Note) {
+        val noteUid = note.uid ?: return
+
+        val intent = NoteEditorActivity.intentForEditNote(requireContext(), noteUid, note.title)
+        startActivity(intent)
+    }
+
+    override fun showEditGroupScreen(group: Group) {
+        showEditGroupScreenEvent.call(group)
+    }
+
+    private fun showEditGroupScreenInternal(group: Group) {
     }
 }

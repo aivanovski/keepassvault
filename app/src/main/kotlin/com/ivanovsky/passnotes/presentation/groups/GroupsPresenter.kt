@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.presentation.groups
 
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus
@@ -153,6 +155,17 @@ class GroupsPresenter(
         return result
     }
 
+    override fun onListItemLongClicked(position: Int) {
+        val dataItems = currentDataItems ?: return
+        val dataItem = dataItems[position]
+
+        if (dataItem is GroupsInteractor.GroupItem) {
+            view.showGroupActionsDialog(dataItem.group)
+        } else if (dataItem is GroupsInteractor.NoteItem) {
+            view.showNoteActionsDialog(dataItem.note)
+        }
+    }
+
     override fun onAddButtonClicked() {
         view.showNewEntryDialog(templates ?: emptyList())
     }
@@ -169,7 +182,6 @@ class GroupsPresenter(
         val currentGroupUid = getCurrentGroupUid() ?: return
 
         view.showNewGroupScreen(currentGroupUid)
-
     }
 
     override fun onCreateNewNoteClicked() {
@@ -182,5 +194,66 @@ class GroupsPresenter(
         val currentGroupUid = getCurrentGroupUid() ?: return
 
         view.showNewNoteScreen(currentGroupUid, template)
+    }
+
+    override fun onEditGroupClicked(group: Group) {
+        view.showEditGroupScreen(group)
+    }
+
+    override fun onRemoveGroupClicked(group: Group) {
+        view.showRemoveConfirmationDialog(group, null)
+    }
+
+    override fun onEditNoteClicked(note: Note) {
+        view.showEditNoteScreen(note)
+    }
+
+    override fun onRemoveNoteClicked(note: Note) {
+        view.showRemoveConfirmationDialog(null, note)
+    }
+
+    override fun onRemoveConfirmed(group: Group?, note: Note?) {
+        val groupUid = group?.uid
+        val noteUid = note?.uid
+
+        if (groupUid != null) {
+            removeGroup(groupUid)
+        } else if (noteUid != null) {
+            removeNote(note.groupUid, noteUid)
+        }
+    }
+
+    private fun removeGroup(groupUid: UUID) {
+        view.screenState = ScreenState.loading()
+
+        scope.launch {
+            val removeResult = withContext(Dispatchers.Default) {
+                interactor.removeGroup(groupUid)
+            }
+
+            if (removeResult.isSucceededOrDeferred) {
+                view.showToastMessage(resourceHelper.getString(R.string.successfully_removed))
+            } else {
+                val message = errorInteractor.processAndGetMessage(removeResult.error)
+                view.screenState = ScreenState.error(message)
+            }
+        }
+    }
+
+    private fun removeNote(groupUid: UUID, noteUid: UUID) {
+        view.screenState = ScreenState.loading()
+
+        scope.launch {
+            val removeResult = withContext(Dispatchers.Default) {
+                interactor.removeNote(groupUid, noteUid)
+            }
+
+            if (removeResult.isSucceededOrDeferred) {
+                view.showToastMessage(resourceHelper.getString(R.string.successfully_removed))
+            } else {
+                val message = errorInteractor.processAndGetMessage(removeResult.error)
+                view.screenState = ScreenState.error(message)
+            }
+        }
     }
 }

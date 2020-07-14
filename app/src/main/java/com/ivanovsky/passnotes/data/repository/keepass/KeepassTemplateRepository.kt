@@ -19,11 +19,17 @@ class KeepassTemplateRepository(
     private val templatesRef = AtomicReference<List<Template>>(emptyList())
 
     init {
-        noteDao.setOnNoteChangeListener { groupUid, oldNoteUid, newNoteUid ->
-            onNoteUpdated(groupUid, oldNoteUid, newNoteUid)
+        noteDao.setOnNoteChangeListener { groupUid, _, _ ->
+            checkGroupUid(groupUid)
         }
-        noteDao.setOnNoteInsertListener { groupUid, noteUid ->
-            onNoteInserted(groupUid, noteUid)
+        noteDao.setOnNoteInsertListener { groupUid, _ ->
+            checkGroupUid(groupUid)
+        }
+        noteDao.setOnNoteRemoveListener { groupUid, _ ->
+            checkGroupUid(groupUid)
+        }
+        groupDao.setOnGroupRemoveLister { groupUid ->
+            checkGroupUid(groupUid)
         }
     }
 
@@ -58,25 +64,7 @@ class KeepassTemplateRepository(
         return OperationResult.success(true)
     }
 
-    private fun onNoteUpdated(groupUid: UUID, oldNoteUid: UUID, newNoteUid: UUID) {
-        if (templateGroupUidRef.get() != groupUid) return
-
-        val templates = templatesRef.get() ?: return
-        val updatedTemplate = templates.firstOrNull { template -> template.uid == oldNoteUid }
-        if (updatedTemplate == null) {
-            return
-        }
-
-        // TODO: refactor, we can just replace updated note in templates list
-
-        val findResult = findTemplateNotes()
-        if (findResult.isFailed) {
-            templatesRef.set(null)
-            return
-        }
-    }
-
-    private fun onNoteInserted(groupUid: UUID, noteUid: UUID) {
+    private fun checkGroupUid(groupUid: UUID) {
         if (templateGroupUidRef.get() != groupUid) return
 
         // TODO: refactor

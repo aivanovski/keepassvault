@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.domain.interactor.groups
 
+import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -7,7 +8,10 @@ import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import java.util.*
 
-class GroupsInteractor(dbRepo: EncryptedDatabaseRepository) {
+class GroupsInteractor(
+    dbRepo: EncryptedDatabaseRepository,
+    private val observerBus: ObserverBus
+) {
 
     private val groupRepository = dbRepo.groupRepository
     private val noteRepository = dbRepo.noteRepository
@@ -74,6 +78,22 @@ class GroupsInteractor(dbRepo: EncryptedDatabaseRepository) {
         }
 
         return OperationResult.success(items)
+    }
+
+    fun removeGroup(groupUid: UUID): OperationResult<Unit> {
+        val removeResult = groupRepository.remove(groupUid)
+
+        observerBus.notifyGroupDataSetChanged()
+
+        return removeResult.takeStatusWith(Unit)
+    }
+
+    fun removeNote(groupUid: UUID, noteUid: UUID): OperationResult<Unit> {
+        val removeResult = noteRepository.remove(noteUid)
+
+        observerBus.notifyNoteDataSetChanged(groupUid)
+
+        return removeResult.takeStatusWith(Unit)
     }
 
     abstract class Item

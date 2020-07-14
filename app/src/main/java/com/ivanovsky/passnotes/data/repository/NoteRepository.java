@@ -13,4 +13,5 @@ public interface NoteRepository {
 	OperationResult<UUID> insert(Note note);
 	OperationResult<Note> getNoteByUid(UUID uid);
 	OperationResult<UUID> update(Note note);
+	OperationResult<Boolean> remove(UUID noteUid);
 }

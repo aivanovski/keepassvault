@@ -28,6 +28,7 @@ public class OperationError {
 	public static final String MESSAGE_UID_IS_NULL = "Uid is null";
 	public static final String MESSAGE_DUPLICATED_NOTE = "Duplicated note";
 	public static final String MESSAGE_FAILED_TO_ADD_ENTRY = "Failed to add entry";
+	public static final String MESSAGE_FAILED_TO_REMOVE_ROOT_GROUP = "Failed to remove root group";
 
 	private Type type;
 	private String message;

@@ -14,15 +14,25 @@ import java.util.UUID;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_REMOVE_ROOT_GROUP;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNKNOWN_ERROR;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 
 public class KeepassGroupDao implements GroupDao {
 
 	private final KeepassDatabase db;
+	private volatile OnGroupRemoveLister removeLister;
+
+	public interface OnGroupRemoveLister {
+		void onGroupRemoved(UUID groupUid);
+	}
 
 	public KeepassGroupDao(KeepassDatabase db) {
 		this.db = db;
+	}
+
+	public void setOnGroupRemoveLister(OnGroupRemoveLister removeLister) {
+		this.removeLister = removeLister;
 	}
 
 	@Override
@@ -129,5 +139,33 @@ public class KeepassGroupDao implements GroupDao {
 		}
 
 		return commitResult.takeStatusWith(newGroup.getUuid());
+	}
+
+	@Override
+	public OperationResult<Boolean> remove(UUID groupUid) {
+		SimpleDatabase keepassDb = db.getKeepassDatabase();
+
+		SimpleGroup group = keepassDb.findGroup(groupUid);
+		if (group == null) {
+			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+		}
+
+		SimpleGroup parentGroup = group.getParent();
+		if (parentGroup == null) {
+			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_REMOVE_ROOT_GROUP));
+		}
+
+		parentGroup.removeGroup(group);
+
+		OperationResult<Boolean> commitResult = db.commit();
+		if (commitResult.isFailed()) {
+			return commitResult.takeError();
+		}
+
+		if (removeLister != null) {
+			removeLister.onGroupRemoved(groupUid);
+		}
+
+		return commitResult.takeStatusWith(true);
 	}
 }

@@ -35,6 +35,7 @@ public class KeepassNoteDao implements NoteDao {
 	private final KeepassDatabase db;
 	private volatile OnNoteUpdateListener updateListener;
 	private volatile OnNoteInsertListener insertListener;
+	private volatile OnNoteRemoveListener removeListener;
 
 	public interface OnNoteUpdateListener {
 		void onNoteChanged(UUID groupUid, UUID oldNoteUid, UUID newNoteUid);
@@ -42,6 +43,10 @@ public class KeepassNoteDao implements NoteDao {
 
 	public interface OnNoteInsertListener {
 		void onNoteCreated(UUID groupUid, UUID noteUid);
+	}
+
+	public interface OnNoteRemoveListener {
+		void onNoteRemove(UUID groupUid, UUID noteUid);
 	}
 
 	public KeepassNoteDao(KeepassDatabase db) {
@@ -54,6 +59,10 @@ public class KeepassNoteDao implements NoteDao {
 
 	public void setOnNoteInsertListener(OnNoteInsertListener insertListener) {
 		this.insertListener = insertListener;
+	}
+
+	public void setOnNoteRemoveListener(OnNoteRemoveListener removeListener) {
+		this.removeListener = removeListener;
 	}
 
 	@Override
@@ -245,5 +254,37 @@ public class KeepassNoteDao implements NoteDao {
 		}
 
 		return commitResult.takeStatusWith(newUid);
+	}
+
+	@Override
+	public OperationResult<Boolean> remove(UUID noteUid) {
+		SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
+
+		List<? extends SimpleEntry> entries = rootGroup.findEntries(
+				entry -> entry.getUuid().equals(noteUid),
+				true);
+		if (entries.size() != 1) {
+		    return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
+		}
+
+	    SimpleEntry note = entries.get(0);
+
+		SimpleGroup group = note.getParent();
+		if (group == null) {
+			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+		}
+
+		group.removeEntry(note);
+
+		OperationResult<Boolean> commitResult = db.commit();
+		if (commitResult.isFailed()) {
+			return commitResult.takeError();
+		}
+
+		if (removeListener != null) {
+			removeListener.onNoteRemove(group.getUuid(), noteUid);
+		}
+
+		return commitResult.takeStatusWith(true);
 	}
 }

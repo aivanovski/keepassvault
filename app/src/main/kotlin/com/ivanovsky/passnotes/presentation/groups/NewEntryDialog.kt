@@ -16,6 +16,7 @@ class NewEntryDialog : DialogFragment(), DialogInterface.OnClickListener {
     lateinit var resourceHelper: ResourceHelper
 
     lateinit var onItemClickListener: (itemIndex: Int) -> Unit
+    private lateinit var entries: List<String>
 
     init {
         Injector.getInstance().appComponent.inject(this)
@@ -30,14 +31,9 @@ class NewEntryDialog : DialogFragment(), DialogInterface.OnClickListener {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val items = arrayOf(
-            resourceHelper.getString(R.string.new_item_entry_new_group),
-            resourceHelper.getString(R.string.new_item_entry_new_note)
-        )
-
         return AlertDialog.Builder(context)
             .setTitle(resourceHelper.getString(R.string.create))
-            .setItems(items, this)
+            .setItems(entries.toTypedArray(), this)
             .create()
     }
 
@@ -47,5 +43,11 @@ class NewEntryDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     companion object {
         val TAG = NewEntryDialog::class.java.simpleName
+
+        fun newInstance(entries: List<String>): NewEntryDialog {
+            val dialog = NewEntryDialog()
+            dialog.entries = entries
+            return dialog
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.domain.interactor.groups
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import java.util.*
 
@@ -10,6 +11,11 @@ class GroupsInteractor(dbRepo: EncryptedDatabaseRepository) {
 
     private val groupRepository = dbRepo.groupRepository
     private val noteRepository = dbRepo.noteRepository
+    private val templateRepository = dbRepo.templateRepository
+
+    fun getTemplates(): List<Template>? {
+        return templateRepository.templates
+    }
 
     fun getRootUid(): UUID? {
         val rootResult = groupRepository.rootGroup

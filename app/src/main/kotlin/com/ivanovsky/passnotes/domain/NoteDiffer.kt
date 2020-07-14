@@ -65,12 +65,10 @@ class NoteDiffer {
         val lhsProps = lhs.properties.filter { property -> !equalsProperties.contains(property) }
         val rhsProps = rhs.properties.filter { property -> !equalsProperties.contains(property) }
 
-        val lhsPropMap = lhsProps.filter { property -> property.type != null }
-            .map { property -> property.type to property }
+        val lhsPropMap = lhsProps.map { property -> property.name to property }
             .toMap()
 
-        val rhsPropMap = rhsProps.filter { property -> property.type != null }
-            .map { property -> property.type to property }
+        val rhsPropMap = rhsProps.map { property -> property.name to property }
             .toMap()
 
         if (lhsPropMap.size != rhsPropMap.size) {
@@ -78,7 +76,7 @@ class NoteDiffer {
         }
 
         for (lhsProp in lhsPropMap.values) {
-            val rhsProp = rhsPropMap[lhsProp.type]
+            val rhsProp = rhsPropMap[lhsProp.name]
 
             if (lhsProp != rhsProp) {
                 return false

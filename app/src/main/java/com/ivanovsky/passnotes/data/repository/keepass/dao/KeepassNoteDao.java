@@ -33,9 +33,27 @@ public class KeepassNoteDao implements NoteDao {
 	private static final String PROPERTY_NOTES = "Notes";
 
 	private final KeepassDatabase db;
+	private volatile OnNoteUpdateListener updateListener;
+	private volatile OnNoteInsertListener insertListener;
+
+	public interface OnNoteUpdateListener {
+		void onNoteChanged(UUID groupUid, UUID oldNoteUid, UUID newNoteUid);
+	}
+
+	public interface OnNoteInsertListener {
+		void onNoteCreated(UUID groupUid, UUID noteUid);
+	}
 
 	public KeepassNoteDao(KeepassDatabase db) {
 		this.db = db;
+	}
+
+	public void setOnNoteChangeListener(OnNoteUpdateListener updateListener) {
+		this.updateListener = updateListener;
+	}
+
+	public void setOnNoteInsertListener(OnNoteInsertListener insertListener) {
+		this.insertListener = insertListener;
 	}
 
 	@Override
@@ -145,6 +163,10 @@ public class KeepassNoteDao implements NoteDao {
 			return commitResult.takeError();
 		}
 
+		if (insertListener != null) {
+			insertListener.onNoteCreated(note.getGroupUid(), newEntry.getUuid());
+		}
+
 		return commitResult.takeStatusWith(newEntry.getUuid());
 	}
 
@@ -182,8 +204,8 @@ public class KeepassNoteDao implements NoteDao {
 
 	@Override
 	public OperationResult<UUID> update(Note note) {
-		UUID noteUid = note.getUid();
-		if (noteUid == null) {
+		UUID oldUid = note.getUid();
+		if (oldUid == null) {
 			return OperationResult.error(newGenericError(MESSAGE_UID_IS_NULL));
 		}
 
@@ -193,7 +215,7 @@ public class KeepassNoteDao implements NoteDao {
 		}
 
 		List<? extends SimpleEntry> entries =
-				group.findEntries(entry -> noteUid.equals(entry.getUuid()), false);
+				group.findEntries(entry -> oldUid.equals(entry.getUuid()), false);
 		if (entries.size() == 0) {
 			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
 		} else if (entries.size() > 1) {
@@ -216,6 +238,10 @@ public class KeepassNoteDao implements NoteDao {
 		if (commitResult.isFailed()) {
 			group.removeEntry(newEntry);
 			return commitResult.takeError();
+		}
+
+		if (updateListener != null) {
+			updateListener.onNoteChanged(note.getGroupUid(), oldUid, newUid);
 		}
 
 		return commitResult.takeStatusWith(newUid);

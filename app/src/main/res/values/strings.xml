@@ -53,7 +53,7 @@
 	<string name="notes_with_count">Notes: %d</string>
 	<string name="groups_with_count">Groups: %d</string>
 	<string name="groups_and_notes_with_count">Groups: %1$d  Notes: %2$d</string>
-    <string name="new_item_entry_new_note">New Note</string>
+    <string name="new_item_entry_standard_note">Standard Note</string>
 	<string name="new_item_entry_new_group">New Group</string>
 
 	<!-- New group screen -->

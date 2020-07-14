@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.domain.interactor.note_editor
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import java.util.*
 
@@ -12,6 +13,7 @@ class NoteEditorInteractor(
 ) {
 
     private val noteRepository = dbRepo.noteRepository
+    private val templateRepository = dbRepo.templateRepository
 
     fun createNewNote(note: Note): OperationResult<Unit> {
         val insertResult = noteRepository.insert(note)
@@ -41,5 +43,10 @@ class NoteEditorInteractor(
         observerBus.notifyNoteContentChanged(groupUid, oldUid, newUid)
 
         return updateResult.takeStatusWith(Unit)
+    }
+
+    fun loadTemplate(templateUid: UUID): Template? {
+        val templates = templateRepository.templates ?: return null
+        return templates.firstOrNull { template -> template.uid == templateUid }
     }
 }

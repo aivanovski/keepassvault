@@ -36,7 +36,7 @@ public class KeepassNoteRepository implements NoteRepository {
 	}
 
 	@Override
-	public synchronized OperationResult<UUID> insert(Note note) {
+	public OperationResult<UUID> insert(Note note) {
 		return dao.insert(note);
 	}
 
@@ -46,12 +46,12 @@ public class KeepassNoteRepository implements NoteRepository {
 	}
 
 	@Override
-	public synchronized OperationResult<UUID> update(Note note) {
+	public OperationResult<UUID> update(Note note) {
 		return dao.update(note);
 	}
 
 	@Override
-	public synchronized OperationResult<Boolean> remove(UUID noteUid) {
+	public OperationResult<Boolean> remove(UUID noteUid) {
 		return dao.remove(noteUid);
 	}
 }

@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.data.repository.TemplateRepository;
 
 public interface EncryptedDatabase {
 
+	Object getLock();
 	GroupRepository getGroupRepository();
 	NoteRepository getNoteRepository();
 	TemplateRepository getTemplateRepository();

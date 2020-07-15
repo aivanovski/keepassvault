@@ -37,34 +37,33 @@ public class KeepassGroupDao implements GroupDao {
 
 	@Override
 	public OperationResult<Group> getRootGroup() {
-		OperationResult<Group> result;
-
 		SimpleDatabase keepassDb = db.getKeepassDatabase();
 
-		SimpleGroup rootGroup = keepassDb.getRootGroup();
-		if (rootGroup != null) {
-			result = OperationResult.success(createGroupFromKeepassGroup(rootGroup));
-		} else {
-			result = OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_ROOT_GROUP));
+		SimpleGroup rootGroup;
+		synchronized (db.getLock()) {
+			rootGroup = keepassDb.getRootGroup();
+			if (rootGroup == null) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_ROOT_GROUP));
+			}
 		}
 
-		return result;
+		return OperationResult.success(createGroupFromKeepassGroup(rootGroup));
 	}
 
 	@Override
 	public OperationResult<List<Group>> getChildGroups(UUID parentGroupUid) {
-		SimpleDatabase keepassDb = db.getKeepassDatabase();
-
-		SimpleGroup parentGroup = keepassDb.findGroup(parentGroupUid);
-		if (parentGroup == null) {
-			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
-		}
-
 		List<Group> groups = new ArrayList<>();
 
-		List<SimpleGroup> childGroups = parentGroup.getGroups();
-		if (childGroups != null) {
-		    groups.addAll(createGroupsFromKeepassGroups(childGroups));
+		synchronized (db.getLock()) {
+			SimpleGroup parentGroup = db.getKeepassDatabase().findGroup(parentGroupUid);
+			if (parentGroup == null) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+			}
+
+			List<SimpleGroup> childGroups = parentGroup.getGroups();
+			if (childGroups != null) {
+				groups.addAll(createGroupsFromKeepassGroups(childGroups));
+			}
 		}
 
 		return OperationResult.success(groups);
@@ -74,9 +73,11 @@ public class KeepassGroupDao implements GroupDao {
 	public OperationResult<List<Group>> getAll() {
 		List<Group> groups = new ArrayList<>();
 
-		SimpleDatabase keepassDb = db.getKeepassDatabase();
+		synchronized (db.getLock()) {
+			SimpleDatabase keepassDb = db.getKeepassDatabase();
 
-		putAllGroupsIntoListRecursively(groups, keepassDb.getRootGroup());
+			putAllGroupsIntoListRecursively(groups, keepassDb.getRootGroup());
+		}
 
 		return OperationResult.success(groups);
 	}
@@ -120,52 +121,57 @@ public class KeepassGroupDao implements GroupDao {
 	public OperationResult<UUID> insert(Group group, UUID parentGroupUid) {
 		SimpleDatabase keepassDb = db.getKeepassDatabase();
 
-		SimpleGroup parentGroup = keepassDb.findGroup(parentGroupUid);
-		if (parentGroup == null) {
-			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+		SimpleGroup newGroup;
+		synchronized (db.getLock()) {
+			SimpleGroup parentGroup = keepassDb.findGroup(parentGroupUid);
+			if (parentGroup == null) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+			}
+
+			newGroup = keepassDb.newGroup(group.getTitle());
+
+			parentGroup.addGroup(newGroup);
+			if (newGroup.getUuid() == null) {
+				return OperationResult.error(newDbError(MESSAGE_UNKNOWN_ERROR));
+			}
+
+			OperationResult<Boolean> commitResult = db.commit();
+			if (commitResult.isFailed()) {
+				keepassDb.deleteGroup(newGroup.getUuid());
+				return commitResult.takeError();
+			}
 		}
 
-		SimpleGroup newGroup = keepassDb.newGroup(group.getTitle());
-
-		parentGroup.addGroup(newGroup);
-		if (newGroup.getUuid() == null) {
-			return OperationResult.error(newDbError(MESSAGE_UNKNOWN_ERROR));
-		}
-
-		OperationResult<Boolean> commitResult = db.commit();
-		if (commitResult.isFailed()) {
-			keepassDb.deleteGroup(newGroup.getUuid());
-			return commitResult.takeError();
-		}
-
-		return commitResult.takeStatusWith(newGroup.getUuid());
+		return OperationResult.success(newGroup.getUuid());
 	}
 
 	@Override
 	public OperationResult<Boolean> remove(UUID groupUid) {
 		SimpleDatabase keepassDb = db.getKeepassDatabase();
 
-		SimpleGroup group = keepassDb.findGroup(groupUid);
-		if (group == null) {
-			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
-		}
+		synchronized (db.getLock()) {
+			SimpleGroup group = keepassDb.findGroup(groupUid);
+			if (group == null) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+			}
 
-		SimpleGroup parentGroup = group.getParent();
-		if (parentGroup == null) {
-			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_REMOVE_ROOT_GROUP));
-		}
+			SimpleGroup parentGroup = group.getParent();
+			if (parentGroup == null) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_REMOVE_ROOT_GROUP));
+			}
 
-		parentGroup.removeGroup(group);
+			parentGroup.removeGroup(group);
 
-		OperationResult<Boolean> commitResult = db.commit();
-		if (commitResult.isFailed()) {
-			return commitResult.takeError();
+			OperationResult<Boolean> commitResult = db.commit();
+			if (commitResult.isFailed()) {
+				return commitResult.takeError();
+			}
 		}
 
 		if (removeLister != null) {
 			removeLister.onGroupRemoved(groupUid);
 		}
 
-		return commitResult.takeStatusWith(true);
+		return OperationResult.success(true);
 	}
 }

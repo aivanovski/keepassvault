@@ -67,16 +67,18 @@ public class KeepassNoteDao implements NoteDao {
 
 	@Override
 	public OperationResult<List<Note>> getNotesByGroupUid(UUID groupUid) {
-		SimpleGroup group = db.getKeepassDatabase().findGroup(groupUid);
-		if (group == null) {
-			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
-		}
-
 		List<Note> notes = new ArrayList<>();
 
-		List<SimpleEntry> entries = group.getEntries();
-		if (entries != null) {
-			notes.addAll(createNotesFromEntries(group.getEntries()));
+		synchronized (db.getLock()) {
+			SimpleGroup group = db.getKeepassDatabase().findGroup(groupUid);
+			if (group == null) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+			}
+
+			List<SimpleEntry> entries = group.getEntries();
+			if (entries != null) {
+				notes.addAll(createNotesFromEntries(group.getEntries()));
+			}
 		}
 
 		return OperationResult.success(notes);
@@ -156,27 +158,31 @@ public class KeepassNoteDao implements NoteDao {
 
 	@Override
 	public OperationResult<UUID> insert(Note note) {
-		SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
-		if (group == null) {
-			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
-		}
 
-		SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
-		if (newEntry == null) {
-			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
-		}
+	    SimpleEntry newEntry;
+		synchronized (db.getLock()) {
+			SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
+			if (group == null) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+			}
 
-		OperationResult<Boolean> commitResult = db.commit();
-		if (commitResult.isFailed()) {
-			group.removeEntry(newEntry);
-			return commitResult.takeError();
+			newEntry = group.addEntry(createEntryFromNote(note));
+			if (newEntry == null) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
+			}
+
+			OperationResult<Boolean> commitResult = db.commit();
+			if (commitResult.isFailed()) {
+				group.removeEntry(newEntry);
+				return commitResult.takeError();
+			}
 		}
 
 		if (insertListener != null) {
 			insertListener.onNoteCreated(note.getGroupUid(), newEntry.getUuid());
 		}
 
-		return commitResult.takeStatusWith(newEntry.getUuid());
+		return OperationResult.success(newEntry.getUuid());
 	}
 
 	private SimpleEntry createEntryFromNote(Note note) {
@@ -195,20 +201,21 @@ public class KeepassNoteDao implements NoteDao {
 
 	@Override
 	public OperationResult<Note> getNoteByUid(UUID noteUid) {
-		OperationResult<Note> result = new OperationResult<>();
+		SimpleEntry note;
+		synchronized (db.getLock()) {
+			SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
 
-		SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
+			List<? extends SimpleEntry> entries = rootGroup.findEntries(
+					entry -> entry.getUuid().equals(noteUid),
+					true);
+			if (entries.size() == 0) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
+			}
 
-		List<? extends SimpleEntry> entries = rootGroup.findEntries(
-				entry -> entry.getUuid().equals(noteUid),
-				true);
-		if (entries.size() != 0) {
-			result.setObj(createNoteFromEntry(entries.get(0)));
-		} else {
-			result.setError(newDbError(OperationError.MESSAGE_FAILED_TO_FIND_NOTE));
+			note = entries.get(0);
 		}
 
-		return result;
+		return OperationResult.success(createNoteFromEntry(note));
 	}
 
 	@Override
@@ -218,73 +225,81 @@ public class KeepassNoteDao implements NoteDao {
 			return OperationResult.error(newGenericError(MESSAGE_UID_IS_NULL));
 		}
 
-		SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
-		if (group == null) {
-			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
-		}
+		UUID newUid;
+		synchronized (db.getLock()) {
 
-		List<? extends SimpleEntry> entries =
-				group.findEntries(entry -> oldUid.equals(entry.getUuid()), false);
-		if (entries.size() == 0) {
-			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
-		} else if (entries.size() > 1) {
-			return OperationResult.error(newDbError(MESSAGE_DUPLICATED_NOTE));
-		}
+			SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
+			if (group == null) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+			}
 
-		SimpleEntry oldEntry = entries.get(0);
-		group.removeEntry(oldEntry);
+			List<? extends SimpleEntry> entries =
+					group.findEntries(entry -> oldUid.equals(entry.getUuid()), false);
+			if (entries.size() == 0) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
+			} else if (entries.size() > 1) {
+				return OperationResult.error(newDbError(MESSAGE_DUPLICATED_NOTE));
+			}
 
-		// TODO: entry insertion can be reused from insert() method
+			SimpleEntry oldEntry = entries.get(0);
+			group.removeEntry(oldEntry);
 
-		SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
-		if (newEntry == null) {
-			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
-		}
+			// TODO: entry insertion can be reused from insert() method
 
-		UUID newUid = newEntry.getUuid();
+			SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
+			if (newEntry == null) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
+			}
 
-		OperationResult<Boolean> commitResult = db.commit();
-		if (commitResult.isFailed()) {
-			group.removeEntry(newEntry);
-			return commitResult.takeError();
+			newUid = newEntry.getUuid();
+
+			OperationResult<Boolean> commitResult = db.commit();
+			if (commitResult.isFailed()) {
+				group.removeEntry(newEntry);
+				return commitResult.takeError();
+			}
 		}
 
 		if (updateListener != null) {
 			updateListener.onNoteChanged(note.getGroupUid(), oldUid, newUid);
 		}
 
-		return commitResult.takeStatusWith(newUid);
+		return OperationResult.success(newUid);
 	}
 
 	@Override
 	public OperationResult<Boolean> remove(UUID noteUid) {
-		SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
+		SimpleGroup group;
 
-		List<? extends SimpleEntry> entries = rootGroup.findEntries(
-				entry -> entry.getUuid().equals(noteUid),
-				true);
-		if (entries.size() != 1) {
-		    return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
-		}
+	    synchronized (db.getLock()) {
+			SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
 
-	    SimpleEntry note = entries.get(0);
+			List<? extends SimpleEntry> entries = rootGroup.findEntries(
+					entry -> entry.getUuid().equals(noteUid),
+					true);
+			if (entries.size() != 1) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
+			}
 
-		SimpleGroup group = note.getParent();
-		if (group == null) {
-			return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
-		}
+			SimpleEntry note = entries.get(0);
 
-		group.removeEntry(note);
+			group = note.getParent();
+			if (group == null) {
+				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+			}
 
-		OperationResult<Boolean> commitResult = db.commit();
-		if (commitResult.isFailed()) {
-			return commitResult.takeError();
+			group.removeEntry(note);
+
+			OperationResult<Boolean> commitResult = db.commit();
+			if (commitResult.isFailed()) {
+				return commitResult.takeError();
+			}
 		}
 
 		if (removeListener != null) {
 			removeListener.onNoteRemove(group.getUuid(), noteUid);
 		}
 
-		return commitResult.takeStatusWith(true);
+		return OperationResult.success(true);
 	}
 }

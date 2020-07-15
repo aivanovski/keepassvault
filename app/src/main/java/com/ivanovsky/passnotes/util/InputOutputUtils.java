@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.annotation.Nullable;
+
 public class InputOutputUtils {
 
 	public static FileInputStream newFileInputStreamOrNull(File file) {
@@ -106,6 +108,30 @@ public class InputOutputUtils {
 		if (close) {
 			in.close();
 			out.close();
+		}
+	}
+
+	public static void close(@Nullable OutputStream out) {
+	    if (out == null) {
+	    	return;
+		}
+
+		try {
+			out.close();
+		} catch (IOException e) {
+		    Logger.printStackTrace(e);
+		}
+	}
+
+	public static void close(@Nullable InputStream in) {
+		if (in == null) {
+			return;
+		}
+
+		try {
+			in.close();
+		} catch (IOException e) {
+			Logger.printStackTrace(e);
 		}
 	}
 

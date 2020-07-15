@@ -29,9 +29,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import javax.inject.Inject;
 
-import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 
 public class KeepassDatabase implements EncryptedDatabase {
 
@@ -46,13 +47,15 @@ public class KeepassDatabase implements EncryptedDatabase {
 	private final KeepassNoteRepository noteRepository;
 	private final KeepassTemplateRepository templateRepository;
 	private final SimpleDatabase db;
+	private final Object lock;
 
 	public KeepassDatabase(FileDescriptor file, InputStream in, byte[] key) throws EncryptedDatabaseException {
 		Injector.getInstance().getAppComponent().inject(this);
 
 		this.file = file;
-		this.db = readDatabaseFile(in, key);
 		this.key = key;
+		this.lock = new Object();
+		this.db = readDatabaseFile(in, key);
 
 		KeepassNoteDao noteDao = new KeepassNoteDao(this);
 		KeepassGroupDao groupDao = new KeepassGroupDao(this);
@@ -66,36 +69,36 @@ public class KeepassDatabase implements EncryptedDatabase {
 		templateRepository.findTemplateNotes();
 	}
 
-	private synchronized SimpleDatabase readDatabaseFile(InputStream in, byte[] key) throws EncryptedDatabaseException {
+	private SimpleDatabase readDatabaseFile(InputStream in, byte[] key) throws EncryptedDatabaseException {
 		SimpleDatabase result;
 
 		Credentials credentials = new KdbxCreds(key);
 
-		try {
-			result = SimpleDatabase.load(credentials, in);
-		} catch (IllegalStateException e) {
-			Logger.printStackTrace(e);
-			throw new EncryptedDatabaseException(e);
+		synchronized (lock) {
+			try {
+				result = SimpleDatabase.load(credentials, in);
+			} catch (IllegalStateException e) {
+				Logger.printStackTrace(e);
+				throw new EncryptedDatabaseException(e);
 
-		} catch (IOException e) {
-			throw new FailedToWriteDBException();
+			} catch (IOException e) {
+				throw new FailedToWriteDBException();
 
-		} catch (Exception e) {
-			Logger.printStackTrace(e);
-			throw new EncryptedDatabaseException(e);
+			} catch (Exception e) {
+				Logger.printStackTrace(e);
+				throw new EncryptedDatabaseException(e);
 
-		} finally {
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException e) {
-					// TODO: should be handled or not?
-					Logger.printStackTrace(e);
-				}
+			} finally {
+				InputOutputUtils.close(in);
 			}
 		}
 
 		return result;
+	}
+
+	@Override
+	public Object getLock() {
+		return lock;
 	}
 
 	@Override
@@ -114,22 +117,25 @@ public class KeepassDatabase implements EncryptedDatabase {
 	}
 
 	@Override
-	public synchronized OperationResult<Boolean> commit() {
+	public OperationResult<Boolean> commit() {
 		OperationResult<Boolean> result = new OperationResult<>();
 
-		FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsType());
+		synchronized (lock) {
+			FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsType());
 
-		Credentials credentials = new KdbxCreds(key);
+			Credentials credentials = new KdbxCreds(key);
 
-		file.setModified(System.currentTimeMillis());
+			file.setModified(System.currentTimeMillis());
 
-		OutputStream out;
-		try {
-			OperationResult<OutputStream> outResult = provider.openFileForWrite(file,
-					OnConflictStrategy.CANCEL,
-					true);
+			OutputStream out = null;
+			try {
+				OperationResult<OutputStream> outResult = provider.openFileForWrite(file,
+						OnConflictStrategy.CANCEL,
+						true);
+				if (outResult.isFailed()) {
+					return outResult.takeError();
+				}
 
-			if (outResult.isSucceededOrDeferred()) {
 				out = outResult.getObj();
 
 				// method 'SimpleDatabase.save' closes output stream after work is done
@@ -153,12 +159,12 @@ public class KeepassDatabase implements EncryptedDatabase {
 				} else {
 					result.setObj(true);
 				}
-			} else {
-				result.setError(outResult.getError());
-			}
 
-		} catch (IOException e) {
-			result.setError(newNetworkIOError());
+			} catch (IOException e) {
+				InputOutputUtils.close(out);
+
+				result.setError(newGenericIOError(e));
+			}
 		}
 
 		return result;

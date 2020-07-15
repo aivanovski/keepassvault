@@ -15,21 +15,21 @@ import com.ivanovsky.passnotes.domain.FileSyncHelper
 
 class UnlockInteractor(
     private val fileRepository: UsedFileRepository,
-    private val dbRepository: EncryptedDatabaseRepository,
+    private val dbRepo: EncryptedDatabaseRepository,
     private val observerBus: ObserverBus,
     private val fileSyncHelper: FileSyncHelper
 ) {
 
     fun hasActiveDatabase(): Boolean {
-        return dbRepository.isOpened
+        return dbRepo.isOpened
     }
 
     fun closeActiveDatabase(): OperationResult<Unit> {
-        if (!dbRepository.isOpened) {
+        if (!dbRepo.isOpened) {
             return OperationResult.success(Unit)
         }
 
-        val closeResult = dbRepository.close()
+        val closeResult = dbRepo.close()
         return closeResult.takeStatusWith(Unit)
     }
 
@@ -66,7 +66,7 @@ class UnlockInteractor(
         }
 
         if (syncError == null) {
-            val openResult = dbRepository.open(key, file)
+            val openResult = dbRepo.open(key, file)
             if (openResult.isSucceededOrDeferred) {
                 updateFileAccessTime(file)
                 result.obj = true

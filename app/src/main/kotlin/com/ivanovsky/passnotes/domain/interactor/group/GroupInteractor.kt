@@ -10,14 +10,13 @@ import com.ivanovsky.passnotes.domain.ResourceHelper
 import java.util.*
 
 class GroupInteractor(
-    dbRepos: EncryptedDatabaseRepository,
+    private val dbRepo: EncryptedDatabaseRepository,
     private val resourceHelper: ResourceHelper,
     private val observerBus: ObserverBus
 ) {
-    private val groupRepository = dbRepos.groupRepository
 
     fun getRootGroupUid(): OperationResult<UUID> {
-        val rootGroupResult = groupRepository.rootGroup
+        val rootGroupResult = dbRepo.groupRepository.rootGroup
         if (rootGroupResult.isFailed) {
             return rootGroupResult.takeError()
         }
@@ -36,7 +35,7 @@ class GroupInteractor(
         val group = Group()
         group.title = title
 
-        val insertResult = groupRepository.insert(group, parentUid)
+        val insertResult = dbRepo.groupRepository.insert(group, parentUid)
         if (insertResult.isFailed) {
             return insertResult.takeError()
         }
@@ -46,7 +45,7 @@ class GroupInteractor(
     }
 
     private fun isTitleFree(title: String): Boolean {
-        val groups = groupRepository.allGroup
+        val groups = dbRepo.groupRepository.allGroup
         return groups.isSucceededOrDeferred
                 && groups.obj.none { group -> group.title == title }
     }

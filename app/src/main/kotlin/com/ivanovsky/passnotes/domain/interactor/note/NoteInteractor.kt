@@ -10,14 +10,12 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class NoteInteractor(
-    dbRepo: EncryptedDatabaseRepository,
+    private val dbRepo: EncryptedDatabaseRepository,
     private val clipboardHelper: ClipboardHelper
 ) {
 
-    private val noteRepository = dbRepo.noteRepository
-
     fun getNoteByUid(noteUid: UUID): OperationResult<Note> {
-        return noteRepository.getNoteByUid(noteUid)
+        return dbRepo.noteRepository.getNoteByUid(noteUid)
     }
 
     fun copyToClipboardWithTimeout(text: String) {

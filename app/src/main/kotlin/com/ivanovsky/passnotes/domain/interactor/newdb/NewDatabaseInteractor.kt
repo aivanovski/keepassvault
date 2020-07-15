@@ -9,10 +9,9 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
-import com.ivanovsky.passnotes.injection.Injector
 
 open class NewDatabaseInteractor(
-    private val dbRepository: EncryptedDatabaseRepository,
+    private val dbRepo: EncryptedDatabaseRepository,
     private val usedFileRepository: UsedFileRepository,
     private val fileSystemResolver: FileSystemResolver,
     private val observerBus: ObserverBus
@@ -32,7 +31,7 @@ open class NewDatabaseInteractor(
             val isExists = existsResult.obj
 
             if (!isExists) {
-                val creationResult = dbRepository.createNew(key, file)
+                val creationResult = dbRepo.createNew(key, file)
 
                 if (creationResult.isSucceeded) {
                     val getFileResult = getFile(file)
@@ -55,7 +54,7 @@ open class NewDatabaseInteractor(
 
                         observerBus.notifyUsedFileDataSetChanged()
 
-                        val openResult = dbRepository.open(key, file)
+                        val openResult = dbRepo.open(key, file)
                         if (openResult.isSucceededOrDeferred) {
                             result.obj = true
                         } else {

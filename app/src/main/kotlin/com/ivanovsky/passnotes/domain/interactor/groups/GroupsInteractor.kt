@@ -9,20 +9,16 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import java.util.*
 
 class GroupsInteractor(
-    dbRepo: EncryptedDatabaseRepository,
+    private val dbRepo: EncryptedDatabaseRepository,
     private val observerBus: ObserverBus
 ) {
 
-    private val groupRepository = dbRepo.groupRepository
-    private val noteRepository = dbRepo.noteRepository
-    private val templateRepository = dbRepo.templateRepository
-
     fun getTemplates(): List<Template>? {
-        return templateRepository.templates
+        return dbRepo.templateRepository.templates
     }
 
     fun getRootUid(): UUID? {
-        val rootResult = groupRepository.rootGroup
+        val rootResult = dbRepo.groupRepository.rootGroup
         if (rootResult.isFailed) {
             return null
         }
@@ -31,7 +27,7 @@ class GroupsInteractor(
     }
 
     fun getRootGroupData(): OperationResult<List<Item>> {
-        val rootGroupResult = groupRepository.rootGroup
+        val rootGroupResult = dbRepo.groupRepository.rootGroup
         if (rootGroupResult.isFailed) {
             return rootGroupResult.takeError()
         }
@@ -42,12 +38,12 @@ class GroupsInteractor(
     }
 
     fun getGroupData(groupUid: UUID): OperationResult<List<Item>> {
-        val groupsResult = groupRepository.getChildGroups(groupUid)
+        val groupsResult = dbRepo.groupRepository.getChildGroups(groupUid)
         if (groupsResult.isFailed) {
             return groupsResult.takeError()
         }
 
-        val notesResult = noteRepository.getNotesByGroupUid(groupUid)
+        val notesResult = dbRepo.noteRepository.getNotesByGroupUid(groupUid)
         if (notesResult.isFailed) {
             return groupsResult.takeError()
         }
@@ -57,12 +53,12 @@ class GroupsInteractor(
 
         val items = mutableListOf<Item>()
         for (group in groups) {
-            val noteCountResult = noteRepository.getNoteCountByGroupUid(group.uid)
+            val noteCountResult = dbRepo.noteRepository.getNoteCountByGroupUid(group.uid)
             if (noteCountResult.isFailed) {
                 return noteCountResult.takeError()
             }
 
-            val childGroupCountResult = groupRepository.getChildGroupsCount(group.uid)
+            val childGroupCountResult = dbRepo.groupRepository.getChildGroupsCount(group.uid)
             if (childGroupCountResult.isFailed) {
                 return childGroupCountResult.takeError()
             }
@@ -81,7 +77,7 @@ class GroupsInteractor(
     }
 
     fun removeGroup(groupUid: UUID): OperationResult<Unit> {
-        val removeResult = groupRepository.remove(groupUid)
+        val removeResult = dbRepo.groupRepository.remove(groupUid)
 
         observerBus.notifyGroupDataSetChanged()
 
@@ -89,7 +85,7 @@ class GroupsInteractor(
     }
 
     fun removeNote(groupUid: UUID, noteUid: UUID): OperationResult<Unit> {
-        val removeResult = noteRepository.remove(noteUid)
+        val removeResult = dbRepo.noteRepository.remove(noteUid)
 
         observerBus.notifyNoteDataSetChanged(groupUid)
 

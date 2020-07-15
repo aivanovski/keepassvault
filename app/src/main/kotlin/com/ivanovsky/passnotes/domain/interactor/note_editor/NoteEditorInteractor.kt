@@ -8,15 +8,12 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import java.util.*
 
 class NoteEditorInteractor(
-    dbRepo: EncryptedDatabaseRepository,
+    private val dbRepo: EncryptedDatabaseRepository,
     private val observerBus: ObserverBus
 ) {
 
-    private val noteRepository = dbRepo.noteRepository
-    private val templateRepository = dbRepo.templateRepository
-
     fun createNewNote(note: Note): OperationResult<Unit> {
-        val insertResult = noteRepository.insert(note)
+        val insertResult = dbRepo.noteRepository.insert(note)
         if (insertResult.isFailed) {
             return insertResult.takeError()
         }
@@ -27,11 +24,11 @@ class NoteEditorInteractor(
     }
 
     fun loadNote(uid: UUID): OperationResult<Note> {
-        return noteRepository.getNoteByUid(uid)
+        return dbRepo.noteRepository.getNoteByUid(uid)
     }
 
     fun updateNote(note: Note): OperationResult<Unit> {
-        val updateResult = noteRepository.update(note)
+        val updateResult = dbRepo.noteRepository.update(note)
         if (updateResult.isFailed) {
             return updateResult.takeError()
         }
@@ -46,7 +43,7 @@ class NoteEditorInteractor(
     }
 
     fun loadTemplate(templateUid: UUID): Template? {
-        val templates = templateRepository.templates ?: return null
+        val templates = dbRepo.templateRepository.templates ?: return null
         return templates.firstOrNull { template -> template.uid == templateUid }
     }
 }

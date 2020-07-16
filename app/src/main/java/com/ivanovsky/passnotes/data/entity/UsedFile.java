@@ -14,6 +14,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public class UsedFile {
 
 	@PrimaryKey(autoGenerate = true)
+	@ColumnInfo(name = "id")
 	private int id;
 
 	@ColumnInfo(name = "added_time")

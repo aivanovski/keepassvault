@@ -26,6 +26,7 @@ public class DropboxFile {
 	private boolean downloading;
 
 	@PrimaryKey(autoGenerate = true)
+	@ColumnInfo(name = "id")
 	private Long id;
 
 	@ColumnInfo(name = "retry_count")

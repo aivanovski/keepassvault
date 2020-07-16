@@ -9,44 +9,51 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Spinner
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingMode
 import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuActivity
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListActivity
-import com.ivanovsky.passnotes.util.FileUtils.getFileNameFromPath
-import com.ivanovsky.passnotes.util.FileUtils.getFileNameWithoutExtensionFromPath
-import com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput
+import com.ivanovsky.passnotes.util.FileUtils
 import java.util.*
 import java.util.regex.Pattern
 
-private const val REQUEST_CODE_PICK_FILE = 100
-
 class UnlockFragment : BaseFragment(), UnlockContract.View {
 
-    private var selectedFile: FileDescriptor? = null
-    private var files: List<FileDescriptor>? = null
-
     override var presenter: UnlockContract.Presenter? = null
+
     private lateinit var fileAdapter: FileSpinnerAdapter
-    private lateinit var passwordRules: List<PasswordRule>
+    private lateinit var passwordRules: List<PasswordAutofillRule>
     private lateinit var fileSpinner: Spinner
     private lateinit var fab: FloatingActionButton
     private lateinit var passwordEditText: EditText
 
-    companion object {
+    private val itemsData = MutableLiveData<List<DropDownItem>>()
+    private val selectedItemData = MutableLiveData<Int>()
+    private val showGroupsScreenEvent = SingleLiveEvent<Unit>()
+    private val showNewDatabaseScreenEvent = SingleLiveEvent<Unit>()
+    private val showOpenFileScreenEvent = SingleLiveEvent<Unit>()
+    private val showSettingsScreenEvent = SingleLiveEvent<Unit>()
+    private val showAboutScreenEvent = SingleLiveEvent<Unit>()
+    private val showDebugMenuScreenEvent = SingleLiveEvent<Unit>()
 
-        fun newInstance(): UnlockFragment {
-            return UnlockFragment()
+    private val spinnerSelectedListener = object : AdapterView.OnItemSelectedListener {
+        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            autofillPasswordIfNeed()
+            presenter?.onRecentlyUsedItemSelected(position)
+        }
+
+        override fun onNothingSelected(parent: AdapterView<*>?) {
         }
     }
 
@@ -54,12 +61,12 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
         super.onCreate(savedInstanceState)
 
         if (BuildConfig.DEBUG) {
-            passwordRules = compileFileNamePatterns()
+            passwordRules = compileDebugAutofillPatterns()
         }
     }
 
-    private fun compileFileNamePatterns(): List<PasswordRule> {
-        val rules = ArrayList<PasswordRule>()
+    private fun compileDebugAutofillPatterns(): List<PasswordAutofillRule> {
+        val rules = ArrayList<PasswordAutofillRule>()
 
         if (BuildConfig.DEBUG_FILE_NAME_PATTERNS != null && BuildConfig.DEBUG_PASSWORDS != null) {
             for (idx in BuildConfig.DEBUG_FILE_NAME_PATTERNS.indices) {
@@ -68,7 +75,7 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
                 val password = BuildConfig.DEBUG_PASSWORDS[idx]
                 val pattern = Pattern.compile(fileNamePattern)
 
-                rules.add(PasswordRule(pattern, password))
+                rules.add(PasswordAutofillRule(pattern, password))
             }
         }
 
@@ -104,33 +111,30 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
         fab.setOnClickListener { showNewDatabaseScreen() }
         unlockButton.setOnClickListener { onUnlockButtonClicked() }
 
-        presenter?.recentlyUsedFiles?.observe(this,
-            Observer { files -> setRecentlyUsedFiles(files!!) })
-        presenter?.selectedRecentlyUsedFile?.observe(this,
-            Observer { selectedFile -> setSelectedFile(selectedFile!!) })
-        presenter?.showGroupsScreenEvent?.observe(this,
-            Observer { showGroupsScreen() })
-        presenter?.showNewDatabaseScreenEvent?.observe(this,
-            Observer { showNewDatabaseScreen() })
-        presenter?.showOpenFileScreenEvent?.observe(this,
-            Observer { showOpenFileScreen() })
-        presenter?.showSettingsScreenEvent?.observe(this,
-            Observer { showSettingScreen() })
-        presenter?.showAboutScreenEvent?.observe(this,
-            Observer { showAboutScreen() })
-        presenter?.showDebugMenuScreenEvent?.observe(this,
-            Observer { showDebugMenuScreen() })
+        itemsData.observe(viewLifecycleOwner,
+            Observer { items -> setRecentlyUsedItemsInternal(items) })
+        selectedItemData.observe(viewLifecycleOwner,
+            Observer { position -> setSelectedRecentlyUsedItemInternal(position) })
+        showGroupsScreenEvent.observe(viewLifecycleOwner,
+            Observer { showGroupsScreenInternal() })
+        showNewDatabaseScreenEvent.observe(viewLifecycleOwner,
+            Observer { showNewDatabaseScreenInternal() })
+        showOpenFileScreenEvent.observe(viewLifecycleOwner,
+            Observer { showOpenFileScreenInternal() })
+        showSettingsScreenEvent.observe(viewLifecycleOwner,
+            Observer { showSettingsScreenInternal() })
+        showAboutScreenEvent.observe(viewLifecycleOwner,
+            Observer { showAboutScreenInternal() })
+        showDebugMenuScreenEvent.observe(viewLifecycleOwner,
+            Observer { showDebugMenuScreenInternal() })
 
-        return view
+       return view
     }
 
     private fun onUnlockButtonClicked() {
         val password = passwordEditText.text.toString().trim()
 
-        val file = selectedFile
-        if (file != null) {
-            presenter?.onUnlockButtonClicked(password, file)
-        }
+        presenter?.onUnlockButtonClicked(password)
     }
 
     override fun getContentContainerId(): Int {
@@ -147,104 +151,95 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
         }
     }
 
-    private fun createAdapterItems(files: List<FileDescriptor>): List<FileSpinnerAdapter.Item> {
-        val items = ArrayList<FileSpinnerAdapter.Item>()
-
-        for (file in files) {
-            val path = file.path
-            val filename = getFileNameFromPath(path)
-
-            if (filename != null) {
-                items.add(FileSpinnerAdapter.Item(filename, path, formatFsType(file.fsType)))
-            }
-        }
-
-        return items
+    override fun setRecentlyUsedItems(items: List<DropDownItem>) {
+        itemsData.value = items
     }
 
-    private fun formatFsType(fsType: FSType): String {
-        return when (fsType) {
-            FSType.DROPBOX -> "Dropbox"
-            FSType.REGULAR_FS -> "Device"
-        }
-    }
-
-    private fun setSelectedFile(file: FileDescriptor) {
-        selectedFile = file
-        selectFileInSpinner(file)
-
-        if (BuildConfig.DEBUG) {
-            val fileName = getFileNameWithoutExtensionFromPath(file.path)
-            if (fileName != null) {
-                for (rule in passwordRules) {
-                    if (rule.pattern.matcher(fileName).matches()) {
-                        passwordEditText.setText(rule.password)
-                        break
-                    }
-                }
-            }
-        }
-    }
-
-    override fun setRecentlyUsedFiles(files: List<FileDescriptor>) {
-        this.files = files
-
+    private fun setRecentlyUsedItemsInternal(items: List<DropDownItem>) {
         fileSpinner.onItemSelectedListener = null
 
-        fileAdapter.setItem(createAdapterItems(files))
+        fileAdapter.setItems(items)
         fileAdapter.notifyDataSetChanged()
 
-        fileSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>,
-                view: View,
-                position: Int,
-                id: Long
-            ) {
-                presenter?.onFileSelectedByUser(files[position])
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>) {
-            }
-        }
+        fileSpinner.onItemSelectedListener = spinnerSelectedListener
     }
 
-    override fun selectFileInSpinner(file: FileDescriptor) {
-        val files = this.files
-        if (files != null) {
-            val position = files.indexOfFirst { f -> isFileEqualsByUidAndFsType(f, file) }
-            if (position != -1) {
-                fileSpinner.setSelection(position)
-            }
-        }
+    override fun setSelectedRecentlyUsedItem(position: Int) {
+        selectedItemData.value = position
     }
 
-    private fun isFileEqualsByUidAndFsType(lhs: FileDescriptor, rhs: FileDescriptor): Boolean {
-        return lhs.uid == rhs.uid && lhs.fsType == rhs.fsType
+    private fun setSelectedRecentlyUsedItemInternal(position: Int) {
+        fileSpinner.onItemSelectedListener = null
+        fileSpinner.setSelection(position)
+        fileSpinner.onItemSelectedListener = spinnerSelectedListener
+
+        autofillPasswordIfNeed()
+    }
+
+    private fun autofillPasswordIfNeed() {
+        if (!BuildConfig.DEBUG) {
+            return
+        }
+
+        val selectedPosition = fileSpinner.selectedItemPosition
+
+        val filePath = itemsData.value?.get(selectedPosition)?.path ?: return
+
+        val fileName = FileUtils.getFileNameWithoutExtensionFromPath(filePath) ?: return
+        for (rule in passwordRules) {
+            if (rule.pattern.matcher(fileName).matches()) {
+                passwordEditText.setText(rule.password)
+                break
+            }
+        }
     }
 
     override fun showGroupsScreen() {
+        showGroupsScreenEvent.call()
+    }
+
+    private fun showGroupsScreenInternal() {
         startActivity(GroupsActivity.startForRootGroup(context!!))
     }
 
     override fun showNewDatabaseScreen() {
+        showNewDatabaseScreenEvent.call()
+    }
+
+    private fun showNewDatabaseScreenInternal() {
         startActivity(Intent(context, NewDatabaseActivity::class.java))
     }
 
     override fun showOpenFileScreen() {
+        showOpenFileScreenEvent.call()
+    }
+
+    private fun showOpenFileScreenInternal() {
         val intent = StorageListActivity.createStartIntent(context!!, Action.PICK_FILE)
         startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
     }
 
     override fun showSettingScreen() {
+        showSettingsScreenEvent.call()
+    }
+
+    private fun showSettingsScreenInternal() {
         throw RuntimeException("Not implemented") //TODO: handle menu click
     }
 
     override fun showAboutScreen() {
+        showAboutScreenEvent.call()
+    }
+
+    private fun showAboutScreenInternal() {
         throw RuntimeException("Not implemented") //TODO: handle menu click
     }
 
     override fun showDebugMenuScreen() {
+        showDebugMenuScreenEvent.call()
+    }
+
+    private fun showDebugMenuScreenInternal() {
         val intent = DebugMenuActivity.createStartIntent(context!!)
         startActivity(intent)
     }
@@ -261,5 +256,11 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
         }
     }
 
-    private class PasswordRule(val pattern: Pattern, val password: String)
+    companion object {
+        private const val REQUEST_CODE_PICK_FILE = 100
+    }
+
+    private class PasswordAutofillRule(val pattern: Pattern, val password: String)
+
+    data class DropDownItem(val filename: String, val path: String, val storageType: String)
 }

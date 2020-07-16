@@ -49,10 +49,9 @@ open class NewDatabaseInteractor(
                         usedFile.fileUid = file.uid
                         usedFile.fsType = file.fsType
                         usedFile.lastAccessTime = System.currentTimeMillis()
+                        usedFile.addedTime = usedFile.lastAccessTime
 
                         usedFileRepository.insert(usedFile)
-
-                        observerBus.notifyUsedFileDataSetChanged()
 
                         val openResult = dbRepo.open(key, file)
                         if (openResult.isSucceededOrDeferred) {

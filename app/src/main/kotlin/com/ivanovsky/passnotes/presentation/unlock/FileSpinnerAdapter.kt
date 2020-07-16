@@ -8,13 +8,14 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.presentation.unlock.UnlockFragment.DropDownItem
 
 internal class FileSpinnerAdapter(context: Context) : BaseAdapter() {
 
     private val inflater = LayoutInflater.from(context)
-    private val items = mutableListOf<Item>()
+    private val items = mutableListOf<DropDownItem>()
 
-    fun setItem(newItems: List<Item>?) {
+    fun setItems(newItems: List<DropDownItem>?) {
         items.clear()
 
         if (newItems != null) {
@@ -26,7 +27,7 @@ internal class FileSpinnerAdapter(context: Context) : BaseAdapter() {
         return items.size
     }
 
-    override fun getItem(position: Int): Item {
+    override fun getItem(position: Int): DropDownItem {
         return items[position]
     }
 
@@ -87,6 +88,4 @@ internal class FileSpinnerAdapter(context: Context) : BaseAdapter() {
         val pathTextView = view.findViewById<TextView>(R.id.path)!!
         val storageTypeTextView = view.findViewById<TextView>(R.id.storage_type)!!
     }
-
-    internal class Item(val filename: String, val path: String, val storageType: String)
 }

@@ -30,7 +30,7 @@ class UnlockActivity : BaseActivity() {
         drawer = findViewById(R.id.drawer_layout)
         navigationView = findViewById(R.id.navigation_view)
 
-        val fragment = UnlockFragment.newInstance()
+        val fragment = UnlockFragment()
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()

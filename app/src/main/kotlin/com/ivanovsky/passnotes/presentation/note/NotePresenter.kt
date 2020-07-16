@@ -16,7 +16,7 @@ class NotePresenter(
     private var noteUid: UUID?,
     private val view: NoteContract.View
 ) : NoteContract.Presenter,
-    ObserverBus.NoteContentChangedObserver {
+    ObserverBus.NoteContentObserver {
 
     @Inject
     lateinit var interactor: NoteInteractor

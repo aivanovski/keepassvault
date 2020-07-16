@@ -86,8 +86,6 @@ class UnlockInteractor(
             usedFile.lastAccessTime = System.currentTimeMillis()
 
             fileRepository.update(usedFile)
-
-            observerBus.notifyUsedFileDataSetChanged()
         }
     }
 
@@ -99,7 +97,6 @@ class UnlockInteractor(
             file.lastAccessTime = null
 
             fileRepository.insert(file)
-            observerBus.notifyUsedFileDataSetChanged()
 
             result.obj = true
         } else {

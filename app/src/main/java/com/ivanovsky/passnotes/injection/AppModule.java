@@ -59,8 +59,8 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	UsedFileRepository provideUsedFileRepository(AppDatabase db) {
-		return new UsedFileRepository(db);
+	UsedFileRepository provideUsedFileRepository(AppDatabase db, ObserverBus bus) {
+		return new UsedFileRepository(db, bus);
 	}
 
 	@Provides

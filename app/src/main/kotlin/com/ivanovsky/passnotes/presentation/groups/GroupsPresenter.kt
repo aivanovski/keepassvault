@@ -22,7 +22,7 @@ class GroupsPresenter(
 ) : GroupsContract.Presenter,
     ObserverBus.GroupDataSetObserver,
     ObserverBus.NoteDataSetChanged,
-    ObserverBus.NoteContentChangedObserver {
+    ObserverBus.NoteContentObserver {
 
     @Inject
     lateinit var interactor: GroupsInteractor

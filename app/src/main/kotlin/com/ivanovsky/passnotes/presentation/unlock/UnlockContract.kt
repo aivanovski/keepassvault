@@ -1,16 +1,14 @@
 package com.ivanovsky.passnotes.presentation.unlock
 
-import androidx.lifecycle.LiveData
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.presentation.core.BasePresenter
 import com.ivanovsky.passnotes.presentation.core.BaseView
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 
 class UnlockContract {
 
     interface View : BaseView<Presenter> {
-        fun setRecentlyUsedFiles(files: List<FileDescriptor>)
-        fun selectFileInSpinner(file: FileDescriptor)
+        fun setRecentlyUsedItems(items: List<UnlockFragment.DropDownItem>)
+        fun setSelectedRecentlyUsedItem(position: Int)
         fun showGroupsScreen()
         fun showNewDatabaseScreen()
         fun showOpenFileScreen()
@@ -20,18 +18,10 @@ class UnlockContract {
     }
 
     interface Presenter : BasePresenter {
-        val recentlyUsedFiles: LiveData<List<FileDescriptor>>
-        val selectedRecentlyUsedFile: LiveData<FileDescriptor>
-        val showGroupsScreenEvent: SingleLiveEvent<Void>
-        val showNewDatabaseScreenEvent: SingleLiveEvent<Void>
-        val showOpenFileScreenEvent: SingleLiveEvent<Void>
-        val showSettingsScreenEvent: SingleLiveEvent<Void>
-        val showAboutScreenEvent: SingleLiveEvent<Void>
-        val showDebugMenuScreenEvent: SingleLiveEvent<Void>
 
-        fun loadData(selectedFile: FileDescriptor?)
-        fun onFileSelectedByUser(file: FileDescriptor)
-        fun onUnlockButtonClicked(password: String, file: FileDescriptor)
+        fun loadData(resetSelection: Boolean)
+        fun onRecentlyUsedItemSelected(position: Int)
+        fun onUnlockButtonClicked(password: String)
         fun onOpenFileMenuClicked()
         fun onSettingsMenuClicked()
         fun onAboutMenuClicked()

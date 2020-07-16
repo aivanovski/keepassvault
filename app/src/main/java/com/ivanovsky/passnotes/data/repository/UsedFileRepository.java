@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.data.repository;
 
 import com.annimon.stream.Stream;
+import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
 import com.ivanovsky.passnotes.data.entity.UsedFile;
 import com.ivanovsky.passnotes.data.repository.db.dao.UsedFileDao;
@@ -13,10 +14,12 @@ public class UsedFileRepository {
 	@SuppressWarnings("unused")
 	private static final String TAG = UsedFileRepository.class.getSimpleName();
 
-	private UsedFileDao dao;
+	private final UsedFileDao dao;
+	private final ObserverBus bus;
 
-	public UsedFileRepository(AppDatabase db) {
+	public UsedFileRepository(AppDatabase db, ObserverBus bus) {
 		this.dao = db.getUsedFileDao();
+		this.bus = bus;
 	}
 
 	public List<UsedFile> getAll() {
@@ -33,9 +36,13 @@ public class UsedFileRepository {
 	public void insert(UsedFile file) {
 		long id = dao.insert(file);
 		file.setId((int) id);
+
+		bus.notifyUsedFileDataSetChanged();
 	}
 
 	public void update(UsedFile file) {
 		dao.update(file);
+
+		bus.notifyUsedFileContentChanged(file.getId());
 	}
 }

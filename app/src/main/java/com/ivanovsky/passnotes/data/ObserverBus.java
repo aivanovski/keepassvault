@@ -29,11 +29,15 @@ public class ObserverBus {
 		void onUsedFileDataSetChanged();
 	}
 
+	public interface UsedFileContentObserver extends Observer {
+		void onUsedFileContentChanged(int usedFileId);
+	}
+
 	public interface NoteDataSetChanged extends Observer {
 		void onNoteDataSetChanged(@NotNull UUID groupUid);
 	}
 
-	public interface NoteContentChangedObserver extends Observer {
+	public interface NoteContentObserver extends Observer {
 		void onNoteContentChanged(@NotNull UUID groupUid,
 								  @NotNull UUID oldNoteUid,
 								  @NotNull UUID newNoteUid);
@@ -68,6 +72,12 @@ public class ObserverBus {
 		}
 	}
 
+	public void notifyUsedFileContentChanged(int usedFileId) {
+		for (UsedFileContentObserver observer : filterObservers(UsedFileContentObserver.class)) {
+			handler.post(() -> observer.onUsedFileContentChanged(usedFileId));
+		}
+	}
+
 	public void notifyNoteDataSetChanged(UUID groupUid) {
 		for (NoteDataSetChanged observer : filterObservers(NoteDataSetChanged.class)) {
 			handler.post(() -> observer.onNoteDataSetChanged(groupUid));
@@ -75,7 +85,7 @@ public class ObserverBus {
 	}
 
 	public void notifyNoteContentChanged(UUID groupUid, UUID oldNoteUid, UUID newNoteUid) {
-		for (NoteContentChangedObserver observer : filterObservers(NoteContentChangedObserver.class)) {
+		for (NoteContentObserver observer : filterObservers(NoteContentObserver.class)) {
 			handler.post(() -> observer.onNoteContentChanged(groupUid, oldNoteUid, newNoteUid));
 		}
 	}

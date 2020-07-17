@@ -15,4 +15,14 @@ class ProcessingUnit {
 		this.fileUid = fileUid;
 		this.remotePath = remotePath;
 	}
+
+	@Override
+	public String toString() {
+		return "ProcessingUnit{" +
+				"processingUid=" + processingUid +
+				", status=" + status +
+				", fileUid='" + fileUid + '\'' +
+				", remotePath='" + remotePath + '\'' +
+				'}';
+	}
 }

@@ -213,4 +213,24 @@ public class DropboxFile {
 				.append(revision)
 				.toHashCode();
 	}
+
+	@Override
+	public String toString() {
+		return "DropboxFile{" +
+				"locallyModified=" + locallyModified +
+				", uploaded=" + uploaded +
+				", uploadFailed=" + uploadFailed +
+				", uploading=" + uploading +
+				", downloading=" + downloading +
+				", id=" + id +
+				", retryCount=" + retryCount +
+				", lastRetryTimestamp=" + lastRetryTimestamp +
+				", lastDownloadTimestamp=" + lastDownloadTimestamp +
+				", lastModificationTimestamp=" + lastModificationTimestamp +
+				", localPath='" + localPath + '\'' +
+				", remotePath='" + remotePath + '\'' +
+				", uid='" + uid + '\'' +
+				", revision='" + revision + '\'' +
+				'}';
+	}
 }

@@ -228,8 +228,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 							remotePath);
 
 					if (startProcessingUnit(unit)) {
-						Logger.d(TAG, "Downloading new file: remote=" + remotePath +
-								", local=" + destinationPath);
+						Logger.d(TAG, "Downloading new file: remote=%s, local=%s", remotePath, destinationPath);
 
 						metadata = dropboxClient.downloadFileOrThrow(remotePath, destinationPath);
 
@@ -260,8 +259,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 								remotePath);
 
 						if (startProcessingUnit(unit)) {
-							Logger.d(TAG, "Updating cached file: remote=" + remotePath +
-									", local=" + cachedFile.getLocalPath());
+							Logger.d(TAG, "Updating cached file: remote=%s, local=%s", remotePath, cachedFile.getLocalPath());
 
 							metadata = dropboxClient.downloadFileOrThrow(remotePath, cachedFile.getLocalPath());
 
@@ -288,8 +286,8 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 					}
 				} else {
 					// local revision is the same as in the server
-					Logger.d(TAG, "Local cached file is up to date: remote=" + remotePath +
-							", local=" + cachedFile.getLocalPath());
+					Logger.d(TAG, "Local cached file is up to date: remote=%s, local=%s",
+							remotePath, cachedFile.getLocalPath());
 
 					cachedFile.setRemotePath(metadata.getPathLower());
 					cachedFile.setLastModificationTimestamp(
@@ -395,6 +393,9 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 							cachedFile.getUid(),
 							cachedFile.getRemotePath());
 
+					Logger.d(TAG, "Uploading to new file: remote=%s, local=%s",
+							cachedFile.getRemotePath(), cachedFile.getLocalPath());
+
 					if (startProcessingUnit(unit)) {
 						result.from(processFileUploading(cachedFile, unit.processingUid));
 
@@ -428,6 +429,9 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 									ProcessingStatus.UPLOADING,
 									cachedFile.getUid(),
 									cachedFile.getRemotePath());
+
+							Logger.d(TAG, "Uploading to existing file: remote=%s, local=%s",
+									cachedFile.getRemotePath(), cachedFile.getLocalPath());
 
 							if (startProcessingUnit(unit)) {
 								result.from(processFileUploading(cachedFile, unit.processingUid));
@@ -574,6 +578,8 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 	}
 
 	void onFileUploadFailed(DropboxFile file, UUID processingUnitUid) {
+		Logger.d(TAG, "onFileUploadFailed: unitUid=%s, file=%s", processingUnitUid, file);
+
 		file.setUploadFailed(true);
 
 		cache.update(file);
@@ -582,6 +588,8 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 	}
 
 	void onFileUploadFinished(DropboxFile file, FileMetadata metadata, UUID processingUnitUid) {
+		Logger.d(TAG, "onFileUploadFinished: unitUid=%s, file=%s", processingUnitUid, file);
+
 		file.setUploadFailed(false);
 		file.setLocallyModified(false);
 		file.setUploaded(true);
@@ -598,12 +606,16 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 	}
 
 	void onOfflineWriteFailed(DropboxFile file, UUID processingUnitUid) {
+		Logger.d(TAG, "onOfflineWriteFailed: unitUid=%s, file=%s", processingUnitUid, file);
+
 		cache.update(file);
 
 		onFinishProcessingUnit(processingUnitUid);
 	}
 
 	void onOfflineWriteFinished(DropboxFile file, UUID processingUnitUid) {
+		Logger.d(TAG, "onOfflineWriteFinished: unitUid=%s, file=%s", processingUnitUid, file);
+
 		cache.update(file);
 
 		onFinishProcessingUnit(processingUnitUid);
@@ -613,6 +625,8 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		boolean unitStarted = false;
 
 		unitProcessingLock.lock();
+
+		Logger.d(TAG, "Starting processing unit: %s", unit);
 
 		try {
 			boolean running = true;

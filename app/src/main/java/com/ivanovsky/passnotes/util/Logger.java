@@ -8,6 +8,10 @@ public class Logger {
 		Log.d(tag, message);
 	}
 
+	public static void d(String tag, String message, Object...args) {
+		Log.d(tag, String.format(message, args));
+	}
+
 	public static void printStackTrace(Exception exception) {
 		exception.printStackTrace();
 	}

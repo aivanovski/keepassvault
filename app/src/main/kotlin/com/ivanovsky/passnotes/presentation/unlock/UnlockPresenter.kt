@@ -169,7 +169,7 @@ class UnlockPresenter(private val view: UnlockContract.View) :
                 view.screenState = ScreenState.data()
             } else {
                 val message = errorInteractor.processAndGetMessage(result.error)
-                view.screenState = ScreenState.error(message)
+                view.screenState = ScreenState.dataWithError(message)
             }
         }
     }

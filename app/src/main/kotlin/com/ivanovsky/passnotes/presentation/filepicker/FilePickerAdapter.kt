@@ -48,15 +48,14 @@ class FilePickerAdapter(context: Context) :
     }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
-        val root = view.findViewById<ViewGroup>(R.id.root_layout)
-        val icon = view.findViewById<ImageView>(R.id.icon)
-        val primaryText = view.findViewById<TextView>(R.id.primary_text)
-        val secondaryText = view.findViewById<TextView>(R.id.secondary_text)
-        val selectedBackground = view.findViewById<View>(R.id.selected_background)
+        val root: ViewGroup = view.findViewById(R.id.root_layout)
+        val icon: ImageView = view.findViewById(R.id.icon)
+        val primaryText: TextView = view.findViewById(R.id.primary_text)
+        val secondaryText: TextView = view.findViewById(R.id.secondary_text)
+        val selectedBackground: View = view.findViewById(R.id.selected_background)
     }
 
-    class Item(
+    data class Item(
         @DrawableRes val iconResId: Int,
         val title: String,
         val description: String,

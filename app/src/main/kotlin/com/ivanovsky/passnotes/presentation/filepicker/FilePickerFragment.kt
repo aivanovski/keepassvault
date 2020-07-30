@@ -7,12 +7,14 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.BaseListFragment
+import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import javax.inject.Inject
 
 class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerContract.View {
@@ -22,6 +24,11 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
 
     override var presenter: FilePickerContract.Presenter? = null
     private lateinit var adapter: FilePickerAdapter
+
+    private val items = MutableLiveData<List<FilePickerAdapter.Item>>()
+    private val doneButtonVisibility = MutableLiveData<Boolean>()
+    private val requestPermissionEvent = SingleLiveEvent<String>()
+    private val selectFileAndFinishEvent = SingleLiveEvent<FileDescriptor>()
 
     private var menu: Menu? = null
 
@@ -38,14 +45,14 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        presenter?.items?.observe(viewLifecycleOwner,
-            Observer { files -> setItems(files) })
-        presenter?.requestPermissionEvent?.observe(viewLifecycleOwner,
-            Observer { permission -> requestPermission(permission) })
-        presenter?.doneButtonVisibility?.observe(viewLifecycleOwner,
-            Observer { isVisible -> setDoneButtonVisibility(isVisible) })
-        presenter?.fileSelectedEvent?.observe(viewLifecycleOwner,
-            Observer { file -> selectFileAndFinish(file) })
+        items.observe(viewLifecycleOwner,
+            Observer { items -> setItemsInternal(items) })
+        doneButtonVisibility.observe(viewLifecycleOwner,
+            Observer { isVisible -> setDoneButtonVisibilityInternal(isVisible) })
+        requestPermissionEvent.observe(viewLifecycleOwner,
+            Observer { permission -> requestPermissionInternal(permission) })
+        selectFileAndFinishEvent.observe(viewLifecycleOwner,
+            Observer { file -> selectFileAndFinishInternal(file) })
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -55,27 +62,37 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
     }
 
     override fun setDoneButtonVisibility(isVisible: Boolean) {
-        if (menu != null) {
-            val item = menu!!.findItem(R.id.menu_done) //TODO: wtf with !!
-            item.isVisible = isVisible
-        }
+        doneButtonVisibility.value = isVisible
+    }
+
+    private fun setDoneButtonVisibilityInternal(isVisible: Boolean) {
+        val menu = this.menu ?: return
+
+        val item = menu.findItem(R.id.menu_done) //TODO: wtf with !!
+        item.isVisible = isVisible
     }
 
     override fun selectFileAndFinish(file: FileDescriptor) {
+        selectFileAndFinishEvent.call(file)
+    }
+
+    private fun selectFileAndFinishInternal(file: FileDescriptor) {
+        val activity = requireActivity()
+
         val data = Intent()
 
         data.putExtra(FilePickerActivity.EXTRA_RESULT, file)
 
-        activity!!.setResult(Activity.RESULT_OK, data)
-        activity!!.finish()
+        activity.setResult(Activity.RESULT_OK, data)
+        activity.finish()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.menu_done) {
+        return if (item.itemId == R.id.menu_done) {
             presenter?.onDoneButtonClicked()
-            return true
+            true
         } else {
-            return super.onOptionsItemSelected(item)
+            super.onOptionsItemSelected(item)
         }
     }
 
@@ -104,13 +121,20 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
     }
 
     override fun setItems(items: List<FilePickerAdapter.Item>) {
+        this.items.value = items
+    }
+
+    private fun setItemsInternal(items: List<FilePickerAdapter.Item>) {
         adapter.setItems(items)
         adapter.notifyDataSetChanged()
-
         adapter.onItemClickListener = { position -> presenter?.onItemClicked(position) }
     }
 
     override fun requestPermission(permission: String) {
+        requestPermissionEvent.call(permission)
+    }
+
+    private fun requestPermissionInternal(permission: String) {
         permissionHelper.requestPermission(this, permission, REQUEST_CODE_PERMISSION)
     }
 

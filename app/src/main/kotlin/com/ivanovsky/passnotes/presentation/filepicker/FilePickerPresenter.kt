@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.presentation.filepicker
 import android.Manifest
 import android.content.Context
 import androidx.annotation.DrawableRes
-import androidx.lifecycle.MutableLiveData
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -13,7 +12,6 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import com.ivanovsky.passnotes.util.formatAccordingSystemLocale
 import kotlinx.coroutines.*
 import java.util.*
@@ -39,14 +37,11 @@ class FilePickerPresenter(
     @Inject
     lateinit var resourceHelper: ResourceHelper
 
-    override val items = MutableLiveData<List<FilePickerAdapter.Item>>()
-    override val doneButtonVisibility = MutableLiveData<Boolean>()
-    override val requestPermissionEvent = SingleLiveEvent<String>()
-    override val fileSelectedEvent = SingleLiveEvent<FileDescriptor>()
-
     private var isPermissionRejected = false
     private var currentDir = rootFile
-    private lateinit var files: List<FileDescriptor>
+    private var files: List<FileDescriptor>? = null
+    private var items: List<FilePickerAdapter.Item>? = null
+
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.Main + job)
 
@@ -70,7 +65,7 @@ class FilePickerPresenter(
 
     override fun loadData() {
         view.screenState = ScreenState.loading()
-        doneButtonVisibility.value = false
+        view.setDoneButtonVisibility(false)
 
         //TODO: app doesnt need permission for private storage and network storage
         if (permissionHelper.isPermissionGranted(SDCARD_PERMISSION)) {
@@ -82,7 +77,7 @@ class FilePickerPresenter(
                 onFilesLoaded(currentDir, files)
             }
         } else {
-            requestPermissionEvent.call(SDCARD_PERMISSION)
+            view.requestPermission(SDCARD_PERMISSION)
         }
     }
 
@@ -102,21 +97,26 @@ class FilePickerPresenter(
             } else {
                 val sortedFiles = sortFiles(unsortedFiles)
 
-                if (isBrowsingEnabled) {
-                    files = sortedFiles
+                val displayedFiles = if (isBrowsingEnabled) {
+                    sortedFiles
                 } else {
-                    //hide all directories
-                    files = sortedFiles.filter { file -> !file.isDirectory }
+                    // hide all directories
+                    sortedFiles.filter { file -> !file.isDirectory }
                 }
 
-                items.value = createAdapterItems(files, null)
+                val adapterItems = createAdapterItems(displayedFiles, null)
+
+                items = adapterItems
+                files = displayedFiles
+
+                view.setItems(adapterItems)
                 view.screenState = ScreenState.data()
-                doneButtonVisibility.value = true
+                view.setDoneButtonVisibility(true)
             }
         } else {
             val message = errorInteractor.processAndGetMessage(result.error)
             view.screenState = ScreenState.error(message)
-            doneButtonVisibility.value = false
+            view.setDoneButtonVisibility(false)
         }
     }
 
@@ -132,13 +132,13 @@ class FilePickerPresenter(
 
             files = sortedFiles
 
-            items.value = createAdapterItems(sortedFiles, parent)
+            view.setItems(createAdapterItems(sortedFiles, parent))
             view.screenState = ScreenState.data()
-            doneButtonVisibility.value = true
+            view.setDoneButtonVisibility(true)
         } else {
             val message = errorInteractor.processAndGetMessage(result.error)
             view.screenState = ScreenState.error(message)
-            doneButtonVisibility.value = false
+            view.setDoneButtonVisibility(false)
         }
     }
 
@@ -195,11 +195,13 @@ class FilePickerPresenter(
             view.screenState = ScreenState.error(
                 resourceHelper.getString(R.string.application_requires_external_storage_permission)
             )
-            doneButtonVisibility.value = false
+            view.setDoneButtonVisibility(false)
         }
     }
 
     override fun onItemClicked(position: Int) {
+        val files = this.files ?: return
+
         val selectedFile = files[position]
 
         if (selectedFile.isDirectory) {
@@ -207,26 +209,29 @@ class FilePickerPresenter(
 
             loadData()
         } else if (mode == Mode.PICK_FILE) {
-            val items = this.items.value!!
+            val items = this.items ?: return
 
-            if (items[position].selected) {
-                items[position].selected = false
+            val newItems = items.toMutableList()
+
+            val selectedItem = items[position]
+            if (selectedItem.selected) {
+                newItems[position] = selectedItem.copy(selected = false)
             } else {
-                items.forEach { item -> item.selected = false }
-                items[position].selected = true
+                newItems.forEach { item -> item.selected = false }
+                newItems[position] = selectedItem.copy(selected = true)
             }
 
-            this.items.value = items
+            view.setItems(newItems)
         }
     }
 
     override fun onDoneButtonClicked() {
         if (mode == Mode.PICK_DIRECTORY) {
-            fileSelectedEvent.call(currentDir)
+            view.selectFileAndFinish(currentDir)
 
         } else if (mode == Mode.PICK_FILE) {
             if (isAnyFileSelected()) {
-                fileSelectedEvent.call(getSelectedFile())
+                view.selectFileAndFinish(getSelectedFile())
             } else {
                 view.showSnackbarMessage(context.getString(R.string.please_select_any_file))
             }
@@ -234,11 +239,16 @@ class FilePickerPresenter(
     }
 
     private fun isAnyFileSelected(): Boolean {
-        return items.value!!.any { item -> item.selected }
+        val items = this.items ?: return false
+
+        return items.any { item -> item.selected }
     }
 
     private fun getSelectedFile(): FileDescriptor {
-        val position = items.value!!.indexOfFirst { item -> item.selected }
+        val items = this.items ?: throw IllegalStateException("No items for selecting")
+        val files = this.files ?: throw IllegalStateException("No files")
+
+        val position = items.indexOfFirst { item -> item.selected }
         return files[position]
     }
 }

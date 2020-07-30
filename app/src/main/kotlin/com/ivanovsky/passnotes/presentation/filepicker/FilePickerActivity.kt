@@ -31,7 +31,7 @@ class FilePickerActivity : BaseActivity() {
             .replace(R.id.fragment_container, fragment)
             .commit()
 
-        val presenter = FilePickerPresenter(fragment, mode, rootFile, isBrowsingEnabled, this)
+        val presenter = FilePickerPresenter(fragment, mode, rootFile, isBrowsingEnabled)
         fragment.presenter = presenter
     }
 

@@ -1,18 +1,18 @@
 package com.ivanovsky.passnotes.presentation.filepicker
 
 import android.Manifest
-import android.content.Context
 import androidx.annotation.DrawableRes
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.domain.LocaleProvider
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceHelper
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.util.formatAccordingSystemLocale
+import com.ivanovsky.passnotes.util.formatAccordingLocale
 import kotlinx.coroutines.*
 import java.util.*
 import javax.inject.Inject
@@ -21,8 +21,7 @@ class FilePickerPresenter(
     private val view: FilePickerContract.View,
     private val mode: Mode,
     rootFile: FileDescriptor,
-    private val isBrowsingEnabled: Boolean,
-    private val context: Context
+    private val isBrowsingEnabled: Boolean
 ) : FilePickerContract.Presenter {
 
     @Inject
@@ -36,6 +35,9 @@ class FilePickerPresenter(
 
     @Inject
     lateinit var resourceHelper: ResourceHelper
+
+    @Inject
+    lateinit var localeProvider: LocaleProvider
 
     private var isPermissionRejected = false
     private var currentDir = rootFile
@@ -130,6 +132,9 @@ class FilePickerPresenter(
             val sortedFiles = sortFiles(unsortedFiles).toMutableList()
             sortedFiles.add(0, parent)
 
+            val adapterItems = createAdapterItems(sortedFiles, parent)
+
+            items = adapterItems
             files = sortedFiles
 
             view.setItems(createAdapterItems(sortedFiles, parent))
@@ -174,7 +179,11 @@ class FilePickerPresenter(
     }
 
     private fun formatModifiedDate(modified: Long?): String {
-        return if (modified != null) Date(modified).formatAccordingSystemLocale(context) else ""
+        return if (modified != null) {
+            Date(modified).formatAccordingLocale(localeProvider.getSystemLocale())
+        } else {
+            ""
+        }
     }
 
     @DrawableRes
@@ -221,6 +230,7 @@ class FilePickerPresenter(
                 newItems[position] = selectedItem.copy(selected = true)
             }
 
+            this.items = newItems
             view.setItems(newItems)
         }
     }
@@ -233,7 +243,7 @@ class FilePickerPresenter(
             if (isAnyFileSelected()) {
                 view.selectFileAndFinish(getSelectedFile())
             } else {
-                view.showSnackbarMessage(context.getString(R.string.please_select_any_file))
+                view.showSnackbarMessage(resourceHelper.getString(R.string.please_select_any_file))
             }
         }
     }

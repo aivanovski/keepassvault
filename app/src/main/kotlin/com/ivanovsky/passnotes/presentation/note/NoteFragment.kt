@@ -14,15 +14,21 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
+import com.ivanovsky.passnotes.domain.LocaleProvider
 import com.ivanovsky.passnotes.domain.entity.PropertySpreader
+import com.ivanovsky.passnotes.injection.Injector
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorActivity
-import com.ivanovsky.passnotes.util.formatAccordingSystemLocale
+import com.ivanovsky.passnotes.util.formatAccordingLocale
 import java.util.*
+import javax.inject.Inject
 
 class NoteFragment : BaseFragment(),
     NoteContract.View {
+
+    @Inject
+    lateinit var localeProvider: LocaleProvider
 
     override var presenter: NoteContract.Presenter? = null
     private val actionBarTitleData = MutableLiveData<String>()
@@ -30,6 +36,10 @@ class NoteFragment : BaseFragment(),
     private lateinit var adapter: NoteAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var modifiedTextView: TextView
+
+    init {
+        Injector.getInstance().appComponent.inject(this)
+    }
 
     override fun onStart() {
         super.onStart()
@@ -85,7 +95,10 @@ class NoteFragment : BaseFragment(),
     }
 
     private fun formatModifiedDate(edited: Date): String {
-        return getString(R.string.edited_at, edited.formatAccordingSystemLocale(context!!))
+        return getString(
+            R.string.edited_at,
+            edited.formatAccordingLocale(localeProvider.getSystemLocale())
+        )
     }
 
     private fun createAdapterItemsFromProperties(properties: List<Property>): List<NoteAdapter.Item> {

@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.data.repository.SettingsRepository;
 import com.ivanovsky.passnotes.domain.ClipboardHelper;
 import com.ivanovsky.passnotes.domain.FileHelper;
 import com.ivanovsky.passnotes.domain.FileSyncHelper;
+import com.ivanovsky.passnotes.domain.LocaleProvider;
 import com.ivanovsky.passnotes.domain.NoteDiffer;
 import com.ivanovsky.passnotes.domain.PermissionHelper;
 import com.ivanovsky.passnotes.domain.ResourceHelper;
@@ -207,5 +208,11 @@ public class AppModule {
 	@Singleton
 	NoteDiffer provideNoteDiffer() {
 		return new NoteDiffer();
+	}
+
+	@Provides
+	@Singleton
+	LocaleProvider provideLocaleProvider() {
+	    return new LocaleProvider(context);
 	}
 }

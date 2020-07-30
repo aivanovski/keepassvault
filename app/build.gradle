@@ -107,7 +107,7 @@ def apacheCommonsLangVersion = '3.0'
 // Test
 def jUnitVersion = '4.12'
 def mockitoVersion = '2.19.1'
-def robolectricVersion = '3.5.1'
+def robolectricVersion = '4.3'
 def truthVersion = '0.42'
 def androidXTestVersion = '1.1.0'
 

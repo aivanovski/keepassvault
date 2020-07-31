@@ -3,10 +3,10 @@ package com.ivanovsky.passnotes.presentation.note
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.domain.ResourceHelper
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import kotlinx.coroutines.*
 import java.util.*
@@ -25,7 +25,7 @@ class NotePresenter(
     lateinit var errorInteractor: ErrorInteractor
 
     @Inject
-    lateinit var resourceHelper: ResourceHelper
+    lateinit var resourceProvider: ResourceProvider
 
     @Inject
     lateinit var observerBus: ObserverBus
@@ -35,7 +35,7 @@ class NotePresenter(
     private var note: Note? = null
 
     init {
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
     }
 
     override fun start() {
@@ -84,7 +84,7 @@ class NotePresenter(
 
         val delayInSeconds = interactor.getTimeoutValueInMillis() / 1000L
 
-        val message = resourceHelper.getString(
+        val message = resourceProvider.getString(
             R.string.copied_clipboard_will_be_cleared_in_seconds,
             delayInSeconds
         )

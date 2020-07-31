@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.injection;
 
-import androidx.room.Room;
 import android.content.Context;
 
 import com.ivanovsky.passnotes.data.ObserverBus;
@@ -12,12 +11,13 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
 import com.ivanovsky.passnotes.domain.ClipboardHelper;
+import com.ivanovsky.passnotes.domain.DispatcherProvider;
 import com.ivanovsky.passnotes.domain.FileHelper;
 import com.ivanovsky.passnotes.domain.FileSyncHelper;
 import com.ivanovsky.passnotes.domain.LocaleProvider;
 import com.ivanovsky.passnotes.domain.NoteDiffer;
 import com.ivanovsky.passnotes.domain.PermissionHelper;
-import com.ivanovsky.passnotes.domain.ResourceHelper;
+import com.ivanovsky.passnotes.domain.ResourceProvider;
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus;
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor;
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor;
@@ -40,22 +40,23 @@ import dagger.Provides;
 public class AppModule {
 
 	private final Context context;
+	private final SharedModule module;
 
-	public AppModule(Context context) {
+	public AppModule(Context context, SharedModule module) {
 		this.context = context;
+		this.module = module;
 	}
 
 	@Provides
 	@Singleton
 	SettingsRepository provideSettingsManager() {
-		return new SettingsRepository(context);
+		return module.getSettings();
 	}
 
 	@Provides
 	@Singleton
 	AppDatabase provideAppDatabase() {
-		return Room.databaseBuilder(context.getApplicationContext(),
-				AppDatabase.class, AppDatabase.FILE_NAME).build();
+		return module.getDatabase();
 	}
 
 	@Provides
@@ -66,8 +67,8 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	DropboxFileRepository provideDropboxFileRepository(AppDatabase db) {
-		return new DropboxFileRepository(db.getDropboxFileDao());
+	DropboxFileRepository provideDropboxFileRepository() {
+		return module.getDropboxFileRepository();
 	}
 
 	@Provides
@@ -84,10 +85,8 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	FileSystemResolver provideFilSystemResolver(SettingsRepository settings,
-												DropboxFileRepository dropboxFileRepository,
-												FileHelper fileHelper) {
-		return new FileSystemResolver(settings, dropboxFileRepository, fileHelper);
+	FileSystemResolver provideFilSystemResolver() {
+		return module.getFileSystemResolver();
 	}
 
 	@Provides
@@ -108,7 +107,7 @@ public class AppModule {
 	@Provides
 	@Singleton
 	ErrorInteractor provideErrorInteractor() {
-		return new ErrorInteractor(context);
+		return module.getErrorInteractor();
 	}
 
 	@Provides
@@ -149,13 +148,13 @@ public class AppModule {
 	@Provides
 	@Singleton
 	PermissionHelper providerPermissionHelper() {
-		return new PermissionHelper(context);
+		return module.getPermissionHelper();
 	}
 
 	@Provides
 	@Singleton
-	ResourceHelper providerResourceHelper() {
-		return new ResourceHelper(context);
+	ResourceProvider providerResourceHelper() {
+		return module.getResourceHelper();
 	}
 
 	@Provides
@@ -167,7 +166,7 @@ public class AppModule {
 	@Provides
 	@Singleton
 	FileHelper provideFileHelper(SettingsRepository settings) {
-		return new FileHelper(context, settings);
+		return module.getFileHelper();
 	}
 
 	@Provides
@@ -185,9 +184,9 @@ public class AppModule {
 	@Provides
 	@Singleton
 	GroupInteractor provideNewGroupInteractor(EncryptedDatabaseRepository dbRepo,
-											  ResourceHelper resourceHelper,
+											  ResourceProvider resourceProvider,
 											  ObserverBus observerBus) {
-		return new GroupInteractor(dbRepo, resourceHelper, observerBus);
+		return new GroupInteractor(dbRepo, resourceProvider, observerBus);
 	}
 
 	@Provides
@@ -213,6 +212,12 @@ public class AppModule {
 	@Provides
 	@Singleton
 	LocaleProvider provideLocaleProvider() {
-	    return new LocaleProvider(context);
+	    return module.getLocaleProvider();
+	}
+
+	@Provides
+	@Singleton
+	DispatcherProvider provideDispatcherProvider() {
+		return module.getDispatcherProvider();
 	}
 }

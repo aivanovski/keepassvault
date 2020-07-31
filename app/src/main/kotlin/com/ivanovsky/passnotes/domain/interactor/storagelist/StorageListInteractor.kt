@@ -9,7 +9,7 @@ import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.*
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.DaggerInjector
 import javax.inject.Inject
 
 class StorageListInteractor(private val context: Context) {
@@ -18,7 +18,7 @@ class StorageListInteractor(private val context: Context) {
     lateinit var fileSystemResolver: FileSystemResolver
 
     init {
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
     }
 
     fun getAvailableStorageOptions(): List<StorageOption> {

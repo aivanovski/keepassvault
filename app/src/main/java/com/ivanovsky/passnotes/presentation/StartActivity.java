@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 
-import com.ivanovsky.passnotes.injection.Injector;
+import com.ivanovsky.passnotes.injection.DaggerInjector;
 import com.ivanovsky.passnotes.presentation.core.BaseActivity;
 import com.ivanovsky.passnotes.presentation.unlock.UnlockActivity;
 
@@ -13,7 +13,7 @@ public class StartActivity extends BaseActivity {
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Injector.getInstance().getAppComponent().inject(this);
+		DaggerInjector.getInstance().getAppComponent().inject(this);
 
 		startActivity(new Intent(this, UnlockActivity.class));
 		finish();

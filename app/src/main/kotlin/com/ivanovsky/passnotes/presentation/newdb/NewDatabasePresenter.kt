@@ -6,10 +6,10 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.FileHelper
-import com.ivanovsky.passnotes.domain.ResourceHelper
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import kotlinx.coroutines.*
@@ -30,7 +30,7 @@ class NewDatabasePresenter(
     lateinit var fileHelper: FileHelper
 
     @Inject
-    lateinit var resourceHelper: ResourceHelper
+    lateinit var resourceProvider: ResourceProvider
 
     override val storageTypeAndPath = MutableLiveData<Pair<String, String>>()
     override val doneButtonVisibility = MutableLiveData<Boolean>()
@@ -41,7 +41,7 @@ class NewDatabasePresenter(
     private val scope = CoroutineScope(Dispatchers.Main + job)
 
     init {
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
     }
 
     override fun start() {
@@ -74,7 +74,7 @@ class NewDatabasePresenter(
                     if (created) {
                         showGroupsScreenEvent.call()
                     } else {
-                        val errorText = resourceHelper.getString(R.string.error_was_occurred)
+                        val errorText = resourceProvider.getString(R.string.error_was_occurred)
                         view.screenState = ScreenState.dataWithError(errorText)
                         doneButtonVisibility.value = true
                     }
@@ -86,7 +86,7 @@ class NewDatabasePresenter(
             }
 
         } else {
-            val errorText = resourceHelper.getString(R.string.storage_is_not_selected)
+            val errorText = resourceProvider.getString(R.string.storage_is_not_selected)
             view.screenState = ScreenState.dataWithError(errorText)
         }
     }
@@ -103,14 +103,14 @@ class NewDatabasePresenter(
 
             if (fileHelper.isLocatedInPrivateStorage(file)) {
                 storageTypeAndPath.value =
-                    Pair(resourceHelper.getString(R.string.private_storage), selectedFile.path)
+                    Pair(resourceProvider.getString(R.string.private_storage), selectedFile.path)
             } else {
                 storageTypeAndPath.value =
-                    Pair(resourceHelper.getString(R.string.public_storage), selectedFile.path)
+                    Pair(resourceProvider.getString(R.string.public_storage), selectedFile.path)
             }
         } else if (selectedFile.fsType == FSType.DROPBOX) {
             storageTypeAndPath.value =
-                Pair(resourceHelper.getString(R.string.dropbox), selectedFile.path)
+                Pair(resourceProvider.getString(R.string.dropbox), selectedFile.path)
         }
     }
 }

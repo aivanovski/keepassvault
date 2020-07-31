@@ -5,17 +5,13 @@ import androidx.annotation.DrawableRes
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.domain.LocaleProvider
-import com.ivanovsky.passnotes.domain.PermissionHelper
-import com.ivanovsky.passnotes.domain.ResourceHelper
+import com.ivanovsky.passnotes.domain.*
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.util.formatAccordingLocale
 import kotlinx.coroutines.*
 import java.util.*
-import javax.inject.Inject
 
 class FilePickerPresenter(
     private val view: FilePickerContract.View,
@@ -24,20 +20,12 @@ class FilePickerPresenter(
     private val isBrowsingEnabled: Boolean
 ) : FilePickerContract.Presenter {
 
-    @Inject
-    lateinit var interactor: FilePickerInteractor
-
-    @Inject
-    lateinit var errorInteractor: ErrorInteractor
-
-    @Inject
-    lateinit var permissionHelper: PermissionHelper
-
-    @Inject
-    lateinit var resourceHelper: ResourceHelper
-
-    @Inject
-    lateinit var localeProvider: LocaleProvider
+    private val interactor: FilePickerInteractor by inject()
+    private val errorInteractor: ErrorInteractor by inject()
+    private val permissionHelper: PermissionHelper by inject()
+    private val resources: ResourceProvider by inject()
+    private val dateFormatProvider: DateFormatProvider by inject()
+    private val dispatchers: DispatcherProvider by inject()
 
     private var isPermissionRejected = false
     private var currentDir = rootFile
@@ -45,15 +33,7 @@ class FilePickerPresenter(
     private var items: List<FilePickerAdapter.Item>? = null
 
     private val job = Job()
-    private val scope = CoroutineScope(Dispatchers.Main + job)
-
-    companion object {
-        private const val SDCARD_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE
-    }
-
-    init {
-        Injector.getInstance().appComponent.inject(this)
-    }
+    private val scope = CoroutineScope(dispatchers.Main + job)
 
     override fun start() {
         if (!isPermissionRejected) {
@@ -72,7 +52,7 @@ class FilePickerPresenter(
         //TODO: app doesnt need permission for private storage and network storage
         if (permissionHelper.isPermissionGranted(SDCARD_PERMISSION)) {
             scope.launch {
-                val files = withContext(Dispatchers.Default) {
+                val files = withContext(dispatchers.Default) {
                     interactor.getFileList(currentDir)
                 }
 
@@ -89,7 +69,7 @@ class FilePickerPresenter(
 
             if (!dir.isRoot && isBrowsingEnabled) {
                 scope.launch {
-                    val parent = withContext(Dispatchers.Default) {
+                    val parent = withContext(dispatchers.Default) {
                         interactor.getParent(currentDir)
                     }
 
@@ -180,7 +160,7 @@ class FilePickerPresenter(
 
     private fun formatModifiedDate(modified: Long?): String {
         return if (modified != null) {
-            Date(modified).formatAccordingLocale(localeProvider.getSystemLocale())
+            dateFormatProvider.getShortDateFormat().format(Date(modified))
         } else {
             ""
         }
@@ -202,7 +182,7 @@ class FilePickerPresenter(
             //TODO: somehow user should see retry button
             isPermissionRejected = true
             view.screenState = ScreenState.error(
-                resourceHelper.getString(R.string.application_requires_external_storage_permission)
+                resources.getString(R.string.application_requires_external_storage_permission)
             )
             view.setDoneButtonVisibility(false)
         }
@@ -243,7 +223,7 @@ class FilePickerPresenter(
             if (isAnyFileSelected()) {
                 view.selectFileAndFinish(getSelectedFile())
             } else {
-                view.showSnackbarMessage(resourceHelper.getString(R.string.please_select_any_file))
+                view.showSnackbarMessage(resources.getString(R.string.please_select_any_file))
             }
         }
     }
@@ -260,5 +240,9 @@ class FilePickerPresenter(
 
         val position = items.indexOfFirst { item -> item.selected }
         return files[position]
+    }
+
+    companion object {
+        private const val SDCARD_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE
     }
 }

@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.util
 
-import android.content.Context
 import java.text.DateFormat
 import java.util.*
 

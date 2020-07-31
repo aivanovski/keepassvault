@@ -18,9 +18,10 @@ class FilePickerActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.core_base_activity)
 
-        mode = intent.extras.getSerializable(EXTRA_MODE) as Mode
-        rootFile = intent.extras.getParcelable(EXTRA_ROOT_FILE)
-        isBrowsingEnabled = intent.extras.getBoolean(EXTRA_IS_BROWSING_ENABLED)
+        // TODO: remove !!
+        mode = intent.extras!!.getSerializable(EXTRA_MODE) as Mode
+        rootFile = intent.extras!!.getParcelable(EXTRA_ROOT_FILE)!!
+        isBrowsingEnabled = intent.extras!!.getBoolean(EXTRA_IS_BROWSING_ENABLED)
 
         initCurrentActionBar(findViewById(R.id.tool_bar))
         currentActionBar.title = getString(R.string.select_directory)

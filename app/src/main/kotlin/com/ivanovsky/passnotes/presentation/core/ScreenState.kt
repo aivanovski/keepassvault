@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.presentation.core
 
-class ScreenState private constructor(
+data class ScreenState private constructor(
         val displayingMode: ScreenDisplayingMode,
         val message: String? = null
 ) {

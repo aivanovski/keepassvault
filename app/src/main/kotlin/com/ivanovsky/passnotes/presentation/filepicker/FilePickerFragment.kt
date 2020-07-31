@@ -12,15 +12,14 @@ import androidx.lifecycle.Observer
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.domain.PermissionHelper
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.DaggerInjector
+import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BaseListFragment
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
-import javax.inject.Inject
 
 class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerContract.View {
 
-    @Inject
-    lateinit var permissionHelper: PermissionHelper
+    private val permissionHelper: PermissionHelper by inject()
 
     override var presenter: FilePickerContract.Presenter? = null
     private lateinit var adapter: FilePickerAdapter
@@ -33,7 +32,7 @@ class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerC
     private var menu: Menu? = null
 
     init {
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

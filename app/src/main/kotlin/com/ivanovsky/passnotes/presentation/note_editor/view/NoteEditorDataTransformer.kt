@@ -4,9 +4,9 @@ package com.ivanovsky.passnotes.presentation.note_editor.view
 
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.*
-import com.ivanovsky.passnotes.domain.ResourceHelper
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PropertySpreader
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_CUSTOM
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_NOTES
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Companion.ITEM_ID_PASSWORD
@@ -28,10 +28,10 @@ class NoteEditorDataTransformer(
 ) {
 
     @Inject
-    lateinit var resources: ResourceHelper
+    lateinit var resources: ResourceProvider
 
     init {
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
     }
 
     fun createEditorItemsForNewNote(): List<BaseDataItem> {

@@ -51,9 +51,9 @@ android {
 		}
 		release {
 			storeFile file("../keys/release.keystore")
-			storePassword "zimber88"
-			keyAlias "alexei.ivanovski"
-			keyPassword "zimber88"
+			storePassword ext.keystorePassword
+			keyAlias ext.keystoreAlias
+			keyPassword ext.keystorePassword
 		}
 	}
 

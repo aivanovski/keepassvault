@@ -10,6 +10,8 @@ import groovy.json.JsonSlurper
 def PROPERTY_DEBUG_PASSWORD_RULES = 'debugPasswordRules'
 def PROPERTY_DROPBOX_APP_KEY = 'dropboxAppKey'
 def PROPERTY_DROPBOX_APP_SECRET = 'dropboxAppSecret'
+def KEYSTORE_PASSWORD = "password"
+def KEYSTORE_ALIAS = "alias"
 
 def parsePropertiesMap = { ->
 	def result = [:]
@@ -44,12 +46,29 @@ def parsePropertiesMap = { ->
 	return result
 }
 
+def parseKeystoreProperties = {
+	def result = [:]
+
+	def propertiesFile = project.file('keys/keystore.properties')
+
+	if (propertiesFile.canRead()) {
+		Properties properties = new Properties()
+		properties.load(new FileInputStream(propertiesFile))
+        result.putAll(properties)
+	}
+
+	return result
+}
+
 def propertiesMap = parsePropertiesMap()
+def keystorePropertiesMap = parseKeystoreProperties()
 
 ext {
 	debugFileNameToPasswordMap = propertiesMap[PROPERTY_DEBUG_PASSWORD_RULES]
 	dropboxAppKey = propertiesMap[PROPERTY_DROPBOX_APP_KEY]
 	dropboxAppSecret = propertiesMap[PROPERTY_DROPBOX_APP_SECRET]
+	keystorePassword = keystorePropertiesMap[KEYSTORE_PASSWORD]
+	keystoreAlias = keystorePropertiesMap[KEYSTORE_ALIAS]
 
 	android = [
 			minSdk    : 16,

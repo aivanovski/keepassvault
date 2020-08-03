@@ -109,8 +109,7 @@ def okHttpVersion = '3.10.0'
 def apacheCommonsLangVersion = '3.0'
 
 // Test
-def jUnitVersion = '4.12'
-def mockitoVersion = '2.19.1'
+def jUnitVersion = '4.13'
 def robolectricVersion = '4.3'
 def androidXTestVersion = '1.1.0'
 
@@ -119,9 +118,7 @@ dependencies {
 
 	// Test dependencies
 	testImplementation "junit:junit:$jUnitVersion"
-//	testImplementation "org.mockito:mockito-core:$mockitoVersion"
 	testImplementation "io.mockk:mockk:1.10.0"
-	testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
 	testImplementation "com.google.truth:truth:1.0"
 	testImplementation "org.robolectric:robolectric:$robolectricVersion"
 	testImplementation "org.robolectric:shadows-multidex:$robolectricVersion"

@@ -714,4 +714,9 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 	public FileSystemSyncProcessor getSyncProcessor() {
 		return syncProcessor;
 	}
+
+	@Override
+	public OperationResult<Boolean> isStoragePermissionRequired(FileDescriptor file) {
+		return OperationResult.success(false);
+	}
 }

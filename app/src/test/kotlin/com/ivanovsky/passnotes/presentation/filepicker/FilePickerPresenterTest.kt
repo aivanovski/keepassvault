@@ -8,7 +8,6 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.domain.DateFormatProvider
-import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
@@ -28,7 +27,6 @@ class FilePickerPresenterTest {
     private lateinit var view: FilePickerContract.View
     private lateinit var interactor: FilePickerInteractor
     private lateinit var errorInteractor: ErrorInteractor
-    private lateinit var permissionHelper: PermissionHelper
     private lateinit var resources: ResourceProvider
     private lateinit var dateFormatProvider: DateFormatProvider
 
@@ -37,14 +35,12 @@ class FilePickerPresenterTest {
         view = mockk(relaxUnitFun = true)
         interactor = mockk(relaxUnitFun = true)
         errorInteractor = mockk(relaxUnitFun = true)
-        permissionHelper = mockk(relaxUnitFun = true)
         resources = mockk(relaxUnitFun = true)
         dateFormatProvider = mockk(relaxUnitFun = true)
 
         val module = module {
             single { interactor }
             single { errorInteractor }
-            single { permissionHelper }
             single { resources }
             single { dateFormatProvider }
             single { TEST_DISPATCHER_PROVIDER }
@@ -64,7 +60,7 @@ class FilePickerPresenterTest {
     @Test
     fun `loadData should request permission`() {
         // arrange
-        every { permissionHelper.isPermissionGranted(PERMISSION) }.returns(false)
+        every { interactor.isStoragePermissionRequired(ROOT_DIR) }.returns(OperationResult.success(true))
 
         // act
         createPresenter(
@@ -72,7 +68,7 @@ class FilePickerPresenterTest {
         ).loadData()
 
         // assert
-        verify { permissionHelper.isPermissionGranted(PERMISSION) }
+        verify { interactor.isStoragePermissionRequired(ROOT_DIR) }
         verify { view.requestPermission(PERMISSION) }
         verify { view.setDoneButtonVisibility(false) }
         verify { view.screenState = ScreenState.loading() }
@@ -81,7 +77,7 @@ class FilePickerPresenterTest {
     @Test
     fun `loadData should load files`() {
         // arrange
-        every { permissionHelper.isPermissionGranted(PERMISSION) }.returns(true)
+        every { interactor.isStoragePermissionRequired(ROOT_DIR) }.returns(OperationResult.success(false))
         every { interactor.getFileList(ROOT_DIR) }.returns(OperationResult.success(ROOT_DIR_FILES))
         every { dateFormatProvider.getShortDateFormat() }.returns(DATE_FORMAT)
 
@@ -92,8 +88,10 @@ class FilePickerPresenterTest {
         ).loadData()
 
         // asset
-        verify { permissionHelper.isPermissionGranted(PERMISSION) }
-        verify { interactor.getFileList(ROOT_DIR) }
+        verifyOrder {
+            interactor.isStoragePermissionRequired(ROOT_DIR)
+            interactor.getFileList(ROOT_DIR)
+        }
         verify { view.setDoneButtonVisibility(true) }
         verify { view.screenState = ScreenState.data() }
         verify { view.setItems(ROOT_DIR_VIEW_ITEMS) }
@@ -102,7 +100,7 @@ class FilePickerPresenterTest {
     @Test
     fun `loadData should show empty state`() {
         // arrange
-        every { permissionHelper.isPermissionGranted(PERMISSION) }.returns(true)
+        every { interactor.isStoragePermissionRequired(ROOT_DIR) }.returns(OperationResult.success(false))
         every { interactor.getFileList(ROOT_DIR) }.returns(OperationResult.success(emptyList()))
         every { resources.getString(R.string.no_items) }.returns(EMPTY_TEXT)
 
@@ -112,9 +110,11 @@ class FilePickerPresenterTest {
         ).loadData()
 
         // assert
-        verify { permissionHelper.isPermissionGranted(PERMISSION) }
         verify { resources.getString(R.string.no_items) }
-        verify { interactor.getFileList(ROOT_DIR) }
+        verifyOrder {
+            interactor.isStoragePermissionRequired(ROOT_DIR)
+            interactor.getFileList(ROOT_DIR)
+        }
         verify { view.screenState = ScreenState.empty(EMPTY_TEXT) }
         verify { view.setDoneButtonVisibility(false) }
     }
@@ -123,7 +123,7 @@ class FilePickerPresenterTest {
     fun `loadData should show error`() {
         // arrange
         val error = newGenericError(ERROR_TEXT)
-        every { permissionHelper.isPermissionGranted(PERMISSION) }.returns(true)
+        every { interactor.isStoragePermissionRequired(ROOT_DIR) }.returns(OperationResult.success(false))
         every { errorInteractor.processAndGetMessage(error) }.returns(ERROR_TEXT)
         every { interactor.getFileList(ROOT_DIR) }.returns(
             OperationResult.error(newGenericError(ERROR_TEXT))
@@ -135,9 +135,11 @@ class FilePickerPresenterTest {
         ).loadData()
 
         // assert
-        verify { permissionHelper.isPermissionGranted(PERMISSION) }
         verify { errorInteractor.processAndGetMessage(error) }
-        verify { interactor.getFileList(ROOT_DIR) }
+        verify {
+            interactor.isStoragePermissionRequired(ROOT_DIR)
+            interactor.getFileList(ROOT_DIR)
+        }
         verify { view.screenState = ScreenState.error(ERROR_TEXT) }
         verify { view.setDoneButtonVisibility(false) }
     }
@@ -245,7 +247,8 @@ class FilePickerPresenterTest {
     @Test
     fun `onItemClicked should change directory`() {
         // arrange
-        every { permissionHelper.isPermissionGranted(PERMISSION) }.returns(true)
+        every { interactor.isStoragePermissionRequired(ROOT_DIR) }.returns(OperationResult.success(false))
+        every { interactor.isStoragePermissionRequired(CHILD_DIR) }.returns(OperationResult.success(false))
         every { interactor.getFileList(ROOT_DIR) }.returns(OperationResult.success(ROOT_DIR_FILES))
         every { interactor.getFileList(CHILD_DIR) }.returns(OperationResult.success(CHILD_DIR_FILES))
         every { interactor.getParent(CHILD_DIR) }.returns(OperationResult.success(ROOT_DIR))
@@ -260,13 +263,14 @@ class FilePickerPresenterTest {
         presenter.onItemClicked(0)
 
         // assert
-        verify(exactly = 2) { permissionHelper.isPermissionGranted(PERMISSION) }
-        verify { interactor.getParent(CHILD_DIR) }
         verify { view.setDoneButtonVisibility(true) }
         verify { view.screenState = ScreenState.data() }
         verifyOrder {
+            interactor.isStoragePermissionRequired(ROOT_DIR)
             interactor.getFileList(ROOT_DIR)
+            interactor.isStoragePermissionRequired(CHILD_DIR)
             interactor.getFileList(CHILD_DIR)
+            interactor.getParent(CHILD_DIR)
         }
         val viewItems = mutableListOf<FilePickerAdapter.Item>()
         viewItems.add(VIEW_ITEM_MAPPER.map(CHILD_DIR).copy(title = ".."))
@@ -287,7 +291,7 @@ class FilePickerPresenterTest {
     }
 
     private fun setupFilesInMocks(files: List<FileDescriptor>) {
-        every { permissionHelper.isPermissionGranted(PERMISSION) }.returns(true)
+        every { interactor.isStoragePermissionRequired(ROOT_DIR) }.returns(OperationResult.success(false))
         every { interactor.getFileList(ROOT_DIR) }.returns(OperationResult.success(files))
         every { dateFormatProvider.getShortDateFormat() }.returns(DATE_FORMAT)
     }

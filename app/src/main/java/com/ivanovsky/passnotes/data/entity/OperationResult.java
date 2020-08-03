@@ -98,6 +98,10 @@ public class OperationResult<T> {
 		return status == SUCCEEDED || status == DEFERRED;
 	}
 
+	public boolean getResultOrFalse() {
+		return (obj instanceof Boolean) ? (Boolean) obj : false;
+	}
+
 	@NonNull
 	public OperationStatus getStatus() {
 		OperationStatus status;

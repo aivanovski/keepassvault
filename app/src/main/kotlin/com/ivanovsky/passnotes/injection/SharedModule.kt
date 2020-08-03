@@ -21,7 +21,12 @@ class SharedModule(private val context: Context) {
     val dispatcherProvider = DispatcherProvider()
 
     val dropboxFileRepository = DropboxFileRepository(database.dropboxFileDao)
-    val fileSystemResolver = FileSystemResolver(settings, dropboxFileRepository, fileHelper)
+    val fileSystemResolver = FileSystemResolver(
+        settings,
+        dropboxFileRepository,
+        fileHelper,
+        permissionHelper
+    )
 
     private fun provideAppDatabase(): AppDatabase {
         return Room.databaseBuilder(

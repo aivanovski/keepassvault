@@ -6,7 +6,6 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.DispatcherProvider
-import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
@@ -27,7 +26,6 @@ class FilePickerPresenter(
 
     private val interactor: FilePickerInteractor by inject()
     private val errorInteractor: ErrorInteractor by inject()
-    private val permissionHelper: PermissionHelper by inject()
     private val resources: ResourceProvider by inject()
     private val dateFormatProvider: DateFormatProvider by inject()
     private val dispatchers: DispatcherProvider by inject()
@@ -55,17 +53,18 @@ class FilePickerPresenter(
         view.screenState = ScreenState.loading()
         view.setDoneButtonVisibility(false)
 
-        //TODO: app doesnt need permission for private storage and network storage
-        if (permissionHelper.isPermissionGranted(SDCARD_PERMISSION)) {
-            scope.launch {
+        scope.launch {
+            val permissionRequiredResult = interactor.isStoragePermissionRequired(currentDir)
+            val isPermissionRequired = permissionRequiredResult.resultOrFalse
+            if (!isPermissionRequired) {
                 val files = withContext(dispatchers.Default) {
                     interactor.getFileList(currentDir)
                 }
 
                 onFilesLoaded(currentDir, files)
+            } else {
+                view.requestPermission(SDCARD_PERMISSION)
             }
-        } else {
-            view.requestPermission(SDCARD_PERMISSION)
         }
     }
 

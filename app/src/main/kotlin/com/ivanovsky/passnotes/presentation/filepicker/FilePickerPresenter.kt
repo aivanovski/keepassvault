@@ -1,16 +1,21 @@
 package com.ivanovsky.passnotes.presentation.filepicker
 
 import android.Manifest
-import androidx.annotation.DrawableRes
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.domain.*
+import com.ivanovsky.passnotes.domain.DateFormatProvider
+import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.PermissionHelper
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class FilePickerPresenter(
@@ -26,6 +31,7 @@ class FilePickerPresenter(
     private val resources: ResourceProvider by inject()
     private val dateFormatProvider: DateFormatProvider by inject()
     private val dispatchers: DispatcherProvider by inject()
+    private val viewItemMapper by lazy { ViewItemMapper(dateFormatProvider.getShortDateFormat()) }
 
     private var isPermissionRejected = false
     private var currentDir = rootFile
@@ -91,14 +97,17 @@ class FilePickerPresenter(
                 items = adapterItems
                 files = displayedFiles
 
-                view.setItems(adapterItems)
-                view.screenState = ScreenState.data()
-                view.setDoneButtonVisibility(true)
+                if (adapterItems.isNotEmpty()) {
+                    view.setItems(adapterItems)
+                    view.screenState = ScreenState.data()
+                    view.setDoneButtonVisibility(true)
+                } else {
+                    view.screenState = ScreenState.empty(resources.getString(R.string.no_items))
+                }
             }
         } else {
             val message = errorInteractor.processAndGetMessage(result.error)
             view.screenState = ScreenState.error(message)
-            view.setDoneButtonVisibility(false)
         }
     }
 
@@ -148,31 +157,15 @@ class FilePickerPresenter(
         val items = mutableListOf<FilePickerAdapter.Item>()
 
         for (file in files) {
-            val iconResId = getIconResId(file.isDirectory)
-            val title = if (file == parent) ".." else formatItemTitle(file)
-            val description = formatModifiedDate(file.modified)
-
-            items.add(FilePickerAdapter.Item(iconResId, title, description, false))
+            if (file == parent) {
+                val item = viewItemMapper.map(file)
+                items.add(item.copy(title = ".."))
+            } else {
+                items.add(viewItemMapper.map(file))
+            }
         }
 
         return items
-    }
-
-    private fun formatModifiedDate(modified: Long?): String {
-        return if (modified != null) {
-            dateFormatProvider.getShortDateFormat().format(Date(modified))
-        } else {
-            ""
-        }
-    }
-
-    @DrawableRes
-    private fun getIconResId(isDirectory: Boolean): Int {
-        return if (isDirectory) R.drawable.ic_folder_white_24dp else R.drawable.ic_file_white_24dp
-    }
-
-    private fun formatItemTitle(file: FileDescriptor): String {
-        return if (file.isDirectory) file.name + "/" else file.name
     }
 
     override fun onPermissionResult(granted: Boolean) {
@@ -182,7 +175,7 @@ class FilePickerPresenter(
             //TODO: somehow user should see retry button
             isPermissionRejected = true
             view.screenState = ScreenState.error(
-                resources.getString(R.string.application_requires_external_storage_permission)
+                resources.getString(R.string.permission_denied_message)
             )
             view.setDoneButtonVisibility(false)
         }

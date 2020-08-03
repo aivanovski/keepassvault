@@ -1,5 +1,8 @@
 package com.ivanovsky.passnotes.data.entity;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 public class OperationError {
 
 	public static final String MESSAGE_FAILED_TO_FIND_GROUP = "Failed to find group";
@@ -167,5 +170,29 @@ public class OperationError {
 
 	public void setThrowable(Throwable throwable) {
 		this.throwable = throwable;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+
+		if (o == null || getClass() != o.getClass()) return false;
+
+		OperationError that = (OperationError) o;
+
+		return new EqualsBuilder()
+				.append(type, that.type)
+				.append(message, that.message)
+				.append(throwable, that.throwable)
+				.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+				.append(type)
+				.append(message)
+				.append(throwable)
+				.toHashCode();
 	}
 }

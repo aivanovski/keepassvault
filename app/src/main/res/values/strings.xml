@@ -24,10 +24,14 @@
 	<string name="empty_field">Empty field</string>
 	<string name="offline_modification_message">Could not save to source file: %s. Changes will be synced later or do it manually with \'Sync\' button</string>
 
-	<!-- Recently opened files screen -->
+	<!-- Unlock screen -->
 	<string name="recently_used">Recently used</string>
 	<string name="no_files_to_open">No files to open</string>
 	<string name="unlock">Unlock</string>
+	<string-array name="unlock_fab_actions">
+		<item>New file</item>
+		<item>Open file</item>
+	</string-array>
 
 	<!-- New database screen -->
 	<string name="new_database">New database</string>

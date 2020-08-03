@@ -28,5 +28,6 @@ class UnlockContract {
         fun onDebugMenuClicked()
         fun onFilePicked(file: FileDescriptor)
         fun closeActiveDatabaseIfNeed()
+        fun onFabActionClicked(position: Int)
     }
 }

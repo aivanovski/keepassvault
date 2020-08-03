@@ -9,9 +9,9 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.Spinner
+import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
@@ -19,6 +19,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingMode
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuActivity
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity
@@ -35,7 +36,7 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
     private lateinit var fileAdapter: FileSpinnerAdapter
     private lateinit var passwordRules: List<PasswordAutofillRule>
     private lateinit var fileSpinner: Spinner
-    private lateinit var fab: FloatingActionButton
+    private lateinit var fab: ExpandableFloatingActionButton
     private lateinit var passwordEditText: EditText
 
     private val itemsData = MutableLiveData<List<DropDownItem>>()
@@ -108,7 +109,10 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
 
         fileSpinner.adapter = fileAdapter
 
-        fab.setOnClickListener { showNewDatabaseScreen() }
+        val fabItems = resources.getStringArray(R.array.unlock_fab_actions).toList()
+        fab.inflate(fabItems)
+        fab.onItemClickListener = { position -> presenter?.onFabActionClicked(position)}
+
         unlockButton.setOnClickListener { onUnlockButtonClicked() }
 
         itemsData.observe(viewLifecycleOwner,
@@ -145,9 +149,9 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
         when (screenState.displayingMode) {
             ScreenDisplayingMode.EMPTY,
             ScreenDisplayingMode.DISPLAYING_DATA_WITH_ERROR_PANEL,
-            ScreenDisplayingMode.DISPLAYING_DATA -> fab.show()
+            ScreenDisplayingMode.DISPLAYING_DATA -> fab.isVisible = true
 
-            ScreenDisplayingMode.LOADING, ScreenDisplayingMode.ERROR -> fab.hide()
+            ScreenDisplayingMode.LOADING, ScreenDisplayingMode.ERROR -> fab.isVisible = false
         }
     }
 

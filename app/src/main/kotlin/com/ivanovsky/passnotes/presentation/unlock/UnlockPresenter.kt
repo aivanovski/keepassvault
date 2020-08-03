@@ -233,6 +233,13 @@ class UnlockPresenter(private val view: UnlockContract.View) :
         selectedPosition = position
     }
 
+    override fun onFabActionClicked(position: Int) {
+        when (position) {
+            0 -> view.showNewDatabaseScreen()
+            1 -> view.showOpenFileScreen()
+        }
+    }
+
     companion object {
         val LOG_TAG = UnlockPresenter::class.java.simpleName
     }

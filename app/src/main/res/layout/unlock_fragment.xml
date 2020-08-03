@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<androidx.constraintlayout.widget.ConstraintLayout
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
@@ -51,13 +51,14 @@
 
 	</androidx.constraintlayout.widget.ConstraintLayout>
 
-
-	<com.google.android.material.floatingactionbutton.FloatingActionButton
+	<com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
 		android:id="@+id/fab"
 		style="@style/Material.FloatingActionButton"
-		android:layout_gravity="bottom|right"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
 		android:layout_marginRight="@dimen/material_fab_margin"
-		android:layout_marginBottom="@dimen/material_fab_margin"
-		app:srcCompat="@drawable/ic_add_white_24dp"/>
+		android:layout_marginBottom="@dimen/half_margin"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"/>
 
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

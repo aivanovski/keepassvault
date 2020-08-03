@@ -13,6 +13,8 @@
 	<com.google.android.material.floatingactionbutton.FloatingActionButton
 		android:id="@+id/fab"
 		style="@style/Material.FloatingActionButton"
+        android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
 		android:layout_marginBottom="@dimen/material_fab_margin"
 		android:layout_marginRight="@dimen/material_fab_margin"
 		app:layout_constraintBottom_toBottomOf="@id/recycler_view"

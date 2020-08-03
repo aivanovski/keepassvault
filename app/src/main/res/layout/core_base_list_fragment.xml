@@ -24,6 +24,7 @@
 		android:layout_marginRight="@dimen/element_margin"
 		android:layout_marginBottom="@dimen/element_margin"
 		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintBottom_toBottomOf="parent"/>
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:fabSize="normal"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

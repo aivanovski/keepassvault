@@ -56,8 +56,14 @@
 	</style>
 
 	<style name="Material.FloatingActionButton">
-		<item name="android:layout_width">@dimen/material_fab_size</item>
-		<item name="android:layout_height">@dimen/material_fab_size</item>
+		<item name="android:minWidth">@dimen/material_fab_size</item>
+		<item name="android:minHeight">@dimen/material_fab_size</item>
+		<item name="fabSize">normal</item>
+	</style>
+
+	<style name="Material.ExpandedFloatingActionButton"/>
+	<style name="Material.ExpandedFloatingActionButton.Item">
+		<item name="android:textColor">@android:color/black</item>
 	</style>
 
 	<style name="Material.PrimaryText">

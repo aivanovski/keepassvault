@@ -13,6 +13,7 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.util.asDate
 import io.mockk.*
 import org.junit.After
 import org.junit.Before
@@ -325,7 +326,7 @@ class FilePickerPresenterTest {
             val file = FileDescriptor()
 
             file.fsType = FSType.REGULAR_FS
-            file.modified = System.currentTimeMillis() // TODO: replace with constant
+            file.modified = "2018-01-01".asDate().time
             file.isDirectory = isDirectory
             file.path = path
             file.uid = path

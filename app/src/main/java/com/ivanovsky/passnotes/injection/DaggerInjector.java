@@ -2,30 +2,30 @@ package com.ivanovsky.passnotes.injection;
 
 import com.ivanovsky.passnotes.App;
 
-public class Injector {
+public class DaggerInjector {
 
-	private static volatile Injector instance;
+	private static volatile DaggerInjector instance;
 
 	private volatile AppComponent appComponent;
 
-	public static Injector getInstance() {
+	public static DaggerInjector getInstance() {
 		if (instance == null) {
-			synchronized (Injector.class) {
+			synchronized (DaggerInjector.class) {
 				if (instance == null) {
-					instance = new Injector();
+					instance = new DaggerInjector();
 				}
 			}
 		}
 		return instance;
 	}
 
-	private Injector() {
+	private DaggerInjector() {
 		appComponent = buildComponent();
 	}
 
 	private AppComponent buildComponent() {
 		return DaggerAppComponent.builder()
-				.appModule(new AppModule(App.getInstance()))
+				.appModule(new AppModule(App.getAppInstance(), App.getSharedModule()))
 				.build();
 	}
 

@@ -5,14 +5,14 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import com.ivanovsky.passnotes.domain.ResourceHelper
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.injection.DaggerInjector
 import javax.inject.Inject
 
 class ChooseOptionDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     @Inject
-    lateinit var resourceHelper: ResourceHelper
+    lateinit var resourceProvider: ResourceProvider
 
     lateinit var onItemClickListener: (itemIndex: Int) -> Unit
 
@@ -20,7 +20,7 @@ class ChooseOptionDialog : DialogFragment(), DialogInterface.OnClickListener {
     private lateinit var entries: List<String>
 
     init {
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

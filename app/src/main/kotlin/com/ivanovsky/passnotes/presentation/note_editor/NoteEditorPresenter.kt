@@ -5,11 +5,11 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.domain.NoteDiffer
-import com.ivanovsky.passnotes.domain.ResourceHelper
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PropertySpreader
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorContract.LaunchMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorContract.LaunchMode.EDIT
@@ -36,7 +36,7 @@ class NoteEditorPresenter(
     lateinit var interactor: NoteEditorInteractor
 
     @Inject
-    lateinit var resources: ResourceHelper
+    lateinit var resources: ResourceProvider
 
     @Inject
     lateinit var errorInteractor: ErrorInteractor
@@ -52,7 +52,7 @@ class NoteEditorPresenter(
     private var loadedTemplate: Template? = null
 
     init {
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
     }
 
     override fun start() {

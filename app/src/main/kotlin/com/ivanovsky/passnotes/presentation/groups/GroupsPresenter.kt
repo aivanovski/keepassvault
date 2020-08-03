@@ -5,12 +5,12 @@ import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
-import com.ivanovsky.passnotes.domain.ResourceHelper
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarMessageLiveAction
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import kotlinx.coroutines.*
 import java.util.*
@@ -37,7 +37,7 @@ class GroupsPresenter(
     lateinit var globalSnackbarBus: GlobalSnackbarBus
 
     @Inject
-    lateinit var resourceHelper: ResourceHelper
+    lateinit var resourceProvider: ResourceProvider
 
     override val globalSnackbarMessageAction: GlobalSnackbarMessageLiveAction
 
@@ -48,7 +48,7 @@ class GroupsPresenter(
     private var templates: List<Template>? = null
 
     init {
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
         globalSnackbarMessageAction = globalSnackbarBus.messageAction
     }
 
@@ -93,7 +93,7 @@ class GroupsPresenter(
                     view.setItems(createAdapterItems(dataItems))
                     view.screenState = ScreenState.data()
                 } else {
-                    val emptyText = resourceHelper.getString(R.string.no_items)
+                    val emptyText = resourceProvider.getString(R.string.no_items)
                     view.screenState = ScreenState.empty(emptyText)
                 }
             } else {
@@ -232,7 +232,7 @@ class GroupsPresenter(
             }
 
             if (removeResult.isSucceededOrDeferred) {
-                view.showToastMessage(resourceHelper.getString(R.string.successfully_removed))
+                view.showToastMessage(resourceProvider.getString(R.string.successfully_removed))
             } else {
                 val message = errorInteractor.processAndGetMessage(removeResult.error)
                 view.screenState = ScreenState.error(message)
@@ -249,7 +249,7 @@ class GroupsPresenter(
             }
 
             if (removeResult.isSucceededOrDeferred) {
-                view.showToastMessage(resourceHelper.getString(R.string.successfully_removed))
+                view.showToastMessage(resourceProvider.getString(R.string.successfully_removed))
             } else {
                 val message = errorInteractor.processAndGetMessage(removeResult.error)
                 view.screenState = ScreenState.error(message)

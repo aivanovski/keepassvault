@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.util
 
+import java.text.SimpleDateFormat
 import java.util.*
 
 fun String.isDigitsOnly(): Boolean {
@@ -33,3 +34,20 @@ fun String.toUUID(): UUID? {
 private fun Char.isHex(): Boolean {
     return isDigit() || (toLowerCase() in 'a'..'f')
 }
+
+// parses string containing date "2020-02-18"
+fun String.asDate(): Date {
+    val date = DATE_FORMAT.parse(this) ?: throw IllegalStateException("Unable to parse date")
+
+    val cal = Calendar.getInstance()
+    cal.timeInMillis = date.time
+
+    cal.set(Calendar.HOUR_OF_DAY, 0)
+    cal.set(Calendar.MINUTE, 0)
+    cal.set(Calendar.SECOND, 0)
+    cal.set(Calendar.MILLISECOND, 0)
+
+    return cal.time
+}
+
+private val DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)

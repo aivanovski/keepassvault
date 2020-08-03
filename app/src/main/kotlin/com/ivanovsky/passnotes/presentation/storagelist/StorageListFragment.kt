@@ -15,7 +15,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.entity.StorageOption
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.adapter.SingleLineAdapter
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerActivity
@@ -30,7 +30,7 @@ class StorageListFragment : BaseFragment(), StorageListContract.View {
     private lateinit var adapter: SingleLineAdapter
 
     init {
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
     }
 
     override fun onStart() {

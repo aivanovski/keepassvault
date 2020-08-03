@@ -101,7 +101,7 @@
 
 	<!-- File picker screen -->
 	<string name="select_directory">Select directory</string>
-	<string name="application_requires_external_storage_permission">Application requires external storage permission</string>
+	<string name="permission_denied_message">Application requires external storage permission</string>
 	<string name="please_select_any_file">Please select any file</string>
 
 	<!-- Debug menu screen -->

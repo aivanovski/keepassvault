@@ -52,7 +52,7 @@ ext {
 	dropboxAppSecret = propertiesMap[PROPERTY_DROPBOX_APP_SECRET]
 
 	android = [
-			minSdk    : 15,
+			minSdk    : 16,
 			targetSdk : 29,
 			compileSdk: 29,
 			buildTools: '29.0.2'

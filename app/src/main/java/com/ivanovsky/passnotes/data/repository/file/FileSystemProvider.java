@@ -30,4 +30,6 @@ public interface FileSystemProvider {
 	OperationResult<Boolean> exists(FileDescriptor file);
 
 	OperationResult<FileDescriptor> getFile(String path, boolean cacheOperationsEnabled);
+
+	OperationResult<Boolean> isStoragePermissionRequired(FileDescriptor file);
 }

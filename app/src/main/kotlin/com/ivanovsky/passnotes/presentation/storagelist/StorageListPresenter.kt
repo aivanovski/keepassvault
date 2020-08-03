@@ -6,12 +6,12 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
-import com.ivanovsky.passnotes.domain.ResourceHelper
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListContract.FilePickerArgs
@@ -33,7 +33,7 @@ class StorageListPresenter(
     lateinit var fileSystemResolver: FileSystemResolver
 
     @Inject
-    lateinit var resourceHelper: ResourceHelper
+    lateinit var resourceProvider: ResourceProvider
 
     override val storageOptions = MutableLiveData<List<StorageOption>>()
     override val showFilePickerScreenEvent = SingleLiveEvent<FilePickerArgs>()
@@ -45,7 +45,7 @@ class StorageListPresenter(
     private val scope = CoroutineScope(Dispatchers.Main + job)
 
     init {
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
     }
 
     override fun start() {
@@ -55,7 +55,7 @@ class StorageListPresenter(
 
             val provider = fileSystemResolver.resolveProvider(FSType.DROPBOX)
             if (provider.authenticator.isAuthenticationRequired) {
-                val errorMessage = resourceHelper.getString(R.string.authentication_failed)
+                val errorMessage = resourceProvider.getString(R.string.authentication_failed)
                 view.screenState = ScreenState.dataWithError(errorMessage)
             } else {
                 scope.launch {

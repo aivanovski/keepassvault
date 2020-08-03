@@ -6,10 +6,10 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
-import com.ivanovsky.passnotes.domain.ResourceHelper
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.unlock.UnlockFragment.DropDownItem
 import com.ivanovsky.passnotes.util.FileUtils
@@ -32,7 +32,7 @@ class UnlockPresenter(private val view: UnlockContract.View) :
     lateinit var observerBus: ObserverBus
 
     @Inject
-    lateinit var resourceHelper: ResourceHelper
+    lateinit var resourceProvider: ResourceProvider
 
     private var selectedRecentlyUsedFile: FileDescriptor? = null
     private var selectedPosition: Int? = null
@@ -41,7 +41,7 @@ class UnlockPresenter(private val view: UnlockContract.View) :
     private val scope = CoroutineScope(Dispatchers.Main + job)
 
     init {
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
     }
 
     override fun start() {
@@ -99,7 +99,7 @@ class UnlockPresenter(private val view: UnlockContract.View) :
 
                     view.screenState = ScreenState.data()
                 } else {
-                    val emptyText = resourceHelper.getString(R.string.no_files_to_open)
+                    val emptyText = resourceProvider.getString(R.string.no_files_to_open)
                     view.screenState = ScreenState.empty(emptyText)
                 }
             } else {

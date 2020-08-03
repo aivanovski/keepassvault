@@ -1,10 +1,8 @@
 package com.ivanovsky.passnotes.presentation.filepicker
 
-import androidx.lifecycle.LiveData
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.presentation.core.BasePresenter
 import com.ivanovsky.passnotes.presentation.core.BaseView
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 
 class FilePickerContract {
 
@@ -16,11 +14,6 @@ class FilePickerContract {
     }
 
     interface Presenter : BasePresenter {
-        val items: LiveData<List<FilePickerAdapter.Item>>
-        val doneButtonVisibility: LiveData<Boolean>
-        val requestPermissionEvent: SingleLiveEvent<String>
-        val fileSelectedEvent: SingleLiveEvent<FileDescriptor>
-
         fun loadData()
         fun onPermissionResult(granted: Boolean)
         fun onItemClicked(position: Int)

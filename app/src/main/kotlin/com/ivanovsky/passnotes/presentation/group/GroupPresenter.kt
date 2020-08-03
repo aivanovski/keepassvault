@@ -1,13 +1,13 @@
 package com.ivanovsky.passnotes.presentation.group
 
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.domain.ResourceHelper
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarMessageLiveAction
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.ErrorResolution
 import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import kotlinx.coroutines.*
 import java.util.*
@@ -28,7 +28,7 @@ class GroupPresenter(
     lateinit var globalSnackbarBus: GlobalSnackbarBus
 
     @Inject
-    lateinit var resourceHelper: ResourceHelper
+    lateinit var resourceProvider: ResourceProvider
 
     override val globalSnackbarMessageAction: GlobalSnackbarMessageLiveAction
 
@@ -37,7 +37,7 @@ class GroupPresenter(
     private var rootUid: UUID? = null
 
     init {
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
 
         globalSnackbarMessageAction = globalSnackbarBus.messageAction
     }
@@ -105,7 +105,7 @@ class GroupPresenter(
                 }
             }
         } else {
-            view.setTitleEditTextError(resourceHelper.getString(R.string.empty_field))
+            view.setTitleEditTextError(resourceProvider.getString(R.string.empty_field))
         }
     }
 

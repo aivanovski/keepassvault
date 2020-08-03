@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
-import com.ivanovsky.passnotes.injection.Injector
+import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.BaseActivity
 import java.util.*
 
@@ -22,7 +22,7 @@ class GroupsActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Injector.getInstance().appComponent.inject(this)
+        DaggerInjector.getInstance().appComponent.inject(this)
 
         setContentView(R.layout.core_base_activity)
 

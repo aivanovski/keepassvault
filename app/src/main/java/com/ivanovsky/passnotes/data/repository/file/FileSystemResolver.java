@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.data.repository.SettingsRepository;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.DropboxFileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.regular.RegularFileSystemProvider;
 import com.ivanovsky.passnotes.domain.FileHelper;
+import com.ivanovsky.passnotes.domain.PermissionHelper;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -14,14 +15,17 @@ public class FileSystemResolver {
 	private final SettingsRepository settings;
 	private final DropboxFileRepository dropboxFileRepository;
 	private final FileHelper fileHelper;
+	private final PermissionHelper permissionHelper;
 	private Map<FSType, FileSystemProvider> providers;
 
 	public FileSystemResolver(SettingsRepository settings,
 							  DropboxFileRepository dropboxFileRepository,
-							  FileHelper fileHelper) {
+							  FileHelper fileHelper,
+							  PermissionHelper permissionHelper) {
 		this.settings = settings;
 		this.dropboxFileRepository = dropboxFileRepository;
 		this.fileHelper = fileHelper;
+		this.permissionHelper = permissionHelper;
 		this.providers = new EnumMap<>(FSType.class);
 	}
 
@@ -40,7 +44,7 @@ public class FileSystemResolver {
 		FileSystemProvider provider;
 
 		if (type == FSType.REGULAR_FS) {
-			provider = new RegularFileSystemProvider();
+			provider = new RegularFileSystemProvider(permissionHelper);
 		} else if (type == FSType.DROPBOX) {
 			provider = new DropboxFileSystemProvider(settings, dropboxFileRepository, fileHelper);
 		} else {

@@ -6,12 +6,12 @@ import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
-import com.ivanovsky.passnotes.domain.ResourceHelper
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import java.util.*
 
 class GroupInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
-    private val resourceHelper: ResourceHelper,
+    private val resourceProvider: ResourceProvider,
     private val observerBus: ObserverBus
 ) {
 
@@ -28,7 +28,7 @@ class GroupInteractor(
     fun createNewGroup(title: String, parentUid: UUID): OperationResult<Group> {
         if (!isTitleFree(title)) {
             return OperationResult.error(
-                newGenericError(resourceHelper.getString(R.string.group_with_this_name_is_already_exist))
+                newGenericError(resourceProvider.getString(R.string.group_with_this_name_is_already_exist))
             )
         }
 

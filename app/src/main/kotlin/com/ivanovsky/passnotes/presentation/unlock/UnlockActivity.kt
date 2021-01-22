@@ -4,28 +4,31 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.navigation.NavigationView
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.core.BaseActivity
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.initActionBar
 
-class UnlockActivity : BaseActivity() {
+class UnlockActivity : AppCompatActivity() {
 
     private lateinit var drawer: DrawerLayout
     private lateinit var navigationView: NavigationView
-    private lateinit var presenter: UnlockPresenter
+
+    private val viewModel: UnlockViewModel by lazy {
+        ViewModelProvider(this, UnlockViewModel.FACTORY)
+            .get(UnlockViewModel::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.core_base_activity_with_side_menu)
 
-        setSupportActionBar(findViewById(R.id.tool_bar))
-        currentActionBar.title = getString(R.string.app_name)
-        currentActionBar.setDisplayHomeAsUpEnabled(true)
-        currentActionBar.setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
+        initActionBar(R.id.tool_bar)
 
         drawer = findViewById(R.id.drawer_layout)
         navigationView = findViewById(R.id.navigation_view)
@@ -34,9 +37,6 @@ class UnlockActivity : BaseActivity() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
-
-        presenter = UnlockPresenter(fragment)
-        fragment.presenter = presenter
 
         navigationView.setNavigationItemSelectedListener { item -> onNavigationItemSelected(item) }
 
@@ -60,23 +60,23 @@ class UnlockActivity : BaseActivity() {
         return when (item.itemId) {
             R.id.menu_open_file -> {
                 drawer.closeDrawer(GravityCompat.START)
-                presenter.onOpenFileMenuClicked()
+                viewModel.onOpenFileMenuClicked()
                 true
             }
 
             R.id.menu_settings -> {
-                presenter.onSettingsMenuClicked()
+                viewModel.onSettingsMenuClicked()
                 true
             }
 
             R.id.menu_about -> {
-                presenter.onAboutMenuClicked()
+                viewModel.onAboutMenuClicked()
                 true
             }
 
             R.id.menu_debug_menu -> {
                 drawer.closeDrawer(GravityCompat.START)
-                presenter.onDebugMenuClicked()
+                viewModel.onDebugMenuClicked()
                 true
             }
 

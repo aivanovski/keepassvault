@@ -6,7 +6,7 @@ import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.presentation.core.BasePresenter
 import com.ivanovsky.passnotes.presentation.core.BaseView
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 
 class StorageListContract {
 

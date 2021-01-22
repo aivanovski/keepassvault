@@ -13,7 +13,7 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListContract.FilePickerArgs
 import kotlinx.coroutines.*
 import javax.inject.Inject

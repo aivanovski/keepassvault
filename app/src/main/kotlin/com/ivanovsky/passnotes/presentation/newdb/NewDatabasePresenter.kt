@@ -11,7 +11,7 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 import kotlinx.coroutines.*
 import java.io.File
 import javax.inject.Inject

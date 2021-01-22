@@ -18,7 +18,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingMode
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.group.GroupActivity
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.note.NoteActivity

@@ -8,9 +8,9 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.unlock.UnlockFragment.DropDownItem
+import com.ivanovsky.passnotes.presentation.unlock.model.DropDownItem
 
-internal class FileSpinnerAdapter(context: Context) : BaseAdapter() {
+class FileSpinnerAdapter(context: Context) : BaseAdapter() {
 
     private val inflater = LayoutInflater.from(context)
     private val items = mutableListOf<DropDownItem>()
@@ -63,6 +63,7 @@ internal class FileSpinnerAdapter(context: Context) : BaseAdapter() {
         val holder: ViewHolder
         val view: View
 
+        // TODO: move layout to DataBinding
         if (convertView == null) {
             view = inflater.inflate(R.layout.unlock_spinner_dropdown_item, parent, false)
 

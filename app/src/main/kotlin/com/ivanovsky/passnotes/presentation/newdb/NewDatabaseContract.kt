@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.presentation.core.BasePresenter
 import com.ivanovsky.passnotes.presentation.core.BaseView
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 
 class NewDatabaseContract {
 

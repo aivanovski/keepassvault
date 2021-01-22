@@ -19,7 +19,6 @@ import com.ivanovsky.passnotes.presentation.note_editor.view.NoteEditorDataTrans
 import com.ivanovsky.passnotes.presentation.notes.NotesPresenter;
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListFragment;
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListPresenter;
-import com.ivanovsky.passnotes.presentation.unlock.UnlockPresenter;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +31,6 @@ import dagger.Component;
 public interface AppComponent {
 
 	void inject(StartActivity startActivity);
-	void inject(UnlockPresenter unlockPresenter);
 	void inject(NewDatabaseActivity newDatabaseActivity);
 	void inject(@NotNull NewDatabasePresenter newDatabasePresenter);
 	void inject(@NotNull StorageListPresenter storageListPresenter);

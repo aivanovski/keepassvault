@@ -18,7 +18,7 @@ import com.ivanovsky.passnotes.domain.LocaleProvider
 import com.ivanovsky.passnotes.domain.entity.PropertySpreader
 import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorActivity
 import com.ivanovsky.passnotes.util.formatAccordingLocale
 import java.util.*

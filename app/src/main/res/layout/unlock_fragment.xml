@@ -1,64 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent">
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
 
-	<androidx.constraintlayout.widget.ConstraintLayout
-		android:id="@+id/content"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent">
+    <data>
 
-		<Spinner
-			android:id="@+id/file_spinner"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_marginTop="@dimen/element_margin"
-			android:layout_marginLeft="@dimen/element_margin"
-			android:layout_marginRight="@dimen/element_margin"
-			app:layout_constraintTop_toTopOf="parent"/>
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel" />
+    </data>
 
-		<com.google.android.material.textfield.TextInputLayout
-			android:id="@+id/password_layout"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_marginTop="@dimen/element_margin"
-			android:layout_marginLeft="@dimen/element_margin"
-			android:layout_marginRight="@dimen/element_margin"
-			app:layout_constraintTop_toBottomOf="@id/file_spinner">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@id/rootLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-			<com.google.android.material.textfield.TextInputEditText
-				android:id="@+id/password"
-				style="@style/Material.EditText.Password"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
-				android:hint="@string/password"/>
+        <com.ivanovsky.passnotes.presentation.core_mvvm.widget.ErrorPanelView
+            android:id="@+id/errorPanelView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}"/>
 
-		</com.google.android.material.textfield.TextInputLayout>
+        <com.ivanovsky.passnotes.presentation.core_mvvm.widget.ScreenStateView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}"/>
 
-		<Button
-			style="@style/Material.ContainedButton"
-			android:id="@+id/unlock_button"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_marginTop="@dimen/element_margin"
-			android:layout_marginLeft="@dimen/element_margin"
-			android:layout_marginRight="@dimen/element_margin"
-			android:text="@string/unlock"
-			app:layout_constraintTop_toBottomOf="@id/password_layout"/>
+        <Spinner
+            android:id="@+id/fileSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/element_margin"
+            android:layout_marginTop="@dimen/element_margin"
+            android:layout_marginRight="@dimen/element_margin"
+            app:layout_constraintTop_toBottomOf="@id/errorPanelView"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/passwordLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/element_margin"
+            android:layout_marginTop="@dimen/element_margin"
+            android:layout_marginRight="@dimen/element_margin"
+            app:layout_constraintTop_toBottomOf="@id/fileSpinner"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}">
 
-	</androidx.constraintlayout.widget.ConstraintLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/password"
+                style="@style/Material.EditText.Password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@={viewModel.password}"
+                android:hint="@string/password" />
 
-	<com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
-		android:id="@+id/fab"
-		style="@style/Material.FloatingActionButton"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginRight="@dimen/material_fab_margin"
-		android:layout_marginBottom="@dimen/half_margin"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintEnd_toEndOf="parent"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:id="@+id/unlockButton"
+            style="@style/Material.ContainedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/element_margin"
+            android:layout_marginTop="@dimen/element_margin"
+            android:layout_marginRight="@dimen/element_margin"
+            android:onClick="@{() -> viewModel.onUnlockButtonClicked()}"
+            android:text="@string/unlock"
+            app:layout_constraintTop_toBottomOf="@id/passwordLayout"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
+            android:id="@+id/fab"
+            style="@style/Material.FloatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/material_fab_margin"
+            android:layout_marginRight="@dimen/material_fab_margin"
+            android:layout_marginBottom="@dimen/half_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

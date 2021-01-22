@@ -15,7 +15,7 @@ import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BaseListFragment
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 
 class FilePickerFragment : BaseListFragment<List<FileDescriptor>>(), FilePickerContract.View {
 

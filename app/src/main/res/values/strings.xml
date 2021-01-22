@@ -4,6 +4,7 @@
 
 	<!-- Common for all screens -->
 	<string name="dropbox">Dropbox</string>
+	<string name="device">Device</string>
 	<string name="no_items">No items</string>
 	<string name="yes">Yes</string>
 	<string name="no">No</string>
@@ -28,6 +29,7 @@
 	<string name="recently_used">Recently used</string>
 	<string name="no_files_to_open">No files to open</string>
 	<string name="unlock">Unlock</string>
+	<string name="empty_file_name">No filename</string>
 	<string-array name="unlock_fab_actions">
 		<item>New file</item>
 		<item>Open file</item>

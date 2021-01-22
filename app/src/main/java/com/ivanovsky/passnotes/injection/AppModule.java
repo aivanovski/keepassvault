@@ -61,8 +61,8 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	UsedFileRepository provideUsedFileRepository(AppDatabase db, ObserverBus bus) {
-		return new UsedFileRepository(db, bus);
+	UsedFileRepository provideUsedFileRepository() {
+		return module.getUsedFileRepository();
 	}
 
 	@Provides
@@ -73,14 +73,14 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	EncryptedDatabaseRepository provideEncryptedDatabaseRepository(FileSystemResolver fileSystemResolver) {
-		return new KeepassDatabaseRepository(context, fileSystemResolver);
+	EncryptedDatabaseRepository provideEncryptedDatabaseRepository() {
+		return module.getEncryptedDatabaseRepository();
 	}
 
 	@Provides
 	@Singleton
 	ObserverBus provideObserverBus() {
-		return new ObserverBus();
+		return module.getObserverBus();
 	}
 
 	@Provides
@@ -91,8 +91,8 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	FileSyncHelper provideFileSyncHelper(FileSystemResolver resolver) {
-		return new FileSyncHelper(resolver);
+	FileSyncHelper provideFileSyncHelper() {
+		return module.getFileSyncHelper();
 	}
 
 	@Provides
@@ -154,7 +154,7 @@ public class AppModule {
 	@Provides
 	@Singleton
 	ResourceProvider providerResourceHelper() {
-		return module.getResourceHelper();
+		return module.getResourceProvider();
 	}
 
 	@Provides

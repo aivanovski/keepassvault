@@ -7,175 +7,149 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
-import android.widget.EditText
-import android.widget.Spinner
-import androidx.core.view.isVisible
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.presentation.core.BaseFragment
-import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingMode
-import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
+import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.hideKeyboard
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuActivity
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListActivity
+import com.ivanovsky.passnotes.presentation.unlock.model.DropDownItem
 import com.ivanovsky.passnotes.util.FileUtils
-import java.util.*
-import java.util.regex.Pattern
 
-class UnlockFragment : BaseFragment(), UnlockContract.View {
-
-    override var presenter: UnlockContract.Presenter? = null
+class UnlockFragment : Fragment() {
 
     private lateinit var fileAdapter: FileSpinnerAdapter
-    private lateinit var passwordRules: List<PasswordAutofillRule>
-    private lateinit var fileSpinner: Spinner
-    private lateinit var fab: ExpandableFloatingActionButton
-    private lateinit var passwordEditText: EditText
+    private lateinit var binding: UnlockFragmentBinding
 
-    private val itemsData = MutableLiveData<List<DropDownItem>>()
-    private val selectedItemData = MutableLiveData<Int>()
-    private val showGroupsScreenEvent = SingleLiveEvent<Unit>()
-    private val showNewDatabaseScreenEvent = SingleLiveEvent<Unit>()
-    private val showOpenFileScreenEvent = SingleLiveEvent<Unit>()
-    private val showSettingsScreenEvent = SingleLiveEvent<Unit>()
-    private val showAboutScreenEvent = SingleLiveEvent<Unit>()
-    private val showDebugMenuScreenEvent = SingleLiveEvent<Unit>()
+    private val viewModel: UnlockViewModel by lazy {
+        ViewModelProvider(requireActivity(), UnlockViewModel.FACTORY)
+            .get(UnlockViewModel::class.java)
+    }
 
     private val spinnerSelectedListener = object : AdapterView.OnItemSelectedListener {
         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
             autofillPasswordIfNeed()
-            presenter?.onRecentlyUsedItemSelected(position)
+            viewModel.onRecentlyUsedItemSelected(position)
         }
 
         override fun onNothingSelected(parent: AdapterView<*>?) {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        if (BuildConfig.DEBUG) {
-            passwordRules = compileDebugAutofillPatterns()
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        setupActionBar {
+            title = getString(R.string.app_name)
+            setDisplayHomeAsUpEnabled(true)
+            setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
         }
-    }
-
-    private fun compileDebugAutofillPatterns(): List<PasswordAutofillRule> {
-        val rules = ArrayList<PasswordAutofillRule>()
-
-        if (BuildConfig.DEBUG_FILE_NAME_PATTERNS != null && BuildConfig.DEBUG_PASSWORDS != null) {
-            for (idx in BuildConfig.DEBUG_FILE_NAME_PATTERNS.indices) {
-                val fileNamePattern = BuildConfig.DEBUG_FILE_NAME_PATTERNS[idx]
-
-                val password = BuildConfig.DEBUG_PASSWORDS[idx]
-                val pattern = Pattern.compile(fileNamePattern)
-
-                rules.add(PasswordAutofillRule(pattern, password))
-            }
-        }
-
-        return rules
     }
 
     override fun onStart() {
         super.onStart()
-        presenter?.start()
+        viewModel.onScreenStart()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        presenter?.destroy()
-    }
-
-    override fun onCreateContentView(
+    override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        val view = inflater.inflate(R.layout.unlock_fragment, container, false)
+    ): View? {
+        binding = UnlockFragmentBinding.inflate(inflater, container, false)
+            .also {
+                it.lifecycleOwner = viewLifecycleOwner
+                it.viewModel = viewModel
+            }
 
-        fileSpinner = view.findViewById(R.id.file_spinner)
-        fab = view.findViewById(R.id.fab)
-        passwordEditText = view.findViewById(R.id.password)
-        val unlockButton = view.findViewById<View>(R.id.unlock_button)
+        fileAdapter = FileSpinnerAdapter(requireContext())
+        binding.fileSpinner.adapter = fileAdapter
 
-        fileAdapter = FileSpinnerAdapter(context!!)
-
-        fileSpinner.adapter = fileAdapter
-
+        // TODO: move fab initialization to @BindingAdapter
         val fabItems = resources.getStringArray(R.array.unlock_fab_actions).toList()
-        fab.inflate(fabItems)
-        fab.onItemClickListener = { position -> presenter?.onFabActionClicked(position)}
+        binding.fab.inflate(fabItems)
+        binding.fab.onItemClickListener = { position -> viewModel.onFabActionClicked(position) }
 
-        unlockButton.setOnClickListener { onUnlockButtonClicked() }
-
-        itemsData.observe(viewLifecycleOwner,
-            Observer { items -> setRecentlyUsedItemsInternal(items) })
-        selectedItemData.observe(viewLifecycleOwner,
-            Observer { position -> setSelectedRecentlyUsedItemInternal(position) })
-        showGroupsScreenEvent.observe(viewLifecycleOwner,
-            Observer { showGroupsScreenInternal() })
-        showNewDatabaseScreenEvent.observe(viewLifecycleOwner,
-            Observer { showNewDatabaseScreenInternal() })
-        showOpenFileScreenEvent.observe(viewLifecycleOwner,
-            Observer { showOpenFileScreenInternal() })
-        showSettingsScreenEvent.observe(viewLifecycleOwner,
-            Observer { showSettingsScreenInternal() })
-        showAboutScreenEvent.observe(viewLifecycleOwner,
-            Observer { showAboutScreenInternal() })
-        showDebugMenuScreenEvent.observe(viewLifecycleOwner,
-            Observer { showDebugMenuScreenInternal() })
-
-       return view
+        return binding.root
     }
 
-    private fun onUnlockButtonClicked() {
-        val password = passwordEditText.text.toString().trim()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        subscribeToLiveData()
+        subscribeToLiveEvents()
 
-        presenter?.onUnlockButtonClicked(password)
+        viewModel.loadData(resetSelection = true)
     }
 
-    override fun getContentContainerId(): Int {
-        return R.id.content
-    }
-
-    override fun onScreenStateChanged(screenState: ScreenState) {
-        when (screenState.displayingMode) {
-            ScreenDisplayingMode.EMPTY,
-            ScreenDisplayingMode.DISPLAYING_DATA_WITH_ERROR_PANEL,
-            ScreenDisplayingMode.DISPLAYING_DATA -> fab.isVisible = true
-
-            ScreenDisplayingMode.LOADING, ScreenDisplayingMode.ERROR -> fab.isVisible = false
+    private fun subscribeToLiveData() {
+        viewModel.items.observe(viewLifecycleOwner) { items ->
+            setRecentlyUsedItems(items)
+        }
+        viewModel.selectedItem.observe(viewLifecycleOwner) { position ->
+            setSelectedRecentlyUsedItem(position)
         }
     }
 
-    override fun setRecentlyUsedItems(items: List<DropDownItem>) {
-        itemsData.value = items
+    private fun subscribeToLiveEvents() {
+        viewModel.showGroupsScreenEvent.observe(viewLifecycleOwner) {
+            showGroupsScreen()
+        }
+        viewModel.showNewDatabaseScreenEvent.observe(viewLifecycleOwner) {
+            showNewDatabaseScreen()
+        }
+        viewModel.showOpenFileScreenEvent.observe(viewLifecycleOwner) {
+            showOpenFileScreen()
+        }
+        viewModel.showSettingsScreenEvent.observe(viewLifecycleOwner) {
+            showSettingsScreen()
+        }
+        viewModel.showAboutScreenEvent.observe(viewLifecycleOwner) {
+            showAboutScreen()
+        }
+        viewModel.showDebugMenuScreenEvent.observe(viewLifecycleOwner) {
+            showDebugMenuScreen()
+        }
+        viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
+            hideKeyboard()
+        }
+        viewModel.showSnackbarMessage.observe(viewLifecycleOwner) { message ->
+            showSnackbarMessage(message)
+        }
     }
 
-    private fun setRecentlyUsedItemsInternal(items: List<DropDownItem>) {
-        fileSpinner.onItemSelectedListener = null
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_PICK_FILE) {
+            val extras = data?.extras
+            if (extras != null) {
+                val file = extras.getParcelable<FileDescriptor>(StorageListActivity.EXTRA_RESULT)
+                if (file != null) {
+                    viewModel.onFilePicked(file)
+                }
+            }
+        }
+    }
+
+    private fun setRecentlyUsedItems(items: List<DropDownItem>) {
+        binding.fileSpinner.onItemSelectedListener = null
 
         fileAdapter.setItems(items)
         fileAdapter.notifyDataSetChanged()
 
-        fileSpinner.onItemSelectedListener = spinnerSelectedListener
+        binding.fileSpinner.onItemSelectedListener = spinnerSelectedListener
     }
 
-    override fun setSelectedRecentlyUsedItem(position: Int) {
-        selectedItemData.value = position
-    }
-
-    private fun setSelectedRecentlyUsedItemInternal(position: Int) {
-        fileSpinner.onItemSelectedListener = null
-        fileSpinner.setSelection(position)
-        fileSpinner.onItemSelectedListener = spinnerSelectedListener
+    private fun setSelectedRecentlyUsedItem(position: Int) {
+        binding.fileSpinner.onItemSelectedListener = null
+        binding.fileSpinner.setSelection(position)
+        binding.fileSpinner.onItemSelectedListener = spinnerSelectedListener
 
         autofillPasswordIfNeed()
     }
@@ -185,86 +159,50 @@ class UnlockFragment : BaseFragment(), UnlockContract.View {
             return
         }
 
-        val selectedPosition = fileSpinner.selectedItemPosition
+        val selectedPosition = binding.fileSpinner.selectedItemPosition
 
-        val filePath = itemsData.value?.get(selectedPosition)?.path ?: return
+        val filePath = viewModel.items.value?.get(selectedPosition)?.path ?: return
 
         val fileName = FileUtils.getFileNameWithoutExtensionFromPath(filePath) ?: return
-        for (rule in passwordRules) {
+
+        for (rule in viewModel.debugPasswordRules) {
             if (rule.pattern.matcher(fileName).matches()) {
-                passwordEditText.setText(rule.password)
+                binding.password.setText(rule.password)
                 break
             }
         }
     }
 
-    override fun showGroupsScreen() {
-        showGroupsScreenEvent.call()
+    private fun showGroupsScreen() {
+        startActivity(GroupsActivity.startForRootGroup(requireContext()))
     }
 
-    private fun showGroupsScreenInternal() {
-        startActivity(GroupsActivity.startForRootGroup(context!!))
+    private fun showNewDatabaseScreen() {
+        startActivity(Intent(requireContext(), NewDatabaseActivity::class.java))
     }
 
-    override fun showNewDatabaseScreen() {
-        showNewDatabaseScreenEvent.call()
-    }
-
-    private fun showNewDatabaseScreenInternal() {
-        startActivity(Intent(context, NewDatabaseActivity::class.java))
-    }
-
-    override fun showOpenFileScreen() {
-        showOpenFileScreenEvent.call()
-    }
-
-    private fun showOpenFileScreenInternal() {
-        val intent = StorageListActivity.createStartIntent(context!!, Action.PICK_FILE)
+    private fun showOpenFileScreen() {
+        val intent = StorageListActivity.createStartIntent(requireContext(), Action.PICK_FILE)
         startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
     }
 
-    override fun showSettingScreen() {
-        showSettingsScreenEvent.call()
-    }
-
-    private fun showSettingsScreenInternal() {
+    private fun showSettingsScreen() {
         throw RuntimeException("Not implemented") //TODO: handle menu click
     }
 
-    override fun showAboutScreen() {
-        showAboutScreenEvent.call()
-    }
-
-    private fun showAboutScreenInternal() {
+    private fun showAboutScreen() {
         throw RuntimeException("Not implemented") //TODO: handle menu click
     }
 
-    override fun showDebugMenuScreen() {
-        showDebugMenuScreenEvent.call()
-    }
-
-    private fun showDebugMenuScreenInternal() {
-        val intent = DebugMenuActivity.createStartIntent(context!!)
+    private fun showDebugMenuScreen() {
+        val intent = DebugMenuActivity.createStartIntent(requireContext())
         startActivity(intent)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_PICK_FILE) {
-            val extras = data?.extras
-            if (extras != null) {
-                val file = extras.getParcelable<FileDescriptor>(StorageListActivity.EXTRA_RESULT)
-                if (file != null) {
-                    presenter?.onFilePicked(file)
-                }
-            }
-        }
-    }
-
     companion object {
+
         private const val REQUEST_CODE_PICK_FILE = 100
+
+        fun newInstance() = UnlockFragment()
     }
-
-    private class PasswordAutofillRule(val pattern: Pattern, val password: String)
-
-    data class DropDownItem(val filename: String, val path: String, val storageType: String)
 }

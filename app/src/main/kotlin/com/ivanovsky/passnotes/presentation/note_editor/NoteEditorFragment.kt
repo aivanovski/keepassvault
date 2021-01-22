@@ -8,7 +8,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem
 import com.ivanovsky.passnotes.presentation.note_editor.view.NoteEditorView
 

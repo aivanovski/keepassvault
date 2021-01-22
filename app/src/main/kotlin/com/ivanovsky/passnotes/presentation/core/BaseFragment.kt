@@ -10,9 +10,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.core.livedata.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
 import com.ivanovsky.passnotes.presentation.core.widget.FragmentStateView
+import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 import com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput
 
 abstract class BaseFragment : Fragment(), GenericScreen {

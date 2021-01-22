@@ -5,11 +5,12 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ivanovsky.passnotes.R;
 
-public class ErrorPanelView extends FrameLayout {
+public class ErrorPanelView extends LinearLayout {
 
 	private View retryButton;
 	private TextView errorTextView;
@@ -31,11 +32,12 @@ public class ErrorPanelView extends FrameLayout {
 
 	private void init() {
 		setBackgroundResource(R.color.material_error_panel_background);
+		setOrientation(HORIZONTAL);
 
-		LayoutInflater.from(getContext()).inflate(R.layout.core_error_panel_view, this, true);
+		LayoutInflater.from(getContext()).inflate(R.layout.view_error_panel, this, true);
 
-		errorTextView = findViewById(R.id.error_panel_text);
-		retryButton = findViewById(R.id.retry_button);
+		errorTextView = findViewById(R.id.text);
+		retryButton = findViewById(R.id.retryButton);
 	}
 
 	public void setText(CharSequence text) {

@@ -9,7 +9,7 @@ import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.ivanovsky.passnotes.presentation.core_mvvm.BaseItemViewModel
+import com.ivanovsky.passnotes.presentation.core_mvvm.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core_mvvm.ScreenState
 import com.ivanovsky.passnotes.presentation.core_mvvm.ScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core_mvvm.ViewModelTypes
@@ -30,7 +30,7 @@ fun setScreenState(
 @BindingAdapter("viewModels", "viewTypes")
 fun setViewModel(
     recyclerView: RecyclerView,
-    viewModelsData: LiveData<List<BaseItemViewModel>>,
+    viewModelsData: LiveData<List<BaseCellViewModel>>,
     viewTypes: ViewModelTypes
 ) {
     val lifecycleOwner = recyclerView.context.getLifecycleOwner()

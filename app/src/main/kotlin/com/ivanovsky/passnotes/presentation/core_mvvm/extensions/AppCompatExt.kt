@@ -10,3 +10,7 @@ fun AppCompatActivity.initActionBar(@IdRes toolbarId: Int, action: (ActionBar.()
         action?.invoke(this)
     }
 }
+
+fun AppCompatActivity.requireArgument(argumentName: String): Nothing {
+    throw IllegalStateException("require extra argument with name: $argumentName")
+}

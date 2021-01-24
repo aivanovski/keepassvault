@@ -75,6 +75,5 @@ class StorageListInteractor(private val context: Context) {
     fun getDropboxRoot(): OperationResult<FileDescriptor> {
         val provider = fileSystemResolver.resolveProvider(FSType.DROPBOX)
         return provider.rootFile
-
     }
 }

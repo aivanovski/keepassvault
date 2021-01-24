@@ -4,30 +4,26 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.core.BaseActivity
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.initActionBar
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.requireArgument
 
-class StorageListActivity : BaseActivity() {
-
-    private lateinit var action: Action
+class StorageListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.core_base_activity)
 
-        action = intent.extras?.getSerializable(EXTRA_MODE) as Action
+        val action = intent.extras?.getSerializable(EXTRA_REQUIRED_ACTION) as? Action
+            ?: requireArgument(EXTRA_REQUIRED_ACTION)
 
-        setSupportActionBar(findViewById(R.id.tool_bar))
-        currentActionBar.title = getString(R.string.select_storage)
-        currentActionBar.setDisplayHomeAsUpEnabled(true)
+        initActionBar(R.id.tool_bar)
 
-        val fragment = StorageListFragment.newInstance()
+        val fragment = StorageListFragment.newInstance(action)
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
-
-        val presenter = StorageListPresenter(fragment, action)
-        fragment.presenter = presenter
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -43,14 +39,12 @@ class StorageListActivity : BaseActivity() {
 
         const val EXTRA_RESULT: String = "result"
 
-        private const val EXTRA_MODE = "action"
+        private const val EXTRA_REQUIRED_ACTION = "requiredAction"
 
-        fun createStartIntent(context: Context, action: Action): Intent {
-            val intent = Intent(context, StorageListActivity::class.java)
-
-            intent.putExtra(EXTRA_MODE, action)
-
-            return intent
+        fun createStartIntent(context: Context, requiredAction: Action): Intent {
+            return Intent(context, StorageListActivity::class.java).apply {
+                putExtra(EXTRA_REQUIRED_ACTION, requiredAction)
+            }
         }
     }
 }

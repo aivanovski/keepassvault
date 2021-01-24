@@ -2,9 +2,10 @@ package com.ivanovsky.passnotes.presentation.core_mvvm.widget
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
 import com.ivanovsky.passnotes.R
@@ -14,7 +15,7 @@ import com.ivanovsky.passnotes.presentation.core_mvvm.widget.ErrorPanelView.Stat
 class ErrorPanelView(
     context: Context,
     attrs: AttributeSet
-) : FrameLayout(context, attrs) {
+) : LinearLayout(context, attrs) {
 
     var text: String?
         get() = errorTextView.text.toString()
@@ -33,6 +34,8 @@ class ErrorPanelView(
 
     init {
         setBackgroundResource(R.color.material_error_panel_background)
+        orientation = HORIZONTAL
+        gravity = Gravity.CENTER_HORIZONTAL
 
         LayoutInflater.from(context).inflate(R.layout.view_error_panel, this, true)
 

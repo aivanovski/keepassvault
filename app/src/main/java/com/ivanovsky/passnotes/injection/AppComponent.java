@@ -17,8 +17,6 @@ import com.ivanovsky.passnotes.presentation.note.NotePresenter;
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorPresenter;
 import com.ivanovsky.passnotes.presentation.note_editor.view.NoteEditorDataTransformer;
 import com.ivanovsky.passnotes.presentation.notes.NotesPresenter;
-import com.ivanovsky.passnotes.presentation.storagelist.StorageListFragment;
-import com.ivanovsky.passnotes.presentation.storagelist.StorageListPresenter;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -33,11 +31,9 @@ public interface AppComponent {
 	void inject(StartActivity startActivity);
 	void inject(NewDatabaseActivity newDatabaseActivity);
 	void inject(@NotNull NewDatabasePresenter newDatabasePresenter);
-	void inject(@NotNull StorageListPresenter storageListPresenter);
 	void inject(@NotNull FilePickerPresenter filePickerPresenter);
 	void inject(@NotNull FilePickerFragment filePickerFragment);
 	void inject(@NotNull StorageListInteractor storageListInteractor);
-	void inject(@NotNull StorageListFragment storageListFragment);
 	void inject(KeepassDatabase keepassDatabase);
 	void inject(@NotNull DebugMenuPresenter debugMenuPresenter);
     void inject(@NotNull ChooseOptionDialog newEntryDialog);

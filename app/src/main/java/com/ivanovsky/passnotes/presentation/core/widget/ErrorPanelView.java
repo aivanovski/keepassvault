@@ -2,9 +2,9 @@ package com.ivanovsky.passnotes.presentation.core.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -33,6 +33,7 @@ public class ErrorPanelView extends LinearLayout {
 	private void init() {
 		setBackgroundResource(R.color.material_error_panel_background);
 		setOrientation(HORIZONTAL);
+		setGravity(Gravity.CENTER_HORIZONTAL);
 
 		LayoutInflater.from(getContext()).inflate(R.layout.view_error_panel, this, true);
 

@@ -53,12 +53,14 @@ class FilePickerActivity : BaseActivity() {
         private const val EXTRA_IS_BROWSING_ENABLED = "isBrowsingEnabled"
 
         fun createStartIntent(
-            context: Context, mode: Mode, rootFile: FileDescriptor,
+            context: Context,
+            action: Mode,
+            rootFile: FileDescriptor,
             isBrowsingEnabled: Boolean
         ): Intent {
             val result = Intent(context, FilePickerActivity::class.java)
 
-            result.putExtra(EXTRA_MODE, mode)
+            result.putExtra(EXTRA_MODE, action)
             result.putExtra(EXTRA_ROOT_FILE, rootFile)
             result.putExtra(EXTRA_IS_BROWSING_ENABLED, isBrowsingEnabled)
 

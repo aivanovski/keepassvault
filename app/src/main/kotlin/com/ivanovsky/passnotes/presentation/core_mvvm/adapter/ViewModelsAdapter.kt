@@ -7,7 +7,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.BR
-import com.ivanovsky.passnotes.presentation.core_mvvm.BaseItemViewModel
+import com.ivanovsky.passnotes.presentation.core_mvvm.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core_mvvm.ViewModelTypes
 
 class ViewModelsAdapter(
@@ -15,9 +15,9 @@ class ViewModelsAdapter(
     private val viewTypes: ViewModelTypes
 ) : RecyclerView.Adapter<ViewModelsAdapter.ViewHolder>() {
 
-    private var items: List<BaseItemViewModel> = emptyList()
+    private var items: List<BaseCellViewModel> = emptyList()
 
-    fun updateItems(newItems: List<BaseItemViewModel>) {
+    fun updateItems(newItems: List<BaseCellViewModel>) {
         items = newItems
         notifyDataSetChanged()
     }
@@ -65,6 +65,6 @@ class ViewModelsAdapter(
 
     class ViewHolder(
         val binding: ViewDataBinding,
-        var viewModel: BaseItemViewModel? = null
+        var viewModel: BaseCellViewModel? = null
     ) : RecyclerView.ViewHolder(binding.root)
 }

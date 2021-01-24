@@ -1,26 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	android:orientation="horizontal"
-	android:gravity="center_horizontal">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<TextView
-		android:id="@+id/text"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:padding="@dimen/group_margin"
-		android:gravity="center"
-		android:minHeight="96dp"
-		android:textColor="@color/accent"
-		android:textSize="@dimen/material_primary_text_size"/>
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:minHeight="96dp"
+        android:padding="@dimen/group_margin"
+        android:textColor="@color/accent"
+        android:textSize="@dimen/material_primary_text_size" />
 
-	<com.google.android.material.button.MaterialButton
-		android:id="@+id/retryButton"
-		style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:text="@string/retry"/>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/retryButton"
+        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/retry" />
 
 </merge>

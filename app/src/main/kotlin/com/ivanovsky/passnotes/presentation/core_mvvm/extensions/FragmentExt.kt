@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.core_mvvm.extensions
 
+import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.ActionBar
@@ -9,6 +10,17 @@ import com.google.android.material.snackbar.Snackbar
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.SnackbarMessage
 import com.ivanovsky.passnotes.util.InputMethodUtils
+
+fun <T : Fragment> T.withArguments(initBlock: Bundle.() -> Unit): T {
+    val args = Bundle()
+    initBlock.invoke(args)
+    arguments = args
+    return this
+}
+
+fun Fragment.requireArgument(argumentName: String): Nothing {
+    throw IllegalStateException("require argument with name: $argumentName")
+}
 
 fun Fragment.setupActionBar(action: ActionBar.() -> Unit) {
     val activity = (this.activity as? AppCompatActivity) ?: return

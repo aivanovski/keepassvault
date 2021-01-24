@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
@@ -21,7 +22,6 @@ import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.unlock.model.DropDownItem
 import com.ivanovsky.passnotes.presentation.unlock.model.PasswordRule
 import com.ivanovsky.passnotes.util.FileUtils
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.ArrayList
@@ -31,7 +31,8 @@ class UnlockViewModel(
     private val interactor: UnlockInteractor,
     private val errorInteractor: ErrorInteractor,
     private val observerBus: ObserverBus,
-    private val resourceProvider: ResourceProvider
+    private val resourceProvider: ResourceProvider,
+    private val dispatchers: DispatcherProvider
 ) : ViewModel(),
     ObserverBus.UsedFileDataSetObserver,
     ObserverBus.UsedFileContentObserver{
@@ -87,7 +88,7 @@ class UnlockViewModel(
         screenState.value = ScreenState.loading()
 
         viewModelScope.launch {
-            val result = withContext(Dispatchers.Default) {
+            val result = withContext(dispatchers.IO) {
                 interactor.getRecentlyOpenedFiles()
             }
 
@@ -120,7 +121,7 @@ class UnlockViewModel(
     private fun closeActiveDatabaseIfNeed() {
         if (interactor.hasActiveDatabase()) {
             viewModelScope.launch {
-                val closeResult = withContext(Dispatchers.Default) {
+                val closeResult = withContext(dispatchers.IO) {
                     interactor.closeActiveDatabase()
                 }
 
@@ -187,7 +188,7 @@ class UnlockViewModel(
         val key = KeepassDatabaseKey(password)
 
         viewModelScope.launch {
-            val result = withContext(Dispatchers.Default) {
+            val result = withContext(dispatchers.IO) {
                 interactor.openDatabase(key, selectedFile)
             }
 
@@ -229,7 +230,7 @@ class UnlockViewModel(
         usedFile.addedTime = System.currentTimeMillis()
 
         viewModelScope.launch {
-            val result = withContext(Dispatchers.Default) {
+            val result = withContext(dispatchers.Default) {
                 interactor.saveUsedFileWithoutAccessTime(usedFile)
             }
 
@@ -287,6 +288,7 @@ class UnlockViewModel(
         val FACTORY = object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
                 return UnlockViewModel(
+                    GlobalInjector.get(),
                     GlobalInjector.get(),
                     GlobalInjector.get(),
                     GlobalInjector.get(),

@@ -38,6 +38,6 @@ object KoinModule {
         single { UnlockInteractor(get(), get(), get(), get()) }
         single { StorageListInteractor(get()) }
         
-        viewModel { StorageListViewModel(get(), get(), get(), get()) }
+        viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
     }
 }

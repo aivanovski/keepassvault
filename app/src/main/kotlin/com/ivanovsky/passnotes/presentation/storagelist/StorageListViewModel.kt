@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
+import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType
@@ -21,7 +22,6 @@ import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels.SingleTextCellViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.model.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.storagelist.converter.toCellModels
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -29,7 +29,8 @@ class StorageListViewModel(
     private val interactor: StorageListInteractor,
     private val errorInteractor: ErrorInteractor,
     private val fileSystemResolver: FileSystemResolver,
-    private val resourceProvider: ResourceProvider
+    private val resourceProvider: ResourceProvider,
+    private val dispatchers: DispatcherProvider
 ) : BaseScreenViewModel() {
 
     val viewTypes = ViewModelTypes()
@@ -57,7 +58,7 @@ class StorageListViewModel(
         screenState.value = ScreenState.loading()
 
         viewModelScope.launch {
-            val options = withContext(Dispatchers.IO) {
+            val options = withContext(dispatchers.IO) {
                 interactor.getAvailableStorageOptions()
             }
 
@@ -79,7 +80,7 @@ class StorageListViewModel(
                 screenState.value = ScreenState.dataWithError(errorMessage)
             } else {
                 viewModelScope.launch {
-                    val dropboxRoot = withContext(Dispatchers.Default) {
+                    val dropboxRoot = withContext(dispatchers.IO) {
                         interactor.getDropboxRoot()
                     }
 
@@ -152,7 +153,7 @@ class StorageListViewModel(
 
         } else {
             viewModelScope.launch {
-                val dropboxRoot = withContext(Dispatchers.Default) {
+                val dropboxRoot = withContext(dispatchers.IO) {
                     interactor.getDropboxRoot()
                 }
 

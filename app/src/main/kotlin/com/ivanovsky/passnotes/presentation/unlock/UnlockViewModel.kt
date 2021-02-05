@@ -22,6 +22,8 @@ import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.unlock.model.DropDownItem
 import com.ivanovsky.passnotes.presentation.unlock.model.PasswordRule
 import com.ivanovsky.passnotes.util.FileUtils
+import com.ivanovsky.passnotes.util.StringUtils
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.ArrayList
@@ -41,7 +43,7 @@ class UnlockViewModel(
     val screenState = MutableLiveData<ScreenState>(ScreenState.notInitialized())
     val items = MutableLiveData<List<DropDownItem>>()
     val selectedItem = MutableLiveData<Int>()
-    val password = MutableLiveData<String>("")
+    val password = MutableLiveData<String>(EMPTY)
     val showGroupsScreenEvent = SingleLiveEvent<Unit>()
     val showNewDatabaseScreenEvent = SingleLiveEvent<Unit>()
     val showOpenFileScreenEvent = SingleLiveEvent<Unit>()

@@ -20,8 +20,11 @@ import com.ivanovsky.passnotes.presentation.core_mvvm.ScreenState
 import com.ivanovsky.passnotes.presentation.core_mvvm.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels.SingleTextCellViewModel
-import com.ivanovsky.passnotes.presentation.storagelist.model.FilePickerArgs
+import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.storagelist.converter.toCellModels
+import com.ivanovsky.passnotes.presentation.storagelist.converter.toFilePickerAction
+import com.ivanovsky.passnotes.util.StringUtils
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -96,8 +99,8 @@ class StorageListViewModel(
 
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
-            if (event.containsKey(SingleTextCellViewModel.CLICKED_ITEM_ID)) {
-                val id = event.getString(SingleTextCellViewModel.CLICKED_ITEM_ID) ?: ""
+            if (event.containsKey(SingleTextCellViewModel.ITEM_CLICKED_EVENT)) {
+                val id = event.getString(SingleTextCellViewModel.ITEM_CLICKED_EVENT) ?: EMPTY
                 onStorageOptionClicked(valueOf(id))
             }
         }
@@ -119,8 +122,8 @@ class StorageListViewModel(
         if (action == Action.PICK_FILE) {
             showFilePickerScreenEvent.call(
                 FilePickerArgs(
+                    action.toFilePickerAction(),
                     root,
-                    action,
                     false
                 )
             )
@@ -135,8 +138,8 @@ class StorageListViewModel(
 
         showFilePickerScreenEvent.call(
             FilePickerArgs(
+                action.toFilePickerAction(),
                 root,
-                action,
                 true
             )
         )
@@ -169,8 +172,8 @@ class StorageListViewModel(
             val rootFile = result.obj
             showFilePickerScreenEvent.call(
                 FilePickerArgs(
+                    action.toFilePickerAction(),
                     rootFile,
-                    action,
                     true
                 )
             )

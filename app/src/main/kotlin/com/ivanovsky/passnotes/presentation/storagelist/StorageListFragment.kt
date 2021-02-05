@@ -18,7 +18,7 @@ import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.requireArgument
 import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerActivity
-import com.ivanovsky.passnotes.presentation.storagelist.model.FilePickerArgs
+import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class StorageListFragment : Fragment() {
@@ -104,19 +104,10 @@ class StorageListFragment : Fragment() {
     private fun showFilePickerScreen(args: FilePickerArgs) {
         val intent = FilePickerActivity.createStartIntent(
             context = requireContext(),
-            action = convertActionToFilePickerAction(args.action),
-            rootFile = args.root,
-            isBrowsingEnabled = args.isBrowsingEnabled
+            args = args
         )
 
         startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
-    }
-
-    private fun convertActionToFilePickerAction(action: Action): com.ivanovsky.passnotes.presentation.filepicker.Mode {
-        return when (action) {
-            Action.PICK_FILE -> com.ivanovsky.passnotes.presentation.filepicker.Mode.PICK_FILE
-            Action.PICK_STORAGE -> com.ivanovsky.passnotes.presentation.filepicker.Mode.PICK_DIRECTORY
-        }
     }
 
     companion object {

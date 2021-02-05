@@ -80,8 +80,8 @@ public class TwoLineTwoTextAdapter extends RecyclerView.Adapter<TwoLineTwoTextAd
 		ViewHolder(View view) {
 			super(view);
 			layout = view;
-			title = view.findViewById(R.id.primary_text);
-			description = view.findViewById(R.id.secondary_text);
+			title = view.findViewById(R.id.primaryText);
+			description = view.findViewById(R.id.secondaryText);
 		}
 	}
 

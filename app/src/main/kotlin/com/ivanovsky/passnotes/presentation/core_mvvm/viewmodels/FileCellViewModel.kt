@@ -3,11 +3,11 @@ package com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels
 import android.os.Bundle
 import com.ivanovsky.passnotes.presentation.core_mvvm.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core_mvvm.event.EventProvider
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.SingleTextCellModel
+import com.ivanovsky.passnotes.presentation.core_mvvm.model.FileCellModel
 import kotlin.reflect.jvm.jvmName
 
-class SingleTextCellViewModel(
-    override val model: SingleTextCellModel,
+class FileCellViewModel(
+    override val model: FileCellModel,
     private val eventProvider: EventProvider
 ) : BaseCellViewModel(model) {
 
@@ -19,6 +19,6 @@ class SingleTextCellViewModel(
 
     companion object {
 
-        val ITEM_CLICKED_EVENT = SingleTextCellModel::class.jvmName + "_itemClickedEvent"
+        val ITEM_CLICKED_EVENT = FileCellViewModel::class.jvmName + "_itemClickedEvent"
     }
 }

@@ -14,7 +14,7 @@
 	android:focusable="true">
 
 	<TextView
-		android:id="@+id/primary_text"
+		android:id="@+id/primaryText"
 		style="@style/Material.ListItem.PrimaryText"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
 		tools:text="Primary text"/>
 
 	<TextView
-		android:id="@+id/secondary_text"
+		android:id="@+id/secondaryText"
 		style="@style/Material.ListItem.SecondaryText"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"

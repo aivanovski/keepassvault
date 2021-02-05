@@ -10,7 +10,7 @@
 
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel" />
+            type="com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

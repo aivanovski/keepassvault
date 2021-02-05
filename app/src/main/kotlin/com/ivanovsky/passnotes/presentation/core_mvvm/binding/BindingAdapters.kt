@@ -3,6 +3,8 @@ package com.ivanovsky.passnotes.presentation.core_mvvm.binding
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.ImageView
+import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
@@ -54,12 +56,12 @@ fun setError(textInputLayout: TextInputLayout, errorData: LiveData<String?>) {
     textInputLayout.error = errorData.value
 }
 
-@BindingAdapter("visible")
+@BindingAdapter("bind:visible")
 fun setVisible(view: View, isVisible: Boolean) {
     view.isVisible = isVisible
 }
 
-@BindingAdapter("textWatcher")
+@BindingAdapter("bind:textWatcher")
 fun addTextWatcher(editText: TextInputEditText, onTextChangeListener: (text: String) -> Unit) {
     editText.addTextChangedListener(object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {
@@ -72,4 +74,9 @@ fun addTextWatcher(editText: TextInputEditText, onTextChangeListener: (text: Str
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         }
     })
+}
+
+@BindingAdapter("bind:src")
+fun setImageResource(imageView: ImageView, @DrawableRes imageResourceId: Int){
+    imageView.setImageResource(imageResourceId)
 }

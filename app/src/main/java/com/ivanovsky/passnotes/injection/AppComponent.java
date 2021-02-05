@@ -4,8 +4,6 @@ import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor;
 import com.ivanovsky.passnotes.presentation.StartActivity;
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuPresenter;
-import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment;
-import com.ivanovsky.passnotes.presentation.filepicker.FilePickerPresenter;
 import com.ivanovsky.passnotes.presentation.group.GroupPresenter;
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
 import com.ivanovsky.passnotes.presentation.groups.GroupsPresenter;
@@ -31,8 +29,6 @@ public interface AppComponent {
 	void inject(StartActivity startActivity);
 	void inject(NewDatabaseActivity newDatabaseActivity);
 	void inject(@NotNull NewDatabasePresenter newDatabasePresenter);
-	void inject(@NotNull FilePickerPresenter filePickerPresenter);
-	void inject(@NotNull FilePickerFragment filePickerFragment);
 	void inject(@NotNull StorageListInteractor storageListInteractor);
 	void inject(KeepassDatabase keepassDatabase);
 	void inject(@NotNull DebugMenuPresenter debugMenuPresenter);

@@ -7,7 +7,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.initActionBar
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.requireArgument
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.requireExtraValue
 
 class StorageListActivity : AppCompatActivity() {
 
@@ -16,7 +16,7 @@ class StorageListActivity : AppCompatActivity() {
         setContentView(R.layout.core_base_activity)
 
         val action = intent.extras?.getSerializable(EXTRA_REQUIRED_ACTION) as? Action
-            ?: requireArgument(EXTRA_REQUIRED_ACTION)
+            ?: requireExtraValue(EXTRA_REQUIRED_ACTION)
 
         initActionBar(R.id.tool_bar)
 

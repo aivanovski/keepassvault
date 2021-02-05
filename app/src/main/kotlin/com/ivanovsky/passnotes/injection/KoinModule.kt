@@ -6,8 +6,8 @@ import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
+import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
-import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
@@ -37,7 +37,8 @@ object KoinModule {
         single { FilePickerInteractor(get()) }
         single { UnlockInteractor(get(), get(), get(), get()) }
         single { StorageListInteractor(get()) }
-        
+
         viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
+        viewModel { FilePickerViewModel(get(), get(), get(), get(), get()) }
     }
 }

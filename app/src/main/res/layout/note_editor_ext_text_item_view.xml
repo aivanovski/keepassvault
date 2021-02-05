@@ -17,7 +17,7 @@
         tools:hint="Field Name">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/primary_text"
+            android:id="@+id/primaryText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/material_edit_text_primary_text"
@@ -51,7 +51,7 @@
         tools:hint="Field Value">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/secondary_text"
+            android:id="@+id/secondaryText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/material_edit_text_primary_text"

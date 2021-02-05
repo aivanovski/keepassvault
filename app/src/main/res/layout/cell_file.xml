@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels.FileCellViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/rootLayout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/material_list_item_height_two_line_with_icon"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="@{() -> viewModel.onClicked()}">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="@dimen/element_margin" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineEnd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="@dimen/element_margin" />
+
+        <View
+            android:id="@+id/selectedBackground"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/material_list_item_selected"
+            bind:visible="@{viewModel.model.selected}" />
+
+        <View
+            android:id="@+id/iconBackground"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/material_icon_circle_background"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/guidelineStart"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/iconBackground"
+            app:layout_constraintStart_toStartOf="@id/iconBackground"
+            app:layout_constraintTop_toTopOf="parent"
+            bind:src="@{viewModel.model.iconResId}"
+            tools:src="@drawable/ic_file_white_24dp" />
+
+        <TextView
+            android:id="@+id/primaryText"
+            style="@style/Material.ListItem.PrimaryText.SingleLine"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:text="@{viewModel.model.title}"
+            app:layout_constraintBottom_toTopOf="@id/secondaryText"
+            app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+            app:layout_constraintStart_toEndOf="@id/iconBackground"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="Android/" />
+
+        <TextView
+            android:id="@+id/secondaryText"
+            style="@style/Material.ListItem.SecondaryText.SingleLine"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:text="@{viewModel.model.description}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+            app:layout_constraintStart_toEndOf="@id/iconBackground"
+            app:layout_constraintTop_toBottomOf="@+id/primaryText"
+            tools:text="30 july 18:06" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

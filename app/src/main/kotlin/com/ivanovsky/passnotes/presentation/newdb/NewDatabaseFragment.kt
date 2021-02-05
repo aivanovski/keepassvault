@@ -14,7 +14,6 @@ import com.ivanovsky.passnotes.presentation.core.validation.*
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListActivity
-import com.ivanovsky.passnotes.util.InputMethodUtils.hideSoftInput
 import java.util.regex.Pattern
 
 class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
@@ -176,7 +175,7 @@ class NewDatabaseFragment : BaseFragment(), NewDatabaseContract.View {
 
         private const val REQUEST_CODE_PICK_STORAGE = 100
 
-        private val FILE_NAME_PATTERN = Pattern.compile("[\\w]{1,50}")
+        private val FILE_NAME_PATTERN = Pattern.compile("[\\w-_]{1,50}")
         private val PASSWORD_PATTERN = Pattern.compile("[\\w@#$!%^&+=]{4,20}")
 
         fun newInstance(): NewDatabaseFragment {

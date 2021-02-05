@@ -1,10 +1,14 @@
 package com.ivanovsky.passnotes.presentation.core_mvvm.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
+import androidx.recyclerview.widget.AsyncDifferConfig
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.BR
 import com.ivanovsky.passnotes.presentation.core_mvvm.BaseCellViewModel
@@ -15,19 +19,18 @@ class ViewModelsAdapter(
     private val viewTypes: ViewModelTypes
 ) : RecyclerView.Adapter<ViewModelsAdapter.ViewHolder>() {
 
-    private var items: List<BaseCellViewModel> = emptyList()
+    private val differ = AsyncListDiffer<BaseCellViewModel>(this, ViewModelsDiffCallback())
 
     fun updateItems(newItems: List<BaseCellViewModel>) {
-        items = newItems
-        notifyDataSetChanged()
+        differ.submitList(newItems)
     }
 
     override fun getItemCount(): Int {
-        return items.size
+        return differ.currentList.size
     }
 
     override fun getItemViewType(position: Int): Int {
-        val type = items[position]::class
+        val type = differ.currentList[position]::class
         return viewTypes.getViewType(type)
     }
 
@@ -40,7 +43,7 @@ class ViewModelsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val viewModel = items[position]
+        val viewModel = differ.currentList[position]
         if (holder.viewModel != null && holder.viewModel == viewModel) {
             return
         }
@@ -67,4 +70,20 @@ class ViewModelsAdapter(
         val binding: ViewDataBinding,
         var viewModel: BaseCellViewModel? = null
     ) : RecyclerView.ViewHolder(binding.root)
+
+    class ViewModelsDiffCallback : DiffUtil.ItemCallback<BaseCellViewModel>() {
+
+        override fun areItemsTheSame(
+            oldItem: BaseCellViewModel,
+            newItem: BaseCellViewModel
+        ): Boolean =
+            (oldItem.model == newItem.model)
+
+        @SuppressLint("DiffUtilEquals")
+        override fun areContentsTheSame(
+            oldItem: BaseCellViewModel,
+            newItem: BaseCellViewModel
+        ): Boolean =
+            (oldItem.model == newItem.model)
+    }
 }

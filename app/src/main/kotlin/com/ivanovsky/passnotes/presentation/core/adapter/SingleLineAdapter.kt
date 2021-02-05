@@ -41,7 +41,7 @@ class SingleLineAdapter(context: Context) :
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        val primaryText: TextView = view.findViewById(R.id.primary_text)
+        val primaryText: TextView = view.findViewById(R.id.primaryText)
     }
 
     class Item(val title: String)

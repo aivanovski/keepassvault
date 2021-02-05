@@ -7,14 +7,14 @@
 	xmlns:tools="http://schemas.android.com/tools">
 
 	<androidx.constraintlayout.widget.Guideline
-		android:id="@+id/guideline_start"
+		android:id="@+id/guidelineStart"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
 		app:layout_constraintGuide_begin="@dimen/element_margin"/>
 
 	<androidx.constraintlayout.widget.Guideline
-		android:id="@+id/guideline_end"
+		android:id="@+id/guidelineEnd"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:orientation="vertical"
@@ -30,8 +30,8 @@
 		android:clickable="true"
 		android:paddingTop="4dp"
 		android:paddingBottom="4dp"
-		app:layout_constraintStart_toEndOf="@id/guideline_start"
-		app:layout_constraintEnd_toStartOf="@id/guideline_end"
+		app:layout_constraintStart_toEndOf="@id/guidelineStart"
+		app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
 		app:layout_constraintTop_toTopOf="parent">
 
 		<TextView
@@ -70,7 +70,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="@dimen/element_margin"
-		app:layout_constraintEnd_toStartOf="@id/guideline_end"
+		app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
 		app:layout_constraintTop_toBottomOf="@id/storage_layout">
 
 		<com.google.android.material.textfield.TextInputEditText
@@ -88,7 +88,7 @@
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="@dimen/element_margin"
-		app:layout_constraintStart_toEndOf="@id/guideline_start"
+		app:layout_constraintStart_toEndOf="@id/guidelineStart"
 		app:layout_constraintEnd_toStartOf="@id/file_extension_layout"
 		app:layout_constraintTop_toBottomOf="@id/storage_layout">
 
@@ -109,8 +109,8 @@
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="@dimen/element_margin"
-		app:layout_constraintStart_toEndOf="@id/guideline_start"
-		app:layout_constraintEnd_toStartOf="@id/guideline_end"
+		app:layout_constraintStart_toEndOf="@id/guidelineStart"
+		app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
 		app:layout_constraintTop_toBottomOf="@id/filename_layout">
 
 		<com.google.android.material.textfield.TextInputEditText
@@ -127,8 +127,8 @@
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="@dimen/element_margin"
-		app:layout_constraintStart_toEndOf="@id/guideline_start"
-		app:layout_constraintEnd_toStartOf="@id/guideline_end"
+		app:layout_constraintStart_toEndOf="@id/guidelineStart"
+		app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
 		app:layout_constraintTop_toBottomOf="@id/password_layout">
 
 		<com.google.android.material.textfield.TextInputEditText

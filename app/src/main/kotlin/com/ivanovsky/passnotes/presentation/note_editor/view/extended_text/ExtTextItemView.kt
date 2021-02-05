@@ -32,8 +32,8 @@ class ExtTextItemView(
         val view =
             LayoutInflater.from(context).inflate(R.layout.note_editor_ext_text_item_view, this)
 
-        primaryEditText = view.findViewById(R.id.primary_text)
-        secondaryEditText = view.findViewById(R.id.secondary_text)
+        primaryEditText = view.findViewById(R.id.primaryText)
+        secondaryEditText = view.findViewById(R.id.secondaryText)
         primaryTextLayout = view.findViewById(R.id.primary_text_layout)
         secondaryTextLayout = view.findViewById(R.id.secondary_text_layout)
         expandButton = view.findViewById(R.id.expand_button)

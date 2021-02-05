@@ -2,7 +2,7 @@
 <TextView
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
-	android:id="@+id/primary_text"
+	android:id="@+id/primaryText"
 	style="@style/Material.ListItem.PrimaryText"
 	android:layout_width="match_parent"
 	android:layout_height="@dimen/material_list_item_height_single_line"

@@ -9,7 +9,6 @@ import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
 import com.ivanovsky.passnotes.presentation.groups.GroupsPresenter;
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog;
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity;
-import com.ivanovsky.passnotes.presentation.newdb.NewDatabasePresenter;
 import com.ivanovsky.passnotes.presentation.note.NoteFragment;
 import com.ivanovsky.passnotes.presentation.note.NotePresenter;
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorPresenter;
@@ -28,7 +27,6 @@ public interface AppComponent {
 
 	void inject(StartActivity startActivity);
 	void inject(NewDatabaseActivity newDatabaseActivity);
-	void inject(@NotNull NewDatabasePresenter newDatabasePresenter);
 	void inject(@NotNull StorageListInteractor storageListInteractor);
 	void inject(KeepassDatabase keepassDatabase);
 	void inject(@NotNull DebugMenuPresenter debugMenuPresenter);

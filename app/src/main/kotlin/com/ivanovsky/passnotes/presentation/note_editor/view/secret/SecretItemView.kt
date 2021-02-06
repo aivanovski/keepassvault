@@ -7,7 +7,6 @@ import android.text.method.PasswordTransformationMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.EditText
-import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.textfield.TextInputLayout
 import com.ivanovsky.passnotes.R
@@ -34,7 +33,7 @@ class SecretItemView(
 
         passwordEditText = view.findViewById(R.id.password)
         confirmationEditText = view.findViewById(R.id.confirmation)
-        passwordLayout = view.findViewById(R.id.password_layout)
+        passwordLayout = view.findViewById(R.id.passwordLayout)
         confirmationLayout = view.findViewById(R.id.confirmation_layout)
         visibilityButton = view.findViewById(R.id.visibility_button)
 

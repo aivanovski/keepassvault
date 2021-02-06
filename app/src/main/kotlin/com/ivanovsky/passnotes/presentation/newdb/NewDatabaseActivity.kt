@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.BaseActivity
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.initActionBar
 
 class NewDatabaseActivity : BaseActivity() {
 
@@ -12,17 +13,12 @@ class NewDatabaseActivity : BaseActivity() {
 
         setContentView(R.layout.core_base_activity)
 
-        setSupportActionBar(findViewById(R.id.tool_bar))
-        currentActionBar.title = getString(R.string.new_database)
-        currentActionBar.setDisplayHomeAsUpEnabled(true)
+        initActionBar(R.id.tool_bar)
 
         val fragment = NewDatabaseFragment.newInstance()
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
-
-        val presenter = NewDatabasePresenter(fragment)
-        fragment.presenter = presenter
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

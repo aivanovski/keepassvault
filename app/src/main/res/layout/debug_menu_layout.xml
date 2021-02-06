@@ -119,7 +119,7 @@
 			app:layout_constraintEnd_toEndOf="parent"/>
 
 		<com.google.android.material.textfield.TextInputLayout
-			android:id="@+id/password_layout"
+			android:id="@+id/passwordLayout"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginLeft="@dimen/group_margin"
@@ -143,7 +143,7 @@
 			android:layout_marginLeft="@dimen/group_margin"
 			android:layout_marginRight="@dimen/element_margin"
 			android:text="Open"
-			app:layout_constraintTop_toBottomOf="@id/password_layout"
+			app:layout_constraintTop_toBottomOf="@id/passwordLayout"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintEnd_toStartOf="@id/close_button"
 			app:layout_constraintHorizontal_weight="1"/>
@@ -155,7 +155,7 @@
 			android:layout_height="wrap_content"
 			android:layout_marginRight="@dimen/group_margin"
 			android:text="Close"
-			app:layout_constraintTop_toBottomOf="@id/password_layout"
+			app:layout_constraintTop_toBottomOf="@id/passwordLayout"
 			app:layout_constraintStart_toEndOf="@id/open_button"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintHorizontal_weight="1"/>

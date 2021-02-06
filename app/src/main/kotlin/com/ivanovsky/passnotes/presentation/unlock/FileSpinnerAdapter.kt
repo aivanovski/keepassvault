@@ -87,6 +87,6 @@ class FileSpinnerAdapter(context: Context) : BaseAdapter() {
     private class ViewHolder(view: View) {
         val filenameTextView = view.findViewById<TextView>(R.id.filename)!!
         val pathTextView = view.findViewById<TextView>(R.id.path)!!
-        val storageTypeTextView = view.findViewById<TextView>(R.id.storage_type)!!
+        val storageTypeTextView = view.findViewById<TextView>(R.id.storageType)!!
     }
 }

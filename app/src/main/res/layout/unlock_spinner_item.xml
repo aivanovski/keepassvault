@@ -21,11 +21,11 @@
 		app:layout_constraintHorizontal_chainStyle="spread_inside"
 		app:layout_constraintStart_toStartOf="parent"
 		app:layout_constraintTop_toTopOf="parent"
-		app:layout_constraintEnd_toStartOf="@id/storage_type"
+		app:layout_constraintEnd_toStartOf="@id/storageType"
 		app:layout_constraintBottom_toTopOf="@id/path"/>
 
 	<TextView
-		android:id="@+id/storage_type"
+		android:id="@+id/storageType"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:textSize="@dimen/material_secondary_text_size"

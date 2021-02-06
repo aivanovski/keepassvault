@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.group.GroupViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/rootLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.ivanovsky.passnotes.presentation.core_mvvm.widget.ErrorPanelView
+            android:id="@+id/errorPanelView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <com.ivanovsky.passnotes.presentation.core_mvvm.widget.ScreenStateView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/group_margin"
+            android:layout_marginLeft="@dimen/element_margin"
+            android:layout_marginRight="@dimen/element_margin"
+            app:errorText="@{viewModel.errorText}"
+            app:layout_constraintTop_toBottomOf="@id/errorPanelView"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/groupTitle"
+                style="@style/Material.EditText.PrimarySingleLine"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@={viewModel.groupTitle}"
+                android:hint="@string/group_title"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -4,10 +4,12 @@ import com.ivanovsky.passnotes.App
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
+import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
+import com.ivanovsky.passnotes.presentation.group.GroupViewModel
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -40,9 +42,11 @@ object KoinModule {
         single { UnlockInteractor(get(), get(), get(), get()) }
         single { StorageListInteractor(get()) }
         single { NewDatabaseInteractor(get(), get(), get(), get()) }
+        single { GroupInteractor(get(), get(), get()) }
 
         viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
         viewModel { FilePickerViewModel(get(), get(), get(), get(), get()) }
         viewModel { NewDatabaseViewModel(get(), get(), get(), get()) }
+        viewModel { GroupViewModel(get(), get(), get()) }
     }
 }

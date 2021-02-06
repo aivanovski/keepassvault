@@ -20,7 +20,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class NewDatabaseFragment : Fragment() {
 
     private val viewModel: NewDatabaseViewModel by viewModel()
-    private lateinit var menu: Menu
+    private var menu: Menu? = null
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -107,10 +107,13 @@ class NewDatabaseFragment : Fragment() {
     }
 
     private fun setDoneButtonVisibility(isVisible: Boolean) {
-        val item = menu.findItem(R.id.menu_done)
+        val menu = this.menu ?: return
 
-        item?.isVisible = isVisible
+        val item = menu.findItem(R.id.menu_done)
+        item.isVisible = isVisible
     }
+
+
 
     companion object {
 

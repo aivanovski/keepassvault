@@ -4,7 +4,6 @@ import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor;
 import com.ivanovsky.passnotes.presentation.StartActivity;
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuPresenter;
-import com.ivanovsky.passnotes.presentation.group.GroupPresenter;
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
 import com.ivanovsky.passnotes.presentation.groups.GroupsPresenter;
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog;
@@ -35,7 +34,6 @@ public interface AppComponent {
 	void inject(@NotNull GroupsPresenter groupsPresenter);
 	void inject(@NotNull NotesPresenter notesPresenter);
 	void inject(@NotNull NotePresenter notePresenter);
-	void inject(@NotNull GroupPresenter groupPresenter);
 	void inject(@NotNull NoteEditorPresenter noteEditorPresenter);
     void inject(@NotNull NoteEditorDataTransformer noteEditorDataTransformer);
     void inject(@NotNull NoteFragment noteFragment);

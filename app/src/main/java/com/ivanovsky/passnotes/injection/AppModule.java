@@ -97,44 +97,14 @@ public class AppModule {
 
 	@Provides
 	@Singleton
-	UnlockInteractor provideUnlockInteractor(EncryptedDatabaseRepository dbRepository,
-											 UsedFileRepository usedFileRepository,
-											 ObserverBus observerBus,
-											 FileSyncHelper fileSyncHelper) {
-		return new UnlockInteractor(usedFileRepository, dbRepository, observerBus, fileSyncHelper);
-	}
-
-	@Provides
-	@Singleton
 	ErrorInteractor provideErrorInteractor() {
 		return module.getErrorInteractor();
 	}
 
 	@Provides
 	@Singleton
-	NewDatabaseInteractor provideNewDatabaseInteractor(EncryptedDatabaseRepository dbRepository,
-													   UsedFileRepository usedFileRepository,
-													   FileSystemResolver fileSystemResolver,
-													   ObserverBus observerBus) {
-		return new NewDatabaseInteractor(dbRepository, usedFileRepository, fileSystemResolver, observerBus);
-	}
-
-	@Provides
-	@Singleton
 	ClipboardHelper provideClipboardHelper() {
 		return new ClipboardHelper(context);
-	}
-
-	@Provides
-	@Singleton
-	StorageListInteractor provideStorageInteractor() {
-		return new StorageListInteractor(context);
-	}
-
-	@Provides
-	@Singleton
-	FilePickerInteractor provideFilePickerInteractor(FileSystemResolver fileSystemResolver) {
-		return new FilePickerInteractor(fileSystemResolver);
 	}
 
 	@Provides
@@ -179,14 +149,6 @@ public class AppModule {
 	@Singleton
 	NotesInteractor provideNotesInteractor(EncryptedDatabaseRepository dbRepo) {
 		return new NotesInteractor(dbRepo);
-	}
-
-	@Provides
-	@Singleton
-	GroupInteractor provideNewGroupInteractor(EncryptedDatabaseRepository dbRepo,
-											  ResourceProvider resourceProvider,
-											  ObserverBus observerBus) {
-		return new GroupInteractor(dbRepo, resourceProvider, observerBus);
 	}
 
 	@Provides

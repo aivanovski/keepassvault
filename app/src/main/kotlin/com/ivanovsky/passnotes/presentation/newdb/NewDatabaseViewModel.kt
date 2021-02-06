@@ -22,10 +22,10 @@ import java.io.File
 import java.util.regex.Pattern
 
 class NewDatabaseViewModel(
-    var interactor: NewDatabaseInteractor,
-    var errorInteractor: ErrorInteractor,
-    var fileHelper: FileHelper,
-    var resourceProvider: ResourceProvider
+    private val interactor: NewDatabaseInteractor,
+    private val errorInteractor: ErrorInteractor,
+    private val fileHelper: FileHelper,
+    private val resourceProvider: ResourceProvider
 ) : ViewModel() {
 
     val screenStateHandler = DefaultScreenStateHandler()
@@ -39,7 +39,7 @@ class NewDatabaseViewModel(
     val confirmationError = MutableLiveData<String?>(null)
     val storageType = MutableLiveData<String>()
     val storagePath = MutableLiveData<String>(resourceProvider.getString(R.string.not_selected))
-    val doneButtonVisibility = MutableLiveData<Boolean>()
+    val doneButtonVisibility = MutableLiveData<Boolean>(true)
     val showGroupsScreenEvent = SingleLiveEvent<Unit>()
     val showStorageScreenEvent = SingleLiveEvent<Unit>()
     val hideKeyboardEvent = SingleLiveEvent<Unit>()

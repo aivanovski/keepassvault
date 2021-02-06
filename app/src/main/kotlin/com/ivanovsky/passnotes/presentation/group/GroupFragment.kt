@@ -2,25 +2,27 @@ package com.ivanovsky.passnotes.presentation.group
 
 import android.os.Bundle
 import android.view.*
-import android.widget.EditText
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.Screen
-import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.databinding.GroupFragmentBinding
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.finishActivity
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.hideKeyboard
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.withArguments
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.util.*
 
-class GroupFragment : BaseFragment(), GroupContract.View {
+class GroupFragment : Fragment() {
 
-    override var presenter: GroupContract.Presenter? = null
-    private lateinit var menu: Menu
-    private lateinit var titleEditText: EditText
-    private val doneButtonVisibilityData = MutableLiveData<Boolean>()
-    private val titleEditTextErrorData = MutableLiveData<String?>()
+    private val viewModel: GroupViewModel by viewModel()
+    private var menu: Menu? = null
 
-    companion object {
-
-        fun newInstance(): GroupFragment {
-            return GroupFragment()
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        setupActionBar {
+            title = getString(R.string.new_group)
+            setDisplayHomeAsUpEnabled(true)
         }
     }
 
@@ -29,72 +31,64 @@ class GroupFragment : BaseFragment(), GroupContract.View {
         setHasOptionsMenu(true)
     }
 
-    override fun onStart() {
-        super.onStart()
-        presenter?.start()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        presenter?.destroy()
-    }
-
-    override fun onCreateContentView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val view = inflater.inflate(R.layout.new_group_fragment, container, false)
-
-        titleEditText = view.findViewById(R.id.group_title)
-
-        doneButtonVisibilityData.observe(this,
-            Observer { visibility -> setDoneButtonVisibilityInternal(visibility) })
-        titleEditTextErrorData.observe(this,
-            Observer { error -> setTitleEditTextErrorInternal(error) })
-
-        presenter?.globalSnackbarMessageAction?.observe(this, Screen.GROUP,
-            Observer { message -> showSnackbar(message) })
-
-        return view
-    }
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         this.menu = menu
 
         inflater.inflate(R.menu.base_done, menu)
     }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return GroupFragmentBinding.inflate(inflater, container, false)
+            .also {
+                it.lifecycleOwner = viewLifecycleOwner
+                it.viewModel = viewModel
+            }
+            .root
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return if (item.itemId == R.id.menu_done) {
-            onDoneMenuClicked()
+            viewModel.createNewGroup()
             true
         } else {
             super.onOptionsItemSelected(item)
         }
     }
 
-    private fun onDoneMenuClicked() {
-        val title = titleEditText.text.toString()
-        presenter?.createNewGroup(title)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewModel.doneButtonVisibility.observe(viewLifecycleOwner) { isVisible ->
+            setDoneButtonVisibility(isVisible)
+        }
+        viewModel.finishScreenEvent.observe(viewLifecycleOwner) {
+            finishActivity()
+        }
+        viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
+            hideKeyboard()
+        }
+
+        val parentGroupUid = arguments?.getSerializable(PARENT_GROUP_UID) as? UUID
+        viewModel.start(parentGroupUid)
     }
 
-    override fun setTitleEditTextError(error: String?) {
-        titleEditTextErrorData.value = error
-    }
+    private fun setDoneButtonVisibility(isVisible: Boolean) {
+        val menu = this.menu ?: return
 
-    private fun setTitleEditTextErrorInternal(error: String?) {
-        titleEditText.error = error
-    }
-
-    override fun setDoneButtonVisibility(isVisible: Boolean) {
-        doneButtonVisibilityData.value = isVisible
-    }
-
-    private fun setDoneButtonVisibilityInternal(isVisible: Boolean) {
         val item = menu.findItem(R.id.menu_done)
-        if (item != null) {
-            item.isVisible = isVisible
+        item.isVisible = isVisible
+    }
+
+    companion object {
+
+        private const val PARENT_GROUP_UID = "parentGroupUid"
+
+        fun newInstance(parentGroupUid: UUID?) = GroupFragment().withArguments {
+            putSerializable(PARENT_GROUP_UID, parentGroupUid)
         }
     }
 }

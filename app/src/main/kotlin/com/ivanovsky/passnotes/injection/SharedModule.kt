@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.data.repository.db.AppDatabase
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository
 import com.ivanovsky.passnotes.domain.*
+import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 
 class SharedModule(private val context: Context) {

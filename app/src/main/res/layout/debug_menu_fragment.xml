@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel" />
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/rootLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.ivanovsky.passnotes.presentation.core_mvvm.widget.ErrorPanelView
+                android:id="@+id/errorPanelView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                bind:screenState="@{viewModel.screenState}"
+                bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+            <com.ivanovsky.passnotes.presentation.core_mvvm.widget.ScreenStateView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                bind:screenState="@{viewModel.screenState}"
+                bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/group_margin"
+                android:paddingBottom="@dimen/group_margin"
+                app:layout_constraintTop_toBottomOf="@id/errorPanelView"
+                bind:screenState="@{viewModel.screenState}"
+                bind:screenStateHandler="@{viewModel.screenStateHandler}">
+
+                <TextView
+                    android:id="@+id/fileSystemText"
+                    style="@style/Material.PrimaryText.SingleLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:text="@string/file_system_with_dots"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <View
+                    android:id="@+id/fileSystemDivider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#666666"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/fileSystemText" />
+
+                <Spinner
+                    android:id="@+id/fileSystemSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/element_margin"
+                    android:layout_marginEnd="@dimen/group_margin"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:textSize="@dimen/material_primary_text_size"
+                    app:layout_constraintTop_toBottomOf="@id/fileSystemDivider" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/filePathLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginEnd="@dimen/group_margin"
+                    app:layout_constraintTop_toBottomOf="@id/fileSystemSpinner">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/filePath"
+                        style="@style/Material.EditText.PrimarySingleLine"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/file_path"
+                        android:text="@={viewModel.filePath}" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/readButton"
+                    style="@style/Material.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginEnd="@dimen/element_margin"
+                    android:onClick="@{() -> viewModel.onReadButtonClicked()}"
+                    android:text="@string/read"
+                    app:layout_constraintEnd_toStartOf="@id/writeButton"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/filePathLayout" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/writeButton"
+                    style="@style/Material.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/group_margin"
+                    android:enabled="@{viewModel.isWriteButtonEnabled}"
+                    android:onClick="@{() -> viewModel.onWriteButtonClicked()}"
+                    android:text="@string/write"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toEndOf="@id/readButton"
+                    app:layout_constraintTop_toBottomOf="@id/filePathLayout" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/newButton"
+                    style="@style/Material.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginEnd="@dimen/element_margin"
+                    android:onClick="@{() -> viewModel.onNewButtonClicked()}"
+                    android:text="@string/button_new"
+                    app:layout_constraintEnd_toStartOf="@id/writeButton"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/readButton" />
+
+                <TextView
+                    android:id="@+id/dbText"
+                    style="@style/Material.PrimaryText.SingleLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/group_margin"
+                    android:text="@string/database_with_dots"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/newButton" />
+
+                <View
+                    android:id="@+id/dbDivider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#666666"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/dbText" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/passwordLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginEnd="@dimen/group_margin"
+                    app:layout_constraintTop_toBottomOf="@id/dbDivider">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/password"
+                        style="@style/Material.EditText.Password"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/password_with_default"
+                        android:text="@={viewModel.password}" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/openButton"
+                    style="@style/Material.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginEnd="@dimen/element_margin"
+                    android:enabled="@{viewModel.isOpenDbButtonEnabled}"
+                    android:onClick="@{() -> viewModel.onOpenDbButtonClicked()}"
+                    android:text="@string/open"
+                    app:layout_constraintEnd_toStartOf="@id/closeButton"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/passwordLayout" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/closeButton"
+                    style="@style/Material.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/group_margin"
+                    android:enabled="@{viewModel.isCloseDbButtonEnabled}"
+                    android:onClick="@{() -> viewModel.onCloseDbButtonClicked()}"
+                    android:text="@string/close"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toEndOf="@id/openButton"
+                    app:layout_constraintTop_toBottomOf="@id/passwordLayout" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/addEntryButton"
+                    style="@style/Material.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginEnd="@dimen/element_margin"
+                    android:enabled="@{viewModel.isAddEntryButtonEnabled}"
+                    android:onClick="@{() -> viewModel.onAddEntryButtonClicked()}"
+                    android:text="@string/add_entry"
+                    app:layout_constraintEnd_toStartOf="@id/closeButton"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/openButton" />
+
+                <TextView
+                    android:id="@+id/hooksText"
+                    style="@style/Material.PrimaryText.SingleLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/group_margin"
+                    android:text="@string/hooks_with_dots"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/addEntryButton" />
+
+                <View
+                    android:id="@+id/hooksDivider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#666666"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/hooksText" />
+
+                <CheckBox
+                    android:id="@+id/externalStorageCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/element_margin"
+                    android:checked="@={viewModel.isExternalStorageEnabled}"
+                    android:onCheckedChanged="@{(button, isChecked) -> viewModel.onExternalStorageCheckBoxChanged(isChecked)}"
+                    android:text="@string/use_external_storage_for_remote_files"
+                    android:textColor="@color/primary_text"
+                    android:textSize="@dimen/material_primary_text_size"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/hooksDivider" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+</layout>

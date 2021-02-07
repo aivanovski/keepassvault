@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.injection;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor;
 import com.ivanovsky.passnotes.presentation.StartActivity;
-import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuPresenter;
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
 import com.ivanovsky.passnotes.presentation.groups.GroupsPresenter;
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog;
@@ -28,7 +27,6 @@ public interface AppComponent {
 	void inject(NewDatabaseActivity newDatabaseActivity);
 	void inject(@NotNull StorageListInteractor storageListInteractor);
 	void inject(KeepassDatabase keepassDatabase);
-	void inject(@NotNull DebugMenuPresenter debugMenuPresenter);
     void inject(@NotNull ChooseOptionDialog newEntryDialog);
 	void inject(@NotNull GroupsActivity groupsActivity);
 	void inject(@NotNull GroupsPresenter groupsPresenter);

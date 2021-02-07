@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Debug Menu screen -->
+    <string name="file_system_with_dots" translatable="false">File System:</string>
+    <string name="read" translatable="false">Read</string>
+    <string name="write" translatable="false">Write</string>
+    <string name="open" translatable="false">Open</string>
+    <string name="button_new" translatable="false">New</string>
+    <string name="database_with_dots" translatable="false">Database:</string>
+    <string name="password_with_default" translatable="false">Password (default: abc123)</string>
+    <string name="close" translatable="false">Close</string>
+    <string name="add_entry" translatable="false">Add entry</string>
+    <string name="hooks_with_dots" translatable="false">Hooks:</string>
+    <string name="use_external_storage_for_remote_files" translatable="false">Use External storage for remote files</string>
+    <string name="device_file_system" translatable="false">Device file system</string>
+    <string name="file_read" translatable="false">File read</string>
+    <string name="file_wrote" translatable="false">File wrote</string>
+    <string name="file_is_not_loaded" translatable="false">File is not loaded</string>
+    <string name="new_file_created" translatable="false">New file created</string>
+    <string name="db_opened" translatable="false">DB opened</string>
+    <string name="db_closed" translatable="false">DB closed</string>
+    <string name="entry_added" translatable="false">Entry added</string>
+
+</resources>

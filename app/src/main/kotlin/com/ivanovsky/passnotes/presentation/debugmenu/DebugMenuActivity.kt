@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.BaseActivity
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.initActionBar
 
 class DebugMenuActivity : BaseActivity() {
 
@@ -14,21 +15,16 @@ class DebugMenuActivity : BaseActivity() {
 
         setContentView(R.layout.core_base_activity)
 
+        initActionBar(R.id.tool_bar)
         setSupportActionBar(findViewById(R.id.tool_bar))
-        currentActionBar.title = getString(R.string.debug_menu)
-        currentActionBar.setDisplayHomeAsUpEnabled(true)
 
-        val fragment = DebugMenuFragment.newInstance()
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
+            .replace(R.id.fragment_container, DebugMenuFragment.newInstance())
             .commit()
-
-        val presenter = DebugMenuPresenter(fragment)
-        fragment.presenter = presenter
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return if (item?.itemId == android.R.id.home) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return if (item.itemId == android.R.id.home) {
             onBackPressed()
             true
         } else {

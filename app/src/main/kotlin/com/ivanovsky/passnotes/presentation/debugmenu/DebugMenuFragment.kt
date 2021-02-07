@@ -4,177 +4,86 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.Spinner
-import androidx.lifecycle.Observer
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.FSType
-import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.databinding.DebugMenuFragmentBinding
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.showSnackbarMessage
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class DebugMenuFragment : BaseFragment(), DebugMenuContract.View {
+class DebugMenuFragment : Fragment() {
 
-    override var presenter: DebugMenuContract.Presenter? = null
+    private val viewModel: DebugMenuViewModel by viewModel()
 
-    private lateinit var fileSystemSpinner: Spinner
-    private lateinit var filePathEditText: EditText
-    private lateinit var passwordEditText: EditText
-    private lateinit var readButton: View
-    private lateinit var writeButton: View
-    private lateinit var newButton: View
-    private lateinit var openDbButton: View
-    private lateinit var closeDbButton: View
-    private lateinit var addEntryButton: View
-    private lateinit var externalStorageCheckBox: CheckBox
-
-    override fun onStart() {
-        super.onStart()
-        presenter?.start()
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        setupActionBar {
+            title = getString(R.string.debug_menu)
+            setDisplayHomeAsUpEnabled(true)
+        }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        presenter?.destroy()
-    }
-
-    override fun onCreateContentView(
+    override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        val view = inflater.inflate(R.layout.debug_menu_layout, container, false)
+    ): View? {
+        val binding = DebugMenuFragmentBinding.inflate(inflater, container, false)
+            .also {
+                it.lifecycleOwner = viewLifecycleOwner
+                it.viewModel = viewModel
+            }
+        binding.fileSystemSpinner.adapter = createFileSystemSpinnerAdapter()
+        binding.fileSystemSpinner.onItemSelectedListener = object : OnItemSelectedListener {
 
-        fileSystemSpinner = view.findViewById(R.id.file_system_spinner)
-        filePathEditText = view.findViewById(R.id.file_path)
-        passwordEditText = view.findViewById(R.id.password)
-        readButton = view.findViewById(R.id.read_button)
-        writeButton = view.findViewById(R.id.write_button)
-        newButton = view.findViewById(R.id.new_button)
-        openDbButton = view.findViewById(R.id.open_button)
-        closeDbButton = view.findViewById(R.id.close_button)
-        addEntryButton = view.findViewById(R.id.add_entry_button)
-        externalStorageCheckBox = view.findViewById(R.id.external_storage_check_box)
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
 
-        fileSystemSpinner.adapter = createSpinnerAdapter()
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                onFileSystemItemSelected(position)
+            }
+        }
 
-        presenter?.writeButtonEnabled?.observe(this,
-            Observer { isEnabled -> setWriteButtonEnabled(isEnabled) })
-        presenter?.openDbButtonEnabled?.observe(this,
-            Observer { isEnabled -> setOpenDbButtonEnabled(isEnabled) })
-        presenter?.closeDbButtonEnabled?.observe(this,
-            Observer { isEnabled -> setCloseDbButtonEnabled(isEnabled) })
-        presenter?.addEntryButtonEnabled?.observe(this,
-            Observer { isEnabled -> setAddEntryButtonEnabled(isEnabled) })
-        presenter?.externalStorageCheckBoxChecked?.observe(this,
-            Observer { isChecked -> setExternalStorageCheckBoxChecked(isChecked) })
-
-        readButton.setOnClickListener { onReadButtonClicked() }
-        writeButton.setOnClickListener { onWriteButtonClicked() }
-        newButton.setOnClickListener { onNewButtonClicked() }
-        openDbButton.setOnClickListener { onOpenDbButtonClicked() }
-        closeDbButton.setOnClickListener { onCloseDbButtonClicked() }
-        addEntryButton.setOnClickListener { onAddEntryButtonClicked() }
-
-        return view
+        return binding.root
     }
 
-    private fun createSpinnerAdapter(): ArrayAdapter<String> {
-        val items = arrayListOf("Device file system", "Dropbox")
-        val adapter = ArrayAdapter(context!!, android.R.layout.simple_spinner_item, items)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        return adapter
-    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-    override fun setWriteButtonEnabled(isEnabled: Boolean) {
-        writeButton.isEnabled = isEnabled
-    }
-
-    override fun setOpenDbButtonEnabled(isEnabled: Boolean) {
-        openDbButton.isEnabled = isEnabled
-    }
-
-    override fun setCloseDbButtonEnabled(isEnabled: Boolean) {
-        closeDbButton.isEnabled = isEnabled
-    }
-
-    override fun setAddEntryButtonEnabled(isEnabled: Boolean) {
-        addEntryButton.isEnabled = isEnabled
-    }
-
-    override fun setExternalStorageCheckBoxChecked(isChecked: Boolean) {
-        externalStorageCheckBox.setOnCheckedChangeListener(null)
-
-        externalStorageCheckBox.isChecked = isChecked
-
-        externalStorageCheckBox.setOnCheckedChangeListener { _, checked ->
-            onExternalStorageCheckedChanged(checked)
+        viewModel.showSnackbarEvent.observe(viewLifecycleOwner) { message ->
+            showSnackbarMessage(message)
         }
     }
 
-    private fun onReadButtonClicked() {
-        presenter?.onReadButtonClicked(getSelectedFile())
-    }
-
-    private fun onWriteButtonClicked() {
-        presenter?.onWriteButtonClicked()
-    }
-
-    private fun onNewButtonClicked() {
-        presenter?.onNewButtonClicked(getPassword(), getSelectedFile())
-    }
-
-    private fun onOpenDbButtonClicked() {
-        presenter?.onOpenDbButtonClicked(getPassword())
-    }
-
-    private fun onCloseDbButtonClicked() {
-        presenter?.onCloseDbButtonClicked()
-    }
-
-    private fun onAddEntryButtonClicked() {
-        presenter?.onAddEntryButtonClicked()
-    }
-
-    private fun getSelectedFile(): FileDescriptor {
-        val fsType = getSelectedFileSystem()
-        val path = getPath()
-
-        val file = FileDescriptor()
-
-        file.fsType = fsType
-        file.path = path
-        file.isDirectory = false
-        file.isRoot = false
-        file.uid = null
-
-        return file
-    }
-
-    private fun getSelectedFileSystem(): FSType {
-        return if (fileSystemSpinner.selectedItemPosition == 0) {
-            FSType.REGULAR_FS
-        } else {
-            FSType.DROPBOX
+    private fun createFileSystemSpinnerAdapter(): ArrayAdapter<String> {
+        val items = listOf(
+            getString(R.string.device_file_system),
+            getString(R.string.dropbox)
+        )
+        return ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, items).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
     }
 
-    private fun getPath(): String {
-        return filePathEditText.text.toString()
-    }
-
-    private fun getPassword(): String {
-        return passwordEditText.text.toString()
-    }
-
-    private fun onExternalStorageCheckedChanged(isChecked: Boolean) {
-        presenter?.onExternalStorageCheckedChanged(isChecked)
+    private fun onFileSystemItemSelected(position: Int) {
+        when (position) {
+            0 -> viewModel.onFileSystemSelected(FSType.REGULAR_FS)
+            1 -> viewModel.onFileSystemSelected(FSType.DROPBOX)
+        }
     }
 
     companion object {
-        fun newInstance(): DebugMenuFragment {
-            return DebugMenuFragment()
-        }
+
+        fun newInstance() = DebugMenuFragment()
     }
 }

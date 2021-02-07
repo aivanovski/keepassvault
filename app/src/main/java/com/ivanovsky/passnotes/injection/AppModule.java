@@ -6,7 +6,6 @@ import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.repository.DropboxFileRepository;
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
-import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository;
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
@@ -19,16 +18,10 @@ import com.ivanovsky.passnotes.domain.NoteDiffer;
 import com.ivanovsky.passnotes.domain.PermissionHelper;
 import com.ivanovsky.passnotes.domain.ResourceProvider;
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus;
-import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor;
-import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor;
-import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor;
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor;
-import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor;
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor;
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor;
 import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor;
-import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor;
-import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor;
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
 
 import javax.inject.Singleton;
@@ -105,14 +98,6 @@ public class AppModule {
 	@Singleton
 	ClipboardHelper provideClipboardHelper() {
 		return new ClipboardHelper(context);
-	}
-
-	@Provides
-	@Singleton
-	DebugMenuInteractor provideDebugMenuInteractor(FileSystemResolver fileSystemResolver,
-												   EncryptedDatabaseRepository dbRepository,
-												   FileHelper fileHelper) {
-		return new DebugMenuInteractor(fileSystemResolver, dbRepository, fileHelper);
 	}
 
 	@Provides

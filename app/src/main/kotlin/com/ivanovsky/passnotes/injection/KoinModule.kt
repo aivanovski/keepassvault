@@ -3,11 +3,13 @@ package com.ivanovsky.passnotes.injection
 import com.ivanovsky.passnotes.App
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.domain.DateFormatProvider
+import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
+import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
 import com.ivanovsky.passnotes.presentation.group.GroupViewModel
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseViewModel
@@ -43,10 +45,12 @@ object KoinModule {
         single { StorageListInteractor(get()) }
         single { NewDatabaseInteractor(get(), get(), get(), get()) }
         single { GroupInteractor(get(), get(), get()) }
+        single { DebugMenuInteractor(get(), get(), get()) }
 
         viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
         viewModel { FilePickerViewModel(get(), get(), get(), get(), get()) }
         viewModel { NewDatabaseViewModel(get(), get(), get(), get()) }
         viewModel { GroupViewModel(get(), get(), get()) }
+        viewModel { DebugMenuViewModel(get(), get(), get(), get()) }
     }
 }

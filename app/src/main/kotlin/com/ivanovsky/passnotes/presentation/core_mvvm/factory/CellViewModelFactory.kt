@@ -5,7 +5,7 @@ import com.ivanovsky.passnotes.presentation.core_mvvm.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core_mvvm.model.BaseCellModel
 import kotlin.reflect.jvm.jvmName
 
-interface ItemViewModelFactory {
+interface CellViewModelFactory {
 
     fun createCellViewModels(
         models: List<BaseCellModel>,
@@ -19,7 +19,7 @@ interface ItemViewModelFactory {
         eventProvider: EventProvider
     ): BaseCellViewModel
 
-    fun throwViewModelNotFoundException(model: BaseCellModel): Nothing {
+    fun throwUnsupportedModelException(model: BaseCellModel): Nothing {
         throw IllegalArgumentException("unable to find ViewModel for model: ${model::class.jvmName}")
     }
 }

@@ -7,8 +7,6 @@ import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
 import com.ivanovsky.passnotes.presentation.groups.GroupsPresenter;
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog;
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity;
-import com.ivanovsky.passnotes.presentation.note.NoteFragment;
-import com.ivanovsky.passnotes.presentation.note.NotePresenter;
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorPresenter;
 import com.ivanovsky.passnotes.presentation.note_editor.view.NoteEditorDataTransformer;
 import com.ivanovsky.passnotes.presentation.notes.NotesPresenter;
@@ -31,8 +29,6 @@ public interface AppComponent {
 	void inject(@NotNull GroupsActivity groupsActivity);
 	void inject(@NotNull GroupsPresenter groupsPresenter);
 	void inject(@NotNull NotesPresenter notesPresenter);
-	void inject(@NotNull NotePresenter notePresenter);
 	void inject(@NotNull NoteEditorPresenter noteEditorPresenter);
     void inject(@NotNull NoteEditorDataTransformer noteEditorDataTransformer);
-    void inject(@NotNull NoteFragment noteFragment);
 }

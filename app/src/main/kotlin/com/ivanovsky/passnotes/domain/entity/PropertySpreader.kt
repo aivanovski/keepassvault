@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateParser
 import java.util.*
 
+@Deprecated("") // TODO: Refactor class
 class PropertySpreader(
     private val properties: List<Property>
 ) {

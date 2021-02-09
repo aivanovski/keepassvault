@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels.NotePropertyCellViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/material_list_item_height_two_line_with_icon">
+
+        <TextView
+            android:id="@+id/name"
+            style="@style/Material.SecondaryText.SingleLine"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@{viewModel.model.name}"
+            app:layout_constraintBottom_toTopOf="@id/value"
+            app:layout_constraintEnd_toEndOf="@id/value"
+            app:layout_constraintStart_toStartOf="@id/value"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="User Name" />
+
+        <com.ivanovsky.passnotes.presentation.core.widget.SecureTextView
+            android:id="@+id/value"
+            style="@style/Material.PrimaryText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:text="@{viewModel.model.value}"
+            bind:isTextHidden="@{viewModel.isValueHidden}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/visibilityButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/name"
+            tools:text="default@gmail.com" />
+
+        <ImageButton
+            android:id="@+id/visibilityButton"
+            style="@style/Material.BorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/half_margin"
+            android:onClick="@{() -> viewModel.onVisibilityButtonClicked()}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/copyButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_eye_grey_600_24dp"
+            bind:visible="@{viewModel.model.visibilityButtonVisible}" />
+
+        <ImageButton
+            android:id="@+id/copyButton"
+            style="@style/Material.BorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> viewModel.onCopyButtonClicked()}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_copy_grey_600_24dp"
+            bind:visible="@{viewModel.model.copyButtonVisible}" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
+

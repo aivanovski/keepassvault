@@ -11,6 +11,7 @@ import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.ivanovsky.passnotes.presentation.core.widget.SecureTextView
 import com.ivanovsky.passnotes.presentation.core_mvvm.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core_mvvm.ScreenState
 import com.ivanovsky.passnotes.presentation.core_mvvm.ScreenStateHandler
@@ -79,4 +80,14 @@ fun addTextWatcher(editText: TextInputEditText, onTextChangeListener: (text: Str
 @BindingAdapter("bind:src")
 fun setImageResource(imageView: ImageView, @DrawableRes imageResourceId: Int){
     imageView.setImageResource(imageResourceId)
+}
+
+@BindingAdapter("bind:isTextHidden")
+fun setTextHidden(textView: SecureTextView, isHidden: LiveData<Boolean>?) {
+    val isTextHidden = isHidden?.value ?: false
+    if (isTextHidden) {
+        textView.hideText()
+    } else {
+        textView.showText()
+    }
 }

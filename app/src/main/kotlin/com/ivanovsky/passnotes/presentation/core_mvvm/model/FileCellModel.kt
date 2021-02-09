@@ -8,4 +8,4 @@ data class FileCellModel(
     val title: String,
     val description: String,
     val isSelected: Boolean
-) : BaseCellModel(id)
+) : BaseCellModel()

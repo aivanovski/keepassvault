@@ -35,7 +35,7 @@ class SecretItemView(
         confirmationEditText = view.findViewById(R.id.confirmation)
         passwordLayout = view.findViewById(R.id.passwordLayout)
         confirmationLayout = view.findViewById(R.id.confirmation_layout)
-        visibilityButton = view.findViewById(R.id.visibility_button)
+        visibilityButton = view.findViewById(R.id.visibilityButton)
 
         visibilityButton.setOnClickListener {
             onVisibilityButtonClicked()

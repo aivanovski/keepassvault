@@ -97,7 +97,7 @@ public class AppModule {
 	@Provides
 	@Singleton
 	ClipboardHelper provideClipboardHelper() {
-		return new ClipboardHelper(context);
+		return module.getClipboardHelper();
 	}
 
 	@Provides
@@ -134,13 +134,6 @@ public class AppModule {
 	@Singleton
 	NotesInteractor provideNotesInteractor(EncryptedDatabaseRepository dbRepo) {
 		return new NotesInteractor(dbRepo);
-	}
-
-	@Provides
-	@Singleton
-	NoteInteractor provideAddEditNoteInteractor(EncryptedDatabaseRepository dbRepo,
-												ClipboardHelper clipboardHelper) {
-		return new NoteInteractor(dbRepo, clipboardHelper);
 	}
 
 	@Provides

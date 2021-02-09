@@ -11,16 +11,13 @@
     </data>
 
     <TextView
-        style="@style/Material.ListItem.PrimaryText"
+        style="@style/Material.ListItem.PrimaryText.SingleLine"
         android:layout_width="match_parent"
         android:layout_height="@dimen/material_list_item_height_single_line"
         android:background="?android:attr/selectableItemBackground"
         android:clickable="true"
-        android:ellipsize="end"
         android:focusable="true"
         android:gravity="center_vertical"
-        android:lines="1"
-        android:maxLines="1"
         android:onClick="@{() -> viewModel.onClicked()}"
         android:paddingLeft="@dimen/material_list_item_horizontal_padding"
         android:paddingRight="@dimen/material_list_item_horizontal_padding"

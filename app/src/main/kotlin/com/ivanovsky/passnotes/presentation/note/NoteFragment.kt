@@ -4,144 +4,80 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.ivanovsky.passnotes.R
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.Property
-import com.ivanovsky.passnotes.data.entity.PropertyType
-import com.ivanovsky.passnotes.domain.LocaleProvider
-import com.ivanovsky.passnotes.domain.entity.PropertySpreader
-import com.ivanovsky.passnotes.injection.DaggerInjector
-import com.ivanovsky.passnotes.presentation.core.BaseFragment
-import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
+import com.ivanovsky.passnotes.databinding.NoteMvvmFragmentBinding
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.requireArgument
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.showSnackbarMessage
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorActivity
-import com.ivanovsky.passnotes.util.formatAccordingLocale
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
-import javax.inject.Inject
 
-class NoteFragment : BaseFragment(),
-    NoteContract.View {
+class NoteFragment : Fragment() {
 
-    @Inject
-    lateinit var localeProvider: LocaleProvider
+    private val viewModel: NoteViewModel by viewModel()
 
-    override var presenter: NoteContract.Presenter? = null
-    private val actionBarTitleData = MutableLiveData<String>()
-    private val showEditNoteScreenEvent = SingleLiveEvent<Note>()
-    private lateinit var adapter: NoteAdapter
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var modifiedTextView: TextView
-
-    init {
-        DaggerInjector.getInstance().appComponent.inject(this)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        setupActionBar {
+            title = arguments?.getString(ARG_NOTE_TITLE) ?: requireArgument(ARG_NOTE_TITLE)
+            setDisplayHomeAsUpEnabled(true)
+        }
     }
 
-    override fun onStart() {
-        super.onStart()
-        presenter?.start()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        presenter?.destroy()
-    }
-
-    override fun onCreateContentView(
+    override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        val view = inflater.inflate(R.layout.note_fragment, container, false)
-
-        recyclerView = view.findViewById(R.id.recycler_view)
-        modifiedTextView = view.findViewById(R.id.modified_date)
-        val fab: View = view.findViewById(R.id.fab)
-
-        val layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
-
-        adapter = NoteAdapter(requireContext())
-
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = adapter
-
-        fab.setOnClickListener { presenter?.onEditNoteButtonClicked() }
-
-        showEditNoteScreenEvent.observe(viewLifecycleOwner,
-            Observer { note -> showEditNoteScreenInternal(note) })
-        actionBarTitleData.observe(viewLifecycleOwner,
-            Observer { title -> setActionBarTitleInternal(title) })
-
-        return view
+    ): View? {
+        return NoteMvvmFragmentBinding.inflate(inflater, container, false)
+            .also {
+                it.lifecycleOwner = viewLifecycleOwner
+                it.viewModel = viewModel
+            }
+            .root
     }
 
-    override fun showNote(note: Note) {
-        val propertySpreader = PropertySpreader(note.properties)
-        val properties = propertySpreader.getVisibleNotEmptyWithoutTitle()
-        val adapterItems = createAdapterItemsFromProperties(properties)
-
-        adapter.setItems(adapterItems)
-        adapter.notifyDataSetChanged()
-
-        adapter.onCopyButtonClickListener = { position ->
-            onCopyButtonClicked(properties[position])
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        
+        viewModel.actionBarTitle.observe(viewLifecycleOwner) { actionBarTitle ->
+            setupActionBar { 
+                title = actionBarTitle
+            }
+        }
+        viewModel.showEditNoteScreenEvent.observe(viewLifecycleOwner) { note ->
+            showEditNoteScreen(note)
+        }
+        viewModel.showSnackbarMessageEvent.observe(viewLifecycleOwner) { message ->
+            showSnackbarMessage(message)
         }
 
-        modifiedTextView.text = formatModifiedDate(note.modified)
+
+        val noteUid = arguments?.getSerializable(ARG_NOTE_UID) as? UUID
+            ?: requireArgument(ARG_NOTE_UID)
+
+        viewModel.start(noteUid)
     }
 
-    private fun formatModifiedDate(edited: Date): String {
-        return getString(
-            R.string.edited_at,
-            edited.formatAccordingLocale(localeProvider.getSystemLocale())
-        )
-    }
-
-    private fun createAdapterItemsFromProperties(properties: List<Property>): List<NoteAdapter.Item> {
-        val items = mutableListOf<NoteAdapter.Item>()
-
-        for (property in properties) {
-            val isVisibilityButtonVisible = (property.type == PropertyType.PASSWORD || property.isProtected)
-
-            items.add(
-                NoteAdapter.NotePropertyItem(
-                    property.name ?: "",
-                    property.value ?: "",
-                    isVisibilityButtonVisible,
-                    isVisibilityButtonVisible
-                )
-            )
-        }
-
-        return items
-    }
-
-    private fun onCopyButtonClicked(property: Property) {
-        presenter?.onCopyToClipboardClicked(property.value ?: "")
-    }
-
-    override fun showEditNoteScreen(note: Note) {
-        showEditNoteScreenEvent.call(note)
-    }
-
-    private fun showEditNoteScreenInternal(note: Note) {
+    private fun showEditNoteScreen(note: Note) {
         val noteUid = note.uid ?: return
 
         val intent = NoteEditorActivity.intentForEditNote(requireContext(), noteUid, note.title)
         startActivity(intent)
     }
 
-    override fun setActionBarTitle(title: String) {
-        actionBarTitleData.value = title
-    }
+    companion object {
 
-    private fun setActionBarTitleInternal(title: String) {
-        val activity = this.activity as? AppCompatActivity ?: return
+        private const val ARG_NOTE_UID = "noteUid"
+        private const val ARG_NOTE_TITLE = "noteTitle"
 
-        activity.supportActionBar?.title = title
+        fun newInstance(noteUid: UUID, noteTitle: String) = NoteFragment().withArguments {
+            putSerializable(ARG_NOTE_UID, noteUid)
+            putString(ARG_NOTE_TITLE, noteTitle)
+        }
     }
 }

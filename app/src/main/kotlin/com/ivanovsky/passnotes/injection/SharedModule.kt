@@ -24,6 +24,7 @@ class SharedModule(private val context: Context) {
     val localeProvider = LocaleProvider(context)
     val dispatcherProvider = DispatcherProvider()
     val observerBus = ObserverBus()
+    val clipboardHelper = ClipboardHelper(context)
 
     val dropboxFileRepository = DropboxFileRepository(database.dropboxFileDao)
     val fileSystemResolver = FileSystemResolver(

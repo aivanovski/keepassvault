@@ -54,6 +54,7 @@ class ViewModelsAdapter(
 
         holder.viewModel = viewModel
         holder.binding.setVariable(BR.viewModel, viewModel)
+        holder.binding.executePendingBindings()
     }
 
     override fun onViewAttachedToWindow(holder: ViewHolder) {

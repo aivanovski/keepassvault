@@ -1,46 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
-	xmlns:tools="http://schemas.android.com/tools"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent">
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-	<androidx.recyclerview.widget.RecyclerView
-		android:id="@+id/recycler_view"
-		android:layout_width="match_parent"
-		android:layout_height="0dp"
-		app:layout_constraintBottom_toTopOf="@id/bottom_panel_layout"
-		app:layout_constraintTop_toTopOf="parent"/>
+    <data>
 
-	<androidx.cardview.widget.CardView
-		android:id="@+id/bottom_panel_layout"
-		android:layout_width="match_parent"
-		android:layout_height="42dp"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:cardElevation="5dp"
-		app:cardCornerRadius="0dp">
+        <import type="androidx.recyclerview.widget.LinearLayoutManager" />
 
-		<TextView
-			android:id="@+id/modified_date"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:textColor="@color/secondary_text"
-			android:textSize="@dimen/material_secondary_text_size"
-			android:layout_gravity="center"
-			tools:text="Edited Jan 28"/>
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.note.NoteViewModel" />
+    </data>
 
-	</androidx.cardview.widget.CardView>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/rootLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-	<com.google.android.material.floatingactionbutton.FloatingActionButton
-		android:id="@+id/fab"
-		style="@style/Material.FloatingActionButton"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginBottom="@dimen/element_margin"
-		android:layout_marginRight="@dimen/element_margin"
-		app:srcCompat="@drawable/ic_edit_white_24dp"
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintRight_toRightOf="parent"/>
+        <com.ivanovsky.passnotes.presentation.core_mvvm.widget.ErrorPanelView
+            android:id="@+id/errorPanelView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.ivanovsky.passnotes.presentation.core_mvvm.widget.ScreenStateView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toTopOf="@id/bottomPanelLayout"
+            app:layout_constraintTop_toBottomOf="@id/errorPanelView"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}"
+            bind:viewModels="@{viewModel.cellViewModels}"
+            bind:viewTypes="@{viewModel.viewTypes}" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/bottomPanelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="0dp"
+            app:cardElevation="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}">
+
+            <TextView
+                android:id="@+id/modified_date"
+                style="@style/Material.SecondaryText.SingleLine"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/element_margin"
+                android:layout_marginBottom="@dimen/element_margin"
+                android:text="@{viewModel.modifiedText}"
+                tools:text="Edited Jan 28" />
+
+        </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab"
+            style="@style/Material.FloatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:layout_marginBottom="@dimen/element_margin"
+            android:onClick="@{() -> viewModel.onFabButtonClicked()}"
+            app:layout_constraintBottom_toTopOf="@id/bottomPanelLayout"
+            app:layout_constraintRight_toRightOf="parent"
+            app:srcCompat="@drawable/ic_edit_white_24dp"
+            bind:screenState="@{viewModel.screenState}"
+            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

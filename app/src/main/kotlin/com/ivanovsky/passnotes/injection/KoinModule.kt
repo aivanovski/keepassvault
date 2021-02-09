@@ -7,12 +7,14 @@ import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
+import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
 import com.ivanovsky.passnotes.presentation.group.GroupViewModel
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseViewModel
+import com.ivanovsky.passnotes.presentation.note.NoteViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -31,6 +33,7 @@ object KoinModule {
         single { deps.localeProvider }
         single { deps.dispatcherProvider }
         single { deps.observerBus }
+        single { deps.clipboardHelper }
         single { DateFormatProvider(get()) }
 
         single { deps.fileSyncHelper }
@@ -46,11 +49,13 @@ object KoinModule {
         single { NewDatabaseInteractor(get(), get(), get(), get()) }
         single { GroupInteractor(get(), get(), get()) }
         single { DebugMenuInteractor(get(), get(), get()) }
+        single { NoteInteractor(get(), get()) }
 
         viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
         viewModel { FilePickerViewModel(get(), get(), get(), get(), get()) }
         viewModel { NewDatabaseViewModel(get(), get(), get(), get()) }
         viewModel { GroupViewModel(get(), get(), get()) }
         viewModel { DebugMenuViewModel(get(), get(), get(), get()) }
+        viewModel { NoteViewModel(get(), get(), get(), get(), get()) }
     }
 }

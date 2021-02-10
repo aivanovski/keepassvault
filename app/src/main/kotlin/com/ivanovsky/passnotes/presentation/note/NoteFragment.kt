@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.databinding.NoteMvvmFragmentBinding
+import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
 import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.requireArgument
 import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.showSnackbarMessage
@@ -33,7 +33,7 @@ class NoteFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return NoteMvvmFragmentBinding.inflate(inflater, container, false)
+        return NoteFragmentBinding.inflate(inflater, container, false)
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
                 it.viewModel = viewModel

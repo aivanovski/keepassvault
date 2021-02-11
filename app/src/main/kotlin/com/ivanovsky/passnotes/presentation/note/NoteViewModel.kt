@@ -7,7 +7,7 @@ import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.domain.LocaleProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.entity.PropertySpreader
+import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.presentation.core_mvvm.BaseScreenViewModel
@@ -17,7 +17,6 @@ import com.ivanovsky.passnotes.presentation.core_mvvm.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note.converter.toCellModels
-import com.ivanovsky.passnotes.util.StringUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.formatAccordingLocale
 import kotlinx.coroutines.Dispatchers
@@ -93,9 +92,16 @@ class NoteViewModel(
                 modifiedText.value =
                     note.modified.formatAccordingLocale(localeProvider.getSystemLocale())
 
-                val models = PropertySpreader(note.properties)
-                    .getVisibleNotEmptyWithoutTitle()
+                val filter = PropertyFilter.Builder()
+                    .visible()
+                    .notEmpty()
+                    .excludeTitle()
+                    .sortedByType()
+                    .build()
+
+                val models = filter.apply(note.properties)
                     .toCellModels()
+
                 setCellElements(cellFactory.createCellViewModels(models, eventProvider))
 
                 screenState.value = ScreenState.data()

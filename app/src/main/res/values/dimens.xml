@@ -3,6 +3,7 @@
 	<dimen name="group_margin">24dp</dimen>
 	<dimen name="element_margin">16dp</dimen>
 	<dimen name="half_margin">8dp</dimen>
+	<dimen name="quarter_margin">4dp</dimen>
 
 	<dimen name="material_primary_text_size">16sp</dimen>
 	<dimen name="material_secondary_text_size">14sp</dimen>

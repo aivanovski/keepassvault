@@ -5,23 +5,14 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.injection.DaggerInjector
-import javax.inject.Inject
 
 class ChooseOptionDialog : DialogFragment(), DialogInterface.OnClickListener {
-
-    @Inject
-    lateinit var resourceProvider: ResourceProvider
 
     lateinit var onItemClickListener: (itemIndex: Int) -> Unit
 
     private var title: String? = null
     private lateinit var entries: List<String>
-
-    init {
-        DaggerInjector.getInstance().appComponent.inject(this)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

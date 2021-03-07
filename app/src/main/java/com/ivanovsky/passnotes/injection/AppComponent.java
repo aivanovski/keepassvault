@@ -4,7 +4,6 @@ import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor;
 import com.ivanovsky.passnotes.presentation.StartActivity;
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity;
-import com.ivanovsky.passnotes.presentation.groups.GroupsPresenter;
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog;
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity;
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorPresenter;
@@ -27,7 +26,6 @@ public interface AppComponent {
 	void inject(KeepassDatabase keepassDatabase);
     void inject(@NotNull ChooseOptionDialog newEntryDialog);
 	void inject(@NotNull GroupsActivity groupsActivity);
-	void inject(@NotNull GroupsPresenter groupsPresenter);
 	void inject(@NotNull NotesPresenter notesPresenter);
 	void inject(@NotNull NoteEditorPresenter noteEditorPresenter);
     void inject(@NotNull NoteEditorDataTransformer noteEditorDataTransformer);

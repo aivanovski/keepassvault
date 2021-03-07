@@ -4,49 +4,30 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
-import com.ivanovsky.passnotes.injection.DaggerInjector
-import com.ivanovsky.passnotes.presentation.core.BaseActivity
-import java.util.*
+import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.initActionBar
 
-class GroupsActivity : BaseActivity() {
-
-    private var groupUid: UUID? = null
-    private var groupTitle: String? = null
+class GroupsActivity : AppCompatActivity() {
 
     object ExtraKeys {
-        const val GROUP_UID = "group_uid"
-        const val GROUP_TITLE = "title"
+        const val GROUP = "group"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        DaggerInjector.getInstance().appComponent.inject(this)
 
         setContentView(R.layout.core_base_activity)
 
-        readExtraArgs()
+        initActionBar(R.id.tool_bar)
 
-        setSupportActionBar(findViewById(R.id.tool_bar))
-        currentActionBar.title = groupTitle ?: getString(R.string.groups)
-        currentActionBar.setDisplayHomeAsUpEnabled(true)
-
-        val fragment = GroupsFragment()
+        val group = intent?.extras?.getParcelable(ExtraKeys.GROUP) as? Group
+        val fragment = GroupsFragment.newInstance(group)
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
-
-        val presenter = GroupsPresenter(fragment, groupUid)
-        fragment.presenter = presenter
-    }
-
-    private fun readExtraArgs() {
-        val extras = intent.extras ?: return
-
-        groupTitle = extras.getString(ExtraKeys.GROUP_TITLE)
-        groupUid = extras.getSerializable(ExtraKeys.GROUP_UID) as? UUID
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -67,8 +48,7 @@ class GroupsActivity : BaseActivity() {
         fun intentFroGroup(context: Context, group: Group): Intent {
             val intent = Intent(context, GroupsActivity::class.java)
 
-            intent.putExtra(ExtraKeys.GROUP_UID, group.uid)
-            intent.putExtra(ExtraKeys.GROUP_TITLE, group.title)
+            intent.putExtra(ExtraKeys.GROUP, group)
 
             return intent
         }

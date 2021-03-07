@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels.GroupGridCellViewModel" />
+    </data>
+
+    <com.ivanovsky.passnotes.presentation.core.widget.SquareLayout
+        style="@style/Material.Layout.Selectable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/quarter_margin"
+        android:onClick="@{() -> viewModel.onClicked()}"
+        app:onLongClick="@{() -> viewModel.onLongClicked()}">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/group_frame" />
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/Groups.TitleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary"
+            android:gravity="start"
+            android:paddingStart="@dimen/half_margin"
+            android:paddingTop="@dimen/quarter_margin"
+            android:paddingEnd="@dimen/half_margin"
+            android:paddingBottom="@dimen/quarter_margin"
+            android:text="@{viewModel.model.title}"
+            tools:text="Title" />
+
+        <TextView
+            android:id="@+id/count"
+            style="@style/Groups.CountText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:paddingLeft="@dimen/quarter_margin"
+            android:paddingTop="@dimen/quarter_margin"
+            android:paddingRight="@dimen/quarter_margin"
+            android:paddingBottom="@dimen/quarter_margin"
+            android:text="@{viewModel.model.countText}"
+            tools:tett="13" />
+
+    </com.ivanovsky.passnotes.presentation.core.widget.SquareLayout>
+
+</layout>

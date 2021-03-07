@@ -78,7 +78,7 @@ fun addTextWatcher(editText: TextInputEditText, onTextChangeListener: (text: Str
 }
 
 @BindingAdapter("bind:src")
-fun setImageResource(imageView: ImageView, @DrawableRes imageResourceId: Int){
+fun setImageResource(imageView: ImageView, @DrawableRes imageResourceId: Int) {
     imageView.setImageResource(imageResourceId)
 }
 
@@ -89,5 +89,16 @@ fun setTextHidden(textView: SecureTextView, isHidden: LiveData<Boolean>?) {
         textView.hideText()
     } else {
         textView.showText()
+    }
+}
+
+@BindingAdapter("onLongClick")
+fun setOnLongClickListener(
+    view: View,
+    onLongClicked: () -> Unit
+) {
+    view.setOnLongClickListener {
+        onLongClicked.invoke()
+        true
     }
 }

@@ -18,8 +18,6 @@ import com.ivanovsky.passnotes.domain.NoteDiffer;
 import com.ivanovsky.passnotes.domain.PermissionHelper;
 import com.ivanovsky.passnotes.domain.ResourceProvider;
 import com.ivanovsky.passnotes.domain.globalsnackbar.GlobalSnackbarBus;
-import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor;
-import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor;
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor;
 import com.ivanovsky.passnotes.domain.interactor.notes.NotesInteractor;
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor;
@@ -122,12 +120,6 @@ public class AppModule {
 	@Singleton
 	FileHelper provideFileHelper(SettingsRepository settings) {
 		return module.getFileHelper();
-	}
-
-	@Provides
-	@Singleton
-	GroupsInteractor provideGroupsInteractor(EncryptedDatabaseRepository dbRepo, ObserverBus observerBus) {
-		return new GroupsInteractor(dbRepo, observerBus);
 	}
 
 	@Provides

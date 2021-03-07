@@ -23,7 +23,6 @@ import com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels.SingleTextCellV
 import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.storagelist.converter.toCellModels
 import com.ivanovsky.passnotes.presentation.storagelist.converter.toFilePickerAction
-import com.ivanovsky.passnotes.util.StringUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -99,8 +98,8 @@ class StorageListViewModel(
 
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
-            if (event.containsKey(SingleTextCellViewModel.ITEM_CLICKED_EVENT)) {
-                val id = event.getString(SingleTextCellViewModel.ITEM_CLICKED_EVENT) ?: EMPTY
+            if (event.containsKey(SingleTextCellViewModel.CLICK_EVENT)) {
+                val id = event.getString(SingleTextCellViewModel.CLICK_EVENT) ?: EMPTY
                 onStorageOptionClicked(valueOf(id))
             }
         }

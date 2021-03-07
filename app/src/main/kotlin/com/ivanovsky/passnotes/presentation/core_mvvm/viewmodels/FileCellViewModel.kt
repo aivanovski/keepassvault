@@ -13,12 +13,12 @@ class FileCellViewModel(
 
     fun onClicked() {
         val event = Bundle()
-        event.putString(ITEM_CLICKED_EVENT, model.id)
+        event.putString(CLICK_EVENT, model.id)
         eventProvider.send(event)
     }
 
     companion object {
 
-        val ITEM_CLICKED_EVENT = FileCellViewModel::class.jvmName + "_itemClickedEvent"
+        val CLICK_EVENT = FileCellViewModel::class.jvmName + "_clickEvent"
     }
 }

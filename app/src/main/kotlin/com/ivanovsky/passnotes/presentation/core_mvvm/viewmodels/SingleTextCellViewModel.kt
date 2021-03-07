@@ -13,12 +13,12 @@ class SingleTextCellViewModel(
 
     fun onClicked() {
         val event = Bundle()
-        event.putString(ITEM_CLICKED_EVENT, model.id)
+        event.putString(CLICK_EVENT, model.id)
         eventProvider.send(event)
     }
 
     companion object {
 
-        val ITEM_CLICKED_EVENT = SingleTextCellModel::class.jvmName + "_itemClickedEvent"
+        val CLICK_EVENT = SingleTextCellModel::class.jvmName + "_clickEvent"
     }
 }

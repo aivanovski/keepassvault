@@ -53,8 +53,8 @@ class FilePickerViewModel(
 
     init {
         eventProvider.subscribe(this) { event ->
-            if (event.containsKey(FileCellViewModel.ITEM_CLICKED_EVENT)) {
-                val filePath = event.getString(FileCellViewModel.ITEM_CLICKED_EVENT)
+            if (event.containsKey(FileCellViewModel.CLICK_EVENT)) {
+                val filePath = event.getString(FileCellViewModel.CLICK_EVENT)
                 if (filePath != null) {
                     onItemClicked(filePath)
                 }

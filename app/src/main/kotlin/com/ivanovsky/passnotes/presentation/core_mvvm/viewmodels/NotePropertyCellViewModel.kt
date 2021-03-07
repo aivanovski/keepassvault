@@ -20,12 +20,12 @@ class NotePropertyCellViewModel(
 
     fun onCopyButtonClicked() {
         eventProvider.send(Bundle().apply {
-            putString(COPY_BUTTON_CLICKED_EVENT, model.value)
+            putString(COPY_BUTTON_CLICK_EVENT, model.value)
         })
     }
 
     companion object {
 
-        val COPY_BUTTON_CLICKED_EVENT = NotePropertyCellViewModel::class.jvmName + "_copyTextClickedEvent"
+        val COPY_BUTTON_CLICK_EVENT = NotePropertyCellViewModel::class.jvmName + "_copyTextClickEvent"
     }
 }

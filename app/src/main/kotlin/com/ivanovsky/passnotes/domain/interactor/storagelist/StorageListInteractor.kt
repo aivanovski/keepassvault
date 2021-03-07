@@ -9,17 +9,11 @@ import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.*
-import com.ivanovsky.passnotes.injection.DaggerInjector
-import javax.inject.Inject
 
-class StorageListInteractor(private val context: Context) {
-
-    @Inject
-    lateinit var fileSystemResolver: FileSystemResolver
-
-    init {
-        DaggerInjector.getInstance().appComponent.inject(this)
-    }
+class StorageListInteractor(
+    private val context: Context,
+    private val fileSystemResolver: FileSystemResolver
+) {
 
     fun getAvailableStorageOptions(): List<StorageOption> {
         return listOf(

@@ -14,7 +14,6 @@ import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
-import com.ivanovsky.passnotes.injection.DaggerInjector;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
 import com.ivanovsky.passnotes.util.Logger;
 
@@ -30,28 +29,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.inject.Inject;
-
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 
 public class KeepassDatabase implements EncryptedDatabase {
-
-	// TODO: add lock
-
-	@Inject
-	FileSystemResolver fileSystemResolver;
 
 	private final byte[] key;
 	private final FileDescriptor file;
 	private final KeepassGroupRepository groupRepository;
 	private final KeepassNoteRepository noteRepository;
 	private final KeepassTemplateRepository templateRepository;
+	private final FileSystemResolver fileSystemResolver;
 	private final SimpleDatabase db;
 	private final Object lock;
 
-	public KeepassDatabase(FileDescriptor file, InputStream in, byte[] key) throws EncryptedDatabaseException {
-		DaggerInjector.getInstance().getAppComponent().inject(this);
-
+	public KeepassDatabase(FileSystemResolver fileSystemResolver , FileDescriptor file, InputStream in, byte[] key) throws EncryptedDatabaseException {
+		this.fileSystemResolver = fileSystemResolver;
 		this.file = file;
 		this.key = key;
 		this.lock = new Object();

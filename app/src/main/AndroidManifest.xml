@@ -39,10 +39,6 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".presentation.notes.NotesActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
             android:name=".presentation.groups.GroupsActivity"
             android:screenOrientation="portrait" />
 

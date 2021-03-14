@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.injection;
 
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorPresenter;
 import com.ivanovsky.passnotes.presentation.note_editor.view.NoteEditorDataTransformer;
-import com.ivanovsky.passnotes.presentation.notes.NotesPresenter;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +13,6 @@ import dagger.Component;
 @Singleton
 public interface AppComponent {
 
-	void inject(@NotNull NotesPresenter notesPresenter);
 	void inject(@NotNull NoteEditorPresenter noteEditorPresenter);
     void inject(@NotNull NoteEditorDataTransformer noteEditorDataTransformer);
 }

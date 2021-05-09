@@ -1,9 +1,14 @@
 package com.ivanovsky.passnotes.presentation.core_mvvm.binding
 
 import android.text.Editable
+import android.text.InputType
 import android.text.TextWatcher
+import android.text.method.HideReturnsTransformationMethod
+import android.text.method.PasswordTransformationMethod
 import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
@@ -17,6 +22,14 @@ import com.ivanovsky.passnotes.presentation.core_mvvm.ScreenState
 import com.ivanovsky.passnotes.presentation.core_mvvm.ScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core_mvvm.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core_mvvm.adapter.ViewModelsAdapter
+import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
+import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.HIDE_RETURNS
+import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PASSWORD
+import com.ivanovsky.passnotes.presentation.note_editor.view.secret.SecretInputType
+import com.ivanovsky.passnotes.presentation.note_editor.view.secret.SecretInputType.DIGITS
+import com.ivanovsky.passnotes.presentation.note_editor.view.secret.SecretInputType.TEXT
+import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextInputLines
+import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextInputType
 import com.ivanovsky.passnotes.util.getLifecycleOwner
 
 @BindingAdapter("screenState", "screenStateHandler")
@@ -53,8 +66,8 @@ fun setViewModel(
 }
 
 @BindingAdapter("errorText")
-fun setError(textInputLayout: TextInputLayout, errorData: LiveData<String?>) {
-    textInputLayout.error = errorData.value
+fun setError(textInputLayout: TextInputLayout, errorData: LiveData<String?>?) {
+    textInputLayout.error = errorData?.value
 }
 
 @BindingAdapter("bind:visible")
@@ -101,4 +114,79 @@ fun setOnLongClickListener(
         onLongClicked.invoke()
         true
     }
+}
+
+@BindingAdapter("textInputLines")
+fun setInputLines(editText: EditText, inputLines: TextInputLines?) {
+    when (inputLines) {
+        TextInputLines.SINGLE_LINE -> {
+            editText.minLines = 1
+            editText.maxLines = 1
+        }
+        TextInputLines.MULTIPLE_LINES -> {
+            editText.minLines = 1
+            editText.maxLines = 5
+        }
+    }
+}
+
+@BindingAdapter("textInputType")
+fun setInputType(editText: EditText, textInputType: TextInputType?) {
+    if (textInputType == null) {
+        return
+    }
+
+    val inputType = when (textInputType) {
+        TextInputType.URL -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_URI
+        TextInputType.TEXT -> InputType.TYPE_CLASS_TEXT
+        TextInputType.EMAIL -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+        TextInputType.TEXT_CAP_SENTENCES -> {
+            InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+        }
+    }
+    editText.setRawInputType(inputType)
+}
+
+@BindingAdapter("transformationMethod")
+fun setTransformationMethod(
+    textView: TextView,
+    transformationMethod: LiveData<TextTransformationMethod>?
+) {
+    setTransformationMethod(textView, transformationMethod?.value)
+//    transformationMethod?.value?.let {
+//        textView.transformationMethod = when (it) {
+//            PASSWORD -> PasswordTransformationMethod.getInstance()
+//            HIDE_RETURNS -> HideReturnsTransformationMethod.getInstance()
+//        }
+//    }
+}
+
+//@BindingAdapter("transformationMethod")
+fun setTransformationMethod(
+    textView: TextView,
+    transformationMethod: TextTransformationMethod?
+) {
+    transformationMethod?.let {
+        textView.transformationMethod = when (it) {
+            PASSWORD -> PasswordTransformationMethod.getInstance()
+            HIDE_RETURNS -> HideReturnsTransformationMethod.getInstance()
+        }
+    }
+}
+
+@BindingAdapter("secretInputType")
+fun setSecretInputType(
+    editText: EditText,
+    inputType: SecretInputType?
+) {
+    if (inputType == null) {
+        return
+    }
+
+    val inputType = when (inputType) {
+        TEXT -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_PASSWORD
+        DIGITS -> InputType.TYPE_CLASS_NUMBER + InputType.TYPE_NUMBER_VARIATION_PASSWORD
+    }
+
+    editText.setRawInputType(inputType)
 }

@@ -7,7 +7,7 @@ data class TextDataItem(
     val name: String,
     override val value: String,
     val textInputType: TextInputType,
-    val inputLines: InputLines,
+    val inputLines: TextInputLines,
     val isShouldNotBeEmpty: Boolean = false
 ) : BaseDataItem(id, value) {
 

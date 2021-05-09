@@ -11,9 +11,8 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
 import com.ivanovsky.passnotes.injection.DaggerInjector
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorContract.LaunchMode
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorContract.LaunchMode.EDIT
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorContract.LaunchMode.NEW
+import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode.EDIT
+import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode.NEW
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem
 import com.ivanovsky.passnotes.presentation.note_editor.view.NoteEditorDataTransformer
 import com.ivanovsky.passnotes.presentation.note_editor.view.extended_text.ExtTextDataItem

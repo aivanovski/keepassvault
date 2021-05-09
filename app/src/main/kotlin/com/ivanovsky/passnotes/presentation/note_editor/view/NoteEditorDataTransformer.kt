@@ -17,8 +17,8 @@ import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem.Compan
 import com.ivanovsky.passnotes.presentation.note_editor.view.extended_text.ExtTextDataItem
 import com.ivanovsky.passnotes.presentation.note_editor.view.secret.SecretDataItem
 import com.ivanovsky.passnotes.presentation.note_editor.view.secret.SecretInputType
-import com.ivanovsky.passnotes.presentation.note_editor.view.text.InputLines.MULTIPLE_LINES
-import com.ivanovsky.passnotes.presentation.note_editor.view.text.InputLines.SINGLE_LINE
+import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextInputLines.MULTIPLE_LINES
+import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextInputLines.SINGLE_LINE
 import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextDataItem
 import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextInputType
 import javax.inject.Inject

@@ -8,8 +8,8 @@ import android.widget.FrameLayout
 import com.google.android.material.textfield.TextInputLayout
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.note_editor.view.BaseItemView
-import com.ivanovsky.passnotes.presentation.note_editor.view.text.InputLines.MULTIPLE_LINES
-import com.ivanovsky.passnotes.presentation.note_editor.view.text.InputLines.SINGLE_LINE
+import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextInputLines.MULTIPLE_LINES
+import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextInputLines.SINGLE_LINE
 import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextInputType.*
 
 class TextItemView(
@@ -55,7 +55,7 @@ class TextItemView(
         editText.setRawInputType(inputType)
     }
 
-    private fun applyInputLines(inputLines: InputLines) {
+    private fun applyInputLines(inputLines: TextInputLines) {
         when (inputLines) {
             SINGLE_LINE -> {
                 editText.minLines = 1

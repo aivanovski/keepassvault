@@ -6,11 +6,6 @@ import com.ivanovsky.passnotes.presentation.note_editor.view.BaseDataItem
 
 object NoteEditorContract {
 
-    enum class LaunchMode {
-        NEW,
-        EDIT
-    }
-
     interface View : BaseView<Presenter> {
         fun setEditorItems(items: List<BaseDataItem>)
         fun getEditorItems(): List<BaseDataItem>

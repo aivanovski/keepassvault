@@ -143,7 +143,7 @@ class NoteEditorViewModel(
         finishScreenEvent.call()
     }
 
-    fun onBackPressed() {
+    fun onBackClicked() {
         val properties = createPropertiesFromCells()
 
         when (launchMode) {
@@ -155,6 +155,7 @@ class NoteEditorViewModel(
                 }
             }
             LaunchMode.EDIT -> {
+                // TODO: implement
                 val existingNote = note ?: return
 
 //                val modifiedNote = createModifiedNoteFromEditorItems(items, existingNote, template)

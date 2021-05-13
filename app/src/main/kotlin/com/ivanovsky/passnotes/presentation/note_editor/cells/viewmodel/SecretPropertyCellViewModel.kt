@@ -47,11 +47,7 @@ class SecretPropertyCellViewModel(
         val secret = getSecretText()
         val confirmation = getConfirmationText()
 
-        return if (isConfirmationVisible) {
-            secret.isNotEmpty() && secret == confirmation
-        } else {
-            secret.isNotEmpty()
-        }
+        return !isConfirmationVisible || secret == confirmation
     }
 
     override fun displayError() {

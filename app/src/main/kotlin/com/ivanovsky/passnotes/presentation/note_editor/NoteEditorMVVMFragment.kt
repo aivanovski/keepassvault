@@ -44,19 +44,23 @@ class NoteEditorMVVMFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // TODO: implement android.R.id.home
-        return if (item.itemId == R.id.menu_done) {
-            viewModel.onDoneMenuClicked()
-            true
-        } else {
-            super.onOptionsItemSelected(item)
+        return when (item.itemId) {
+            R.id.menu_done -> {
+                viewModel.onDoneMenuClicked()
+                true
+            }
+            android.R.id.home -> {
+                viewModel.onBackClicked()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
     override fun onStart() {
         super.onStart()
         backCallback = requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            viewModel.onBackPressed()
+            viewModel.onBackClicked()
         }
     }
 

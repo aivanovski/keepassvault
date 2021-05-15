@@ -1,14 +1,13 @@
 package com.ivanovsky.passnotes.presentation.core_mvvm.event
 
-import android.os.Bundle
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.jvm.jvmName
 
 class EventProviderImpl : EventProvider {
 
-    private val subscribers = ConcurrentHashMap<String, (event: Bundle) -> Unit>()
+    private val subscribers = ConcurrentHashMap<String, (event: Event) -> Unit>()
 
-    override fun subscribe(subscriber: Any, observer: (event: Bundle) -> Unit) {
+    override fun subscribe(subscriber: Any, observer: (event: Event) -> Unit) {
         val key = subscriber::class.jvmName
 
         subscribers[key] = observer
@@ -19,7 +18,7 @@ class EventProviderImpl : EventProvider {
         subscribers.remove(key)
     }
 
-    override fun send(event: Bundle) {
+    override fun send(event: Event) {
         subscribers.values.forEach { observer -> observer.invoke(event) }
     }
 

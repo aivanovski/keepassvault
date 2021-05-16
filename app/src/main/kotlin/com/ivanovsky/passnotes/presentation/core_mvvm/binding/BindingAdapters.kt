@@ -16,6 +16,7 @@ import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.widget.SecureTextView
 import com.ivanovsky.passnotes.presentation.core_mvvm.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core_mvvm.ScreenState
@@ -23,13 +24,13 @@ import com.ivanovsky.passnotes.presentation.core_mvvm.ScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core_mvvm.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core_mvvm.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.HIDE_RETURNS
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PASSWORD
-import com.ivanovsky.passnotes.presentation.note_editor.view.secret.SecretInputType
-import com.ivanovsky.passnotes.presentation.note_editor.view.secret.SecretInputType.DIGITS
-import com.ivanovsky.passnotes.presentation.note_editor.view.secret.SecretInputType.TEXT
-import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextInputLines
-import com.ivanovsky.passnotes.presentation.note_editor.view.text.TextInputType
+import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PLANE_TEXT
+import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType
+import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType.DIGITS
+import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType.TEXT
+import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputLines
+import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType
 import com.ivanovsky.passnotes.util.getLifecycleOwner
 
 @BindingAdapter("screenState", "screenStateHandler")
@@ -75,11 +76,20 @@ fun setVisible(view: View, isVisible: Boolean) {
     view.isVisible = isVisible
 }
 
-@BindingAdapter("bind:textWatcher")
-fun addTextWatcher(editText: TextInputEditText, onTextChangeListener: (text: String) -> Unit) {
-    editText.addTextChangedListener(object : TextWatcher {
+@BindingAdapter("onTextChanged")
+fun setOnTextChangedListener(editText: TextInputEditText, onTextChangeListener: OnTextChangeListener?) {
+    val existingListener = editText.getTag(R.id.tagTextWatcher) as? TextWatcher
+    existingListener?.let {
+        editText.removeTextChangedListener(it)
+    }
+
+    if (onTextChangeListener == null) {
+        return
+    }
+
+    val listener = object : TextWatcher {
         override fun afterTextChanged(s: Editable?) {
-            onTextChangeListener.invoke(s.toString())
+            onTextChangeListener.onTextChanged(s.toString())
         }
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -87,7 +97,9 @@ fun addTextWatcher(editText: TextInputEditText, onTextChangeListener: (text: Str
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
         }
-    })
+    }
+    editText.setTag(R.id.tagTextWatcher, listener)
+    editText.addTextChangedListener(listener)
 }
 
 @BindingAdapter("bind:src")
@@ -147,21 +159,14 @@ fun setInputType(editText: EditText, textInputType: TextInputType?) {
     editText.setRawInputType(inputType)
 }
 
-@BindingAdapter("transformationMethod")
-fun setTransformationMethod(
-    textView: TextView,
-    transformationMethod: LiveData<TextTransformationMethod>?
-) {
-    setTransformationMethod(textView, transformationMethod?.value)
-//    transformationMethod?.value?.let {
-//        textView.transformationMethod = when (it) {
-//            PASSWORD -> PasswordTransformationMethod.getInstance()
-//            HIDE_RETURNS -> HideReturnsTransformationMethod.getInstance()
-//        }
-//    }
-}
+//fun setTransformationMethod(
+//    textView: TextView,
+//    transformationMethod: LiveData<TextTransformationMethod>?
+//) {
+//    setTransformationMethod(textView, transformationMethod?.value)
+//}
 
-//@BindingAdapter("transformationMethod")
+@BindingAdapter("textTransformationMethod")
 fun setTransformationMethod(
     textView: TextView,
     transformationMethod: TextTransformationMethod?
@@ -169,7 +174,7 @@ fun setTransformationMethod(
     transformationMethod?.let {
         textView.transformationMethod = when (it) {
             PASSWORD -> PasswordTransformationMethod.getInstance()
-            HIDE_RETURNS -> HideReturnsTransformationMethod.getInstance()
+            PLANE_TEXT -> HideReturnsTransformationMethod.getInstance()
         }
     }
 }
@@ -182,11 +187,10 @@ fun setSecretInputType(
     if (inputType == null) {
         return
     }
-
-    val inputType = when (inputType) {
-        TEXT -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_PASSWORD
-        DIGITS -> InputType.TYPE_CLASS_NUMBER + InputType.TYPE_NUMBER_VARIATION_PASSWORD
-    }
-
-    editText.setRawInputType(inputType)
+    editText.setRawInputType(
+        when (inputType) {
+            TEXT -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_PASSWORD
+            DIGITS -> InputType.TYPE_CLASS_NUMBER + InputType.TYPE_NUMBER_VARIATION_PASSWORD
+        }
+    )
 }

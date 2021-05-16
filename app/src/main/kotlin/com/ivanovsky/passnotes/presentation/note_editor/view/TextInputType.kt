@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.presentation.note_editor.view.text
+package com.ivanovsky.passnotes.presentation.note_editor.view
 
 enum class TextInputType {
     TEXT,

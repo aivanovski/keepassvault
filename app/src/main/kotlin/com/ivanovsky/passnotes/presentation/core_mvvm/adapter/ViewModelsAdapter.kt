@@ -78,7 +78,11 @@ class ViewModelsAdapter(
             oldItem: BaseCellViewModel,
             newItem: BaseCellViewModel
         ): Boolean =
-            (oldItem.model == newItem.model)
+            if (oldItem.model.id != null && newItem.model.id != null) {
+                oldItem.model.id == newItem.model.id
+            } else {
+                oldItem.model == newItem.model
+            }
 
         @SuppressLint("DiffUtilEquals")
         override fun areContentsTheSame(

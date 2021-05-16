@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.presentation.note_editor
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Template
@@ -22,25 +21,12 @@ class NoteEditorActivity : AppCompatActivity() {
 
         initActionBar(R.id.tool_bar)
 
-        val fragment = NoteEditorMVVMFragment.newInstance(args)
+        val fragment = NoteEditorFragment.newInstance(args)
 
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
     }
-
-//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        return if (item.itemId == android.R.id.home) {
-////            presenter.onBackPressed() // TODO: implement
-//            true
-//        } else {
-//            super.onOptionsItemSelected(item)
-//        }
-//    }
-
-//    override fun onBackPressed() {
-////        presenter.onBackPressed() // TODO: implement
-//    }
 
     companion object {
 

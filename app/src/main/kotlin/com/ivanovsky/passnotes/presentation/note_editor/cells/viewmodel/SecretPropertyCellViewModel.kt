@@ -23,13 +23,11 @@ class SecretPropertyCellViewModel(
     val isConfirmationVisible = MutableLiveData(true)
 
     fun onVisibilityButtonClicked() {
-        val isVisible = isConfirmationVisible.value ?: false
-
-        isConfirmationVisible.value = isVisible.not()
-        secretTransformationMethod.value = if (isVisible) {
-            TextTransformationMethod.HIDE_RETURNS
-        } else {
+        isConfirmationVisible.value = isConfirmationVisibleInternal().not()
+        secretTransformationMethod.value = if (isConfirmationVisibleInternal()) {
             TextTransformationMethod.PASSWORD
+        } else {
+            TextTransformationMethod.PLANE_TEXT
         }
     }
 
@@ -43,11 +41,10 @@ class SecretPropertyCellViewModel(
     }
 
     override fun isDataValid(): Boolean {
-        val isConfirmationVisible = isConfirmationVisible.value ?: false
         val secret = getSecretText()
         val confirmation = getConfirmationText()
 
-        return !isConfirmationVisible || secret == confirmation
+        return !isConfirmationVisibleInternal() || secret == confirmation
     }
 
     override fun displayError() {
@@ -61,4 +58,6 @@ class SecretPropertyCellViewModel(
     private fun getSecretText(): String = secretText.value?.trim() ?: EMPTY
 
     private fun getConfirmationText(): String = confirmationText.value?.trim() ?: EMPTY
+
+    private fun isConfirmationVisibleInternal() = isConfirmationVisible.value ?: false
 }

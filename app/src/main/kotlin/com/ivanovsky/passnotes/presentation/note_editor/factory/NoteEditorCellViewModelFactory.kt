@@ -5,8 +5,12 @@ import com.ivanovsky.passnotes.presentation.core_mvvm.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core_mvvm.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core_mvvm.factory.CellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core_mvvm.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.core_mvvm.model.SpaceCellModel
+import com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels.SpaceCellViewModel
+import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedTextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.SecretPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.TextPropertyCellModel
+import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.ExtendedTextPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.SecretPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.TextPropertyCellViewModel
 
@@ -28,6 +32,14 @@ class NoteEditorCellViewModelFactory(
                 model,
                 eventProvider,
                 resourceProvider
+            )
+            is ExtendedTextPropertyCellModel -> ExtendedTextPropertyCellViewModel(
+                model,
+                eventProvider,
+                resourceProvider
+            )
+            is SpaceCellModel -> SpaceCellViewModel(
+                model
             )
             else -> throwUnsupportedModelException(model)
         }

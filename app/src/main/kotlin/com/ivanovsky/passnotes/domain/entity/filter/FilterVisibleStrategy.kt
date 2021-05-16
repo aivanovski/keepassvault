@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.domain.entity.filter
 
 import com.ivanovsky.passnotes.data.entity.Property
 
-open class VisiblePropertiesStrategy : PropertyFilterStrategy {
+open class FilterVisibleStrategy : PropertyFilterStrategy {
 
     override fun apply(properties: Sequence<Property>): Sequence<Property> {
         return properties.filter { isPropertyVisible(it)}

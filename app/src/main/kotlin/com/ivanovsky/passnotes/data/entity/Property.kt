@@ -7,9 +7,13 @@ data class Property(
     val isProtected: Boolean = false
 ) {
 
+    val isDefault = (type != null && PropertyType.DEFAULT_TYPES.contains(type))
+
     companion object {
 
         const val PROPERTY_NAME_TEMPLATE = "_etm_template"
         const val PROPERTY_NAME_TEMPLATE_UID = "_etm_template_uuid"
+
+        const val PROPERTY_VALUE_TEMPLATE = "1"
     }
 }

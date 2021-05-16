@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.TextPropertyCellViewModel" />
+    </data>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/text_input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/element_margin"
+        android:layout_marginTop="@dimen/group_margin"
+        android:layout_marginRight="@dimen/element_margin"
+        android:hint="@{viewModel.model.name}"
+        app:errorEnabled="true"
+        app:errorText="@{viewModel.error}">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@={viewModel.text}"
+            android:textColor="@color/material_edit_text_primary_text"
+            android:textSize="@dimen/material_edit_text_primary_text_size"
+            app:textInputLines="@{viewModel.model.inputLines}"
+            app:textInputType="@{viewModel.model.textInputType}"
+            tools:hint="Text" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</layout>

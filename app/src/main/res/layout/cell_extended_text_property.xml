@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.ExtendedTextPropertyCellViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/primary_text_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:layout_marginTop="@dimen/group_margin"
+            android:hint="@{viewModel.primaryHint}"
+            app:errorText="@{viewModel.primaryError}"
+            app:layout_constraintEnd_toStartOf="@id/expand_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:hint="Field Name">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/primaryText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@={viewModel.primaryText}"
+                android:textColor="@color/material_edit_text_primary_text"
+                android:textSize="@dimen/material_edit_text_primary_text_size"
+                app:onTextChanged="@{viewModel.primaryTextListener}"
+                app:textTransformationMethod="@{viewModel.primaryTransformationMethod}"
+                tools:text="Name" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageButton
+            android:id="@+id/expand_button"
+            style="@style/Material.BorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:onClick="@{() -> viewModel.onExpandButtonClicked()}"
+            android:src="@{viewModel.isCollapsed ? @drawable/ic_expand_more_grey_600_24dp : @drawable/ic_expand_less_grey_600_24dp}"
+            app:layout_constraintBottom_toBottomOf="@id/primary_text_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/primary_text_layout" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/secondary_text_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/element_margin"
+            android:layout_marginTop="@dimen/half_margin"
+            android:layout_marginRight="@dimen/element_margin"
+            android:hint="@{viewModel.secondaryHint}"
+            android:visibility="@{!viewModel.isCollapsed ? View.VISIBLE : View.GONE}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/primary_text_layout"
+            tools:hint="Field Value">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/secondaryText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@={viewModel.secondaryText}"
+                android:textColor="@color/material_edit_text_primary_text"
+                android:textSize="@dimen/material_edit_text_primary_text_size"
+                app:textInputType="@{viewModel.model.inputType}"
+                app:textTransformationMethod="@{viewModel.secondaryTransformationMethod}"
+                tools:text="Value" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/protection_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:checked="@={viewModel.isProtected}"
+            android:text="@string/protected_"
+            android:visibility="@{!viewModel.isCollapsed ? View.VISIBLE : View.GONE}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/secondary_text_layout" />
+
+        <ImageButton
+            android:id="@+id/remove_button"
+            style="@style/Material.BorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:onClick="@{() -> viewModel.onRemoveButtonClicked()}"
+            android:visibility="@{!viewModel.isCollapsed ? View.VISIBLE : View.GONE}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/secondary_text_layout"
+            app:srcCompat="@drawable/ic_delete_red_400_24dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

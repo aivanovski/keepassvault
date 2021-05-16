@@ -9,7 +9,7 @@ class ViewModelTypes {
 
     private val types = mutableListOf<Pair<String, Int>>()
 
-    fun add(type: KClass<*>, @LayoutRes layoutResId: Int): ViewModelTypes {
+    fun add(type: KClass<out BaseCellViewModel>, @LayoutRes layoutResId: Int): ViewModelTypes {
         types.add(Pair(type.jvmName, layoutResId))
         return this
     }

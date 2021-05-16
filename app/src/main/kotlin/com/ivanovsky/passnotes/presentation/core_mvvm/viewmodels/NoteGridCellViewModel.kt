@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels
 
-import android.os.Bundle
 import com.ivanovsky.passnotes.presentation.core_mvvm.BaseCellViewModel
+import com.ivanovsky.passnotes.presentation.core_mvvm.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core_mvvm.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core_mvvm.model.NoteCellModel
 import kotlin.reflect.jvm.jvmName
@@ -12,17 +12,11 @@ class NoteGridCellViewModel(
 ) : BaseCellViewModel(model) {
 
     fun onClicked() {
-        val event = Bundle().apply {
-            putString(CLICK_EVENT, model.id)
-        }
-        eventProvider.send(event)
+        eventProvider.send((CLICK_EVENT to model.id).toEvent())
     }
 
     fun onLongClicked() {
-        val event = Bundle().apply {
-            putString(LONG_CLICK_EVENT, model.id)
-        }
-        eventProvider.send(event)
+        eventProvider.send((LONG_CLICK_EVENT to model.id).toEvent())
     }
 
     companion object {

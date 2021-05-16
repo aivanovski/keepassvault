@@ -3,12 +3,14 @@ package com.ivanovsky.passnotes.injection
 import com.ivanovsky.passnotes.App
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.domain.DateFormatProvider
+import com.ivanovsky.passnotes.domain.NoteDiffer
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
+import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
@@ -19,6 +21,9 @@ import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactor
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseViewModel
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel
+import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel
+import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellModelFactory
+import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -39,6 +44,7 @@ object KoinModule {
         single { deps.observerBus }
         single { deps.clipboardHelper }
         single { DateFormatProvider(get()) }
+        single { NoteDiffer() }
 
         single { deps.fileSyncHelper }
 
@@ -55,9 +61,13 @@ object KoinModule {
         single { DebugMenuInteractor(get(), get(), get()) }
         single { NoteInteractor(get(), get()) }
         single { GroupsInteractor(get(), get()) }
+        single { NoteEditorInteractor(get(), get()) }
 
         single { GroupsCellModelFactory(get()) }
         single { GroupsCellViewModelFactory() }
+
+        single { NoteEditorCellModelFactory(get()) }
+        single { NoteEditorCellViewModelFactory(get()) }
 
         viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
         viewModel { FilePickerViewModel(get(), get(), get(), get(), get()) }
@@ -66,5 +76,6 @@ object KoinModule {
         viewModel { DebugMenuViewModel(get(), get(), get(), get()) }
         viewModel { NoteViewModel(get(), get(), get(), get(), get()) }
         viewModel { GroupsViewModel(get(), get(), get(), get(), get(), get()) }
+        viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get()) }
     }
 }

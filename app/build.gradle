@@ -116,21 +116,28 @@ def apacheCommonsLangVersion = '3.0'
 def jUnitVersion = '4.13'
 def robolectricVersion = '4.3'
 def androidXTestVersion = '1.1.0'
+def mockkVersion = '1.11.0'
+def truthVersion = '1.0'
+def androidXArchVersion = '2.1.0'
+def androidXCoreVersion = '1.2.0'
+def roomTesting = '2.0.0'
 
 dependencies {
 	implementation fileTree(dir: 'libs', include: ['*.jar'])
 
 	// Test dependencies
 	testImplementation "junit:junit:$jUnitVersion"
-	testImplementation "io.mockk:mockk:1.10.0"
-	testImplementation "com.google.truth:truth:1.0"
+	testImplementation "io.mockk:mockk:$mockkVersion"
+	testImplementation "com.google.truth:truth:$truthVersion"
+	testImplementation "androidx.arch.core:core-testing:$androidXArchVersion"
+	testImplementation "androidx.test:core:$androidXCoreVersion"
 	testImplementation "org.robolectric:robolectric:$robolectricVersion"
 	testImplementation "org.robolectric:shadows-multidex:$robolectricVersion"
 
 	// Android test dependencies
 	androidTestImplementation "androidx.test.ext:junit:$androidXTestVersion"
 	androidTestImplementation "androidx.test:rules:$androidXTestVersion"
-	androidTestImplementation "androidx.room:room-testing:2.0.0"
+	androidTestImplementation "androidx.room:room-testing:$roomTesting"
 	androidTestImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
 	// MultiDex

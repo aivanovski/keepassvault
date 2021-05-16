@@ -1,9 +1,18 @@
 package com.ivanovsky.passnotes.injection
 
+import android.content.Context
+import androidx.room.Room
 import com.ivanovsky.passnotes.App
+import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.repository.DropboxFileRepository
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
-import com.ivanovsky.passnotes.domain.DateFormatProvider
-import com.ivanovsky.passnotes.domain.NoteDiffer
+import com.ivanovsky.passnotes.data.repository.SettingsRepository
+import com.ivanovsky.passnotes.data.repository.UsedFileRepository
+import com.ivanovsky.passnotes.data.repository.db.AppDatabase
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository
+import com.ivanovsky.passnotes.domain.*
+import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor
@@ -31,27 +40,25 @@ import org.koin.dsl.module
 object KoinModule {
 
     val appModule = module {
-        val deps = App.sharedModule
-
-        single { deps.settings }
-        single { deps.database }
-        single { deps.fileHelper }
-        single { deps.permissionHelper }
-        single { deps.resourceProvider }
-        single { deps.errorInteractor }
-        single { deps.localeProvider }
-        single { deps.dispatcherProvider }
-        single { deps.observerBus }
-        single { deps.clipboardHelper }
+        single { SettingsRepository(get()) }
+        single { provideAppDatabase(get()) }
+        single { FileHelper(get(), get()) }
+        single { PermissionHelper(get()) }
+        single { ResourceProvider(get()) }
+        single { ErrorInteractor(get()) }
+        single { LocaleProvider(get()) }
+        single { DispatcherProvider() }
+        single { ObserverBus() }
+        single { ClipboardHelper(get()) }
         single { DateFormatProvider(get()) }
         single { NoteDiffer() }
 
-        single { deps.fileSyncHelper }
 
-        single { deps.dropboxFileRepository }
-        single { deps.fileSystemResolver }
-        single { deps.usedFileRepository }
-        single { deps.encryptedDatabaseRepository as EncryptedDatabaseRepository }
+        single { provideDropboxFileRepository(get()) }
+        single { FileSystemResolver(get(), get(), get(), get()) }
+        single { FileSyncHelper(get()) }
+        single { UsedFileRepository(get(), get()) }
+        single { KeepassDatabaseRepository(get(), get()) as EncryptedDatabaseRepository }
 
         single { FilePickerInteractor(get()) }
         single { UnlockInteractor(get(), get(), get(), get()) }
@@ -77,5 +84,19 @@ object KoinModule {
         viewModel { NoteViewModel(get(), get(), get(), get(), get()) }
         viewModel { GroupsViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get()) }
+    }
+
+    private fun provideDropboxFileRepository(
+        database: AppDatabase
+    ): DropboxFileRepository {
+        return DropboxFileRepository(database.dropboxFileDao)
+    }
+
+    private fun provideAppDatabase(context: Context): AppDatabase {
+        return Room.databaseBuilder(
+            context.applicationContext,
+            AppDatabase::class.java,
+            AppDatabase.FILE_NAME
+        ).build()
     }
 }

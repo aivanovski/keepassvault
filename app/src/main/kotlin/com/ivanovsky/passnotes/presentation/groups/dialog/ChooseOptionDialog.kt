@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import com.ivanovsky.passnotes.injection.DaggerInjector
 
 class ChooseOptionDialog : DialogFragment(), DialogInterface.OnClickListener {
 

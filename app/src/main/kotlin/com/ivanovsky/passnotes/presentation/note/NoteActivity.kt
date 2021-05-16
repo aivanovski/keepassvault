@@ -7,8 +7,8 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.initActionBar
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.requireExtraValue
+import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.requireExtraValue
 import java.util.*
 
 class NoteActivity : AppCompatActivity() {

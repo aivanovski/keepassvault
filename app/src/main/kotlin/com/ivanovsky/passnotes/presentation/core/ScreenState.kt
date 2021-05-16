@@ -1,39 +1,59 @@
 package com.ivanovsky.passnotes.presentation.core
 
-data class ScreenState private constructor(
-        val displayingMode: ScreenDisplayingMode,
-        val message: String? = null
+data class ScreenState(
+    val screenDisplayingType: ScreenDisplayingType,
+    val emptyText: String? = null,
+    val errorText: String? = null
 ) {
 
     val isDisplayingData: Boolean
-        get() = displayingMode == ScreenDisplayingMode.DISPLAYING_DATA
+        get() = screenDisplayingType == ScreenDisplayingType.DATA
+
+    val isDisplayingLoading: Boolean
+        get() = screenDisplayingType == ScreenDisplayingType.LOADING
+
+    val isDisplayingEmptyState: Boolean
+        get() = screenDisplayingType == ScreenDisplayingType.EMPTY
 
     val isNotInitialized: Boolean
-        get() = displayingMode == ScreenDisplayingMode.NOT_INITIALIZED
+        get() = screenDisplayingType == ScreenDisplayingType.NOT_INITIALIZED
 
     companion object {
-        fun loading(): ScreenState {
-            return ScreenState(ScreenDisplayingMode.LOADING)
-        }
-
-        fun empty(message: String): ScreenState {
-            return ScreenState(ScreenDisplayingMode.EMPTY, message)
-        }
-
-        fun error(message: String): ScreenState {
-            return ScreenState(ScreenDisplayingMode.ERROR, message)
-        }
 
         fun data(): ScreenState {
-            return ScreenState(ScreenDisplayingMode.DISPLAYING_DATA)
+            return ScreenState(ScreenDisplayingType.DATA)
         }
 
-        fun dataWithError(message: String): ScreenState {
-            return ScreenState(ScreenDisplayingMode.DISPLAYING_DATA_WITH_ERROR_PANEL, message)
+        fun loading(): ScreenState {
+            return ScreenState(ScreenDisplayingType.LOADING)
+        }
+
+        fun empty(emptyText: String?): ScreenState {
+            return ScreenState(
+                ScreenDisplayingType.EMPTY,
+                emptyText = emptyText
+            )
         }
 
         fun notInitialized(): ScreenState {
-            return ScreenState(ScreenDisplayingMode.NOT_INITIALIZED)
+            return ScreenState(ScreenDisplayingType.NOT_INITIALIZED)
+        }
+
+        fun error(errorText: String?): ScreenState {
+            return ScreenState(
+                ScreenDisplayingType.ERROR,
+                emptyText = null,
+                errorText = errorText
+            )
+        }
+
+        fun dataWithError(errorText: String?): ScreenState {
+            return ScreenState(
+                ScreenDisplayingType.DATA_WITH_ERROR,
+                emptyText = null,
+                errorText = errorText
+            )
         }
     }
+
 }

@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.ivanovsky.passnotes.presentation.core_mvvm.widget.ErrorPanelView
+        <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
             android:id="@+id/errorPanelView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
             bind:screenState="@{viewModel.screenState}"
             bind:screenStateHandler="@{viewModel.screenStateHandler}" />
 
-        <com.ivanovsky.passnotes.presentation.core_mvvm.widget.ScreenStateView
+        <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             bind:screenState="@{viewModel.screenState}"

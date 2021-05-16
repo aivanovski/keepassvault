@@ -14,9 +14,9 @@ import com.ivanovsky.passnotes.domain.entity.PropertyMap
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
-import com.ivanovsky.passnotes.presentation.core_mvvm.*
-import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels.SpaceCellViewModel
+import com.ivanovsky.passnotes.presentation.core.*
+import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.viewmodels.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.ExtendedTextPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.PropertyViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.SecretPropertyCellViewModel

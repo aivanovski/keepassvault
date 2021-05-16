@@ -2,11 +2,11 @@ package com.ivanovsky.passnotes.presentation.newdb
 
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.core.BaseActivity
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.initActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
 
-class NewDatabaseActivity : BaseActivity() {
+class NewDatabaseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

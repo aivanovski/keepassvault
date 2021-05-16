@@ -16,13 +16,12 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.core_mvvm.DefaultScreenStateHandler
-import com.ivanovsky.passnotes.presentation.core_mvvm.ScreenState
-import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.unlock.model.DropDownItem
 import com.ivanovsky.passnotes.presentation.unlock.model.PasswordRule
 import com.ivanovsky.passnotes.util.FileUtils
-import com.ivanovsky.passnotes.util.StringUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

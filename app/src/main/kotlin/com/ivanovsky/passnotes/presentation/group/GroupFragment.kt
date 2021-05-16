@@ -6,10 +6,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.GroupFragmentBinding
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.finishActivity
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.hideKeyboard
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
+import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
+import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 

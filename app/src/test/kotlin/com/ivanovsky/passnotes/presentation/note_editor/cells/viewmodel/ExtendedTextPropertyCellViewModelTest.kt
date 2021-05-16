@@ -4,8 +4,8 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.presentation.core_mvvm.event.Event.Companion.toEvent
-import com.ivanovsky.passnotes.presentation.core_mvvm.event.EventProvider
+import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
+import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedTextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType

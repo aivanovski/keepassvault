@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.navigation.NavigationView
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.initActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
 
 class UnlockActivity : AppCompatActivity() {
 

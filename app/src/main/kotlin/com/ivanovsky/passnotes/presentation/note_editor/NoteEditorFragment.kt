@@ -9,7 +9,7 @@ import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.NoteEditorFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.*
+import com.ivanovsky.passnotes.presentation.core.extensions.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class NoteEditorFragment : Fragment() {

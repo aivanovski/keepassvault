@@ -8,10 +8,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.requireArgument
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.showSnackbarMessage
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
+import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*

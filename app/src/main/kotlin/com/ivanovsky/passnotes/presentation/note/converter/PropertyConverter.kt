@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.presentation.note.converter
 
 import com.ivanovsky.passnotes.data.entity.Property
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.BaseCellModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.NotePropertyCellModel
+import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.core.model.NotePropertyCellModel
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 fun List<Property>.toCellModels(): List<BaseCellModel> {

@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes.presentation.note_editor.cells.model
 
 import com.ivanovsky.passnotes.data.entity.PropertyType
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType
 
 data class SecretPropertyCellModel(

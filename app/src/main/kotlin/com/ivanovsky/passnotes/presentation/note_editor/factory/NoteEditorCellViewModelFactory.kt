@@ -1,12 +1,12 @@
 package com.ivanovsky.passnotes.presentation.note_editor.factory
 
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.presentation.core_mvvm.BaseCellViewModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.event.EventProvider
-import com.ivanovsky.passnotes.presentation.core_mvvm.factory.CellViewModelFactory
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.BaseCellModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.SpaceCellModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels.SpaceCellViewModel
+import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
+import com.ivanovsky.passnotes.presentation.core.event.EventProvider
+import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
+import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
+import com.ivanovsky.passnotes.presentation.core.viewmodels.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedTextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.SecretPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.TextPropertyCellModel

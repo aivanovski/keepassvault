@@ -14,9 +14,9 @@ import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.databinding.StorageListFragmentBinding
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.requireArgument
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerActivity
 import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs
 import org.koin.androidx.viewmodel.ext.android.viewModel

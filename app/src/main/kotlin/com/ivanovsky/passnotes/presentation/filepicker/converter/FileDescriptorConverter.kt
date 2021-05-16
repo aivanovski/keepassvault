@@ -3,8 +3,8 @@ package com.ivanovsky.passnotes.presentation.filepicker.converter
 import androidx.annotation.DrawableRes
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.BaseCellModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.FileCellModel
+import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.core.model.FileCellModel
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import java.text.DateFormat
 import java.util.*

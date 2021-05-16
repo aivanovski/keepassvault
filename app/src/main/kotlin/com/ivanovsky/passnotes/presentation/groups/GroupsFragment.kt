@@ -13,9 +13,9 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.showToastMessage
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
+import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.group.GroupActivity
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.note.NoteActivity

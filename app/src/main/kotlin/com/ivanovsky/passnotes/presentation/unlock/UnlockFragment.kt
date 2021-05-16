@@ -14,9 +14,9 @@ import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.hideKeyboard
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.showSnackbarMessage
+import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
+import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuActivity
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity

@@ -82,7 +82,7 @@ abstract class BaseFragment : Fragment(), GenericScreen {
         when (screenState.displayingMode) {
             ScreenDisplayingMode.EMPTY -> stateView.setEmptyText(screenState.message)
             ScreenDisplayingMode.ERROR -> stateView.setErrorText(screenState.message)
-            ScreenDisplayingMode.DISPLAYING_DATA_WITH_ERROR_PANEL -> errorPanelView!!.setText(screenState.message)
+            ScreenDisplayingMode.DISPLAYING_DATA_WITH_ERROR_PANEL -> errorPanelView.setText(screenState.message)
         }
         applyScreenStateToViews(screenState)
         onScreenStateChanged(screenState)

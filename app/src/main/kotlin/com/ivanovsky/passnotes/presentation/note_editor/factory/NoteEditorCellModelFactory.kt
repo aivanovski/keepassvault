@@ -8,8 +8,8 @@ import com.ivanovsky.passnotes.data.entity.TemplateFieldType
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PropertyMap
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.BaseCellModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.SpaceCellModel
+import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel.CellId
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedTextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.SecretPropertyCellModel

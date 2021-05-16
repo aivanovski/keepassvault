@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.core.BaseActivity
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.initActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
 
-class DebugMenuActivity : BaseActivity() {
+class DebugMenuActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

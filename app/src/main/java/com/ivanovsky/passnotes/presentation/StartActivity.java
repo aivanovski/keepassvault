@@ -3,11 +3,10 @@ package com.ivanovsky.passnotes.presentation;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
-
-import com.ivanovsky.passnotes.presentation.core.BaseActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import com.ivanovsky.passnotes.presentation.unlock.UnlockActivity;
 
-public class StartActivity extends BaseActivity {
+public class StartActivity extends AppCompatActivity {
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {

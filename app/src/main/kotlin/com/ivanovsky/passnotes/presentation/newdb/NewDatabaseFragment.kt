@@ -9,9 +9,9 @@ import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.databinding.NewDatabaseFragmentBinding
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.finishActivity
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.hideKeyboard
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
+import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
+import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.groups.GroupsActivity
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListActivity

@@ -3,10 +3,10 @@ package com.ivanovsky.passnotes.presentation.groups.factory
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
-import com.ivanovsky.passnotes.presentation.core_mvvm.factory.CellModelFactory
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.BaseCellModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.GroupCellModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.NoteCellModel
+import com.ivanovsky.passnotes.presentation.core.factory.CellModelFactory
+import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.core.model.GroupCellModel
+import com.ivanovsky.passnotes.presentation.core.model.NoteCellModel
 
 class GroupsCellModelFactory(
     private val resourceProvider: ResourceProvider

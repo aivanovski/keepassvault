@@ -7,7 +7,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.initActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
 
 class GroupsActivity : AppCompatActivity() {
 

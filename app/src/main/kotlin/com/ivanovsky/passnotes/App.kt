@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes
 
 import androidx.multidex.MultiDexApplication
 import com.facebook.stetho.Stetho
-import com.ivanovsky.passnotes.injection.SharedModule
 import com.ivanovsky.passnotes.injection.KoinModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -13,7 +12,6 @@ class App : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
         appInstance = this
-        sharedModule = SharedModule(this)
 
         Stetho.initializeWithDefaults(this)
 
@@ -28,8 +26,5 @@ class App : MultiDexApplication() {
 
         @JvmStatic
         lateinit var appInstance: App
-
-        @JvmStatic
-        lateinit var sharedModule: SharedModule
     }
 }

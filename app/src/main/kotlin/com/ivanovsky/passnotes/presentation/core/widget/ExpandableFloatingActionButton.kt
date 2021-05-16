@@ -5,12 +5,10 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.ivanovsky.passnotes.R
-import kotlin.math.exp
 
 class ExpandableFloatingActionButton constructor(context: Context, attrs: AttributeSet) :
     ConstraintLayout(context, attrs) {

@@ -5,10 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.presentation.core_mvvm.BaseCellViewModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.binding.OnTextChangeListener
-import com.ivanovsky.passnotes.presentation.core_mvvm.event.Event.Companion.toEvent
-import com.ivanovsky.passnotes.presentation.core_mvvm.event.EventProvider
+import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
+import com.ivanovsky.passnotes.presentation.core.binding.OnTextChangeListener
+import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
+import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedTextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY

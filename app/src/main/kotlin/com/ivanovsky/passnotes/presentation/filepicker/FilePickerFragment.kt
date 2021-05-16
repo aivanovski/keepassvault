@@ -11,10 +11,10 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.databinding.FilePickerFragmentBinding
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.requireArgument
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.setupActionBar
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.showSnackbarMessage
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
+import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.filepicker.Action.PICK_DIRECTORY
 import com.ivanovsky.passnotes.presentation.filepicker.Action.PICK_FILE
 import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs

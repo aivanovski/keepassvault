@@ -10,9 +10,9 @@ import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
-import com.ivanovsky.passnotes.presentation.core_mvvm.DefaultScreenStateHandler
-import com.ivanovsky.passnotes.presentation.core_mvvm.ScreenState
-import com.ivanovsky.passnotes.presentation.core_mvvm.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

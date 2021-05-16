@@ -1,11 +1,11 @@
 package com.ivanovsky.passnotes.presentation.filepicker
 
-import com.ivanovsky.passnotes.presentation.core_mvvm.BaseCellViewModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.event.EventProvider
-import com.ivanovsky.passnotes.presentation.core_mvvm.factory.CellViewModelFactory
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.BaseCellModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.model.FileCellModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels.FileCellViewModel
+import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
+import com.ivanovsky.passnotes.presentation.core.event.EventProvider
+import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
+import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.core.model.FileCellModel
+import com.ivanovsky.passnotes.presentation.core.viewmodels.FileCellViewModel
 
 class FilePickerCellFactory : CellViewModelFactory {
 

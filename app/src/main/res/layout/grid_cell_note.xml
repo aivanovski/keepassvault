@@ -10,7 +10,7 @@
 
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.core_mvvm.viewmodels.NoteGridCellViewModel" />
+            type="com.ivanovsky.passnotes.presentation.core.viewmodels.NoteGridCellViewModel" />
     </data>
 
     <com.ivanovsky.passnotes.presentation.core.widget.SquareLayout

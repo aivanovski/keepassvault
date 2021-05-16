@@ -4,13 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.core.BaseActivity
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.initActionBar
-import com.ivanovsky.passnotes.presentation.core_mvvm.extensions.requireExtraValue
+import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.requireExtraValue
 import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs
 
-class FilePickerActivity : BaseActivity() {
+class FilePickerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

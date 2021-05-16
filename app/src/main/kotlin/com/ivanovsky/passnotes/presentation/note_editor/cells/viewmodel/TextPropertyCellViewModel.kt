@@ -4,8 +4,8 @@ import androidx.lifecycle.MutableLiveData
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.presentation.core_mvvm.BaseCellViewModel
-import com.ivanovsky.passnotes.presentation.core_mvvm.event.EventProvider
+import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
+import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.TextPropertyCellModel
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 

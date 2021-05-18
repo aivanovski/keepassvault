@@ -7,7 +7,7 @@ import com.ivanovsky.passnotes.data.repository.encdb.exception.FailedToWriteDBEx
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
-import com.ivanovsky.passnotes.data.repository.file.RemoteFileOutputStream;
+import com.ivanovsky.passnotes.data.repository.file.BaseRemoteFileOutputStream;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassGroupDao;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
@@ -131,8 +131,8 @@ public class KeepassDatabase implements EncryptedDatabase {
 				out = outResult.getObj();
 
 				// method 'SimpleDatabase.save' closes output stream after work is done
-				if (out instanceof RemoteFileOutputStream) {
-					RemoteFileOutputStream remoteOut = (RemoteFileOutputStream) out;
+				if (out instanceof BaseRemoteFileOutputStream) {
+					BaseRemoteFileOutputStream remoteOut = (BaseRemoteFileOutputStream) out;
 
 					File localFile = remoteOut.getOutputFile();
 

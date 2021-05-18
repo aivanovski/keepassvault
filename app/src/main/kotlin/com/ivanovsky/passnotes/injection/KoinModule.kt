@@ -2,9 +2,8 @@ package com.ivanovsky.passnotes.injection
 
 import android.content.Context
 import androidx.room.Room
-import com.ivanovsky.passnotes.App
 import com.ivanovsky.passnotes.data.ObserverBus
-import com.ivanovsky.passnotes.data.repository.DropboxFileRepository
+import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.SettingsRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
@@ -88,8 +87,10 @@ object KoinModule {
 
     private fun provideDropboxFileRepository(
         database: AppDatabase
-    ): DropboxFileRepository {
-        return DropboxFileRepository(database.dropboxFileDao)
+    ): RemoteFileRepository {
+        return RemoteFileRepository(
+            database.remoteFileDao
+        )
     }
 
     private fun provideAppDatabase(context: Context): AppDatabase {

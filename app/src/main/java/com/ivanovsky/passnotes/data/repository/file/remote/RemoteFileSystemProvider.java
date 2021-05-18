@@ -1,14 +1,12 @@
-package com.ivanovsky.passnotes.data.repository.file.dropbox;
+package com.ivanovsky.passnotes.data.repository.file.remote;
 
-import com.dropbox.core.v2.files.FileMetadata;
-import com.dropbox.core.v2.files.FolderMetadata;
-import com.dropbox.core.v2.files.Metadata;
-import com.ivanovsky.passnotes.data.entity.DropboxFile;
+import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
-import com.ivanovsky.passnotes.data.repository.DropboxFileRepository;
-import com.ivanovsky.passnotes.data.repository.SettingsRepository;
+import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata;
+import com.ivanovsky.passnotes.data.entity.RemoteFolderMetadata;
+import com.ivanovsky.passnotes.data.repository.RemoteFileRepository;
 import com.ivanovsky.passnotes.data.repository.file.FSType;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
@@ -17,6 +15,7 @@ import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxApiException;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxAuthException;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxException;
+import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxFileNotFoundException;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxNetworkException;
 import com.ivanovsky.passnotes.domain.FileHelper;
 import com.ivanovsky.passnotes.util.DateUtils;
@@ -48,9 +47,9 @@ import static com.ivanovsky.passnotes.util.DateUtils.anyLastTimestamp;
 import static com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull;
 import static com.ivanovsky.passnotes.util.ObjectUtils.isNotEquals;
 
-public class DropboxFileSystemProvider implements FileSystemProvider {
+public class RemoteFileSystemProvider implements FileSystemProvider {
 
-	private static final String TAG = DropboxFileSystemProvider.class.getSimpleName();
+	private static final String TAG = RemoteFileSystemProvider.class.getSimpleName();
 
 	private static final String ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR = "Failed to find app private dir";
 	private static final String ERROR_FAILED_TO_FIND_FILE = "Failed to find file: %s";
@@ -59,26 +58,30 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 
 	private static final long MAX_AWAITING_TIMEOUT_IN_SEC = 30;
 
-	private final DropboxAuthenticator authenticator;
-	private final DropboxClient dropboxClient;
-	private final DropboxCache cache;
+	private final FileSystemAuthenticator authenticator;
+	private final RemoteApiClient client;
+	private final RemoteFileCache cache;
 	private final StatusMap processingMap;
 	private final Map<UUID, CountDownLatch> processingUidToLatch;
 	private final Lock unitProcessingLock;
 	private final FileHelper fileHelper;
-	private final DropboxSyncProcessor syncProcessor;
+	private final RemoteFileSyncProcessor syncProcessor;
+	private final FSType fsType;
 
-	public DropboxFileSystemProvider(SettingsRepository settings,
-									 DropboxFileRepository dropboxFileRepository,
-									 FileHelper fileHelper) {
-		this.authenticator = new DropboxAuthenticator(settings);
-		this.dropboxClient = new DropboxClient(authenticator);
-		this.cache = new DropboxCache(dropboxFileRepository);
+	public RemoteFileSystemProvider(FileSystemAuthenticator authenticator,
+									RemoteApiClient client,
+									RemoteFileRepository remoteFileRepository,
+									FileHelper fileHelper,
+									FSType fsType) {
+		this.authenticator = authenticator;
+		this.client = client;
+		this.cache = new RemoteFileCache(remoteFileRepository, fsType);
 		this.processingMap = new StatusMap();
 		this.processingUidToLatch = new HashMap<>();
 		this.unitProcessingLock = new ReentrantLock();
 		this.fileHelper = fileHelper;
-		this.syncProcessor = new DropboxSyncProcessor(this, cache, fileHelper);
+		this.syncProcessor = new RemoteFileSyncProcessor(this, cache, fileHelper);
+		this.fsType = fsType;
 	}
 
 	@Override
@@ -91,7 +94,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		OperationResult<List<FileDescriptor>> result = new OperationResult<>();
 
 		try {
-			result.setObj(dropboxClient.listFiles(dir));
+			result.setObj(client.listFiles(dir));
 		} catch (DropboxException e) {
 			result.setError(createOperationErrorFromDropboxException(e));
 		}
@@ -108,6 +111,8 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 			result = newGenericIOError(exception.getMessage());
 		} else if (exception instanceof DropboxNetworkException) {
 			result = newNetworkIOError();
+		} else if (exception instanceof DropboxFileNotFoundException) {
+			result = newGenericIOError(exception.getMessage());
 		} else {
 			throw new IllegalArgumentException("Exception handling is not implemented");
 		}
@@ -120,7 +125,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		OperationResult<FileDescriptor> result = new OperationResult<>();
 
 		try {
-			result.setObj(dropboxClient.getParent(file));
+			result.setObj(client.getParent(file));
 		} catch (DropboxException e) {
 			result.setError(createOperationErrorFromDropboxException(e));
 		}
@@ -133,7 +138,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		OperationResult<FileDescriptor> result = new OperationResult<>();
 
 		try {
-			result.setObj(dropboxClient.getRoot());
+			result.setObj(client.getRoot());
 		} catch (DropboxException e) {
 			result.setError(createOperationErrorFromDropboxException(e));
 		}
@@ -146,11 +151,11 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		OperationResult<FileDescriptor> result = new OperationResult<>();
 
 		try {
-			FileMetadata metadata = dropboxClient.getFileMetadataOrThrow(newDescriptorFromPath(path));
+			RemoteFileMetadata metadata = client.getFileMetadataOrThrow(newDescriptorFromPath(path));
 			result.setObj(newDescriptorFromMetadata(metadata));
 		} catch (DropboxNetworkException e) {
 			if (cacheOperationsEnabled) {
-				DropboxFile file = cache.getByRemotePath(path);
+				RemoteFile file = cache.getByRemotePath(path);
 
 				if (file != null) {
 					result.setDeferredObj(newDescriptorFromDropboxFile(file));
@@ -176,12 +181,12 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		return result;
 	}
 
-	private FileDescriptor newDescriptorFromMetadata(FileMetadata metadata) {
+	private FileDescriptor newDescriptorFromMetadata(RemoteFileMetadata metadata) {
 		FileDescriptor result = new FileDescriptor();
 
 		result.setFsType(FSType.DROPBOX);
-		result.setUid(metadata.getId());
-		result.setPath(metadata.getPathLower());
+		result.setUid(metadata.getUid());
+		result.setPath(metadata.getPath());
 		result.setDirectory(false);
 		result.setModified(anyLastTimestamp(metadata.getServerModified(),
 				metadata.getClientModified()));
@@ -189,7 +194,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		return result;
 	}
 
-	private FileDescriptor newDescriptorFromDropboxFile(DropboxFile file) {
+	private FileDescriptor newDescriptorFromDropboxFile(RemoteFile file) {
 		FileDescriptor result = new FileDescriptor();
 
 		result.setFsType(FSType.DROPBOX);
@@ -211,13 +216,13 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		if (destinationDir != null) {
 			ProcessingUnit unit = null;
 			try {
-				FileMetadata metadata = dropboxClient.getFileMetadataOrThrow(file);
+				RemoteFileMetadata metadata = client.getFileMetadataOrThrow(file);
 
-				String uid = metadata.getId();
-				String remoteRevision = metadata.getRev();
-				String remotePath = metadata.getPathLower();
+				String uid = metadata.getUid();
+				String remoteRevision = metadata.getRevision();
+				String remotePath = metadata.getPath();
 
-				DropboxFile cachedFile = cache.getByUid(uid);
+				RemoteFile cachedFile = cache.getByUid(uid);
 				if (cachedFile == null) {
 					// download file and add new entry to the cache
 					String destinationPath = generateDestinationFilePath(destinationDir);
@@ -230,14 +235,15 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 					if (startProcessingUnit(unit)) {
 						Logger.d(TAG, "Downloading new file: remote=%s, local=%s", remotePath, destinationPath);
 
-						metadata = dropboxClient.downloadFileOrThrow(remotePath, destinationPath);
+						metadata = client.downloadFileOrThrow(remotePath, destinationPath);
 
-						cachedFile = new DropboxFile();
+						cachedFile = new RemoteFile();
 
-						cachedFile.setUid(metadata.getId());
-						cachedFile.setRemotePath(metadata.getPathLower());
+						cachedFile.setFsType(fsType);
+						cachedFile.setUid(metadata.getUid());
+						cachedFile.setRemotePath(metadata.getPath());
 						cachedFile.setLocalPath(destinationPath);
-						cachedFile.setRevision(metadata.getRev());
+						cachedFile.setRevision(metadata.getRevision());
 						cachedFile.setUploaded(true);
 						cachedFile.setLastModificationTimestamp(
 								anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
@@ -261,10 +267,10 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 						if (startProcessingUnit(unit)) {
 							Logger.d(TAG, "Updating cached file: remote=%s, local=%s", remotePath, cachedFile.getLocalPath());
 
-							metadata = dropboxClient.downloadFileOrThrow(remotePath, cachedFile.getLocalPath());
+							metadata = client.downloadFileOrThrow(remotePath, cachedFile.getLocalPath());
 
-							cachedFile.setRemotePath(metadata.getPathLower());
-							cachedFile.setRevision(metadata.getRev());
+							cachedFile.setRemotePath(metadata.getPath());
+							cachedFile.setRevision(metadata.getRevision());
 							cachedFile.setUploaded(true);
 							cachedFile.setUploadFailed(false);
 							cachedFile.setLocallyModified(false);
@@ -289,7 +295,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 					Logger.d(TAG, "Local cached file is up to date: remote=%s, local=%s",
 							remotePath, cachedFile.getLocalPath());
 
-					cachedFile.setRemotePath(metadata.getPathLower());
+					cachedFile.setRemotePath(metadata.getPath());
 					cachedFile.setLastModificationTimestamp(
 							anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
 					cachedFile.setUploaded(true);
@@ -307,7 +313,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 
 			} catch (DropboxNetworkException e) {
 				// use cached file
-				DropboxFile cachedFile = cache.getByUid(file.getUid());
+				RemoteFile cachedFile = cache.getByUid(file.getUid());
 				if (cachedFile != null) {
 					unit = new ProcessingUnit(UUID.randomUUID(),
 							ProcessingStatus.DOWNLOADING,
@@ -334,7 +340,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 			}
 
 			if (unit != null) {
-				onFinishProcessingUnit(unit.processingUid);
+				onFinishProcessingUnit(unit.getProcessingUid());
 			}
 		} else {
 			result.setError(newGenericIOError(ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR));
@@ -348,7 +354,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		return dir.getPath() + "/" + UUID.randomUUID().toString();
 	}
 
-	private boolean canResolveDownloadConflict(DropboxFile cachedFile, OnConflictStrategy onConflictStrategy) {
+	private boolean canResolveDownloadConflict(RemoteFile cachedFile, OnConflictStrategy onConflictStrategy) {
 		boolean result;
 
 		if (cachedFile.isLocallyModified() && onConflictStrategy == OnConflictStrategy.CANCEL) {
@@ -369,19 +375,27 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		File destinationDir = fileHelper.getRemoteFilesDir();
 		if (destinationDir != null) {
 			try {
-				FileMetadata metadata = dropboxClient.getFileMetadataOrNull(file);
+				RemoteFileMetadata metadata;
+
+				try {
+					metadata = client.getFileMetadataOrThrow(file);
+				} catch (DropboxFileNotFoundException e) {
+				    metadata = null;
+				}
+
 				if (metadata == null) {
 					// create and upload new file
 					String parentPath = FileUtils.getParentPath(file.getPath());
 					if (!"/".equals(parentPath)) {
-						FolderMetadata parentMetadata = dropboxClient.getFolderMetadataOrThrow(parentPath);
-						parentPath = parentMetadata.getPathLower();
+						RemoteFolderMetadata parentMetadata = client.getFolderMetadataOrThrow(parentPath);
+						parentPath = parentMetadata.getPath();
 					}
 
-					DropboxFile cachedFile = new DropboxFile();
+					RemoteFile cachedFile = new RemoteFile();
 
 					long timestamp = System.currentTimeMillis();
 
+					cachedFile.setFsType(fsType);
 					cachedFile.setRemotePath(parentPath + "/" + file.getName());
 					cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
 					cachedFile.setLastModificationTimestamp(timestamp);
@@ -397,10 +411,10 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 							cachedFile.getRemotePath(), cachedFile.getLocalPath());
 
 					if (startProcessingUnit(unit)) {
-						result.from(processFileUploading(cachedFile, unit.processingUid));
+						result.from(processFileUploading(cachedFile, unit.getProcessingUid()));
 
 						if (result.isFailed()) {
-							onFinishProcessingUnit(unit.processingUid);
+							onFinishProcessingUnit(unit.getProcessingUid());
 						}
 					} else {
 						result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
@@ -408,17 +422,18 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 
 				} else {
 					// re-write existing file
-					String uid = metadata.getId();
-					String remotePath = metadata.getPathLower();
+					String uid = metadata.getUid();
+					String remotePath = metadata.getPath();
 					Date localModified = new Date(file.getModified());
 					Date serverModified = metadata.getServerModified();
 					Date clientModified = metadata.getClientModified();
 
-					DropboxFile cachedFile = cache.getByUid(uid);
+					RemoteFile cachedFile = cache.getByUid(uid);
 					if (canResolveMergeConflict(localModified, serverModified, clientModified, onConflict)) {
 						if (cachedFile == null) {
-							cachedFile = new DropboxFile();
+							cachedFile = new RemoteFile();
 
+							cachedFile.setFsType(fsType);
 							cachedFile.setRemotePath(remotePath);
 							cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
 							cachedFile.setLastModificationTimestamp(localModified.getTime());
@@ -434,10 +449,10 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 									cachedFile.getRemotePath(), cachedFile.getLocalPath());
 
 							if (startProcessingUnit(unit)) {
-								result.from(processFileUploading(cachedFile, unit.processingUid));
+								result.from(processFileUploading(cachedFile, unit.getProcessingUid()));
 
 								if (result.isFailed()) {
-									onFinishProcessingUnit(unit.processingUid);
+									onFinishProcessingUnit(unit.getProcessingUid());
 								}
 							} else {
 								result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
@@ -456,10 +471,10 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 									cachedFile.getRemotePath());
 
 							if (startProcessingUnit(unit)) {
-								result.from(processFileUploading(cachedFile, unit.processingUid));
+								result.from(processFileUploading(cachedFile, unit.getProcessingUid()));
 
 								if (result.isFailed()) {
-									onFinishProcessingUnit(unit.processingUid);
+									onFinishProcessingUnit(unit.getProcessingUid());
 								}
 							} else {
 								result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
@@ -472,7 +487,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 			} catch (DropboxNetworkException e) {
 				// if device is offline, just write to the local file
 				if (cacheOperationsEnabled) {
-					DropboxFile cachedFile = cache.getByUid(file.getUid());
+					RemoteFile cachedFile = cache.getByUid(file.getUid());
 					if (cachedFile != null) {
 						cachedFile.setLastModificationTimestamp(file.getModified());
 						cachedFile.setLocallyModified(true);
@@ -485,14 +500,14 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 
 						if (startProcessingUnit(unit)) {
 							try {
-								result.setObj(new OfflineFileOutputStream(this, cachedFile, unit.processingUid));
+								result.setObj(new OfflineFileOutputStream(this, cachedFile, unit.getProcessingUid()));
 
 								cache.update(cachedFile);
 							} catch (FileNotFoundException ee) {
 								result.setError(newGenericIOError(String.format(ERROR_FAILED_TO_FIND_FILE,
 										cachedFile.getLocalPath())));
 
-								onFinishProcessingUnit(unit.processingUid);
+								onFinishProcessingUnit(unit.getProcessingUid());
 							}
 						} else {
 							result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
@@ -537,12 +552,12 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 
 		unitProcessingLock.lock();
 		try {
-			if (!processingUidToLatch.containsKey(unit.processingUid)) {
+			if (!processingUidToLatch.containsKey(unit.getProcessingUid())) {
 				latch = new CountDownLatch(1);
 
-				processingUidToLatch.put(unit.processingUid, latch);
+				processingUidToLatch.put(unit.getProcessingUid(), latch);
 			} else {
-				latch = processingUidToLatch.get(unit.processingUid);
+				latch = processingUidToLatch.get(unit.getProcessingUid());
 			}
 		} finally {
 			unitProcessingLock.unlock();
@@ -558,11 +573,11 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 				", remotePath=" + remotePath);
 	}
 
-	private OperationResult<OutputStream> processFileUploading(DropboxFile file, UUID processingUnitUid) {
+	private OperationResult<OutputStream> processFileUploading(RemoteFile file, UUID processingUnitUid) {
 		OperationResult<OutputStream> result = new OperationResult<>();
 
 		try {
-			result.setObj(new DropboxFileOutputStream(this, dropboxClient, file, processingUnitUid));
+			result.setObj(new RemoteFileOutputStream(this, client, file, processingUnitUid));
 
 			if (file.getId() != null) {
 				cache.update(file);
@@ -577,7 +592,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		return result;
 	}
 
-	void onFileUploadFailed(DropboxFile file, UUID processingUnitUid) {
+	public void onFileUploadFailed(RemoteFile file, UUID processingUnitUid) {
 		Logger.d(TAG, "onFileUploadFailed: unitUid=%s, file=%s", processingUnitUid, file);
 
 		file.setUploadFailed(true);
@@ -587,7 +602,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		onFinishProcessingUnit(processingUnitUid);
 	}
 
-	void onFileUploadFinished(DropboxFile file, FileMetadata metadata, UUID processingUnitUid) {
+	public void onFileUploadFinished(RemoteFile file, RemoteFileMetadata metadata, UUID processingUnitUid) {
 		Logger.d(TAG, "onFileUploadFinished: unitUid=%s, file=%s", processingUnitUid, file);
 
 		file.setUploadFailed(false);
@@ -596,16 +611,16 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		file.setLastModificationTimestamp(
 				anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
 		file.setLastDownloadTimestamp(System.currentTimeMillis());
-		file.setRevision(metadata.getRev());
-		file.setUid(metadata.getId());
-		file.setRemotePath(metadata.getPathLower());
+		file.setRevision(metadata.getRevision());
+		file.setUid(metadata.getUid());
+		file.setRemotePath(metadata.getPath());
 
 		cache.update(file);
 
 		onFinishProcessingUnit(processingUnitUid);
 	}
 
-	void onOfflineWriteFailed(DropboxFile file, UUID processingUnitUid) {
+	public void onOfflineWriteFailed(RemoteFile file, UUID processingUnitUid) {
 		Logger.d(TAG, "onOfflineWriteFailed: unitUid=%s, file=%s", processingUnitUid, file);
 
 		cache.update(file);
@@ -613,7 +628,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		onFinishProcessingUnit(processingUnitUid);
 	}
 
-	void onOfflineWriteFinished(DropboxFile file, UUID processingUnitUid) {
+	public void onOfflineWriteFinished(RemoteFile file, UUID processingUnitUid) {
 		Logger.d(TAG, "onOfflineWriteFinished: unitUid=%s, file=%s", processingUnitUid, file);
 
 		cache.update(file);
@@ -631,7 +646,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		try {
 			boolean running = true;
 			while (running) {
-				ProcessingUnit runningUnit = findProcessingUnit(unit.fileUid, unit.remotePath);
+				ProcessingUnit runningUnit = findProcessingUnit(unit.getFileUid(), unit.getRemotePath());
 				if (runningUnit == null) {
 					processingMap.put(unit);
 					unitStarted = true;
@@ -640,7 +655,7 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 					unitProcessingLock.unlock();
 
 					try {
-						awaitProcessingUnitFinish(unit.fileUid, unit.remotePath);
+						awaitProcessingUnitFinish(unit.getFileUid(), unit.getRemotePath());
 
 						unitProcessingLock.lock();
 					} catch (InterruptedException e) {
@@ -700,8 +715,10 @@ public class DropboxFileSystemProvider implements FileSystemProvider {
 		OperationResult<Boolean> result = new OperationResult<>();
 
 		try {
-			Metadata metadata = dropboxClient.getFileMetadataOrNull(file);
-			result.setObj(metadata != null);
+			client.getFileMetadataOrThrow(file);
+			result.setObj(true);
+		} catch (DropboxFileNotFoundException e) {
+			result.setObj(false);
 		} catch (DropboxException e) {
 			Logger.printStackTrace(e);
 			result.setError(createOperationErrorFromDropboxException(e));

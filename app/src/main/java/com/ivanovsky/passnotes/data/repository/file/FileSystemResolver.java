@@ -1,8 +1,11 @@
 package com.ivanovsky.passnotes.data.repository.file;
 
-import com.ivanovsky.passnotes.data.repository.DropboxFileRepository;
+import com.ivanovsky.passnotes.data.repository.RemoteFileRepository;
 import com.ivanovsky.passnotes.data.repository.SettingsRepository;
-import com.ivanovsky.passnotes.data.repository.file.dropbox.DropboxFileSystemProvider;
+import com.ivanovsky.passnotes.data.repository.file.dropbox.DropboxAuthenticator;
+import com.ivanovsky.passnotes.data.repository.file.dropbox.DropboxClient;
+import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClient;
+import com.ivanovsky.passnotes.data.repository.file.remote.RemoteFileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.regular.RegularFileSystemProvider;
 import com.ivanovsky.passnotes.domain.FileHelper;
 import com.ivanovsky.passnotes.domain.PermissionHelper;
@@ -13,28 +16,31 @@ import java.util.Map;
 public class FileSystemResolver {
 
 	private final SettingsRepository settings;
-	private final DropboxFileRepository dropboxFileRepository;
+	private final RemoteFileRepository remoteFileRepository;
 	private final FileHelper fileHelper;
 	private final PermissionHelper permissionHelper;
-	private Map<FSType, FileSystemProvider> providers;
+	private final Map<FSType, FileSystemProvider> providers;
 
 	public FileSystemResolver(SettingsRepository settings,
-							  DropboxFileRepository dropboxFileRepository,
+							  RemoteFileRepository remoteFileRepository,
 							  FileHelper fileHelper,
 							  PermissionHelper permissionHelper) {
 		this.settings = settings;
-		this.dropboxFileRepository = dropboxFileRepository;
+		this.remoteFileRepository = remoteFileRepository;
 		this.fileHelper = fileHelper;
 		this.permissionHelper = permissionHelper;
 		this.providers = new EnumMap<>(FSType.class);
 	}
 
 	public FileSystemProvider resolveProvider(FSType type) {
-		FileSystemProvider provider = providers.get(type);
+		FileSystemProvider provider;
 
-		if (provider == null) {
-			provider = instantiateProvider(type);
-			providers.put(type, provider);
+		synchronized (providers) {
+			provider = providers.get(type);
+			if (provider == null) {
+				provider = instantiateProvider(type);
+				providers.put(type, provider);
+			}
 		}
 
 		return provider;
@@ -46,7 +52,10 @@ public class FileSystemResolver {
 		if (type == FSType.REGULAR_FS) {
 			provider = new RegularFileSystemProvider(permissionHelper);
 		} else if (type == FSType.DROPBOX) {
-			provider = new DropboxFileSystemProvider(settings, dropboxFileRepository, fileHelper);
+		    DropboxAuthenticator authenticator = new DropboxAuthenticator(settings);
+		    RemoteApiClient client = new DropboxClient(authenticator);
+			provider = new RemoteFileSystemProvider(authenticator, client, remoteFileRepository,
+					fileHelper, type);
 		} else {
 			throw new IllegalArgumentException("Specified provider is not implemented: " + type);
 		}

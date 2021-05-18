@@ -1,6 +1,6 @@
-package com.ivanovsky.passnotes.data.repository.file.dropbox;
+package com.ivanovsky.passnotes.data.repository.file.remote;
 
-import com.ivanovsky.passnotes.data.entity.DropboxFile;
+import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.file.FSType;
@@ -30,15 +30,15 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOErr
 import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError;
 import static com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull;
 
-public class DropboxSyncProcessor implements FileSystemSyncProcessor {
+public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
-	private final DropboxFileSystemProvider provider;
-	private final DropboxCache cache;
+	private final RemoteFileSystemProvider provider;
+	private final RemoteFileCache cache;
 	private final FileHelper fileHelper;
 
-	public DropboxSyncProcessor(DropboxFileSystemProvider provider,
-								DropboxCache cache,
-								FileHelper fileHelper) {
+	public RemoteFileSyncProcessor(RemoteFileSystemProvider provider,
+								   RemoteFileCache cache,
+								   FileHelper fileHelper) {
 		this.provider = provider;
 		this.cache = cache;
 		this.fileHelper = fileHelper;
@@ -48,8 +48,8 @@ public class DropboxSyncProcessor implements FileSystemSyncProcessor {
 	public List<FileDescriptor> getLocallyModifiedFiles() {
 		List<FileDescriptor> result = new ArrayList<>();
 
-		List<DropboxFile> dropboxFiles = cache.getLocallyModifiedFiles();
-		for (DropboxFile file : dropboxFiles) {
+		List<RemoteFile> remoteFiles = cache.getLocallyModifiedFiles();
+		for (RemoteFile file : remoteFiles) {
 			FileDescriptor descriptor = new FileDescriptor();
 
 			descriptor.setFsType(FSType.DROPBOX);
@@ -69,7 +69,7 @@ public class DropboxSyncProcessor implements FileSystemSyncProcessor {
 												   OnConflictStrategy onConflictStrategy) {
 		OperationResult<FileDescriptor> result = new OperationResult<>();
 
-		DropboxFile cachedFile = cache.getByUid(localDescriptor.getUid());
+		RemoteFile cachedFile = cache.getByUid(localDescriptor.getUid());
 		if (cachedFile != null) {
 			OperationResult<FileDescriptor> getFileResult = provider.getFile(
 					localDescriptor.getPath(),
@@ -114,7 +114,7 @@ public class DropboxSyncProcessor implements FileSystemSyncProcessor {
 		return result;
 	}
 
-	private OperationResult<FileDescriptor> uploadLocalFile(DropboxFile cachedFile, FileDescriptor localDescriptor) {
+	private OperationResult<FileDescriptor> uploadLocalFile(RemoteFile cachedFile, FileDescriptor localDescriptor) {
 		OperationResult<FileDescriptor> result = new OperationResult<>();
 
 		OperationResult<OutputStream> outResult = provider.openFileForWrite(localDescriptor,
@@ -134,7 +134,7 @@ public class DropboxSyncProcessor implements FileSystemSyncProcessor {
 				try {
 					InputOutputUtils.copy(in, out, true);
 
-					DropboxFile updatedCachedFile = cache.getByUid(cachedFile.getUid());
+					RemoteFile updatedCachedFile = cache.getByUid(cachedFile.getUid());
 
 					localDescriptor.setModified(updatedCachedFile.getLastModificationTimestamp());
 					localDescriptor.setPath(updatedCachedFile.getRemotePath());
@@ -181,7 +181,7 @@ public class DropboxSyncProcessor implements FileSystemSyncProcessor {
 		return result;
 	}
 
-	private OperationResult<FileDescriptor> downloadFile(DropboxFile cachedFile, FileDescriptor localDescriptor) {
+	private OperationResult<FileDescriptor> downloadFile(RemoteFile cachedFile, FileDescriptor localDescriptor) {
 		OperationResult<FileDescriptor> result = new OperationResult<>();
 
 		OperationResult<InputStream> inResult = provider.openFileForRead(localDescriptor,
@@ -194,7 +194,7 @@ public class DropboxSyncProcessor implements FileSystemSyncProcessor {
 			try {
 				in.close();
 
-				DropboxFile updatedCachedFile = cache.getByUid(cachedFile.getUid());
+				RemoteFile updatedCachedFile = cache.getByUid(cachedFile.getUid());
 
 				localDescriptor.setModified(updatedCachedFile.getLastModificationTimestamp());
 				localDescriptor.setPath(updatedCachedFile.getRemotePath());

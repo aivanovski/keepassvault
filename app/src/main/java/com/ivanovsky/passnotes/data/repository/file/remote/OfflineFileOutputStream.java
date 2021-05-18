@@ -1,7 +1,7 @@
-package com.ivanovsky.passnotes.data.repository.file.dropbox;
+package com.ivanovsky.passnotes.data.repository.file.remote;
 
-import com.ivanovsky.passnotes.data.entity.DropboxFile;
-import com.ivanovsky.passnotes.data.repository.file.RemoteFileOutputStream;
+import com.ivanovsky.passnotes.data.entity.RemoteFile;
+import com.ivanovsky.passnotes.data.repository.file.BaseRemoteFileOutputStream;
 import com.ivanovsky.passnotes.util.Logger;
 
 import java.io.BufferedOutputStream;
@@ -12,17 +12,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
 
-class OfflineFileOutputStream extends RemoteFileOutputStream {
+public class OfflineFileOutputStream extends BaseRemoteFileOutputStream {
 
 	private boolean failed;
 	private final UUID processingUnitUid;
 	private final File outFile;
-	private final DropboxFileSystemProvider provider;
+	private final RemoteFileSystemProvider provider;
 	private final OutputStream out;
-	private final DropboxFile file;
+	private final RemoteFile file;
 
-	OfflineFileOutputStream(DropboxFileSystemProvider provider,
-							DropboxFile file,
+	public OfflineFileOutputStream(RemoteFileSystemProvider provider,
+							RemoteFile file,
 							UUID processingUnitUid) throws FileNotFoundException {
 		this.provider = provider;
 		this.file = file;

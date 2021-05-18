@@ -11,7 +11,7 @@ public class DropboxAuthenticator implements FileSystemAuthenticator {
 
 	private final SettingsRepository settings;
 
-	DropboxAuthenticator(SettingsRepository settings) {
+	public DropboxAuthenticator(SettingsRepository settings) {
 		this.settings = settings;
 	}
 

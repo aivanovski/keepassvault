@@ -2,13 +2,20 @@ package com.ivanovsky.passnotes.data.entity;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.jetbrains.annotations.NotNull;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "dropbox_file")
-public class DropboxFile {
+import com.ivanovsky.passnotes.data.repository.file.FSType;
+
+@Entity(tableName = "remote_file")
+public class RemoteFile {
+
+	@ColumnInfo(name = "fs_type")
+	private FSType fsType;
 
 	@ColumnInfo(name = "locally_modified")
 	private boolean locallyModified;
@@ -53,7 +60,15 @@ public class DropboxFile {
 	@ColumnInfo(name = "revision")
 	private String revision;
 
-	public DropboxFile() {
+	public RemoteFile() {
+	}
+
+	public FSType getFsType() {
+		return fsType;
+	}
+
+	public void setFsType(FSType fsType) {
+		this.fsType = fsType;
 	}
 
 	public boolean isLocallyModified() {
@@ -110,10 +125,6 @@ public class DropboxFile {
 
 	public void setRetryCount(int retryCount) {
 		this.retryCount = retryCount;
-	}
-
-	public void incrementRetryCount() {
-		retryCount++;
 	}
 
 	public Long getLastRetryTimestamp() {
@@ -178,13 +189,16 @@ public class DropboxFile {
 
 		if (o == null || getClass() != o.getClass()) return false;
 
-		DropboxFile that = (DropboxFile) o;
+		RemoteFile that = (RemoteFile) o;
 
 		return new EqualsBuilder()
 				.append(locallyModified, that.locallyModified)
 				.append(uploaded, that.uploaded)
 				.append(uploadFailed, that.uploadFailed)
+				.append(uploading, that.uploading)
+				.append(downloading, that.downloading)
 				.append(retryCount, that.retryCount)
+				.append(fsType, that.fsType)
 				.append(id, that.id)
 				.append(lastRetryTimestamp, that.lastRetryTimestamp)
 				.append(lastDownloadTimestamp, that.lastDownloadTimestamp)
@@ -199,9 +213,12 @@ public class DropboxFile {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
+				.append(fsType)
 				.append(locallyModified)
 				.append(uploaded)
 				.append(uploadFailed)
+				.append(uploading)
+				.append(downloading)
 				.append(id)
 				.append(retryCount)
 				.append(lastRetryTimestamp)
@@ -216,8 +233,9 @@ public class DropboxFile {
 
 	@Override
 	public String toString() {
-		return "DropboxFile{" +
-				"locallyModified=" + locallyModified +
+		return "RemoteFile{" +
+				"fsType=" + fsType +
+				", locallyModified=" + locallyModified +
 				", uploaded=" + uploaded +
 				", uploadFailed=" + uploadFailed +
 				", uploading=" + uploading +

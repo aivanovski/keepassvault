@@ -1,8 +1,8 @@
-package com.ivanovsky.passnotes.data.repository.file.dropbox;
+package com.ivanovsky.passnotes.data.repository.file.remote;
 
-import com.dropbox.core.v2.files.FileMetadata;
-import com.ivanovsky.passnotes.data.entity.DropboxFile;
-import com.ivanovsky.passnotes.data.repository.file.RemoteFileOutputStream;
+import com.ivanovsky.passnotes.data.entity.RemoteFile;
+import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata;
+import com.ivanovsky.passnotes.data.repository.file.BaseRemoteFileOutputStream;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxException;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxNetworkException;
 import com.ivanovsky.passnotes.util.Logger;
@@ -15,24 +15,24 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
 
-class DropboxFileOutputStream extends RemoteFileOutputStream {
+public class RemoteFileOutputStream extends BaseRemoteFileOutputStream {
 
-	private static final String TAG = DropboxFileOutputStream.class.getSimpleName();
+	private static final String TAG = RemoteFileOutputStream.class.getSimpleName();
 
 	private boolean failed;
 	private final UUID processingUnitUid;
 	private final File outFile;
-	private final DropboxFileSystemProvider provider;
-	private final DropboxClient client;
-	private final DropboxFile file;
+	private final RemoteFileSystemProvider provider;
+	private final RemoteApiClient client;
+	private final RemoteFile file;
 
 	// should be lazy initialized, because new FileOutputStream make file content empty
 	private OutputStream out;
 
-	DropboxFileOutputStream(DropboxFileSystemProvider provider,
-							DropboxClient client,
-							DropboxFile file,
-							UUID processingUnitUid) throws FileNotFoundException {
+	public RemoteFileOutputStream(RemoteFileSystemProvider provider,
+						   RemoteApiClient client,
+						   RemoteFile file,
+						   UUID processingUnitUid) throws FileNotFoundException {
 		this.provider = provider;
 		this.client = client;
 		this.file = file;
@@ -91,7 +91,7 @@ class DropboxFileOutputStream extends RemoteFileOutputStream {
 			return;
 		}
 
-		FileMetadata metadata;
+		RemoteFileMetadata metadata;
 
 		try {
 			metadata = client.uploadFileOrThrow(file.getRemotePath(), file.getLocalPath());

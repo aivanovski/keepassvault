@@ -13,12 +13,16 @@ import com.dropbox.core.v2.files.ListFolderResult;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.WriteMode;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
+import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata;
+import com.ivanovsky.passnotes.data.entity.RemoteFolderMetadata;
 import com.ivanovsky.passnotes.data.repository.file.FSType;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxApiException;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxAuthException;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxException;
+import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxFileNotFoundException;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxInternalCacheException;
 import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxNetworkException;
+import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClient;
 import com.ivanovsky.passnotes.util.Logger;
 
 import java.io.BufferedInputStream;
@@ -30,12 +34,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import static com.ivanovsky.passnotes.util.DateUtils.anyLastTimestamp;
 import static com.ivanovsky.passnotes.util.FileUtils.getParentPath;
 
-class DropboxClient {
+public class DropboxClient implements RemoteApiClient {
 
 	private static final String TAG = DropboxClient.class.getSimpleName();
 
@@ -52,7 +55,7 @@ class DropboxClient {
 	private final DropboxAuthenticator authenticator;
 	private final DbxRequestConfig config;
 
-	DropboxClient(DropboxAuthenticator authenticator) {
+	public DropboxClient(DropboxAuthenticator authenticator) {
 		this.authenticator = authenticator;
 		this.config = DbxRequestConfig.newBuilder("Passnotes/Android")
 				.withHttpRequestor(new OkHttp3Requestor(OkHttp3Requestor.defaultOkHttpClient()))
@@ -70,8 +73,9 @@ class DropboxClient {
 		}
 	}
 
+	@Override
 	@NonNull
-	List<FileDescriptor> listFiles(FileDescriptor dir) throws DropboxException {
+	public List<FileDescriptor> listFiles(FileDescriptor dir) throws DropboxException {
 		List<FileDescriptor> result;
 
 		if (!dir.isDirectory()) {
@@ -158,8 +162,9 @@ class DropboxClient {
 		return file;
 	}
 
+	@Override
 	@NonNull
-	FileDescriptor getParent(FileDescriptor file) throws DropboxException {
+	public FileDescriptor getParent(FileDescriptor file) throws DropboxException {
 		FileDescriptor result;
 
 		initClientIfNeedOrThrow();
@@ -203,8 +208,9 @@ class DropboxClient {
 		return root;
 	}
 
+	@Override
 	@NonNull
-	FileDescriptor getRoot() throws DropboxException {
+	public FileDescriptor getRoot() throws DropboxException {
 		FileDescriptor result;
 
 		initClientIfNeedOrThrow();
@@ -230,8 +236,9 @@ class DropboxClient {
 		return result;
 	}
 
+	@Override
 	@NonNull
-	FileMetadata getFileMetadataOrThrow(FileDescriptor file) throws DropboxException {
+	public RemoteFileMetadata getFileMetadataOrThrow(FileDescriptor file) throws DropboxException {
 		Metadata metadata;
 
 		initClientIfNeedOrThrow();
@@ -247,36 +254,9 @@ class DropboxClient {
 		} catch (NetworkIOException e) {
 			Logger.printStackTrace(e);
 			throw new DropboxNetworkException();
-
-		} catch (DbxException e) {
-			Logger.printStackTrace(e);
-			throw new DropboxApiException(e.getMessage());
-		}
-
-		return (FileMetadata) metadata;
-	}
-
-	@Nullable
-	FileMetadata getFileMetadataOrNull(FileDescriptor file) throws DropboxException {
-		Metadata metadata;
-
-		initClientIfNeedOrThrow();
-
-		try {
-			metadata = client.files().getMetadata(formatDropboxPath(file.getPath()));
-			if (metadata == null) {
-				throw new DropboxApiException(String.format(ERROR_FAILED_TO_GET_FILE_METADATA, file.getPath()));
-			}
-			if (!(metadata instanceof FileMetadata)) {
-				throw new DropboxApiException(String.format(ERROR_SPECIFIED_FILE_HAS_INCORRECT_METADATA, file.getPath()));
-			}
-		} catch (NetworkIOException e) {
-			Logger.printStackTrace(e);
-			throw new DropboxNetworkException();
-
 		} catch (GetMetadataErrorException e) {
 			if (e.getMessage().contains(PATH_NOT_FOUND_MESSAGE)) {
-				metadata = null;
+			    throw new DropboxFileNotFoundException(file.getPath());
 			} else {
 				Logger.printStackTrace(e);
 				throw new DropboxApiException(ERROR_INCORRECT_MESSAGE_FROM_SERVER);
@@ -287,11 +267,12 @@ class DropboxClient {
 			throw new DropboxApiException(e.getMessage());
 		}
 
-		return (FileMetadata) metadata;
+		return convertMetadata((FileMetadata) metadata);
 	}
 
+	@Override
 	@NonNull
-	FileMetadata downloadFileOrThrow(String remotePath, String destinationPath) throws DropboxException {
+	public RemoteFileMetadata downloadFileOrThrow(String remotePath, String destinationPath) throws DropboxException {
 		FileMetadata result;
 
 		FileOutputStream out = null;
@@ -330,11 +311,12 @@ class DropboxClient {
 			}
 		}
 
-		return result;
+		return convertMetadata(result);
 	}
 
+	@Override
 	@NonNull
-	FolderMetadata getFolderMetadataOrThrow(String path) throws DropboxException {
+	public RemoteFolderMetadata getFolderMetadataOrThrow(String path) throws DropboxException {
 		Metadata metadata;
 
 		try {
@@ -363,11 +345,12 @@ class DropboxClient {
 			throw new DropboxApiException(e.getMessage());
 		}
 
-		return (FolderMetadata) metadata;
+		return convertMetadata((FolderMetadata) metadata);
 	}
 
+	@Override
 	@NonNull
-	FileMetadata uploadFileOrThrow(String remotePath, String destinationPath) throws DropboxException {
+	public RemoteFileMetadata uploadFileOrThrow(String remotePath, String destinationPath) throws DropboxException {
 		FileMetadata result;
 
 		try {
@@ -387,6 +370,15 @@ class DropboxClient {
 			throw new DropboxInternalCacheException();
 		}
 
-		return result;
+		return convertMetadata(result);
+	}
+
+	private RemoteFileMetadata convertMetadata(FileMetadata metadata) {
+		return new RemoteFileMetadata(metadata.getId(), metadata.getPathLower(),
+				metadata.getServerModified(), metadata.getClientModified(), metadata.getRev());
+	}
+
+	private RemoteFolderMetadata convertMetadata(FolderMetadata metadata) {
+		return new RemoteFolderMetadata(metadata.getId(), metadata.getPathLower());
 	}
 }

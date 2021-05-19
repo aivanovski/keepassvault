@@ -2,20 +2,17 @@ package com.ivanovsky.passnotes.data.entity;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.jetbrains.annotations.NotNull;
 
-import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
+import androidx.room.Embedded;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-
-import com.ivanovsky.passnotes.data.repository.file.FSType;
 
 @Entity(tableName = "remote_file")
 public class RemoteFile {
 
-	@ColumnInfo(name = "fs_type")
-	private FSType fsType;
+	@ColumnInfo(name = "fs_authority")
+	private FSAuthority fsAuthority;
 
 	@ColumnInfo(name = "locally_modified")
 	private boolean locallyModified;
@@ -63,12 +60,12 @@ public class RemoteFile {
 	public RemoteFile() {
 	}
 
-	public FSType getFsType() {
-		return fsType;
+	public FSAuthority getFsAuthority() {
+		return fsAuthority;
 	}
 
-	public void setFsType(FSType fsType) {
-		this.fsType = fsType;
+	public void setFsAuthority(FSAuthority fsAuthority) {
+		this.fsAuthority = fsAuthority;
 	}
 
 	public boolean isLocallyModified() {
@@ -198,7 +195,7 @@ public class RemoteFile {
 				.append(uploading, that.uploading)
 				.append(downloading, that.downloading)
 				.append(retryCount, that.retryCount)
-				.append(fsType, that.fsType)
+				.append(fsAuthority, that.fsAuthority)
 				.append(id, that.id)
 				.append(lastRetryTimestamp, that.lastRetryTimestamp)
 				.append(lastDownloadTimestamp, that.lastDownloadTimestamp)
@@ -213,7 +210,7 @@ public class RemoteFile {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-				.append(fsType)
+				.append(fsAuthority)
 				.append(locallyModified)
 				.append(uploaded)
 				.append(uploadFailed)
@@ -234,7 +231,7 @@ public class RemoteFile {
 	@Override
 	public String toString() {
 		return "RemoteFile{" +
-				"fsType=" + fsType +
+				"fsAuthority=" + fsAuthority +
 				", locallyModified=" + locallyModified +
 				", uploaded=" + uploaded +
 				", uploadFailed=" + uploadFailed +

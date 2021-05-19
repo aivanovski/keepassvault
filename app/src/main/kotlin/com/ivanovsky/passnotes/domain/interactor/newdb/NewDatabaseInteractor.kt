@@ -1,20 +1,18 @@
 package com.ivanovsky.passnotes.domain.interactor.newdb
 
-import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError.*
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.extensions.toUsedFile
 
-open class NewDatabaseInteractor(
+class NewDatabaseInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
     private val usedFileRepository: UsedFileRepository,
-    private val fileSystemResolver: FileSystemResolver,
-    private val observerBus: ObserverBus
+    private val fileSystemResolver: FileSystemResolver
 ) {
 
     fun createNewDatabaseAndOpen(
@@ -23,7 +21,7 @@ open class NewDatabaseInteractor(
     ): OperationResult<Boolean> {
         val result = OperationResult<Boolean>()
 
-        val provider = fileSystemResolver.resolveProvider(file.fsType)
+        val provider = fileSystemResolver.resolveProvider(file.fsAuthority)
 
         // TODO: refactor
         val existsResult = provider.exists(file)
@@ -39,17 +37,11 @@ open class NewDatabaseInteractor(
                     if (getFileResult.isSucceeded) {
                         val newFile = getFileResult.obj
 
-                        file.uid = newFile.uid
-                        file.path = newFile.path
-                        file.modified = newFile.modified
-
-                        val usedFile = UsedFile()
-
-                        usedFile.filePath = file.path
-                        usedFile.fileUid = file.uid
-                        usedFile.fsType = file.fsType
-                        usedFile.lastAccessTime = System.currentTimeMillis()
-                        usedFile.addedTime = usedFile.lastAccessTime
+                        val time = System.currentTimeMillis()
+                        val usedFile = newFile.toUsedFile(
+                            addedTime = time,
+                            lastAccessTime = time
+                        )
 
                         usedFileRepository.insert(usedFile)
 
@@ -80,7 +72,7 @@ open class NewDatabaseInteractor(
     private fun getFile(file: FileDescriptor): OperationResult<FileDescriptor> {
         val result = OperationResult<FileDescriptor>()
 
-        val provider = fileSystemResolver.resolveProvider(file.fsType)
+        val provider = fileSystemResolver.resolveProvider(file.fsAuthority)
         val getFileResult = provider.getFile(file.path, true)
 
         if (getFileResult.isSucceeded) {

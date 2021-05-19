@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.domain.interactor.unlock
 
-import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_RECORD_IS_ALREADY_EXISTS
@@ -12,11 +11,11 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.FileSyncHelper
+import com.ivanovsky.passnotes.extensions.toFileDescriptor
 
 class UnlockInteractor(
     private val fileRepository: UsedFileRepository,
     private val dbRepo: EncryptedDatabaseRepository,
-    private val observerBus: ObserverBus,
     private val fileSyncHelper: FileSyncHelper
 ) {
 
@@ -39,25 +38,15 @@ class UnlockInteractor(
 
     private fun loadAndSortUsedFiles(): List<FileDescriptor> {
         return fileRepository.all
-            .sortedByDescending { file -> if (file.lastAccessTime != null) file.lastAccessTime else file.addedTime }
-            .map { file -> createFileDescriptor(file) }
-    }
-
-    private fun createFileDescriptor(usedFile: UsedFile): FileDescriptor {
-        val file = FileDescriptor()
-
-        file.uid = usedFile.fileUid
-        file.path = usedFile.filePath
-        file.fsType = usedFile.fsType
-
-        return file
+            .sortedByDescending { file -> file.lastAccessTime ?: file.addedTime }
+            .map { file -> file.toFileDescriptor() }
     }
 
     fun openDatabase(key: KeepassDatabaseKey, file: FileDescriptor): OperationResult<Boolean> {
         val result = OperationResult<Boolean>()
 
         var syncError: OperationError? = null
-        val locallyModifiedFile = fileSyncHelper.getModifiedFileByUid(file.uid, file.fsType)
+        val locallyModifiedFile = fileSyncHelper.getModifiedFileByUid(file.uid, file.fsAuthority)
         if (locallyModifiedFile != null) {
             val syncResult = fileSyncHelper.resolve(locallyModifiedFile)
             if (syncResult.isFailed && syncResult.error.type != NETWORK_IO_ERROR) {
@@ -81,9 +70,11 @@ class UnlockInteractor(
     }
 
     private fun updateFileAccessTime(file: FileDescriptor) {
-        val usedFile = fileRepository.findByUidAndFsType(file.uid, file.fsType)
+        val usedFile = fileRepository.findByUid(file.uid, file.fsAuthority)
         if (usedFile != null) {
-            usedFile.lastAccessTime = System.currentTimeMillis()
+            val updatedFile = usedFile.copy(
+                lastAccessTime = System.currentTimeMillis()
+            )
 
             fileRepository.update(usedFile)
         }
@@ -92,11 +83,13 @@ class UnlockInteractor(
     fun saveUsedFileWithoutAccessTime(file: UsedFile): OperationResult<Boolean> {
         val result = OperationResult<Boolean>()
 
-        val existing = fileRepository.findByUidAndFsType(file.fileUid, file.fsType)
+        val existing = fileRepository.findByUid(file.fileUid, file.fsAuthority)
         if (existing == null) {
-            file.lastAccessTime = null
+            val newFile = file.copy(
+                lastAccessTime = null
+            )
 
-            fileRepository.insert(file)
+            fileRepository.insert(newFile)
 
             result.obj = true
         } else {

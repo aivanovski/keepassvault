@@ -4,6 +4,7 @@ import androidx.room.Database;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
+import com.ivanovsky.passnotes.data.repository.db.converters.FSAuthorityTypeConverter;
 import com.ivanovsky.passnotes.data.repository.db.converters.FSTypeConverter;
 import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.repository.db.dao.RemoteFileDao;
@@ -17,7 +18,7 @@ import com.ivanovsky.passnotes.data.entity.UsedFile;
 },
 		version = 1,
 		exportSchema = false)
-@TypeConverters(FSTypeConverter.class)
+@TypeConverters(FSAuthorityTypeConverter.class)
 public abstract class AppDatabase extends RoomDatabase {
 
 	public static final String FILE_NAME = "passnotes.db";

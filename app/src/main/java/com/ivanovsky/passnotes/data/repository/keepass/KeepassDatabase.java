@@ -113,15 +113,20 @@ public class KeepassDatabase implements EncryptedDatabase {
 		OperationResult<Boolean> result = new OperationResult<>();
 
 		synchronized (lock) {
-			FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsType());
+			FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsAuthority());
 
 			Credentials credentials = new KdbxCreds(key);
 
-			file.setModified(System.currentTimeMillis());
+			FileDescriptor updatedFile = file.copy(file.getFsAuthority(),
+					file.getPath(),
+					file.getUid(),
+					file.isDirectory(),
+					file.isRoot(),
+					System.currentTimeMillis());
 
 			OutputStream out = null;
 			try {
-				OperationResult<OutputStream> outResult = provider.openFileForWrite(file,
+				OperationResult<OutputStream> outResult = provider.openFileForWrite(updatedFile,
 						OnConflictStrategy.CANCEL,
 						true);
 				if (outResult.isFailed()) {

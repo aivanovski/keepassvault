@@ -27,7 +27,7 @@ class DebugMenuInteractor(
     fun getFileContent(file: FileDescriptor): OperationResult<Pair<FileDescriptor, File>> {
         val result = OperationResult<Pair<FileDescriptor, File>>()
 
-        val provider = fileSystemResolver.resolveProvider(file.fsType)
+        val provider = fileSystemResolver.resolveProvider(file.fsAuthority)
 
         val descriptorResult = provider.getFile(file.path, true)
 
@@ -87,7 +87,7 @@ class DebugMenuInteractor(
     ): OperationResult<Pair<FileDescriptor, File>> {
         val result = OperationResult<Pair<FileDescriptor, File>>()
 
-        val anyFsProvider = fileSystemResolver.resolveProvider(file.fsType)
+        val anyFsProvider = fileSystemResolver.resolveProvider(file.fsAuthority)
 
         val existsResult = anyFsProvider.exists(file)
         if (existsResult.isSucceeded) {
@@ -186,7 +186,7 @@ class DebugMenuInteractor(
     ): OperationResult<Pair<FileDescriptor, File>> {
         val result = OperationResult<Pair<FileDescriptor, File>>()
 
-        val provider = fileSystemResolver.resolveProvider(outFile.fsType)
+        val provider = fileSystemResolver.resolveProvider(outFile.fsAuthority)
 
         val openResult = provider.openFileForWrite(
             outFile,

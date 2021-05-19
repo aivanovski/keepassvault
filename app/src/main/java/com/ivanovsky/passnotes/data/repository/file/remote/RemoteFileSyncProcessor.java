@@ -1,13 +1,15 @@
 package com.ivanovsky.passnotes.data.repository.file.remote;
 
+import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
-import com.ivanovsky.passnotes.data.repository.file.FSType;
+import com.ivanovsky.passnotes.data.entity.FSType;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.data.repository.file.SyncStrategy;
 import com.ivanovsky.passnotes.domain.FileHelper;
+import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
 import com.ivanovsky.passnotes.util.Logger;
 
@@ -50,13 +52,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
 		List<RemoteFile> remoteFiles = cache.getLocallyModifiedFiles();
 		for (RemoteFile file : remoteFiles) {
-			FileDescriptor descriptor = new FileDescriptor();
-
-			descriptor.setFsType(FSType.DROPBOX);
-			descriptor.setUid(file.getUid());
-			descriptor.setPath(file.getRemotePath());
-			descriptor.setModified(file.getLastModificationTimestamp());
-
+			FileDescriptor descriptor = RemoteFileExtKt.toFileDescriptor(file);
 			result.add(descriptor);
 		}
 
@@ -128,25 +124,20 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 			// that 'in'
 
 			OperationResult<InputStream> openBufferResult = copyFileAndOpen(new File(cachedFile.getLocalPath()));
-			if (openBufferResult != null) {
-				InputStream in = openBufferResult.getObj();
+			InputStream in = openBufferResult.getObj();
 
-				try {
-					InputOutputUtils.copy(in, out, true);
+			try {
+				InputOutputUtils.copy(in, out, true);
 
-					RemoteFile updatedCachedFile = cache.getByUid(cachedFile.getUid());
-
-					localDescriptor.setModified(updatedCachedFile.getLastModificationTimestamp());
-					localDescriptor.setPath(updatedCachedFile.getRemotePath());
-					localDescriptor.setUid(updatedCachedFile.getUid());
-
-					result.setObj(localDescriptor);
-				} catch (IOException e) {
-					Logger.printStackTrace(e);
-					result.setError(newNetworkIOError());
+				RemoteFile updatedCachedFile = cache.getByUid(cachedFile.getUid());
+				if (updatedCachedFile != null) {
+					result.setObj(RemoteFileExtKt.toFileDescriptor(updatedCachedFile));
+				} else {
+				    result.setError(newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE));
 				}
-			} else {
-				result.setError(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+			} catch (IOException e) {
+				Logger.printStackTrace(e);
+				result.setError(newNetworkIOError());
 			}
 		} else {
 			result.setError(outResult.getError());
@@ -195,12 +186,11 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 				in.close();
 
 				RemoteFile updatedCachedFile = cache.getByUid(cachedFile.getUid());
-
-				localDescriptor.setModified(updatedCachedFile.getLastModificationTimestamp());
-				localDescriptor.setPath(updatedCachedFile.getRemotePath());
-				localDescriptor.setUid(updatedCachedFile.getUid());
-
-				result.setObj(localDescriptor);
+				if (updatedCachedFile != null) {
+					result.setObj(RemoteFileExtKt.toFileDescriptor(updatedCachedFile));
+				} else {
+					result.setError(newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE));
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 				result.setError(newFileAccessError(MESSAGE_FAILED_TO_ACCESS_TO_FILE));

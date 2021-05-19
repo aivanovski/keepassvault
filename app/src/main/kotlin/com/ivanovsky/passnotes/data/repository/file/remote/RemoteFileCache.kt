@@ -1,20 +1,20 @@
 package com.ivanovsky.passnotes.data.repository.file.remote
 
+import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.RemoteFile
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
-import com.ivanovsky.passnotes.data.repository.file.FSType
 
 class RemoteFileCache(
     private val repository: RemoteFileRepository,
-    private val fsType: FSType
+    private val fsAuthority: FSAuthority
 ) {
 
     fun getByRemotePath(remotePath: String): RemoteFile? {
-        return repository.findByRemotePathAndFsType(remotePath, fsType)
+        return repository.findByRemotePath(remotePath, fsAuthority)
     }
 
     fun getByUid(uid: String): RemoteFile? {
-        return repository.findByUidAndFsType(uid, fsType)
+        return repository.findByUid(uid, fsAuthority)
     }
 
     fun put(file: RemoteFile) {
@@ -26,7 +26,7 @@ class RemoteFileCache(
     }
 
     fun getLocallyModifiedFiles(): List<RemoteFile> {
-        return repository.getAllByFsType(fsType)
+        return repository.getAll(fsAuthority)
             .filter { it.isLocallyModified }
     }
 }

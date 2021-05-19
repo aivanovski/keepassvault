@@ -10,7 +10,7 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.repository.file.FSType
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.databinding.DebugMenuFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage

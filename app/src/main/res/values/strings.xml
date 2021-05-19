@@ -4,6 +4,7 @@
 
 	<!-- Common for all screens -->
 	<string name="dropbox">Dropbox</string>
+	<string name="webdav">WebDAV</string>
 	<string name="device">Device</string>
 	<string name="no_items">No items</string>
 	<string name="yes">Yes</string>
@@ -110,6 +111,10 @@
 	<string name="select_file">Select file</string>
 	<string name="permission_denied_message">Application requires external storage permission</string>
 	<string name="please_select_any_file">Please select any file</string>
+
+	<!-- Server screen -->
+	<string name="add_new_server">Add new server</string>
+	<string name="server_url">Server url</string>
 
 	<!-- Debug menu screen -->
 	<string name="debug_menu">Debug menu</string>

@@ -1,8 +1,9 @@
-package com.ivanovsky.passnotes.data.repository.file
+package com.ivanovsky.passnotes.data.entity
 
 enum class FSType(val value: String) {
     REGULAR_FS("REGULAR_FS"),
-    DROPBOX("DROPBOX");
+    DROPBOX("DROPBOX"),
+    WEBDAV("WEBDAV");
 
     companion object {
 

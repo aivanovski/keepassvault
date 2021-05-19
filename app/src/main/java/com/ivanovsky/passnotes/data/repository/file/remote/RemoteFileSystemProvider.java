@@ -1,23 +1,24 @@
 package com.ivanovsky.passnotes.data.repository.file.remote;
 
+import com.ivanovsky.passnotes.data.entity.FSAuthority;
 import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata;
-import com.ivanovsky.passnotes.data.entity.RemoteFolderMetadata;
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository;
-import com.ivanovsky.passnotes.data.repository.file.FSType;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
-import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxApiException;
-import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxAuthException;
-import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxException;
-import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxFileNotFoundException;
-import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxNetworkException;
+import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSApiException;
+import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSAuthException;
+import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSException;
+import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSFileNotFoundException;
+import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSNetworkException;
 import com.ivanovsky.passnotes.domain.FileHelper;
+import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
+import com.ivanovsky.passnotes.extensions.RemoteFileMetadataExtKt;
 import com.ivanovsky.passnotes.util.DateUtils;
 import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.Logger;
@@ -66,22 +67,22 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 	private final Lock unitProcessingLock;
 	private final FileHelper fileHelper;
 	private final RemoteFileSyncProcessor syncProcessor;
-	private final FSType fsType;
+	private final FSAuthority fsAuthority;
 
 	public RemoteFileSystemProvider(FileSystemAuthenticator authenticator,
 									RemoteApiClient client,
 									RemoteFileRepository remoteFileRepository,
 									FileHelper fileHelper,
-									FSType fsType) {
+									FSAuthority fsAuthority) {
 		this.authenticator = authenticator;
 		this.client = client;
-		this.cache = new RemoteFileCache(remoteFileRepository, fsType);
+		this.cache = new RemoteFileCache(remoteFileRepository, fsAuthority);
 		this.processingMap = new StatusMap();
 		this.processingUidToLatch = new HashMap<>();
 		this.unitProcessingLock = new ReentrantLock();
 		this.fileHelper = fileHelper;
 		this.syncProcessor = new RemoteFileSyncProcessor(this, cache, fileHelper);
-		this.fsType = fsType;
+		this.fsAuthority = fsAuthority;
 	}
 
 	@Override
@@ -95,26 +96,26 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
 		try {
 			result.setObj(client.listFiles(dir));
-		} catch (DropboxException e) {
-			result.setError(createOperationErrorFromDropboxException(e));
+		} catch (RemoteFSException e) {
+			result.setError(createOperationErrorFromException(e));
 		}
 
 		return result;
 	}
 
-	private OperationError createOperationErrorFromDropboxException(DropboxException exception) {
+	private OperationError createOperationErrorFromException(RemoteFSException exception) {
 		OperationError result;
 
-		if (exception instanceof DropboxAuthException) {
+		if (exception instanceof RemoteFSAuthException) {
 			result = newAuthError(exception.getMessage());
-		} else if (exception instanceof DropboxApiException) {
-			result = newGenericIOError(exception.getMessage());
-		} else if (exception instanceof DropboxNetworkException) {
+		} else if (exception instanceof RemoteFSNetworkException) {
 			result = newNetworkIOError();
-		} else if (exception instanceof DropboxFileNotFoundException) {
+		} else if (exception instanceof RemoteFSFileNotFoundException) {
+			result = newGenericIOError(exception.getMessage());
+		} else if (exception instanceof RemoteFSApiException) {
 			result = newGenericIOError(exception.getMessage());
 		} else {
-			throw new IllegalArgumentException("Exception handling is not implemented");
+			throw new IllegalArgumentException("Exception handling is not implemented: exception=" + exception);
 		}
 
 		return result;
@@ -126,8 +127,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
 		try {
 			result.setObj(client.getParent(file));
-		} catch (DropboxException e) {
-			result.setError(createOperationErrorFromDropboxException(e));
+		} catch (RemoteFSException e) {
+			result.setError(createOperationErrorFromException(e));
 		}
 
 		return result;
@@ -139,8 +140,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
 		try {
 			result.setObj(client.getRoot());
-		} catch (DropboxException e) {
-			result.setError(createOperationErrorFromDropboxException(e));
+		} catch (RemoteFSException e) {
+			result.setError(createOperationErrorFromException(e));
 		}
 
 		return result;
@@ -153,7 +154,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 		try {
 			RemoteFileMetadata metadata = client.getFileMetadataOrThrow(newDescriptorFromPath(path));
 			result.setObj(newDescriptorFromMetadata(metadata));
-		} catch (DropboxNetworkException e) {
+		} catch (RemoteFSNetworkException e) {
 			if (cacheOperationsEnabled) {
 				RemoteFile file = cache.getByRemotePath(path);
 
@@ -163,47 +164,30 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 					result.setError(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
 				}
 			} else {
-				result.setError(createOperationErrorFromDropboxException(e));
+				result.setError(createOperationErrorFromException(e));
 			}
-		} catch (DropboxException e) {
-			result.setError(createOperationErrorFromDropboxException(e));
+		} catch (RemoteFSException e) {
+			result.setError(createOperationErrorFromException(e));
 		}
 
 		return result;
 	}
 
 	private FileDescriptor newDescriptorFromPath(String path) {
-		FileDescriptor result = new FileDescriptor();
-
-		result.setFsType(FSType.DROPBOX);
-		result.setPath(path);
-
-		return result;
+		return new FileDescriptor(fsAuthority,
+                path,
+				path,
+                false,
+				false,
+				null);
 	}
 
 	private FileDescriptor newDescriptorFromMetadata(RemoteFileMetadata metadata) {
-		FileDescriptor result = new FileDescriptor();
-
-		result.setFsType(FSType.DROPBOX);
-		result.setUid(metadata.getUid());
-		result.setPath(metadata.getPath());
-		result.setDirectory(false);
-		result.setModified(anyLastTimestamp(metadata.getServerModified(),
-				metadata.getClientModified()));
-
-		return result;
+		return RemoteFileMetadataExtKt.toFileDescriptor(metadata, fsAuthority);
 	}
 
 	private FileDescriptor newDescriptorFromDropboxFile(RemoteFile file) {
-		FileDescriptor result = new FileDescriptor();
-
-		result.setFsType(FSType.DROPBOX);
-		result.setUid(file.getUid());
-		result.setPath(file.getRemotePath());
-		result.setDirectory(false);
-		result.setModified(file.getLastModificationTimestamp());
-
-		return result;
+		return RemoteFileExtKt.toFileDescriptor(file);
 	}
 
 	@Override
@@ -239,7 +223,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
 						cachedFile = new RemoteFile();
 
-						cachedFile.setFsType(fsType);
+						cachedFile.setFsAuthority(fsAuthority);
 						cachedFile.setUid(metadata.getUid());
 						cachedFile.setRemotePath(metadata.getPath());
 						cachedFile.setLocalPath(destinationPath);
@@ -311,7 +295,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 			} catch (FileNotFoundException e) {
 				result.setError(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
 
-			} catch (DropboxNetworkException e) {
+			} catch (RemoteFSNetworkException e) {
 				// use cached file
 				RemoteFile cachedFile = cache.getByUid(file.getUid());
 				if (cachedFile != null) {
@@ -335,8 +319,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 					result.setError(newNetworkIOError());
 				}
 
-			} catch (DropboxException e) {
-				result.setError(createOperationErrorFromDropboxException(e));
+			} catch (RemoteFSException e) {
+				result.setError(createOperationErrorFromException(e));
 			}
 
 			if (unit != null) {
@@ -379,7 +363,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
 				try {
 					metadata = client.getFileMetadataOrThrow(file);
-				} catch (DropboxFileNotFoundException e) {
+				} catch (RemoteFSFileNotFoundException e) {
 				    metadata = null;
 				}
 
@@ -387,17 +371,18 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 					// create and upload new file
 					String parentPath = FileUtils.getParentPath(file.getPath());
 					if (!"/".equals(parentPath)) {
-						RemoteFolderMetadata parentMetadata = client.getFolderMetadataOrThrow(parentPath);
-						parentPath = parentMetadata.getPath();
+						FileDescriptor parent = client.getParent(file);
+						parentPath = parent.getPath();
 					}
 
 					RemoteFile cachedFile = new RemoteFile();
 
 					long timestamp = System.currentTimeMillis();
 
-					cachedFile.setFsType(fsType);
+					cachedFile.setFsAuthority(fsAuthority);
 					cachedFile.setRemotePath(parentPath + "/" + file.getName());
 					cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
+					cachedFile.setUid(cachedFile.getRemotePath());
 					cachedFile.setLastModificationTimestamp(timestamp);
 					cachedFile.setLastDownloadTimestamp(timestamp);
 					cachedFile.setLocallyModified(true);
@@ -433,7 +418,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 						if (cachedFile == null) {
 							cachedFile = new RemoteFile();
 
-							cachedFile.setFsType(fsType);
+							cachedFile.setFsAuthority(fsAuthority);
 							cachedFile.setRemotePath(remotePath);
 							cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
 							cachedFile.setLastModificationTimestamp(localModified.getTime());
@@ -484,7 +469,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 						result.setError(newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
 					}
 				}
-			} catch (DropboxNetworkException e) {
+			} catch (RemoteFSNetworkException e) {
 				// if device is offline, just write to the local file
 				if (cacheOperationsEnabled) {
 					RemoteFile cachedFile = cache.getByUid(file.getUid());
@@ -518,10 +503,10 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 								file.toString())));
 					}
 				} else {
-					result.setError(createOperationErrorFromDropboxException(e));
+					result.setError(createOperationErrorFromException(e));
 				}
-			} catch (DropboxException e) {
-				result.setError(createOperationErrorFromDropboxException(e));
+			} catch (RemoteFSException e) {
+				result.setError(createOperationErrorFromException(e));
 			}
 		} else {
 			result.setError(newGenericIOError(ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR));
@@ -717,11 +702,11 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 		try {
 			client.getFileMetadataOrThrow(file);
 			result.setObj(true);
-		} catch (DropboxFileNotFoundException e) {
+		} catch (RemoteFSFileNotFoundException e) {
 			result.setObj(false);
-		} catch (DropboxException e) {
+		} catch (RemoteFSException e) {
 			Logger.printStackTrace(e);
-			result.setError(createOperationErrorFromDropboxException(e));
+			result.setError(createOperationErrorFromException(e));
 		}
 
 		return result;

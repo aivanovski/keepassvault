@@ -9,8 +9,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.repository.file.FSType
+import com.ivanovsky.passnotes.data.repository.file.AuthType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.databinding.StorageListFragmentBinding
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
@@ -25,6 +26,7 @@ class StorageListFragment : Fragment() {
 
     private val viewModel: StorageListViewModel by viewModel()
     private val fileSystemResolver: FileSystemResolver by inject()
+    private var requestedFSAuthority: FSAuthority? = null
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -64,12 +66,31 @@ class StorageListFragment : Fragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_PICK_FILE) {
-            val extras = data?.extras ?: return
+        when (requestCode) {
+            REQUEST_CODE_PICK_FILE -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    val extras = data?.extras ?: return
+                    val file =
+                        extras.getParcelable<FileDescriptor>(FilePickerActivity.EXTRA_RESULT) ?: return
 
-            val file = extras.getParcelable<FileDescriptor>(FilePickerActivity.EXTRA_RESULT) ?: return
+                    viewModel.onFilePickedByPicker(file)
+                }
+            }
+            REQUEST_CODE_INTERNAL_AUTHENTICATION -> {
+                val fsAuthority = requestedFSAuthority ?: return
+                val authenticator =
+                    fileSystemResolver.resolveProvider(fsAuthority).authenticator ?: return
 
-            viewModel.onFilePickedByPicker(file)
+                val newFsAuthority = data?.let {
+                    authenticator.getAuthorityFromResult(it)
+                }
+
+                if (resultCode == Activity.RESULT_OK && newFsAuthority != null) {
+                    viewModel.onInternalAuthSuccess(newFsAuthority)
+                } else {
+                    viewModel.onInternalAuthFailed()
+                }
+            }
         }
     }
 
@@ -77,8 +98,8 @@ class StorageListFragment : Fragment() {
         viewModel.selectFileEvent.observe(viewLifecycleOwner) { selectedFile ->
             onFileSelected(selectedFile)
         }
-        viewModel.showAuthActivityEvent.observe(viewLifecycleOwner) { fsType ->
-            showAuthActivity(fsType)
+        viewModel.showAuthActivityEvent.observe(viewLifecycleOwner) { fsAuthority ->
+            showAuthActivity(fsAuthority)
         }
         viewModel.showFilePickerScreenEvent.observe(viewLifecycleOwner) { args ->
             showFilePickerScreen(args)
@@ -96,9 +117,19 @@ class StorageListFragment : Fragment() {
         }
     }
 
-    private fun showAuthActivity(fsType: FSType) {
-        val authenticator = fileSystemResolver.resolveProvider(fsType).authenticator
-        authenticator?.startAuthActivity(context)
+    private fun showAuthActivity(fsAuthority: FSAuthority) {
+        requestedFSAuthority = fsAuthority
+
+        val authenticator = fileSystemResolver.resolveProvider(fsAuthority).authenticator
+        val authType = authenticator?.getAuthType()
+        if (authType == AuthType.INTERNAL) {
+            startActivityForResult(
+                authenticator.getAuthIntent(requireContext()),
+                REQUEST_CODE_INTERNAL_AUTHENTICATION
+            )
+        } else if (authType == AuthType.EXTERNAL) {
+            authenticator.startAuthActivity(requireContext())
+        }
     }
 
     private fun showFilePickerScreen(args: FilePickerArgs) {
@@ -113,6 +144,7 @@ class StorageListFragment : Fragment() {
     companion object {
 
         private const val REQUEST_CODE_PICK_FILE = 100
+        private const val REQUEST_CODE_INTERNAL_AUTHENTICATION = 101
 
         private const val ARG_REQUIRED_ACTION = "requiredAction"
 

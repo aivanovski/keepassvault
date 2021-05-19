@@ -3,8 +3,8 @@ package com.ivanovsky.passnotes.data.repository.file.remote;
 import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata;
 import com.ivanovsky.passnotes.data.repository.file.BaseRemoteFileOutputStream;
-import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxException;
-import com.ivanovsky.passnotes.data.repository.file.dropbox.exception.DropboxNetworkException;
+import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSException;
+import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSNetworkException;
 import com.ivanovsky.passnotes.util.Logger;
 
 import java.io.BufferedOutputStream;
@@ -95,14 +95,14 @@ public class RemoteFileOutputStream extends BaseRemoteFileOutputStream {
 
 		try {
 			metadata = client.uploadFileOrThrow(file.getRemotePath(), file.getLocalPath());
-		} catch (DropboxNetworkException e) {
+		} catch (RemoteFSNetworkException e) {
 			Logger.printStackTrace(e);
 
 			provider.onOfflineWriteFinished(file, processingUnitUid);
 
 			throw new IOException(e);
 
-		} catch (DropboxException e) {
+		} catch (RemoteFSException e) {
 			Logger.printStackTrace(e);
 
 			provider.onFileUploadFailed(file, processingUnitUid);

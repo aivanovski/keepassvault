@@ -12,6 +12,10 @@ public class Logger {
 		Log.d(tag, String.format(message, args));
 	}
 
+	public static void e(String tag, String message, Object...args) {
+		Log.e(tag, String.format(message, args));
+	}
+
 	public static void printStackTrace(Exception exception) {
 		exception.printStackTrace();
 	}

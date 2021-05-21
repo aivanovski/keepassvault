@@ -12,6 +12,6 @@ fun RemoteFileMetadata.toFileDescriptor(fsAuthority: FSAuthority): FileDescripto
         path = path,
         uid = uid,
         isDirectory = false,
-        isRoot = FileUtils.ROOT_PATH == path,
+        isRoot = false,
         modified = DateUtils.anyLastTimestamp(serverModified, clientModified)
     )

@@ -3,12 +3,19 @@ package com.ivanovsky.passnotes.domain.interactor.storagelist
 import android.content.Context
 import android.os.Environment
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.repository.file.FSType
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.entity.StorageOption
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType.*
+import com.ivanovsky.passnotes.domain.entity.StorageOptionType.DROPBOX
+import com.ivanovsky.passnotes.domain.entity.StorageOptionType.EXTERNAL_STORAGE
+import com.ivanovsky.passnotes.domain.entity.StorageOptionType.PRIVATE_STORAGE
+import com.ivanovsky.passnotes.domain.entity.StorageOptionType.WEBDAV
+import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class StorageListInteractor(
     private val context: Context,
@@ -19,7 +26,8 @@ class StorageListInteractor(
         return listOf(
             createPrivateStorageOption(),
             createExternalStorageOption(),
-            createDropboxOption()
+            createDropboxOption(),
+            createWebDavOption()
         )
     }
 
@@ -47,6 +55,14 @@ class StorageListInteractor(
         )
     }
 
+    private fun createWebDavOption(): StorageOption {
+        return StorageOption(
+            WEBDAV,
+            context.getString(R.string.webdav),
+            createWebdavStorageDir()
+        )
+    }
+
     private fun createPrivateStorageDir(): FileDescriptor {
         return FileDescriptor.fromRegularFile(context.filesDir)
     }
@@ -55,19 +71,30 @@ class StorageListInteractor(
         return FileDescriptor.fromRegularFile(Environment.getExternalStorageDirectory())
     }
 
-    private fun createDropboxStorageDir(): FileDescriptor {
-        val file = FileDescriptor()
+    private fun createDropboxStorageDir(): FileDescriptor =
+        FileDescriptor(
+            fsAuthority = FSAuthority.DROPBOX_FS_AUTHORITY,
+            path = ROOT_PATH,
+            uid = ROOT_PATH,
+            isDirectory = true,
+            isRoot = true
+        )
 
-        file.fsType = FSType.DROPBOX
-        file.path = "/"
-        file.isDirectory = true
-        file.isRoot = true
+    private fun createWebdavStorageDir(): FileDescriptor =
+        FileDescriptor(
+            fsAuthority = FSAuthority(
+                credentials = null,
+                type = FSType.WEBDAV
+            ),
+            path = ROOT_PATH,
+            uid = ROOT_PATH,
+            isDirectory = true,
+            isRoot = true
+        )
 
-        return file
-    }
-
-    fun getDropboxRoot(): OperationResult<FileDescriptor> {
-        val provider = fileSystemResolver.resolveProvider(FSType.DROPBOX)
-        return provider.rootFile
-    }
+    suspend fun getRemoteFileSystemRoot(fsAuthority: FSAuthority): OperationResult<FileDescriptor> =
+        withContext(Dispatchers.IO) {
+            val provider = fileSystemResolver.resolveProvider(fsAuthority)
+            provider.rootFile
+        }
 }

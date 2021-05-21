@@ -138,6 +138,11 @@
 	<style name="Material.EditText">
 	</style>
 
+	<style name="Material.EditText.PrimaryMultiLine">
+		<item name="android:textSize">@dimen/material_edit_text_primary_text_size</item>
+		<item name="android:textColor">@color/material_edit_text_primary_text</item>
+	</style>
+
 	<style name="Material.EditText.PrimarySingleLine">
 		<item name="android:textSize">@dimen/material_edit_text_primary_text_size</item>
 		<item name="android:textColor">@color/material_edit_text_primary_text</item>

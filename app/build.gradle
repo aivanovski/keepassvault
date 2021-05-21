@@ -7,6 +7,9 @@ def versionMajor = 0
 def versionMinor = 1
 def versionPatch = 0
 
+def debugProperties = new Properties()
+debugProperties.load(new FileInputStream(rootProject.file("debug.properties")))
+
 android {
 	def ext = rootProject.extensions.ext
 
@@ -75,6 +78,14 @@ android {
 						ext.debugFileNameToPasswordMap.values().collect{"\"${it}\""}.join(",") +
 						"}"
 			}
+
+			def debugWebDavUrl = debugProperties['debugWebDavUrl'] ?: ""
+			def debugWebDavUsername = debugProperties['debugWebDavUsername'] ?: ""
+			def debugWebDavPassword = debugProperties['debugWebDavPassword'] ?: ""
+			buildConfigField "String", "DEBUG_WEB_DAV_URL", "\"${debugWebDavUrl}\""
+			buildConfigField "String", "DEBUG_WEB_DAV_USERNAME", "\"${debugWebDavUsername}\""
+			buildConfigField "String", "DEBUG_WEB_DAV_PASSWORD", "\"${debugWebDavPassword}\""
+
 		}
 		release {
 			minifyEnabled false
@@ -108,7 +119,7 @@ def androidXVersion = '1.2.0'
 
 def annimonStreamApiVersion = '1.1.4'
 def dropboxVersion = '3.0.11'
-def okHttpVersion = '3.10.0'
+def okHttpVersion = '4.9.1'
 def apacheCommonsLangVersion = '3.0'
 
 // Test
@@ -178,9 +189,9 @@ dependencies {
 	implementation "org.apache.commons:commons-lang3:$apacheCommonsLangVersion"
 
 	// Kotlin
-	implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+	implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 	implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.2"
+	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
 
 	// KeePassJava2
 	implementation project(':libs:KeePassJava2-database')
@@ -192,7 +203,11 @@ dependencies {
 
 	// OkHttp
 	implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
+	implementation "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
 
 	// Stetho
 	implementation "com.facebook.stetho:stetho:1.5.1"
+
+	// WebDAV client
+	implementation "com.github.thegrizzlylabs:sardine-android:v0.8"
 }

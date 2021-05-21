@@ -1,16 +1,16 @@
 package com.ivanovsky.passnotes.domain
 
+import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.repository.file.FSType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
 
 class FileSyncHelper(private val fileSystemResolver: FileSystemResolver) {
 
-    fun getModifiedFileByUid(uid: String, fsType: FSType): FileDescriptor? {
-        val provider = fileSystemResolver.resolveProvider(fsType)
+    fun getModifiedFileByUid(uid: String, fsAuthority: FSAuthority): FileDescriptor? {
+        val provider = fileSystemResolver.resolveProvider(fsAuthority)
 
         val modifiedFiles = provider.syncProcessor?.locallyModifiedFiles
 
@@ -18,7 +18,7 @@ class FileSyncHelper(private val fileSystemResolver: FileSystemResolver) {
     }
 
     fun resolve(file: FileDescriptor): OperationResult<FileDescriptor> {
-        val provider = fileSystemResolver.resolveProvider(file.fsType)
+        val provider = fileSystemResolver.resolveProvider(file.fsAuthority)
 
         return provider.syncProcessor.process(
             file,

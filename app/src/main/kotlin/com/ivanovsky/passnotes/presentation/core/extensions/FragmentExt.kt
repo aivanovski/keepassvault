@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.core.extensions
 
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.ActionBar
@@ -10,6 +11,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.SnackbarMessage
 import com.ivanovsky.passnotes.util.InputMethodUtils
+
+fun <T : Parcelable> Fragment.getMandarotyArgument(key: String): T {
+    return arguments?.getParcelable(key) ?: requireArgument(key)
+}
 
 fun <T : Fragment> T.withArguments(initBlock: Bundle.() -> Unit): T {
     val args = Bundle()

@@ -8,13 +8,13 @@ import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.UsedFile
-import com.ivanovsky.passnotes.data.repository.file.FSType
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
+import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -156,10 +156,9 @@ class UnlockViewModel(
     private fun createViewItems(files: List<FileDescriptor>): List<DropDownItem> {
         return files.map { file ->
             DropDownItem(
-                FileUtils.getFileNameFromPath(file.path)
-                    ?: resourceProvider.getString(R.string.empty_file_name),
+                FileUtils.getFileNameFromPath(file.path),
                 file.path,
-                formatFsType(file.fsType)
+                formatFsType(file.fsAuthority.type)
             )
         }
     }
@@ -168,6 +167,7 @@ class UnlockViewModel(
         return when (fsType) {
             FSType.DROPBOX -> resourceProvider.getString(R.string.dropbox)
             FSType.REGULAR_FS -> resourceProvider.getString(R.string.device)
+            FSType.WEBDAV -> resourceProvider.getString(R.string.webdav)
         }
     }
 
@@ -176,7 +176,7 @@ class UnlockViewModel(
     }
 
     private fun isFileEqualsByUidAndFsType(lhs: FileDescriptor, rhs: FileDescriptor): Boolean {
-        return lhs.uid == rhs.uid && lhs.fsType == rhs.fsType
+        return lhs.uid == rhs.uid && lhs.fsAuthority == rhs.fsAuthority
     }
 
     fun onUnlockButtonClicked() {
@@ -223,12 +223,7 @@ class UnlockViewModel(
         //called when user select file from built-in file picker
         screenState.value = ScreenState.loading()
 
-        val usedFile = UsedFile()
-
-        usedFile.filePath = file.path
-        usedFile.fileUid = file.uid
-        usedFile.fsType = file.fsType
-        usedFile.addedTime = System.currentTimeMillis()
+        val usedFile = file.toUsedFile(addedTime = System.currentTimeMillis())
 
         viewModelScope.launch {
             val result = withContext(dispatchers.Default) {

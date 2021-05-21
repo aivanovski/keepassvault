@@ -3,15 +3,19 @@ package com.ivanovsky.passnotes.presentation.storagelist
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.repository.file.FSType
+import com.ivanovsky.passnotes.data.repository.file.AuthType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType.*
+import com.ivanovsky.passnotes.domain.entity.StorageOptionType.DROPBOX
+import com.ivanovsky.passnotes.domain.entity.StorageOptionType.EXTERNAL_STORAGE
+import com.ivanovsky.passnotes.domain.entity.StorageOptionType.PRIVATE_STORAGE
+import com.ivanovsky.passnotes.domain.entity.StorageOptionType.WEBDAV
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
@@ -42,13 +46,14 @@ class StorageListViewModel(
     val screenState = MutableLiveData<ScreenState>(ScreenState.notInitialized())
 
     val selectFileEvent = SingleLiveEvent<FileDescriptor>()
-    val showAuthActivityEvent = SingleLiveEvent<FSType>()
+    val showAuthActivityEvent = SingleLiveEvent<FSAuthority>()
     val showFilePickerScreenEvent = SingleLiveEvent<FilePickerArgs>()
 
     private val cellFactory = StorageListCellFactory()
     private var storageOptions: List<StorageOption>? = null
     private var requestedAction: Action? = null
-    private var isAuthActivityDisplayed = false
+    private var isExternalAuthActivityLaunched = false
+    private var selectedOption: StorageOption? = null
 
     init {
         subscribeToEvents()
@@ -73,20 +78,21 @@ class StorageListViewModel(
     }
 
     fun onScreenStart() {
-        if (isAuthActivityDisplayed) {
-            isAuthActivityDisplayed = false
+        val selectedOption = selectedOption ?: return
 
-            val provider = fileSystemResolver.resolveProvider(FSType.DROPBOX)
-            if (provider.authenticator.isAuthenticationRequired) {
+        if (isExternalAuthActivityLaunched) {
+            isExternalAuthActivityLaunched = false
+
+            val fsAuthority = selectedOption.root.fsAuthority
+            val provider = fileSystemResolver.resolveProvider(fsAuthority)
+            if (provider.authenticator.isAuthenticationRequired()) {
                 val errorMessage = resourceProvider.getString(R.string.authentication_failed)
                 screenState.value = ScreenState.dataWithError(errorMessage)
             } else {
                 viewModelScope.launch {
-                    val dropboxRoot = withContext(dispatchers.IO) {
-                        interactor.getDropboxRoot()
-                    }
+                    val fsRoot = interactor.getRemoteFileSystemRoot(fsAuthority)
 
-                    onDropboxRootLoaded(dropboxRoot)
+                    onRemoteRootLoaded(fsRoot)
                 }
             }
         }
@@ -96,22 +102,35 @@ class StorageListViewModel(
         selectFileEvent.call(file)
     }
 
+    fun onInternalAuthSuccess(fsAuthority: FSAuthority) {
+        viewModelScope.launch {
+            val remoteFsRoot = interactor.getRemoteFileSystemRoot(fsAuthority)
+
+            onRemoteRootLoaded(remoteFsRoot)
+        }
+    }
+
+    fun onInternalAuthFailed() {
+        screenState.value = ScreenState.data()
+    }
+
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
             if (event.containsKey(SingleTextCellViewModel.CLICK_EVENT)) {
                 val id = event.getString(SingleTextCellViewModel.CLICK_EVENT) ?: EMPTY
-                onStorageOptionClicked(valueOf(id))
+                onStorageOptionClicked(StorageOptionType.valueOf(id))
             }
         }
     }
 
     private fun onStorageOptionClicked(type: StorageOptionType) {
         val selectedOption = storageOptions?.find { type == it.type } ?: return
+        this.selectedOption = selectedOption
 
         when (selectedOption.type) {
             PRIVATE_STORAGE -> onPrivateStorageSelected(selectedOption.root)
             EXTERNAL_STORAGE -> onExternalStorageSelected(selectedOption.root)
-            DROPBOX -> onDropboxStorageSelected()
+            DROPBOX, WEBDAV -> onRemoteFileStorageSelected(selectedOption.root)
         }
     }
 
@@ -144,27 +163,29 @@ class StorageListViewModel(
         )
     }
 
-    private fun onDropboxStorageSelected() {
-        val provider = fileSystemResolver.resolveProvider(FSType.DROPBOX)
+    private fun onRemoteFileStorageSelected(root: FileDescriptor) {
+        val provider = fileSystemResolver.resolveProvider(root.fsAuthority)
 
         screenState.value = ScreenState.loading()
 
-        if (provider.authenticator.isAuthenticationRequired) {
-            isAuthActivityDisplayed = true
-            showAuthActivityEvent.call(FSType.DROPBOX)
+        val authenticator = provider.authenticator
+        if (authenticator.isAuthenticationRequired()) {
+            val authType = authenticator.getAuthType()
 
+            if (authType == AuthType.EXTERNAL) {
+                isExternalAuthActivityLaunched = true
+            }
+            showAuthActivityEvent.call(root.fsAuthority)
         } else {
             viewModelScope.launch {
-                val dropboxRoot = withContext(dispatchers.IO) {
-                    interactor.getDropboxRoot()
-                }
+                val remoteFsRoot = interactor.getRemoteFileSystemRoot(root.fsAuthority)
 
-                onDropboxRootLoaded(dropboxRoot)
+                onRemoteRootLoaded(remoteFsRoot)
             }
         }
     }
 
-    private fun onDropboxRootLoaded(result: OperationResult<FileDescriptor>) {
+    private fun onRemoteRootLoaded(result: OperationResult<FileDescriptor>) {
         val action = requestedAction ?: return
 
         if (result.isSucceededOrDeferred) {

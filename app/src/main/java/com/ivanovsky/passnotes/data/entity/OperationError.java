@@ -14,6 +14,7 @@ public class OperationError {
 	public static final String MESSAGE_FILE_NOT_FOUND = "File not found";
 	public static final String MESSAGE_FILE_DOES_NOT_EXIST = "File doesn't exist";
 	public static final String MESSAGE_AUTH_FAILED = "Auth failed";
+	public static final String MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS = "Incorrect file system credentials";
 	public static final String MESSAGE_FAILED_TO_LOAD_FILE = "Failed to load file";
 	public static final String MESSAGE_FAILED_TO_LOAD_FILE_LIST = "Failed to load file list";
 	public static final String MESSAGE_IO_ERROR = "IO error";
@@ -32,6 +33,7 @@ public class OperationError {
 	public static final String MESSAGE_DUPLICATED_NOTE = "Duplicated note";
 	public static final String MESSAGE_FAILED_TO_ADD_ENTRY = "Failed to add entry";
 	public static final String MESSAGE_FAILED_TO_REMOVE_ROOT_GROUP = "Failed to remove root group";
+	public static final String MESSAGE_FAILED_TO_GET_PARENT_PATH = "Failed to get paretn path";
 
 	private Type type;
 	private String message;
@@ -75,6 +77,12 @@ public class OperationError {
 		return error;
 	}
 
+	public static OperationError newFileNotFoundError() {
+		OperationError error = new OperationError(Type.FILE_NOT_FOUND_ERROR);
+		error.message = MESSAGE_FILE_NOT_FOUND;
+		return error;
+	}
+
 	public static OperationError newGenericIOError(String message) {
 		OperationError error = new OperationError(Type.GENERIC_IO_ERROR);
 		error.message = message;
@@ -101,6 +109,12 @@ public class OperationError {
 		return error;
 	}
 
+	public static OperationError newAuthError() {
+		OperationError error = new OperationError(Type.AUTH_ERROR);
+		error.message = MESSAGE_AUTH_FAILED;
+		return error;
+	}
+
 	public static OperationError newNetworkIOError() {
 		OperationError error = new OperationError(Type.NETWORK_IO_ERROR);
 		error.message = MESSAGE_IO_ERROR;
@@ -119,17 +133,25 @@ public class OperationError {
 		return error;
 	}
 
+	public static OperationError newRemoteApiError(String message) {
+		OperationError error = new OperationError(Type.REMOTE_API_ERROR);
+		error.message = message;
+		return error;
+	}
+
 	public enum Type {
 		GENERIC_ERROR,
 		DB_AUTH_ERROR,
 		DB_ERROR,
 		DB_VERSION_CONFLICT_ERROR,// if user modified db
 		FILE_ACCESS_ERROR,
+		FILE_NOT_FOUND_ERROR,
 		GENERIC_IO_ERROR,
 		AUTH_ERROR,
 		NETWORK_IO_ERROR,
 		FILE_IS_ALREADY_EXISTS,
 		CACHE_ERROR, // inconsistent cached data
+		REMOTE_API_ERROR
 	}
 
 	//TODO: remove unnecessary constructors and refactor

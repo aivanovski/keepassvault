@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.repository.file.FSType
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
@@ -55,7 +55,8 @@ class NewDatabaseViewModel(
             return
         }
 
-        if (selectedStorageDir == null) {
+        val storageDir = selectedStorageDir
+        if (storageDir == null) {
             val errorText = resourceProvider.getString(R.string.storage_is_not_selected)
             screenState.value = ScreenState.dataWithError(errorText)
             return
@@ -66,7 +67,9 @@ class NewDatabaseViewModel(
         screenState.value = ScreenState.loading()
 
         val dbKey = KeepassDatabaseKey(password)
-        val dbFile = FileDescriptor.fromParent(selectedStorageDir, "$filename.kdbx")
+        val dbFile = storageDir.copy(
+            path = storageDir.path + "/" + "$filename.kdbx"
+        )
 
         viewModelScope.launch {
             val result = withContext(Dispatchers.Default) {
@@ -151,16 +154,22 @@ class NewDatabaseViewModel(
     fun onStorageSelected(selectedFile: FileDescriptor) {
         selectedStorageDir = selectedFile
 
-        if (selectedFile.fsType == FSType.REGULAR_FS) {
-            val file = File(selectedFile.path)
+        when (selectedFile.fsAuthority.type) {
+            FSType.REGULAR_FS -> {
+                val file = File(selectedFile.path)
 
-            if (fileHelper.isLocatedInPrivateStorage(file)) {
-                storageType.value = resourceProvider.getString(R.string.private_storage)
-            } else {
-                storageType.value = resourceProvider.getString(R.string.public_storage)
+                if (fileHelper.isLocatedInPrivateStorage(file)) {
+                    storageType.value = resourceProvider.getString(R.string.private_storage)
+                } else {
+                    storageType.value = resourceProvider.getString(R.string.public_storage)
+                }
             }
-        } else if (selectedFile.fsType == FSType.DROPBOX) {
-            storageType.value = resourceProvider.getString(R.string.dropbox)
+            FSType.DROPBOX -> {
+                storageType.value = resourceProvider.getString(R.string.dropbox)
+            }
+            FSType.WEBDAV -> {
+                storageType.value = resourceProvider.getString(R.string.webdav)
+            }
         }
 
         storagePath.value = selectedFile.path

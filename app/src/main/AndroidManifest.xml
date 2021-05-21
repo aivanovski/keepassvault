@@ -63,6 +63,10 @@
             android:screenOrientation="portrait"/>
 
         <activity
+            android:name=".presentation.server_login.ServerLoginActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity
             android:name="com.dropbox.core.android.AuthActivity"
             android:configChanges="orientation|keyboard"
             android:launchMode="singleTask">

@@ -44,7 +44,7 @@ class NewDatabaseFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val binding = NewDatabaseFragmentBinding.inflate(inflater, container, false)
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
@@ -112,8 +112,6 @@ class NewDatabaseFragment : Fragment() {
         val item = menu.findItem(R.id.menu_done)
         item.isVisible = isVisible
     }
-
-
 
     companion object {
 

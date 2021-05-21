@@ -30,7 +30,7 @@ public class SettingsRepository {
 	}
 
 	public String getDropboxAuthToken() {
-		return preferences.getString(DROPBOX_AUTH_TOKEN, getDefaultValue(DROPBOX_AUTH_TOKEN, String.class));
+		return getString(DROPBOX_AUTH_TOKEN);
 	}
 
 	public void setDropboxAuthToken(String value) {
@@ -53,6 +53,10 @@ public class SettingsRepository {
 
 	private boolean getBoolean(String key) {
 		return preferences.getBoolean(key, getDefaultValue(key, Boolean.class));
+	}
+
+	private String getString(String key) {
+	    return preferences.getString(key, getDefaultValue(key, String.class));
 	}
 
 	private void putBoolean(String key, boolean value) {

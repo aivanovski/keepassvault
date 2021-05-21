@@ -73,7 +73,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 	public OperationResult<EncryptedDatabase> open(EncryptedDatabaseKey key, FileDescriptor file) {
 		OperationResult<EncryptedDatabase> result;
 
-		FileSystemProvider fsProvider = fileSystemResolver.resolveProvider(file.getFsType());
+		FileSystemProvider fsProvider = fileSystemResolver.resolveProvider(file.getFsAuthority());
 
 		synchronized (lock) {
 			if (db != null) {
@@ -112,7 +112,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 			InputStream in = null;
 			OutputStream out = null;
 
-			FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsType());
+			FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsAuthority());
 
 			try {
 				in = new BufferedInputStream(context.getAssets().open(DEFAULT_DB_PATH));

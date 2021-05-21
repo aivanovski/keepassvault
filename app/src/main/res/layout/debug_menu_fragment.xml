@@ -2,7 +2,8 @@
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/apk/res-auto">
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -77,13 +78,41 @@
                     android:textSize="@dimen/material_primary_text_size"
                     app:layout_constraintTop_toBottomOf="@id/fileSystemDivider" />
 
+                <TextView
+                    android:id="@+id/debugServerUrl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/element_margin"
+                    android:layout_marginEnd="@dimen/group_margin"
+                    android:text="@{viewModel.debugServerUrlText}"
+                    android:textSize="@dimen/material_primary_text_size"
+                    app:layout_constraintTop_toBottomOf="@id/fileSystemSpinner"
+                    bind:visible="@{viewModel.isDebugCredentialsVisible}"
+                    tools:text="@string/server_url_with_str"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/debugCredentials"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginEnd="@dimen/group_margin"
+                    android:text="@{viewModel.debugCredentialsText}"
+                    android:textSize="@dimen/material_primary_text_size"
+                    app:layout_constraintTop_toBottomOf="@id/debugServerUrl"
+                    bind:visible="@{viewModel.isDebugCredentialsVisible}"
+                    tools:text="@string/credentials_with_str"
+                    tools:visibility="visible" />
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/filePathLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/element_margin"
                     android:layout_marginEnd="@dimen/group_margin"
-                    app:layout_constraintTop_toBottomOf="@id/fileSystemSpinner">
+                    app:layout_constraintTop_toBottomOf="@id/debugCredentials">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/filePath"

@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.FileHelper
+import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
 import com.ivanovsky.passnotes.util.InputOutputUtils
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileOutputStreamOrNull
@@ -21,8 +22,11 @@ import java.io.OutputStream
 class DebugMenuInteractor(
     private val fileSystemResolver: FileSystemResolver,
     private val dbRepository: EncryptedDatabaseRepository,
-    private val fileHelper: FileHelper
+    private val fileHelper: FileHelper,
+    private val getDebugCredentialsUseCase: GetDebugCredentialsUseCase
 ) {
+
+    fun getDebugWebDavCredentials() = getDebugCredentialsUseCase.getDebugWebDavCredentials()
 
     fun getFileContent(file: FileDescriptor): OperationResult<Pair<FileDescriptor, File>> {
         val result = OperationResult<Pair<FileDescriptor, File>>()

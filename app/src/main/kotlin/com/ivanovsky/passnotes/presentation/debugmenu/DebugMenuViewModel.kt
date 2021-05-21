@@ -28,10 +28,13 @@ class DebugMenuViewModel(
 ) : ViewModel() {
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData<ScreenState>(ScreenState.data())
+    val screenState = MutableLiveData(ScreenState.data())
 
     val filePath = MutableLiveData(EMPTY)
     val password = MutableLiveData(EMPTY)
+    val debugServerUrlText = MutableLiveData(EMPTY)
+    val debugCredentialsText = MutableLiveData(EMPTY)
+    val isDebugCredentialsVisible = MutableLiveData(false)
     val isWriteButtonEnabled = MutableLiveData(false)
     val isOpenDbButtonEnabled = MutableLiveData(false)
     val isCloseDbButtonEnabled = MutableLiveData(false)
@@ -203,6 +206,35 @@ class DebugMenuViewModel(
 
     fun onFileSystemSelected(fsType: FSType) {
         selectedFsType = fsType
+
+        when (fsType) {
+            FSType.WEBDAV -> {
+                val creds = interactor.getDebugWebDavCredentials()
+
+                val (urlText, credsText) = if (creds != null) {
+                    Pair(
+                        creds.serverUrl,
+                        creds.username + " / " + creds.password
+                    )
+                } else {
+                    Pair(EMPTY, EMPTY)
+                }
+
+                debugServerUrlText.value = resourceProvider.getString(
+                    R.string.server_url_with_str,
+                    urlText
+                )
+                debugCredentialsText.value = resourceProvider.getString(
+                    R.string.credentials_with_str,
+                    credsText
+                )
+
+                isDebugCredentialsVisible.value = true
+            }
+            else -> {
+                isDebugCredentialsVisible.value = false
+            }
+        }
     }
 
     fun onExternalStorageCheckBoxChanged(isChecked: Boolean) {
@@ -218,7 +250,10 @@ class DebugMenuViewModel(
         val fsAuthority = when (selectedFsType) {
             FSType.REGULAR_FS -> FSAuthority.REGULAR_FS_AUTHORITY
             FSType.DROPBOX -> FSAuthority.DROPBOX_FS_AUTHORITY
-            FSType.WEBDAV -> FSAuthority(null, selectedFsType)
+            FSType.WEBDAV -> {
+                val creds = interactor.getDebugWebDavCredentials()
+                FSAuthority(creds, selectedFsType)
+            }
         }
 
         return FileDescriptor(

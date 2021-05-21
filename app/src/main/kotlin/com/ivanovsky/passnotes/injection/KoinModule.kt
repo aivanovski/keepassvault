@@ -74,7 +74,7 @@ object KoinModule {
         single { StorageListInteractor(get(), get()) }
         single { NewDatabaseInteractor(get(), get(), get()) }
         single { GroupInteractor(get(), get(), get()) }
-        single { DebugMenuInteractor(get(), get(), get()) }
+        single { DebugMenuInteractor(get(), get(), get(), get()) }
         single { NoteInteractor(get(), get()) }
         single { GroupsInteractor(get(), get()) }
         single { NoteEditorInteractor(get(), get()) }

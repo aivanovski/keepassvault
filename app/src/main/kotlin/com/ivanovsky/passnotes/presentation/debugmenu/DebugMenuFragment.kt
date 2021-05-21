@@ -66,23 +66,24 @@ class DebugMenuFragment : Fragment() {
     }
 
     private fun createFileSystemSpinnerAdapter(): ArrayAdapter<String> {
-        val items = listOf(
-            getString(R.string.device_file_system),
-            getString(R.string.dropbox)
-        )
+        val items = FILE_SYSTEM_ITEMS.map { (_, resId) -> requireContext().getString(resId) }
         return ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, items).apply {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         }
     }
 
     private fun onFileSystemItemSelected(position: Int) {
-        when (position) {
-            0 -> viewModel.onFileSystemSelected(FSType.REGULAR_FS)
-            1 -> viewModel.onFileSystemSelected(FSType.DROPBOX)
-        }
+        val fsType = FILE_SYSTEM_ITEMS[position].first
+        viewModel.onFileSystemSelected(fsType)
     }
 
     companion object {
+
+        private val FILE_SYSTEM_ITEMS = listOf(
+            FSType.REGULAR_FS to R.string.device_file_system,
+            FSType.DROPBOX to R.string.dropbox,
+            FSType.WEBDAV to R.string.webdav
+        )
 
         fun newInstance() = DebugMenuFragment()
     }

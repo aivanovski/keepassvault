@@ -3,6 +3,8 @@
 
     <!-- Debug Menu screen -->
     <string name="file_system_with_dots" translatable="false">File System:</string>
+    <string name="server_url_with_str" translatable="false">Server url: %s</string>
+    <string name="credentials_with_str" translatable="false">Credentials: %s</string>
     <string name="read" translatable="false">Read</string>
     <string name="write" translatable="false">Write</string>
     <string name="open" translatable="false">Open</string>

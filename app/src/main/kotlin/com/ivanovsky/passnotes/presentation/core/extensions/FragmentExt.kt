@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.core.SnackbarMessage
 import com.ivanovsky.passnotes.util.InputMethodUtils
 
 fun <T : Parcelable> Fragment.getMandarotyArgument(key: String): T {
@@ -55,20 +54,6 @@ fun Fragment.showSnackbarMessage(message: String) {
 
     Snackbar.make(view, message, Snackbar.LENGTH_SHORT)
         .show()
-}
-
-fun Fragment.showSnackbar(message: SnackbarMessage) {
-    val view = findViewForSnackbar() ?: return
-
-    val snackbar = if (message.isDisplayOkButton) {
-        val snack = Snackbar.make(view, message.message, Snackbar.LENGTH_INDEFINITE)
-        snack.setAction(R.string.ok) { snack.dismiss() }
-        snack
-    } else {
-        Snackbar.make(view, message.message, Snackbar.LENGTH_SHORT)
-    }
-
-    snackbar.show()
 }
 
 private fun Fragment.findViewForSnackbar(): View? {

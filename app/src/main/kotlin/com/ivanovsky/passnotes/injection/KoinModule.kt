@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.room.Room
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.SettingsRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
+import com.ivanovsky.passnotes.data.repository.db.converters.FSAuthorityTypeConverter
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository
 import com.ivanovsky.passnotes.domain.*
@@ -48,7 +50,6 @@ object KoinModule {
 
     val appModule = module {
         single { SettingsRepository(get()) }
-        single { provideAppDatabase(get()) }
         single { FileHelper(get(), get()) }
         single { PermissionHelper(get()) }
         single { ResourceProvider(get()) }
@@ -60,15 +61,22 @@ object KoinModule {
         single { DateFormatProvider(get()) }
         single { NoteDiffer() }
         single { provideOkHttp() }
+        single { DataCipherProvider(get()) }
 
+        // Database
+        single { provideAppDatabase(get(), get()) }
         single { provideRemoteFileRepository(get()) }
+        single { provideUsedFileRepository(get(), get()) }
+
+        // Files, Keepass
         single { FileSystemResolver(get(), get(), get(), get(), get()) }
         single { FileSyncHelper(get()) }
-        single { UsedFileRepository(get(), get()) }
         single { KeepassDatabaseRepository(get(), get()) as EncryptedDatabaseRepository }
 
+        // Use Cases
         single { GetDebugCredentialsUseCase() }
 
+        // Interactors
         single { FilePickerInteractor(get()) }
         single { UnlockInteractor(get(), get(), get()) }
         single { StorageListInteractor(get(), get()) }
@@ -80,12 +88,13 @@ object KoinModule {
         single { NoteEditorInteractor(get(), get()) }
         single { ServerLoginInteractor(get(), get(), get()) }
 
+        // Cell factories
         single { GroupsCellModelFactory(get()) }
         single { GroupsCellViewModelFactory() }
-
         single { NoteEditorCellModelFactory(get()) }
         single { NoteEditorCellViewModelFactory(get()) }
 
+        // ViewModels
         viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
         viewModel { FilePickerViewModel(get(), get(), get(), get(), get()) }
         viewModel { NewDatabaseViewModel(get(), get(), get(), get()) }
@@ -113,17 +122,22 @@ object KoinModule {
         return builder.build()
     }
 
-    private fun provideRemoteFileRepository(
-        database: AppDatabase
-    ): RemoteFileRepository {
-        return RemoteFileRepository(database.remoteFileDao)
-    }
+    private fun provideRemoteFileRepository(database: AppDatabase) =
+        RemoteFileRepository(database.remoteFileDao)
 
-    private fun provideAppDatabase(context: Context): AppDatabase {
+    private fun provideUsedFileRepository(database: AppDatabase, observerBus: ObserverBus) =
+        UsedFileRepository(database.usedFileDao, observerBus)
+
+    private fun provideAppDatabase(
+        context: Context,
+        cipherProvider: DataCipherProvider
+    ): AppDatabase {
         return Room.databaseBuilder(
             context.applicationContext,
             AppDatabase::class.java,
             AppDatabase.FILE_NAME
-        ).build()
+        )
+            .addTypeConverter(FSAuthorityTypeConverter(cipherProvider))
+            .build()
     }
 }

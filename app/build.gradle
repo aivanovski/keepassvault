@@ -113,7 +113,7 @@ android {
     }
 }
 
-def roomVersion = '2.2.5'
+def roomVersion = '2.3.0'
 def lifecycleVersion = '2.2.0'
 def androidXVersion = '1.2.0'
 
@@ -148,6 +148,7 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidXTestVersion"
     androidTestImplementation "androidx.test:rules:$androidXTestVersion"
     androidTestImplementation "androidx.room:room-testing:$roomTesting"
+    androidTestImplementation "com.google.truth:truth:$truthVersion"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
     // MultiDex

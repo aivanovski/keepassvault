@@ -4,4 +4,4 @@
     style="@style/Material.ExpandedFloatingActionButton.Item"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/element_margin"/>
+    android:layout_marginBottom="@dimen/element_margin" />

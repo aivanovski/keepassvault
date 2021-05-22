@@ -4,22 +4,22 @@ import com.ivanovsky.passnotes.data.entity.OperationError;
 
 public class EncryptedDatabaseException extends Exception {
 
-	private OperationError error;
+    private OperationError error;
 
-	public EncryptedDatabaseException(String message) {
-		super(message);
-	}
+    public EncryptedDatabaseException(String message) {
+        super(message);
+    }
 
-	public EncryptedDatabaseException(Exception reason) {
-		super(reason);
-	}
+    public EncryptedDatabaseException(Exception reason) {
+        super(reason);
+    }
 
-	public EncryptedDatabaseException(OperationError error) {
-		super(error.getMessage());
-		this.error = error;
-	}
+    public EncryptedDatabaseException(OperationError error) {
+        super(error.getMessage());
+        this.error = error;
+    }
 
-	public OperationError getError() {
-		return error;
-	}
+    public OperationError getError() {
+        return error;
+    }
 }

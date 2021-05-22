@@ -7,22 +7,22 @@ import java.util.List;
 
 public class CollectionUtils {
 
-	public static <T> T getFirstOrNull(@NonNull List<T> items) {
-		T result = null;
+    public static <T> T getFirstOrNull(@NonNull List<T> items) {
+        T result = null;
 
-		if (items.size() != 0) {
-			result = items.get(0);
-		}
+        if (items.size() != 0) {
+            result = items.get(0);
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	public static <T> List<T> newLinkedListWith(T item) {
-		List<T> result = new LinkedList<>();
-		result.add(item);
-		return result;
-	}
+    public static <T> List<T> newLinkedListWith(T item) {
+        List<T> result = new LinkedList<>();
+        result.add(item);
+        return result;
+    }
 
-	private CollectionUtils() {
-	}
+    private CollectionUtils() {
+    }
 }

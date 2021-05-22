@@ -17,104 +17,104 @@ import java.util.UUID;
 
 public class RemoteFileOutputStream extends BaseRemoteFileOutputStream {
 
-	private static final String TAG = RemoteFileOutputStream.class.getSimpleName();
+    private static final String TAG = RemoteFileOutputStream.class.getSimpleName();
 
-	private boolean failed;
-	private final UUID processingUnitUid;
-	private final File outFile;
-	private final RemoteFileSystemProvider provider;
-	private final RemoteApiClient client;
-	private final RemoteFile file;
+    private boolean failed;
+    private final UUID processingUnitUid;
+    private final File outFile;
+    private final RemoteFileSystemProvider provider;
+    private final RemoteApiClient client;
+    private final RemoteFile file;
 
-	// should be lazy initialized, because new FileOutputStream make file content empty
-	private OutputStream out;
+    // should be lazy initialized, because new FileOutputStream make file content empty
+    private OutputStream out;
 
-	public RemoteFileOutputStream(RemoteFileSystemProvider provider,
-						   RemoteApiClient client,
-						   RemoteFile file,
-						   UUID processingUnitUid) throws FileNotFoundException {
-		this.provider = provider;
-		this.client = client;
-		this.file = file;
-		this.outFile = new File(file.getLocalPath());
-		this.processingUnitUid = processingUnitUid;
-	}
+    public RemoteFileOutputStream(RemoteFileSystemProvider provider,
+                                  RemoteApiClient client,
+                                  RemoteFile file,
+                                  UUID processingUnitUid) throws FileNotFoundException {
+        this.provider = provider;
+        this.client = client;
+        this.file = file;
+        this.outFile = new File(file.getLocalPath());
+        this.processingUnitUid = processingUnitUid;
+    }
 
-	@Override
-	public void write(int b) throws IOException {
-		if (failed) {
-			return;
-		}
+    @Override
+    public void write(int b) throws IOException {
+        if (failed) {
+            return;
+        }
 
-		if (out == null) {
-			out = new BufferedOutputStream(new FileOutputStream(outFile));
-		}
+        if (out == null) {
+            out = new BufferedOutputStream(new FileOutputStream(outFile));
+        }
 
-		try {
-			out.write(b);
-		} catch (IOException e) {
-			Logger.printStackTrace(e);
+        try {
+            out.write(b);
+        } catch (IOException e) {
+            Logger.printStackTrace(e);
 
-			failed = true;
+            failed = true;
 
-			provider.onFileUploadFailed(file, processingUnitUid);
+            provider.onFileUploadFailed(file, processingUnitUid);
 
-			throw new IOException(e);
-		}
-	}
+            throw new IOException(e);
+        }
+    }
 
-	@Override
-	public void flush() throws IOException {
-		if (failed) {
-			return;
-		}
-		if (out == null) {
-			return;
-		}
+    @Override
+    public void flush() throws IOException {
+        if (failed) {
+            return;
+        }
+        if (out == null) {
+            return;
+        }
 
-		try {
-			out.flush();
-		} catch (IOException e) {
-			Logger.printStackTrace(e);
+        try {
+            out.flush();
+        } catch (IOException e) {
+            Logger.printStackTrace(e);
 
-			failed = true;
+            failed = true;
 
-			provider.onFileUploadFailed(file, processingUnitUid);
+            provider.onFileUploadFailed(file, processingUnitUid);
 
-			throw new IOException(e);
-		}
-	}
+            throw new IOException(e);
+        }
+    }
 
-	@Override
-	public void close() throws IOException {
-		if (failed) {
-			return;
-		}
+    @Override
+    public void close() throws IOException {
+        if (failed) {
+            return;
+        }
 
-		RemoteFileMetadata metadata;
+        RemoteFileMetadata metadata;
 
-		try {
-			metadata = client.uploadFileOrThrow(file.getRemotePath(), file.getLocalPath());
-		} catch (RemoteFSNetworkException e) {
-			Logger.printStackTrace(e);
+        try {
+            metadata = client.uploadFileOrThrow(file.getRemotePath(), file.getLocalPath());
+        } catch (RemoteFSNetworkException e) {
+            Logger.printStackTrace(e);
 
-			provider.onOfflineWriteFinished(file, processingUnitUid);
+            provider.onOfflineWriteFinished(file, processingUnitUid);
 
-			throw new IOException(e);
+            throw new IOException(e);
 
-		} catch (RemoteFSException e) {
-			Logger.printStackTrace(e);
+        } catch (RemoteFSException e) {
+            Logger.printStackTrace(e);
 
-			provider.onFileUploadFailed(file, processingUnitUid);
+            provider.onFileUploadFailed(file, processingUnitUid);
 
-			throw new IOException(e);
-		}
+            throw new IOException(e);
+        }
 
-		provider.onFileUploadFinished(file, metadata, processingUnitUid);
-	}
+        provider.onFileUploadFinished(file, metadata, processingUnitUid);
+    }
 
-	@Override
-	public File getOutputFile() {
-		return outFile;
-	}
+    @Override
+    public File getOutputFile() {
+        return outFile;
+    }
 }

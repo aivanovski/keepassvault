@@ -1,37 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<color name="primary">#3F51B5</color>
-	<color name="primary_dark">#303F9F</color>
-	<color name="accent">#FF4081</color>
-	<color name="divider">#B6B6B6</color>
+    <color name="primary">#3F51B5</color>
+    <color name="primary_dark">#303F9F</color>
+    <color name="accent">#FF4081</color>
+    <color name="divider">#B6B6B6</color>
 
-	<!-- TODO: add prefix "material_" to primary_text, secondary_text, primary_text_light -->
-	<color name="primary_text">#212121</color>
-	<color name="secondary_text">#757575</color>
-	<color name="primary_text_light">#F2F2F2</color>
+    <!-- TODO: add prefix "material_" to primary_text, secondary_text, primary_text_light -->
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+    <color name="primary_text_light">#F2F2F2</color>
 
-	<color name="material_selector_pressed">#66999999</color>
-	<color name="material_icon_background">#9d9d9d</color>
+    <color name="material_icon_background">#9d9d9d</color>
 
-	<!-- text fields colors -->
-	<color name="material_edit_text_primary_text">@color/primary_text</color> <!-- TODO: remove color -->
+    <!-- text fields colors -->
+    <color name="material_edit_text_primary_text">@color/primary_text</color>
 
-	<!-- list item colors -->
-	<color name="material_list_item_primary_text">@color/primary_text</color>
-	<color name="material_list_item_secondary_text">#757575</color>
-	<color name="material_list_item_selected">#99999999</color>
+    <!-- list item colors -->
+    <color name="material_list_item_primary_text">@color/primary_text</color>
+    <color name="material_list_item_secondary_text">#757575</color>
+    <color name="material_list_item_selected">#99999999</color>
 
-	<!-- error panel -->
-	<color name="material_error_panel_background">#e7e7e7</color>
+    <!-- error panel -->
+    <color name="material_error_panel_background">#e7e7e7</color>
 
-	<!-- action bar -->
-	<color name="action_bar_background">@color/primary</color>
+    <!-- action bar -->
+    <color name="action_bar_background">@color/primary</color>
 
-	<!-- progress bar -->
-	<color name="material_progress_bar">@color/primary</color>
+    <!-- progress bar -->
+    <color name="material_progress_bar">@color/primary</color>
 
-	<!-- errors -->
-	<color name="material_error_secondary_text">#b0b0b0</color>
+    <!-- errors -->
+    <color name="material_error_secondary_text">#b0b0b0</color>
 
 </resources>

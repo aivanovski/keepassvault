@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.encdb.dao;
 
+import androidx.annotation.NonNull;
+
 import com.ivanovsky.passnotes.data.entity.Note;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 
@@ -8,9 +10,18 @@ import java.util.UUID;
 
 public interface NoteDao {
 
-	OperationResult<List<Note>> getNotesByGroupUid(UUID groupUid);
-	OperationResult<Note> getNoteByUid(UUID noteUid);
-	OperationResult<UUID> insert(Note note);
-	OperationResult<UUID> update(Note note);
-	OperationResult<Boolean> remove(UUID noteUid);
+    @NonNull
+    OperationResult<List<Note>> getNotesByGroupUid(UUID groupUid);
+
+    @NonNull
+    OperationResult<Note> getNoteByUid(UUID noteUid);
+
+    @NonNull
+    OperationResult<UUID> insert(Note note);
+
+    @NonNull
+    OperationResult<UUID> update(Note note);
+
+    @NonNull
+    OperationResult<Boolean> remove(UUID noteUid);
 }

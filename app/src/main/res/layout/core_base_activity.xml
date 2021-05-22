@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-	<androidx.appcompat.widget.Toolbar
-		android:id="@+id/tool_bar"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:background="@color/action_bar_background"
-		android:minHeight="?attr/actionBarSize"
-		android:theme="@style/ActionBarStyle"/>
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tool_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/action_bar_background"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ActionBarStyle" />
 
-	<FrameLayout
-		android:id="@+id/fragment_container"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:layout_below="@id/tool_bar"/>
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/tool_bar" />
 
-	<View
-		android:layout_width="match_parent"
-		android:layout_height="5dp"
-		android:layout_below="@id/tool_bar"
-		android:background="@drawable/action_bar_shadow"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_below="@id/tool_bar"
+        android:background="@drawable/action_bar_shadow" />
 
 </RelativeLayout>

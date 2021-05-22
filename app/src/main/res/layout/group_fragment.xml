@@ -33,8 +33,8 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/group_margin"
             android:layout_marginLeft="@dimen/element_margin"
+            android:layout_marginTop="@dimen/group_margin"
             android:layout_marginRight="@dimen/element_margin"
             app:errorText="@{viewModel.errorText}"
             app:layout_constraintTop_toBottomOf="@id/errorPanelView"
@@ -46,8 +46,8 @@
                 style="@style/Material.EditText.PrimarySingleLine"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@={viewModel.groupTitle}"
-                android:hint="@string/group_title"/>
+                android:hint="@string/group_title"
+                android:text="@={viewModel.groupTitle}" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

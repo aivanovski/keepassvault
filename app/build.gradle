@@ -11,106 +11,106 @@ def debugProperties = new Properties()
 debugProperties.load(new FileInputStream(rootProject.file("debug.properties")))
 
 android {
-	def ext = rootProject.extensions.ext
+    def ext = rootProject.extensions.ext
 
-	compileSdkVersion ext.android.compileSdk
-	buildToolsVersion ext.android.buildTools
+    compileSdkVersion ext.android.compileSdk
+    buildToolsVersion ext.android.buildTools
 
-	defaultConfig {
-		applicationId 'com.ivanovsky.passnotes'
-		minSdkVersion ext.android.minSdk
-		targetSdkVersion ext.android.targetSdk
-		versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
-		versionName "${versionMajor}.${versionMinor}.${versionPatch}"
-		testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
-		vectorDrawables.useSupportLibrary true
-		multiDexEnabled true
+    defaultConfig {
+        applicationId 'com.ivanovsky.passnotes'
+        minSdkVersion ext.android.minSdk
+        targetSdkVersion ext.android.targetSdk
+        versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        vectorDrawables.useSupportLibrary true
+        multiDexEnabled true
 
-		buildConfigField "String[]", "DEBUG_FILE_NAME_PATTERNS", "null"
-		buildConfigField "String[]", "DEBUG_PASSWORDS", "null"
+        buildConfigField "String[]", "DEBUG_FILE_NAME_PATTERNS", "null"
+        buildConfigField "String[]", "DEBUG_PASSWORDS", "null"
 
-		buildConfigField "String", "DROPBOX_APP_KEY", "$ext.dropboxAppKey"
-		buildConfigField "String", "DROPBOX_APP_SECRET", "$ext.dropboxAppSecret"
-	}
+        buildConfigField "String", "DROPBOX_APP_KEY", "$ext.dropboxAppKey"
+        buildConfigField "String", "DROPBOX_APP_SECRET", "$ext.dropboxAppSecret"
+    }
 
-	dataBinding {
-		enabled = true
-	}
+    dataBinding {
+        enabled = true
+    }
 
-	sourceSets {
-		main.java.srcDirs += 'src/main/kotlin'
-		androidTest.java.srcDirs += 'src/androidTest/kotlin'
-		test.java.srcDirs += 'src/test/kotlin'
-	}
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+        androidTest.java.srcDirs += 'src/androidTest/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
+    }
 
-	compileOptions {
-		sourceCompatibility JavaVersion.VERSION_1_8
-		targetCompatibility JavaVersion.VERSION_1_8
-	}
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 
-	kotlinOptions {
-		jvmTarget = JavaVersion.VERSION_1_8.toString()
-	}
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
 
-	signingConfigs {
-		debug {
-			storeFile file("../keys/debug.keystore")
-		}
-		release {
-			storeFile file("../keys/release.keystore")
-			storePassword ext.keystorePassword
-			keyAlias ext.keystoreAlias
-			keyPassword ext.keystorePassword
-		}
-	}
+    signingConfigs {
+        debug {
+            storeFile file("../keys/debug.keystore")
+        }
+        release {
+            storeFile file("../keys/release.keystore")
+            storePassword ext.keystorePassword
+            keyAlias ext.keystoreAlias
+            keyPassword ext.keystorePassword
+        }
+    }
 
-	buildTypes {
-		debug {
-			debuggable true
-			minifyEnabled false
-			signingConfig signingConfigs.debug
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+            signingConfig signingConfigs.debug
 
-			if (ext.debugFileNameToPasswordMap != null) {
-				buildConfigField "String[]", "DEBUG_FILE_NAME_PATTERNS", "{" +
-						ext.debugFileNameToPasswordMap.keySet().collect{"\"${it}\""}.join(",") +
-						"}"
-				buildConfigField "String[]", "DEBUG_PASSWORDS", "{" +
-						ext.debugFileNameToPasswordMap.values().collect{"\"${it}\""}.join(",") +
-						"}"
-			}
+            if (ext.debugFileNameToPasswordMap != null) {
+                buildConfigField "String[]", "DEBUG_FILE_NAME_PATTERNS", "{" +
+                        ext.debugFileNameToPasswordMap.keySet().collect { "\"${it}\"" }.join(",") +
+                        "}"
+                buildConfigField "String[]", "DEBUG_PASSWORDS", "{" +
+                        ext.debugFileNameToPasswordMap.values().collect { "\"${it}\"" }.join(",") +
+                        "}"
+            }
 
-			def debugWebDavUrl = debugProperties['debugWebDavUrl'] ?: ""
-			def debugWebDavUsername = debugProperties['debugWebDavUsername'] ?: ""
-			def debugWebDavPassword = debugProperties['debugWebDavPassword'] ?: ""
-			buildConfigField "String", "DEBUG_WEB_DAV_URL", "\"${debugWebDavUrl}\""
-			buildConfigField "String", "DEBUG_WEB_DAV_USERNAME", "\"${debugWebDavUsername}\""
-			buildConfigField "String", "DEBUG_WEB_DAV_PASSWORD", "\"${debugWebDavPassword}\""
+            def debugWebDavUrl = debugProperties['debugWebDavUrl'] ?: ""
+            def debugWebDavUsername = debugProperties['debugWebDavUsername'] ?: ""
+            def debugWebDavPassword = debugProperties['debugWebDavPassword'] ?: ""
+            buildConfigField "String", "DEBUG_WEB_DAV_URL", "\"${debugWebDavUrl}\""
+            buildConfigField "String", "DEBUG_WEB_DAV_USERNAME", "\"${debugWebDavUsername}\""
+            buildConfigField "String", "DEBUG_WEB_DAV_PASSWORD", "\"${debugWebDavPassword}\""
 
-		}
-		release {
-			minifyEnabled false
-			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-			signingConfig signingConfigs.release
-		}
-	}
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
 
-	testOptions {
-		unitTests {
-			includeAndroidResources = true
-		}
-	}
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 
-	kapt {
-		generateStubs = true
-	}
+    kapt {
+        generateStubs = true
+    }
 
-	packagingOptions {
-		exclude 'META-INF/proguard/coroutines.pro' //TODO: should be removed
-	}
+    packagingOptions {
+        exclude 'META-INF/proguard/coroutines.pro' //TODO: should be removed
+    }
 
-	androidExtensions {
-		experimental = true
-	}
+    androidExtensions {
+        experimental = true
+    }
 }
 
 def roomVersion = '2.2.5'
@@ -133,81 +133,81 @@ def androidXCoreVersion = '1.2.0'
 def roomTesting = '2.0.0'
 
 dependencies {
-	implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-	// Test dependencies
-	testImplementation "junit:junit:$jUnitVersion"
-	testImplementation "io.mockk:mockk:$mockkVersion"
-	testImplementation "com.google.truth:truth:$truthVersion"
-	testImplementation "androidx.arch.core:core-testing:$androidXArchVersion"
-	testImplementation "androidx.test:core:$androidXCoreVersion"
-	testImplementation "org.robolectric:robolectric:$robolectricVersion"
-	testImplementation "org.robolectric:shadows-multidex:$robolectricVersion"
+    // Test dependencies
+    testImplementation "junit:junit:$jUnitVersion"
+    testImplementation "io.mockk:mockk:$mockkVersion"
+    testImplementation "com.google.truth:truth:$truthVersion"
+    testImplementation "androidx.arch.core:core-testing:$androidXArchVersion"
+    testImplementation "androidx.test:core:$androidXCoreVersion"
+    testImplementation "org.robolectric:robolectric:$robolectricVersion"
+    testImplementation "org.robolectric:shadows-multidex:$robolectricVersion"
 
-	// Android test dependencies
-	androidTestImplementation "androidx.test.ext:junit:$androidXTestVersion"
-	androidTestImplementation "androidx.test:rules:$androidXTestVersion"
-	androidTestImplementation "androidx.room:room-testing:$roomTesting"
-	androidTestImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    // Android test dependencies
+    androidTestImplementation "androidx.test.ext:junit:$androidXTestVersion"
+    androidTestImplementation "androidx.test:rules:$androidXTestVersion"
+    androidTestImplementation "androidx.room:room-testing:$roomTesting"
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
-	// MultiDex
-	implementation "androidx.multidex:multidex:2.0.1"
+    // MultiDex
+    implementation "androidx.multidex:multidex:2.0.1"
 
-	// DI
-	def koin_version = '2.0.1'
-	implementation "org.koin:koin-android:$koin_version"
-	implementation "org.koin:koin-core:$koin_version"
-	implementation "org.koin:koin-androidx-viewmodel:$koin_version"
+    // DI
+    def koin_version = '2.0.1'
+    implementation "org.koin:koin-android:$koin_version"
+    implementation "org.koin:koin-core:$koin_version"
+    implementation "org.koin:koin-androidx-viewmodel:$koin_version"
 
-	// Room
-	implementation "androidx.room:room-runtime:$roomVersion"
-	kapt "androidx.room:room-compiler:$roomVersion"
-	androidTestImplementation "androidx.room:room-testing:$roomVersion"
+    // Room
+    implementation "androidx.room:room-runtime:$roomVersion"
+    kapt "androidx.room:room-compiler:$roomVersion"
+    androidTestImplementation "androidx.room:room-testing:$roomVersion"
 
-	// Lifecycle libraries
-	implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
+    // Lifecycle libraries
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
 
-	// AndroidX libraries
-	implementation "androidx.appcompat:appcompat:$androidXVersion"
-	implementation "com.google.android.material:material:$androidXVersion"
-	implementation "androidx.legacy:legacy-support-v4:1.0.0"
-	implementation "androidx.recyclerview:recyclerview:1.1.0"
-	implementation "androidx.cardview:cardview:1.0.0"
-	implementation "androidx.annotation:annotation:1.1.0"
-	implementation "androidx.constraintlayout:constraintlayout:1.1.3"
+    // AndroidX libraries
+    implementation "androidx.appcompat:appcompat:$androidXVersion"
+    implementation "com.google.android.material:material:$androidXVersion"
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+    implementation "androidx.recyclerview:recyclerview:1.1.0"
+    implementation "androidx.cardview:cardview:1.0.0"
+    implementation "androidx.annotation:annotation:1.1.0"
+    implementation "androidx.constraintlayout:constraintlayout:1.1.3"
 
-	// Android KTX
-	implementation "androidx.core:core-ktx:1.3.1"
-	implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
-	implementation "androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion"
-	implementation "androidx.activity:activity-ktx:1.1.0"
+    // Android KTX
+    implementation "androidx.core:core-ktx:1.3.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion"
+    implementation "androidx.activity:activity-ktx:1.1.0"
 
-	// Java stream API
-	implementation "com.annimon:stream:$annimonStreamApiVersion"
+    // Java stream API
+    implementation "com.annimon:stream:$annimonStreamApiVersion"
 
-	//Apache Commons Lang
-	implementation "org.apache.commons:commons-lang3:$apacheCommonsLangVersion"
+    //Apache Commons Lang
+    implementation "org.apache.commons:commons-lang3:$apacheCommonsLangVersion"
 
-	// Kotlin
-	implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-	implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-	implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
 
-	// KeePassJava2
-	implementation project(':libs:KeePassJava2-database')
-	implementation project(':libs:KeePassJava2-kdbx')
-	implementation project(':libs:KeePassJava2-simple')
+    // KeePassJava2
+    implementation project(':libs:KeePassJava2-database')
+    implementation project(':libs:KeePassJava2-kdbx')
+    implementation project(':libs:KeePassJava2-simple')
 
-	// Dropbox
-	implementation "com.dropbox.core:dropbox-core-sdk:$dropboxVersion"
+    // Dropbox
+    implementation "com.dropbox.core:dropbox-core-sdk:$dropboxVersion"
 
-	// OkHttp
-	implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
-	implementation "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
+    // OkHttp
+    implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
 
-	// Stetho
-	implementation "com.facebook.stetho:stetho:1.5.1"
+    // Stetho
+    implementation "com.facebook.stetho:stetho:1.5.1"
 
-	// WebDAV client
-	implementation "com.github.thegrizzlylabs:sardine-android:v0.8"
+    // WebDAV client
+    implementation "com.github.thegrizzlylabs:sardine-android:v0.8"
 }

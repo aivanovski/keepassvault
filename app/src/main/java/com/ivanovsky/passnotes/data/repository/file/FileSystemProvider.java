@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.file;
 
+import androidx.annotation.NonNull;
+
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 
@@ -9,27 +11,37 @@ import java.util.List;
 
 public interface FileSystemProvider {
 
-	FileSystemAuthenticator getAuthenticator();
+    @NonNull
+    FileSystemAuthenticator getAuthenticator();
 
-	FileSystemSyncProcessor getSyncProcessor();
+    @NonNull
+    FileSystemSyncProcessor getSyncProcessor();
 
-	OperationResult<List<FileDescriptor>> listFiles(FileDescriptor dir);
+    @NonNull
+    OperationResult<List<FileDescriptor>> listFiles(FileDescriptor dir);
 
-	OperationResult<FileDescriptor> getParent(FileDescriptor file);
+    @NonNull
+    OperationResult<FileDescriptor> getParent(FileDescriptor file);
 
-	OperationResult<FileDescriptor> getRootFile();
+    @NonNull
+    OperationResult<FileDescriptor> getRootFile();
 
-	OperationResult<InputStream> openFileForRead(FileDescriptor file,
-												 OnConflictStrategy onConflictStrategy,
-												 boolean cacheOperationsEnabled);
+    @NonNull
+    OperationResult<InputStream> openFileForRead(FileDescriptor file,
+                                                 OnConflictStrategy onConflictStrategy,
+                                                 boolean cacheOperationsEnabled);
 
-	OperationResult<OutputStream> openFileForWrite(FileDescriptor file,
-												   OnConflictStrategy onConflictStrategy,
-												   boolean cacheOperationsEnabled);
+    @NonNull
+    OperationResult<OutputStream> openFileForWrite(FileDescriptor file,
+                                                   OnConflictStrategy onConflictStrategy,
+                                                   boolean cacheOperationsEnabled);
 
-	OperationResult<Boolean> exists(FileDescriptor file);
+    @NonNull
+    OperationResult<Boolean> exists(FileDescriptor file);
 
-	OperationResult<FileDescriptor> getFile(String path, boolean cacheOperationsEnabled);
+    @NonNull
+    OperationResult<FileDescriptor> getFile(String path, boolean cacheOperationsEnabled);
 
-	OperationResult<Boolean> isStoragePermissionRequired(FileDescriptor file);
+    @NonNull
+    OperationResult<Boolean> isStoragePermissionRequired(FileDescriptor file);
 }

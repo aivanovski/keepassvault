@@ -6,25 +6,25 @@ import java.util.Set;
 
 public enum PropertyType {
 
-	TITLE("Title"),
-	PASSWORD("Password"),
-	USER_NAME("UserName"),
-	URL("URL"),
-	NOTES("Notes");
+    TITLE("Title"),
+    PASSWORD("Password"),
+    USER_NAME("UserName"),
+    URL("URL"),
+    NOTES("Notes");
 
-	public static Set<PropertyType> DEFAULT_TYPES = createDefaultPropertiesSet();
+    public static Set<PropertyType> DEFAULT_TYPES = createDefaultPropertiesSet();
 
-	private static Set<PropertyType> createDefaultPropertiesSet() {
-	    return new HashSet<>(Arrays.asList(TITLE, PASSWORD, USER_NAME, URL, NOTES));
-	}
+    private static Set<PropertyType> createDefaultPropertiesSet() {
+        return new HashSet<>(Arrays.asList(TITLE, PASSWORD, USER_NAME, URL, NOTES));
+    }
 
-	private final String propertyName;
+    private final String propertyName;
 
-	PropertyType(String propertyName) {
-		this.propertyName = propertyName;
-	}
+    PropertyType(String propertyName) {
+        this.propertyName = propertyName;
+    }
 
-	public String getPropertyName() {
-		return propertyName;
-	}
+    public String getPropertyName() {
+        return propertyName;
+    }
 }

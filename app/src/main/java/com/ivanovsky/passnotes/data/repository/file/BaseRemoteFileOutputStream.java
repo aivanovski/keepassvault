@@ -5,5 +5,5 @@ import java.io.OutputStream;
 
 public abstract class BaseRemoteFileOutputStream extends OutputStream {
 
-	public abstract File getOutputFile();
+    public abstract File getOutputFile();
 }

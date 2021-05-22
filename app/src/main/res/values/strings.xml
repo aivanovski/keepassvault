@@ -1,122 +1,122 @@
 <resources>
 
-	<string name="app_name">PassNotes</string>
+    <string name="app_name">PassNotes</string>
 
-	<!-- Common for all screens -->
-	<string name="dropbox">Dropbox</string>
-	<string name="webdav">WebDAV</string>
-	<string name="device">Device</string>
-	<string name="no_items">No items</string>
-	<string name="yes">Yes</string>
-	<string name="no">No</string>
+    <!-- Common for all screens -->
+    <string name="dropbox">Dropbox</string>
+    <string name="webdav">WebDAV</string>
+    <string name="device">Device</string>
+    <string name="no_items">No items</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
-	<!-- Menu and buttons -->
-	<string name="retry">retry</string>
-	<string name="create">Create</string>
-	<string name="done">Done</string>
-	<string name="open_file">Open file</string>
-	<string name="settings">Settings</string>
-	<string name="about">About</string>
-	<string name="ok">Ok</string>
+    <!-- Menu and buttons -->
+    <string name="retry">retry</string>
+    <string name="create">Create</string>
+    <string name="done">Done</string>
+    <string name="open_file">Open file</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
+    <string name="ok">Ok</string>
 
-	<!-- Common for error -->
-	<string name="error_was_occurred">Error was occurred</string>
-	<string name="network_error_was_occurred_check_internet_connection">Network error was occurred, check internet connection</string>
-	<string name="file_is_already_exist">File is already exist</string>
-	<string name="empty_field">Empty field</string>
-	<string name="offline_modification_message">Could not save to source file: %s. Changes will be synced later or do it manually with \'Sync\' button</string>
+    <!-- Common for error -->
+    <string name="error_was_occurred">Error was occurred</string>
+    <string name="network_error_was_occurred_check_internet_connection">Network error was occurred, check internet connection</string>
+    <string name="file_is_already_exist">File is already exist</string>
+    <string name="empty_field">Empty field</string>
+    <string name="offline_modification_message">Could not save to source file: %s. Changes will be synced later or do it manually with \'Sync\' button</string>
 
-	<!-- Unlock screen -->
-	<string name="recently_used">Recently used</string>
-	<string name="no_files_to_open">No files to open</string>
-	<string name="unlock">Unlock</string>
-	<string name="empty_file_name">No filename</string>
-	<string-array name="unlock_fab_actions">
-		<item>New file</item>
-		<item>Open file</item>
-	</string-array>
+    <!-- Unlock screen -->
+    <string name="recently_used">Recently used</string>
+    <string name="no_files_to_open">No files to open</string>
+    <string name="unlock">Unlock</string>
+    <string name="empty_file_name">No filename</string>
+    <string-array name="unlock_fab_actions">
+        <item>New file</item>
+        <item>Open file</item>
+    </string-array>
 
-	<!-- New database screen -->
-	<string name="new_database">New database</string>
-	<string name="file_name">File name</string>
-	<string name="password">Password</string>
-	<string name="confirm">Confirm</string>
-	<string name="field_contains_illegal_character">Field contains illegal character</string>
-	<string name="you_entered_two_different_passwords_please_try_again">You entered two different passwords. Please try again.</string>
-	<string name="this_field_should_match_password">This field should match password</string>
-	<string name="storage_type">Storage type:</string>
-	<string name="not_selected">Not selected</string>
-	<string name="dot_kdbx">.kdbx</string>
-	<string name="private_storage">Private storage</string>
-	<string name="public_storage">Public storage</string>
-	<string name="storage_is_not_selected">Storage is not selected</string>
+    <!-- New database screen -->
+    <string name="new_database">New database</string>
+    <string name="file_name">File name</string>
+    <string name="password">Password</string>
+    <string name="confirm">Confirm</string>
+    <string name="field_contains_illegal_character">Field contains illegal character</string>
+    <string name="you_entered_two_different_passwords_please_try_again">You entered two different passwords. Please try again.</string>
+    <string name="this_field_should_match_password">This field should match password</string>
+    <string name="storage_type">Storage type:</string>
+    <string name="not_selected">Not selected</string>
+    <string name="dot_kdbx">.kdbx</string>
+    <string name="private_storage">Private storage</string>
+    <string name="public_storage">Public storage</string>
+    <string name="storage_is_not_selected">Storage is not selected</string>
 
-	<!-- Open file screen -->
-	<string name="file_path">File path</string>
+    <!-- Open file screen -->
+    <string name="file_path">File path</string>
 
-	<!-- Groups screen -->
-	<string name="groups">Groups</string>
-	<string name="no_items_to_show">No items to show</string>
-	<string name="notes_with_count">Notes: %d</string>
-	<string name="groups_with_count">Groups: %d</string>
-	<string name="groups_and_notes_with_count">Groups: %1$d  Notes: %2$d</string>
+    <!-- Groups screen -->
+    <string name="groups">Groups</string>
+    <string name="no_items_to_show">No items to show</string>
+    <string name="notes_with_count">Notes: %d</string>
+    <string name="groups_with_count">Groups: %d</string>
+    <string name="groups_and_notes_with_count">Groups: %1$d  Notes: %2$d</string>
     <string name="new_item_entry_standard_note">Standard Note</string>
-	<string name="new_item_entry_new_group">New Group</string>
-	<string name="note_remove_confirmation_message">Are you sure want to remove note "%s" ?</string>
-	<string name="group_remove_confirmation_message">Are you sure want to remove this group?</string>
-	<string name="successfully_removed">Successfully removed</string>
-	<string-array name="item_actions_entries">
-		<item>Edit</item>
-		<item>Remove</item>
-	</string-array>
+    <string name="new_item_entry_new_group">New Group</string>
+    <string name="note_remove_confirmation_message">Are you sure want to remove note "%s" ?</string>
+    <string name="group_remove_confirmation_message">Are you sure want to remove this group?</string>
+    <string name="successfully_removed">Successfully removed</string>
+    <string-array name="item_actions_entries">
+        <item>Edit</item>
+        <item>Remove</item>
+    </string-array>
 
-	<!-- New group screen -->
-	<string name="new_group">New group</string>
-	<string name="group_title">Group title</string>
-	<string name="group_with_this_name_is_already_exist">Group with this name is already exist</string>
+    <!-- New group screen -->
+    <string name="new_group">New group</string>
+    <string name="group_title">Group title</string>
+    <string name="group_with_this_name_is_already_exist">Group with this name is already exist</string>
 
-	<!-- Note screen -->
-	<string name="copied_clipboard_will_be_cleared_in_seconds">Copied! Clipboard will be cleared in %d seconds</string>
-	<string name="edited_at">Edited %s</string>
+    <!-- Note screen -->
+    <string name="copied_clipboard_will_be_cleared_in_seconds">Copied! Clipboard will be cleared in %d seconds</string>
+    <string name="edited_at">Edited %s</string>
 
-	<!-- Note editor screen -->
-	<string name="new_note">New note</string>
-	<string name="name">Name</string>
-	<string name="username">Username</string>
-	<string name="no_changes">No changes</string>
-	<string name="url_cap">URL</string>
-	<string name="notes">Notes</string>
-	<string name="confirm_password">Confirm password</string>
-	<string name="does_not_match_with_password">Does not match with password</string>
-	<string name="value">Value</string>
+    <!-- Note editor screen -->
+    <string name="new_note">New note</string>
+    <string name="name">Name</string>
+    <string name="username">Username</string>
+    <string name="no_changes">No changes</string>
+    <string name="url_cap">URL</string>
+    <string name="notes">Notes</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="does_not_match_with_password">Does not match with password</string>
+    <string name="value">Value</string>
     <string name="protected_">Protected</string>
-	<string name="field_name">Field Name</string>
-	<string name="field_value">Field Value</string>
-	<string name="empty_field_name_message">Field Name shouldn\'t be empty</string>
-	<string name="title">Title</string>
-	<string name="should_not_be_empty">Should not be empty</string>
+    <string name="field_name">Field Name</string>
+    <string name="field_value">Field Value</string>
+    <string name="empty_field_name_message">Field Name shouldn\'t be empty</string>
+    <string name="title">Title</string>
+    <string name="should_not_be_empty">Should not be empty</string>
     <string name="discard_changes">Discard changes?</string>
-	<string name="discard">Discard</string>
-	<string name="cancel">Cancel</string>
+    <string name="discard">Discard</string>
+    <string name="cancel">Cancel</string>
 
-	<!-- Storage screen -->
-	<string name="select_storage">Select storage</string>
-	<string name="private_app_storage">Private app storage</string>
-	<string name="external_storage">External storage</string>
-	<string name="external_storage_system_picker">External storage (system picker)</string>
-	<string name="authentication_failed">Authentication failed</string>
+    <!-- Storage screen -->
+    <string name="select_storage">Select storage</string>
+    <string name="private_app_storage">Private app storage</string>
+    <string name="external_storage">External storage</string>
+    <string name="external_storage_system_picker">External storage (system picker)</string>
+    <string name="authentication_failed">Authentication failed</string>
 
-	<!-- File picker screen -->
-	<string name="select_directory">Select directory</string>
-	<string name="select_file">Select file</string>
-	<string name="permission_denied_message">Application requires external storage permission</string>
-	<string name="please_select_any_file">Please select any file</string>
+    <!-- File picker screen -->
+    <string name="select_directory">Select directory</string>
+    <string name="select_file">Select file</string>
+    <string name="permission_denied_message">Application requires external storage permission</string>
+    <string name="please_select_any_file">Please select any file</string>
 
-	<!-- Server screen -->
-	<string name="add_new_server">Add new server</string>
-	<string name="server_url">Server url</string>
+    <!-- Server screen -->
+    <string name="add_new_server">Add new server</string>
+    <string name="server_url">Server url</string>
 
-	<!-- Debug menu screen -->
-	<string name="debug_menu">Debug menu</string>
+    <!-- Debug menu screen -->
+    <string name="debug_menu">Debug menu</string>
 
 </resources>

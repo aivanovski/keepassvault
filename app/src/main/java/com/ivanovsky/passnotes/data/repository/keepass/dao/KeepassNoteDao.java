@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.keepass.dao;
 
+import androidx.annotation.NonNull;
+
 import com.ivanovsky.passnotes.data.entity.Note;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
@@ -26,280 +28,285 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 
 public class KeepassNoteDao implements NoteDao {
 
-	private static final String PROPERTY_TITLE = "Title";
-	private static final String PROPERTY_PASSWORD = "Password";
-	private static final String PROPERTY_URL = "URL";
-	private static final String PROPERTY_USER_NAME = "UserName";
-	private static final String PROPERTY_NOTES = "Notes";
+    private static final String PROPERTY_TITLE = "Title";
+    private static final String PROPERTY_PASSWORD = "Password";
+    private static final String PROPERTY_URL = "URL";
+    private static final String PROPERTY_USER_NAME = "UserName";
+    private static final String PROPERTY_NOTES = "Notes";
 
-	private final KeepassDatabase db;
-	private volatile OnNoteUpdateListener updateListener;
-	private volatile OnNoteInsertListener insertListener;
-	private volatile OnNoteRemoveListener removeListener;
+    private final KeepassDatabase db;
+    private volatile OnNoteUpdateListener updateListener;
+    private volatile OnNoteInsertListener insertListener;
+    private volatile OnNoteRemoveListener removeListener;
 
-	public interface OnNoteUpdateListener {
-		void onNoteChanged(UUID groupUid, UUID oldNoteUid, UUID newNoteUid);
-	}
+    public interface OnNoteUpdateListener {
+        void onNoteChanged(UUID groupUid, UUID oldNoteUid, UUID newNoteUid);
+    }
 
-	public interface OnNoteInsertListener {
-		void onNoteCreated(UUID groupUid, UUID noteUid);
-	}
+    public interface OnNoteInsertListener {
+        void onNoteCreated(UUID groupUid, UUID noteUid);
+    }
 
-	public interface OnNoteRemoveListener {
-		void onNoteRemove(UUID groupUid, UUID noteUid);
-	}
+    public interface OnNoteRemoveListener {
+        void onNoteRemove(UUID groupUid, UUID noteUid);
+    }
 
-	public KeepassNoteDao(KeepassDatabase db) {
-		this.db = db;
-	}
+    public KeepassNoteDao(KeepassDatabase db) {
+        this.db = db;
+    }
 
-	public void setOnNoteChangeListener(OnNoteUpdateListener updateListener) {
-		this.updateListener = updateListener;
-	}
+    public void setOnNoteChangeListener(OnNoteUpdateListener updateListener) {
+        this.updateListener = updateListener;
+    }
 
-	public void setOnNoteInsertListener(OnNoteInsertListener insertListener) {
-		this.insertListener = insertListener;
-	}
+    public void setOnNoteInsertListener(OnNoteInsertListener insertListener) {
+        this.insertListener = insertListener;
+    }
 
-	public void setOnNoteRemoveListener(OnNoteRemoveListener removeListener) {
-		this.removeListener = removeListener;
-	}
+    public void setOnNoteRemoveListener(OnNoteRemoveListener removeListener) {
+        this.removeListener = removeListener;
+    }
 
-	@Override
-	public OperationResult<List<Note>> getNotesByGroupUid(UUID groupUid) {
-		List<Note> notes = new ArrayList<>();
+    @NonNull
+    @Override
+    public OperationResult<List<Note>> getNotesByGroupUid(UUID groupUid) {
+        List<Note> notes = new ArrayList<>();
 
-		synchronized (db.getLock()) {
-			SimpleGroup group = db.getKeepassDatabase().findGroup(groupUid);
-			if (group == null) {
-				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
-			}
+        synchronized (db.getLock()) {
+            SimpleGroup group = db.getKeepassDatabase().findGroup(groupUid);
+            if (group == null) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+            }
 
-			List<SimpleEntry> entries = group.getEntries();
-			if (entries != null) {
-				notes.addAll(createNotesFromEntries(group.getEntries()));
-			}
-		}
+            List<SimpleEntry> entries = group.getEntries();
+            if (entries != null) {
+                notes.addAll(createNotesFromEntries(group.getEntries()));
+            }
+        }
 
-		return OperationResult.success(notes);
-	}
+        return OperationResult.success(notes);
+    }
 
-	private List<Note> createNotesFromEntries(List<SimpleEntry> entries) {
-		List<Note> notes = new ArrayList<>();
+    private List<Note> createNotesFromEntries(List<SimpleEntry> entries) {
+        List<Note> notes = new ArrayList<>();
 
-		if (entries != null) {
-			for (SimpleEntry entry : entries) {
-				notes.add(createNoteFromEntry(entry));
-			}
-		}
+        if (entries != null) {
+            for (SimpleEntry entry : entries) {
+                notes.add(createNoteFromEntry(entry));
+            }
+        }
 
-		return notes;
-	}
+        return notes;
+    }
 
-	private Note createNoteFromEntry(SimpleEntry entry) {
-		UUID uid;
-		UUID groupUid;
-		String title;
-		Date created;
-		Date modified;
+    private Note createNoteFromEntry(SimpleEntry entry) {
+        UUID uid;
+        UUID groupUid;
+        String title;
+        Date created;
+        Date modified;
 
-		// TODO: add field validation
+        // TODO: add field validation
 
-		uid = entry.getUuid();
-		groupUid = entry.getParent().getUuid();
-		title = entry.getTitle();
-		created = entry.getCreationTime();
+        uid = entry.getUuid();
+        groupUid = entry.getParent().getUuid();
+        title = entry.getTitle();
+        created = entry.getCreationTime();
 
-		if (entry.getLastModificationTime() != null) {
-			modified = entry.getLastModificationTime();
-		} else {
-			modified = entry.getCreationTime();
-		}
+        if (entry.getLastModificationTime() != null) {
+            modified = entry.getLastModificationTime();
+        } else {
+            modified = entry.getCreationTime();
+        }
 
-		List<Property> properties = new ArrayList<>();
-		List<String> propertyNames = entry.getPropertyNames();
-		if (propertyNames != null) {
-			for (String propertyName : propertyNames) {
-				String propertyValue = entry.getProperty(propertyName);
-				boolean isProtected = entry.isPropertyProtected(propertyName);
+        List<Property> properties = new ArrayList<>();
+        List<String> propertyNames = entry.getPropertyNames();
+        if (propertyNames != null) {
+            for (String propertyName : propertyNames) {
+                String propertyValue = entry.getProperty(propertyName);
+                boolean isProtected = entry.isPropertyProtected(propertyName);
 
-				Property property = createProperty(propertyName, propertyValue, isProtected);
-				if (property != null) {
-					properties.add(property);
-				}
-			}
-		}
+                Property property = createProperty(propertyName, propertyValue, isProtected);
+                if (property != null) {
+                    properties.add(property);
+                }
+            }
+        }
 
-		return new Note(uid, groupUid, created, modified, title, properties);
-	}
+        return new Note(uid, groupUid, created, modified, title, properties);
+    }
 
-	private Property createProperty(String name, String value, boolean isProtected) {
-		if (name == null) return null;
+    private Property createProperty(String name, String value, boolean isProtected) {
+        if (name == null) return null;
 
-		return new Property(parsePropertyType(name), name, value, isProtected);
-	}
+        return new Property(parsePropertyType(name), name, value, isProtected);
+    }
 
-	private PropertyType parsePropertyType(String type) {
-		switch (type) {
-			case PROPERTY_TITLE:
-				return PropertyType.TITLE;
-			case PROPERTY_PASSWORD:
-				return PropertyType.PASSWORD;
-			case PROPERTY_USER_NAME:
-				return PropertyType.USER_NAME;
-			case PROPERTY_URL:
-				return PropertyType.URL;
-			case PROPERTY_NOTES:
-				return PropertyType.NOTES;
-			default:
-				return null;
-		}
-	}
+    private PropertyType parsePropertyType(String type) {
+        switch (type) {
+            case PROPERTY_TITLE:
+                return PropertyType.TITLE;
+            case PROPERTY_PASSWORD:
+                return PropertyType.PASSWORD;
+            case PROPERTY_USER_NAME:
+                return PropertyType.USER_NAME;
+            case PROPERTY_URL:
+                return PropertyType.URL;
+            case PROPERTY_NOTES:
+                return PropertyType.NOTES;
+            default:
+                return null;
+        }
+    }
 
-	@Override
-	public OperationResult<UUID> insert(Note note) {
+    @NonNull
+    @Override
+    public OperationResult<UUID> insert(Note note) {
 
-	    SimpleEntry newEntry;
-		synchronized (db.getLock()) {
-			SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
-			if (group == null) {
-				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
-			}
+        SimpleEntry newEntry;
+        synchronized (db.getLock()) {
+            SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
+            if (group == null) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+            }
 
-			newEntry = group.addEntry(createEntryFromNote(note));
-			if (newEntry == null) {
-				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
-			}
+            newEntry = group.addEntry(createEntryFromNote(note));
+            if (newEntry == null) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
+            }
 
-			OperationResult<Boolean> commitResult = db.commit();
-			if (commitResult.isFailed()) {
-				group.removeEntry(newEntry);
-				return commitResult.takeError();
-			}
-		}
+            OperationResult<Boolean> commitResult = db.commit();
+            if (commitResult.isFailed()) {
+                group.removeEntry(newEntry);
+                return commitResult.takeError();
+            }
+        }
 
-		if (insertListener != null) {
-			insertListener.onNoteCreated(note.getGroupUid(), newEntry.getUuid());
-		}
+        if (insertListener != null) {
+            insertListener.onNoteCreated(note.getGroupUid(), newEntry.getUuid());
+        }
 
-		return OperationResult.success(newEntry.getUuid());
-	}
+        return OperationResult.success(newEntry.getUuid());
+    }
 
-	private SimpleEntry createEntryFromNote(Note note) {
-		SimpleEntry entry = SimpleEntry.createEntry(db.getKeepassDatabase());
+    private SimpleEntry createEntryFromNote(Note note) {
+        SimpleEntry entry = SimpleEntry.createEntry(db.getKeepassDatabase());
 
-		// TODO: add protected properties
+        // TODO: add protected properties
 
-		for (Property property : note.getProperties()) {
-			entry.setProperty(property.getName(), property.getValue(), property.isProtected());
-		}
+        for (Property property : note.getProperties()) {
+            entry.setProperty(property.getName(), property.getValue(), property.isProtected());
+        }
 
-		entry.setTitle(note.getTitle());
+        entry.setTitle(note.getTitle());
 
-		return entry;
-	}
+        return entry;
+    }
 
-	@Override
-	public OperationResult<Note> getNoteByUid(UUID noteUid) {
-		SimpleEntry note;
-		synchronized (db.getLock()) {
-			SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
+    @NonNull
+    @Override
+    public OperationResult<Note> getNoteByUid(UUID noteUid) {
+        SimpleEntry note;
+        synchronized (db.getLock()) {
+            SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
 
-			List<? extends SimpleEntry> entries = rootGroup.findEntries(
-					entry -> entry.getUuid().equals(noteUid),
-					true);
-			if (entries.size() == 0) {
-				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
-			}
+            List<? extends SimpleEntry> entries = rootGroup.findEntries(
+                    entry -> entry.getUuid().equals(noteUid),
+                    true);
+            if (entries.size() == 0) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
+            }
 
-			note = entries.get(0);
-		}
+            note = entries.get(0);
+        }
 
-		return OperationResult.success(createNoteFromEntry(note));
-	}
+        return OperationResult.success(createNoteFromEntry(note));
+    }
 
-	@Override
-	public OperationResult<UUID> update(Note note) {
-		UUID oldUid = note.getUid();
-		if (oldUid == null) {
-			return OperationResult.error(newGenericError(MESSAGE_UID_IS_NULL));
-		}
+    @NonNull
+    @Override
+    public OperationResult<UUID> update(Note note) {
+        UUID oldUid = note.getUid();
+        if (oldUid == null) {
+            return OperationResult.error(newGenericError(MESSAGE_UID_IS_NULL));
+        }
 
-		UUID newUid;
-		synchronized (db.getLock()) {
+        UUID newUid;
+        synchronized (db.getLock()) {
 
-			SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
-			if (group == null) {
-				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
-			}
+            SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
+            if (group == null) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+            }
 
-			List<? extends SimpleEntry> entries =
-					group.findEntries(entry -> oldUid.equals(entry.getUuid()), false);
-			if (entries.size() == 0) {
-				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
-			} else if (entries.size() > 1) {
-				return OperationResult.error(newDbError(MESSAGE_DUPLICATED_NOTE));
-			}
+            List<? extends SimpleEntry> entries =
+                    group.findEntries(entry -> oldUid.equals(entry.getUuid()), false);
+            if (entries.size() == 0) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
+            } else if (entries.size() > 1) {
+                return OperationResult.error(newDbError(MESSAGE_DUPLICATED_NOTE));
+            }
 
-			SimpleEntry oldEntry = entries.get(0);
-			group.removeEntry(oldEntry);
+            SimpleEntry oldEntry = entries.get(0);
+            group.removeEntry(oldEntry);
 
-			// TODO: entry insertion can be reused from insert() method
+            // TODO: entry insertion can be reused from insert() method
 
-			SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
-			if (newEntry == null) {
-				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
-			}
+            SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
+            if (newEntry == null) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
+            }
 
-			newUid = newEntry.getUuid();
+            newUid = newEntry.getUuid();
 
-			OperationResult<Boolean> commitResult = db.commit();
-			if (commitResult.isFailed()) {
-				group.removeEntry(newEntry);
-				return commitResult.takeError();
-			}
-		}
+            OperationResult<Boolean> commitResult = db.commit();
+            if (commitResult.isFailed()) {
+                group.removeEntry(newEntry);
+                return commitResult.takeError();
+            }
+        }
 
-		if (updateListener != null) {
-			updateListener.onNoteChanged(note.getGroupUid(), oldUid, newUid);
-		}
+        if (updateListener != null) {
+            updateListener.onNoteChanged(note.getGroupUid(), oldUid, newUid);
+        }
 
-		return OperationResult.success(newUid);
-	}
+        return OperationResult.success(newUid);
+    }
 
-	@Override
-	public OperationResult<Boolean> remove(UUID noteUid) {
-		SimpleGroup group;
+    @NonNull
+    @Override
+    public OperationResult<Boolean> remove(UUID noteUid) {
+        SimpleGroup group;
 
-	    synchronized (db.getLock()) {
-			SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
+        synchronized (db.getLock()) {
+            SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
 
-			List<? extends SimpleEntry> entries = rootGroup.findEntries(
-					entry -> entry.getUuid().equals(noteUid),
-					true);
-			if (entries.size() != 1) {
-				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
-			}
+            List<? extends SimpleEntry> entries = rootGroup.findEntries(
+                    entry -> entry.getUuid().equals(noteUid),
+                    true);
+            if (entries.size() != 1) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
+            }
 
-			SimpleEntry note = entries.get(0);
+            SimpleEntry note = entries.get(0);
 
-			group = note.getParent();
-			if (group == null) {
-				return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
-			}
+            group = note.getParent();
+            if (group == null) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+            }
 
-			group.removeEntry(note);
+            group.removeEntry(note);
 
-			OperationResult<Boolean> commitResult = db.commit();
-			if (commitResult.isFailed()) {
-				return commitResult.takeError();
-			}
-		}
+            OperationResult<Boolean> commitResult = db.commit();
+            if (commitResult.isFailed()) {
+                return commitResult.takeError();
+            }
+        }
 
-		if (removeListener != null) {
-			removeListener.onNoteRemove(group.getUuid(), noteUid);
-		}
+        if (removeListener != null) {
+            removeListener.onNoteRemove(group.getUuid(), noteUid);
+        }
 
-		return OperationResult.success(true);
-	}
+        return OperationResult.success(true);
+    }
 }

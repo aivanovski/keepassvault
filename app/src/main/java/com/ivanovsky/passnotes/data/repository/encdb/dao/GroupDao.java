@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.encdb.dao;
 
+import androidx.annotation.NonNull;
+
 import com.ivanovsky.passnotes.data.entity.Group;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 
@@ -8,9 +10,18 @@ import java.util.UUID;
 
 public interface GroupDao {
 
-	OperationResult<List<Group>> getAll();
-	OperationResult<Group> getRootGroup();
-	OperationResult<List<Group>> getChildGroups(UUID parentGroupUid);
-	OperationResult<UUID> insert(Group group, UUID parentGroupUid);
-	OperationResult<Boolean> remove(UUID groupUid);
+    @NonNull
+    OperationResult<List<Group>> getAll();
+
+    @NonNull
+    OperationResult<Group> getRootGroup();
+
+    @NonNull
+    OperationResult<List<Group>> getChildGroups(UUID parentGroupUid);
+
+    @NonNull
+    OperationResult<UUID> insert(Group group, UUID parentGroupUid);
+
+    @NonNull
+    OperationResult<Boolean> remove(UUID groupUid);
 }

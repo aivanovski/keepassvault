@@ -43,7 +43,7 @@ class NoteEditorInteractor(
     }
 
     fun loadTemplate(templateUid: UUID): Template? {
-        val templates = dbRepo.templateRepository.templates ?: return null
+        val templates = dbRepo.templateRepository?.templates ?: return null
         return templates.firstOrNull { template -> template.uid == templateUid }
     }
 }

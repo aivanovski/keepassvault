@@ -20,119 +20,119 @@ import androidx.annotation.Nullable;
 
 public class FileHelper {
 
-	private final Context context;
-	private final SettingsRepository settings;
+    private final Context context;
+    private final SettingsRepository settings;
 
-	public FileHelper(Context context, SettingsRepository settings) {
-		this.context = context;
-		this.settings = settings;
-	}
+    public FileHelper(Context context, SettingsRepository settings) {
+        this.context = context;
+        this.settings = settings;
+    }
 
-	@Nullable
-	public File generateDestinationFileForRemoteFile() {
-		File result = null;
+    @Nullable
+    public File generateDestinationFileForRemoteFile() {
+        File result = null;
 
-		String destination = generateDestinationForRemoteFile();
-		if (destination != null) {
-			result = new File(destination);
-		}
+        String destination = generateDestinationForRemoteFile();
+        if (destination != null) {
+            result = new File(destination);
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@Nullable
-	public String generateDestinationForRemoteFile() {
-		String result = null;
+    @Nullable
+    public String generateDestinationForRemoteFile() {
+        String result = null;
 
-		File dir = getRemoteFilesDir();
-		if (dir != null) {
-			result = dir.getPath() + "/" + UUID.randomUUID().toString();
-		}
+        File dir = getRemoteFilesDir();
+        if (dir != null) {
+            result = dir.getPath() + "/" + UUID.randomUUID().toString();
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@Nullable
-	public File getRemoteFilesDir() {
-		File result;
+    @Nullable
+    public File getRemoteFilesDir() {
+        File result;
 
-		if (settings.isExternalStorageCacheEnabled()) {
-			result = getExternalStorageDir("remote-files");
-		} else {
-			result = getPrivateDir("remote-files");
-		}
+        if (settings.isExternalStorageCacheEnabled()) {
+            result = getExternalStorageDir("remote-files");
+        } else {
+            result = getPrivateDir("remote-files");
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@Nullable
-	private File getPrivateDir(@NonNull String name) {
-		File result = null;
+    @Nullable
+    private File getPrivateDir(@NonNull String name) {
+        File result = null;
 
-		File dir = context.getDir(name, Context.MODE_PRIVATE);
-		if (dir != null && dir.exists()) {
-			result = dir;
-		}
+        File dir = context.getDir(name, Context.MODE_PRIVATE);
+        if (dir != null && dir.exists()) {
+            result = dir;
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	private File getExternalStorageDir(@NonNull String name) {
-		File result = null;
+    private File getExternalStorageDir(@NonNull String name) {
+        File result = null;
 
-		File dir = context.getExternalCacheDir();
-		if (dir != null && dir.exists()) {
-			File subDir = new File(dir, name);
-			if (subDir.exists() || (!subDir.exists() && subDir.mkdirs())) {
-				result = subDir;
-			}
-		}
+        File dir = context.getExternalCacheDir();
+        if (dir != null && dir.exists()) {
+            File subDir = new File(dir, name);
+            if (subDir.exists() || (!subDir.exists() && subDir.mkdirs())) {
+                result = subDir;
+            }
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@Nullable
-	public File getDatabaseDir() {
-		File result = null;
+    @Nullable
+    public File getDatabaseDir() {
+        File result = null;
 
-		File filesDir = context.getFilesDir();
-		if (filesDir != null && filesDir.getParentFile() != null) {
+        File filesDir = context.getFilesDir();
+        if (filesDir != null && filesDir.getParentFile() != null) {
 
-			File dataDir = filesDir.getParentFile();
-			if (dataDir.exists()) {
+            File dataDir = filesDir.getParentFile();
+            if (dataDir.exists()) {
 
-				File databaseDir = new File(dataDir.getPath() + File.separator + "databases");
-				if (databaseDir.exists()) {
-					result = databaseDir;
-				}
-			}
-		}
+                File databaseDir = new File(dataDir.getPath() + File.separator + "databases");
+                if (databaseDir.exists()) {
+                    result = databaseDir;
+                }
+            }
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	public boolean isLocatedInPrivateStorage(@NonNull File file) {
-		boolean result = false;
+    public boolean isLocatedInPrivateStorage(@NonNull File file) {
+        boolean result = false;
 
-		File privateDir = context.getFilesDir();
-		if (privateDir != null) {
-			File dataDir = privateDir.getParentFile();
-			if (dataDir != null) {
-				String dataDirPath = dataDir.getPath();
+        File privateDir = context.getFilesDir();
+        if (privateDir != null) {
+            File dataDir = privateDir.getParentFile();
+            if (dataDir != null) {
+                String dataDirPath = dataDir.getPath();
 
-				result = file.getPath().startsWith(dataDirPath);
-			}
-		}
+                result = file.getPath().startsWith(dataDirPath);
+            }
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@Nullable
-	public void duplicateFile(@NonNull File src, @NonNull File destination)
-			throws IOException {
-		InputStream in = new BufferedInputStream(new FileInputStream(src));
-		OutputStream out = new BufferedOutputStream(new FileOutputStream(destination));
+    @Nullable
+    public void duplicateFile(@NonNull File src, @NonNull File destination)
+            throws IOException {
+        InputStream in = new BufferedInputStream(new FileInputStream(src));
+        OutputStream out = new BufferedOutputStream(new FileOutputStream(destination));
 
-		InputOutputUtils.copy(in, out, true);
-	}
+        InputOutputUtils.copy(in, out, true);
+    }
 }

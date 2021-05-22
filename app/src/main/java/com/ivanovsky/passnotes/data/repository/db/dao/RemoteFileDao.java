@@ -12,15 +12,15 @@ import androidx.room.Update;
 @Dao
 public interface RemoteFileDao {
 
-	@Query("SELECT * FROM remote_file")
-	List<RemoteFile> getAll();
+    @Query("SELECT * FROM remote_file")
+    List<RemoteFile> getAll();
 
-	@Insert
-	long insert(RemoteFile file);
+    @Insert
+    long insert(RemoteFile file);
 
-	@Update
-	void update(RemoteFile file);
+    @Update
+    void update(RemoteFile file);
 
-	@Query("DELETE FROM remote_file WHERE id = :id")
-	void delete(long id);
+    @Query("DELETE FROM remote_file WHERE id = :id")
+    void delete(long id);
 }

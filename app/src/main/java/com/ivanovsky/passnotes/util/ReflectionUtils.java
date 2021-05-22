@@ -4,12 +4,12 @@ import com.annimon.stream.Stream;
 
 public class ReflectionUtils {
 
-	public static boolean containsInterfaceInClass(Class classType, Class interfaceType) {
-		return Stream.of(classType.getInterfaces())
-				.anyMatch(classInterface -> classInterface == interfaceType);
-	}
+    public static boolean containsInterfaceInClass(Class classType, Class interfaceType) {
+        return Stream.of(classType.getInterfaces())
+                .anyMatch(classInterface -> classInterface == interfaceType);
+    }
 
-	private ReflectionUtils() {
-	}
+    private ReflectionUtils() {
+    }
 }
 

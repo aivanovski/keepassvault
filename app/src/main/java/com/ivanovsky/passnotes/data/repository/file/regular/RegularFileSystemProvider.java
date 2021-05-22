@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.data.repository.file.regular;
 
 import android.Manifest;
 
+import androidx.annotation.NonNull;
+
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
@@ -31,155 +33,169 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOErr
 
 public class RegularFileSystemProvider implements FileSystemProvider {
 
-	private static final String SDCARD_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    private static final String SDCARD_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
-	private final PermissionHelper permissionHelper;
-	private final Lock lock;
+    private final PermissionHelper permissionHelper;
+    private final Lock lock;
+    private final FileSystemAuthenticator authenticator;
+    private final FileSystemSyncProcessor syncProcessor;
 
-	public RegularFileSystemProvider(PermissionHelper permissionHelper) {
-		this.lock = new ReentrantLock();
-		this.permissionHelper = permissionHelper;
-	}
+    public RegularFileSystemProvider(PermissionHelper permissionHelper) {
+        this.lock = new ReentrantLock();
+        this.permissionHelper = permissionHelper;
+        this.authenticator = new RegularFileSystemAuthenticator();
+        this.syncProcessor = new RegularFileSystemSyncProcessor();
+    }
 
-	@Override
-	public FileSystemAuthenticator getAuthenticator() {
-		return null;
-	}
+    @NonNull
+    @Override
+    public FileSystemAuthenticator getAuthenticator() {
+        return authenticator;
+    }
 
-	@Override
-	public FileSystemSyncProcessor getSyncProcessor() {
-		return null;
-	}
+    @NonNull
+    @Override
+    public FileSystemSyncProcessor getSyncProcessor() {
+        return syncProcessor;
+    }
 
-	@Override
-	public OperationResult<List<FileDescriptor>> listFiles(FileDescriptor dir) {
-		OperationResult<List<FileDescriptor>> result = new OperationResult<>();
+    @NonNull
+    @Override
+    public OperationResult<List<FileDescriptor>> listFiles(FileDescriptor dir) {
+        OperationResult<List<FileDescriptor>> result = new OperationResult<>();
 
-		if (dir.isDirectory()) {
-			File file = new File(dir.getPath());
-			if (file.exists()) {
-				List<FileDescriptor> files = new ArrayList<>();
+        if (dir.isDirectory()) {
+            File file = new File(dir.getPath());
+            if (file.exists()) {
+                List<FileDescriptor> files = new ArrayList<>();
 
-				try {
-					File[] childFiles = file.listFiles();
-					if (childFiles != null && childFiles.length != 0) {
-						for (File childFile : childFiles) {
-							files.add(FileDescriptor.fromRegularFile(childFile));
-						}
-					}
+                try {
+                    File[] childFiles = file.listFiles();
+                    if (childFiles != null && childFiles.length != 0) {
+                        for (File childFile : childFiles) {
+                            files.add(FileDescriptor.fromRegularFile(childFile));
+                        }
+                    }
 
-					result.setObj(files);
-				} catch (SecurityException e) {
-					result.setError(newFileAccessError(OperationError.MESSAGE_FILE_ACCESS_IS_FORBIDDEN, e));
-				}
-			} else {
-				result.setError(newGenericIOError(OperationError.MESSAGE_FILE_NOT_FOUND));
-			}
-		} else {
-			result.setError(newGenericIOError(OperationError.MESSAGE_FILE_IS_NOT_A_DIRECTORY));
-		}
+                    result.setObj(files);
+                } catch (SecurityException e) {
+                    result.setError(newFileAccessError(OperationError.MESSAGE_FILE_ACCESS_IS_FORBIDDEN, e));
+                }
+            } else {
+                result.setError(newGenericIOError(OperationError.MESSAGE_FILE_NOT_FOUND));
+            }
+        } else {
+            result.setError(newGenericIOError(OperationError.MESSAGE_FILE_IS_NOT_A_DIRECTORY));
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@Override
-	public OperationResult<FileDescriptor> getParent(FileDescriptor fileDescriptor) {
-		OperationResult<FileDescriptor> result = new OperationResult<>();
+    @NonNull
+    @Override
+    public OperationResult<FileDescriptor> getParent(FileDescriptor fileDescriptor) {
+        OperationResult<FileDescriptor> result = new OperationResult<>();
 
-		File file = new File(fileDescriptor.getPath());
-		if (file.exists()) {
-			File parentFile = file.getParentFile();
+        File file = new File(fileDescriptor.getPath());
+        if (file.exists()) {
+            File parentFile = file.getParentFile();
 
-			if (parentFile != null) {
-				result.setObj(FileDescriptor.fromRegularFile(parentFile));
-			} else {
-				result.setError(newGenericIOError(OperationError.MESSAGE_FILE_DOES_NOT_EXIST));
-			}
-		} else {
-			result.setError(newGenericIOError(OperationError.MESSAGE_FILE_NOT_FOUND));
-		}
+            if (parentFile != null) {
+                result.setObj(FileDescriptor.fromRegularFile(parentFile));
+            } else {
+                result.setError(newGenericIOError(OperationError.MESSAGE_FILE_DOES_NOT_EXIST));
+            }
+        } else {
+            result.setError(newGenericIOError(OperationError.MESSAGE_FILE_NOT_FOUND));
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@Override
-	public OperationResult<FileDescriptor> getRootFile() {
-		OperationResult<FileDescriptor> result = new OperationResult<>();
+    @NonNull
+    @Override
+    public OperationResult<FileDescriptor> getRootFile() {
+        OperationResult<FileDescriptor> result = new OperationResult<>();
 
-		File root = new File("/");
-		if (root.exists()) {
-			result.setObj(FileDescriptor.fromRegularFile(root));
-		} else {
-			result.setError(newGenericIOError(OperationError.MESSAGE_FILE_NOT_FOUND));
-		}
+        File root = new File("/");
+        if (root.exists()) {
+            result.setObj(FileDescriptor.fromRegularFile(root));
+        } else {
+            result.setError(newGenericIOError(OperationError.MESSAGE_FILE_NOT_FOUND));
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@Override
-	public OperationResult<InputStream> openFileForRead(FileDescriptor file,
-														OnConflictStrategy onConflictStrategy,
-														boolean cacheOperationsEnabled) {
-		OperationResult<InputStream> result = new OperationResult<>();
+    @NonNull
+    @Override
+    public OperationResult<InputStream> openFileForRead(FileDescriptor file,
+                                                        OnConflictStrategy onConflictStrategy,
+                                                        boolean cacheOperationsEnabled) {
+        OperationResult<InputStream> result = new OperationResult<>();
 
-		lock.lock();
-		try {
-			InputStream in = new BufferedInputStream(new FileInputStream(file.getPath()));
-			result.setObj(in);
-		} catch (FileNotFoundException e) {
-			Logger.printStackTrace(e);
-			result.setError(newGenericIOError(e.getMessage()));
-		} finally {
-			lock.unlock();
-		}
+        lock.lock();
+        try {
+            InputStream in = new BufferedInputStream(new FileInputStream(file.getPath()));
+            result.setObj(in);
+        } catch (FileNotFoundException e) {
+            Logger.printStackTrace(e);
+            result.setError(newGenericIOError(e.getMessage()));
+        } finally {
+            lock.unlock();
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@Override
-	public OperationResult<OutputStream> openFileForWrite(FileDescriptor file,
-														  OnConflictStrategy onConflictStrategy,
-														  boolean cacheOperationsEnabled) {
-		// TODO: implement onConflictStrategy
-		OperationResult<OutputStream> result = new OperationResult<>();
+    @NonNull
+    @Override
+    public OperationResult<OutputStream> openFileForWrite(FileDescriptor file,
+                                                          OnConflictStrategy onConflictStrategy,
+                                                          boolean cacheOperationsEnabled) {
+        // TODO: implement onConflictStrategy
+        OperationResult<OutputStream> result = new OperationResult<>();
 
-		lock.lock();
-		try {
-			OutputStream out = new BufferedOutputStream(new FileOutputStream(file.getPath()));
-			result.setObj(out);
-		} catch (FileNotFoundException e) {
-			Logger.printStackTrace(e);
-			result.setError(newGenericIOError(e.getMessage()));
-		} finally {
-			lock.unlock();
-		}
+        lock.lock();
+        try {
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(file.getPath()));
+            result.setObj(out);
+        } catch (FileNotFoundException e) {
+            Logger.printStackTrace(e);
+            result.setError(newGenericIOError(e.getMessage()));
+        } finally {
+            lock.unlock();
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@Override
-	public OperationResult<Boolean> exists(FileDescriptor file) {
-		boolean exists = new File(file.getPath()).exists();
-		return OperationResult.success(exists);
-	}
+    @NonNull
+    @Override
+    public OperationResult<Boolean> exists(FileDescriptor file) {
+        boolean exists = new File(file.getPath()).exists();
+        return OperationResult.success(exists);
+    }
 
-	@Override
-	public OperationResult<FileDescriptor> getFile(String path, boolean cacheOperationsEnabled) {
-		OperationResult<FileDescriptor> result = new OperationResult<>();
+    @NonNull
+    @Override
+    public OperationResult<FileDescriptor> getFile(String path, boolean cacheOperationsEnabled) {
+        OperationResult<FileDescriptor> result = new OperationResult<>();
 
-		File file = new File(path);
-		if (file.exists()) {
-			result.setObj(FileDescriptor.fromRegularFile(file));
-		} else {
-			result.setError(newGenericIOError(MESSAGE_FILE_NOT_FOUND));
-		}
+        File file = new File(path);
+        if (file.exists()) {
+            result.setObj(FileDescriptor.fromRegularFile(file));
+        } else {
+            result.setError(newGenericIOError(MESSAGE_FILE_NOT_FOUND));
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	@Override
-	public OperationResult<Boolean> isStoragePermissionRequired(FileDescriptor file) {
-		// TODO: actually permission is required only for external storage
-		return OperationResult.success(!permissionHelper.isPermissionGranted(SDCARD_PERMISSION));
-	}
+    @NonNull
+    @Override
+    public OperationResult<Boolean> isStoragePermissionRequired(FileDescriptor file) {
+        // TODO: actually permission is required only for external storage
+        return OperationResult.success(!permissionHelper.isPermissionGranted(SDCARD_PERMISSION));
+    }
 }

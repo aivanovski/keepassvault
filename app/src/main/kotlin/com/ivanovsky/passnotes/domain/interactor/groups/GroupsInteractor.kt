@@ -14,7 +14,7 @@ class GroupsInteractor(
 ) {
 
     fun getTemplates(): List<Template>? {
-        return dbRepo.templateRepository.templates
+        return dbRepo.templateRepository?.templates
     }
 
     fun getRootUid(): UUID? {

@@ -13,7 +13,7 @@
         android:layout_marginBottom="8dp"
         android:tint="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <LinearLayout
         android:id="@+id/fab_container"
@@ -22,6 +22,6 @@
         android:layout_marginBottom="@dimen/element_margin"
         android:orientation="vertical"
         app:layout_constraintBottom_toTopOf="@id/fab_main"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </merge>

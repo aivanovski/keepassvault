@@ -12,7 +12,7 @@ class FileSyncHelper(private val fileSystemResolver: FileSystemResolver) {
     fun getModifiedFileByUid(uid: String, fsAuthority: FSAuthority): FileDescriptor? {
         val provider = fileSystemResolver.resolveProvider(fsAuthority)
 
-        val modifiedFiles = provider.syncProcessor?.locallyModifiedFiles
+        val modifiedFiles = provider.syncProcessor.locallyModifiedFiles
 
         return modifiedFiles?.find { file -> file.uid == uid }
     }

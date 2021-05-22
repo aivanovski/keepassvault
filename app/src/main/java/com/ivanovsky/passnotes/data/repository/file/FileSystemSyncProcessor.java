@@ -7,10 +7,12 @@ import java.util.List;
 
 public interface FileSystemSyncProcessor {
 
-	List<FileDescriptor> getLocallyModifiedFiles();
+    List<FileDescriptor> getLocallyModifiedFiles();
 
-	/** Returns updated FileDescriptor */
-	OperationResult<FileDescriptor> process(FileDescriptor file,
-											SyncStrategy syncStrategy,
-											OnConflictStrategy onConflictStrategy);
+    /**
+     * Returns updated FileDescriptor
+     */
+    OperationResult<FileDescriptor> process(FileDescriptor file,
+                                            SyncStrategy syncStrategy,
+                                            OnConflictStrategy onConflictStrategy);
 }

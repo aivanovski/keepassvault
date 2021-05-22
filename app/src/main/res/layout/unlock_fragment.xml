@@ -22,13 +22,13 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}"/>
+            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}"/>
+            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <Spinner
             android:id="@+id/fileSpinner"
@@ -57,8 +57,8 @@
                 style="@style/Material.EditText.Password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@={viewModel.password}"
-                android:hint="@string/password" />
+                android:hint="@string/password"
+                android:text="@={viewModel.password}" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

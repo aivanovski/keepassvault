@@ -37,7 +37,7 @@ class UnlockInteractor(
     }
 
     private fun loadAndSortUsedFiles(): List<FileDescriptor> {
-        return fileRepository.all
+        return fileRepository.getAll()
             .sortedByDescending { file -> file.lastAccessTime ?: file.addedTime }
             .map { file -> file.toFileDescriptor() }
     }

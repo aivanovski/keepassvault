@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
@@ -16,9 +17,15 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
+import com.ivanovsky.passnotes.presentation.Screens.DebugMenuScreen
+import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
+import com.ivanovsky.passnotes.presentation.Screens.NewDatabaseScreen
+import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
+import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.unlock.model.DropDownItem
 import com.ivanovsky.passnotes.presentation.unlock.model.PasswordRule
 import com.ivanovsky.passnotes.util.FileUtils
@@ -33,22 +40,17 @@ class UnlockViewModel(
     private val errorInteractor: ErrorInteractor,
     private val observerBus: ObserverBus,
     private val resourceProvider: ResourceProvider,
-    private val dispatchers: DispatcherProvider
+    private val dispatchers: DispatcherProvider,
+    private val router: Router
 ) : ViewModel(),
     ObserverBus.UsedFileDataSetObserver,
     ObserverBus.UsedFileContentObserver{
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData<ScreenState>(ScreenState.notInitialized())
+    val screenState = MutableLiveData(ScreenState.notInitialized())
     val items = MutableLiveData<List<DropDownItem>>()
     val selectedItem = MutableLiveData<Int>()
-    val password = MutableLiveData<String>(EMPTY)
-    val showGroupsScreenEvent = SingleLiveEvent<Unit>()
-    val showNewDatabaseScreenEvent = SingleLiveEvent<Unit>()
-    val showOpenFileScreenEvent = SingleLiveEvent<Unit>()
-    val showSettingsScreenEvent = SingleLiveEvent<Unit>()
-    val showAboutScreenEvent = SingleLiveEvent<Unit>()
-    val showDebugMenuScreenEvent = SingleLiveEvent<Unit>()
+    val password = MutableLiveData(EMPTY)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val showSnackbarMessage = SingleLiveEvent<String>()
     val debugPasswordRules: List<PasswordRule>
@@ -194,7 +196,7 @@ class UnlockViewModel(
             }
 
             if (result.isSucceededOrDeferred) {
-                showGroupsScreenEvent.call()
+                router.newChain(GroupsScreen(GroupsArgs(groupUid = null)))
                 screenState.value = ScreenState.data()
             } else {
                 val message = errorInteractor.processAndGetMessage(result.error)
@@ -203,23 +205,28 @@ class UnlockViewModel(
         }
     }
 
-    fun onOpenFileMenuClicked() {
-        showOpenFileScreenEvent.call()
-    }
-
     fun onSettingsMenuClicked() {
-        showSettingsScreenEvent.call()
+        throw RuntimeException("Not implemented") //TODO: handle menu click
     }
 
     fun onAboutMenuClicked() {
-        showAboutScreenEvent.call()
+        throw RuntimeException("Not implemented") //TODO: handle menu click
     }
 
     fun onDebugMenuClicked() {
-        showDebugMenuScreenEvent.call()
+        router.navigateTo(DebugMenuScreen())
     }
 
-    fun onFilePicked(file: FileDescriptor) {
+    fun navigateToFilePicker() {
+        router.setResultListener(StorageListScreen.RESULT_KEY) { file ->
+            if (file is FileDescriptor) {
+                onFilePicked(file)
+            }
+        }
+        router.navigateTo(StorageListScreen(Action.PICK_FILE))
+    }
+
+    private fun onFilePicked(file: FileDescriptor) {
         //called when user select file from built-in file picker
         screenState.value = ScreenState.loading()
 
@@ -251,8 +258,8 @@ class UnlockViewModel(
 
     fun onFabActionClicked(position: Int) {
         when (position) {
-            0 -> showNewDatabaseScreenEvent.call()
-            1 -> showOpenFileScreenEvent.call()
+            0 -> router.navigateTo(NewDatabaseScreen())
+            1 -> navigateToFilePicker()
         }
     }
 
@@ -284,6 +291,7 @@ class UnlockViewModel(
         val FACTORY = object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
                 return UnlockViewModel(
+                    GlobalInjector.get(),
                     GlobalInjector.get(),
                     GlobalInjector.get(),
                     GlobalInjector.get(),

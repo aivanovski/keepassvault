@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.presentation.debugmenu
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
@@ -24,7 +25,8 @@ class DebugMenuViewModel(
     private val interactor: DebugMenuInteractor,
     private val errorInteractor: ErrorInteractor,
     private val resourceProvider: ResourceProvider,
-    private val settings: SettingsRepository
+    private val settings: SettingsRepository,
+    private val router: Router
 ) : ViewModel() {
 
     val screenStateHandler = DefaultScreenStateHandler()
@@ -264,6 +266,8 @@ class DebugMenuViewModel(
             isRoot = false
         )
     }
+
+    fun navigateBack() = router.exit()
 
     companion object {
 

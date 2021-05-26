@@ -11,6 +11,9 @@ import java.util.UUID;
 public interface GroupRepository {
 
     @NonNull
+    OperationResult<Group> getGroupByUid(@NonNull UUID groupUid);
+
+    @NonNull
     OperationResult<List<Group>> getAllGroup();
 
     @NonNull

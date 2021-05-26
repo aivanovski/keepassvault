@@ -1,0 +1,92 @@
+package com.ivanovsky.passnotes.presentation
+
+import androidx.fragment.app.FragmentFactory
+import com.github.terrakok.cicerone.androidx.FragmentScreen
+import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuFragment
+import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment
+import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs
+import com.ivanovsky.passnotes.presentation.group.GroupFragment
+import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
+import com.ivanovsky.passnotes.presentation.groups.GroupsFragment
+import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseFragment
+import com.ivanovsky.passnotes.presentation.note.NoteFragment
+import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
+import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorFragment
+import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
+import com.ivanovsky.passnotes.presentation.server_login.ServerLoginFragment
+import com.ivanovsky.passnotes.presentation.storagelist.Action
+import com.ivanovsky.passnotes.presentation.storagelist.StorageListFragment
+import com.ivanovsky.passnotes.presentation.unlock.UnlockFragment
+import java.util.UUID
+
+object Screens {
+    class UnlockScreen : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            UnlockFragment.newInstance()
+    }
+
+    // File and Storage
+    class StorageListScreen(private val action: Action) : FragmentScreen {
+
+        override fun createFragment(factory: FragmentFactory) =
+            StorageListFragment.newInstance(action)
+
+        companion object {
+            val RESULT_KEY = StorageListScreen::class.simpleName + "_result"
+        }
+    }
+
+    class FilePickerScreen(private val args: FilePickerArgs) : FragmentScreen {
+
+        override fun createFragment(factory: FragmentFactory) =
+            FilePickerFragment.newInstance(args)
+
+        companion object {
+            val RESULT_KEY = FilePickerScreen::class.simpleName + "_result"
+        }
+    }
+
+    // Network
+    class ServerLoginScreen(private val args: ServerLoginArgs) : FragmentScreen {
+
+        override fun createFragment(factory: FragmentFactory) =
+            ServerLoginFragment.newInstance(args)
+
+        companion object {
+            val RESULT_KEY = ServerLoginScreen::class.simpleName + "_result"
+        }
+    }
+
+    // Database
+    class NewDatabaseScreen : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            NewDatabaseFragment.newInstance()
+    }
+
+    // View Notes and Groups
+    class GroupsScreen(private val args: GroupsArgs) : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            GroupsFragment.newInstance(args)
+    }
+
+    class GroupScreen(private val parentGroupUid: UUID) : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            GroupFragment.newInstance(parentGroupUid)
+    }
+
+    class NoteEditorScreen(private val args: NoteEditorArgs) : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            NoteEditorFragment.newInstance(args)
+    }
+
+    class NoteScreen(private val noteUid: UUID) : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            NoteFragment.newInstance(noteUid)
+    }
+
+    // Debug
+    class DebugMenuScreen : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            DebugMenuFragment.newInstance()
+    }
+}

@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.groups
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
@@ -10,6 +11,10 @@ import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
+import com.ivanovsky.passnotes.presentation.Screens.GroupScreen
+import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
+import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
+import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -19,6 +24,9 @@ import com.ivanovsky.passnotes.presentation.core.viewmodels.GroupGridCellViewMod
 import com.ivanovsky.passnotes.presentation.core.viewmodels.NoteGridCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode
+import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toUUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,7 +39,8 @@ class GroupsViewModel(
     private val observerBus: ObserverBus,
     private val resourceProvider: ResourceProvider,
     private val cellModelFactory: GroupsCellModelFactory,
-    private val cellViewModelFactory: GroupsCellViewModelFactory
+    private val cellViewModelFactory: GroupsCellViewModelFactory,
+    private val router: Router
 ) : BaseScreenViewModel(),
     ObserverBus.GroupDataSetObserver,
     ObserverBus.NoteDataSetChanged,
@@ -42,19 +51,14 @@ class GroupsViewModel(
         .add(GroupGridCellViewModel::class, R.layout.grid_cell_group)
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData<ScreenState>(ScreenState.notInitialized())
+    val screenState = MutableLiveData(ScreenState.notInitialized())
 
+    val screenTitle = MutableLiveData(EMPTY)
     val toastMessage = MutableLiveData<String>()
-    val showNoteScreenEvent = SingleLiveEvent<Note>()
-    val showNoteListScreenEvent = SingleLiveEvent<Group>()
-    val showNewGroupScreenEvent = SingleLiveEvent<UUID>()
-    val showNewNoteScreenEvent = SingleLiveEvent<Pair<UUID, Template?>>()
     val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
     val showGroupActionsDialogEvent = SingleLiveEvent<Group>()
     val showNoteActionsDialogEvent = SingleLiveEvent<Note>()
     val showRemoveConfirmationDialogEvent = SingleLiveEvent<Pair<Group?, Note?>>()
-    val showEditNoteScreenEvent = SingleLiveEvent<Note>()
-    val showEditGroupScreenEvent = SingleLiveEvent<Group>()
 
     private var currentDataItems: List<GroupsInteractor.Item>? = null
     private var rootGroupUid: UUID? = null
@@ -90,6 +94,10 @@ class GroupsViewModel(
     fun start(groupUid: UUID?) {
         this.groupUid = groupUid
 
+        if (groupUid == null) {
+            screenTitle.value = resourceProvider.getString(R.string.groups)
+        }
+
         loadData()
     }
 
@@ -110,6 +118,13 @@ class GroupsViewModel(
             if (groupUid == null && rootGroupUid == null) {
                 rootGroupUid = withContext(Dispatchers.IO) {
                     interactor.getRootUid()
+                }
+            }
+
+            groupUid?.let {
+                val group = interactor.getGroup(it)
+                if (group.isSucceededOrDeferred) {
+                    screenTitle.value = group.obj.title ?: ""
                 }
             }
 
@@ -141,23 +156,41 @@ class GroupsViewModel(
     fun onCreateNewGroupClicked() {
         val currentGroupUid = getCurrentGroupUid() ?: return
 
-        showNewGroupScreenEvent.call(currentGroupUid)
+        router.navigateTo(GroupScreen(currentGroupUid))
     }
 
     fun onCreateNewNoteClicked() {
         val currentGroupUid = getCurrentGroupUid() ?: return
 
-        showNewNoteScreenEvent.call(Pair(currentGroupUid, null))
+        router.navigateTo(
+            NoteEditorScreen(
+                NoteEditorArgs(
+                    launchMode = LaunchMode.NEW,
+                    groupUid = currentGroupUid,
+                    template = null,
+                    title = resourceProvider.getString(R.string.new_note)
+                )
+            )
+        )
     }
 
     fun onCreateNewNoteFromTemplateClicked(template: Template) {
         val currentGroupUid = getCurrentGroupUid() ?: return
 
-        showNewNoteScreenEvent.call(Pair(currentGroupUid, template))
+        router.navigateTo(
+            NoteEditorScreen(
+                NoteEditorArgs(
+                    launchMode = LaunchMode.NEW,
+                    groupUid = currentGroupUid,
+                    template = template,
+                    title = resourceProvider.getString(R.string.new_note)
+                )
+            )
+        )
     }
 
     fun onEditGroupClicked(group: Group) {
-        showEditGroupScreenEvent.call(group)
+        throw RuntimeException("Not implemented") // TODO: implement
     }
 
     fun onRemoveGroupClicked(group: Group) {
@@ -165,7 +198,15 @@ class GroupsViewModel(
     }
 
     fun onEditNoteClicked(note: Note) {
-        showEditNoteScreenEvent.call(note)
+        router.navigateTo(
+            NoteEditorScreen(
+                NoteEditorArgs(
+                    launchMode = LaunchMode.EDIT,
+                    noteUid = note.uid,
+                    title = note.title
+                )
+            )
+        )
     }
 
     fun onRemoveNoteClicked(note: Note) {
@@ -182,6 +223,8 @@ class GroupsViewModel(
             removeNote(note.groupUid, noteUid)
         }
     }
+
+    fun navigateBack() = router.exit()
 
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
@@ -211,9 +254,7 @@ class GroupsViewModel(
     }
 
     private fun onGroupClicked(groupUid: UUID) {
-        val group = findGroupInItems(groupUid) ?: return
-
-        showNoteListScreenEvent.call(group)
+        router.navigateTo(GroupsScreen(GroupsArgs(groupUid)))
     }
 
     private fun onGroupLongClicked(groupUid: UUID) {
@@ -233,9 +274,7 @@ class GroupsViewModel(
     }
 
     private fun onNoteClicked(noteUid: UUID) {
-        val note = findNoteInItems(noteUid) ?: return
-
-        showNoteScreenEvent.call(note)
+        router.navigateTo(NoteScreen(noteUid))
     }
 
     private fun onNoteLongClicked(noteUid: UUID) {

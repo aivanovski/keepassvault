@@ -1,14 +1,12 @@
 package com.ivanovsky.passnotes.presentation.server_login
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.databinding.ServerLoginFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandarotyArgument
@@ -32,6 +30,7 @@ class ServerLoginFragment : FragmentWithDoneButton() {
         super.onActivityCreated(savedInstanceState)
         setupActionBar {
             title = getString(R.string.add_new_server)
+            setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
         }
     }
@@ -50,6 +49,16 @@ class ServerLoginFragment : FragmentWithDoneButton() {
         return binding.root
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                viewModel.navigateBack()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -59,24 +68,10 @@ class ServerLoginFragment : FragmentWithDoneButton() {
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
             hideKeyboard()
         }
-        viewModel.finishScreenEvent.observe(viewLifecycleOwner) {
-            setResultAndFinish(it)
-        }
     }
 
     override fun onDoneMenuClicked() {
         viewModel.authenticate()
-    }
-
-    private fun setResultAndFinish(fsAuthority: FSAuthority) {
-        val data = Intent().apply {
-            putExtra(ServerLoginActivity.EXTRA_RESULT, fsAuthority)
-        }
-
-        requireActivity().apply {
-            setResult(Activity.RESULT_OK, data)
-            finish()
-        }
     }
 
     companion object {

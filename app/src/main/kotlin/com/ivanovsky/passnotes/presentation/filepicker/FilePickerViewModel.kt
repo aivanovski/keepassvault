@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.presentation.filepicker
 import android.Manifest
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -11,6 +12,7 @@ import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
+import com.ivanovsky.passnotes.presentation.Screens.FilePickerScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -28,17 +30,17 @@ class FilePickerViewModel(
     private val errorInteractor: ErrorInteractor,
     private val resources: ResourceProvider,
     private val dateFormatProvider: DateFormatProvider,
-    private val dispatchers: DispatcherProvider
+    private val dispatchers: DispatcherProvider,
+    private val router: Router
 ) : BaseScreenViewModel() {
 
     val viewTypes = ViewModelTypes()
         .add(FileCellViewModel::class, R.layout.cell_file)
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData<ScreenState>(ScreenState.notInitialized())
+    val screenState = MutableLiveData(ScreenState.notInitialized())
     val doneButtonVisibility = MutableLiveData<Boolean>()
     val requestPermissionEvent = SingleLiveEvent<String>()
-    val selectFileAndFinishEvent = SingleLiveEvent<FileDescriptor>()
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
 
     private lateinit var action: Action
@@ -79,12 +81,14 @@ class FilePickerViewModel(
         if (action == Action.PICK_DIRECTORY) {
             val currentDir = currentDir ?: return
 
-            selectFileAndFinishEvent.call(currentDir)
+            router.sendResult(FilePickerScreen.RESULT_KEY, currentDir)
+            router.exit()
         } else if (action == Action.PICK_FILE) {
             if (isAnyFileSelected()) {
                 val selectedFile = selectedFile ?: return
 
-                selectFileAndFinishEvent.call(selectedFile)
+                router.sendResult(FilePickerScreen.RESULT_KEY, selectedFile)
+                router.exit()
             } else {
                 showSnackbarMessageEvent.call(resources.getString(R.string.please_select_any_file))
             }
@@ -103,6 +107,8 @@ class FilePickerViewModel(
             doneButtonVisibility.value = false
         }
     }
+
+    fun navigateBack() = router.exit()
 
     private fun loadData() {
         screenState.value = ScreenState.loading()

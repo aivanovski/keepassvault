@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.groups
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -13,19 +14,18 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
+import com.ivanovsky.passnotes.presentation.core.extensions.getMandarotyArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
-import com.ivanovsky.passnotes.presentation.group.GroupActivity
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
-import com.ivanovsky.passnotes.presentation.note.NoteActivity
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.*
 
 class GroupsFragment : Fragment() {
 
     private val viewModel: GroupsViewModel by viewModel()
+
+    private val args by lazy { getMandarotyArgument<GroupsArgs>(ARGUMENTS) }
 
     private lateinit var binding: GroupsFragmentBinding
 
@@ -33,7 +33,7 @@ class GroupsFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = GroupsFragmentBinding.inflate(inflater, container, false)
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
@@ -45,36 +45,37 @@ class GroupsFragment : Fragment() {
         return binding.root
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                viewModel.navigateBack()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val group = arguments?.getParcelable(ARG_GROUP) as? Group
-
         setupActionBar {
-            title = group?.title ?: resources.getString(R.string.groups)
+            setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
         }
 
         subscribeToLiveData()
 
-        viewModel.start(group?.uid)
+        viewModel.start(args.groupUid)
     }
 
     private fun subscribeToLiveData() {
         viewModel.toastMessage.observe(viewLifecycleOwner) { message ->
             showToastMessage(message)
         }
-        viewModel.showNoteListScreenEvent.observe(viewLifecycleOwner) { group ->
-            showNoteListScreen(group)
-        }
-        viewModel.showNoteScreenEvent.observe(viewLifecycleOwner) { note ->
-            showNoteScreen(note)
-        }
-        viewModel.showNewGroupScreenEvent.observe(viewLifecycleOwner) { parentGroupUid ->
-            showNewGroupScreen(parentGroupUid)
-        }
-        viewModel.showNewNoteScreenEvent.observe(viewLifecycleOwner) { (groupUid, template) ->
-            showNewNoteScreen(groupUid, template)
+        viewModel.screenTitle.observe(viewLifecycleOwner) {
+            setupActionBar {
+                title = it
+            }
         }
         viewModel.showNewEntryDialogEvent.observe(viewLifecycleOwner) { templates ->
             showNewEntryDialog(templates)
@@ -88,42 +89,12 @@ class GroupsFragment : Fragment() {
         viewModel.showRemoveConfirmationDialogEvent.observe(viewLifecycleOwner) { (group, note) ->
             showRemoveConfirmationDialog(group, note)
         }
-        viewModel.showEditNoteScreenEvent.observe(viewLifecycleOwner) { note ->
-            showEditNoteScreen(note)
-        }
-        viewModel.showEditGroupScreenEvent.observe(viewLifecycleOwner) { group ->
-            showEditGroupScreen(group)
-        }
     }
 
     private fun setupRecyclerView() {
         (binding.recyclerView.layoutManager as? GridLayoutManager)?.let {
             it.spanCount = COLUMN_COUNT
         }
-    }
-
-    private fun showNoteListScreen(group: Group) {
-        val context = this.context ?: return
-
-        startActivity(GroupsActivity.intentFroGroup(context, group))
-    }
-
-    private fun showNoteScreen(note: Note) {
-        val context = this.context ?: return
-
-        startActivity(NoteActivity.createStartIntent(context, note))
-    }
-
-    private fun showNewGroupScreen(parentGroupUid: UUID) {
-        val context = this.context ?: return
-
-        startActivity(GroupActivity.createChildGroup(context, parentGroupUid))
-    }
-
-    private fun showNewNoteScreen(parentGroupUid: UUID, template: Template?) {
-        val context = this.context ?: return
-
-        startActivity(NoteEditorActivity.intentForNewNote(context, parentGroupUid, template))
     }
 
     private fun showNewEntryDialog(templates: List<Template>) {
@@ -190,25 +161,14 @@ class GroupsFragment : Fragment() {
         dialog.show(childFragmentManager, ConfirmationDialog.TAG)
     }
 
-    private fun showEditNoteScreen(note: Note) {
-        val noteUid = note.uid ?: return
-
-        val intent = NoteEditorActivity.intentForEditNote(requireContext(), noteUid, note.title)
-        startActivity(intent)
-    }
-
-    private fun showEditGroupScreen(group: Group) {
-        // TODO: implement
-    }
-
     companion object {
 
-        private const val ARG_GROUP = "group"
+        private const val ARGUMENTS = "arguments"
 
         private const val COLUMN_COUNT = 3
 
-        fun newInstance(group: Group?) = GroupsFragment().withArguments {
-            putParcelable(ARG_GROUP, group)
+        fun newInstance(args: GroupsArgs) = GroupsFragment().withArguments {
+            putParcelable(ARGUMENTS, args)
         }
     }
 }

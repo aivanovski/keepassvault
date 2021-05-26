@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.presentation.unlock
+package com.ivanovsky.passnotes.presentation
 
 import android.content.Context
 import android.content.Intent
@@ -8,15 +8,25 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
+import com.github.terrakok.cicerone.NavigatorHolder
+import com.github.terrakok.cicerone.Router
+import com.github.terrakok.cicerone.androidx.AppNavigator
 import com.google.android.material.navigation.NavigationView
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
+import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 
-class UnlockActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var drawer: DrawerLayout
     private lateinit var navigationView: NavigationView
+
+    private val navigatorHolder: NavigatorHolder by inject()
+    private val router: Router by inject()
+    private val navigator = AppNavigator(this, R.id.fragment_container)
 
     private val viewModel: UnlockViewModel by lazy {
         ViewModelProvider(this, UnlockViewModel.FACTORY)
@@ -33,10 +43,7 @@ class UnlockActivity : AppCompatActivity() {
         drawer = findViewById(R.id.drawer_layout)
         navigationView = findViewById(R.id.navigation_view)
 
-        val fragment = UnlockFragment()
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, fragment)
-            .commit()
+        router.newRootScreen(UnlockScreen())
 
         navigationView.setNavigationItemSelectedListener { item -> onNavigationItemSelected(item) }
 
@@ -45,7 +52,22 @@ class UnlockActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        navigatorHolder.removeNavigator()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        navigatorHolder.setNavigator(navigator)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val handledByFragment = supportFragmentManager.fragments.any { it.onOptionsItemSelected(item) }
+        if (handledByFragment) {
+            return true
+        }
+
         return when (item.itemId) {
             android.R.id.home -> {
                 drawer.openDrawer(GravityCompat.START)
@@ -60,7 +82,7 @@ class UnlockActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.menu_open_file -> {
                 drawer.closeDrawer(GravityCompat.START)
-                viewModel.onOpenFileMenuClicked()
+                viewModel.navigateToFilePicker()
                 true
             }
 
@@ -87,7 +109,7 @@ class UnlockActivity : AppCompatActivity() {
     companion object {
 
         fun createStartIntent(context: Context): Intent {
-            return Intent(context, UnlockActivity::class.java)
+            return Intent(context, MainActivity::class.java)
         }
     }
 }

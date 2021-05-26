@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.presentation.group
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -19,15 +20,15 @@ import java.util.*
 class GroupViewModel(
     private val interactor: GroupInteractor,
     private val errorInteractor: ErrorInteractor,
-    private val resourceProvider: ResourceProvider
+    private val resourceProvider: ResourceProvider,
+    private val router: Router
 ) : ViewModel() {
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData<ScreenState>(ScreenState.notInitialized())
-    val groupTitle = MutableLiveData<String>(EMPTY)
+    val screenState = MutableLiveData(ScreenState.notInitialized())
+    val groupTitle = MutableLiveData(EMPTY)
     val errorText = MutableLiveData<String?>()
-    val doneButtonVisibility = MutableLiveData<Boolean>(true)
-    val finishScreenEvent = SingleLiveEvent<Unit>()
+    val doneButtonVisibility = MutableLiveData(true)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
 
     private var parentGroupUid: UUID? = null
@@ -77,7 +78,7 @@ class GroupViewModel(
             }
 
             if (result.isSucceeded) {
-                finishScreenEvent.call()
+                router.exit()
             } else {
                 doneButtonVisibility.value = true
 
@@ -86,6 +87,8 @@ class GroupViewModel(
             }
         }
     }
+
+    fun navigateBack() = router.exit()
 
     private fun getParentUid(): UUID? {
         return when {

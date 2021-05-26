@@ -121,6 +121,8 @@ def annimonStreamApiVersion = '1.1.4'
 def dropboxVersion = '3.0.11'
 def okHttpVersion = '4.9.1'
 def apacheCommonsLangVersion = '3.0'
+def sardineAndroidVersion = 'v0.8'
+def ciceroneVersion = '7.0'
 
 // Test
 def jUnitVersion = '4.13'
@@ -210,5 +212,8 @@ dependencies {
     implementation "com.facebook.stetho:stetho:1.5.1"
 
     // WebDAV client
-    implementation "com.github.thegrizzlylabs:sardine-android:v0.8"
+    implementation "com.github.thegrizzlylabs:sardine-android:$sardineAndroidVersion"
+
+    //Cicerone
+    implementation "com.github.terrakok:cicerone:$ciceroneVersion"
 }

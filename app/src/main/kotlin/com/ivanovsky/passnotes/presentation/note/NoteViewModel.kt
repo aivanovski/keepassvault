@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
+import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
@@ -87,6 +88,11 @@ class NoteViewModel(
 
             loadData()
         }
+    }
+
+    fun onLockButtonClicked() {
+        interactor.closeDatabase()
+        router.backTo(Screens.UnlockScreen())
     }
 
     fun navigateBack() = router.exit()

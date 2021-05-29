@@ -6,12 +6,14 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.domain.ClipboardHelper
+import com.ivanovsky.passnotes.domain.usecases.DatabaseLockUseCase
 import java.util.*
 import java.util.concurrent.TimeUnit
 
 class NoteInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
-    private val clipboardHelper: ClipboardHelper
+    private val clipboardHelper: ClipboardHelper,
+    private val lockUseCase: DatabaseLockUseCase
 ) {
 
     fun getNoteByUid(noteUid: UUID): OperationResult<Note> {
@@ -27,5 +29,9 @@ class NoteInteractor(
 
     fun getTimeoutValueInMillis(): Long {
         return TimeUnit.SECONDS.toMillis(30)
+    }
+
+    fun closeDatabase() {
+        lockUseCase.lockIfNeed()
     }
 }

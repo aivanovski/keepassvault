@@ -2,11 +2,14 @@ package com.ivanovsky.passnotes.presentation.note
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
+import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
@@ -21,12 +24,35 @@ class NoteFragment : Fragment() {
 
     private val viewModel: NoteViewModel by viewModel()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         setupActionBar {
             title = StringUtils.EMPTY
             setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.base_lock, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                viewModel.navigateBack()
+                true
+            }
+            R.id.menu_lock -> {
+                viewModel.onLockButtonClicked()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -43,22 +69,12 @@ class NoteFragment : Fragment() {
             .root
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                viewModel.navigateBack()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewLifecycleOwner.lifecycle.addObserver(DatabaseInteractionWatcher(this))
-        
+
         viewModel.actionBarTitle.observe(viewLifecycleOwner) { actionBarTitle ->
-            setupActionBar { 
+            setupActionBar {
                 title = actionBarTitle
             }
         }

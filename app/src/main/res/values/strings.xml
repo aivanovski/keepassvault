@@ -18,6 +18,12 @@
     <string name="settings">Settings</string>
     <string name="about">About</string>
     <string name="ok">Ok</string>
+    <string name="lock_database">Lock database</string>
+
+    <!-- Lock notification -->
+    <string name="notification_channel">Quick Lock</string>
+    <string name="notification_channel_description">Button to lock opened database</string>
+    <string name="notification_text">Database is opened</string>
 
     <!-- Common for error -->
     <string name="error_was_occurred">Error was occurred</string>

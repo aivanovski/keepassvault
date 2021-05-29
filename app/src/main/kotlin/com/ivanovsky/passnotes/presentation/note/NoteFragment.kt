@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
+import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
@@ -54,6 +55,7 @@ class NoteFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewLifecycleOwner.lifecycle.addObserver(DatabaseInteractionWatcher(this))
         
         viewModel.actionBarTitle.observe(viewLifecycleOwner) { actionBarTitle ->
             setupActionBar { 

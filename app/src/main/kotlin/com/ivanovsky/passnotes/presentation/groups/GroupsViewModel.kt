@@ -15,6 +15,7 @@ import com.ivanovsky.passnotes.presentation.Screens.GroupScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
+import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -44,7 +45,8 @@ class GroupsViewModel(
 ) : BaseScreenViewModel(),
     ObserverBus.GroupDataSetObserver,
     ObserverBus.NoteDataSetChanged,
-    ObserverBus.NoteContentObserver {
+    ObserverBus.NoteContentObserver,
+    ObserverBus.DatabaseCloseObserver {
 
     val viewTypes = ViewModelTypes()
         .add(NoteGridCellViewModel::class, R.layout.grid_cell_note)
@@ -89,6 +91,10 @@ class GroupsViewModel(
         if (groupUid == getCurrentGroupUid()) {
             loadData()
         }
+    }
+
+    override fun onDatabaseClosed() {
+        router.backTo(UnlockScreen())
     }
 
     fun start(groupUid: UUID?) {
@@ -224,7 +230,12 @@ class GroupsViewModel(
         }
     }
 
-    fun navigateBack() = router.exit()
+    fun onBackClicked() {
+        if (groupUid == null) {
+            interactor.closeDatabaseIfNeed()
+        }
+        router.exit()
+    }
 
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->

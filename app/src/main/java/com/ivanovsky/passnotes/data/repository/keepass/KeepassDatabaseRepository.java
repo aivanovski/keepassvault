@@ -4,6 +4,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 
+import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
@@ -16,6 +17,7 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
+import com.ivanovsky.passnotes.domain.DatabaseLockInteractor;
 import com.ivanovsky.passnotes.util.Logger;
 
 import org.linguafranca.pwdb.Credentials;
@@ -37,11 +39,18 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     private volatile KeepassDatabase db;
     private final Context context;
     private final FileSystemResolver fileSystemResolver;
+    private final DatabaseLockInteractor lockInteractor;
+    private final ObserverBus observerBus;
     private final Object lock;
 
-    public KeepassDatabaseRepository(Context context, FileSystemResolver fileSystemResolver) {
+    public KeepassDatabaseRepository(Context context,
+                                     FileSystemResolver fileSystemResolver,
+                                     DatabaseLockInteractor lockInteractor,
+                                     ObserverBus observerBus) {
         this.context = context;
         this.fileSystemResolver = fileSystemResolver;
+        this.lockInteractor = lockInteractor;
+        this.observerBus = observerBus;
         this.lock = new Object();
     }
 
@@ -98,9 +107,11 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
                 result = inResult.takeStatusWith(db);
             } catch (EncryptedDatabaseException e) {
                 Logger.printStackTrace(e);
-                return OperationResult.error(newDbError(e.getMessage()));
+                result = OperationResult.error(newDbError(e.getMessage()));
             }
         }
+
+        onDatabaseOpened();
 
         return result;
     }
@@ -171,6 +182,18 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
             }
         }
 
+        onDatabaseClosed();
+
         return OperationResult.success(true);
+    }
+
+    private void onDatabaseOpened() {
+        lockInteractor.onDatabaseOpened();
+        observerBus.notifyDatabaseOpened();
+    }
+
+    private void onDatabaseClosed() {
+        lockInteractor.onDatabaseClosed();
+        observerBus.notifyDatabaseClosed();
     }
 }

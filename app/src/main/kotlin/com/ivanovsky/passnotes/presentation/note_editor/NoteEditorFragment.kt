@@ -8,6 +8,7 @@ import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.NoteEditorFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
+import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -59,6 +60,8 @@ class NoteEditorFragment : FragmentWithDoneButton() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        viewLifecycleOwner.lifecycle.addObserver(DatabaseInteractionWatcher(this))
 
         val args = (arguments?.getParcelable(ARGUMENTS) as? NoteEditorArgs)
             ?: requireArgument(ARGUMENTS)

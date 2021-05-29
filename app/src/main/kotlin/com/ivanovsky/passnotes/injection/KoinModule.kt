@@ -28,6 +28,7 @@ import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredential
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
+import com.ivanovsky.passnotes.domain.usecases.DatabaseLockUseCase
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
 import com.ivanovsky.passnotes.presentation.group.GroupViewModel
@@ -73,10 +74,11 @@ object KoinModule {
         // Files, Keepass
         single { FileSystemResolver(get(), get(), get(), get(), get()) }
         single { FileSyncHelper(get()) }
-        single { KeepassDatabaseRepository(get(), get()) as EncryptedDatabaseRepository }
+        single { KeepassDatabaseRepository(get(), get(), get(), get()) as EncryptedDatabaseRepository }
 
         // Use Cases
         single { GetDebugCredentialsUseCase() }
+        single { DatabaseLockUseCase() }
 
         // Interactors
         single { FilePickerInteractor(get()) }
@@ -89,6 +91,7 @@ object KoinModule {
         single { GroupsInteractor(get(), get(), get()) }
         single { NoteEditorInteractor(get(), get()) }
         single { ServerLoginInteractor(get(), get(), get()) }
+        single { DatabaseLockInteractor(get(), get(), get()) }
 
         // Cell factories
         single { GroupsCellModelFactory(get()) }

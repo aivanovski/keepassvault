@@ -101,6 +101,12 @@ class GroupsInteractor(
         }
     }
 
+    fun closeDatabaseIfNeed() {
+        if (dbRepo.isOpened) {
+            dbRepo.close()
+        }
+    }
+
     abstract class Item
     data class GroupItem(val group: Group, val noteCount: Int, val childGroupCount: Int) : Item()
     data class NoteItem(val note: Note) : Item()

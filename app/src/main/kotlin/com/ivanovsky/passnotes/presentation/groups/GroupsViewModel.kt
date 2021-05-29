@@ -232,9 +232,14 @@ class GroupsViewModel(
 
     fun onBackClicked() {
         if (groupUid == null) {
-            interactor.closeDatabaseIfNeed()
+            interactor.closeDatabase()
         }
         router.exit()
+    }
+
+    fun onLockButtonClicked() {
+        interactor.closeDatabase()
+        router.backTo(UnlockScreen())
     }
 
     private fun subscribeToEvents() {

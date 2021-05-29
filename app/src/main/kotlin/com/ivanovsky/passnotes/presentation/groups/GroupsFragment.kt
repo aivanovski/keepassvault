@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.presentation.groups
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -33,6 +35,11 @@ class GroupsFragment : Fragment() {
     private lateinit var binding: GroupsFragmentBinding
     private var backCallback: OnBackPressedCallback? = null
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -49,10 +56,18 @@ class GroupsFragment : Fragment() {
         return binding.root
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.base_lock, menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
                 viewModel.onBackClicked()
+                true
+            }
+            R.id.menu_lock -> {
+                viewModel.onLockButtonClicked()
                 true
             }
             else -> super.onOptionsItemSelected(item)

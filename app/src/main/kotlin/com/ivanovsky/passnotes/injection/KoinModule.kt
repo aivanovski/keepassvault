@@ -88,7 +88,7 @@ object KoinModule {
         single { GroupInteractor(get(), get(), get()) }
         single { DebugMenuInteractor(get(), get(), get(), get()) }
         single { NoteInteractor(get(), get()) }
-        single { GroupsInteractor(get(), get(), get()) }
+        single { GroupsInteractor(get(), get(), get(), get()) }
         single { NoteEditorInteractor(get(), get()) }
         single { ServerLoginInteractor(get(), get(), get()) }
         single { DatabaseLockInteractor(get(), get(), get()) }

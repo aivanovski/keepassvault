@@ -19,6 +19,7 @@
     <string name="about">About</string>
     <string name="ok">Ok</string>
     <string name="lock_database">Lock database</string>
+    <string name="lock">Lock</string>
 
     <!-- Lock notification -->
     <string name="notification_channel">Quick Lock</string>

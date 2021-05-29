@@ -31,5 +31,5 @@ dependencies {
 	}
 	implementation "com.madgag.spongycastle:core:$spongyCastleVersion"
 	implementation project(':libs:KeePassJava2-database')
-	implementation project(':libs:commons-codec-repacked')
+	implementation "com.epam.reportportal:commons-codec-repacked:$repackedCodecsVersion"
 }

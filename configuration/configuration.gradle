@@ -86,5 +86,6 @@ ext {
     spongyCastleVersion = '1.58.0.0'
     simpleXmlVersion = '2.7.1'
     aaltoXmlVersion = '1.0.0'
+    repackedCodecsVersion = '1.0.2'
 
 }

@@ -137,6 +137,10 @@ public abstract class EntryClasses {
             public void setProtected(boolean aProtected) {
                 this._protected = aProtected;
             }
+
+            public boolean isProtected() {
+                return (_protected != null) ? _protected : false;
+            }
         }
     }
 

@@ -135,8 +135,6 @@ def androidXCoreVersion = '1.2.0'
 def roomTesting = '2.0.0'
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
     // Test dependencies
     testImplementation "junit:junit:$jUnitVersion"
     testImplementation "io.mockk:mockk:$mockkVersion"
@@ -152,6 +150,29 @@ dependencies {
     androidTestImplementation "androidx.room:room-testing:$roomTesting"
     androidTestImplementation "com.google.truth:truth:$truthVersion"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+
+    implementation fileTree(include: ['*.jar', '*.aar'], exclude: 'KeePassJava2*', dir: 'libs')
+
+    debugImplementation files('libs/KeePassJava2-database-debug.aar')
+    debugImplementation files('libs/KeePassJava2-simple-debug.aar')
+    debugImplementation files('libs/KeePassJava2-kdbx-debug.aar')
+
+    releaseImplementation files('libs/KeePassJava2-database-release.aar')
+    releaseImplementation files('libs/KeePassJava2-simple-release.aar')
+    releaseImplementation files('libs/KeePassJava2-kdbx-release.aar')
+
+    // KeePassJava2
+    // for KeePassJava2-database
+    implementation "org.jetbrains:annotations:$jetbrainsAnnotationsVersion"
+    implementation ("com.google.guava:guava:$guavaVersion") {
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+    }
+    implementation "com.madgag.spongycastle:core:$spongyCastleVersion"
+    // for KeePassJava2-kdbx
+    implementation "com.epam.reportportal:commons-codec-repacked:$repackedCodecsVersion"
+    // for KeePassJava2-simple
+    implementation "org.simpleframework:simple-xml:$simpleXmlVersion"
+    implementation "com.fasterxml:aalto-xml:$aaltoXmlVersion"
 
     // MultiDex
     implementation "androidx.multidex:multidex:2.0.1"
@@ -195,11 +216,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
-
-    // KeePassJava2
-    implementation project(':libs:KeePassJava2-database')
-    implementation project(':libs:KeePassJava2-kdbx')
-    implementation project(':libs:KeePassJava2-simple')
 
     // Dropbox
     implementation "com.dropbox.core:dropbox-core-sdk:$dropboxVersion"

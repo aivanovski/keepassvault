@@ -1,0 +1,74 @@
+From 1b8fb1f32a171bd1221604d7f24f1a8ef787774d Mon Sep 17 00:00:00 2001
+From: Aleksey Ivanovsky <alexei.ivanovski@gmail.com>
+Date: Sat, 29 May 2021 18:51:36 +0300
+Subject: [PATCH] Add hack for protected properties into KeePassJava2
+
+---
+ .../pwdb/kdbx/simple/SimpleDatabase.java           |  2 +-
+ .../linguafranca/pwdb/kdbx/simple/SimpleEntry.java | 14 ++++++++++++++
+ .../pwdb/kdbx/simple/model/EntryClasses.java       |  4 ++++
+ 3 files changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/libs/KeePassJava2-simple/src/main/java/org/linguafranca/pwdb/kdbx/simple/SimpleDatabase.java b/libs/KeePassJava2-simple/src/main/java/org/linguafranca/pwdb/kdbx/simple/SimpleDatabase.java
+index c30d2b1..fbb83df 100644
+--- a/libs/KeePassJava2-simple/src/main/java/org/linguafranca/pwdb/kdbx/simple/SimpleDatabase.java
++++ b/libs/KeePassJava2-simple/src/main/java/org/linguafranca/pwdb/kdbx/simple/SimpleDatabase.java
+@@ -294,7 +294,7 @@ public class SimpleDatabase extends AbstractDatabase<SimpleDatabase, SimpleGroup
+         }
+         for (SimpleEntry entry: parent.entry) {
+             for (EntryClasses.StringProperty property : entry.string) {
+-                boolean shouldProtect = parent.database.shouldProtect(property.getKey());
++                boolean shouldProtect = parent.database.shouldProtect(property.getKey()) || property.getValue().isProtected();
+                 property.getValue().setProtected(shouldProtect);
+             }
+         }
+diff --git a/libs/KeePassJava2-simple/src/main/java/org/linguafranca/pwdb/kdbx/simple/SimpleEntry.java b/libs/KeePassJava2-simple/src/main/java/org/linguafranca/pwdb/kdbx/simple/SimpleEntry.java
+index 3fea86c..d94cc25 100644
+--- a/libs/KeePassJava2-simple/src/main/java/org/linguafranca/pwdb/kdbx/simple/SimpleEntry.java
++++ b/libs/KeePassJava2-simple/src/main/java/org/linguafranca/pwdb/kdbx/simple/SimpleEntry.java
+@@ -104,6 +104,11 @@ public class SimpleEntry extends AbstractEntry<SimpleDatabase, SimpleGroup, Simp
+         return getStringContent(getStringProperty(s, string));
+     }
+ 
++    public boolean isPropertyProtected(String name) {
++        StringProperty property = getStringProperty(name, string);
++        return property != null && property.getValue() != null && property.getValue().isProtected();
++    }
++
+     @Override
+     public void setProperty(String s, String s1) {
+         EntryClasses.StringProperty sp;
+@@ -114,6 +119,15 @@ public class SimpleEntry extends AbstractEntry<SimpleDatabase, SimpleGroup, Simp
+         touch();
+     }
+ 
++    public void setProperty(String s, String s1, boolean isProtected) {
++        EntryClasses.StringProperty sp;
++        if ((sp = getStringProperty(s, string)) != null) {
++            this.string.remove(sp);
++        }
++        this.string.add(new EntryClasses.StringProperty(s, new EntryClasses.StringProperty.Value(s1, isProtected)));
++        touch();
++    }
++
+     @Override
+     public boolean removeProperty(String name) throws IllegalArgumentException {
+         if (STANDARD_PROPERTY_NAMES.contains(name)) throw new IllegalArgumentException("may not remove property: " + name);
+diff --git a/libs/KeePassJava2-simple/src/main/java/org/linguafranca/pwdb/kdbx/simple/model/EntryClasses.java b/libs/KeePassJava2-simple/src/main/java/org/linguafranca/pwdb/kdbx/simple/model/EntryClasses.java
+index b597b3a..31243f8 100644
+--- a/libs/KeePassJava2-simple/src/main/java/org/linguafranca/pwdb/kdbx/simple/model/EntryClasses.java
++++ b/libs/KeePassJava2-simple/src/main/java/org/linguafranca/pwdb/kdbx/simple/model/EntryClasses.java
+@@ -137,6 +137,10 @@ public abstract class EntryClasses {
+             public void setProtected(boolean aProtected) {
+                 this._protected = aProtected;
+             }
++
++            public boolean isProtected() {
++                return (_protected != null) ? _protected : false;
++            }
+         }
+     }
+ 
+-- 
+2.31.0
+

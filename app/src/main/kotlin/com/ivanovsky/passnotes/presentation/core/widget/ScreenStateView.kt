@@ -44,6 +44,8 @@ class ScreenStateView(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         emptyTextView = findViewById(R.id.emptyTextView)
         errorTextView = findViewById(R.id.errorTextView)
         errorLayout = findViewById(R.id.errorLayout)
+
+        applyState(state)
     }
 
     private fun applyState(state: State) {
@@ -69,7 +71,6 @@ class ScreenStateView(context: Context, attrs: AttributeSet?) : FrameLayout(cont
     enum class State {
         LOADING,
         EMPTY,
-        ERROR,
-        ERROR_PANEL
+        ERROR
     }
 }

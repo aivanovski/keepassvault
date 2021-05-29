@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView.State.HIDDEN
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView.State.MESSAGE
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView.State.MESSAGE_WITH_RETRY
 
@@ -23,7 +24,7 @@ class ErrorPanelView(
             errorTextView.text = value
         }
 
-    var state: State = MESSAGE
+    var state: State = HIDDEN
         set(value) {
             applyState(value)
             field = value
@@ -41,20 +42,29 @@ class ErrorPanelView(
 
         errorTextView = findViewById(R.id.text)
         retryButton = findViewById(R.id.retryButton)
+
+        applyState(HIDDEN)
     }
 
     private fun applyState(state: State) {
         when (state) {
             MESSAGE -> {
                 retryButton.isVisible = false
+                errorTextView.isVisible = true
             }
             MESSAGE_WITH_RETRY -> {
                 retryButton.isVisible = true
+                errorTextView.isVisible = true
+            }
+            HIDDEN -> {
+                retryButton.isVisible = false
+                errorTextView.isVisible = false
             }
         }
     }
 
     enum class State {
+        HIDDEN,
         MESSAGE,
         MESSAGE_WITH_RETRY
     }

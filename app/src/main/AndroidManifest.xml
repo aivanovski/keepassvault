@@ -6,6 +6,7 @@
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application
         android:name=".App"
@@ -45,6 +46,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <!-- Services -->
+        <service android:name=".presentation.service.DatabaseLockService"/>
+
+        <!-- Broadcast Receivers -->
+        <receiver android:name=".presentation.service.DatabaseLockBroadcastReceiver"/>
 
     </application>
 

@@ -43,6 +43,14 @@ public class ObserverBus {
                                   @NotNull UUID newNoteUid);
     }
 
+    public interface DatabaseCloseObserver extends Observer {
+        void onDatabaseClosed();
+    }
+
+    public interface DatabaseOpenObserver extends Observer {
+        void onDatabaseOpened();
+    }
+
     public ObserverBus() {
         observers = new CopyOnWriteArrayList<>();
         handler = new Handler(Looper.getMainLooper());
@@ -87,6 +95,18 @@ public class ObserverBus {
     public void notifyNoteContentChanged(UUID groupUid, UUID oldNoteUid, UUID newNoteUid) {
         for (NoteContentObserver observer : filterObservers(NoteContentObserver.class)) {
             handler.post(() -> observer.onNoteContentChanged(groupUid, oldNoteUid, newNoteUid));
+        }
+    }
+
+    public void notifyDatabaseClosed() {
+        for (DatabaseCloseObserver observer : filterObservers(DatabaseCloseObserver.class)) {
+            handler.post(observer::onDatabaseClosed);
+        }
+    }
+
+    public void notifyDatabaseOpened() {
+        for (DatabaseOpenObserver observer : filterObservers(DatabaseOpenObserver.class)) {
+            handler.post(observer::onDatabaseOpened);
         }
     }
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.GroupFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
+import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
@@ -56,6 +57,8 @@ class GroupFragment : FragmentWithDoneButton() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        viewLifecycleOwner.lifecycle.addObserver(DatabaseInteractionWatcher(this))
 
         viewModel.doneButtonVisibility.observe(viewLifecycleOwner) { isVisible ->
             setDoneButtonVisibility(isVisible)

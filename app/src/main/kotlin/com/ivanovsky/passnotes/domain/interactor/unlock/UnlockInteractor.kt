@@ -76,7 +76,7 @@ class UnlockInteractor(
                 lastAccessTime = System.currentTimeMillis()
             )
 
-            fileRepository.update(usedFile)
+            fileRepository.update(updatedFile)
         }
     }
 

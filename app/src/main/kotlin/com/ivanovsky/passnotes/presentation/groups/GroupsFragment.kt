@@ -2,9 +2,13 @@ package com.ivanovsky.passnotes.presentation.groups
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
@@ -13,6 +17,7 @@ import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
+import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandarotyArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
@@ -28,6 +33,12 @@ class GroupsFragment : Fragment() {
     private val args by lazy { getMandarotyArgument<GroupsArgs>(ARGUMENTS) }
 
     private lateinit var binding: GroupsFragmentBinding
+    private var backCallback: OnBackPressedCallback? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,18 +56,40 @@ class GroupsFragment : Fragment() {
         return binding.root
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.base_lock, menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                viewModel.navigateBack()
+                viewModel.onBackClicked()
+                true
+            }
+            R.id.menu_lock -> {
+                viewModel.onLockButtonClicked()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        backCallback = requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            viewModel.onBackClicked()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        backCallback?.remove()
+        backCallback = null
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewLifecycleOwner.lifecycle.addObserver(DatabaseInteractionWatcher(this))
 
         setupActionBar {
             setHomeAsUpIndicator(null)

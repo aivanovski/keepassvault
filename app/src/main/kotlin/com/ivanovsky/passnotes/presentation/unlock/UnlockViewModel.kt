@@ -196,7 +196,14 @@ class UnlockViewModel(
             }
 
             if (result.isSucceededOrDeferred) {
-                router.newChain(GroupsScreen(GroupsArgs(groupUid = null)))
+                router.newChain(
+                    GroupsScreen(
+                        GroupsArgs(
+                            groupUid = null,
+                            isCloseDatabaseOnExit = true
+                        )
+                    )
+                )
                 screenState.value = ScreenState.data()
             } else {
                 val message = errorInteractor.processAndGetMessage(result.error)

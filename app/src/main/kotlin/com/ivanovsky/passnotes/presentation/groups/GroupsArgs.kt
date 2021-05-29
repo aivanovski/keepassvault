@@ -6,5 +6,6 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class GroupsArgs(
-    val groupUid: UUID?
+    val groupUid: UUID?,
+    val isCloseDatabaseOnExit: Boolean
 ) : Parcelable

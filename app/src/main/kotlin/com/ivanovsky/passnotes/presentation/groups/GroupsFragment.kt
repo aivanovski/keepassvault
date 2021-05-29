@@ -98,7 +98,7 @@ class GroupsFragment : Fragment() {
 
         subscribeToLiveData()
 
-        viewModel.start(args.groupUid)
+        viewModel.start(args)
     }
 
     private fun subscribeToLiveData() {

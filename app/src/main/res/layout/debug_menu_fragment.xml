@@ -214,9 +214,23 @@
                     android:enabled="@{viewModel.isOpenDbButtonEnabled}"
                     android:onClick="@{() -> viewModel.onOpenDbButtonClicked()}"
                     android:text="@string/open"
-                    app:layout_constraintEnd_toStartOf="@id/closeButton"
+                    app:layout_constraintEnd_toStartOf="@id/editButton"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/passwordLayout" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/editButton"
+                    style="@style/Material.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/group_margin"
+                    android:enabled="@{viewModel.isEditDbButtonEnabled}"
+                    android:onClick="@{() -> viewModel.onEditDbButtonClicked()}"
+                    android:text="@string/edit_in_app"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toEndOf="@id/openButton"
                     app:layout_constraintTop_toBottomOf="@id/passwordLayout" />
 
                 <com.google.android.material.button.MaterialButton
@@ -224,14 +238,15 @@
                     style="@style/Material.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
                     android:layout_marginEnd="@dimen/group_margin"
                     android:enabled="@{viewModel.isCloseDbButtonEnabled}"
                     android:onClick="@{() -> viewModel.onCloseDbButtonClicked()}"
                     android:text="@string/close"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_weight="1"
-                    app:layout_constraintStart_toEndOf="@id/openButton"
-                    app:layout_constraintTop_toBottomOf="@id/passwordLayout" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/openButton" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/addEntryButton"
@@ -243,10 +258,10 @@
                     android:enabled="@{viewModel.isAddEntryButtonEnabled}"
                     android:onClick="@{() -> viewModel.onAddEntryButtonClicked()}"
                     android:text="@string/add_entry"
-                    app:layout_constraintEnd_toStartOf="@id/closeButton"
+                    app:layout_constraintEnd_toEndOf="@id/openButton"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/openButton" />
+                    app:layout_constraintTop_toBottomOf="@id/closeButton" />
 
                 <TextView
                     android:id="@+id/hooksText"

@@ -185,7 +185,16 @@ class NoteEditorViewModel(
         setCellElements(viewModels)
     }
 
-    private fun finishScreen() = router.backTo(GroupsScreen(GroupsArgs(groupUid)))
+    private fun finishScreen() {
+        router.backTo(
+            GroupsScreen(
+                GroupsArgs(
+                    groupUid = groupUid,
+                    isCloseDatabaseOnExit = (groupUid == null)
+                )
+            )
+        )
+    }
 
     private fun loadData() {
         val uid = noteUid ?: return

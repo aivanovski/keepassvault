@@ -66,6 +66,7 @@ class GroupsViewModel(
     private var rootGroupUid: UUID? = null
     private var groupUid: UUID? = null
     private var templates: List<Template>? = null
+    private var args: GroupsArgs? = null
 
     init {
         observerBus.register(this)
@@ -97,8 +98,9 @@ class GroupsViewModel(
         router.backTo(UnlockScreen())
     }
 
-    fun start(groupUid: UUID?) {
-        this.groupUid = groupUid
+    fun start(args: GroupsArgs) {
+        this.args = args
+        this.groupUid = args.groupUid
 
         if (groupUid == null) {
             screenTitle.value = resourceProvider.getString(R.string.groups)
@@ -231,7 +233,9 @@ class GroupsViewModel(
     }
 
     fun onBackClicked() {
-        if (groupUid == null) {
+        val isCloseDatabase = args?.isCloseDatabaseOnExit ?: return
+
+        if (isCloseDatabase) {
             interactor.closeDatabase()
         }
         router.exit()
@@ -270,7 +274,14 @@ class GroupsViewModel(
     }
 
     private fun onGroupClicked(groupUid: UUID) {
-        router.navigateTo(GroupsScreen(GroupsArgs(groupUid)))
+        router.navigateTo(
+            GroupsScreen(
+                GroupsArgs(
+                    groupUid = groupUid,
+                    isCloseDatabaseOnExit = false
+                )
+            )
+        )
     }
 
     private fun onGroupLongClicked(groupUid: UUID) {

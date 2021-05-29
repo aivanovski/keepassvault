@@ -8,6 +8,7 @@
     <string name="read" translatable="false">Read</string>
     <string name="write" translatable="false">Write</string>
     <string name="open" translatable="false">Open</string>
+    <string name="edit_in_app" translatable="false">Edit in App</string>
     <string name="button_new" translatable="false">New</string>
     <string name="database_with_dots" translatable="false">Database:</string>
     <string name="password_with_default" translatable="false">Password (default: abc123)</string>

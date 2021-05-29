@@ -12,9 +12,11 @@ import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
+import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -39,6 +41,7 @@ class DebugMenuViewModel(
     val isDebugCredentialsVisible = MutableLiveData(false)
     val isWriteButtonEnabled = MutableLiveData(false)
     val isOpenDbButtonEnabled = MutableLiveData(false)
+    val isEditDbButtonEnabled = MutableLiveData(false)
     val isCloseDbButtonEnabled = MutableLiveData(false)
     val isAddEntryButtonEnabled = MutableLiveData(false)
     val isExternalStorageEnabled = MutableLiveData(settings.isExternalStorageCacheEnabled)
@@ -85,8 +88,15 @@ class DebugMenuViewModel(
 
         if (isFileSelected()) {
             viewModelScope.launch {
+                val newPath = filePath.value ?: ""
+                val newDescriptor = descriptor.copy(
+                    uid = newPath,
+                    path = newPath,
+                    modified = file.lastModified()
+                )
+
                 val result = withContext(Dispatchers.Default) {
-                    interactor.writeDbFile(file, descriptor.copy(modified = file.lastModified()))
+                    interactor.writeDbFile(file, newDescriptor)
                 }
 
                 if (result.isSucceededOrDeferred) {
@@ -156,12 +166,26 @@ class DebugMenuViewModel(
 
     private fun onDbOpened() {
         isOpenDbButtonEnabled.value = false
+        isEditDbButtonEnabled.value = true
         isCloseDbButtonEnabled.value = true
         isAddEntryButtonEnabled.value = true
     }
 
     private fun isFileSelected(): Boolean {
         return lastReadFile != null && lastReadDescriptor != null
+    }
+
+    fun onEditDbButtonClicked() {
+        screenState.value = ScreenState.data()
+
+        router.navigateTo(
+            GroupsScreen(
+                GroupsArgs(
+                    groupUid = null,
+                    isCloseDatabaseOnExit = false
+                )
+            )
+        )
     }
 
     fun onCloseDbButtonClicked() {
@@ -185,6 +209,7 @@ class DebugMenuViewModel(
 
     private fun onDbClosed() {
         isOpenDbButtonEnabled.value = true
+        isEditDbButtonEnabled.value = false
         isCloseDbButtonEnabled.value = false
         isAddEntryButtonEnabled.value = false
     }

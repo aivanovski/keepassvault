@@ -84,7 +84,14 @@ class NewDatabaseViewModel(
                 val created = result.obj
 
                 if (created) {
-                    router.replaceScreen(GroupsScreen(GroupsArgs(groupUid = null)))
+                    router.replaceScreen(
+                        GroupsScreen(
+                            GroupsArgs(
+                                groupUid = null,
+                                isCloseDatabaseOnExit = true
+                            )
+                        )
+                    )
                 } else {
                     val errorText = resourceProvider.getString(R.string.error_was_occurred)
                     screenState.value = ScreenState.dataWithError(errorText)

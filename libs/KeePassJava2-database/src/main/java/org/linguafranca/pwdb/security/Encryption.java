@@ -116,10 +116,8 @@ public class Encryption {
     /**
      * Create a decrypted input stream from an encrypted one
      */
-    @SuppressWarnings("deprecation")
     public static InputStream getDecryptedInputStream (InputStream encryptedInputStream, byte[] keyData, byte[] ivData) {
         final ParametersWithIV keyAndIV = new ParametersWithIV(new KeyParameter(keyData), ivData);
-        //TODO: fix deprecated AESFastEngine usage
         PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESFastEngine()));
         pbbc.init(false, keyAndIV);
         return new CipherInputStream(encryptedInputStream, pbbc);
@@ -128,7 +126,6 @@ public class Encryption {
     /**
      * Create an encrypted output stream from an unencrypted output stream
      */
-    @SuppressWarnings("deprecation")
     public static OutputStream getEncryptedOutputStream (OutputStream decryptedOutputStream, byte[] keyData, byte[] ivData) {
         final ParametersWithIV keyAndIV = new ParametersWithIV(new KeyParameter(keyData), ivData);
         PaddedBufferedBlockCipher pbbc = new PaddedBufferedBlockCipher(new CBCBlockCipher(new AESFastEngine()));

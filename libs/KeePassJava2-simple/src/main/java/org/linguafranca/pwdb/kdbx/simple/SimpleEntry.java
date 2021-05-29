@@ -104,11 +104,6 @@ public class SimpleEntry extends AbstractEntry<SimpleDatabase, SimpleGroup, Simp
         return getStringContent(getStringProperty(s, string));
     }
 
-    public boolean isPropertyProtected(String name) {
-        StringProperty property = getStringProperty(name, string);
-        return property != null && property.getValue() != null && property.getValue().isProtected();
-    }
-
     @Override
     public void setProperty(String s, String s1) {
         EntryClasses.StringProperty sp;
@@ -116,15 +111,6 @@ public class SimpleEntry extends AbstractEntry<SimpleDatabase, SimpleGroup, Simp
             this.string.remove(sp);
         }
         this.string.add(new EntryClasses.StringProperty(s, new EntryClasses.StringProperty.Value(s1)));
-        touch();
-    }
-
-    public void setProperty(String s, String s1, boolean isProtected) {
-        EntryClasses.StringProperty sp;
-        if ((sp = getStringProperty(s, string)) != null) {
-            this.string.remove(sp);
-        }
-        this.string.add(new EntryClasses.StringProperty(s, new EntryClasses.StringProperty.Value(s1, isProtected)));
         touch();
     }
 

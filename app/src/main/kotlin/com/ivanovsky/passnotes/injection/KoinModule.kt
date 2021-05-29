@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.injection
 
 import android.content.Context
 import androidx.room.Room
+import com.github.terrakok.cicerone.Cicerone
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
@@ -84,7 +86,7 @@ object KoinModule {
         single { GroupInteractor(get(), get(), get()) }
         single { DebugMenuInteractor(get(), get(), get(), get()) }
         single { NoteInteractor(get(), get()) }
-        single { GroupsInteractor(get(), get()) }
+        single { GroupsInteractor(get(), get(), get()) }
         single { NoteEditorInteractor(get(), get()) }
         single { ServerLoginInteractor(get(), get(), get()) }
 
@@ -94,16 +96,21 @@ object KoinModule {
         single { NoteEditorCellModelFactory(get()) }
         single { NoteEditorCellViewModelFactory(get()) }
 
+        // Cicerone
+        single { Cicerone.create() }
+        single { provideCiceroneRouter(get()) }
+        single { provideCiceroneNavigatorHolder(get()) }
+
         // ViewModels
-        viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
-        viewModel { FilePickerViewModel(get(), get(), get(), get(), get()) }
-        viewModel { NewDatabaseViewModel(get(), get(), get(), get()) }
-        viewModel { GroupViewModel(get(), get(), get()) }
-        viewModel { DebugMenuViewModel(get(), get(), get(), get()) }
-        viewModel { NoteViewModel(get(), get(), get(), get(), get()) }
-        viewModel { GroupsViewModel(get(), get(), get(), get(), get(), get()) }
-        viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get()) }
-        viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), args) }
+        viewModel { StorageListViewModel(get(), get(), get(), get(), get(), get()) }
+        viewModel { FilePickerViewModel(get(), get(), get(), get(), get(), get()) }
+        viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
+        viewModel { GroupViewModel(get(), get(), get(), get()) }
+        viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
+        viewModel { NoteViewModel(get(), get(), get(), get(), get(), get()) }
+        viewModel { GroupsViewModel(get(), get(), get(), get(), get(), get(), get()) }
+        viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+        viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
     }
 
     private fun provideOkHttp(): OkHttpClient {
@@ -140,4 +147,10 @@ object KoinModule {
             .addTypeConverter(FSAuthorityTypeConverter(cipherProvider))
             .build()
     }
+
+    private fun provideCiceroneRouter(cicerone: Cicerone<Router>) =
+        cicerone.router
+
+    private fun provideCiceroneNavigatorHolder(cicerone: Cicerone<Router>) =
+        cicerone.getNavigatorHolder()
 }

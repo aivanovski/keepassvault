@@ -28,43 +28,7 @@
         </activity>
 
         <activity
-            android:name=".presentation.unlock.UnlockActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".presentation.newdb.NewDatabaseActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".presentation.group.GroupActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".presentation.groups.GroupsActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".presentation.note.NoteActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".presentation.storagelist.StorageListActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".presentation.filepicker.FilePickerActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".presentation.debugmenu.DebugMenuActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".presentation.note_editor.NoteEditorActivity"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".presentation.server_login.ServerLoginActivity"
+            android:name=".presentation.MainActivity"
             android:screenOrientation="portrait" />
 
         <activity

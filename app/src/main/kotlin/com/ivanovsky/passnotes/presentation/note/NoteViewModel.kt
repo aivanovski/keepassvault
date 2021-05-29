@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.note
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Note
@@ -10,6 +11,7 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
+import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -17,6 +19,8 @@ import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.viewmodels.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note.converter.toCellModels
+import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode
+import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.formatAccordingLocale
 import kotlinx.coroutines.Dispatchers
@@ -29,18 +33,18 @@ class NoteViewModel(
     private val errorInteractor: ErrorInteractor,
     private val resourceProvider: ResourceProvider,
     private val localeProvider: LocaleProvider,
-    private val observerBus: ObserverBus
+    private val observerBus: ObserverBus,
+    private val router: Router
 ) : BaseScreenViewModel(), ObserverBus.NoteContentObserver {
 
     val viewTypes = ViewModelTypes()
         .add(NotePropertyCellViewModel::class, R.layout.cell_note_property)
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData<ScreenState>(ScreenState.notInitialized())
+    val screenState = MutableLiveData(ScreenState.notInitialized())
 
     val actionBarTitle = MutableLiveData<String>()
     val modifiedText = MutableLiveData<String>()
-    val showEditNoteScreenEvent = SingleLiveEvent<Note>()
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
 
     private val cellFactory = NoteCellFactory()
@@ -65,7 +69,16 @@ class NoteViewModel(
 
     fun onFabButtonClicked() {
         val note = this.note ?: return
-        showEditNoteScreenEvent.call(note)
+
+        router.navigateTo(
+            NoteEditorScreen(
+                NoteEditorArgs(
+                    launchMode = LaunchMode.EDIT,
+                    noteUid = note.uid,
+                    title = note.title
+                )
+            )
+        )
     }
 
     override fun onNoteContentChanged(groupUid: UUID, oldNoteUid: UUID, newNoteUid: UUID) {
@@ -75,6 +88,8 @@ class NoteViewModel(
             loadData()
         }
     }
+
+    fun navigateBack() = router.exit()
 
     private fun loadData() {
         val noteUid = this.noteUid ?: return

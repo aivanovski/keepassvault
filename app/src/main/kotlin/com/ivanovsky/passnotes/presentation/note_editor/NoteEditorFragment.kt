@@ -4,30 +4,18 @@ import android.os.Bundle
 import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.NoteEditorFragmentBinding
+import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class NoteEditorFragment : Fragment() {
+class NoteEditorFragment : FragmentWithDoneButton() {
 
     private val viewModel: NoteEditorViewModel by viewModel()
-    private var menu: Menu? = null
     private var backCallback: OnBackPressedCallback? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        this.menu = menu
-
-        inflater.inflate(R.menu.base_done, menu)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,12 +30,12 @@ class NoteEditorFragment : Fragment() {
             .root
     }
 
+    override fun onDoneMenuClicked() {
+        viewModel.onDoneMenuClicked()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.menu_done -> {
-                viewModel.onDoneMenuClicked()
-                true
-            }
             android.R.id.home -> {
                 viewModel.onBackClicked()
                 true
@@ -79,6 +67,7 @@ class NoteEditorFragment : Fragment() {
             args.title?.let {
                 title = it
             }
+            setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
         }
 
@@ -97,18 +86,9 @@ class NoteEditorFragment : Fragment() {
         viewModel.showToastEvent.observe(viewLifecycleOwner) { message ->
             showToastMessage(message)
         }
-        viewModel.finishScreenEvent.observe(viewLifecycleOwner) {
-            finishActivity()
-        }
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
             hideKeyboard()
         }
-    }
-
-    private fun setDoneButtonVisibility(isVisible: Boolean) {
-        val item = menu?.findItem(R.id.menu_done) ?: return
-
-        item.isVisible = isVisible
     }
 
     private fun showDiscardDialog(message: String) {

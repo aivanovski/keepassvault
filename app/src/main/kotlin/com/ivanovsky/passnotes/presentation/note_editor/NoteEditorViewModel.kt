@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.note_editor
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
@@ -14,9 +15,11 @@ import com.ivanovsky.passnotes.domain.entity.PropertyMap
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
+import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.core.*
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.viewmodels.SpaceCellViewModel
+import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.ExtendedTextPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.PropertyViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.SecretPropertyCellViewModel
@@ -38,7 +41,8 @@ class NoteEditorViewModel(
     private val noteDiffer: NoteDiffer,
     private val dispatchers: DispatcherProvider,
     private val modelFactory: NoteEditorCellModelFactory,
-    private val viewModelFactory: NoteEditorCellViewModelFactory
+    private val viewModelFactory: NoteEditorCellViewModelFactory,
+    private val router: Router
 ) : BaseScreenViewModel() {
 
     val viewTypes = ViewModelTypes()
@@ -48,11 +52,10 @@ class NoteEditorViewModel(
         .add(SpaceCellViewModel::class, R.layout.cell_space_two_line)
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData<ScreenState>(ScreenState.notInitialized())
+    val screenState = MutableLiveData(ScreenState.notInitialized())
 
     val isDoneButtonVisible = MutableLiveData<Boolean>()
     val showDiscardDialogEvent = SingleLiveEvent<String>()
-    val finishScreenEvent = SingleLiveEvent<Unit>()
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val showToastEvent = SingleLiveEvent<String>()
 
@@ -107,7 +110,7 @@ class NoteEditorViewModel(
                 }
 
                 if (createNoteResult.isSucceededOrDeferred) {
-                    finishScreenEvent.call()
+                    finishScreen()
                 } else {
                     val message = errorInteractor.processAndGetMessage(createNoteResult.error)
                     isDoneButtonVisible.value = true
@@ -130,7 +133,7 @@ class NoteEditorViewModel(
                     }
 
                     if (updateNoteResult.isSucceededOrDeferred) {
-                        finishScreenEvent.call()
+                        finishScreen()
                     } else {
                         val message = errorInteractor.processAndGetMessage(updateNoteResult.error)
                         isDoneButtonVisible.value = true
@@ -139,13 +142,13 @@ class NoteEditorViewModel(
                 }
             } else {
                 showToastEvent.call(resources.getString(R.string.no_changes))
-                finishScreenEvent.call()
+                finishScreen()
             }
         }
     }
 
     fun onDiscardConfirmed() {
-        finishScreenEvent.call()
+        finishScreen()
     }
 
     fun onBackClicked() {
@@ -154,7 +157,7 @@ class NoteEditorViewModel(
         when (launchMode) {
             LaunchMode.NEW -> {
                 if (properties.isEmpty()) {
-                    finishScreenEvent.call()
+                    finishScreen()
                 } else {
                     showDiscardDialogEvent.call(resources.getString(R.string.discard_changes))
                 }
@@ -167,7 +170,7 @@ class NoteEditorViewModel(
                 if (isNoteChanged(sourceNote, newNote)) {
                     showDiscardDialogEvent.call(resources.getString(R.string.discard_changes))
                 } else {
-                    finishScreenEvent.call()
+                    finishScreen()
                 }
             }
         }
@@ -181,6 +184,8 @@ class NoteEditorViewModel(
 
         setCellElements(viewModels)
     }
+
+    private fun finishScreen() = router.backTo(GroupsScreen(GroupsArgs(groupUid)))
 
     private fun loadData() {
         val uid = noteUid ?: return

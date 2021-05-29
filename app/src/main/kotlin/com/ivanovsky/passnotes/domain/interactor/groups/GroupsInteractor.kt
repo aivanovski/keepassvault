@@ -6,11 +6,14 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
+import com.ivanovsky.passnotes.domain.DispatcherProvider
 import java.util.*
+import kotlinx.coroutines.withContext
 
 class GroupsInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
-    private val observerBus: ObserverBus
+    private val observerBus: ObserverBus,
+    private val dispatchers: DispatcherProvider
 ) {
 
     fun getTemplates(): List<Template>? {
@@ -90,6 +93,12 @@ class GroupsInteractor(
         observerBus.notifyNoteDataSetChanged(groupUid)
 
         return removeResult.takeStatusWith(Unit)
+    }
+
+    suspend fun getGroup(groupUid: UUID): OperationResult<Group> {
+        return withContext(dispatchers.IO) {
+            dbRepo.groupRepository.getGroupByUid(groupUid)
+        }
     }
 
     abstract class Item

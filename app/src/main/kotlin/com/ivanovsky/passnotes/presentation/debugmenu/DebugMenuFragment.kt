@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.debugmenu
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
@@ -24,6 +25,7 @@ class DebugMenuFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
         setupActionBar {
             title = getString(R.string.debug_menu)
+            setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
         }
     }
@@ -55,6 +57,16 @@ class DebugMenuFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                viewModel.navigateBack()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

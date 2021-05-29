@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.storagelist
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
@@ -18,6 +19,9 @@ import com.ivanovsky.passnotes.domain.entity.StorageOptionType.PRIVATE_STORAGE
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.WEBDAV
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
+import com.ivanovsky.passnotes.presentation.Screens.FilePickerScreen
+import com.ivanovsky.passnotes.presentation.Screens.ServerLoginScreen
+import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -25,6 +29,7 @@ import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.viewmodels.SingleTextCellViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs
+import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.storagelist.converter.toCellModels
 import com.ivanovsky.passnotes.presentation.storagelist.converter.toFilePickerAction
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -36,18 +41,16 @@ class StorageListViewModel(
     private val errorInteractor: ErrorInteractor,
     private val fileSystemResolver: FileSystemResolver,
     private val resourceProvider: ResourceProvider,
-    private val dispatchers: DispatcherProvider
+    private val dispatchers: DispatcherProvider,
+    private val router: Router
 ) : BaseScreenViewModel() {
 
     val viewTypes = ViewModelTypes()
         .add(SingleTextCellViewModel::class, R.layout.cell_single_text)
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData<ScreenState>(ScreenState.notInitialized())
-
-    val selectFileEvent = SingleLiveEvent<FileDescriptor>()
+    val screenState = MutableLiveData(ScreenState.notInitialized())
     val showAuthActivityEvent = SingleLiveEvent<FSAuthority>()
-    val showFilePickerScreenEvent = SingleLiveEvent<FilePickerArgs>()
 
     private val cellFactory = StorageListCellFactory()
     private var storageOptions: List<StorageOption>? = null
@@ -98,11 +101,9 @@ class StorageListViewModel(
         }
     }
 
-    fun onFilePickedByPicker(file: FileDescriptor) {
-        selectFileEvent.call(file)
-    }
+    fun navigateBack() = router.exit()
 
-    fun onInternalAuthSuccess(fsAuthority: FSAuthority) {
+    private fun onInternalAuthSuccess(fsAuthority: FSAuthority) {
         viewModelScope.launch {
             val remoteFsRoot = interactor.getRemoteFileSystemRoot(fsAuthority)
 
@@ -110,8 +111,22 @@ class StorageListViewModel(
         }
     }
 
-    fun onInternalAuthFailed() {
+    private fun onInternalAuthFailed() {
         screenState.value = ScreenState.data()
+    }
+
+    private fun navigateToFilePicker(args: FilePickerArgs) {
+        router.setResultListener(FilePickerScreen.RESULT_KEY) { file ->
+            if (file is FileDescriptor) {
+                onFilePickedByPicker(file)
+            }
+        }
+        router.navigateTo(FilePickerScreen(args))
+    }
+
+    private fun onFilePickedByPicker(file: FileDescriptor) {
+        router.sendResult(StorageListScreen.RESULT_KEY, file)
+        router.exit()
     }
 
     private fun subscribeToEvents() {
@@ -138,23 +153,23 @@ class StorageListViewModel(
         val action = requestedAction ?: return
 
         if (action == Action.PICK_FILE) {
-            showFilePickerScreenEvent.call(
+            navigateToFilePicker(
                 FilePickerArgs(
                     action.toFilePickerAction(),
                     root,
                     false
                 )
             )
-
         } else if (action == Action.PICK_STORAGE) {
-            selectFileEvent.call(root)
+            router.sendResult(StorageListScreen.RESULT_KEY, root)
+            router.exit()
         }
     }
 
     private fun onExternalStorageSelected(root: FileDescriptor) {
         val action = requestedAction ?: return
 
-        showFilePickerScreenEvent.call(
+        navigateToFilePicker(
             FilePickerArgs(
                 action.toFilePickerAction(),
                 root,
@@ -171,11 +186,24 @@ class StorageListViewModel(
         val authenticator = provider.authenticator
         if (authenticator.isAuthenticationRequired()) {
             val authType = authenticator.getAuthType()
-
-            if (authType == AuthType.EXTERNAL) {
+            if (authType == AuthType.INTERNAL) {
+                router.setResultListener(ServerLoginScreen.RESULT_KEY) { fsAuthority ->
+                    if (fsAuthority is FSAuthority) {
+                        onInternalAuthSuccess(fsAuthority)
+                    } else {
+                        onInternalAuthFailed()
+                    }
+                }
+                router.navigateTo(
+                    ServerLoginScreen(
+                        ServerLoginArgs(root.fsAuthority)
+                    )
+                )
+            } else if (authType == AuthType.EXTERNAL) {
                 isExternalAuthActivityLaunched = true
+                showAuthActivityEvent.call(root.fsAuthority)
             }
-            showAuthActivityEvent.call(root.fsAuthority)
+
         } else {
             viewModelScope.launch {
                 val remoteFsRoot = interactor.getRemoteFileSystemRoot(root.fsAuthority)
@@ -190,7 +218,7 @@ class StorageListViewModel(
 
         if (result.isSucceededOrDeferred) {
             val rootFile = result.obj
-            showFilePickerScreenEvent.call(
+            navigateToFilePicker(
                 FilePickerArgs(
                     action.toFilePickerAction(),
                     rootFile,

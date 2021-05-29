@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository.keepass;
 
 import androidx.annotation.NonNull;
 
+import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
@@ -10,12 +11,34 @@ import com.ivanovsky.passnotes.data.entity.Group;
 import java.util.List;
 import java.util.UUID;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
+
 public class KeepassGroupRepository implements GroupRepository {
 
     private final GroupDao dao;
 
     KeepassGroupRepository(GroupDao dao) {
         this.dao = dao;
+    }
+
+    @NonNull
+    @Override
+    public OperationResult<Group> getGroupByUid(@NonNull UUID groupUid) {
+        OperationResult<List<Group>> groups = dao.getAll();
+        if (groups.isFailed()) {
+            return groups.takeError();
+        }
+
+        Group matchedGroup = Stream.of(groups.getObj())
+                .filter(group -> groupUid.equals(group.getUid()))
+                .findFirst()
+                .orElse(null);
+        if (matchedGroup == null) {
+            return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+        }
+
+        return OperationResult.success(matchedGroup);
     }
 
     @NonNull

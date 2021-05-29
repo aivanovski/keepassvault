@@ -1,7 +1,5 @@
 package com.ivanovsky.passnotes.presentation.unlock
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,16 +10,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
-import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuActivity
-import com.ivanovsky.passnotes.presentation.groups.GroupsActivity
-import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseActivity
-import com.ivanovsky.passnotes.presentation.storagelist.Action
-import com.ivanovsky.passnotes.presentation.storagelist.StorageListActivity
 import com.ivanovsky.passnotes.presentation.unlock.model.DropDownItem
 import com.ivanovsky.passnotes.util.FileUtils
 
@@ -63,7 +55,7 @@ class UnlockFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = UnlockFragmentBinding.inflate(inflater, container, false)
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
@@ -99,41 +91,11 @@ class UnlockFragment : Fragment() {
     }
 
     private fun subscribeToLiveEvents() {
-        viewModel.showGroupsScreenEvent.observe(viewLifecycleOwner) {
-            showGroupsScreen()
-        }
-        viewModel.showNewDatabaseScreenEvent.observe(viewLifecycleOwner) {
-            showNewDatabaseScreen()
-        }
-        viewModel.showOpenFileScreenEvent.observe(viewLifecycleOwner) {
-            showOpenFileScreen()
-        }
-        viewModel.showSettingsScreenEvent.observe(viewLifecycleOwner) {
-            showSettingsScreen()
-        }
-        viewModel.showAboutScreenEvent.observe(viewLifecycleOwner) {
-            showAboutScreen()
-        }
-        viewModel.showDebugMenuScreenEvent.observe(viewLifecycleOwner) {
-            showDebugMenuScreen()
-        }
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
             hideKeyboard()
         }
         viewModel.showSnackbarMessage.observe(viewLifecycleOwner) { message ->
             showSnackbarMessage(message)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_PICK_FILE) {
-            val extras = data?.extras
-            if (extras != null) {
-                val file = extras.getParcelable<FileDescriptor>(StorageListActivity.EXTRA_RESULT)
-                if (file != null) {
-                    viewModel.onFilePicked(file)
-                }
-            }
         }
     }
 
@@ -173,36 +135,7 @@ class UnlockFragment : Fragment() {
         }
     }
 
-    private fun showGroupsScreen() {
-        startActivity(GroupsActivity.startForRootGroup(requireContext()))
-    }
-
-    private fun showNewDatabaseScreen() {
-        startActivity(Intent(requireContext(), NewDatabaseActivity::class.java))
-    }
-
-    private fun showOpenFileScreen() {
-        val intent = StorageListActivity.createStartIntent(requireContext(), Action.PICK_FILE)
-        startActivityForResult(intent, REQUEST_CODE_PICK_FILE)
-    }
-
-    private fun showSettingsScreen() {
-        throw RuntimeException("Not implemented") //TODO: handle menu click
-    }
-
-    private fun showAboutScreen() {
-        throw RuntimeException("Not implemented") //TODO: handle menu click
-    }
-
-    private fun showDebugMenuScreen() {
-        val intent = DebugMenuActivity.createStartIntent(requireContext())
-        startActivity(intent)
-    }
-
     companion object {
-
-        private const val REQUEST_CODE_PICK_FILE = 100
-
         fun newInstance() = UnlockFragment()
     }
 }

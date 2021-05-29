@@ -3,13 +3,14 @@ package com.ivanovsky.passnotes.presentation.server_login
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.ServerCredentials
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
+import com.ivanovsky.passnotes.presentation.Screens.ServerLoginScreen
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
@@ -20,11 +21,12 @@ class ServerLoginViewModel(
     private val interactor: ServerLoginInteractor,
     private val errorInteractor: ErrorInteractor,
     private val resourceProvider: ResourceProvider,
+    private val router: Router,
     private val args: ServerLoginArgs
 ) : ViewModel() {
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData<ScreenState>(ScreenState.data())
+    val screenState = MutableLiveData(ScreenState.data())
 
     val url = MutableLiveData(EMPTY)
     val username = MutableLiveData(EMPTY)
@@ -32,7 +34,6 @@ class ServerLoginViewModel(
     val urlError = MutableLiveData<String?>()
     val doneButtonVisibility = MutableLiveData(true)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
-    val finishScreenEvent = SingleLiveEvent<FSAuthority>()
 
     init {
         loadDebugData()
@@ -73,13 +74,15 @@ class ServerLoginViewModel(
             val fsAuthority = args.fsAuthority.copy(
                 credentials = credentials
             )
-            finishScreenEvent.call(fsAuthority)
+
+            router.sendResult(ServerLoginScreen.RESULT_KEY, fsAuthority)
+            router.exit()
         }
     }
 
-    private fun isFieldsValid(
-        url: String
-    ): Boolean {
+    fun navigateBack() = router.exit()
+
+    private fun isFieldsValid(url: String): Boolean {
         urlError.value = if (url.isBlank()) {
             resourceProvider.getString(R.string.empty_field)
         } else {

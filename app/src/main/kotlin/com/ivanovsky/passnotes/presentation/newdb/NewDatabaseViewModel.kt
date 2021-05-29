@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.presentation.newdb
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.FSType
@@ -11,9 +12,13 @@ import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
+import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
+import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
+import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,23 +30,22 @@ class NewDatabaseViewModel(
     private val interactor: NewDatabaseInteractor,
     private val errorInteractor: ErrorInteractor,
     private val fileHelper: FileHelper,
-    private val resourceProvider: ResourceProvider
+    private val resourceProvider: ResourceProvider,
+    private val router: Router
 ) : ViewModel() {
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData<ScreenState>(ScreenState.data())
+    val screenState = MutableLiveData(ScreenState.data())
 
-    val filename = MutableLiveData<String>(EMPTY)
-    val password = MutableLiveData<String>(EMPTY)
-    val confirmation = MutableLiveData<String>(EMPTY)
+    val filename = MutableLiveData(EMPTY)
+    val password = MutableLiveData(EMPTY)
+    val confirmation = MutableLiveData(EMPTY)
     val filenameError = MutableLiveData<String?>(null)
     val passwordError = MutableLiveData<String?>(null)
     val confirmationError = MutableLiveData<String?>(null)
     val storageType = MutableLiveData<String>()
-    val storagePath = MutableLiveData<String>(resourceProvider.getString(R.string.not_selected))
-    val doneButtonVisibility = MutableLiveData<Boolean>(true)
-    val showGroupsScreenEvent = SingleLiveEvent<Unit>()
-    val showStorageScreenEvent = SingleLiveEvent<Unit>()
+    val storagePath = MutableLiveData(resourceProvider.getString(R.string.not_selected))
+    val doneButtonVisibility = MutableLiveData(true)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
 
     private var selectedStorageDir: FileDescriptor? = null
@@ -80,7 +84,7 @@ class NewDatabaseViewModel(
                 val created = result.obj
 
                 if (created) {
-                    showGroupsScreenEvent.call()
+                    router.replaceScreen(GroupsScreen(GroupsArgs(groupUid = null)))
                 } else {
                     val errorText = resourceProvider.getString(R.string.error_was_occurred)
                     screenState.value = ScreenState.dataWithError(errorText)
@@ -148,10 +152,17 @@ class NewDatabaseViewModel(
     }
 
     fun onSelectStorageClicked() {
-        showStorageScreenEvent.call()
+        router.setResultListener(StorageListScreen.RESULT_KEY) { file ->
+            if (file is FileDescriptor) {
+                onStorageSelected(file)
+            }
+        }
+        router.navigateTo(StorageListScreen(Action.PICK_STORAGE))
     }
 
-    fun onStorageSelected(selectedFile: FileDescriptor) {
+    fun navigateBack() = router.exit()
+
+    private fun onStorageSelected(selectedFile: FileDescriptor) {
         selectedStorageDir = selectedFile
 
         when (selectedFile.fsAuthority.type) {

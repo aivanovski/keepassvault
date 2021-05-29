@@ -16,7 +16,8 @@
 
 package org.linguafranca.pwdb.kdbx;
 
-import org.apache.commons.codec.binary.Base64;
+import com.epam.reportportal.apache.commons.codec.binary.Base64;
+
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;

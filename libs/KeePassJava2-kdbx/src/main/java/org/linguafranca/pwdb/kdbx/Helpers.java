@@ -16,9 +16,9 @@
 
 package org.linguafranca.pwdb.kdbx;
 
+import com.epam.reportportal.apache.commons.codec.binary.Base64;
+import com.epam.reportportal.apache.commons.codec.binary.Hex;
 import com.google.common.io.ByteStreams;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Hex;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

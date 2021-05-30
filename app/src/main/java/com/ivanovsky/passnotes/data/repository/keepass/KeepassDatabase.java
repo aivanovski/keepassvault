@@ -9,7 +9,6 @@ import com.ivanovsky.passnotes.data.repository.encdb.exception.FailedToWriteDBEx
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
-import com.ivanovsky.passnotes.data.repository.file.BaseRemoteFileOutputStream;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassGroupDao;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
@@ -23,10 +22,6 @@ import org.linguafranca.pwdb.Credentials;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -145,20 +140,7 @@ public class KeepassDatabase implements EncryptedDatabase {
                 out = outResult.getObj();
 
                 // method 'SimpleDatabase.save' closes output stream after work is done
-                if (out instanceof BaseRemoteFileOutputStream) {
-                    BaseRemoteFileOutputStream remoteOut = (BaseRemoteFileOutputStream) out;
-
-                    File localFile = remoteOut.getOutputFile();
-
-                    BufferedOutputStream localOut = new BufferedOutputStream(new FileOutputStream(localFile));
-                    db.save(credentials, localOut);
-
-                    InputOutputUtils.copy(new FileInputStream(localFile), out, false);
-
-                    out.close();
-                } else {
-                    db.save(credentials, out);
-                }
+                db.save(credentials, out);
 
                 if (outResult.isDeferred()) {
                     result.setDeferredObj(true);

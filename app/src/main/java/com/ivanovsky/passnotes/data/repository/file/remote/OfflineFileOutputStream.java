@@ -15,6 +15,8 @@ import java.util.UUID;
 public class OfflineFileOutputStream extends BaseRemoteFileOutputStream {
 
     private boolean failed;
+    private boolean flushed;
+    private boolean closed;
     private final UUID processingUnitUid;
     private final File outFile;
     private final RemoteFileSystemProvider provider;
@@ -35,6 +37,7 @@ public class OfflineFileOutputStream extends BaseRemoteFileOutputStream {
     public void write(int b) throws IOException {
         try {
             out.write(b);
+            flushed = false;
         } catch (IOException e) {
             Logger.printStackTrace(e);
 
@@ -50,6 +53,7 @@ public class OfflineFileOutputStream extends BaseRemoteFileOutputStream {
     public void flush() throws IOException {
         try {
             out.flush();
+            flushed = true;
         } catch (IOException e) {
             Logger.printStackTrace(e);
 
@@ -62,11 +66,16 @@ public class OfflineFileOutputStream extends BaseRemoteFileOutputStream {
     }
 
     @Override
-    public void close() {
-        if (failed) {
+    public void close() throws IOException {
+        if (failed || closed) {
             return;
         }
 
+        if (!flushed) {
+            flush();
+        }
+
+        closed = true;
         provider.onOfflineWriteFinished(file, processingUnitUid);
     }
 

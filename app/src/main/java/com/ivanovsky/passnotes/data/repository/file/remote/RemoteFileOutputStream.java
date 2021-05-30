@@ -20,6 +20,8 @@ public class RemoteFileOutputStream extends BaseRemoteFileOutputStream {
     private static final String TAG = RemoteFileOutputStream.class.getSimpleName();
 
     private boolean failed;
+    private boolean flushed;
+    private boolean closed;
     private final UUID processingUnitUid;
     private final File outFile;
     private final RemoteFileSystemProvider provider;
@@ -52,6 +54,7 @@ public class RemoteFileOutputStream extends BaseRemoteFileOutputStream {
 
         try {
             out.write(b);
+            flushed = false;
         } catch (IOException e) {
             Logger.printStackTrace(e);
 
@@ -74,6 +77,7 @@ public class RemoteFileOutputStream extends BaseRemoteFileOutputStream {
 
         try {
             out.flush();
+            flushed = true;
         } catch (IOException e) {
             Logger.printStackTrace(e);
 
@@ -87,14 +91,31 @@ public class RemoteFileOutputStream extends BaseRemoteFileOutputStream {
 
     @Override
     public void close() throws IOException {
-        if (failed) {
+        if (failed || closed) {
             return;
+        }
+
+        if (!flushed) {
+            flush();
+        }
+
+        if (out != null) {
+            try {
+                out.close();
+            } catch (IOException e) {
+                failed = true;
+
+                provider.onFileUploadFailed(file, processingUnitUid);
+
+                throw new IOException(e);
+            }
         }
 
         RemoteFileMetadata metadata;
 
         try {
             metadata = client.uploadFileOrThrow(file.getRemotePath(), file.getLocalPath());
+            closed = true;
         } catch (RemoteFSNetworkException e) {
             Logger.printStackTrace(e);
 

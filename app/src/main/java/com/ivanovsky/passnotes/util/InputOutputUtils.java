@@ -15,6 +15,8 @@ import javax.annotation.Nullable;
 
 public class InputOutputUtils {
 
+    private static final int BUFFER_SIZE = 1024 * 8;
+
     public static FileInputStream newFileInputStreamOrNull(File file) {
         FileInputStream result = null;
 
@@ -69,7 +71,7 @@ public class InputOutputUtils {
     }
 
     public static void copy(InputStream in, OutputStream out, boolean close) throws IOException {
-        byte[] buf = new byte[1024 * 4];
+        byte[] buf = new byte[BUFFER_SIZE];
         int len;
 
         try {
@@ -97,7 +99,7 @@ public class InputOutputUtils {
 
     public static void copy(InputStream in, OutputStream out, boolean close,
                             AtomicBoolean cancellation) throws IOException {
-        byte[] buf = new byte[1024 * 4];
+        byte[] buf = new byte[BUFFER_SIZE];
         int len;
 
         while ((len = in.read(buf)) > 0 && !cancellation.get()) {

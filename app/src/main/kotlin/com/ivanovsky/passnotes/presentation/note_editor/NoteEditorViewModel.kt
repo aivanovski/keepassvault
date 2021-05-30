@@ -156,7 +156,7 @@ class NoteEditorViewModel(
 
         when (launchMode) {
             LaunchMode.NEW -> {
-                if (properties.isEmpty()) {
+                if (properties.isEmpty() || isAllDefaultAndEmpty(properties)) {
                     finishScreen()
                 } else {
                     showDiscardDialogEvent.call(resources.getString(R.string.discard_changes))
@@ -433,6 +433,12 @@ class NoteEditorViewModel(
             modifiedNote,
             NoteDiffer.ALL_FIELDS_WITHOUT_MODIFIED
         )
+    }
+
+    private fun isAllDefaultAndEmpty(properties: List<Property>): Boolean {
+        return properties.all { property ->
+            property.isDefault && property.value.isNullOrEmpty()
+        }
     }
 
     object CellId {

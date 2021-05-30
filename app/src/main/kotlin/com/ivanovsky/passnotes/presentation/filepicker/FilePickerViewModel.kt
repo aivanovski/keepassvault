@@ -20,7 +20,7 @@ import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.FileCellModel
-import com.ivanovsky.passnotes.presentation.core.viewmodels.FileCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.FileCellViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.converter.toCellModels
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

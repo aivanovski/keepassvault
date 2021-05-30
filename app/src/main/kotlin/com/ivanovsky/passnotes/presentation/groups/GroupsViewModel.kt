@@ -21,8 +21,8 @@ import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.core.viewmodels.GroupGridCellViewModel
-import com.ivanovsky.passnotes.presentation.core.viewmodels.NoteGridCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupGridCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteGridCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode

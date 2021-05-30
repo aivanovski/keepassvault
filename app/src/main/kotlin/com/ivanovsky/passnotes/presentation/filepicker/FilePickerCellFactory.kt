@@ -5,7 +5,7 @@ import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.FileCellModel
-import com.ivanovsky.passnotes.presentation.core.viewmodels.FileCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.FileCellViewModel
 
 class FilePickerCellFactory : CellViewModelFactory {
 

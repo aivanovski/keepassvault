@@ -27,7 +27,7 @@ import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.core.viewmodels.SingleTextCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.SingleTextCellViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.storagelist.converter.toCellModels

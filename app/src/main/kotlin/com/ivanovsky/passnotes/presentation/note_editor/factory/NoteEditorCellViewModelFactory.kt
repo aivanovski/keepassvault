@@ -6,7 +6,7 @@ import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
-import com.ivanovsky.passnotes.presentation.core.viewmodels.SpaceCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedTextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.SecretPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.TextPropertyCellModel

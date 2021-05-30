@@ -18,7 +18,7 @@ import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteracto
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.core.*
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.core.viewmodels.SpaceCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.ExtendedTextPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.PropertyViewModel

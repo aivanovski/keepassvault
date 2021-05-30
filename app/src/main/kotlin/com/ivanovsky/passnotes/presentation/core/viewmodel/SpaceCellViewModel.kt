@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.presentation.core.viewmodels
+package com.ivanovsky.passnotes.presentation.core.viewmodel
 
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel

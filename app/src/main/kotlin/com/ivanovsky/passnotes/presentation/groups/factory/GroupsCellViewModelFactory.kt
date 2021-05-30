@@ -6,8 +6,8 @@ import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.GroupCellModel
 import com.ivanovsky.passnotes.presentation.core.model.NoteCellModel
-import com.ivanovsky.passnotes.presentation.core.viewmodels.GroupGridCellViewModel
-import com.ivanovsky.passnotes.presentation.core.viewmodels.NoteGridCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupGridCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteGridCellViewModel
 
 class GroupsCellViewModelFactory : CellViewModelFactory {
 

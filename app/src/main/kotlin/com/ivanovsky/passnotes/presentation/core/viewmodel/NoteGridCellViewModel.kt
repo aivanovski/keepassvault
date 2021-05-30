@@ -1,12 +1,12 @@
-package com.ivanovsky.passnotes.presentation.core.viewmodels
+package com.ivanovsky.passnotes.presentation.core.viewmodel
 
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
-import com.ivanovsky.passnotes.presentation.core.model.GroupCellModel
+import com.ivanovsky.passnotes.presentation.core.model.NoteCellModel
 
-class GroupGridCellViewModel(
-    override val model: GroupCellModel,
+class NoteGridCellViewModel(
+    override val model: NoteCellModel,
     private val eventProvider: EventProvider
 ) : BaseCellViewModel(model) {
 
@@ -20,7 +20,7 @@ class GroupGridCellViewModel(
 
     companion object {
 
-        val CLICK_EVENT = GroupGridCellViewModel::class.qualifiedName + "_clickEvent"
-        val LONG_CLICK_EVENT = GroupGridCellViewModel::class.qualifiedName + "_longClickEvent"
+        val CLICK_EVENT = NoteGridCellViewModel::class.qualifiedName + "_clickEvent"
+        val LONG_CLICK_EVENT = NoteGridCellViewModel::class.qualifiedName + "_longClickEvent"
     }
 }

@@ -5,7 +5,7 @@ import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.NotePropertyCellModel
-import com.ivanovsky.passnotes.presentation.core.viewmodels.NotePropertyCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.NotePropertyCellViewModel
 
 class NoteCellFactory : CellViewModelFactory {
 

@@ -18,7 +18,7 @@ import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.core.viewmodels.NotePropertyCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note.converter.toCellModels
 import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs

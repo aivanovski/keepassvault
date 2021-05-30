@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.presentation.core.viewmodels
+package com.ivanovsky.passnotes.presentation.core.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel

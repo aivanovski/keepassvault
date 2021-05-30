@@ -8,7 +8,7 @@
 
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.core.viewmodels.FileCellViewModel" />
+            type="com.ivanovsky.passnotes.presentation.core.viewmodel.FileCellViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

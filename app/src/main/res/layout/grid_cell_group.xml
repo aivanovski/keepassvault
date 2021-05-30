@@ -10,7 +10,7 @@
 
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.core.viewmodels.GroupGridCellViewModel" />
+            type="com.ivanovsky.passnotes.presentation.core.viewmodel.GroupGridCellViewModel" />
     </data>
 
     <com.ivanovsky.passnotes.presentation.core.widget.SquareLayout

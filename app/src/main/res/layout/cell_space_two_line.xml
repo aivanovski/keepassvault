@@ -6,7 +6,7 @@
 
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.core.viewmodels.SpaceCellViewModel" />
+            type="com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel" />
     </data>
 
     <View

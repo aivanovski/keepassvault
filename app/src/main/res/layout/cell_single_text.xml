@@ -7,7 +7,7 @@
 
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.core.viewmodels.SingleTextCellViewModel" />
+            type="com.ivanovsky.passnotes.presentation.core.viewmodel.SingleTextCellViewModel" />
     </data>
 
     <TextView

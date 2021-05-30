@@ -5,7 +5,7 @@ import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.SingleTextCellModel
-import com.ivanovsky.passnotes.presentation.core.viewmodels.SingleTextCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.SingleTextCellViewModel
 
 class StorageListCellFactory : CellViewModelFactory {
 

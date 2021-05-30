@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import kotlin.reflect.jvm.jvmName
 
 class ConfirmationDialog : DialogFragment(), DialogInterface.OnClickListener {
 
@@ -35,7 +34,7 @@ class ConfirmationDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     companion object {
 
-        val TAG = ConfirmationDialog::class.jvmName
+        val TAG = ConfirmationDialog::class.qualifiedName
 
         fun newInstance(
             message: String,

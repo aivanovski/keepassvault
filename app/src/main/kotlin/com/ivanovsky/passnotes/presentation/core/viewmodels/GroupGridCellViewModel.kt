@@ -4,7 +4,6 @@ import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.model.GroupCellModel
-import kotlin.reflect.jvm.jvmName
 
 class GroupGridCellViewModel(
     override val model: GroupCellModel,
@@ -21,7 +20,7 @@ class GroupGridCellViewModel(
 
     companion object {
 
-        val CLICK_EVENT = GroupGridCellViewModel::class.jvmName + "_clickEvent"
-        val LONG_CLICK_EVENT = GroupGridCellViewModel::class.jvmName + "_longClickEvent"
+        val CLICK_EVENT = GroupGridCellViewModel::class.qualifiedName + "_clickEvent"
+        val LONG_CLICK_EVENT = GroupGridCellViewModel::class.qualifiedName + "_longClickEvent"
     }
 }

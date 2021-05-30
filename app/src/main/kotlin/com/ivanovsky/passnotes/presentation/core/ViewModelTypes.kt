@@ -2,22 +2,21 @@ package com.ivanovsky.passnotes.presentation.core
 
 import androidx.annotation.LayoutRes
 import kotlin.reflect.KClass
-import kotlin.reflect.jvm.jvmName
 
 class ViewModelTypes {
 
     private val types = mutableListOf<Pair<String, Int>>()
 
     fun add(type: KClass<out BaseCellViewModel>, @LayoutRes layoutResId: Int): ViewModelTypes {
-        types.add(Pair(type.jvmName, layoutResId))
+        types.add(Pair(keyFromType(type), layoutResId))
         return this
     }
 
-    fun getViewType(type: KClass<*>): Int = types.indexOfFirst { type.jvmName == it.first }
+    fun getViewType(type: KClass<*>): Int = types.indexOfFirst { keyFromType(type) == it.first }
 
     @LayoutRes
     fun getLayoutResId(type: KClass<*>): Int {
-        return types.firstOrNull { type.jvmName == it.first }?.second
+        return types.firstOrNull { keyFromType(type) == it.first }?.second
             ?: throwNoLayoutId()
     }
 
@@ -27,6 +26,10 @@ class ViewModelTypes {
         }
 
         return types[viewType].second
+    }
+
+    private fun keyFromType(type: KClass<*>): String {
+        return type.java.name
     }
 
     private fun throwNoLayoutId(): Nothing {

@@ -4,7 +4,6 @@ import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.model.NoteCellModel
-import kotlin.reflect.jvm.jvmName
 
 class NoteGridCellViewModel(
     override val model: NoteCellModel,
@@ -21,7 +20,7 @@ class NoteGridCellViewModel(
 
     companion object {
 
-        val CLICK_EVENT = NoteGridCellViewModel::class.jvmName + "_clickEvent"
-        val LONG_CLICK_EVENT = NoteGridCellViewModel::class.jvmName + "_longClickEvent"
+        val CLICK_EVENT = NoteGridCellViewModel::class.qualifiedName + "_clickEvent"
+        val LONG_CLICK_EVENT = NoteGridCellViewModel::class.qualifiedName + "_longClickEvent"
     }
 }

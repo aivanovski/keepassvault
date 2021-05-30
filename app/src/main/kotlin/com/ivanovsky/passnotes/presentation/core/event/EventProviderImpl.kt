@@ -1,20 +1,19 @@
 package com.ivanovsky.passnotes.presentation.core.event
 
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.reflect.jvm.jvmName
 
 class EventProviderImpl : EventProvider {
 
     private val subscribers = ConcurrentHashMap<String, (event: Event) -> Unit>()
 
     override fun subscribe(subscriber: Any, observer: (event: Event) -> Unit) {
-        val key = subscriber::class.jvmName
+        val key = subscriber::class.java.name
 
         subscribers[key] = observer
     }
 
     override fun unSubscribe(subscriber: Any) {
-        val key = subscriber::class.jvmName
+        val key = subscriber::class.java.name
         subscribers.remove(key)
     }
 

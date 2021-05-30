@@ -4,7 +4,6 @@ import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.model.SingleTextCellModel
-import kotlin.reflect.jvm.jvmName
 
 class SingleTextCellViewModel(
     override val model: SingleTextCellModel,
@@ -17,6 +16,6 @@ class SingleTextCellViewModel(
 
     companion object {
 
-        val CLICK_EVENT = SingleTextCellModel::class.jvmName + "_clickEvent"
+        val CLICK_EVENT = SingleTextCellModel::class.qualifiedName + "_clickEvent"
     }
 }

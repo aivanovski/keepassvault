@@ -5,7 +5,6 @@ import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.model.NotePropertyCellModel
-import kotlin.reflect.jvm.jvmName
 
 class NotePropertyCellViewModel(
     override val model: NotePropertyCellModel,
@@ -24,6 +23,6 @@ class NotePropertyCellViewModel(
 
     companion object {
 
-        val COPY_BUTTON_CLICK_EVENT = NotePropertyCellViewModel::class.jvmName + "_copyTextClickEvent"
+        val COPY_BUTTON_CLICK_EVENT = NotePropertyCellViewModel::class.qualifiedName + "_copyTextClickEvent"
     }
 }

@@ -134,7 +134,7 @@ class DataCipher(
 
     companion object {
 
-        private val TAG = Cipher::class.simpleName
+        private val TAG = DataCipher::class.simpleName
 
         fun isAndroidKeyStoreCipherAllowed(): Boolean {
             return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&

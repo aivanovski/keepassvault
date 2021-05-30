@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -21,14 +20,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
@@ -38,8 +37,8 @@
             android:layout_marginRight="@dimen/element_margin"
             app:errorText="@{viewModel.errorText}"
             app:layout_constraintTop_toBottomOf="@id/errorPanelView"
-            bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}">
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/groupTitle"

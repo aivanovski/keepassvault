@@ -2,7 +2,6 @@
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -40,7 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/material_list_item_selected"
-            bind:visible="@{viewModel.model.selected}" />
+            app:visible="@{viewModel.model.selected}" />
 
         <View
             android:id="@+id/iconBackground"
@@ -59,7 +58,7 @@
             app:layout_constraintEnd_toEndOf="@id/iconBackground"
             app:layout_constraintStart_toStartOf="@id/iconBackground"
             app:layout_constraintTop_toTopOf="parent"
-            bind:src="@{viewModel.model.iconResId}"
+            app:imageResourceId="@{viewModel.model.iconResId}"
             tools:src="@drawable/ic_file_white_24dp" />
 
         <TextView

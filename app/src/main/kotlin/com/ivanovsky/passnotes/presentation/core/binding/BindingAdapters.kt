@@ -71,7 +71,7 @@ fun setError(textInputLayout: TextInputLayout, errorData: LiveData<String?>?) {
     textInputLayout.error = errorData?.value
 }
 
-@BindingAdapter("bind:visible")
+@BindingAdapter("visible")
 fun setVisible(view: View, isVisible: Boolean) {
     view.isVisible = isVisible
 }
@@ -102,12 +102,12 @@ fun setOnTextChangedListener(editText: TextInputEditText, onTextChangeListener: 
     editText.addTextChangedListener(listener)
 }
 
-@BindingAdapter("bind:src")
+@BindingAdapter("imageResourceId")
 fun setImageResource(imageView: ImageView, @DrawableRes imageResourceId: Int) {
     imageView.setImageResource(imageResourceId)
 }
 
-@BindingAdapter("bind:isTextHidden")
+@BindingAdapter("isTextHidden")
 fun setTextHidden(textView: SecureTextView, isHidden: LiveData<Boolean>?) {
     val isTextHidden = isHidden?.value ?: false
     if (isTextHidden) {
@@ -158,13 +158,6 @@ fun setInputType(editText: EditText, textInputType: TextInputType?) {
     }
     editText.setRawInputType(inputType)
 }
-
-//fun setTransformationMethod(
-//    textView: TextView,
-//    transformationMethod: LiveData<TextTransformationMethod>?
-//) {
-//    setTransformationMethod(textView, transformationMethod?.value)
-//}
 
 @BindingAdapter("textTransformationMethod")
 fun setTransformationMethod(

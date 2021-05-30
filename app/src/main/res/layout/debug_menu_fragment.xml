@@ -2,7 +2,6 @@
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -27,16 +26,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
-                bind:screenState="@{viewModel.screenState}"
-                bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+                app:screenState="@{viewModel.screenState}"
+                app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
             <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                bind:screenState="@{viewModel.screenState}"
-                bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+                app:screenState="@{viewModel.screenState}"
+                app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -44,8 +43,8 @@
                 android:paddingTop="@dimen/group_margin"
                 android:paddingBottom="@dimen/group_margin"
                 app:layout_constraintTop_toBottomOf="@id/errorPanelView"
-                bind:screenState="@{viewModel.screenState}"
-                bind:screenStateHandler="@{viewModel.screenStateHandler}">
+                app:screenState="@{viewModel.screenState}"
+                app:screenStateHandler="@{viewModel.screenStateHandler}">
 
                 <TextView
                     android:id="@+id/fileSystemText"
@@ -88,7 +87,7 @@
                     android:text="@{viewModel.debugServerUrlText}"
                     android:textSize="@dimen/material_primary_text_size"
                     app:layout_constraintTop_toBottomOf="@id/fileSystemSpinner"
-                    bind:visible="@{viewModel.isDebugCredentialsVisible}"
+                    app:visible="@{viewModel.isDebugCredentialsVisible}"
                     tools:text="@string/server_url_with_str"
                     tools:visibility="visible" />
 
@@ -101,7 +100,7 @@
                     android:text="@{viewModel.debugCredentialsText}"
                     android:textSize="@dimen/material_primary_text_size"
                     app:layout_constraintTop_toBottomOf="@id/debugServerUrl"
-                    bind:visible="@{viewModel.isDebugCredentialsVisible}"
+                    app:visible="@{viewModel.isDebugCredentialsVisible}"
                     tools:text="@string/credentials_with_str"
                     tools:visibility="visible" />
 

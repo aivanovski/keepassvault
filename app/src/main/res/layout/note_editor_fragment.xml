@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -23,14 +22,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
@@ -39,10 +38,10 @@
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/errorPanelView"
-            bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}"
-            bind:viewModels="@{viewModel.cellViewModels}"
-            bind:viewTypes="@{viewModel.viewTypes}" />
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            app:viewModels="@{viewModel.cellViewModels}"
+            app:viewTypes="@{viewModel.viewTypes}" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
@@ -54,9 +53,9 @@
             android:onClick="@{() -> viewModel.onAddButtonClicked()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/ic_add_white_24dp"
-            bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            app:srcCompat="@drawable/ic_add_white_24dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

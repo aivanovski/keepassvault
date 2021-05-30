@@ -2,7 +2,6 @@
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -24,14 +23,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
@@ -41,10 +40,10 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@id/bottomPanelLayout"
             app:layout_constraintTop_toBottomOf="@id/errorPanelView"
-            bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}"
-            bind:viewModels="@{viewModel.cellViewModels}"
-            bind:viewTypes="@{viewModel.viewTypes}" />
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            app:viewModels="@{viewModel.cellViewModels}"
+            app:viewTypes="@{viewModel.viewTypes}" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/bottomPanelLayout"
@@ -53,8 +52,8 @@
             app:cardCornerRadius="0dp"
             app:cardElevation="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}">
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}">
 
             <TextView
                 android:id="@+id/modified_date"
@@ -79,9 +78,9 @@
             android:onClick="@{() -> viewModel.onFabButtonClicked()}"
             app:layout_constraintBottom_toTopOf="@id/bottomPanelLayout"
             app:layout_constraintRight_toRightOf="parent"
-            app:srcCompat="@drawable/ic_edit_white_24dp"
-            bind:screenState="@{viewModel.screenState}"
-            bind:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            app:srcCompat="@drawable/ic_edit_white_24dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

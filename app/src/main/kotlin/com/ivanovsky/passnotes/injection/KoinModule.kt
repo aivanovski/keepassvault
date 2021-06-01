@@ -82,7 +82,7 @@ object KoinModule {
 
         // Interactors
         single { FilePickerInteractor(get()) }
-        single { UnlockInteractor(get(), get(), get()) }
+        single { UnlockInteractor(get(), get(), get(), get(), get()) }
         single { StorageListInteractor(get(), get()) }
         single { NewDatabaseInteractor(get(), get(), get()) }
         single { GroupInteractor(get(), get(), get()) }

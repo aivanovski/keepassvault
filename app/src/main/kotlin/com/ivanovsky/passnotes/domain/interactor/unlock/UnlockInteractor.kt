@@ -9,14 +9,18 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileSyncHelper
 import com.ivanovsky.passnotes.extensions.toFileDescriptor
 
 class UnlockInteractor(
     private val fileRepository: UsedFileRepository,
     private val dbRepo: EncryptedDatabaseRepository,
-    private val fileSyncHelper: FileSyncHelper
+    private val fileSyncHelper: FileSyncHelper,
+    private val dispatchers: DispatcherProvider,
+    private val fileSystemResolver: FileSystemResolver
 ) {
 
     fun hasActiveDatabase(): Boolean {
@@ -98,5 +102,9 @@ class UnlockInteractor(
         }
 
         return result
+    }
+
+    companion object {
+        private val TAG = UnlockInteractor::class.simpleName
     }
 }

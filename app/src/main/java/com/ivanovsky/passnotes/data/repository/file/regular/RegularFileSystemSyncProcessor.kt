@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository.file.regular
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
@@ -11,6 +12,10 @@ class RegularFileSystemSyncProcessor : FileSystemSyncProcessor {
 
     override fun getLocallyModifiedFiles(): MutableList<FileDescriptor> {
         return mutableListOf()
+    }
+
+    override fun getSyncStatusForFile(uid: String?): SyncStatus {
+        return SyncStatus.NO_CHANGES
     }
 
     override fun process(

@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.file.remote;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
 import com.ivanovsky.passnotes.data.entity.RemoteFile;
@@ -240,6 +239,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         cachedFile.setUploaded(true);
                         cachedFile.setLastModificationTimestamp(
                                 anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
+                        cachedFile.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
                         cachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
 
                         cache.put(cachedFile);
@@ -269,6 +269,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                             cachedFile.setLocallyModified(false);
                             cachedFile.setLastModificationTimestamp(
                                     anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
+                            cachedFile.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
                             cachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
                             cachedFile.setRetryCount(0);
                             cachedFile.setLastRetryTimestamp(null);
@@ -291,6 +292,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                     cachedFile.setRemotePath(metadata.getPath());
                     cachedFile.setLastModificationTimestamp(
                             anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
+                    cachedFile.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
                     cachedFile.setUploaded(true);
                     cachedFile.setUploadFailed(false);
                     cachedFile.setLocallyModified(false);
@@ -395,6 +397,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                     cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
                     cachedFile.setUid(cachedFile.getRemotePath());
                     cachedFile.setLastModificationTimestamp(timestamp);
+                    cachedFile.setLastRemoteModificationTimestamp(null);
                     cachedFile.setLastDownloadTimestamp(timestamp);
                     cachedFile.setLocallyModified(true);
 
@@ -433,6 +436,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                             cachedFile.setRemotePath(remotePath);
                             cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
                             cachedFile.setLastModificationTimestamp(localModified.getTime());
+                            cachedFile.setLastRemoteModificationTimestamp(serverModified.getTime());
                             cachedFile.setLastDownloadTimestamp(localModified.getTime());
                             cachedFile.setLocallyModified(true);
 
@@ -457,6 +461,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         } else {
                             cachedFile.setRemotePath(remotePath);
                             cachedFile.setLastModificationTimestamp(localModified.getTime());
+                            cachedFile.setLastRemoteModificationTimestamp(serverModified.getTime());
                             cachedFile.setLastDownloadTimestamp(localModified.getTime());
                             cachedFile.setLocallyModified(true);
                             cachedFile.setUploaded(false);
@@ -604,11 +609,13 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                                      UUID processingUnitUid) {
         Logger.d(TAG, "onFileUploadFinished: unitUid=%s, file=%s", processingUnitUid, file);
 
+        Long modifiedTimestamp = anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified());
+
         file.setUploadFailed(false);
         file.setLocallyModified(false);
         file.setUploaded(true);
-        file.setLastModificationTimestamp(
-                anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
+        file.setLastModificationTimestamp(modifiedTimestamp);
+        file.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
         file.setLastDownloadTimestamp(System.currentTimeMillis());
         file.setRevision(metadata.getRevision());
         file.setUid(metadata.getUid());

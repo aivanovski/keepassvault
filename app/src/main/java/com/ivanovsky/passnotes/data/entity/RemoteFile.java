@@ -44,6 +44,9 @@ public class RemoteFile {
     @ColumnInfo(name = "last_modification_timestamp")
     private Long lastModificationTimestamp;
 
+    @ColumnInfo(name = "last_remote_modification_timestamp")
+    private Long lastRemoteModificationTimestamp;
+
     @ColumnInfo(name = "local_path")
     private String localPath;
 
@@ -147,6 +150,14 @@ public class RemoteFile {
         this.lastModificationTimestamp = lastModificationTimestamp;
     }
 
+    public Long getLastRemoteModificationTimestamp() {
+        return lastRemoteModificationTimestamp;
+    }
+
+    public void setLastRemoteModificationTimestamp(Long lastRemoteModificationTimestamp) {
+        this.lastRemoteModificationTimestamp = lastRemoteModificationTimestamp;
+    }
+
     public String getLocalPath() {
         return localPath;
     }
@@ -199,6 +210,7 @@ public class RemoteFile {
                 .append(lastRetryTimestamp, that.lastRetryTimestamp)
                 .append(lastDownloadTimestamp, that.lastDownloadTimestamp)
                 .append(lastModificationTimestamp, that.lastModificationTimestamp)
+                .append(lastRemoteModificationTimestamp, that.lastRemoteModificationTimestamp)
                 .append(localPath, that.localPath)
                 .append(remotePath, that.remotePath)
                 .append(uid, that.uid)
@@ -220,6 +232,7 @@ public class RemoteFile {
                 .append(lastRetryTimestamp)
                 .append(lastDownloadTimestamp)
                 .append(lastModificationTimestamp)
+                .append(lastRemoteModificationTimestamp)
                 .append(localPath)
                 .append(remotePath)
                 .append(uid)
@@ -241,6 +254,7 @@ public class RemoteFile {
                 ", lastRetryTimestamp=" + lastRetryTimestamp +
                 ", lastDownloadTimestamp=" + lastDownloadTimestamp +
                 ", lastModificationTimestamp=" + lastModificationTimestamp +
+                ", lastServerModificationTimestamp=" + lastRemoteModificationTimestamp +
                 ", localPath='" + localPath + '\'' +
                 ", remotePath='" + remotePath + '\'' +
                 ", uid='" + uid + '\'' +

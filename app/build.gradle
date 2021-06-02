@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 
 def versionMajor = 0
 def versionMinor = 7
@@ -14,7 +14,6 @@ android {
     def ext = rootProject.extensions.ext
 
     compileSdkVersion ext.android.compileSdk
-    buildToolsVersion ext.android.buildTools
 
     defaultConfig {
         applicationId 'com.ivanovsky.passnotes'
@@ -33,8 +32,9 @@ android {
         buildConfigField "String", "DROPBOX_APP_SECRET", "$ext.dropboxAppSecret"
     }
 
-    dataBinding {
-        enabled = true
+    buildFeatures {
+        dataBinding true
+        viewBinding true
     }
 
     sourceSets {
@@ -98,18 +98,6 @@ android {
         unitTests {
             includeAndroidResources = true
         }
-    }
-
-    kapt {
-        generateStubs = true
-    }
-
-    packagingOptions {
-        exclude 'META-INF/proguard/coroutines.pro' //TODO: should be removed
-    }
-
-    androidExtensions {
-        experimental = true
     }
 }
 

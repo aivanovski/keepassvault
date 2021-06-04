@@ -1,11 +1,14 @@
 package com.ivanovsky.passnotes.data.repository.file.remote;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.entity.SyncConflictInfo;
 import com.ivanovsky.passnotes.data.entity.SyncResolution;
 import com.ivanovsky.passnotes.data.entity.SyncStatus;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor;
@@ -27,10 +30,13 @@ import java.util.List;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ACCESS_TO_FILE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_CACHED_FILE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_IS_NOT_MODIFIED;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_SYNC_STATUS;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newCacheError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbVersionConflictError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError;
 import static com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull;
@@ -51,6 +57,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
         this.syncResolver = new SyncStrategyResolver();
     }
 
+    @NonNull
     @Override
     public List<FileDescriptor> getLocallyModifiedFiles() {
         List<FileDescriptor> result = new ArrayList<>();
@@ -66,7 +73,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
     @NonNull
     @Override
-    public SyncStatus getSyncStatusForFile(String uid) {
+    public SyncStatus getSyncStatusForFile(@NonNull String uid) {
         RemoteFile cachedFile = cache.getByUid(uid);
         if (cachedFile == null) {
             return SyncStatus.NO_CHANGES;
@@ -121,17 +128,56 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
         }
     }
 
+    @NonNull
     @Override
-    public OperationResult<FileDescriptor> process(FileDescriptor localDescriptor,
-                                                   SyncStrategy syncStrategy,
-                                                   OnConflictStrategy onConflictStrategy) {
-        RemoteFile cachedFile = cache.getByUid(localDescriptor.getUid());
+    public OperationResult<SyncConflictInfo> getSyncConflictForFile(@NonNull String uid) {
+        RemoteFile cachedFile = cache.getByUid(uid);
         if (cachedFile == null) {
             return OperationResult.error(newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE));
         }
 
         OperationResult<FileDescriptor> getFile = provider.getFile(
-                localDescriptor.getPath(),
+                cachedFile.getRemotePath(),
+                false);
+        if (getFile.isFailed()) {
+            return getFile.takeError();
+        }
+
+        Long localModified = cachedFile.getLastModificationTimestamp();
+        Long remoteModified = getFile.getObj().getModified();
+
+        if (!cachedFile.isLocallyModified()) {
+            return OperationResult.error(newGenericError(MESSAGE_FILE_IS_NOT_MODIFIED));
+        }
+
+        SyncResolution resolution = syncResolver.resolve(localModified,
+                cachedFile.getLastRemoteModificationTimestamp(),
+                remoteModified,
+                SyncStrategy.LAST_REMOTE_MODIFICATION_WINS);
+        if (resolution != SyncResolution.ERROR) {
+            return OperationResult.error(newGenericError(MESSAGE_INCORRECT_SYNC_STATUS));
+        }
+
+        SyncConflictInfo info = new SyncConflictInfo(RemoteFileExtKt.toFileDescriptor(cachedFile),
+                getFile.getObj());
+
+        return OperationResult.success(info);
+    }
+
+    @NonNull
+    @Override
+    public OperationResult<FileDescriptor> process(@NonNull FileDescriptor file,
+                                                   @NonNull SyncStrategy syncStrategy,
+                                                   @Nullable ConflictResolutionStrategy resolutionStrategy) {
+        RemoteFile cachedFile = cache.getByUid(file.getUid());
+        if (cachedFile == null) {
+            return OperationResult.error(newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE));
+        }
+
+        FileDescriptor localFile = RemoteFileExtKt.toFileDescriptor(cachedFile);
+
+        OperationResult<FileDescriptor> getFile = provider.getFile(
+                localFile.getPath(),
                 false);
         if (getFile.isFailed()) {
             return getFile.takeError();
@@ -139,7 +185,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         FileDescriptor remoteDescriptor = getFile.getObj();
 
-        Long localModified = localDescriptor.getModified();
+        Long localModified = localFile.getModified();
         Long remoteModified = remoteDescriptor.getModified();
 
         SyncResolution resolution = syncResolver.resolve(localModified,
@@ -149,13 +195,23 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         switch (resolution) {
             case LOCAL:
-                return uploadLocalFile(cachedFile, localDescriptor);
+                return uploadLocalFile(cachedFile, localFile);
 
             case REMOTE:
             case EQUALS:
-                return downloadFile(cachedFile, localDescriptor);
+                return downloadFile(cachedFile, localFile);
 
             case ERROR:
+                if (resolutionStrategy == ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE) {
+                    return uploadLocalFile(cachedFile, localFile);
+
+                } else if (resolutionStrategy == ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE) {
+                    return downloadFile(cachedFile, localFile);
+
+                } else {
+                    return OperationResult.error(newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
+                }
+
             default:
                 return OperationResult.error(newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
         }

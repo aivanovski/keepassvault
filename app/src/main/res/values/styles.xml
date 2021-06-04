@@ -21,8 +21,8 @@
     </style>
 
     <style name="Material.ProgressBar" parent="@style/Base.Widget.AppCompat.ProgressBar">
-        <item name="android:minWidth">48dp</item>
-        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">@dimen/progress_bar_size</item>
+        <item name="android:minHeight">@dimen/progress_bar_size</item>
     </style>
 
     <style name="Material.Navigation"></style>
@@ -39,6 +39,11 @@
     <style name="Material.ContainedButton" parent="@style/Widget.MaterialComponents.Button.UnelevatedButton">
         <item name="android:layout_height">36dp</item>
         <item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
+    </style>
+
+    <style name="Material.TextButton" parent="@style/Widget.MaterialComponents.Button.TextButton">
+        <item name="android:layout_height">36dp</item>
+        <item name="android:textSize">@dimen/material_primary_text_size</item>
     </style>
 
     <style name="Material.OutlinedButton" parent="@style/Widget.MaterialComponents.Button.OutlinedButton"></style>
@@ -95,6 +100,17 @@
     <style name="Material.ErrorSecondaryText">
         <item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
         <item name="android:textColor">@color/material_error_secondary_text</item>
+    </style>
+
+    <style name="Material.SecondarySmallText">
+        <item name="android:textSize">@dimen/material_small_text_size</item>
+        <item name="android:textColor">@color/material_list_item_secondary_text</item>
+    </style>
+
+    <style name="Material.SecondarySmallText.SingleLine">
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:lines">1</item>
     </style>
 
     <style name="Material.ListItem"></style>

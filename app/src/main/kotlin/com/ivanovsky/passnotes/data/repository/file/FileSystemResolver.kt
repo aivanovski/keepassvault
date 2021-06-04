@@ -45,6 +45,10 @@ class FileSystemResolver(
         return result
     }
 
+    fun resolveSyncProcessor(fsAuthority: FSAuthority): FileSystemSyncProcessor {
+        return resolveProvider(fsAuthority).syncProcessor
+    }
+
     private fun instantiateProvider(fsAuthority: FSAuthority): FileSystemProvider {
         return when (fsAuthority.type) {
             FSType.REGULAR_FS -> {

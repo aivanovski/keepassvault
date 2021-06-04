@@ -1,22 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
 
     <TextView
         android:id="@+id/text"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_margin="@dimen/element_margin"
         android:gravity="center"
         android:minHeight="96dp"
-        android:padding="@dimen/group_margin"
-        android:textColor="@color/accent"
-        android:textSize="@dimen/material_primary_text_size" />
+        android:textColor="@color/error_text"
+        android:textSize="@dimen/material_primary_text_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/retryButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Please retry request"/>
 
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/retryButton"
-        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+        style="@style/Material.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/retry" />
+        android:layout_marginStart="@dimen/element_margin"
+        android:layout_marginEnd="@dimen/element_margin"
+        android:textColor="@color/error_text"
+        android:textSize="@dimen/material_primary_text_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@string/retry" />
 
 </merge>

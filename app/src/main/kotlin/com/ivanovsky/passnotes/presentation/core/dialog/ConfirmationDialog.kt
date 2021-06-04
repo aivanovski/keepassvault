@@ -24,12 +24,14 @@ class ConfirmationDialog : DialogFragment(), DialogInterface.OnClickListener {
         return AlertDialog.Builder(context)
             .setMessage(message)
             .setPositiveButton(positiveButtonText, this)
-            .setNegativeButton(negativeButtonText, null)
+            .setNegativeButton(negativeButtonText, this)
             .create()
     }
 
     override fun onClick(dialog: DialogInterface?, which: Int) {
-        onConfirmationLister.invoke()
+        if (which == DialogInterface.BUTTON_POSITIVE) {
+            onConfirmationLister.invoke()
+        }
     }
 
     companion object {

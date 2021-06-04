@@ -34,4 +34,10 @@ class UsedFileRepository(
 
         bus.notifyUsedFileContentChanged(file.id)
     }
+
+    fun remove(id: Int) {
+        dao.remove(id)
+
+        bus.notifyUsedFileDataSetChanged()
+    }
 }

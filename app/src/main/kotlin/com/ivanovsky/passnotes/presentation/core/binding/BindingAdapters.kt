@@ -23,6 +23,8 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
+import com.ivanovsky.passnotes.presentation.core.widget.CellLinearLayout
+import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PASSWORD
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PLANE_TEXT
@@ -47,7 +49,7 @@ fun setScreenState(
 @BindingAdapter("viewModels", "viewTypes")
 fun setViewModel(
     recyclerView: RecyclerView,
-    viewModelsData: LiveData<List<BaseCellViewModel>>,
+    viewModelsData: List<BaseCellViewModel>?,
     viewTypes: ViewModelTypes
 ) {
     val lifecycleOwner = recyclerView.context.getLifecycleOwner()
@@ -61,9 +63,19 @@ fun setViewModel(
             recyclerView.adapter = it
         }
 
-    viewModelsData.value?.let { viewModels ->
+    viewModelsData?.let { viewModels ->
         adapter.updateItems(viewModels)
     }
+}
+
+@BindingAdapter("viewModels", "viewTypes")
+fun setViewModels(
+    view: CellLinearLayout,
+    viewModels: List<BaseCellViewModel>?,
+    viewTypes: ViewModelTypes
+) {
+    view.setViewTypes(viewTypes)
+    view.setViewModels(viewModels ?: emptyList())
 }
 
 @BindingAdapter("errorText")
@@ -186,4 +198,12 @@ fun setSecretInputType(
             DIGITS -> InputType.TYPE_CLASS_NUMBER + InputType.TYPE_NUMBER_VARIATION_PASSWORD
         }
     )
+}
+
+@BindingAdapter("onButtonClicked")
+fun setOnButtonClickListener(
+    errorPanelView: ErrorPanelView,
+    listener: ErrorPanelView.OnButtonClickListener?
+) {
+    errorPanelView.buttonClickListener = listener
 }

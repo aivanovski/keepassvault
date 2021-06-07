@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.*
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
+import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.extensions.toUsedFile
@@ -45,7 +46,7 @@ class NewDatabaseInteractor(
 
                         usedFileRepository.insert(usedFile)
 
-                        val openResult = dbRepo.open(key, file)
+                        val openResult = dbRepo.open(key, file, FSOptions.DEFAULT)
                         if (openResult.isSucceededOrDeferred) {
                             result.obj = true
                         } else {
@@ -73,7 +74,7 @@ class NewDatabaseInteractor(
         val result = OperationResult<FileDescriptor>()
 
         val provider = fileSystemResolver.resolveProvider(file.fsAuthority)
-        val getFileResult = provider.getFile(file.path, true)
+        val getFileResult = provider.getFile(file.path, FSOptions.DEFAULT)
 
         if (getFileResult.isSucceeded) {
             result.obj = getFileResult.obj

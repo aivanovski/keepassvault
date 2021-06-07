@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.domain.interactor.unlock
 
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_RECORD_IS_ALREADY_EXISTS
 import com.ivanovsky.passnotes.data.entity.OperationError.Type.NETWORK_IO_ERROR
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
@@ -11,6 +12,7 @@ import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
+import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
@@ -67,14 +69,23 @@ class UnlockInteractor(
                 }
             }
 
-            val open = dbRepo.open(key, file)
-            if (open.isFailed) {
-                return@withContext open.takeError()
+            val open = dbRepo.open(key, file, FSOptions.DEFAULT)
+
+            val result = if (open.isFailed &&
+                open.error.type == OperationError.Type.DB_VERSION_CONFLICT_ERROR) {
+                val cachedDb = dbRepo.open(key, file, FSOptions.CACHE_ONLY)
+                if (cachedDb.isSucceededOrDeferred) {
+                    cachedDb
+                } else {
+                    open
+                }
+            } else {
+                open
             }
 
             updateFileAccessTime(file)
 
-            open.takeStatusWith(true)
+            result.takeStatusWith(true)
         }
 
     private fun updateFileAccessTime(file: FileDescriptor) {

@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo;
 import com.ivanovsky.passnotes.data.entity.SyncResolution;
 import com.ivanovsky.passnotes.data.entity.SyncStatus;
+import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.data.repository.file.SyncStrategy;
@@ -81,7 +82,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         OperationResult<FileDescriptor> getFile = provider.getFile(
                 cachedFile.getRemotePath(),
-                false);
+                FSOptions.noCache());
         if (getFile.isFailed()) {
             boolean networkError =
                     (getFile.getError().getType() == OperationError.Type.NETWORK_IO_ERROR);
@@ -138,7 +139,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         OperationResult<FileDescriptor> getFile = provider.getFile(
                 cachedFile.getRemotePath(),
-                false);
+                FSOptions.noCache());
         if (getFile.isFailed()) {
             return getFile.takeError();
         }
@@ -178,7 +179,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         OperationResult<FileDescriptor> getFile = provider.getFile(
                 localFile.getPath(),
-                false);
+                FSOptions.noCache());
         if (getFile.isFailed()) {
             return getFile.takeError();
         }
@@ -223,7 +224,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         OperationResult<OutputStream> outResult = provider.openFileForWrite(localDescriptor,
                 OnConflictStrategy.REWRITE,
-                false);
+                FSOptions.noCache());
 
         if (outResult.isSucceeded()) {
             OutputStream out = outResult.getObj();
@@ -286,7 +287,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         OperationResult<InputStream> inResult = provider.openFileForRead(localDescriptor,
                 OnConflictStrategy.REWRITE,
-                false);
+                FSOptions.noCache());
 
         if (inResult.isSucceeded()) {
             InputStream in = inResult.getObj();

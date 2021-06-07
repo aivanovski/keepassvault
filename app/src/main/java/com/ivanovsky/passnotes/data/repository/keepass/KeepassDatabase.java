@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.TemplateRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.exception.FailedToWriteDBException;
+import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
@@ -36,12 +37,17 @@ public class KeepassDatabase implements EncryptedDatabase {
     private final KeepassNoteRepository noteRepository;
     private final KeepassTemplateRepository templateRepository;
     private final FileSystemResolver fileSystemResolver;
+    private final FSOptions fsOptions;
     private final SimpleDatabase db;
     private final Object lock;
 
-    public KeepassDatabase(FileSystemResolver fileSystemResolver, FileDescriptor file,
-                           InputStream in, byte[] key) throws EncryptedDatabaseException {
+    public KeepassDatabase(FileSystemResolver fileSystemResolver,
+                           FSOptions fsOptions,
+                           FileDescriptor file,
+                           InputStream in,
+                           byte[] key) throws EncryptedDatabaseException {
         this.fileSystemResolver = fileSystemResolver;
+        this.fsOptions = fsOptions;
         this.file = file;
         this.key = key;
         this.lock = new Object();
@@ -132,7 +138,7 @@ public class KeepassDatabase implements EncryptedDatabase {
             try {
                 OperationResult<OutputStream> outResult = provider.openFileForWrite(updatedFile,
                         OnConflictStrategy.CANCEL,
-                        true);
+                        fsOptions);
                 if (outResult.isFailed()) {
                     return outResult.takeError();
                 }

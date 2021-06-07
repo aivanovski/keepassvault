@@ -38,6 +38,7 @@ public class OperationError {
     public static final String MESSAGE_FILE_IS_NOT_MODIFIED = "File is not modified";
     public static final String MESSAGE_INCORRECT_SYNC_STATUS = "Incorrect sync status";
     public static final String MESSAGE_INCORRECT_USE_CASE = "Incorrect use case";
+    public static final String MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED = "Write operation is not supported";
 
     private Type type;
     private String message;

@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.GroupRepository
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
+import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.FileHelper
@@ -33,12 +34,12 @@ class DebugMenuInteractor(
 
         val provider = fileSystemResolver.resolveProvider(file.fsAuthority)
 
-        val descriptorResult = provider.getFile(file.path, true)
+        val descriptorResult = provider.getFile(file.path, FSOptions.DEFAULT)
 
         if (descriptorResult.isSucceededOrDeferred) {
             val descriptor = descriptorResult.obj
             val contentResult =
-                provider.openFileForRead(descriptor, OnConflictStrategy.REWRITE, true)
+                provider.openFileForRead(descriptor, OnConflictStrategy.REWRITE, FSOptions.DEFAULT)
 
             if (contentResult.isSucceededOrDeferred) {
                 val destinationResult = createNewLocalDestinationStream()
@@ -104,7 +105,7 @@ class DebugMenuInteractor(
                     val openResult = anyFsProvider.openFileForWrite(
                         file,
                         OnConflictStrategy.CANCEL,
-                        true
+                        FSOptions.DEFAULT
                     )
                     if (openResult.isSucceededOrDeferred) {
                         val inputFile = creationResult.obj.first
@@ -113,7 +114,7 @@ class DebugMenuInteractor(
                         val copyResult = copyStreamToStream(inputStream, outStream)
 
                         if (copyResult.isSucceededOrDeferred) {
-                            val fileResult = anyFsProvider.getFile(file.path, true)
+                            val fileResult = anyFsProvider.getFile(file.path, FSOptions.DEFAULT)
 
                             if (fileResult.isSucceededOrDeferred) {
                                 val outDescriptor = fileResult.obj
@@ -195,7 +196,7 @@ class DebugMenuInteractor(
         val openResult = provider.openFileForWrite(
             outFile,
             OnConflictStrategy.REWRITE,
-            true
+            FSOptions.DEFAULT
         )
 
         if (openResult.isSucceededOrDeferred) {
@@ -225,7 +226,7 @@ class DebugMenuInteractor(
 
         val key = KeepassDatabaseKey(password)
 
-        val openResult = dbRepository.open(key, FileDescriptor.fromRegularFile(file))
+        val openResult = dbRepository.open(key, FileDescriptor.fromRegularFile(file), FSOptions.DEFAULT)
         if (openResult.isSucceededOrDeferred) {
             result.obj = true
         } else {

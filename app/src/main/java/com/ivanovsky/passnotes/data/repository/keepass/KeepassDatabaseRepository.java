@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabase
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
+import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
@@ -83,7 +84,9 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
     @NonNull
     @Override
-    public OperationResult<EncryptedDatabase> open(EncryptedDatabaseKey key, FileDescriptor file) {
+    public OperationResult<EncryptedDatabase> open(@NonNull EncryptedDatabaseKey key,
+                                                   @NonNull FileDescriptor file,
+                                                   @NonNull FSOptions options) {
         OperationResult<EncryptedDatabase> result;
 
         FileSystemProvider fsProvider = fileSystemResolver.resolveProvider(file.getFsAuthority());
@@ -95,7 +98,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
             OperationResult<InputStream> inResult = fsProvider.openFileForRead(file,
                     OnConflictStrategy.CANCEL,
-                    true);
+                    options);
             if (inResult.isFailed()) {
                 return inResult.takeError();
             }
@@ -103,7 +106,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
             InputStream in = inResult.getObj();
 
             try {
-                db = new KeepassDatabase(fileSystemResolver, file, in, key.getKey());
+                db = new KeepassDatabase(fileSystemResolver, options, file, in, key.getKey());
                 result = inResult.takeStatusWith(db);
             } catch (EncryptedDatabaseException e) {
                 Logger.printStackTrace(e);
@@ -118,7 +121,8 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
     @NonNull
     @Override
-    public OperationResult<Boolean> createNew(EncryptedDatabaseKey key, FileDescriptor file) {
+    public OperationResult<Boolean> createNew(@NonNull EncryptedDatabaseKey key,
+                                              @NonNull FileDescriptor file) {
         OperationResult<Boolean> result = new OperationResult<>();
 
         synchronized (lock) {
@@ -137,7 +141,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
                 OperationResult<OutputStream> outResult = provider.openFileForWrite(file,
                         OnConflictStrategy.CANCEL,
-                        true);
+                        FSOptions.defaultOptions());
                 if (outResult.isSucceededOrDeferred()) {
                     out = outResult.getObj();
 

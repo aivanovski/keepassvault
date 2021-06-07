@@ -17,8 +17,13 @@ open class DefaultScreenStateHandler : ScreenStateHandler {
             }
             DATA_WITH_ERROR -> {
                 if (view is ErrorPanelView) {
+                    view.state = if (screenState.errorButtonText.isNullOrEmpty()) {
+                        ErrorPanelView.State.MESSAGE
+                    } else {
+                        ErrorPanelView.State.MESSAGE_WITH_RETRY
+                    }
                     view.text = screenState.errorText
-                    view.state = ErrorPanelView.State.MESSAGE
+                    view.buttonText = screenState.errorButtonText
                     view.isVisible = true
                 } else {
                     view.isVisible = (view !is ScreenStateView)

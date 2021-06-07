@@ -19,6 +19,7 @@
             android:id="@+id/errorPanelView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:onButtonClicked="@{() -> viewModel.onErrorPanelButtonClicked()}"
             app:layout_constraintTop_toTopOf="parent"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
@@ -29,16 +30,16 @@
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
-        <Spinner
-            android:id="@+id/fileSpinner"
+        <com.ivanovsky.passnotes.presentation.core.widget.CellLinearLayout
+            android:id="@+id/databaseFileContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/element_margin"
-            android:layout_marginTop="@dimen/element_margin"
-            android:layout_marginRight="@dimen/element_margin"
+            android:orientation="vertical"
             app:layout_constraintTop_toBottomOf="@id/errorPanelView"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            app:viewModels="@{viewModel.fileCellViewModels}"
+            app:viewTypes="@{viewModel.fileCellTypes}" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/passwordLayout"
@@ -47,7 +48,7 @@
             android:layout_marginLeft="@dimen/element_margin"
             android:layout_marginTop="@dimen/element_margin"
             android:layout_marginRight="@dimen/element_margin"
-            app:layout_constraintTop_toBottomOf="@id/fileSpinner"
+            app:layout_constraintTop_toBottomOf="@id/databaseFileContainer"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}">
 

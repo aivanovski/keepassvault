@@ -23,4 +23,7 @@ public interface UsedFileDao {
 
     @Update
     void update(UsedFile file);
+
+    @Query("DELETE FROM used_file WHERE id = :id")
+    void remove(int id);
 }

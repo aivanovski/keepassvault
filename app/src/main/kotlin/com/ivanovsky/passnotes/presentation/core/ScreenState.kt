@@ -3,7 +3,8 @@ package com.ivanovsky.passnotes.presentation.core
 data class ScreenState(
     val screenDisplayingType: ScreenDisplayingType,
     val emptyText: String? = null,
-    val errorText: String? = null
+    val errorText: String? = null,
+    val errorButtonText: String? = null
 ) {
 
     val isDisplayingData: Boolean
@@ -47,11 +48,12 @@ data class ScreenState(
             )
         }
 
-        fun dataWithError(errorText: String?): ScreenState {
+        fun dataWithError(errorText: String?, errorButtonText: String? = null): ScreenState {
             return ScreenState(
                 ScreenDisplayingType.DATA_WITH_ERROR,
                 emptyText = null,
-                errorText = errorText
+                errorText = errorText,
+                errorButtonText = errorButtonText
             )
         }
     }

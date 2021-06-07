@@ -10,11 +10,11 @@ import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSFil
 import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSNetworkException
 
 class RemoteApiClientAdapter(
-    private val client: RemoteApiClientV2
+    val baseClient: RemoteApiClientV2
 ) : RemoteApiClient {
 
     override fun listFiles(dir: FileDescriptor): List<FileDescriptor> {
-        val files = client.listFiles(dir)
+        val files = baseClient.listFiles(dir)
         if (files.isFailed) {
             throwExceptionFromError(files.error)
         }
@@ -23,7 +23,7 @@ class RemoteApiClientAdapter(
     }
 
     override fun getParent(file: FileDescriptor): FileDescriptor {
-        val parent = client.getParent(file)
+        val parent = baseClient.getParent(file)
         if (parent.isFailed) {
             throwExceptionFromError(parent.error)
         }
@@ -32,7 +32,7 @@ class RemoteApiClientAdapter(
     }
 
     override fun getRoot(): FileDescriptor {
-        val root = client.getRoot()
+        val root = baseClient.getRoot()
         if (root.isFailed) {
             throwExceptionFromError(root.error)
         }
@@ -41,7 +41,7 @@ class RemoteApiClientAdapter(
     }
 
     override fun getFileMetadataOrThrow(file: FileDescriptor): RemoteFileMetadata {
-        val metadata = client.getFileMetadata(file)
+        val metadata = baseClient.getFileMetadata(file)
         if (metadata.isFailed) {
             throwExceptionFromError(metadata.error)
         }
@@ -53,7 +53,7 @@ class RemoteApiClientAdapter(
         remotePath: String,
         destinationPath: String
     ): RemoteFileMetadata {
-        val download = client.downloadFile(remotePath, destinationPath)
+        val download = baseClient.downloadFile(remotePath, destinationPath)
         if (download.isFailed) {
             throwExceptionFromError(download.error)
         }
@@ -62,7 +62,7 @@ class RemoteApiClientAdapter(
     }
 
     override fun uploadFileOrThrow(remotePath: String, localPath: String): RemoteFileMetadata {
-        val upload = client.uploadFile(remotePath, localPath)
+        val upload = baseClient.uploadFile(remotePath, localPath)
         if (upload.isFailed) {
             throwExceptionFromError(upload.error)
         }

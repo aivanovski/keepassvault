@@ -4,37 +4,31 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
-import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE
+import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE
+import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding
+import com.ivanovsky.passnotes.domain.DateFormatProvider
+import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.core.dialog.ThreeButtonDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
-import com.ivanovsky.passnotes.presentation.unlock.model.DropDownItem
-import com.ivanovsky.passnotes.util.FileUtils
+import java.util.Date
+import org.apache.commons.lang3.StringUtils.EMPTY
 
 class UnlockFragment : Fragment() {
 
-    private lateinit var fileAdapter: FileSpinnerAdapter
     private lateinit var binding: UnlockFragmentBinding
+    private val dateFormatProvider: DateFormatProvider by inject()
 
     private val viewModel: UnlockViewModel by lazy {
         ViewModelProvider(requireActivity(), UnlockViewModel.FACTORY)
             .get(UnlockViewModel::class.java)
-    }
-
-    private val spinnerSelectedListener = object : AdapterView.OnItemSelectedListener {
-        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-            autofillPasswordIfNeed()
-            viewModel.onRecentlyUsedItemSelected(position)
-        }
-
-        override fun onNothingSelected(parent: AdapterView<*>?) {
-        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -62,9 +56,6 @@ class UnlockFragment : Fragment() {
                 it.viewModel = viewModel
             }
 
-        fileAdapter = FileSpinnerAdapter(requireContext())
-        binding.fileSpinner.adapter = fileAdapter
-
         // TODO: move fab initialization to @BindingAdapter
         val fabItems = resources.getStringArray(R.array.unlock_fab_actions).toList()
         binding.fab.inflate(fabItems)
@@ -75,19 +66,9 @@ class UnlockFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        subscribeToLiveData()
         subscribeToLiveEvents()
 
-        viewModel.loadData(resetSelection = true)
-    }
-
-    private fun subscribeToLiveData() {
-        viewModel.items.observe(viewLifecycleOwner) { items ->
-            setRecentlyUsedItems(items)
-        }
-        viewModel.selectedItem.observe(viewLifecycleOwner) { position ->
-            setSelectedRecentlyUsedItem(position)
-        }
+        viewModel.loadData(resetSelection = false)
     }
 
     private fun subscribeToLiveEvents() {
@@ -97,42 +78,47 @@ class UnlockFragment : Fragment() {
         viewModel.showSnackbarMessage.observe(viewLifecycleOwner) { message ->
             showSnackbarMessage(message)
         }
-    }
-
-    private fun setRecentlyUsedItems(items: List<DropDownItem>) {
-        binding.fileSpinner.onItemSelectedListener = null
-
-        fileAdapter.setItems(items)
-        fileAdapter.notifyDataSetChanged()
-
-        binding.fileSpinner.onItemSelectedListener = spinnerSelectedListener
-    }
-
-    private fun setSelectedRecentlyUsedItem(position: Int) {
-        binding.fileSpinner.onItemSelectedListener = null
-        binding.fileSpinner.setSelection(position)
-        binding.fileSpinner.onItemSelectedListener = spinnerSelectedListener
-
-        autofillPasswordIfNeed()
-    }
-
-    private fun autofillPasswordIfNeed() {
-        if (!BuildConfig.DEBUG) {
-            return
+        viewModel.showResolveConflictDialog.observe(viewLifecycleOwner) { info ->
+            showResolveConflictDialog(info)
         }
+    }
 
-        val selectedPosition = binding.fileSpinner.selectedItemPosition
+    private fun showResolveConflictDialog(info: SyncConflictInfo) {
+        val localDate = info.localFile.modified?.let { Date(it) }
+        val remoteDate = info.remoteFile.modified?.let { Date(it) }
+        val dateFormat = dateFormatProvider.getLongDateFormat()
+        val timeFormat = dateFormatProvider.getTimeFormat()
 
-        val filePath = viewModel.items.value?.get(selectedPosition)?.path ?: return
+        val localDateText = localDate
+            ?.let { dateFormat.format(it) + " " + timeFormat.format(it) }
+            ?: EMPTY
 
-        val fileName = FileUtils.getFileNameWithoutExtensionFromPath(filePath) ?: return
+        val remoteDateText = remoteDate
+            ?.let { dateFormat.format(it) + " " + timeFormat.format(it) }
+            ?: EMPTY
 
-        for (rule in viewModel.debugPasswordRules) {
-            if (rule.pattern.matcher(fileName).matches()) {
-                binding.password.setText(rule.password)
-                break
+        val message = getString(
+            R.string.resolve_conflict_dialog_message,
+            localDateText,
+            remoteDateText
+        )
+
+        val dialog = ThreeButtonDialog.newInstance(
+            message = message,
+            positiveButtonText = getString(R.string.remote_database),
+            negativeButtonText = getString(R.string.local_database),
+            neutralButtonText = getString(R.string.cancel)
+        )
+            .apply {
+                onPositiveClicked = {
+                    viewModel.onResolveConflictConfirmed(RESOLVE_WITH_REMOTE_FILE)
+                }
+                onNegativeClicked = {
+                    viewModel.onResolveConflictConfirmed(RESOLVE_WITH_LOCAL_FILE)
+                }
             }
-        }
+
+        dialog.show(childFragmentManager, ThreeButtonDialog.TAG)
     }
 
     companion object {

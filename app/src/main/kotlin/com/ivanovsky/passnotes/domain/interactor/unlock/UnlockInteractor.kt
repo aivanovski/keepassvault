@@ -1,22 +1,30 @@
 package com.ivanovsky.passnotes.domain.interactor.unlock
 
+import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_RECORD_IS_ALREADY_EXISTS
 import com.ivanovsky.passnotes.data.entity.OperationError.Type.NETWORK_IO_ERROR
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
+import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
+import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
-import com.ivanovsky.passnotes.domain.FileSyncHelper
-import com.ivanovsky.passnotes.extensions.toFileDescriptor
+import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
+import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
+import kotlinx.coroutines.withContext
 
 class UnlockInteractor(
     private val fileRepository: UsedFileRepository,
     private val dbRepo: EncryptedDatabaseRepository,
-    private val fileSyncHelper: FileSyncHelper
+    private val dispatchers: DispatcherProvider,
+    private val getFilesUseCase: GetRecentlyOpenedFilesUseCase,
+    private val syncUseCases: SyncUseCases
 ) {
 
     fun hasActiveDatabase(): Boolean {
@@ -32,42 +40,53 @@ class UnlockInteractor(
         return closeResult.takeStatusWith(Unit)
     }
 
-    fun getRecentlyOpenedFiles(): OperationResult<List<FileDescriptor>> {
-        return OperationResult.success(loadAndSortUsedFiles())
-    }
+    suspend fun getRecentlyOpenedFiles(): OperationResult<List<FileDescriptor>> =
+        getFilesUseCase.getRecentlyOpenedFiles()
 
-    private fun loadAndSortUsedFiles(): List<FileDescriptor> {
-        return fileRepository.getAll()
-            .sortedByDescending { file -> file.lastAccessTime ?: file.addedTime }
-            .map { file -> file.toFileDescriptor() }
-    }
+    suspend fun getSyncConflictInfo(file: FileDescriptor): OperationResult<SyncConflictInfo> =
+        syncUseCases.getSyncConflictInfo(file)
 
-    fun openDatabase(key: KeepassDatabaseKey, file: FileDescriptor): OperationResult<Boolean> {
-        val result = OperationResult<Boolean>()
+    suspend fun getSyncStatus(file: FileDescriptor): SyncStatus =
+        syncUseCases.getSyncStatus(file)
 
-        var syncError: OperationError? = null
-        val locallyModifiedFile = fileSyncHelper.getModifiedFileByUid(file.uid, file.fsAuthority)
-        if (locallyModifiedFile != null) {
-            val syncResult = fileSyncHelper.resolve(locallyModifiedFile)
-            if (syncResult.isFailed && syncResult.error.type != NETWORK_IO_ERROR) {
-                syncError = syncResult.error
+    suspend fun resolveConflict(
+        file: FileDescriptor,
+        resolutionStrategy: ConflictResolutionStrategy
+    ): OperationResult<FileDescriptor> =
+        syncUseCases.resolveConflict(file, resolutionStrategy)
+
+    suspend fun openDatabase(
+        key: KeepassDatabaseKey,
+        file: FileDescriptor
+    ): OperationResult<Boolean> =
+        withContext(dispatchers.IO) {
+            val syncStatus = syncUseCases.getSyncStatus(file)
+
+            if (syncStatus == SyncStatus.LOCAL_CHANGES || syncStatus == SyncStatus.REMOTE_CHANGES) {
+                val syncResult = syncUseCases.processSync(file)
+                if (syncResult.isFailed && syncResult.error.type != NETWORK_IO_ERROR) {
+                    return@withContext syncResult.takeError()
+                }
             }
-        }
 
-        if (syncError == null) {
-            val openResult = dbRepo.open(key, file)
-            if (openResult.isSucceededOrDeferred) {
-                updateFileAccessTime(file)
-                result.obj = true
+            val open = dbRepo.open(key, file, FSOptions.DEFAULT)
+
+            val result = if (open.isFailed &&
+                open.error.type == OperationError.Type.DB_VERSION_CONFLICT_ERROR) {
+                val cachedDb = dbRepo.open(key, file, FSOptions.CACHE_ONLY)
+                if (cachedDb.isSucceededOrDeferred) {
+                    cachedDb
+                } else {
+                    open
+                }
             } else {
-                result.error = openResult.error
+                open
             }
-        } else {
-            result.error = syncError
-        }
 
-        return result
-    }
+            updateFileAccessTime(file)
+
+            result.takeStatusWith(true)
+        }
 
     private fun updateFileAccessTime(file: FileDescriptor) {
         val usedFile = fileRepository.findByUid(file.uid, file.fsAuthority)
@@ -98,5 +117,9 @@ class UnlockInteractor(
         }
 
         return result
+    }
+
+    companion object {
+        private val TAG = UnlockInteractor::class.simpleName
     }
 }

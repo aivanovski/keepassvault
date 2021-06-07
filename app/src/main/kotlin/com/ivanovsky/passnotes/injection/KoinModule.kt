@@ -24,11 +24,14 @@ import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
+import com.ivanovsky.passnotes.domain.interactor.selectdb.SelectDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.domain.usecases.DatabaseLockUseCase
+import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
+import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
 import com.ivanovsky.passnotes.presentation.group.GroupViewModel
@@ -40,9 +43,16 @@ import com.ivanovsky.passnotes.presentation.note.NoteViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
+import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseViewModel
+import com.ivanovsky.passnotes.presentation.selectdb.cells.factory.SelectDatabaseCellModelFactory
+import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
+import com.ivanovsky.passnotes.presentation.selectdb.cells.factory.SelectDatabaseCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
+import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
+import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
 import com.ivanovsky.passnotes.util.Logger
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -73,16 +83,17 @@ object KoinModule {
 
         // Files, Keepass
         single { FileSystemResolver(get(), get(), get(), get(), get()) }
-        single { FileSyncHelper(get()) }
         single { KeepassDatabaseRepository(get(), get(), get(), get()) as EncryptedDatabaseRepository }
 
         // Use Cases
         single { GetDebugCredentialsUseCase() }
         single { DatabaseLockUseCase() }
+        single { GetRecentlyOpenedFilesUseCase(get(), get()) }
+        single { SyncUseCases(get(), get()) }
 
         // Interactors
         single { FilePickerInteractor(get()) }
-        single { UnlockInteractor(get(), get(), get()) }
+        single { UnlockInteractor(get(), get(), get(), get(), get()) }
         single { StorageListInteractor(get(), get()) }
         single { NewDatabaseInteractor(get(), get(), get()) }
         single { GroupInteractor(get(), get(), get()) }
@@ -92,12 +103,20 @@ object KoinModule {
         single { NoteEditorInteractor(get(), get()) }
         single { ServerLoginInteractor(get(), get(), get()) }
         single { DatabaseLockInteractor(get(), get(), get()) }
+        single { SelectDatabaseInteractor(get(), get(), get(), get()) }
 
         // Cell factories
         single { GroupsCellModelFactory(get()) }
         single { GroupsCellViewModelFactory() }
+
         single { NoteEditorCellModelFactory(get()) }
         single { NoteEditorCellViewModelFactory(get()) }
+
+        single { SelectDatabaseCellModelFactory(get()) }
+        single { SelectDatabaseCellViewModelFactory() }
+
+        single { UnlockCellModelFactory(get()) }
+        single { UnlockCellViewModelFactory() }
 
         // Cicerone
         single { Cicerone.create() }
@@ -114,6 +133,8 @@ object KoinModule {
         viewModel { GroupsViewModel(get(), get(), get(), get(), get(), get(), get()) }
         viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
+        viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }
+        factory { UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     }
 
     private fun provideOkHttp(): OkHttpClient {

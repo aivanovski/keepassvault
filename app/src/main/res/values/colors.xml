@@ -10,6 +10,10 @@
     <color name="primary_text">#212121</color>
     <color name="secondary_text">#757575</color>
     <color name="primary_text_light">#F2F2F2</color>
+    <color name="error_text">#C00020</color>
+
+    <!-- Color for icons -->
+    <color name="icon_gray">#757575</color>
 
     <color name="material_icon_background">#9d9d9d</color>
 

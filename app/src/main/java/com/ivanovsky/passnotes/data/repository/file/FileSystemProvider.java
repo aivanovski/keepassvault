@@ -18,30 +18,31 @@ public interface FileSystemProvider {
     FileSystemSyncProcessor getSyncProcessor();
 
     @NonNull
-    OperationResult<List<FileDescriptor>> listFiles(FileDescriptor dir);
+    OperationResult<List<FileDescriptor>> listFiles(@NonNull FileDescriptor dir);
 
     @NonNull
-    OperationResult<FileDescriptor> getParent(FileDescriptor file);
+    OperationResult<FileDescriptor> getParent(@NonNull FileDescriptor file);
 
     @NonNull
     OperationResult<FileDescriptor> getRootFile();
 
     @NonNull
-    OperationResult<InputStream> openFileForRead(FileDescriptor file,
-                                                 OnConflictStrategy onConflictStrategy,
-                                                 boolean cacheOperationsEnabled);
+    OperationResult<InputStream> openFileForRead(@NonNull FileDescriptor file,
+                                                 @NonNull OnConflictStrategy onConflictStrategy,
+                                                 @NonNull FSOptions options);
 
     @NonNull
-    OperationResult<OutputStream> openFileForWrite(FileDescriptor file,
-                                                   OnConflictStrategy onConflictStrategy,
-                                                   boolean cacheOperationsEnabled);
+    OperationResult<OutputStream> openFileForWrite(@NonNull FileDescriptor file,
+                                                   @NonNull OnConflictStrategy onConflictStrategy,
+                                                   @NonNull FSOptions options);
 
     @NonNull
-    OperationResult<Boolean> exists(FileDescriptor file);
+    OperationResult<Boolean> exists(@NonNull FileDescriptor file);
 
     @NonNull
-    OperationResult<FileDescriptor> getFile(String path, boolean cacheOperationsEnabled);
+    OperationResult<FileDescriptor> getFile(@NonNull String path,
+                                            @NonNull FSOptions options);
 
     @NonNull
-    OperationResult<Boolean> isStoragePermissionRequired(FileDescriptor file);
+    OperationResult<Boolean> isStoragePermissionRequired(@NonNull FileDescriptor file);
 }

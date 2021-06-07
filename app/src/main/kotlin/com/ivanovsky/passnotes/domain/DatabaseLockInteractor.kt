@@ -53,16 +53,17 @@ class DatabaseLockInteractor(
         }
     }
 
+    @UiThread
+    fun stopServiceIfNeed() {
+        if (DatabaseLockService.getCurrentState() != ServiceState.STOPPED) {
+            DatabaseLockService.stop(context)
+        }
+    }
+
     private fun startServiceIfNeed() {
         if (DatabaseLockService.getCurrentState() == ServiceState.STOPPED &&
             settings.isLockNotificationVisible) {
             DatabaseLockService.start(context)
-        }
-    }
-
-    private fun stopServiceIfNeed() {
-        if (DatabaseLockService.getCurrentState() != ServiceState.STOPPED) {
-            DatabaseLockService.stop(context)
         }
     }
 

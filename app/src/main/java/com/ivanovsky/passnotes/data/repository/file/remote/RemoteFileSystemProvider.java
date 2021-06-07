@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata;
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository;
+import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor;
@@ -43,6 +44,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_FILE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newAuthError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbVersionConflictError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
@@ -96,7 +98,13 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
     @NonNull
     @Override
-    public OperationResult<List<FileDescriptor>> listFiles(FileDescriptor dir) {
+    public OperationResult<List<FileDescriptor>> listFiles(@NonNull FileDescriptor dir) {
+        if (client instanceof RemoteApiClientAdapter) {
+            RemoteApiClientAdapter clientAdapter = (RemoteApiClientAdapter) client;
+            return clientAdapter.getBaseClient().listFiles(dir);
+        }
+
+        // TODO: deprecated RemoteApiClient usage
         OperationResult<List<FileDescriptor>> result = new OperationResult<>();
 
         try {
@@ -128,7 +136,13 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
     @NonNull
     @Override
-    public OperationResult<FileDescriptor> getParent(FileDescriptor file) {
+    public OperationResult<FileDescriptor> getParent(@NonNull FileDescriptor file) {
+        if (client instanceof RemoteApiClientAdapter) {
+            RemoteApiClientAdapter clientAdapter = (RemoteApiClientAdapter) client;
+            return clientAdapter.getBaseClient().getParent(file);
+        }
+
+        // TODO: deprecated RemoteApiClient usage
         OperationResult<FileDescriptor> result = new OperationResult<>();
 
         try {
@@ -143,6 +157,13 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     @NonNull
     @Override
     public OperationResult<FileDescriptor> getRootFile() {
+        if (client instanceof RemoteApiClientAdapter) {
+            RemoteApiClientAdapter clientAdapter = (RemoteApiClientAdapter) client;
+            return clientAdapter.getBaseClient().getRoot();
+        }
+
+        // TODO: deprecated RemoteApiClient usage
+
         OperationResult<FileDescriptor> result = new OperationResult<>();
 
         try {
@@ -154,26 +175,54 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         return result;
     }
 
+    private OperationResult<FileDescriptor> getDeferredFileFromCache(@NonNull String path,
+                                                                     @Nullable OperationError error) {
+        RemoteFile cachedFile = cache.getByRemotePath(path);
+
+        if (cachedFile != null) {
+            return OperationResult.deferred(newDescriptorFromRemoteFile(cachedFile), error);
+        } else {
+            return OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+        }
+    }
+
     @NonNull
     @Override
-    public OperationResult<FileDescriptor> getFile(String path, boolean cacheOperationsEnabled) {
+    public OperationResult<FileDescriptor> getFile(@NonNull String path,
+                                                   @NonNull FSOptions options) {
+        if (options.isCacheOnly()) {
+            return getDeferredFileFromCache(path, null);
+        }
+
+        if (client instanceof RemoteApiClientAdapter) {
+            RemoteApiClientAdapter clientAdapter = (RemoteApiClientAdapter) client;
+
+            OperationResult<RemoteFileMetadata> metadata =
+                    clientAdapter.getBaseClient().getFileMetadata(newDescriptorFromPath(path));
+            if (metadata.isFailedDueToNetwork() && options.isCacheEnabled()) {
+                return getDeferredFileFromCache(path, metadata.getError());
+            }
+
+            if (metadata.isFailed()) {
+                return metadata.takeError();
+            }
+
+            return OperationResult.success(newDescriptorFromMetadata(metadata.getObj()));
+        }
+
+        // TODO: deprecated RemoteApiClient usage
         OperationResult<FileDescriptor> result = new OperationResult<>();
 
         try {
             RemoteFileMetadata metadata = client.getFileMetadataOrThrow(newDescriptorFromPath(path));
             result.setObj(newDescriptorFromMetadata(metadata));
         } catch (RemoteFSNetworkException e) {
-            if (cacheOperationsEnabled) {
-                RemoteFile file = cache.getByRemotePath(path);
-
-                if (file != null) {
-                    result.setDeferredObj(newDescriptorFromDropboxFile(file));
-                } else {
-                    result.setError(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
-                }
-            } else {
-                result.setError(createOperationErrorFromException(e));
+            if (!options.isCacheEnabled()) {
+                return OperationResult.error(createOperationErrorFromException(e));
             }
+
+            return getDeferredFileFromCache(path, createOperationErrorFromException(e));
+
         } catch (RemoteFSException e) {
             result.setError(createOperationErrorFromException(e));
         }
@@ -194,42 +243,66 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         return RemoteFileMetadataExtKt.toFileDescriptor(metadata, fsAuthority);
     }
 
-    private FileDescriptor newDescriptorFromDropboxFile(RemoteFile file) {
+    private FileDescriptor newDescriptorFromRemoteFile(RemoteFile file) {
         return RemoteFileExtKt.toFileDescriptor(file);
+    }
+
+    private OperationResult<InputStream> openDeferredFileForReadFromCache(@NonNull FileDescriptor file,
+                                                                          @Nullable OperationError error) {
+        RemoteFile cachedFile = cache.getByUid(file.getUid());
+        if (cachedFile == null) {
+            String message = String.format(ERROR_FAILED_TO_FIND_FILE_IN_CACHE, file.getPath());
+            return OperationResult.error(newGenericIOError(message));
+        }
+
+        try {
+            return OperationResult.deferred(new FileInputStream(cachedFile.getLocalPath()), error);
+        } catch (FileNotFoundException e) {
+            return OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+        }
     }
 
     @NonNull
     @Override
-    public OperationResult<InputStream> openFileForRead(FileDescriptor file,
-                                                        OnConflictStrategy onConflictStrategy,
-                                                        boolean cacheOperationsEnabled) {
+    public OperationResult<InputStream> openFileForRead(@NonNull FileDescriptor file,
+                                                        @NonNull OnConflictStrategy onConflictStrategy,
+                                                        @NonNull FSOptions options) {
         OperationResult<InputStream> result = new OperationResult<>();
 
         File destinationDir = fileHelper.getRemoteFilesDir();
-        if (destinationDir != null) {
-            ProcessingUnit unit = null;
-            try {
-                RemoteFileMetadata metadata = client.getFileMetadataOrThrow(file);
+        if (destinationDir == null) {
+            return OperationResult.error(newGenericIOError(ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR));
+        }
 
-                String uid = metadata.getUid();
-                String remoteRevision = metadata.getRevision();
-                String remotePath = metadata.getPath();
+        if (options.isCacheOnly()) {
+            return openDeferredFileForReadFromCache(file, null);
+        }
 
-                RemoteFile cachedFile = cache.getByUid(uid);
-                if (cachedFile == null) {
-                    // download file and add new entry to the cache
-                    String destinationPath = generateDestinationFilePath(destinationDir);
+        ProcessingUnit unit = null;
+        try {
+            RemoteFileMetadata metadata = client.getFileMetadataOrThrow(file);
 
-                    unit = new ProcessingUnit(UUID.randomUUID(),
-                            ProcessingStatus.DOWNLOADING,
-                            uid,
-                            remotePath);
+            String uid = metadata.getUid();
+            String remoteRevision = metadata.getRevision();
+            String remotePath = metadata.getPath();
 
-                    if (startProcessingUnit(unit)) {
-                        Logger.d(TAG, "Downloading new file: remote=%s, local=%s", remotePath, destinationPath);
+            RemoteFile cachedFile = cache.getByUid(uid);
 
-                        metadata = client.downloadFileOrThrow(remotePath, destinationPath);
+            if (cachedFile == null || !options.isCacheEnabled()) {
+                // download file and add new entry to the cache
+                String destinationPath = generateDestinationFilePath(destinationDir);
 
+                unit = new ProcessingUnit(UUID.randomUUID(),
+                        ProcessingStatus.DOWNLOADING,
+                        uid,
+                        remotePath);
+
+                if (startProcessingUnit(unit)) {
+                    Logger.d(TAG, "Downloading new file: remote=%s, local=%s", remotePath, destinationPath);
+
+                    metadata = client.downloadFileOrThrow(remotePath, destinationPath);
+
+                    if (options.isCacheEnabled()) {
                         cachedFile = new RemoteFile();
 
                         cachedFile.setFsAuthority(fsAuthority);
@@ -240,103 +313,104 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         cachedFile.setUploaded(true);
                         cachedFile.setLastModificationTimestamp(
                                 anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
+                        cachedFile.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
                         cachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
 
                         cache.put(cachedFile);
-
-                        result.setObj(new FileInputStream(destinationPath));
-                    } else {
-                        result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
                     }
 
-                } else if (isNotEquals(remoteRevision, cachedFile.getRevision())) {
-                    if (canResolveDownloadConflict(cachedFile, onConflictStrategy)) {
-                        // server has new version of db
-                        unit = new ProcessingUnit(UUID.randomUUID(),
-                                ProcessingStatus.DOWNLOADING,
-                                uid,
-                                remotePath);
-
-                        if (startProcessingUnit(unit)) {
-                            Logger.d(TAG, "Updating cached file: remote=%s, local=%s", remotePath, cachedFile.getLocalPath());
-
-                            metadata = client.downloadFileOrThrow(remotePath, cachedFile.getLocalPath());
-
-                            cachedFile.setRemotePath(metadata.getPath());
-                            cachedFile.setRevision(metadata.getRevision());
-                            cachedFile.setUploaded(true);
-                            cachedFile.setUploadFailed(false);
-                            cachedFile.setLocallyModified(false);
-                            cachedFile.setLastModificationTimestamp(
-                                    anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
-                            cachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
-                            cachedFile.setRetryCount(0);
-                            cachedFile.setLastRetryTimestamp(null);
-
-                            cache.update(cachedFile);
-
-                            result.setObj(new FileInputStream(cachedFile.getLocalPath()));
-                        } else {
-                            result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
-                        }
-                    } else {
-                        // user modified db
-                        result.setError(newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
-                    }
+                    result.setObj(new FileInputStream(destinationPath));
                 } else {
-                    // local revision is the same as in the server
-                    Logger.d(TAG, "Local cached file is up to date: remote=%s, local=%s",
-                            remotePath, cachedFile.getLocalPath());
-
-                    cachedFile.setRemotePath(metadata.getPath());
-                    cachedFile.setLastModificationTimestamp(
-                            anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
-                    cachedFile.setUploaded(true);
-                    cachedFile.setUploadFailed(false);
-                    cachedFile.setLocallyModified(false);
-                    cachedFile.setRetryCount(0);
-                    cachedFile.setLastRetryTimestamp(null);
-
-                    cache.update(cachedFile);
-
-                    result.setObj(new FileInputStream(cachedFile.getLocalPath()));
+                    result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
                 }
-            } catch (FileNotFoundException e) {
-                result.setError(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
 
-            } catch (RemoteFSNetworkException e) {
-                // use cached file
-                RemoteFile cachedFile = cache.getByUid(file.getUid());
-                if (cachedFile != null) {
+            } else if (isNotEquals(remoteRevision, cachedFile.getRevision())) {
+                if (canResolveDownloadConflict(cachedFile, onConflictStrategy)) {
+                    // server has new version of db
                     unit = new ProcessingUnit(UUID.randomUUID(),
                             ProcessingStatus.DOWNLOADING,
-                            cachedFile.getUid(),
-                            cachedFile.getRemotePath());
+                            uid,
+                            remotePath);
 
                     if (startProcessingUnit(unit)) {
-                        InputStream fileStream = newFileInputStreamOrNull(new File(cachedFile.getLocalPath()));
-                        if (fileStream != null) {
-                            result.setDeferredObj(fileStream);
-                        } else {
-                            result.setError(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
-                        }
+                        Logger.d(TAG, "Updating cached file: remote=%s, local=%s", remotePath, cachedFile.getLocalPath());
+
+                        metadata = client.downloadFileOrThrow(remotePath, cachedFile.getLocalPath());
+
+                        cachedFile.setRemotePath(metadata.getPath());
+                        cachedFile.setRevision(metadata.getRevision());
+                        cachedFile.setUploaded(true);
+                        cachedFile.setUploadFailed(false);
+                        cachedFile.setLocallyModified(false);
+                        cachedFile.setLastModificationTimestamp(
+                                anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
+                        cachedFile.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
+                        cachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
+                        cachedFile.setRetryCount(0);
+                        cachedFile.setLastRetryTimestamp(null);
+
+                        cache.update(cachedFile);
+
+                        result.setObj(new FileInputStream(cachedFile.getLocalPath()));
                     } else {
                         result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
                     }
-
                 } else {
-                    result.setError(newNetworkIOError());
+                    // user modified db
+                    result.setError(newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
+                }
+            } else {
+                // local revision is the same as in the server
+                Logger.d(TAG, "Local cached file is up to date: remote=%s, local=%s",
+                        remotePath, cachedFile.getLocalPath());
+
+                cachedFile.setRemotePath(metadata.getPath());
+                cachedFile.setLastModificationTimestamp(
+                        anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
+                cachedFile.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
+                cachedFile.setUploaded(true);
+                cachedFile.setUploadFailed(false);
+                cachedFile.setLocallyModified(false);
+                cachedFile.setRetryCount(0);
+                cachedFile.setLastRetryTimestamp(null);
+
+                cache.update(cachedFile);
+
+                result.setObj(new FileInputStream(cachedFile.getLocalPath()));
+            }
+        } catch (FileNotFoundException e) {
+            result.setError(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+
+        } catch (RemoteFSNetworkException e) {
+            // use cached file
+            RemoteFile cachedFile = cache.getByUid(file.getUid());
+            if (cachedFile != null) {
+                unit = new ProcessingUnit(UUID.randomUUID(),
+                        ProcessingStatus.DOWNLOADING,
+                        cachedFile.getUid(),
+                        cachedFile.getRemotePath());
+
+                if (startProcessingUnit(unit)) {
+                    InputStream fileStream = newFileInputStreamOrNull(new File(cachedFile.getLocalPath()));
+                    if (fileStream != null) {
+                        result.setDeferredObj(fileStream);
+                    } else {
+                        result.setError(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+                    }
+                } else {
+                    result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
                 }
 
-            } catch (RemoteFSException e) {
-                result.setError(createOperationErrorFromException(e));
+            } else {
+                result.setError(newNetworkIOError());
             }
 
-            if (unit != null) {
-                onFinishProcessingUnit(unit.getProcessingUid());
-            }
-        } else {
-            result.setError(newGenericIOError(ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR));
+        } catch (RemoteFSException e) {
+            result.setError(createOperationErrorFromException(e));
+        }
+
+        if (unit != null) {
+            onFinishProcessingUnit(unit.getProcessingUid());
         }
 
         return result;
@@ -360,132 +434,153 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         return result;
     }
 
+    private OperationResult<OutputStream> openCachedFileForWrite(@NonNull FileDescriptor file,
+                                                                 @Nullable OperationError error) {
+        RemoteFile cachedFile = cache.getByUid(file.getUid());
+        if (cachedFile == null) {
+            String message = String.format(ERROR_FAILED_TO_FIND_FILE_IN_CACHE, file.getPath());
+            return OperationResult.error(newGenericIOError(message));
+        }
+
+        cachedFile.setLastModificationTimestamp(file.getModified());
+        cachedFile.setLocallyModified(true);
+        cachedFile.setUploaded(false);
+
+        ProcessingUnit unit = new ProcessingUnit(UUID.randomUUID(),
+                ProcessingStatus.UPLOADING,
+                cachedFile.getUid(),
+                cachedFile.getRemotePath());
+
+        if (startProcessingUnit(unit)) {
+            try {
+                OutputStream out = new OfflineFileOutputStream(this, cachedFile, unit.getProcessingUid());
+
+                cache.update(cachedFile);
+
+                return OperationResult.deferred(out, error);
+            } catch (FileNotFoundException ee) {
+                onFinishProcessingUnit(unit.getProcessingUid());
+
+                return OperationResult.error(newGenericIOError(String.format(ERROR_FAILED_TO_FIND_FILE,
+                        cachedFile.getLocalPath())));
+            }
+        } else {
+            return OperationResult.error(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
+        }
+    }
+
     @NonNull
     @Override
-    public OperationResult<OutputStream> openFileForWrite(FileDescriptor file,
-                                                          OnConflictStrategy onConflict,
-                                                          boolean cacheOperationsEnabled) {
+    public OperationResult<OutputStream> openFileForWrite(@NonNull FileDescriptor file,
+                                                          @NonNull OnConflictStrategy onConflict,
+                                                          @NonNull FSOptions options) {
+        if (!options.isWriteEnabled()) {
+            return OperationResult.error(newGenericIOError(MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED));
+        }
+
         OperationResult<OutputStream> result = new OperationResult<>();
 
         File destinationDir = fileHelper.getRemoteFilesDir();
-        if (destinationDir != null) {
+        if (destinationDir == null) {
+            return OperationResult.error(newGenericIOError(ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR));
+        }
+
+        if (options.isCacheOnly()) {
+            return openCachedFileForWrite(file, null);
+        }
+
+        try {
+            RemoteFileMetadata metadata;
+
             try {
-                RemoteFileMetadata metadata;
+                metadata = client.getFileMetadataOrThrow(file);
+            } catch (RemoteFSFileNotFoundException e) {
+                metadata = null;
+            }
 
-                try {
-                    metadata = client.getFileMetadataOrThrow(file);
-                } catch (RemoteFSFileNotFoundException e) {
-                    metadata = null;
+            if (metadata == null) {
+                // create and upload new file
+                String parentPath = FileUtils.getParentPath(file.getPath());
+                if (!"/".equals(parentPath)) {
+                    FileDescriptor parent = client.getParent(file);
+                    parentPath = parent.getPath();
                 }
 
-                if (metadata == null) {
-                    // create and upload new file
-                    String parentPath = FileUtils.getParentPath(file.getPath());
-                    if (!"/".equals(parentPath)) {
-                        FileDescriptor parent = client.getParent(file);
-                        parentPath = parent.getPath();
+                RemoteFile cachedFile = new RemoteFile();
+
+                long timestamp = System.currentTimeMillis();
+
+                cachedFile.setFsAuthority(fsAuthority);
+                cachedFile.setRemotePath(parentPath + "/" + file.getName());
+                cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
+                cachedFile.setUid(cachedFile.getRemotePath());
+                cachedFile.setLastModificationTimestamp(timestamp);
+                cachedFile.setLastRemoteModificationTimestamp(null);
+                cachedFile.setLastDownloadTimestamp(timestamp);
+                cachedFile.setLocallyModified(true);
+
+                ProcessingUnit unit = new ProcessingUnit(UUID.randomUUID(),
+                        ProcessingStatus.UPLOADING,
+                        cachedFile.getUid(),
+                        cachedFile.getRemotePath());
+
+                Logger.d(TAG, "Uploading to new file: remote=%s, local=%s",
+                        cachedFile.getRemotePath(), cachedFile.getLocalPath());
+
+                if (startProcessingUnit(unit)) {
+                    result.from(processFileUploading(cachedFile, unit.getProcessingUid()));
+
+                    if (result.isFailed()) {
+                        onFinishProcessingUnit(unit.getProcessingUid());
                     }
-
-                    RemoteFile cachedFile = new RemoteFile();
-
-                    long timestamp = System.currentTimeMillis();
-
-                    cachedFile.setFsAuthority(fsAuthority);
-                    cachedFile.setRemotePath(parentPath + "/" + file.getName());
-                    cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
-                    cachedFile.setUid(cachedFile.getRemotePath());
-                    cachedFile.setLastModificationTimestamp(timestamp);
-                    cachedFile.setLastDownloadTimestamp(timestamp);
-                    cachedFile.setLocallyModified(true);
-
-                    ProcessingUnit unit = new ProcessingUnit(UUID.randomUUID(),
-                            ProcessingStatus.UPLOADING,
-                            cachedFile.getUid(),
-                            cachedFile.getRemotePath());
-
-                    Logger.d(TAG, "Uploading to new file: remote=%s, local=%s",
-                            cachedFile.getRemotePath(), cachedFile.getLocalPath());
-
-                    if (startProcessingUnit(unit)) {
-                        result.from(processFileUploading(cachedFile, unit.getProcessingUid()));
-
-                        if (result.isFailed()) {
-                            onFinishProcessingUnit(unit.getProcessingUid());
-                        }
-                    } else {
-                        result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
-                    }
-
                 } else {
-                    // re-write existing file
-                    String uid = metadata.getUid();
-                    String remotePath = metadata.getPath();
-                    Date localModified = new Date(file.getModified());
-                    Date serverModified = metadata.getServerModified();
-                    Date clientModified = metadata.getClientModified();
-
-                    RemoteFile cachedFile = cache.getByUid(uid);
-                    if (canResolveMergeConflict(localModified, serverModified, clientModified, onConflict)) {
-                        if (cachedFile == null) {
-                            cachedFile = new RemoteFile();
-
-                            cachedFile.setFsAuthority(fsAuthority);
-                            cachedFile.setRemotePath(remotePath);
-                            cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
-                            cachedFile.setLastModificationTimestamp(localModified.getTime());
-                            cachedFile.setLastDownloadTimestamp(localModified.getTime());
-                            cachedFile.setLocallyModified(true);
-
-                            ProcessingUnit unit = new ProcessingUnit(UUID.randomUUID(),
-                                    ProcessingStatus.UPLOADING,
-                                    cachedFile.getUid(),
-                                    cachedFile.getRemotePath());
-
-                            Logger.d(TAG, "Uploading to existing file: remote=%s, local=%s",
-                                    cachedFile.getRemotePath(), cachedFile.getLocalPath());
-
-                            if (startProcessingUnit(unit)) {
-                                result.from(processFileUploading(cachedFile, unit.getProcessingUid()));
-
-                                if (result.isFailed()) {
-                                    onFinishProcessingUnit(unit.getProcessingUid());
-                                }
-                            } else {
-                                result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
-                            }
-
-                        } else {
-                            cachedFile.setRemotePath(remotePath);
-                            cachedFile.setLastModificationTimestamp(localModified.getTime());
-                            cachedFile.setLastDownloadTimestamp(localModified.getTime());
-                            cachedFile.setLocallyModified(true);
-                            cachedFile.setUploaded(false);
-
-                            ProcessingUnit unit = new ProcessingUnit(UUID.randomUUID(),
-                                    ProcessingStatus.UPLOADING,
-                                    cachedFile.getUid(),
-                                    cachedFile.getRemotePath());
-
-                            if (startProcessingUnit(unit)) {
-                                result.from(processFileUploading(cachedFile, unit.getProcessingUid()));
-
-                                if (result.isFailed()) {
-                                    onFinishProcessingUnit(unit.getProcessingUid());
-                                }
-                            } else {
-                                result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
-                            }
-                        }
-                    } else {
-                        result.setError(newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
-                    }
+                    result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
                 }
-            } catch (RemoteFSNetworkException e) {
-                // if device is offline, just write to the local file
-                if (cacheOperationsEnabled) {
-                    RemoteFile cachedFile = cache.getByUid(file.getUid());
-                    if (cachedFile != null) {
-                        cachedFile.setLastModificationTimestamp(file.getModified());
+
+            } else {
+                // re-write existing file
+                String uid = metadata.getUid();
+                String remotePath = metadata.getPath();
+                Date localModified = new Date(file.getModified());
+                Date serverModified = metadata.getServerModified();
+                Date clientModified = metadata.getClientModified();
+
+                RemoteFile cachedFile = cache.getByUid(uid);
+                if (canResolveMergeConflict(localModified, serverModified, clientModified, onConflict)) {
+                    if (cachedFile == null) {
+                        cachedFile = new RemoteFile();
+
+                        cachedFile.setFsAuthority(fsAuthority);
+                        cachedFile.setRemotePath(remotePath);
+                        cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
+                        cachedFile.setLastModificationTimestamp(localModified.getTime());
+                        cachedFile.setLastRemoteModificationTimestamp(serverModified.getTime());
+                        cachedFile.setLastDownloadTimestamp(localModified.getTime());
+                        cachedFile.setLocallyModified(true);
+
+                        ProcessingUnit unit = new ProcessingUnit(UUID.randomUUID(),
+                                ProcessingStatus.UPLOADING,
+                                cachedFile.getUid(),
+                                cachedFile.getRemotePath());
+
+                        Logger.d(TAG, "Uploading to existing file: remote=%s, local=%s",
+                                cachedFile.getRemotePath(), cachedFile.getLocalPath());
+
+                        if (startProcessingUnit(unit)) {
+                            result.from(processFileUploading(cachedFile, unit.getProcessingUid()));
+
+                            if (result.isFailed()) {
+                                onFinishProcessingUnit(unit.getProcessingUid());
+                            }
+                        } else {
+                            result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
+                        }
+
+                    } else {
+                        cachedFile.setRemotePath(remotePath);
+                        cachedFile.setLastModificationTimestamp(localModified.getTime());
+                        cachedFile.setLastRemoteModificationTimestamp(serverModified.getTime());
+                        cachedFile.setLastDownloadTimestamp(localModified.getTime());
                         cachedFile.setLocallyModified(true);
                         cachedFile.setUploaded(false);
 
@@ -495,32 +590,29 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                                 cachedFile.getRemotePath());
 
                         if (startProcessingUnit(unit)) {
-                            try {
-                                result.setObj(new OfflineFileOutputStream(this, cachedFile, unit.getProcessingUid()));
+                            result.from(processFileUploading(cachedFile, unit.getProcessingUid()));
 
-                                cache.update(cachedFile);
-                            } catch (FileNotFoundException ee) {
-                                result.setError(newGenericIOError(String.format(ERROR_FAILED_TO_FIND_FILE,
-                                        cachedFile.getLocalPath())));
-
+                            if (result.isFailed()) {
                                 onFinishProcessingUnit(unit.getProcessingUid());
                             }
                         } else {
                             result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
                         }
-                    } else {
-                        // by some reason file is not in cache, return error
-                        result.setError(newGenericIOError(String.format(ERROR_FAILED_TO_FIND_FILE_IN_CACHE,
-                                file.toString())));
                     }
                 } else {
-                    result.setError(createOperationErrorFromException(e));
+                    result.setError(newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
                 }
-            } catch (RemoteFSException e) {
-                result.setError(createOperationErrorFromException(e));
             }
-        } else {
-            result.setError(newGenericIOError(ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR));
+        } catch (RemoteFSNetworkException e) {
+            // if device is offline, just write to the local file
+            if (!options.isCacheEnabled()) {
+                return OperationResult.error(createOperationErrorFromException(e));
+            }
+
+            return openCachedFileForWrite(file, createOperationErrorFromException(e));
+
+        } catch (RemoteFSException e) {
+            result.setError(createOperationErrorFromException(e));
         }
 
         return result;
@@ -604,11 +696,13 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                                      UUID processingUnitUid) {
         Logger.d(TAG, "onFileUploadFinished: unitUid=%s, file=%s", processingUnitUid, file);
 
+        Long modifiedTimestamp = anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified());
+
         file.setUploadFailed(false);
         file.setLocallyModified(false);
         file.setUploaded(true);
-        file.setLastModificationTimestamp(
-                anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
+        file.setLastModificationTimestamp(modifiedTimestamp);
+        file.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
         file.setLastDownloadTimestamp(System.currentTimeMillis());
         file.setRevision(metadata.getRevision());
         file.setUid(metadata.getUid());
@@ -711,7 +805,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
     @NonNull
     @Override
-    public OperationResult<Boolean> exists(FileDescriptor file) {
+    public OperationResult<Boolean> exists(@NonNull FileDescriptor file) {
         OperationResult<Boolean> result = new OperationResult<>();
 
         try {
@@ -735,7 +829,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
     @NonNull
     @Override
-    public OperationResult<Boolean> isStoragePermissionRequired(FileDescriptor file) {
+    public OperationResult<Boolean> isStoragePermissionRequired(@NonNull FileDescriptor file) {
         return OperationResult.success(false);
     }
 }

@@ -93,6 +93,10 @@ public class OperationResult<T> {
         return getStatus() == FAILED;
     }
 
+    public boolean isFailedDueToNetwork() {
+        return getStatus() == FAILED && error.getType() == OperationError.Type.NETWORK_IO_ERROR;
+    }
+
     public boolean isSucceededOrDeferred() {
         OperationStatus status = getStatus();
         return status == SUCCEEDED || status == DEFERRED;

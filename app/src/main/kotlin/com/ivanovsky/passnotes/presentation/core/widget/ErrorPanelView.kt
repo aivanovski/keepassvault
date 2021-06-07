@@ -2,11 +2,10 @@ package com.ivanovsky.passnotes.presentation.core.widget
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
-import android.widget.LinearLayout
+import android.widget.Button
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView.State.HIDDEN
@@ -16,12 +15,18 @@ import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView.State.MES
 class ErrorPanelView(
     context: Context,
     attrs: AttributeSet
-) : LinearLayout(context, attrs) {
+) : ConstraintLayout(context, attrs) {
 
     var text: String?
         get() = errorTextView.text.toString()
         set(value) {
             errorTextView.text = value
+        }
+
+    var buttonText: String?
+        get() = retryButton.text.toString()
+        set(value) {
+            retryButton.text = value
         }
 
     var state: State = HIDDEN
@@ -30,18 +35,19 @@ class ErrorPanelView(
             field = value
         }
 
+    var buttonClickListener: OnButtonClickListener? = null
+
     private val errorTextView: TextView
-    private val retryButton: View
+    private val retryButton: Button
 
     init {
         setBackgroundResource(R.color.material_error_panel_background)
-        orientation = HORIZONTAL
-        gravity = Gravity.CENTER_HORIZONTAL
 
         LayoutInflater.from(context).inflate(R.layout.view_error_panel, this, true)
 
         errorTextView = findViewById(R.id.text)
         retryButton = findViewById(R.id.retryButton)
+        retryButton.setOnClickListener { buttonClickListener?.onButtonClicked() }
 
         applyState(HIDDEN)
     }
@@ -67,5 +73,9 @@ class ErrorPanelView(
         HIDDEN,
         MESSAGE,
         MESSAGE_WITH_RETRY
+    }
+
+    interface OnButtonClickListener {
+        fun onButtonClicked()
     }
 }

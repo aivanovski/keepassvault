@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor;
@@ -28,6 +29,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_NOT_FOUND;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 
@@ -61,7 +63,7 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 
     @NonNull
     @Override
-    public OperationResult<List<FileDescriptor>> listFiles(FileDescriptor dir) {
+    public OperationResult<List<FileDescriptor>> listFiles(@NonNull FileDescriptor dir) {
         OperationResult<List<FileDescriptor>> result = new OperationResult<>();
 
         if (dir.isDirectory()) {
@@ -93,7 +95,7 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 
     @NonNull
     @Override
-    public OperationResult<FileDescriptor> getParent(FileDescriptor fileDescriptor) {
+    public OperationResult<FileDescriptor> getParent(@NonNull FileDescriptor fileDescriptor) {
         OperationResult<FileDescriptor> result = new OperationResult<>();
 
         File file = new File(fileDescriptor.getPath());
@@ -129,9 +131,9 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 
     @NonNull
     @Override
-    public OperationResult<InputStream> openFileForRead(FileDescriptor file,
-                                                        OnConflictStrategy onConflictStrategy,
-                                                        boolean cacheOperationsEnabled) {
+    public OperationResult<InputStream> openFileForRead(@NonNull FileDescriptor file,
+                                                        @NonNull OnConflictStrategy onConflictStrategy,
+                                                        @NonNull FSOptions options) {
         OperationResult<InputStream> result = new OperationResult<>();
 
         lock.lock();
@@ -150,10 +152,13 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 
     @NonNull
     @Override
-    public OperationResult<OutputStream> openFileForWrite(FileDescriptor file,
-                                                          OnConflictStrategy onConflictStrategy,
-                                                          boolean cacheOperationsEnabled) {
-        // TODO: implement onConflictStrategy
+    public OperationResult<OutputStream> openFileForWrite(@NonNull FileDescriptor file,
+                                                          @NonNull OnConflictStrategy onConflictStrategy,
+                                                          @NonNull FSOptions options) {
+        if (options.isWriteEnabled()) {
+            return OperationResult.error(newGenericIOError(MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED));
+        }
+
         OperationResult<OutputStream> result = new OperationResult<>();
 
         lock.lock();
@@ -172,14 +177,15 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 
     @NonNull
     @Override
-    public OperationResult<Boolean> exists(FileDescriptor file) {
+    public OperationResult<Boolean> exists(@NonNull FileDescriptor file) {
         boolean exists = new File(file.getPath()).exists();
         return OperationResult.success(exists);
     }
 
     @NonNull
     @Override
-    public OperationResult<FileDescriptor> getFile(String path, boolean cacheOperationsEnabled) {
+    public OperationResult<FileDescriptor> getFile(@NonNull String path,
+                                                   @NonNull FSOptions options) {
         OperationResult<FileDescriptor> result = new OperationResult<>();
 
         File file = new File(path);
@@ -194,7 +200,7 @@ public class RegularFileSystemProvider implements FileSystemProvider {
 
     @NonNull
     @Override
-    public OperationResult<Boolean> isStoragePermissionRequired(FileDescriptor file) {
+    public OperationResult<Boolean> isStoragePermissionRequired(@NonNull FileDescriptor file) {
         // TODO: actually permission is required only for external storage
         return OperationResult.success(!permissionHelper.isPermissionGranted(SDCARD_PERMISSION));
     }

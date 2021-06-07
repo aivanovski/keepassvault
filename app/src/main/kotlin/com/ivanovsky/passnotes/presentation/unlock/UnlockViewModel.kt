@@ -8,8 +8,10 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.FSType
+import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
+import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
@@ -20,20 +22,28 @@ import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.Screens.DebugMenuScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NewDatabaseScreen
+import com.ivanovsky.passnotes.presentation.Screens.SelectDatabaseScreen
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
+import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
+import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
+import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
+import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
 import com.ivanovsky.passnotes.presentation.storagelist.Action
-import com.ivanovsky.passnotes.presentation.unlock.model.DropDownItem
+import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.unlock.cells.model.DatabaseCellModel
+import com.ivanovsky.passnotes.presentation.unlock.cells.viewmodel.DatabaseCellViewModel
 import com.ivanovsky.passnotes.presentation.unlock.model.PasswordRule
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.ArrayList
 import java.util.regex.Pattern
+import kotlinx.coroutines.withContext
 
 class UnlockViewModel(
     private val interactor: UnlockInteractor,
@@ -41,26 +51,30 @@ class UnlockViewModel(
     private val observerBus: ObserverBus,
     private val resourceProvider: ResourceProvider,
     private val dispatchers: DispatcherProvider,
+    private val modelFactory: UnlockCellModelFactory,
+    private val viewModelFactory: UnlockCellViewModelFactory,
     private val router: Router
 ) : ViewModel(),
     ObserverBus.UsedFileDataSetObserver,
-    ObserverBus.UsedFileContentObserver{
+    ObserverBus.UsedFileContentObserver {
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.notInitialized())
-    val items = MutableLiveData<List<DropDownItem>>()
-    val selectedItem = MutableLiveData<Int>()
+    val screenState = MutableLiveData(ScreenState.loading())
     val password = MutableLiveData(EMPTY)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val showSnackbarMessage = SingleLiveEvent<String>()
-    val debugPasswordRules: List<PasswordRule>
+    val fileCellViewModels = MutableLiveData<List<BaseCellViewModel>>()
 
-    private var selectedRecentlyUsedFile: FileDescriptor? = null
-    private var selectedPosition: Int? = null
+    val fileCellTypes = ViewModelTypes()
+        .add(DatabaseCellViewModel::class, R.layout.cell_database)
+
+    val showResolveConflictDialog = SingleLiveEvent<SyncConflictInfo>()
+
+    private var selectedFile: FileDescriptor? = null
     private var recentlyUsedFiles: List<FileDescriptor>? = null
+    private val debugPasswordRules: List<PasswordRule>
 
     init {
-        screenState.value = ScreenState.loading()
         observerBus.register(this)
 
         debugPasswordRules = if (BuildConfig.DEBUG) {
@@ -91,27 +105,27 @@ class UnlockViewModel(
         screenState.value = ScreenState.loading()
 
         viewModelScope.launch {
-            val result = withContext(dispatchers.IO) {
-                interactor.getRecentlyOpenedFiles()
-            }
+            val result = interactor.getRecentlyOpenedFiles()
 
             if (result.isSucceededOrDeferred) {
                 val files = result.obj
                 if (files.isNotEmpty()) {
                     recentlyUsedFiles = files
 
-                    items.value = createViewItems(files)
-
                     if (resetSelection) {
-                        selectedPosition = null
-                        selectedRecentlyUsedFile = null
+                        selectedFile = null
                     }
 
-                    selectAlreadySelectedOrFirstFile(files)
+                    val selectedFile = takeAlreadySelectedOrFirst(files)
+                    if (selectedFile != null) {
+                        setSelectedFile(selectedFile)
+                    } else {
+                        removeSelectedFileCell()
+                    }
 
                     screenState.value = ScreenState.data()
                 } else {
-                    val emptyText = resourceProvider.getString(R.string.no_files_to_open)
+                    val emptyText = resourceProvider.getString(R.string.no_databases)
                     screenState.value = ScreenState.empty(emptyText)
                 }
             } else {
@@ -121,60 +135,45 @@ class UnlockViewModel(
         }
     }
 
-    private fun closeActiveDatabaseIfNeed() {
-        if (interactor.hasActiveDatabase()) {
-            viewModelScope.launch {
-                val closeResult = withContext(dispatchers.IO) {
-                    interactor.closeActiveDatabase()
-                }
+    fun onErrorPanelButtonClicked() {
+        val selectFile = selectedFile ?: return
+        val lastState = screenState.value ?: return
 
-                if (closeResult.isFailed) {
-                    val message = errorInteractor.processAndGetMessage(closeResult.error)
-                    screenState.value = ScreenState.error(message)
-                }
+        screenState.value = ScreenState.loading()
+
+        viewModelScope.launch {
+            val conflict = interactor.getSyncConflictInfo(selectFile)
+            if (conflict.isSucceeded) {
+                showResolveConflictDialog.call(conflict.obj)
+                screenState.value = lastState
+            } else {
+                screenState.value = ScreenState.dataWithError(
+                    errorText = errorInteractor.processAndGetMessage(conflict.error)
+                )
             }
         }
     }
 
-    private fun selectAlreadySelectedOrFirstFile(files: List<FileDescriptor>) {
-        val selectedFile = selectedRecentlyUsedFile
-        if (selectedFile == null) {
-            selectedRecentlyUsedFile = files[0]
-            selectedPosition = 0
-            selectedItem.value = 0
-        } else {
-            val newSelectedPosition = indexOfFile(files, selectedFile)
-            if (newSelectedPosition >= 0 && newSelectedPosition != selectedPosition) {
-                selectedPosition = newSelectedPosition
-                selectedItem.value = newSelectedPosition
-            } else if (newSelectedPosition == -1) {
-                selectedRecentlyUsedFile = files[0]
-                selectedPosition = 0
-                selectedItem.value = 0
+    fun onResolveConflictConfirmed(resolutionStrategy: ConflictResolutionStrategy) {
+        val selectFile = selectedFile ?: return
+
+        screenState.value = ScreenState.loading()
+
+        viewModelScope.launch {
+            val resolvedConflict = interactor.resolveConflict(selectFile, resolutionStrategy)
+
+            if (resolvedConflict.isSucceeded) {
+                loadData(resetSelection = false)
+            } else {
+                screenState.value = ScreenState.dataWithError(
+                    errorText = errorInteractor.processAndGetMessage(resolvedConflict.error)
+                )
             }
-        }
-    }
-
-    private fun createViewItems(files: List<FileDescriptor>): List<DropDownItem> {
-        return files.map { file ->
-            DropDownItem(
-                FileUtils.getFileNameFromPath(file.path),
-                file.path,
-                formatFsType(file.fsAuthority.type)
-            )
-        }
-    }
-
-    private fun formatFsType(fsType: FSType): String {
-        return when (fsType) {
-            FSType.DROPBOX -> resourceProvider.getString(R.string.dropbox)
-            FSType.REGULAR_FS -> resourceProvider.getString(R.string.device)
-            FSType.WEBDAV -> resourceProvider.getString(R.string.webdav)
         }
     }
 
     private fun indexOfFile(files: List<FileDescriptor>, fileToFind: FileDescriptor): Int {
-        return files.indexOfFirst { file -> isFileEqualsByUidAndFsType(file, fileToFind)}
+        return files.indexOfFirst { file -> isFileEqualsByUidAndFsType(file, fileToFind) }
     }
 
     private fun isFileEqualsByUidAndFsType(lhs: FileDescriptor, rhs: FileDescriptor): Boolean {
@@ -183,7 +182,7 @@ class UnlockViewModel(
 
     fun onUnlockButtonClicked() {
         val password = this.password.value ?: return
-        val selectedFile = selectedRecentlyUsedFile ?: return
+        val selectedFile = selectedFile ?: return
 
         hideKeyboardEvent.call()
         screenState.value = ScreenState.loading()
@@ -191,11 +190,11 @@ class UnlockViewModel(
         val key = KeepassDatabaseKey(password)
 
         viewModelScope.launch {
-            val result = withContext(dispatchers.IO) {
-                interactor.openDatabase(key, selectedFile)
-            }
+            val open = interactor.openDatabase(key, selectedFile)
 
-            if (result.isSucceededOrDeferred) {
+            if (open.isSucceededOrDeferred) {
+                clearEnteredPassword()
+
                 router.newChain(
                     GroupsScreen(
                         GroupsArgs(
@@ -206,8 +205,9 @@ class UnlockViewModel(
                 )
                 screenState.value = ScreenState.data()
             } else {
-                val message = errorInteractor.processAndGetMessage(result.error)
-                screenState.value = ScreenState.dataWithError(message)
+                screenState.value = ScreenState.dataWithError(
+                    errorText = errorInteractor.processAndGetMessage(open.error)
+                )
             }
         }
     }
@@ -256,11 +256,21 @@ class UnlockViewModel(
         }
     }
 
-    fun onRecentlyUsedItemSelected(position: Int) {
-        val newSelectedFile = recentlyUsedFiles?.get(position) ?: return
+    private fun navigateToSelectDatabaseScreen() {
+        val selectedFile = selectedFile ?: return
 
-        selectedRecentlyUsedFile = newSelectedFile
-        selectedPosition = position
+        router.setResultListener(SelectDatabaseScreen.RESULT_KEY) { file ->
+            if (file is FileDescriptor) {
+                setSelectedFile(file)
+            }
+        }
+        router.navigateTo(
+            SelectDatabaseScreen(
+                SelectDatabaseArgs(
+                    selectedFile = selectedFile
+                )
+            )
+        )
     }
 
     fun onFabActionClicked(position: Int) {
@@ -292,19 +302,117 @@ class UnlockViewModel(
         return rules
     }
 
+    private fun closeActiveDatabaseIfNeed() {
+        if (interactor.hasActiveDatabase()) {
+            viewModelScope.launch {
+                val closeResult = withContext(dispatchers.IO) {
+                    interactor.closeActiveDatabase()
+                }
+
+                if (closeResult.isFailed) {
+                    val message = errorInteractor.processAndGetMessage(closeResult.error)
+                    screenState.value = ScreenState.error(message)
+                }
+            }
+        }
+    }
+
+    private fun takeAlreadySelectedOrFirst(files: List<FileDescriptor>): FileDescriptor? {
+        if (files.isEmpty()) return null
+
+        val selectedFile = this.selectedFile
+
+        return if (selectedFile == null) {
+            files[0]
+        } else {
+            val fileIndex = indexOfFile(files, selectedFile)
+            if (fileIndex != -1) {
+                selectedFile
+            } else {
+                files[0]
+            }
+        }
+    }
+
+    private fun setSelectedFile(file: FileDescriptor) {
+        this.selectedFile = file
+
+        val files = recentlyUsedFiles ?: return
+
+        fillPasswordIfNeed()
+
+        setSelectedFileCell(
+            modelFactory.createFileCellModel(
+                file = file,
+                syncStatus = null,
+                isNextButtonVisible = files.size > 1,
+                onFileClicked = { navigateToSelectDatabaseScreen() }
+            )
+        )
+
+        viewModelScope.launch {
+            val syncStatus = interactor.getSyncStatus(file)
+
+            onSyncStatusReceived(file, syncStatus)
+        }
+    }
+
+    private fun fillPasswordIfNeed() {
+        if (!BuildConfig.DEBUG) return
+
+        val file = selectedFile ?: return
+
+        val name = FileUtils.getFileNameWithoutExtensionFromPath(file.path) ?: return
+
+        for (passwordRule in debugPasswordRules) {
+            if (passwordRule.pattern.matcher(name).matches()) {
+                password.value = passwordRule.password
+            }
+        }
+    }
+
+    private fun onSyncStatusReceived(file: FileDescriptor, syncStatus: SyncStatus) {
+        if (file != selectedFile) return
+
+        val files = recentlyUsedFiles ?: return
+
+        setSelectedFileCell(
+            modelFactory.createFileCellModel(
+                file = file,
+                syncStatus = syncStatus,
+                isNextButtonVisible = files.size > 1,
+                onFileClicked = { navigateToSelectDatabaseScreen() }
+            )
+        )
+
+        if (syncStatus == SyncStatus.CONFLICT) {
+            screenState.value = ScreenState.dataWithError(
+                errorText = resourceProvider.getString(R.string.file_update_conflict_message),
+                errorButtonText = resourceProvider.getString(R.string.resolve)
+            )
+        }
+    }
+
+    private fun setSelectedFileCell(model: DatabaseCellModel) {
+        fileCellViewModels.value = listOf(
+            viewModelFactory.createCellViewModel(model, EventProviderImpl())
+        )
+    }
+
+    private fun removeSelectedFileCell() {
+        fileCellViewModels.value = listOf()
+    }
+
+    private fun clearEnteredPassword() {
+        password.value = EMPTY
+    }
+
     companion object {
 
         @Suppress("UNCHECKED_CAST")
         val FACTORY = object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return UnlockViewModel(
-                    GlobalInjector.get(),
-                    GlobalInjector.get(),
-                    GlobalInjector.get(),
-                    GlobalInjector.get(),
-                    GlobalInjector.get(),
-                    GlobalInjector.get()
-                ) as T
+                return GlobalInjector.get<UnlockViewModel>() as T
             }
         }
     }

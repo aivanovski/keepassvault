@@ -19,6 +19,8 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor;
+import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
+import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase;
 import com.ivanovsky.passnotes.util.Logger;
 
 import org.linguafranca.pwdb.Credentials;
@@ -41,16 +43,19 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     private final Context context;
     private final FileSystemResolver fileSystemResolver;
     private final DatabaseLockInteractor lockInteractor;
+    private final DetermineDatabaseStatusUseCase statusUseCase;
     private final ObserverBus observerBus;
     private final Object lock;
 
     public KeepassDatabaseRepository(Context context,
                                      FileSystemResolver fileSystemResolver,
                                      DatabaseLockInteractor lockInteractor,
+                                     DetermineDatabaseStatusUseCase statusUseCase,
                                      ObserverBus observerBus) {
         this.context = context;
         this.fileSystemResolver = fileSystemResolver;
         this.lockInteractor = lockInteractor;
+        this.statusUseCase = statusUseCase;
         this.observerBus = observerBus;
         this.lock = new Object();
     }
@@ -106,7 +111,8 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
             InputStream in = inResult.getObj();
 
             try {
-                db = new KeepassDatabase(fileSystemResolver, options, file, in, key.getKey());
+                db = new KeepassDatabase(fileSystemResolver, statusUseCase, observerBus,
+                        options, file, in, inResult, key.getKey());
                 result = inResult.takeStatusWith(db);
             } catch (EncryptedDatabaseException e) {
                 Logger.printStackTrace(e);
@@ -114,7 +120,9 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
             }
         }
 
-        onDatabaseOpened();
+        if (db != null) {
+            onDatabaseOpened(options, db.getStatus());
+        }
 
         return result;
     }
@@ -191,9 +199,9 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
         return OperationResult.success(true);
     }
 
-    private void onDatabaseOpened() {
-        lockInteractor.onDatabaseOpened();
-        observerBus.notifyDatabaseOpened();
+    private void onDatabaseOpened(FSOptions fsOptions, DatabaseStatus status) {
+        lockInteractor.onDatabaseOpened(fsOptions, status);
+        observerBus.notifyDatabaseOpened(fsOptions, status);
     }
 
     private void onDatabaseClosed() {

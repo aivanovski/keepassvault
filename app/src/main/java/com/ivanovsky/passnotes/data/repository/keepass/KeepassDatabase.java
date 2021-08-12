@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository.keepass;
 
 import androidx.annotation.NonNull;
 
+import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.TemplateRepository;
@@ -16,6 +17,8 @@ import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
+import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
+import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
 import com.ivanovsky.passnotes.util.Logger;
 
@@ -26,6 +29,7 @@ import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 
@@ -37,21 +41,30 @@ public class KeepassDatabase implements EncryptedDatabase {
     private final KeepassNoteRepository noteRepository;
     private final KeepassTemplateRepository templateRepository;
     private final FileSystemResolver fileSystemResolver;
+    private final DetermineDatabaseStatusUseCase statusUseCase;
+    private final ObserverBus observerBus;
     private final FSOptions fsOptions;
     private final SimpleDatabase db;
     private final Object lock;
+    private final AtomicReference<DatabaseStatus> status;
 
     public KeepassDatabase(FileSystemResolver fileSystemResolver,
+                           DetermineDatabaseStatusUseCase statusUseCase,
+                           ObserverBus observerBus,
                            FSOptions fsOptions,
                            FileDescriptor file,
                            InputStream in,
+                           OperationResult<?> inResult,
                            byte[] key) throws EncryptedDatabaseException {
         this.fileSystemResolver = fileSystemResolver;
+        this.statusUseCase = statusUseCase;
+        this.observerBus = observerBus;
         this.fsOptions = fsOptions;
         this.file = file;
         this.key = key;
         this.lock = new Object();
         this.db = readDatabaseFile(in, key);
+        this.status = new AtomicReference<>(statusUseCase.determineStatus(fsOptions, inResult));
 
         KeepassNoteDao noteDao = new KeepassNoteDao(this);
         KeepassGroupDao groupDao = new KeepassGroupDao(this);
@@ -97,6 +110,12 @@ public class KeepassDatabase implements EncryptedDatabase {
     @Override
     public Object getLock() {
         return lock;
+    }
+
+    @NonNull
+    @Override
+    public DatabaseStatus getStatus() {
+        return status.get();
     }
 
     @NonNull
@@ -154,6 +173,11 @@ public class KeepassDatabase implements EncryptedDatabase {
                     result.setObj(true);
                 }
 
+                DatabaseStatus newStatus = statusUseCase.determineStatus(fsOptions, result);
+                if (status.get() != newStatus) {
+                    status.set(newStatus);
+                    observerBus.notifyDatabaseStatusChanged(newStatus);
+                }
             } catch (IOException e) {
                 InputOutputUtils.close(out);
 

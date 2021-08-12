@@ -4,9 +4,15 @@ import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.core.model.DatabaseStatusCellModel
 import com.ivanovsky.passnotes.presentation.core.model.NotePropertyCellModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NotePropertyCellViewModel
 
+// TODO: refactor:
+// - move to package "factory"
+// - should be instantiated in KoinModule
+// - NoteViewModel should receive it as dependency in constructor
 class NoteCellFactory : CellViewModelFactory {
 
     override fun createCellViewModel(
@@ -18,6 +24,7 @@ class NoteCellFactory : CellViewModelFactory {
                 model,
                 eventProvider
             )
+            is DatabaseStatusCellModel -> DatabaseStatusCellViewModel(model)
             else -> throwUnsupportedModelException(model)
         }
     }

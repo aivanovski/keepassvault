@@ -6,6 +6,8 @@ import android.os.Looper
 import androidx.annotation.UiThread
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.repository.SettingsRepository
+import com.ivanovsky.passnotes.data.repository.file.FSOptions
+import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.ServiceState
 import com.ivanovsky.passnotes.domain.usecases.DatabaseLockUseCase
 import com.ivanovsky.passnotes.presentation.service.DatabaseLockService
@@ -24,7 +26,7 @@ class DatabaseLockInteractor(
     private var isTimerStarted = false
 
     @UiThread
-    override fun onDatabaseOpened() {
+    override fun onDatabaseOpened(fsOptions: FSOptions, status: DatabaseStatus) {
         startServiceIfNeed()
         isDatabaseOpened = true
     }

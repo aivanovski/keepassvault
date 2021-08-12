@@ -12,6 +12,8 @@
     <string name="text_with_colon">%s:</string>
     <string name="text_with_dots">%s...</string>
     <string name="remove_confirmation_message">Are you sure want to remove %1$s "%2$s" ?</string>
+    <string name="status_offline_mode">Displaying data in Offline mode</string>
+    <string name="status_read_only_mode">Displaying data in Read-Only mode</string>
 
     <!-- Menu and buttons -->
     <string name="retry">retry</string>

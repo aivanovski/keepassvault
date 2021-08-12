@@ -30,8 +30,11 @@ import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInterac
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.domain.usecases.DatabaseLockUseCase
+import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase
+import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
+import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
 import com.ivanovsky.passnotes.presentation.group.GroupViewModel
@@ -83,13 +86,15 @@ object KoinModule {
 
         // Files, Keepass
         single { FileSystemResolver(get(), get(), get(), get(), get()) }
-        single { KeepassDatabaseRepository(get(), get(), get(), get()) as EncryptedDatabaseRepository }
+        single { KeepassDatabaseRepository(get(), get(), get(), get(), get()) as EncryptedDatabaseRepository }
 
         // Use Cases
         single { GetDebugCredentialsUseCase() }
         single { DatabaseLockUseCase() }
         single { GetRecentlyOpenedFilesUseCase(get(), get()) }
         single { SyncUseCases(get(), get()) }
+        single { DetermineDatabaseStatusUseCase() }
+        single { GetDatabaseStatusUseCase(get(), get()) }
 
         // Interactors
         single { FilePickerInteractor(get()) }
@@ -98,14 +103,16 @@ object KoinModule {
         single { NewDatabaseInteractor(get(), get(), get()) }
         single { GroupInteractor(get(), get(), get()) }
         single { DebugMenuInteractor(get(), get(), get(), get()) }
-        single { NoteInteractor(get(), get(), get()) }
-        single { GroupsInteractor(get(), get(), get(), get()) }
+        single { NoteInteractor(get(), get(), get(), get()) }
+        single { GroupsInteractor(get(), get(), get(), get(), get()) }
         single { NoteEditorInteractor(get(), get()) }
         single { ServerLoginInteractor(get(), get(), get()) }
         single { DatabaseLockInteractor(get(), get(), get()) }
         single { SelectDatabaseInteractor(get(), get(), get(), get()) }
 
         // Cell factories
+        single { DatabaseStatusCellModelFactory(get()) }
+
         single { GroupsCellModelFactory(get()) }
         single { GroupsCellViewModelFactory() }
 
@@ -129,8 +136,8 @@ object KoinModule {
         viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
         viewModel { GroupViewModel(get(), get(), get(), get()) }
         viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
-        viewModel { NoteViewModel(get(), get(), get(), get(), get(), get()) }
-        viewModel { GroupsViewModel(get(), get(), get(), get(), get(), get(), get()) }
+        viewModel { NoteViewModel(get(), get(), get(), get(), get(), get(), get()) }
+        viewModel { GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
         viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }

@@ -254,7 +254,7 @@ class DebugMenuInteractor(
     fun addEntryToDb(): OperationResult<Boolean> {
         val db = dbRepository.database
         if (db == null) {
-            return OperationResult.error(newDbError(MESSAGE_DB_IS_NOT_OPENED))
+            return OperationResult.error(newDbError(MESSAGE_FAILED_TO_GET_DATABASE))
         }
 
         val newGroupTitle = generateNewGroupTitle(db.groupRepository)

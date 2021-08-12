@@ -17,6 +17,7 @@ import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
+import com.ivanovsky.passnotes.extensions.setItemVisibility
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandarotyArgument
@@ -34,6 +35,7 @@ class GroupsFragment : Fragment() {
 
     private lateinit var binding: GroupsFragmentBinding
     private var backCallback: OnBackPressedCallback? = null
+    private var menu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +59,19 @@ class GroupsFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.base_lock, menu)
+        this.menu = menu
+
+        inflater.inflate(R.menu.groups, menu)
+
+        viewModel.isLockMenuVisible.value?.let {
+            menu.setItemVisibility(R.id.menu_lock, it)
+        }
+        viewModel.isMoreMenuVisible.value?.let {
+            menu.setItemVisibility(R.id.menu_more, it)
+        }
+        viewModel.isAddTemplatesMenuVisible.value?.let {
+            menu.setItemVisibility(R.id.menu_add_templates, it)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -68,6 +82,10 @@ class GroupsFragment : Fragment() {
             }
             R.id.menu_lock -> {
                 viewModel.onLockButtonClicked()
+                true
+            }
+            R.id.menu_add_templates -> {
+                viewModel.onAddTemplatesClicked()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -110,6 +128,17 @@ class GroupsFragment : Fragment() {
                 title = it
             }
         }
+
+        viewModel.isLockMenuVisible.observe(viewLifecycleOwner) {
+            menu?.setItemVisibility(R.id.menu_lock, it)
+        }
+        viewModel.isMoreMenuVisible.observe(viewLifecycleOwner) {
+            menu?.setItemVisibility(R.id.menu_more, it)
+        }
+        viewModel.isAddTemplatesMenuVisible.observe(viewLifecycleOwner) {
+            menu?.setItemVisibility(R.id.menu_add_templates, it)
+        }
+
         viewModel.showNewEntryDialogEvent.observe(viewLifecycleOwner) { templates ->
             showNewEntryDialog(templates)
         }
@@ -121,6 +150,9 @@ class GroupsFragment : Fragment() {
         }
         viewModel.showRemoveConfirmationDialogEvent.observe(viewLifecycleOwner) { (group, note) ->
             showRemoveConfirmationDialog(group, note)
+        }
+        viewModel.showAddTemplatesDialogEvent.observe(viewLifecycleOwner) {
+            showAddTemplatesDialog()
         }
     }
 
@@ -190,6 +222,19 @@ class GroupsFragment : Fragment() {
         )
         dialog.onConfirmationLister = {
             viewModel.onRemoveConfirmed(group, note)
+        }
+        dialog.show(childFragmentManager, ConfirmationDialog.TAG)
+    }
+
+    private fun showAddTemplatesDialog() {
+        val dialog = ConfirmationDialog.newInstance(
+            getString(R.string.add_templates_confirmation_message),
+            getString(R.string.yes),
+            getString(R.string.no)
+        ).apply {
+            onConfirmationLister = {
+                viewModel.onAddTemplatesConfirmed()
+            }
         }
         dialog.show(childFragmentManager, ConfirmationDialog.TAG)
     }

@@ -8,6 +8,7 @@ import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
+import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.DatabaseLockUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import java.util.*
@@ -18,7 +19,8 @@ class GroupsInteractor(
     private val observerBus: ObserverBus,
     private val dispatchers: DispatcherProvider,
     private val lockUseCase: DatabaseLockUseCase,
-    private val getStatusUseCase: GetDatabaseStatusUseCase
+    private val getStatusUseCase: GetDatabaseStatusUseCase,
+    private val addTemplatesUseCase: AddTemplatesUseCase
 ) {
 
     fun getTemplates(): List<Template>? {
@@ -112,6 +114,9 @@ class GroupsInteractor(
 
     suspend fun getDatabaseStatus(): OperationResult<DatabaseStatus> =
         getStatusUseCase.getDatabaseStatus()
+
+    suspend fun addTemplates(): OperationResult<Boolean> =
+        addTemplatesUseCase.addTemplates()
 
     abstract class Item
     data class GroupItem(val group: Group, val noteCount: Int, val childGroupCount: Int) : Item()

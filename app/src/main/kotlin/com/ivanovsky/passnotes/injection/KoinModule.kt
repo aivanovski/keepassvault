@@ -29,6 +29,7 @@ import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredential
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
+import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.DatabaseLockUseCase
 import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
@@ -95,6 +96,7 @@ object KoinModule {
         single { SyncUseCases(get(), get()) }
         single { DetermineDatabaseStatusUseCase() }
         single { GetDatabaseStatusUseCase(get(), get()) }
+        single { AddTemplatesUseCase(get(), get(), get()) }
 
         // Interactors
         single { FilePickerInteractor(get()) }
@@ -104,7 +106,7 @@ object KoinModule {
         single { GroupInteractor(get(), get(), get()) }
         single { DebugMenuInteractor(get(), get(), get(), get()) }
         single { NoteInteractor(get(), get(), get(), get()) }
-        single { GroupsInteractor(get(), get(), get(), get(), get()) }
+        single { GroupsInteractor(get(), get(), get(), get(), get(), get()) }
         single { NoteEditorInteractor(get(), get()) }
         single { ServerLoginInteractor(get(), get(), get()) }
         single { DatabaseLockInteractor(get(), get(), get()) }

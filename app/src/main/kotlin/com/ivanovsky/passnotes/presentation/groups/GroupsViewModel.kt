@@ -30,7 +30,6 @@ import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactor
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
-import com.ivanovsky.passnotes.util.Logger
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toUUID
 import kotlinx.coroutines.Dispatchers
@@ -70,10 +69,14 @@ class GroupsViewModel(
 
     val screenTitle = MutableLiveData(EMPTY)
     val toastMessage = MutableLiveData<String>()
+    val isLockMenuVisible = MutableLiveData(false)
+    val isMoreMenuVisible = MutableLiveData(false)
+    val isAddTemplatesMenuVisible = MutableLiveData(false)
     val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
     val showGroupActionsDialogEvent = SingleLiveEvent<Group>()
     val showNoteActionsDialogEvent = SingleLiveEvent<Note>()
     val showRemoveConfirmationDialogEvent = SingleLiveEvent<Pair<Group?, Note?>>()
+    val showAddTemplatesDialogEvent = SingleLiveEvent<Unit>()
 
     private var currentDataItems: List<GroupsInteractor.Item>? = null
     private var rootGroupUid: UUID? = null
@@ -127,6 +130,8 @@ class GroupsViewModel(
     }
 
     fun loadData() {
+        hideMenu()
+
         viewModelScope.launch {
             templates = interactor.getTemplates()
 
@@ -173,6 +178,8 @@ class GroupsViewModel(
                 if (status.isSucceededOrDeferred) {
                     updateStatusViewModel(status.obj)
                 }
+
+                showMenu()
             } else {
                 val message = errorInteractor.processAndGetMessage(data.error)
                 screenState.value = ScreenState.error(message)
@@ -269,6 +276,29 @@ class GroupsViewModel(
         router.backTo(UnlockScreen())
     }
 
+    fun onAddTemplatesClicked() {
+        showAddTemplatesDialogEvent.call()
+    }
+
+    fun onAddTemplatesConfirmed() {
+        hideMenu()
+        screenState.value = ScreenState.loading()
+
+        viewModelScope.launch {
+            val isAdded = interactor.addTemplates()
+
+            if (isAdded.isSucceededOrDeferred) {
+                screenState.value = ScreenState.data()
+                toastMessage.value = resourceProvider.getString(R.string.successfully_added)
+
+                showMenu()
+            } else {
+                val message = errorInteractor.processAndGetMessage(isAdded.error)
+                screenState.value = ScreenState.error(message)
+            }
+        }
+    }
+
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
             when {
@@ -352,6 +382,7 @@ class GroupsViewModel(
     }
 
     private fun removeGroup(groupUid: UUID) {
+        hideMenu()
         screenState.value = ScreenState.loading()
 
         viewModelScope.launch {
@@ -361,6 +392,8 @@ class GroupsViewModel(
 
             if (removeResult.isSucceededOrDeferred) {
                 toastMessage.value = resourceProvider.getString(R.string.successfully_removed)
+
+                showMenu()
             } else {
                 val message = errorInteractor.processAndGetMessage(removeResult.error)
                 screenState.value = ScreenState.error(message)
@@ -369,6 +402,7 @@ class GroupsViewModel(
     }
 
     private fun removeNote(groupUid: UUID, noteUid: UUID) {
+        hideMenu()
         screenState.value = ScreenState.loading()
 
         viewModelScope.launch {
@@ -378,6 +412,8 @@ class GroupsViewModel(
 
             if (removeResult.isSucceededOrDeferred) {
                 toastMessage.value = resourceProvider.getString(R.string.successfully_removed)
+
+                showMenu()
             } else {
                 val message = errorInteractor.processAndGetMessage(removeResult.error)
                 screenState.value = ScreenState.error(message)
@@ -390,5 +426,17 @@ class GroupsViewModel(
             model = statusCellModelFactory.createStatusCellModel(status),
             eventProvider = eventProvider
         ) as DatabaseStatusCellViewModel
+    }
+
+    private fun hideMenu() {
+        isLockMenuVisible.value = false
+        isAddTemplatesMenuVisible.value = false
+        isMoreMenuVisible.value = false
+    }
+
+    private fun showMenu() {
+        isLockMenuVisible.value = true
+        isAddTemplatesMenuVisible.value = templates.isNullOrEmpty()
+        isMoreMenuVisible.value = isAddTemplatesMenuVisible.value
     }
 }

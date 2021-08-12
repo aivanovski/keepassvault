@@ -10,6 +10,10 @@
 
     <style name="ActionBarStyle" parent="ThemeOverlay.AppCompat.Dark.ActionBar"></style>
 
+    <style name="ActionBarPopupStyle" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:textColorPrimary">@android:color/black</item>
+    </style>
+
     <!-- Material design styles -->
 
     <style name="Material"></style>

@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.domain.entity
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.data.entity.Template
-import com.ivanovsky.passnotes.data.repository.keepass.TemplateParser
+import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst
 import java.util.*
 
 @Deprecated("") // TODO: Refactor class
@@ -89,9 +89,9 @@ class PropertySpreader(
     companion object {
 
         private val TEMPLATE_PROPERTY_PREFIXES = setOf(
-            TemplateParser.PROPERTY_PREFIX_POSITION,
-            TemplateParser.PROPERTY_PREFIX_TITLE,
-            TemplateParser.PROPERTY_PREFIX_TYPE
+            TemplateConst.PROPERTY_PREFIX_POSITION,
+            TemplateConst.PROPERTY_PREFIX_TITLE,
+            TemplateConst.PROPERTY_PREFIX_TYPE
         )
 
         private val DEFAULT_PROPERTIES = EnumSet.of(

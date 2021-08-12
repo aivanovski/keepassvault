@@ -2,8 +2,9 @@ package com.ivanovsky.passnotes.data.repository.keepass.dao;
 
 import androidx.annotation.NonNull;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.data.entity.Note;
-import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.Property;
 import com.ivanovsky.passnotes.data.entity.PropertyType;
@@ -18,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_NOT_FOUND;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_DUPLICATED_NOTE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ADD_ENTRY;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
@@ -25,6 +27,10 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericError;
+
+import static java.util.Collections.singletonList;
+
+import android.util.Pair;
 
 public class KeepassNoteDao implements NoteDao {
 
@@ -44,7 +50,7 @@ public class KeepassNoteDao implements NoteDao {
     }
 
     public interface OnNoteInsertListener {
-        void onNoteCreated(UUID groupUid, UUID noteUid);
+        void onNoteCreated(List<Pair<UUID, UUID>> groupAndNoteUids);
     }
 
     public interface OnNoteRemoveListener {
@@ -162,8 +168,12 @@ public class KeepassNoteDao implements NoteDao {
     @NonNull
     @Override
     public OperationResult<UUID> insert(Note note) {
+        return insert(note, true, true);
+    }
 
+    private OperationResult<UUID> insert(Note note, boolean notifyListener, boolean doCommit) {
         SimpleEntry newEntry;
+
         synchronized (db.getLock()) {
             SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
             if (group == null) {
@@ -175,18 +185,67 @@ public class KeepassNoteDao implements NoteDao {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
             }
 
-            OperationResult<Boolean> commitResult = db.commit();
-            if (commitResult.isFailed()) {
-                group.removeEntry(newEntry);
-                return commitResult.takeError();
+            if (doCommit) {
+                OperationResult<Boolean> commitResult = db.commit();
+                if (commitResult.isFailed()) {
+                    group.removeEntry(newEntry);
+                    return commitResult.takeError();
+                }
             }
         }
 
-        if (insertListener != null) {
-            insertListener.onNoteCreated(note.getGroupUid(), newEntry.getUuid());
+        UUID newEntryUid = newEntry.getUuid();
+
+        if (notifyListener && insertListener != null) {
+            insertListener.onNoteCreated(singletonList(
+                    new Pair<>(note.getGroupUid(), newEntryUid)));
         }
 
-        return OperationResult.success(newEntry.getUuid());
+        return OperationResult.success(newEntryUid);
+    }
+
+    @NonNull
+    @Override
+    public OperationResult<Boolean> insert(List<Note> notes) {
+        List<Pair<Note, OperationResult<UUID>>> results = Stream.of(notes)
+                .map(note -> new Pair<>(note, insert(note, false, false)))
+                .collect(Collectors.toList());
+
+        boolean success = Stream.of(results)
+                .allMatch(noteToResultPair -> noteToResultPair.second.isSucceededOrDeferred());
+
+        if (success) {
+            OperationResult<Boolean> commitResult = db.commit();
+            if (commitResult.isFailed()) {
+                return commitResult.takeError();
+            }
+
+            if (insertListener != null) {
+                List<Pair<UUID, UUID>> groupAndNoteUids = Stream.of(results)
+                        .map(noteToResultPair -> new Pair<>(
+                                noteToResultPair.first.getGroupUid(),
+                                noteToResultPair.second.getObj()
+                        ))
+                        .collect(Collectors.toList());
+
+                insertListener.onNoteCreated(groupAndNoteUids);
+            }
+
+            return OperationResult.success(true);
+        } else {
+            OperationResult<UUID> failedOperation = Stream.of(results)
+                    .filter(noteToResultPair -> noteToResultPair.second.isFailed())
+                    .map(noteToResultPair -> noteToResultPair.second)
+                    .findFirst()
+                    .orElse(null);
+
+            if (failedOperation == null) {
+                return OperationResult.error(newDbError(
+                        String.format(GENERIC_MESSAGE_NOT_FOUND, "Operation")));
+            }
+
+            return failedOperation.takeError();
+        }
     }
 
     private SimpleEntry createEntryFromNote(Note note) {

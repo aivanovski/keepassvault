@@ -20,6 +20,9 @@ public interface NoteDao {
     OperationResult<UUID> insert(Note note);
 
     @NonNull
+    OperationResult<Boolean> insert(List<Note> notes);
+
+    @NonNull
     OperationResult<UUID> update(Note note);
 
     @NonNull

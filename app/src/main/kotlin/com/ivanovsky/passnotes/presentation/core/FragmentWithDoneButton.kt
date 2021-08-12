@@ -6,6 +6,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.fragment.app.Fragment
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.extensions.setItemVisibility
 
 abstract class FragmentWithDoneButton : Fragment() {
 
@@ -40,10 +41,6 @@ abstract class FragmentWithDoneButton : Fragment() {
     protected fun setDoneButtonVisibility(isVisible: Boolean) {
         isDoneButtonVisible = isVisible
 
-        val menu = this.menu ?: return
-
-        val item = menu.findItem(R.id.menu_done) ?: return
-
-        item.isVisible = isVisible
+        menu?.setItemVisibility(R.id.menu_done, isVisible)
     }
 }

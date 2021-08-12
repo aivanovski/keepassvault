@@ -1,14 +1,14 @@
 package com.ivanovsky.passnotes.data.repository.keepass
 
 import com.ivanovsky.passnotes.data.entity.*
+import com.ivanovsky.passnotes.data.entity.Property.Companion.PROPERTY_NAME_TEMPLATE
+import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst.PROPERTY_PREFIX_POSITION
+import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst.PROPERTY_PREFIX_TITLE
+import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst.PROPERTY_PREFIX_TYPE
 import com.ivanovsky.passnotes.domain.entity.PropertySpreader
 import com.ivanovsky.passnotes.util.isDigitsOnly
 
 object TemplateParser {
-
-    const val PROPERTY_PREFIX_POSITION = "_etm_position_"
-    const val PROPERTY_PREFIX_TITLE = "_etm_title_"
-    const val PROPERTY_PREFIX_TYPE = "_etm_type_"
 
     fun parse(note: Note): Template? {
         val uid = note.uid ?: return null
@@ -17,7 +17,7 @@ object TemplateParser {
 
         val propertySpreader = PropertySpreader(properties)
 
-        val templateIndicator = propertySpreader.getPropertyByName(Property.PROPERTY_NAME_TEMPLATE)
+        val templateIndicator = propertySpreader.getPropertyByName(PROPERTY_NAME_TEMPLATE)
         if (templateIndicator == null || templateIndicator.value != "1") {
             return null
         }

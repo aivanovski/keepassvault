@@ -8,6 +8,7 @@ import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.domain.LocaleProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
@@ -18,6 +19,8 @@ import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
+import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note.converter.toCellModels
 import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode
@@ -35,11 +38,16 @@ class NoteViewModel(
     private val resourceProvider: ResourceProvider,
     private val localeProvider: LocaleProvider,
     private val observerBus: ObserverBus,
-    private val router: Router
-) : BaseScreenViewModel(), ObserverBus.NoteContentObserver {
+    private val router: Router,
+    private val statusCellModelFactory: DatabaseStatusCellModelFactory
+) : BaseScreenViewModel(),
+    ObserverBus.NoteContentObserver,
+    ObserverBus.DatabaseStatusObserver {
 
     val viewTypes = ViewModelTypes()
         .add(NotePropertyCellViewModel::class, R.layout.cell_note_property)
+
+    private val cellViewModelFactory = NoteCellFactory()
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
@@ -48,13 +56,23 @@ class NoteViewModel(
     val modifiedText = MutableLiveData<String>()
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
 
-    private val cellFactory = NoteCellFactory()
+    val statusViewModel = MutableLiveData(
+        cellViewModelFactory.createCellViewModel(
+            model = statusCellModelFactory.createDefaultStatusCellModel(),
+            eventProvider = eventProvider
+        ) as DatabaseStatusCellViewModel
+    )
+
     private var note: Note? = null
     private var noteUid: UUID? = null
 
     init {
         observerBus.register(this)
         subscribeToCellEvents()
+    }
+
+    override fun onDatabaseStatusChanged(status: DatabaseStatus) {
+        updateStatusViewModel(status)
     }
 
     override fun onCleared() {
@@ -105,6 +123,8 @@ class NoteViewModel(
                 interactor.getNoteByUid(noteUid)
             }
 
+            val status = interactor.getDatabaseStatus()
+
             if (result.isSucceededOrDeferred) {
                 val note = result.obj
                 this@NoteViewModel.note = note
@@ -123,7 +143,11 @@ class NoteViewModel(
                 val models = filter.apply(note.properties)
                     .toCellModels()
 
-                setCellElements(cellFactory.createCellViewModels(models, eventProvider))
+                setCellElements(cellViewModelFactory.createCellViewModels(models, eventProvider))
+
+                if (status.isSucceededOrDeferred) {
+                    updateStatusViewModel(status.obj)
+                }
 
                 screenState.value = ScreenState.data()
             } else {
@@ -153,5 +177,12 @@ class NoteViewModel(
             delayInSeconds
         )
         showSnackbarMessageEvent.call(message)
+    }
+
+    private fun updateStatusViewModel(status: DatabaseStatus) {
+        statusViewModel.value = cellViewModelFactory.createCellViewModel(
+            model = statusCellModelFactory.createStatusCellModel(status),
+            eventProvider = eventProvider
+        ) as DatabaseStatusCellViewModel
     }
 }

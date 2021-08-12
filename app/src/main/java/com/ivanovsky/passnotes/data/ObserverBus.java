@@ -3,11 +3,13 @@ package com.ivanovsky.passnotes.data;
 import android.os.Handler;
 import android.os.Looper;
 
+import androidx.annotation.NonNull;
+
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.ivanovsky.passnotes.data.repository.file.FSOptions;
+import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 import com.ivanovsky.passnotes.util.ReflectionUtils;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.UUID;
@@ -34,13 +36,13 @@ public class ObserverBus {
     }
 
     public interface NoteDataSetChanged extends Observer {
-        void onNoteDataSetChanged(@NotNull UUID groupUid);
+        void onNoteDataSetChanged(@NonNull UUID groupUid);
     }
 
     public interface NoteContentObserver extends Observer {
-        void onNoteContentChanged(@NotNull UUID groupUid,
-                                  @NotNull UUID oldNoteUid,
-                                  @NotNull UUID newNoteUid);
+        void onNoteContentChanged(@NonNull UUID groupUid,
+                                  @NonNull UUID oldNoteUid,
+                                  @NonNull UUID newNoteUid);
     }
 
     public interface DatabaseCloseObserver extends Observer {
@@ -48,7 +50,12 @@ public class ObserverBus {
     }
 
     public interface DatabaseOpenObserver extends Observer {
-        void onDatabaseOpened();
+        void onDatabaseOpened(@NonNull FSOptions fsOptions,
+                              @NonNull DatabaseStatus status);
+    }
+
+    public interface DatabaseStatusObserver extends Observer {
+        void onDatabaseStatusChanged(@NonNull DatabaseStatus status);
     }
 
     public ObserverBus() {
@@ -104,9 +111,15 @@ public class ObserverBus {
         }
     }
 
-    public void notifyDatabaseOpened() {
+    public void notifyDatabaseOpened(FSOptions fsOptions, DatabaseStatus status) {
         for (DatabaseOpenObserver observer : filterObservers(DatabaseOpenObserver.class)) {
-            handler.post(observer::onDatabaseOpened);
+            handler.post(() -> observer.onDatabaseOpened(fsOptions, status));
+        }
+    }
+
+    public void notifyDatabaseStatusChanged(DatabaseStatus status) {
+        for (DatabaseStatusObserver observer : filterObservers(DatabaseStatusObserver.class)) {
+            handler.post(() -> observer.onDatabaseStatusChanged(status));
         }
     }
 

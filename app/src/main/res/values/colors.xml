@@ -5,6 +5,7 @@
     <color name="primary_dark">#303F9F</color>
     <color name="accent">#FF4081</color>
     <color name="divider">#B6B6B6</color>
+    <color name="light_grey">#EEEEEE</color>
 
     <!-- TODO: add prefix "material_" to primary_text, secondary_text, primary_text_light -->
     <color name="primary_text">#212121</color>

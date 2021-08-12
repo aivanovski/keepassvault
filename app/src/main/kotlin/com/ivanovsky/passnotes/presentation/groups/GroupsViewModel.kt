@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.presentation.Screens.GroupScreen
@@ -21,12 +22,15 @@ import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
+import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupGridCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteGridCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
+import com.ivanovsky.passnotes.util.Logger
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toUUID
 import kotlinx.coroutines.Dispatchers
@@ -40,13 +44,15 @@ class GroupsViewModel(
     private val observerBus: ObserverBus,
     private val resourceProvider: ResourceProvider,
     private val cellModelFactory: GroupsCellModelFactory,
+    private val statusCellModelFactory: DatabaseStatusCellModelFactory,
     private val cellViewModelFactory: GroupsCellViewModelFactory,
     private val router: Router
 ) : BaseScreenViewModel(),
     ObserverBus.GroupDataSetObserver,
     ObserverBus.NoteDataSetChanged,
     ObserverBus.NoteContentObserver,
-    ObserverBus.DatabaseCloseObserver {
+    ObserverBus.DatabaseCloseObserver,
+    ObserverBus.DatabaseStatusObserver {
 
     val viewTypes = ViewModelTypes()
         .add(NoteGridCellViewModel::class, R.layout.grid_cell_note)
@@ -54,6 +60,13 @@ class GroupsViewModel(
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
+
+    val statusViewModel = MutableLiveData(
+        cellViewModelFactory.createCellViewModel(
+            model = statusCellModelFactory.createDefaultStatusCellModel(),
+            eventProvider = eventProvider
+        ) as DatabaseStatusCellViewModel
+    )
 
     val screenTitle = MutableLiveData(EMPTY)
     val toastMessage = MutableLiveData<String>()
@@ -98,6 +111,10 @@ class GroupsViewModel(
         router.backTo(UnlockScreen())
     }
 
+    override fun onDatabaseStatusChanged(status: DatabaseStatus) {
+        updateStatusViewModel(status)
+    }
+
     fun start(args: GroupsArgs) {
         this.args = args
         this.groupUid = args.groupUid
@@ -136,6 +153,8 @@ class GroupsViewModel(
                 }
             }
 
+            val status = interactor.getDatabaseStatus()
+
             if (data.isSucceededOrDeferred) {
                 val dataItems = data.obj
                 currentDataItems = dataItems
@@ -149,6 +168,10 @@ class GroupsViewModel(
                 } else {
                     val emptyText = resourceProvider.getString(R.string.no_items)
                     screenState.value = ScreenState.empty(emptyText)
+                }
+
+                if (status.isSucceededOrDeferred) {
+                    updateStatusViewModel(status.obj)
                 }
             } else {
                 val message = errorInteractor.processAndGetMessage(data.error)
@@ -360,5 +383,12 @@ class GroupsViewModel(
                 screenState.value = ScreenState.error(message)
             }
         }
+    }
+
+    private fun updateStatusViewModel(status: DatabaseStatus) {
+        statusViewModel.value = cellViewModelFactory.createCellViewModel(
+            model = statusCellModelFactory.createStatusCellModel(status),
+            eventProvider = eventProvider
+        ) as DatabaseStatusCellViewModel
     }
 }

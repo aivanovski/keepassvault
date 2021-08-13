@@ -7,7 +7,6 @@
 /build
 /captures
 .externalNativeBuild
-dev.properties
-debug.properties
+project.properties
 /.project
 /tmp

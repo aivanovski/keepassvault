@@ -1,14 +1,31 @@
+apply from: '../config.gradle'
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 
 def versionMajor = 0
-def versionMinor = 7
+def versionMinor = 8
 def versionPatch = 0
 
-def debugProperties = new Properties()
-debugProperties.load(new FileInputStream(rootProject.file("debug.properties")))
+def PROPERTIES_FILE = file("../project.properties")
+
+def PROPERTY_DROPBOX_APP_KEY = 'DROPBOX_APP_KEY'
+def PROPERTY_DROPBOX_APP_SECRET = 'DROPBOX_APP_SECRET'
+def PROPERTY_KEYSTORE_PASSWORD = 'KEYSTORE_PASSWORD'
+def PROPERTY_KEYSTORE_ALIAS = 'KEYSTORE_ALIAS'
+def PROPERTY_DEBUG_WEBDAV_URL = 'DEBUG_WEBDAV_URL'
+def PROPERTY_DEBUG_WEBDAV_USERNAME = 'DEBUG_WEBDAV_USERNAME'
+def PROPERTY_DEBUG_WEBDAV_PASSWORD = 'DEBUG_WEBDAV_PASSWORD'
+
+project.ext.customProps = new Properties()
+if (PROPERTIES_FILE.exists()) {
+    project.ext.customProps.load(new FileInputStream(PROPERTIES_FILE))
+}
+
+String getCustomProperty(String key) {
+    return project.ext.customProps[key] ?: System.getenv(key) ?: ""
+}
 
 android {
     def ext = rootProject.extensions.ext
@@ -27,9 +44,14 @@ android {
 
         buildConfigField "String[]", "DEBUG_FILE_NAME_PATTERNS", "null"
         buildConfigField "String[]", "DEBUG_PASSWORDS", "null"
+        buildConfigField "String", "DEBUG_WEB_DAV_URL", "\"\""
+        buildConfigField "String", "DEBUG_WEB_DAV_USERNAME", "\"\""
+        buildConfigField "String", "DEBUG_WEB_DAV_PASSWORD", "\"\""
 
-        buildConfigField "String", "DROPBOX_APP_KEY", "$ext.dropboxAppKey"
-        buildConfigField "String", "DROPBOX_APP_SECRET", "$ext.dropboxAppSecret"
+        def dropboxAppKey = getCustomProperty(PROPERTY_DROPBOX_APP_KEY)
+        def dropboxAppSecret = getCustomProperty(PROPERTY_DROPBOX_APP_SECRET)
+        buildConfigField "String", "DROPBOX_APP_KEY", "\"$dropboxAppKey\""
+        buildConfigField "String", "DROPBOX_APP_SECRET", "\"$dropboxAppSecret\""
     }
 
     buildFeatures {
@@ -58,9 +80,9 @@ android {
         }
         release {
             storeFile file("../keys/release.keystore")
-            storePassword ext.keystorePassword
-            keyAlias ext.keystoreAlias
-            keyPassword ext.keystorePassword
+            storePassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD) ?: ""
+            keyAlias getCustomProperty(PROPERTY_KEYSTORE_ALIAS) ?: ""
+            keyPassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD) ?: ""
         }
     }
 
@@ -70,21 +92,22 @@ android {
             minifyEnabled false
             signingConfig signingConfigs.debug
 
-            if (ext.debugFileNameToPasswordMap != null) {
+            def debugPasswordRules = extractPasswordRules(project.ext.customProps)
+            if (debugPasswordRules != null) {
                 buildConfigField "String[]", "DEBUG_FILE_NAME_PATTERNS", "{" +
-                        ext.debugFileNameToPasswordMap.keySet().collect { "\"${it}\"" }.join(",") +
+                        debugPasswordRules.keySet().collect { "\"${it}\"" }.join(",") +
                         "}"
                 buildConfigField "String[]", "DEBUG_PASSWORDS", "{" +
-                        ext.debugFileNameToPasswordMap.values().collect { "\"${it}\"" }.join(",") +
+                        debugPasswordRules.values().collect { "\"${it}\"" }.join(",") +
                         "}"
             }
 
-            def debugWebDavUrl = debugProperties['debugWebDavUrl'] ?: ""
-            def debugWebDavUsername = debugProperties['debugWebDavUsername'] ?: ""
-            def debugWebDavPassword = debugProperties['debugWebDavPassword'] ?: ""
-            buildConfigField "String", "DEBUG_WEB_DAV_URL", "\"${debugWebDavUrl}\""
-            buildConfigField "String", "DEBUG_WEB_DAV_USERNAME", "\"${debugWebDavUsername}\""
-            buildConfigField "String", "DEBUG_WEB_DAV_PASSWORD", "\"${debugWebDavPassword}\""
+            def debugWebDavUrl = getCustomProperty(PROPERTY_DEBUG_WEBDAV_URL) ?: ""
+            def debugWebDavUsername = getCustomProperty(PROPERTY_DEBUG_WEBDAV_USERNAME) ?: ""
+            def debugWebDavPassword = getCustomProperty(PROPERTY_DEBUG_WEBDAV_PASSWORD) ?: ""
+            buildConfigField "String", "DEBUG_WEB_DAV_URL", "\"$debugWebDavUrl\""
+            buildConfigField "String", "DEBUG_WEB_DAV_USERNAME", "\"$debugWebDavUsername\""
+            buildConfigField "String", "DEBUG_WEB_DAV_PASSWORD", "\"$debugWebDavPassword\""
 
         }
         release {
@@ -99,8 +122,14 @@ android {
             includeAndroidResources = true
         }
     }
+
+    lintOptions {
+        checkReleaseBuilds true
+        abortOnError false
+    }
 }
 
+def koinVersion = '2.0.1'
 def roomVersion = '2.3.0'
 def lifecycleVersion = '2.2.0'
 def androidXVersion = '1.2.0'
@@ -166,10 +195,9 @@ dependencies {
     implementation "androidx.multidex:multidex:2.0.1"
 
     // DI
-    def koin_version = '2.0.1'
-    implementation "org.koin:koin-android:$koin_version"
-    implementation "org.koin:koin-core:$koin_version"
-    implementation "org.koin:koin-androidx-viewmodel:$koin_version"
+    implementation "org.koin:koin-android:$koinVersion"
+    implementation "org.koin:koin-core:$koinVersion"
+    implementation "org.koin:koin-androidx-viewmodel:$koinVersion"
 
     // Room
     implementation "androidx.room:room-runtime:$roomVersion"

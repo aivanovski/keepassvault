@@ -1,0 +1,35 @@
+ext.extractPasswordRules = { Properties props ->
+    def result = [:]
+
+    for (key in (props.keySet() as Set<String>)) {
+        if (key.startsWith('DEBUG_PASSWORD_RULE_')) {
+            def values = (props[key] as String).split("=")
+            def fileNameRegexp = values[0]
+            def password = values[1]
+            project.logger.lifecycle("Use password $password for file with name matched $fileNameRegexp")
+            result.put(fileNameRegexp, password)
+        }
+    }
+
+    return result
+}
+
+ext {
+    android = [
+            minSdk    : 17,
+            targetSdk : 29,
+            compileSdk: 30,
+            buildTools: '30.0.0'
+    ]
+
+    kotlinVersion = '1.5.0'
+
+    // KeePassJava 2 dependencies
+    jetbrainsAnnotationsVersion = '15.0'
+    guavaVersion = '24.0-android'
+    spongyCastleVersion = '1.58.0.0'
+    simpleXmlVersion = '2.7.1'
+    aaltoXmlVersion = '1.0.0'
+    repackedCodecsVersion = '1.0.2'
+
+}

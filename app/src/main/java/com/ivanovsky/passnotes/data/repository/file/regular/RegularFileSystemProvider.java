@@ -155,7 +155,7 @@ public class RegularFileSystemProvider implements FileSystemProvider {
     public OperationResult<OutputStream> openFileForWrite(@NonNull FileDescriptor file,
                                                           @NonNull OnConflictStrategy onConflictStrategy,
                                                           @NonNull FSOptions options) {
-        if (options.isWriteEnabled()) {
+        if (!options.isWriteEnabled()) {
             return OperationResult.error(newGenericIOError(MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED));
         }
 

@@ -2,12 +2,15 @@ package com.ivanovsky.passnotes.data.repository.keepass;
 
 import androidx.annotation.NonNull;
 
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.data.entity.Note;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public class KeepassNoteRepository implements NoteRepository {
@@ -61,5 +64,26 @@ public class KeepassNoteRepository implements NoteRepository {
     @Override
     public OperationResult<Boolean> remove(UUID noteUid) {
         return dao.remove(noteUid);
+    }
+
+    @NonNull
+    @Override
+    public OperationResult<List<Note>> find(@NonNull String query) {
+        OperationResult<List<Note>> allNotesResult = dao.getAll();
+        if (allNotesResult.isFailed()) {
+            return allNotesResult.takeError();
+        }
+
+        String loweredQuery = query.toLowerCase(Locale.getDefault());
+        List<Note> allNotes = allNotesResult.getObj();
+        List<Note> matchedNotes = Stream.of(allNotes)
+                .filter(note ->
+                        note.getTitle()
+                                .toLowerCase(Locale.getDefault())
+                                .contains(loweredQuery)
+                )
+                .collect(Collectors.toList());
+
+        return OperationResult.success(matchedNotes);
     }
 }

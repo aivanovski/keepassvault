@@ -12,6 +12,7 @@ import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseFragment
 import com.ivanovsky.passnotes.presentation.note.NoteFragment
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorFragment
+import com.ivanovsky.passnotes.presentation.search.SearchFragment
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseFragment
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
@@ -93,6 +94,11 @@ object Screens {
     class NoteScreen(private val noteUid: UUID) : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
             NoteFragment.newInstance(noteUid)
+    }
+
+    class SearchScreen : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            SearchFragment.newInstance()
     }
 
     // Debug

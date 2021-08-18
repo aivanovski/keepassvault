@@ -23,9 +23,6 @@
 
         <menu>
             <item
-                android:id="@+id/menu_add_templates"
-                android:title="@string/add_templates" />
-            <item
                 android:id="@+id/menu_settings"
                 android:title="@string/settings" />
         </menu>

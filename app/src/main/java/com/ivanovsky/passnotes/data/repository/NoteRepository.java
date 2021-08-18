@@ -27,4 +27,7 @@ public interface NoteRepository {
 
     @NonNull
     OperationResult<Boolean> remove(UUID noteUid);
+
+    @NonNull
+    OperationResult<List<Note>> find(@NonNull String query);
 }

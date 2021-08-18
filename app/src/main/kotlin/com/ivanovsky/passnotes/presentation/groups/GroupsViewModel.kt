@@ -16,6 +16,7 @@ import com.ivanovsky.passnotes.presentation.Screens.GroupScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
+import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
@@ -24,8 +25,8 @@ import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
-import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupGridCellViewModel
-import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteGridCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode
@@ -54,8 +55,8 @@ class GroupsViewModel(
     ObserverBus.DatabaseStatusObserver {
 
     val viewTypes = ViewModelTypes()
-        .add(NoteGridCellViewModel::class, R.layout.grid_cell_note)
-        .add(GroupGridCellViewModel::class, R.layout.grid_cell_group)
+        .add(NoteCellViewModel::class, R.layout.grid_cell_note)
+        .add(GroupCellViewModel::class, R.layout.grid_cell_group)
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
@@ -69,9 +70,7 @@ class GroupsViewModel(
 
     val screenTitle = MutableLiveData(EMPTY)
     val toastMessage = MutableLiveData<String>()
-    val isLockMenuVisible = MutableLiveData(false)
-    val isMoreMenuVisible = MutableLiveData(false)
-    val isAddTemplatesMenuVisible = MutableLiveData(false)
+    val isMenuVisible = MutableLiveData(false)
     val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
     val showGroupActionsDialogEvent = SingleLiveEvent<Group>()
     val showNoteActionsDialogEvent = SingleLiveEvent<Note>()
@@ -299,26 +298,30 @@ class GroupsViewModel(
         }
     }
 
+    fun onSearchButtonClicked() {
+        router.navigateTo(SearchScreen())
+    }
+
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
             when {
-                event.containsKey(GroupGridCellViewModel.CLICK_EVENT) -> {
-                    event.getString(GroupGridCellViewModel.CLICK_EVENT)?.toUUID()?.let {
+                event.containsKey(GroupCellViewModel.CLICK_EVENT) -> {
+                    event.getString(GroupCellViewModel.CLICK_EVENT)?.toUUID()?.let {
                         onGroupClicked(it)
                     }
                 }
-                event.containsKey(GroupGridCellViewModel.LONG_CLICK_EVENT) -> {
-                    event.getString(GroupGridCellViewModel.LONG_CLICK_EVENT)?.toUUID()?.let {
+                event.containsKey(GroupCellViewModel.LONG_CLICK_EVENT) -> {
+                    event.getString(GroupCellViewModel.LONG_CLICK_EVENT)?.toUUID()?.let {
                         onGroupLongClicked(it)
                     }
                 }
-                event.containsKey(NoteGridCellViewModel.CLICK_EVENT) -> {
-                    event.getString(NoteGridCellViewModel.CLICK_EVENT)?.toUUID()?.let {
+                event.containsKey(NoteCellViewModel.CLICK_EVENT) -> {
+                    event.getString(NoteCellViewModel.CLICK_EVENT)?.toUUID()?.let {
                         onNoteClicked(it)
                     }
                 }
-                event.containsKey(NoteGridCellViewModel.LONG_CLICK_EVENT) -> {
-                    event.getString(NoteGridCellViewModel.LONG_CLICK_EVENT)?.toUUID()?.let {
+                event.containsKey(NoteCellViewModel.LONG_CLICK_EVENT) -> {
+                    event.getString(NoteCellViewModel.LONG_CLICK_EVENT)?.toUUID()?.let {
                         onNoteLongClicked(it)
                     }
                 }
@@ -429,14 +432,10 @@ class GroupsViewModel(
     }
 
     private fun hideMenu() {
-        isLockMenuVisible.value = false
-        isAddTemplatesMenuVisible.value = false
-        isMoreMenuVisible.value = false
+        isMenuVisible.value = false
     }
 
     private fun showMenu() {
-        isLockMenuVisible.value = true
-        isAddTemplatesMenuVisible.value = templates.isNullOrEmpty()
-        isMoreMenuVisible.value = isAddTemplatesMenuVisible.value
+        isMenuVisible.value = true
     }
 }

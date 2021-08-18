@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
+import com.ivanovsky.passnotes.extensions.setItemVisibility
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
@@ -23,6 +24,7 @@ import java.util.*
 class NoteFragment : Fragment() {
 
     private val viewModel: NoteViewModel by viewModel()
+    private var menu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +41,15 @@ class NoteFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.base_lock, menu)
+        this.menu = menu
+
+        inflater.inflate(R.menu.note, menu)
+
+        viewModel.isMenuVisible.value?.let {
+            menu.setItemVisibility(R.id.menu_lock, it)
+            menu.setItemVisibility(R.id.menu_search, it)
+            menu.setItemVisibility(R.id.menu_more, it)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -50,6 +60,14 @@ class NoteFragment : Fragment() {
             }
             R.id.menu_lock -> {
                 viewModel.onLockButtonClicked()
+                true
+            }
+            R.id.menu_search -> {
+                viewModel.onSearchButtonClicked()
+                true
+            }
+            R.id.menu_settings -> {
+                // TODO: implement
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -73,6 +91,20 @@ class NoteFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewLifecycleOwner.lifecycle.addObserver(DatabaseInteractionWatcher(this))
 
+        subscribeToLiveData()
+
+        val noteUid = arguments?.getSerializable(ARG_NOTE_UID) as? UUID
+            ?: requireArgument(ARG_NOTE_UID)
+
+        viewModel.start(noteUid)
+    }
+
+    private fun subscribeToLiveData() {
+        viewModel.isMenuVisible.observe(viewLifecycleOwner) {
+            menu?.setItemVisibility(R.id.menu_lock, it)
+            menu?.setItemVisibility(R.id.menu_search, it)
+            menu?.setItemVisibility(R.id.menu_more, it)
+        }
         viewModel.actionBarTitle.observe(viewLifecycleOwner) { actionBarTitle ->
             setupActionBar {
                 title = actionBarTitle
@@ -81,11 +113,6 @@ class NoteFragment : Fragment() {
         viewModel.showSnackbarMessageEvent.observe(viewLifecycleOwner) { message ->
             showSnackbarMessage(message)
         }
-
-        val noteUid = arguments?.getSerializable(ARG_NOTE_UID) as? UUID
-            ?: requireArgument(ARG_NOTE_UID)
-
-        viewModel.start(noteUid)
     }
 
     companion object {

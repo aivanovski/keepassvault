@@ -30,4 +30,7 @@ public interface GroupRepository {
 
     @NonNull
     OperationResult<Boolean> remove(UUID groupUid);
+
+    @NonNull
+    OperationResult<List<Group>> find(@NonNull String query);
 }

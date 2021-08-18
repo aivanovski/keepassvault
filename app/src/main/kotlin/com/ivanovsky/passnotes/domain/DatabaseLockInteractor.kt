@@ -9,14 +9,14 @@ import com.ivanovsky.passnotes.data.repository.SettingsRepository
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.ServiceState
-import com.ivanovsky.passnotes.domain.usecases.DatabaseLockUseCase
+import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.presentation.service.DatabaseLockService
 import com.ivanovsky.passnotes.util.Logger
 
 class DatabaseLockInteractor(
     private val context: Context,
     private val settings: SettingsRepository,
-    private val lockUseCase: DatabaseLockUseCase
+    private val lockUseCase: LockDatabaseUseCase
 ) : ObserverBus.DatabaseOpenObserver,
     ObserverBus.DatabaseCloseObserver {
 

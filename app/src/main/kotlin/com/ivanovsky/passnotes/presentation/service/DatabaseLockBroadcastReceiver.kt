@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
-import com.ivanovsky.passnotes.domain.usecases.DatabaseLockUseCase
+import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.util.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -15,7 +15,7 @@ class DatabaseLockBroadcastReceiver : BroadcastReceiver() {
 
     private val dispatchers: DispatcherProvider by inject()
     private val errorInteractor: ErrorInteractor by inject()
-    private val lockDatabaseUseCase: DatabaseLockUseCase by inject()
+    private val lockDatabaseUseCase: LockDatabaseUseCase by inject()
 
     override fun onReceive(context: Context?, intent: Intent?) {
         CoroutineScope(dispatchers.IO).launch {

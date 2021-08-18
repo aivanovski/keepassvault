@@ -12,8 +12,9 @@ import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
-import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
+import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
+import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -55,6 +56,7 @@ class NoteViewModel(
     val actionBarTitle = MutableLiveData<String>()
     val modifiedText = MutableLiveData<String>()
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
+    val isMenuVisible = MutableLiveData(false)
 
     val statusViewModel = MutableLiveData(
         cellViewModelFactory.createCellViewModel(
@@ -109,14 +111,20 @@ class NoteViewModel(
     }
 
     fun onLockButtonClicked() {
-        interactor.closeDatabase()
-        router.backTo(Screens.UnlockScreen())
+        interactor.lockDatabase()
+        router.backTo(UnlockScreen())
+    }
+
+    fun onSearchButtonClicked() {
+        router.navigateTo(SearchScreen())
     }
 
     fun navigateBack() = router.exit()
 
     private fun loadData() {
         val noteUid = this.noteUid ?: return
+
+        isMenuVisible.value = false
 
         viewModelScope.launch {
             val result = withContext(Dispatchers.Default) {
@@ -149,6 +157,7 @@ class NoteViewModel(
                     updateStatusViewModel(status.obj)
                 }
 
+                isMenuVisible.value = true
                 screenState.value = ScreenState.data()
             } else {
                 val message = errorInteractor.processAndGetMessage(result.error)

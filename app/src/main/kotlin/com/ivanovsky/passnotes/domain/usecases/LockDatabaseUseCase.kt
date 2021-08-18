@@ -5,7 +5,7 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 
-class DatabaseLockUseCase {
+class LockDatabaseUseCase {
 
     private val dbRepository: EncryptedDatabaseRepository by inject()
     private val lockInteractor: DatabaseLockInteractor by inject()

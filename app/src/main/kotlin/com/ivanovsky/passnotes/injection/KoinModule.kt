@@ -24,15 +24,17 @@ import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
+import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
 import com.ivanovsky.passnotes.domain.interactor.selectdb.SelectDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
-import com.ivanovsky.passnotes.domain.usecases.DatabaseLockUseCase
+import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
+import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
@@ -47,6 +49,9 @@ import com.ivanovsky.passnotes.presentation.note.NoteViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.search.SearchViewModel
+import com.ivanovsky.passnotes.presentation.search.factory.SearchCellModelFactory
+import com.ivanovsky.passnotes.presentation.search.factory.SearchCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseViewModel
 import com.ivanovsky.passnotes.presentation.selectdb.cells.factory.SelectDatabaseCellModelFactory
@@ -91,12 +96,13 @@ object KoinModule {
 
         // Use Cases
         single { GetDebugCredentialsUseCase() }
-        single { DatabaseLockUseCase() }
+        single { LockDatabaseUseCase() }
         single { GetRecentlyOpenedFilesUseCase(get(), get()) }
         single { SyncUseCases(get(), get()) }
         single { DetermineDatabaseStatusUseCase() }
         single { GetDatabaseStatusUseCase(get(), get()) }
         single { AddTemplatesUseCase(get(), get(), get()) }
+        single { GetDatabaseUseCase(get(), get()) }
 
         // Interactors
         single { FilePickerInteractor(get()) }
@@ -111,12 +117,13 @@ object KoinModule {
         single { ServerLoginInteractor(get(), get(), get()) }
         single { DatabaseLockInteractor(get(), get(), get()) }
         single { SelectDatabaseInteractor(get(), get(), get(), get()) }
+        single { SearchInteractor(get(), get(), get(), get()) }
 
         // Cell factories
         single { DatabaseStatusCellModelFactory(get()) }
 
-        single { GroupsCellModelFactory(get()) }
-        single { GroupsCellViewModelFactory() }
+        single { GroupsCellModelFactory() }
+        single { GroupsCellViewModelFactory(get(), get()) }
 
         single { NoteEditorCellModelFactory(get()) }
         single { NoteEditorCellViewModelFactory(get()) }
@@ -126,6 +133,9 @@ object KoinModule {
 
         single { UnlockCellModelFactory(get()) }
         single { UnlockCellViewModelFactory() }
+
+        single { SearchCellModelFactory() }
+        single { SearchCellViewModelFactory(get(), get()) }
 
         // Cicerone
         single { Cicerone.create() }
@@ -143,6 +153,7 @@ object KoinModule {
         viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
         viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }
+        viewModel { SearchViewModel(get(), get(), get(), get(), get(), get()) }
         factory { UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     }
 

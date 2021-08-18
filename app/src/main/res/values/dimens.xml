@@ -21,6 +21,7 @@
     <dimen name="material_list_item_primary_text_size">@dimen/material_primary_text_size</dimen>
     <dimen name="material_list_item_secondary_text_size">@dimen/material_secondary_text_size</dimen>
     <dimen name="material_list_item_horizontal_padding">16dp</dimen>
+    <dimen name="material_list_item_icon_size">40dp</dimen>
 
     <!-- progress bar -->
     <dimen name="progress_bar_size">48dp</dimen>

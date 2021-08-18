@@ -155,4 +155,10 @@
     <string name="status">Status</string>
     <string name="database_lower">database</string>
 
+    <!-- Search screen -->
+    <string name="search">Search</string>
+    <string name="query">Query</string>
+    <string name="input_text_to_start_search">Input text to start search</string>
+    <string name="no_results">No results</string>
+
 </resources>

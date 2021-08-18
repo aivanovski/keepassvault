@@ -10,7 +10,7 @@
 
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.core.viewmodel.GroupGridCellViewModel" />
+            type="com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel" />
     </data>
 
     <com.ivanovsky.passnotes.presentation.core.widget.SquareLayout
@@ -37,7 +37,7 @@
             android:paddingTop="@dimen/quarter_margin"
             android:paddingEnd="@dimen/half_margin"
             android:paddingBottom="@dimen/quarter_margin"
-            android:text="@{viewModel.model.title}"
+            android:text="@{viewModel.model.group.title}"
             tools:text="Title" />
 
         <TextView
@@ -51,7 +51,7 @@
             android:paddingTop="@dimen/quarter_margin"
             android:paddingRight="@dimen/quarter_margin"
             android:paddingBottom="@dimen/quarter_margin"
-            android:text="@{viewModel.model.countText}"
+            android:text="@{viewModel.description}"
             tools:tett="13" />
 
     </com.ivanovsky.passnotes.presentation.core.widget.SquareLayout>

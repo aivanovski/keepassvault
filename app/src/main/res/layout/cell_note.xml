@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        style="@style/Material.Layout.Selectable"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/material_list_item_height_two_line"
+        android:onClick="@{() -> viewModel.onClicked()}"
+        app:onLongClick="@{() -> viewModel.onLongClicked()}">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="@dimen/element_margin" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineEnd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="@dimen/element_margin" />
+
+        <TextView
+            android:id="@+id/primaryText"
+            style="@style/Material.ListItem.PrimaryText.SingleLine"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@{viewModel.title}"
+            app:layout_constraintBottom_toTopOf="@id/secondaryText"
+            app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
+            app:layout_constraintStart_toEndOf="@id/guidelineStart"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="Title" />
+
+        <TextView
+            android:id="@+id/secondaryText"
+            style="@style/Material.ListItem.SecondaryText.SingleLine"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/quarter_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:text="@{viewModel.description}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/date"
+            app:layout_constraintStart_toStartOf="@id/primaryText"
+            app:layout_constraintTop_toBottomOf="@+id/primaryText"
+            tools:text="username" />
+
+        <TextView
+            android:id="@+id/date"
+            style="@style/Material.ListItem.SecondaryText.SingleLine"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@{viewModel.date}"
+            app:layout_constraintBottom_toBottomOf="@id/secondaryText"
+            app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+            app:layout_constraintTop_toTopOf="@id/secondaryText"
+            tools:text="30 july 18:06" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository.keepass;
 
 import androidx.annotation.NonNull;
 
+import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
@@ -9,6 +10,7 @@ import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
 import com.ivanovsky.passnotes.data.entity.Group;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
@@ -91,5 +93,26 @@ public class KeepassGroupRepository implements GroupRepository {
     @Override
     public OperationResult<Boolean> remove(UUID groupUid) {
         return dao.remove(groupUid);
+    }
+
+    @NonNull
+    @Override
+    public OperationResult<List<Group>> find(@NonNull String query) {
+        OperationResult<List<Group>> allGroupsResult = dao.getAll();
+        if (allGroupsResult.isFailed()) {
+            return allGroupsResult.takeError();
+        }
+
+        String loweredQuery = query.toLowerCase(Locale.getDefault());
+        List<Group> allGroups = allGroupsResult.getObj();
+        List<Group> matchedGroups = Stream.of(allGroups)
+                .filter(group ->
+                        group.getTitle()
+                                .toLowerCase(Locale.getDefault())
+                                .contains(loweredQuery)
+                )
+                .collect(Collectors.toList());
+
+        return OperationResult.success(matchedGroups);
     }
 }

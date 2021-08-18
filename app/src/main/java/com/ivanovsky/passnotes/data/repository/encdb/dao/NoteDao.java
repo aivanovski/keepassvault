@@ -11,6 +11,9 @@ import java.util.UUID;
 public interface NoteDao {
 
     @NonNull
+    OperationResult<List<Note>> getAll();
+
+    @NonNull
     OperationResult<List<Note>> getNotesByGroupUid(UUID groupUid);
 
     @NonNull

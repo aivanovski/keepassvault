@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.ivanovsky.passnotes.data.entity.Group;
 import com.ivanovsky.passnotes.data.entity.Note;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.Property;
@@ -71,6 +72,31 @@ public class KeepassNoteDao implements NoteDao {
 
     public void setOnNoteRemoveListener(OnNoteRemoveListener removeListener) {
         this.removeListener = removeListener;
+    }
+
+    @NonNull
+    @Override
+    public OperationResult<List<Note>> getAll() {
+        List<Note> allNotes = new ArrayList<>();
+
+        synchronized (db.getLock()) {
+            OperationResult<List<Group>> allGroupsResult = db.getGroupRepository().getAllGroup();
+            if (allGroupsResult.isFailed()) {
+                return allGroupsResult.takeError();
+            }
+
+            List<Group> allGroups = allGroupsResult.getObj();
+            for (Group group : allGroups) {
+                OperationResult<List<Note>> notesResult = getNotesByGroupUid(group.getUid());
+                if (notesResult.isFailed()) {
+                    return notesResult.takeError();
+                }
+
+                allNotes.addAll(notesResult.getObj());
+            }
+        }
+
+        return OperationResult.success(allNotes);
     }
 
     @NonNull

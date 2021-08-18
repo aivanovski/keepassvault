@@ -9,7 +9,7 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
-import com.ivanovsky.passnotes.domain.usecases.DatabaseLockUseCase
+import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import java.util.*
 import kotlinx.coroutines.withContext
@@ -18,7 +18,7 @@ class GroupsInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
     private val observerBus: ObserverBus,
     private val dispatchers: DispatcherProvider,
-    private val lockUseCase: DatabaseLockUseCase,
+    private val lockUseCase: LockDatabaseUseCase,
     private val getStatusUseCase: GetDatabaseStatusUseCase,
     private val addTemplatesUseCase: AddTemplatesUseCase
 ) {

@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.domain.entity
 
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.Property.Companion.PROPERTY_NAME_TEMPLATE_UID
+import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.entity.filter.*
 
 class PropertyFilter private constructor(
@@ -59,6 +60,11 @@ class PropertyFilter private constructor(
 
         fun filterByName(name: String): Builder {
             filters.add(FilterByNameStrategy(name))
+            return this
+        }
+
+        fun filterByType(vararg types: PropertyType): Builder {
+            filters.add(FilterByTypeStrategy(*types))
             return this
         }
 

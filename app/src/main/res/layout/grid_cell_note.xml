@@ -10,7 +10,7 @@
 
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.core.viewmodel.NoteGridCellViewModel" />
+            type="com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel" />
     </data>
 
     <com.ivanovsky.passnotes.presentation.core.widget.SquareLayout
@@ -38,7 +38,7 @@
             android:paddingTop="@dimen/quarter_margin"
             android:paddingEnd="@dimen/half_margin"
             android:paddingBottom="@dimen/quarter_margin"
-            android:text="@{viewModel.model.title}"
+            android:text="@{viewModel.title}"
             tools:text="Title" />
 
     </com.ivanovsky.passnotes.presentation.core.widget.SquareLayout>

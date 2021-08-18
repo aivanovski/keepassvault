@@ -49,8 +49,7 @@
             app:layout_constraintEnd_toEndOf="@id/iconBackground"
             app:layout_constraintStart_toStartOf="@id/iconBackground"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_folder_white_24dp"
-            tools:src="@drawable/ic_file_white_24dp" />
+            app:srcCompat="@drawable/ic_folder_white_24dp" />
 
         <TextView
             android:id="@+id/primaryText"
@@ -78,7 +77,7 @@
             app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
             app:layout_constraintStart_toStartOf="@id/primaryText"
             app:layout_constraintTop_toBottomOf="@+id/primaryText"
-            tools:text="username" />
+            tools:text="6 notes" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

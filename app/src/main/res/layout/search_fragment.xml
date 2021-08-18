@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -66,7 +67,9 @@
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}"
             app:viewModels="@{viewModel.cellViewModels}"
-            app:viewTypes="@{viewModel.cellViewTypes}" />
+            app:viewTypes="@{viewModel.cellViewTypes}"
+            tools:itemCount="5"
+            tools:listitem="@layout/cell_note" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

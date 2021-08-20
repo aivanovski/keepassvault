@@ -87,11 +87,13 @@ class MainActivity : AppCompatActivity() {
             }
 
             R.id.menu_settings -> {
+                drawer.closeDrawer(GravityCompat.START)
                 viewModel.onSettingsMenuClicked()
                 true
             }
 
             R.id.menu_about -> {
+                drawer.closeDrawer(GravityCompat.START)
                 viewModel.onAboutMenuClicked()
                 true
             }

@@ -4,6 +4,7 @@ import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
 import android.text.method.HideReturnsTransformationMethod
+import android.text.method.LinkMovementMethod
 import android.text.method.PasswordTransformationMethod
 import android.view.View
 import android.widget.EditText
@@ -25,6 +26,7 @@ import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.widget.CellLinearLayout
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
+import com.ivanovsky.passnotes.presentation.core.widget.TextMovementMethod
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PASSWORD
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PLANE_TEXT
@@ -180,6 +182,18 @@ fun setTransformationMethod(
         textView.transformationMethod = when (it) {
             PASSWORD -> PasswordTransformationMethod.getInstance()
             PLANE_TEXT -> HideReturnsTransformationMethod.getInstance()
+        }
+    }
+}
+
+@BindingAdapter("textMovementMethod")
+fun setMovementMethod(
+    textView: TextView,
+    movementMethod: TextMovementMethod?
+) {
+    when (movementMethod) {
+        TextMovementMethod.LINK_MOVEMENT_METHOD -> {
+            textView.movementMethod = LinkMovementMethod.getInstance()
         }
     }
 }

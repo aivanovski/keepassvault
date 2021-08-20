@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="homepage_url" translatable="false"><a href="https://github.com/aivanovski/passnotes">https://github.com/aivanovski/passnotes</a></string>
+    <string name="feedback_url" translatable="false"><a href="https://github.com/aivanovski/passnotes/issues">https://github.com/aivanovski/passnotes/issues</a></string>
+</resources>

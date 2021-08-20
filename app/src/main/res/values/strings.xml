@@ -161,4 +161,12 @@
     <string name="input_text_to_start_search">Input text to start search</string>
     <string name="no_results">No results</string>
 
+    <!-- About screen -->
+    <string name="version_with_str">Version: %s</string>
+    <string name="build_with_str">Build: %s</string>
+    <string name="about_intro"><![CDATA[is another client for KeePass password manager databases.\nIt uses <a href="https://github.com/jorabin/KeePassJava2">KeePassJava2</a> library to access KeePass database files.]]></string>
+    <string name="about_licence_intro">%s is open source software provided under Apache License version 2.0. It comes without any warranty of use.</string>
+    <string name="feedback">Feedback</string>
+    <string name="homepage">Homepage</string>
+
 </resources>

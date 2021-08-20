@@ -19,6 +19,8 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
+import com.ivanovsky.passnotes.presentation.Screens
+import com.ivanovsky.passnotes.presentation.Screens.AboutScreen
 import com.ivanovsky.passnotes.presentation.Screens.DebugMenuScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NewDatabaseScreen
@@ -217,7 +219,7 @@ class UnlockViewModel(
     }
 
     fun onAboutMenuClicked() {
-        throw RuntimeException("Not implemented") //TODO: handle menu click
+        router.navigateTo(AboutScreen())
     }
 
     fun onDebugMenuClicked() {

@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation
 
 import androidx.fragment.app.FragmentFactory
 import com.github.terrakok.cicerone.androidx.FragmentScreen
+import com.ivanovsky.passnotes.presentation.about.AboutFragment
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuFragment
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment
 import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs
@@ -99,6 +100,11 @@ object Screens {
     class SearchScreen : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
             SearchFragment.newInstance()
+    }
+
+    class AboutScreen : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            AboutFragment.newInstance()
     }
 
     // Debug

@@ -145,7 +145,6 @@ class NoteViewModel(
                 val filter = PropertyFilter.Builder()
                     .visible()
                     .notEmpty()
-                    .excludeTitle()
                     .sortedByType()
                     .build()
 

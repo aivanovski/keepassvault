@@ -90,6 +90,8 @@ android {
         debug {
             debuggable true
             minifyEnabled false
+            applicationIdSuffix '.debug'
+            versionNameSuffix 'd'
             signingConfig signingConfigs.debug
 
             def debugPasswordRules = extractPasswordRules(project.ext.customProps)

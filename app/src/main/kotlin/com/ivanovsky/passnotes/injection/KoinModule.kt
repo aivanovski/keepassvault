@@ -46,7 +46,9 @@ import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseViewModel
+import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel
+import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellViewModelFactory
@@ -138,6 +140,9 @@ object KoinModule {
         single { SearchCellModelFactory() }
         single { SearchCellViewModelFactory(get(), get()) }
 
+        single { NoteCellModelFactory() }
+        single { NoteCellViewModelFactory() }
+
         // Cicerone
         single { Cicerone.create() }
         single { provideCiceroneRouter(get()) }
@@ -149,7 +154,7 @@ object KoinModule {
         viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
         viewModel { GroupViewModel(get(), get(), get(), get()) }
         viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
-        viewModel { NoteViewModel(get(), get(), get(), get(), get(), get(), get()) }
+        viewModel { NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }

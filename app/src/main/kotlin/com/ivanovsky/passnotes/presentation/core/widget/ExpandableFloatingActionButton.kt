@@ -13,7 +13,7 @@ import com.ivanovsky.passnotes.R
 class ExpandableFloatingActionButton constructor(context: Context, attrs: AttributeSet) :
     ConstraintLayout(context, attrs) {
 
-    lateinit var onItemClickListener: (position: Int) -> Unit
+    var onItemClickListener: OnItemClickListener? = null
     private val mainFab: FloatingActionButton
     private val fabContainer: ViewGroup
     private val inflater: LayoutInflater = LayoutInflater.from(context)
@@ -36,7 +36,7 @@ class ExpandableFloatingActionButton constructor(context: Context, attrs: Attrib
             val innerFab = createFabItem(entry)
 
             innerFab.setOnClickListener {
-                onItemClickListener.invoke(idx)
+                onItemClickListener?.onItemClicked(idx)
                 collapse()
             }
 
@@ -70,5 +70,9 @@ class ExpandableFloatingActionButton constructor(context: Context, attrs: Attrib
         fabContainer.isVisible = false
 
         isCollapsed = true
+    }
+
+    interface OnItemClickListener {
+        fun onItemClicked(position: Int)
     }
 }

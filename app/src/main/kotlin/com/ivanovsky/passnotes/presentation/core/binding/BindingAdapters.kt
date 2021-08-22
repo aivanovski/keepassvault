@@ -26,6 +26,8 @@ import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.widget.CellLinearLayout
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
+import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
+import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
 import com.ivanovsky.passnotes.presentation.core.widget.TextMovementMethod
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PASSWORD
@@ -220,4 +222,20 @@ fun setOnButtonClickListener(
     listener: ErrorPanelView.OnButtonClickListener?
 ) {
     errorPanelView.buttonClickListener = listener
+}
+
+@BindingAdapter("fabItems")
+fun setFabItems(
+    fab: ExpandableFloatingActionButton,
+    items: List<String>?
+) {
+    fab.inflate(items ?: emptyList())
+}
+
+@BindingAdapter("onFabItemClicked")
+fun setFabClickListener(
+    fab: ExpandableFloatingActionButton,
+    onItemClickListener: OnItemClickListener?
+) {
+    fab.onItemClickListener = onItemClickListener
 }

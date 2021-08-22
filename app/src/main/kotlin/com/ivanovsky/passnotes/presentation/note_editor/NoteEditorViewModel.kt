@@ -73,6 +73,7 @@ class NoteEditorViewModel(
         launchMode = args.launchMode
         noteUid = args.noteUid
         groupUid = args.groupUid
+        template = args.template
 
         if (launchMode == LaunchMode.NEW) {
             val models = modelFactory.createModelsForNewNote(args.template)

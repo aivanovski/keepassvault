@@ -11,6 +11,8 @@ import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.*
+import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
+import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel.AddPropertyDialogItem
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class NoteEditorFragment : FragmentWithDoneButton() {
@@ -86,6 +88,9 @@ class NoteEditorFragment : FragmentWithDoneButton() {
         viewModel.showDiscardDialogEvent.observe(viewLifecycleOwner) { message ->
             showDiscardDialog(message)
         }
+        viewModel.showAddPropertyDialogEvent.observe(viewLifecycleOwner) { items ->
+            showAddPropertyDialog(items)
+        }
         viewModel.showToastEvent.observe(viewLifecycleOwner) { message ->
             showToastMessage(message)
         }
@@ -106,6 +111,22 @@ class NoteEditorFragment : FragmentWithDoneButton() {
         }
 
         dialog.show(childFragmentManager, ConfirmationDialog.TAG)
+    }
+
+    private fun showAddPropertyDialog(items: List<Pair<AddPropertyDialogItem, String>>) {
+        val entries = items.map { it.second }
+
+        val dialog = ChooseOptionDialog.newInstance(
+            getString(
+                R.string.text_with_colon,
+                getString(R.string.choose_property_type)
+            ),
+            entries
+        )
+        dialog.onItemClickListener = { itemIdx ->
+            viewModel.onAddPropertyClicked(items[itemIdx].first)
+        }
+        dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
     }
 
     companion object {

@@ -11,12 +11,16 @@ import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.NoteDiffer
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.entity.PropertyMap
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
+import com.ivanovsky.passnotes.domain.entity.PropertyMap
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
-import com.ivanovsky.passnotes.presentation.core.*
+import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
+import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
@@ -32,7 +36,8 @@ import com.ivanovsky.passnotes.util.toUUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.Date
+import java.util.UUID
 
 class NoteEditorViewModel(
     private val interactor: NoteEditorInteractor,
@@ -56,6 +61,7 @@ class NoteEditorViewModel(
 
     val isDoneButtonVisible = MutableLiveData<Boolean>()
     val showDiscardDialogEvent = SingleLiveEvent<String>()
+    val showAddPropertyDialogEvent = SingleLiveEvent<List<Pair<AddPropertyDialogItem, String>>>()
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val showToastEvent = SingleLiveEvent<String>()
 
@@ -177,8 +183,60 @@ class NoteEditorViewModel(
         }
     }
 
-    fun onAddButtonClicked() {
-        val models = modelFactory.createCustomPropertyModels()
+    fun onFabButtonClicked() {
+        val typesToAdd = determineCellTypesToAdd()
+
+        if (typesToAdd.isNotEmpty()) {
+            val dialogItems = typesToAdd
+                .map { propertyType ->
+                    when (propertyType) {
+                        PropertyType.TITLE -> {
+                            Pair(
+                                AddPropertyDialogItem.TITLE,
+                                resources.getString(R.string.title)
+                            )
+                        }
+                        PropertyType.PASSWORD -> {
+                            Pair(
+                                AddPropertyDialogItem.PASSWORD,
+                                resources.getString(R.string.password)
+                            )
+                        }
+                        PropertyType.USER_NAME -> {
+                            Pair(
+                                AddPropertyDialogItem.USER_NAME,
+                                resources.getString(R.string.username)
+                            )
+                        }
+                        PropertyType.URL -> {
+                            Pair(
+                                AddPropertyDialogItem.URL,
+                                resources.getString(R.string.url_cap)
+                            )
+                        }
+                        PropertyType.NOTES -> {
+                            Pair(
+                                AddPropertyDialogItem.NOTES,
+                                resources.getString(R.string.notes)
+                            )
+                        }
+                    }
+                }
+
+            showAddPropertyDialogEvent.call(
+                dialogItems +
+                    Pair(
+                        AddPropertyDialogItem.CUSTOM,
+                        resources.getString(R.string.custom)
+                    )
+            )
+        } else {
+            onAddPropertyClicked(AddPropertyDialogItem.CUSTOM)
+        }
+    }
+
+    fun onAddPropertyClicked(item: AddPropertyDialogItem) {
+        val models = modelFactory.createCustomPropertyModels(item.propertyType)
 
         val viewModels = getViewModelsWithoutSpace().toMutableList()
         viewModels.addAll(viewModelFactory.createCellViewModels(models, eventProvider))
@@ -442,11 +500,48 @@ class NoteEditorViewModel(
         }
     }
 
+    private fun determineCellTypesToAdd(): List<PropertyType> {
+        val titleCell = findViewModelByCellId(CellId.TITLE)
+        val passwordCell = findViewModelByCellId(CellId.PASSWORD)
+        val userNameCell = findViewModelByCellId(CellId.USER_NAME)
+        val urlCell = findViewModelByCellId(CellId.URL)
+        val notesCell = findViewModelByCellId(CellId.NOTES)
+
+        val cells = mutableListOf<PropertyType>()
+
+        if (titleCell == null) {
+            cells.add(PropertyType.TITLE)
+        }
+        if (passwordCell == null) {
+            cells.add(PropertyType.PASSWORD)
+        }
+        if (userNameCell == null) {
+            cells.add(PropertyType.USER_NAME)
+        }
+        if (urlCell == null) {
+            cells.add(PropertyType.URL)
+        }
+        if (notesCell == null) {
+            cells.add(PropertyType.NOTES)
+        }
+
+        return cells
+    }
+
     object CellId {
         const val TITLE = "title"
         const val USER_NAME = "userName"
         const val URL = "url"
         const val NOTES = "notes"
         const val PASSWORD = "password"
+    }
+
+    enum class AddPropertyDialogItem(val title: String, val propertyType: PropertyType?) {
+        TITLE(CellId.TITLE, PropertyType.TITLE),
+        PASSWORD(CellId.PASSWORD, PropertyType.PASSWORD),
+        USER_NAME(CellId.USER_NAME, PropertyType.USER_NAME),
+        URL(CellId.URL, PropertyType.URL),
+        NOTES(CellId.NOTES, PropertyType.NOTES),
+        CUSTOM("Custom", null)
     }
 }

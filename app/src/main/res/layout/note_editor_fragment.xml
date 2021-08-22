@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/element_margin"
             android:layout_marginBottom="@dimen/element_margin"
-            android:onClick="@{() -> viewModel.onAddButtonClicked()}"
+            android:onClick="@{() -> viewModel.onFabButtonClicked()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:screenState="@{viewModel.screenState}"

@@ -23,7 +23,8 @@ import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NotePropertyCellViewModel
-import com.ivanovsky.passnotes.presentation.note.converter.toCellModels
+import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
+import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -39,6 +40,8 @@ class NoteViewModel(
     private val resourceProvider: ResourceProvider,
     private val localeProvider: LocaleProvider,
     private val observerBus: ObserverBus,
+    private val cellModelFactory: NoteCellModelFactory,
+    private val cellViewModelFactory: NoteCellViewModelFactory,
     private val router: Router,
     private val statusCellModelFactory: DatabaseStatusCellModelFactory
 ) : BaseScreenViewModel(),
@@ -47,8 +50,6 @@ class NoteViewModel(
 
     val viewTypes = ViewModelTypes()
         .add(NotePropertyCellViewModel::class, R.layout.cell_note_property)
-
-    private val cellViewModelFactory = NoteCellFactory()
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
@@ -144,12 +145,10 @@ class NoteViewModel(
                 val filter = PropertyFilter.Builder()
                     .visible()
                     .notEmpty()
-                    .excludeTitle()
                     .sortedByType()
                     .build()
 
-                val models = filter.apply(note.properties)
-                    .toCellModels()
+                val models = cellModelFactory.createCellModels(filter.apply(note.properties))
 
                 setCellElements(cellViewModelFactory.createCellViewModels(models, eventProvider))
 

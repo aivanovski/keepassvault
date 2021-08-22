@@ -56,11 +56,6 @@ class UnlockFragment : Fragment() {
                 it.viewModel = viewModel
             }
 
-        // TODO: move fab initialization to @BindingAdapter
-        val fabItems = resources.getStringArray(R.array.unlock_fab_actions).toList()
-        binding.fab.inflate(fabItems)
-        binding.fab.onItemClickListener = { position -> viewModel.onFabActionClicked(position) }
-
         return binding.root
     }
 

@@ -19,7 +19,6 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.AboutScreen
 import com.ivanovsky.passnotes.presentation.Screens.DebugMenuScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
@@ -32,10 +31,11 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
 import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
-import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
 import com.ivanovsky.passnotes.presentation.storagelist.Action
+import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.cells.model.DatabaseCellModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.viewmodel.DatabaseCellViewModel
@@ -43,9 +43,9 @@ import com.ivanovsky.passnotes.presentation.unlock.model.PasswordRule
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.ArrayList
 import java.util.regex.Pattern
-import kotlinx.coroutines.withContext
 
 class UnlockViewModel(
     private val interactor: UnlockInteractor,
@@ -71,6 +71,15 @@ class UnlockViewModel(
         .add(DatabaseCellViewModel::class, R.layout.cell_database)
 
     val showResolveConflictDialog = SingleLiveEvent<SyncConflictInfo>()
+
+    val fabItems = FAB_ITEMS
+        .map { (_, resId) -> resourceProvider.getString(resId) }
+
+    val fabClickListener = object : OnItemClickListener {
+        override fun onItemClicked(position: Int) {
+            onFabItemClicked(position)
+        }
+    }
 
     private var selectedFile: FileDescriptor? = null
     private var recentlyUsedFiles: List<FileDescriptor>? = null
@@ -275,10 +284,10 @@ class UnlockViewModel(
         )
     }
 
-    fun onFabActionClicked(position: Int) {
+    private fun onFabItemClicked(position: Int) {
         when (position) {
-            0 -> router.navigateTo(NewDatabaseScreen())
-            1 -> navigateToFilePicker()
+            FAB_ITEM_NEW_FILE -> router.navigateTo(NewDatabaseScreen())
+            FAB_ITEM_OPEN_FILE -> navigateToFilePicker()
         }
     }
 
@@ -410,6 +419,14 @@ class UnlockViewModel(
     }
 
     companion object {
+
+        private const val FAB_ITEM_NEW_FILE = 0
+        private const val FAB_ITEM_OPEN_FILE = 1
+
+        private val FAB_ITEMS = listOf(
+            FAB_ITEM_NEW_FILE to R.string.new_file,
+            FAB_ITEM_OPEN_FILE to R.string.open_file
+        )
 
         @Suppress("UNCHECKED_CAST")
         val FACTORY = object : ViewModelProvider.Factory {

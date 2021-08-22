@@ -86,6 +86,8 @@
             android:layout_marginBottom="@dimen/half_margin"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:fabItems="@{viewModel.fabItems}"
+            app:onFabItemClicked="@{viewModel.fabClickListener}"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 

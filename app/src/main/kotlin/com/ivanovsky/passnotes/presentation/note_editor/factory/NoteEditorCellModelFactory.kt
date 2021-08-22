@@ -6,8 +6,8 @@ import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.TemplateFieldType
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.entity.PropertyMap
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
+import com.ivanovsky.passnotes.domain.entity.PropertyMap
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel.CellId
@@ -17,10 +17,12 @@ import com.ivanovsky.passnotes.presentation.note_editor.cells.model.TextProperty
 import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputLines.MULTIPLE_LINES
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputLines.SINGLE_LINE
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType.*
+import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType.TEXT
+import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType.TEXT_CAP_SENTENCES
+import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType.URL
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toCleanString
-import java.util.*
+import java.util.UUID
 
 class NoteEditorCellModelFactory(
     private val resourceProvider: ResourceProvider
@@ -75,19 +77,23 @@ class NoteEditorCellModelFactory(
         }
     }
 
-    fun createCustomPropertyModels(): List<BaseCellModel> {
-        val cellId = UUID.randomUUID().toCleanString()
-        return listOf(
-            ExtendedTextPropertyCellModel(
-                id = cellId,
+    fun createCustomPropertyModels(type: PropertyType?): List<BaseCellModel> {
+        val cellModel = when (type) {
+            PropertyType.TITLE,
+            PropertyType.PASSWORD,
+            PropertyType.USER_NAME,
+            PropertyType.URL,
+            PropertyType.NOTES -> createCellByPropertyType(type, EMPTY)
+            else -> ExtendedTextPropertyCellModel(
+                id = UUID.randomUUID().toCleanString(),
                 name = EMPTY,
                 value = EMPTY,
                 isProtected = false,
                 isCollapsed = false,
                 inputType = TEXT
-            ),
-            createSpaceCell()
-        )
+            )
+        }
+        return listOf(cellModel, createSpaceCell())
     }
 
     private fun isTemplateNote(note: Note): Boolean {
@@ -145,18 +151,12 @@ class NoteEditorCellModelFactory(
             val cellId = note.uid.toString() + "_" + field.title
 
             when (property?.type) {
-                PropertyType.USER_NAME -> {
-                    models.add(createUserNameCell(property.value ?: EMPTY))
-                }
-                PropertyType.PASSWORD -> {
-                    models.add(createPasswordCell(property.value ?: EMPTY))
-                }
-                PropertyType.URL -> {
-                    models.add(createUrlCell(property.value ?: EMPTY))
-                }
-                PropertyType.NOTES -> {
-                    models.add(createNotesCell(property.value ?: EMPTY))
-                }
+                PropertyType.USER_NAME,
+                PropertyType.PASSWORD,
+                PropertyType.URL,
+                PropertyType.NOTES -> models.add(
+                    createCellByPropertyType(property.type, property.value ?: EMPTY)
+                )
                 else -> {
                     models.add(
                         ExtendedTextPropertyCellModel(
@@ -176,25 +176,34 @@ class NoteEditorCellModelFactory(
         val filter = PropertyFilter.Builder()
             .visible()
             .excludeByName(*excludedNames.toTypedArray())
-            .excludeDefaultTypes() // TODO: some of default properties may contains information
+            .excludeByName(PropertyType.TITLE.propertyName)
+            .notEmpty()
             .sortedByType()
             .build()
 
         val otherProperties = filter.apply(note.properties)
         for (property in otherProperties) {
-            // TODO: what if property.name will be null ?
-            val cellId = note.uid.toString() + "_" + (property.name ?: EMPTY)
-
-            models.add(
-                ExtendedTextPropertyCellModel(
-                    id = cellId,
-                    name = property.name ?: EMPTY,
-                    value = property.value ?: EMPTY,
-                    isProtected = property.isProtected,
-                    isCollapsed = true,
-                    inputType = TEXT
+            when (property.type) {
+                PropertyType.USER_NAME,
+                PropertyType.PASSWORD,
+                PropertyType.URL,
+                PropertyType.NOTES -> models.add(
+                    createCellByPropertyType(property.type, property.value ?: EMPTY)
                 )
-            )
+                else -> {
+                    val cellId = note.uid.toString() + "_" + (property.name ?: EMPTY)
+                    models.add(
+                        ExtendedTextPropertyCellModel(
+                            id = cellId,
+                            name = property.name ?: EMPTY,
+                            value = property.value ?: EMPTY,
+                            isProtected = property.isProtected,
+                            isCollapsed = true,
+                            inputType = TEXT
+                        )
+                    )
+                }
+            }
         }
 
         models.add(createSpaceCell())
@@ -248,6 +257,16 @@ class NoteEditorCellModelFactory(
         models.add(createSpaceCell())
 
         return models
+    }
+
+    private fun createCellByPropertyType(type: PropertyType, value: String): BaseCellModel {
+        return when (type) {
+            PropertyType.TITLE -> createTitleCell(value)
+            PropertyType.PASSWORD -> createPasswordCell(value)
+            PropertyType.USER_NAME -> createUserNameCell(value)
+            PropertyType.URL -> createUrlCell(value)
+            PropertyType.NOTES -> createNotesCell(value)
+        }
     }
 
     private fun createSpaceCell(): BaseCellModel {

@@ -69,8 +69,8 @@ class GroupsViewModel(
     )
 
     val screenTitle = MutableLiveData(EMPTY)
-    val toastMessage = MutableLiveData<String>()
     val isMenuVisible = MutableLiveData(false)
+    val showToastEvent = SingleLiveEvent<String>()
     val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
     val showGroupActionsDialogEvent = SingleLiveEvent<Group>()
     val showNoteActionsDialogEvent = SingleLiveEvent<Note>()
@@ -288,7 +288,7 @@ class GroupsViewModel(
 
             if (isAdded.isSucceededOrDeferred) {
                 screenState.value = ScreenState.data()
-                toastMessage.value = resourceProvider.getString(R.string.successfully_added)
+                showToastEvent.call(resourceProvider.getString(R.string.successfully_added))
 
                 showMenu()
             } else {
@@ -394,7 +394,7 @@ class GroupsViewModel(
             }
 
             if (removeResult.isSucceededOrDeferred) {
-                toastMessage.value = resourceProvider.getString(R.string.successfully_removed)
+                showToastEvent.call(resourceProvider.getString(R.string.successfully_removed))
 
                 showMenu()
             } else {
@@ -414,7 +414,7 @@ class GroupsViewModel(
             }
 
             if (removeResult.isSucceededOrDeferred) {
-                toastMessage.value = resourceProvider.getString(R.string.successfully_removed)
+                showToastEvent.call(resourceProvider.getString(R.string.successfully_removed))
 
                 showMenu()
             } else {

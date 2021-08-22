@@ -121,7 +121,7 @@ class GroupsFragment : Fragment() {
     }
 
     private fun subscribeToLiveData() {
-        viewModel.toastMessage.observe(viewLifecycleOwner) { message ->
+        viewModel.showToastEvent.observe(viewLifecycleOwner) { message ->
             showToastMessage(message)
         }
         viewModel.screenTitle.observe(viewLifecycleOwner) {

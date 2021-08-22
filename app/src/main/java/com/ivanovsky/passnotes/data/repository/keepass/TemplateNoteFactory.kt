@@ -18,15 +18,15 @@ object TemplateNoteFactory {
             .flatMap { field ->
                 listOf(
                     Property(
-                        name = TemplateConst.PROPERTY_PREFIX_POSITION + template.title,
+                        name = TemplateConst.PROPERTY_PREFIX_POSITION + field.title,
                         value = field.position?.toString()
                     ),
                     Property(
-                        name = PROPERTY_PREFIX_TITLE + template.title,
-                        value = template.title
+                        name = PROPERTY_PREFIX_TITLE + field.title,
+                        value = field.title
                     ),
                     Property(
-                        name = PROPERTY_PREFIX_TYPE + template.title,
+                        name = PROPERTY_PREFIX_TYPE + field.title,
                         value = field.type?.name
                     ),
                 )

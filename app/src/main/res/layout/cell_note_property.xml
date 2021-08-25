@@ -37,7 +37,7 @@
             android:layout_marginStart="@dimen/element_margin"
             android:layout_marginEnd="@dimen/element_margin"
             android:text="@{viewModel.model.value}"
-            bind:isTextHidden="@{viewModel.isValueHidden}"
+            app:isTextHidden="@{viewModel.isValueHidden}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/visibilityButton"
             app:layout_constraintStart_toStartOf="parent"
@@ -55,7 +55,7 @@
             app:layout_constraintEnd_toStartOf="@id/copyButton"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_eye_grey_600_24dp"
-            bind:visible="@{viewModel.model.visibilityButtonVisible}" />
+            app:visible="@{viewModel.model.visibilityButtonVisible}" />
 
         <ImageButton
             android:id="@+id/copyButton"
@@ -67,7 +67,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_copy_grey_600_24dp"
-            bind:visible="@{viewModel.model.copyButtonVisible}" />
+            app:visible="@{viewModel.model.copyButtonVisible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

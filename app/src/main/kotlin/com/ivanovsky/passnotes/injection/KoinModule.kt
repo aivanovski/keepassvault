@@ -9,12 +9,13 @@ import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
-import com.ivanovsky.passnotes.data.repository.SettingsRepository
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
 import com.ivanovsky.passnotes.data.repository.db.converters.FSAuthorityTypeConverter
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.*
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
@@ -28,6 +29,8 @@ import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
 import com.ivanovsky.passnotes.domain.interactor.selectdb.SelectDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
+import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
+import com.ivanovsky.passnotes.domain.interactor.settings.main.MainSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
@@ -62,6 +65,9 @@ import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModel
 import com.ivanovsky.passnotes.presentation.selectdb.cells.factory.SelectDatabaseCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginViewModel
+import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
+import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsViewModel
+import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
 import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
@@ -74,10 +80,10 @@ import org.koin.dsl.module
 object KoinModule {
 
     val appModule = module {
-        single { SettingsRepository(get()) }
+        single { ResourceProvider(get()) }
+        single { SettingsImpl(get(), get()) as Settings }
         single { FileHelper(get(), get()) }
         single { PermissionHelper(get()) }
-        single { ResourceProvider(get()) }
         single { ErrorInteractor(get()) }
         single { LocaleProvider(get()) }
         single { DispatcherProvider() }
@@ -114,13 +120,15 @@ object KoinModule {
         single { NewDatabaseInteractor(get(), get(), get()) }
         single { GroupInteractor(get(), get(), get()) }
         single { DebugMenuInteractor(get(), get(), get(), get()) }
-        single { NoteInteractor(get(), get(), get(), get()) }
+        single { NoteInteractor(get(), get(), get(), get(), get()) }
         single { GroupsInteractor(get(), get(), get(), get(), get(), get()) }
         single { NoteEditorInteractor(get(), get()) }
         single { ServerLoginInteractor(get(), get(), get()) }
         single { DatabaseLockInteractor(get(), get(), get()) }
         single { SelectDatabaseInteractor(get(), get(), get(), get()) }
         single { SearchInteractor(get(), get(), get(), get()) }
+        single { MainSettingsInteractor(get()) }
+        single { DatabaseSettingsInteractor(get(), get()) }
 
         // Cell factories
         single { DatabaseStatusCellModelFactory(get()) }
@@ -147,6 +155,7 @@ object KoinModule {
         single { Cicerone.create() }
         single { provideCiceroneRouter(get()) }
         single { provideCiceroneNavigatorHolder(get()) }
+        single { SettingsRouter(get()) }
 
         // ViewModels
         viewModel { StorageListViewModel(get(), get(), get(), get(), get(), get()) }
@@ -161,6 +170,8 @@ object KoinModule {
         viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }
         viewModel { SearchViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { AboutViewModel(get(), get()) }
+        viewModel { MainSettingsViewModel(get(), get()) }
+        viewModel { DatabaseSettingsViewModel(get(), get()) }
         factory { UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     }
 

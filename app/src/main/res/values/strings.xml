@@ -168,4 +168,21 @@
     <string name="feedback">Feedback</string>
     <string name="homepage">Homepage</string>
 
+    <!-- Settings screens -->
+    <string name="database">Database</string>
+    <string name="application">Application</string>
+    <string name="database_settings">Database settings</string>
+    <string name="application_settings">Application settings</string>
+
+    <!-- AppSettings screen -->
+    <string name="pref_auto_lock_delay_in_ms_title">Database lock timeout</string>
+    <string name="pref_auto_lock_delay_in_ms_summary">Interval after which database will be locked due to inactivity</string>
+    <string name="pref_is_lock_notification_visible_title">Show notification with lock button</string>
+    <string name="pref_auto_clear_clipboard_delay_in_ms_title">Clear clipboard timeout</string>
+    <string name="pref_auto_clear_clipboard_delay_in_ms_summary">Interval after which clipboard will be cleared</string>
+
+    <!-- DatabaseSettings screen -->
+    <string name="pref_is_recycle_bin_enabled_title">Use Recycle bin</string>
+    <string name="pref_is_recycle_bin_enabled_summary">Moves groups and notes to "Recycle bin" group before deleting</string>
+
 </resources>

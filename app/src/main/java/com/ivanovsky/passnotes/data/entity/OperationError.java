@@ -39,6 +39,8 @@ public class OperationError {
     public static final String MESSAGE_INCORRECT_SYNC_STATUS = "Incorrect sync status";
     public static final String MESSAGE_INCORRECT_USE_CASE = "Incorrect use case";
     public static final String MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED = "Write operation is not supported";
+    public static final String MESSAGE_UNSUPPORTED_CONFIG_TYPE = "Unsupported config type";
+    public static final String MESSAGE_FAILED_TO_COMPLETE_OPERATION = "Failed to complete operation";
 
     public static final String GENERIC_MESSAGE_NOT_FOUND = "%s not found";
     public static final String GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST = "Group '%s' already exists";

@@ -19,10 +19,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_NOT_FOUND;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_DUPLICATED_NOTE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ADD_ENTRY;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_COMPLETE_OPERATION;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_NOTE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL;
@@ -42,9 +44,9 @@ public class KeepassNoteDao implements NoteDao {
     private static final String PROPERTY_NOTES = "Notes";
 
     private final KeepassDatabase db;
-    private volatile OnNoteUpdateListener updateListener;
-    private volatile OnNoteInsertListener insertListener;
-    private volatile OnNoteRemoveListener removeListener;
+    private final List<OnNoteUpdateListener> updateListeners;
+    private final List<OnNoteInsertListener> insertListeners;
+    private final List<OnNoteRemoveListener> removeListeners;
 
     public interface OnNoteUpdateListener {
         void onNoteChanged(UUID groupUid, UUID oldNoteUid, UUID newNoteUid);
@@ -60,18 +62,21 @@ public class KeepassNoteDao implements NoteDao {
 
     public KeepassNoteDao(KeepassDatabase db) {
         this.db = db;
+        this.updateListeners = new CopyOnWriteArrayList<>();
+        this.insertListeners = new CopyOnWriteArrayList<>();
+        this.removeListeners = new CopyOnWriteArrayList<>();
     }
 
-    public void setOnNoteChangeListener(OnNoteUpdateListener updateListener) {
-        this.updateListener = updateListener;
+    public void addOnNoteChangeListener(OnNoteUpdateListener updateListener) {
+        updateListeners.add(updateListener);
     }
 
-    public void setOnNoteInsertListener(OnNoteInsertListener insertListener) {
-        this.insertListener = insertListener;
+    public void addOnNoteInsertListener(OnNoteInsertListener insertListener) {
+        insertListeners.add(insertListener);
     }
 
-    public void setOnNoteRemoveListener(OnNoteRemoveListener removeListener) {
-        this.removeListener = removeListener;
+    public void addOnNoteRemoveListener(OnNoteRemoveListener removeListener) {
+        removeListeners.add(removeListener);
     }
 
     @NonNull
@@ -105,7 +110,7 @@ public class KeepassNoteDao implements NoteDao {
         List<Note> notes = new ArrayList<>();
 
         synchronized (db.getLock()) {
-            SimpleGroup group = db.getKeepassDatabase().findGroup(groupUid);
+            SimpleGroup group = db.findGroupByUid(groupUid);
             if (group == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
             }
@@ -201,7 +206,7 @@ public class KeepassNoteDao implements NoteDao {
         SimpleEntry newEntry;
 
         synchronized (db.getLock()) {
-            SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
+            SimpleGroup group = db.findGroupByUid(note.getGroupUid());
             if (group == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
             }
@@ -222,8 +227,8 @@ public class KeepassNoteDao implements NoteDao {
 
         UUID newEntryUid = newEntry.getUuid();
 
-        if (notifyListener && insertListener != null) {
-            insertListener.onNoteCreated(singletonList(
+        if (notifyListener) {
+            notifyNoteInserted(singletonList(
                     new Pair<>(note.getGroupUid(), newEntryUid)));
         }
 
@@ -246,7 +251,7 @@ public class KeepassNoteDao implements NoteDao {
                 return commitResult.takeError();
             }
 
-            if (insertListener != null) {
+            if (insertListeners.size() != 0) {
                 List<Pair<UUID, UUID>> groupAndNoteUids = Stream.of(results)
                         .map(noteToResultPair -> new Pair<>(
                                 noteToResultPair.first.getGroupUid(),
@@ -254,7 +259,7 @@ public class KeepassNoteDao implements NoteDao {
                         ))
                         .collect(Collectors.toList());
 
-                insertListener.onNoteCreated(groupAndNoteUids);
+                notifyNoteInserted(groupAndNoteUids);
             }
 
             return OperationResult.success(true);
@@ -311,21 +316,19 @@ public class KeepassNoteDao implements NoteDao {
     @NonNull
     @Override
     public OperationResult<UUID> update(Note note) {
-        UUID oldUid = note.getUid();
-        if (oldUid == null) {
+        UUID uid = note.getUid();
+        if (uid == null) {
             return OperationResult.error(newGenericError(MESSAGE_UID_IS_NULL));
         }
 
-        UUID newUid;
         synchronized (db.getLock()) {
-
-            SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
+            SimpleGroup group = db.findGroupByUid(note.getGroupUid());
             if (group == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
             }
 
             List<? extends SimpleEntry> entries =
-                    group.findEntries(entry -> oldUid.equals(entry.getUuid()), false);
+                    group.findEntries(entry -> uid.equals(entry.getUuid()), false);
             if (entries.size() == 0) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
             } else if (entries.size() > 1) {
@@ -333,16 +336,9 @@ public class KeepassNoteDao implements NoteDao {
             }
 
             SimpleEntry oldEntry = entries.get(0);
-            group.removeEntry(oldEntry);
+            SimpleEntry newEntry = createEntryFromNote(note);
 
-            // TODO: entry insertion can be reused from insert() method
-
-            SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
-            if (newEntry == null) {
-                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
-            }
-
-            newUid = newEntry.getUuid();
+            updateEntryValues(oldEntry, newEntry);
 
             OperationResult<Boolean> commitResult = db.commit();
             if (commitResult.isFailed()) {
@@ -351,36 +347,53 @@ public class KeepassNoteDao implements NoteDao {
             }
         }
 
-        if (updateListener != null) {
-            updateListener.onNoteChanged(note.getGroupUid(), oldUid, newUid);
+        notifyNoteUpdated(note.getGroupUid(), uid, uid);
+
+        return OperationResult.success(uid);
+    }
+
+    private void updateEntryValues(SimpleEntry oldEntry, SimpleEntry newEntry) {
+        oldEntry.setTitle(newEntry.getTitle());
+        oldEntry.setUsername(newEntry.getUsername());
+        oldEntry.setPassword(newEntry.getPassword());
+        oldEntry.setUrl(newEntry.getUrl());
+        oldEntry.setNotes(newEntry.getNotes());
+
+        List<String> oldNames = oldEntry.getPropertyNames();
+        for (String propertyName : oldNames) {
+            PropertyType type = parsePropertyType(propertyName);
+            if (!PropertyType.DEFAULT_TYPES.contains(type)) {
+                oldEntry.removeProperty(propertyName);
+            }
         }
 
-        return OperationResult.success(newUid);
+        List<String> newNames = newEntry.getPropertyNames();
+        for (String propertyName : newNames) {
+            PropertyType type = parsePropertyType(propertyName);
+            if (!PropertyType.DEFAULT_TYPES.contains(type)) {
+                oldEntry.setProperty(propertyName, newEntry.getProperty(propertyName),
+                        newEntry.isPropertyProtected(propertyName));
+            }
+        }
     }
 
     @NonNull
     @Override
     public OperationResult<Boolean> remove(UUID noteUid) {
-        SimpleGroup group;
-
+        boolean deleted;
+        Note note;
         synchronized (db.getLock()) {
-            SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
-
-            List<? extends SimpleEntry> entries = rootGroup.findEntries(
-                    entry -> entry.getUuid().equals(noteUid),
-                    true);
-            if (entries.size() != 1) {
-                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
+            OperationResult<Note> getNote = getNoteByUid(noteUid);
+            if (getNote.isFailed()) {
+                return getNote.takeError();
             }
 
-            SimpleEntry note = entries.get(0);
+            note = getNote.getObj();
 
-            group = note.getParent();
-            if (group == null) {
-                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+            deleted = db.getKeepassDatabase().deleteEntry(noteUid);
+            if (!deleted) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_COMPLETE_OPERATION));
             }
-
-            group.removeEntry(note);
 
             OperationResult<Boolean> commitResult = db.commit();
             if (commitResult.isFailed()) {
@@ -388,10 +401,26 @@ public class KeepassNoteDao implements NoteDao {
             }
         }
 
-        if (removeListener != null) {
-            removeListener.onNoteRemove(group.getUuid(), noteUid);
-        }
+        notifyNoteRemoved(note.getGroupUid(), noteUid);
 
         return OperationResult.success(true);
+    }
+
+    private void notifyNoteUpdated(UUID groupUid, UUID oldNoteUid, UUID newNoteUid) {
+        for (OnNoteUpdateListener listener : updateListeners) {
+            listener.onNoteChanged(groupUid, oldNoteUid, newNoteUid);
+        }
+    }
+
+    private void notifyNoteInserted(List<Pair<UUID, UUID>> groupAndNoteUids) {
+        for (OnNoteInsertListener listener : insertListeners) {
+            listener.onNoteCreated(groupAndNoteUids);
+        }
+    }
+
+    private void notifyNoteRemoved(UUID groupUid, UUID noteUid) {
+        for (OnNoteRemoveListener listener : removeListeners) {
+            listener.onNoteRemove(groupUid, noteUid);
+        }
     }
 }

@@ -23,10 +23,10 @@ class KeepassTemplateRepository(
     private val templatesRef = AtomicReference<List<Template>>(emptyList())
 
     init {
-        noteDao.setOnNoteChangeListener { groupUid, _, _ ->
+        noteDao.addOnNoteChangeListener { groupUid, _, _ ->
             checkGroupUid(groupUid)
         }
-        noteDao.setOnNoteInsertListener { groupAndNoteUids ->
+        noteDao.addOnNoteInsertListener { groupAndNoteUids ->
             val groupUids = groupAndNoteUids
                 .map { it.first }
                 .toSet()
@@ -35,10 +35,10 @@ class KeepassTemplateRepository(
                 checkGroupUid(groupUid)
             }
         }
-        noteDao.setOnNoteRemoveListener { groupUid, _ ->
+        noteDao.addOnNoteRemoveListener { groupUid, _ ->
             checkGroupUid(groupUid)
         }
-        groupDao.setOnGroupRemoveLister { groupUid ->
+        groupDao.addOnGroupRemoveLister { groupUid ->
             checkGroupUid(groupUid)
         }
     }

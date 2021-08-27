@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreferenceCompat
+        app:key="@string/pref_is_lock_notification_visible"
+        app:title="@string/pref_is_lock_notification_visible_title" />
+
+    <ListPreference
+        app:key="@string/pref_auto_lock_delay_in_ms"
+        app:title="@string/pref_auto_lock_delay_in_ms_title"
+        app:summary="@string/pref_auto_lock_delay_in_ms_summary"
+        app:entries="@array/pref_auto_lock_entries"
+        app:entryValues="@array/pref_auto_lock_values"/>
+
+    <ListPreference
+        app:key="@string/pref_auto_clear_clipboard_delay_in_ms"
+        app:title="@string/pref_auto_clear_clipboard_delay_in_ms_title"
+        app:summary="@string/pref_auto_clear_clipboard_delay_in_ms_summary"
+        app:entries="@array/pref_auto_clear_clipboard_entries"
+        app:entryValues="@array/pref_auto_clear_clipboard_values"/>
+
+</PreferenceScreen>

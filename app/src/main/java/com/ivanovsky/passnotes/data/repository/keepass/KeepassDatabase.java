@@ -1,11 +1,13 @@
 package com.ivanovsky.passnotes.data.repository.keepass;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.TemplateRepository;
+import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseConfig;
 import com.ivanovsky.passnotes.data.repository.encdb.exception.FailedToWriteDBException;
 import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
@@ -25,12 +27,17 @@ import com.ivanovsky.passnotes.util.Logger;
 import org.linguafranca.pwdb.Credentials;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
+import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.LinkedList;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_CONFIG_TYPE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 
 public class KeepassDatabase implements EncryptedDatabase {
@@ -73,8 +80,6 @@ public class KeepassDatabase implements EncryptedDatabase {
         this.noteRepository = new KeepassNoteRepository(noteDao);
         this.templateRepository = new KeepassTemplateRepository(groupDao, noteDao);
 
-        db.enableRecycleBin(false);
-
         templateRepository.findTemplateNotes();
     }
 
@@ -116,6 +121,36 @@ public class KeepassDatabase implements EncryptedDatabase {
     @Override
     public DatabaseStatus getStatus() {
         return status.get();
+    }
+
+    @NonNull
+    @Override
+    public OperationResult<EncryptedDatabaseConfig> getConfig() {
+        KeepassDatabaseConfig config;
+        synchronized (lock) {
+            config = new KeepassDatabaseConfig(db.isRecycleBinEnabled());
+        }
+
+        return OperationResult.success(config);
+    }
+
+    @NonNull
+    @Override
+    public OperationResult<Boolean> applyConfig(@NonNull EncryptedDatabaseConfig config) {
+        if (!(config instanceof KeepassDatabaseConfig)) {
+            return OperationResult.error(newDbError(MESSAGE_UNSUPPORTED_CONFIG_TYPE));
+        }
+
+        OperationResult<Boolean> result;
+        synchronized (lock) {
+            if (db.isRecycleBinEnabled() != config.isRecycleBinEnabled()) {
+                db.enableRecycleBin(config.isRecycleBinEnabled());
+            }
+
+            result = commit();
+        }
+
+        return result;
     }
 
     @NonNull
@@ -190,5 +225,29 @@ public class KeepassDatabase implements EncryptedDatabase {
 
     public SimpleDatabase getKeepassDatabase() {
         return db;
+    }
+
+    @Nullable
+    public SimpleGroup findGroupByUid(@NonNull UUID groupUid) {
+        SimpleGroup root = db.getRootGroup();
+        if (root == null) return null;
+
+        return findGroupByUid(groupUid, root);
+    }
+
+    @Nullable
+    public SimpleGroup findGroupByUid(@NonNull UUID groupUid, @NonNull SimpleGroup root) {
+        if (groupUid.equals(root.getUuid())) return root;
+
+        LinkedList<SimpleGroup> nextGroups = new LinkedList<>(root.getGroups());
+        SimpleGroup currentGroup;
+        while ((currentGroup = nextGroups.pollFirst()) != null) {
+            if (groupUid.equals(currentGroup.getUuid())) {
+                return currentGroup;
+            }
+            nextGroups.addAll(currentGroup.getGroups());
+        }
+
+        return null;
     }
 }

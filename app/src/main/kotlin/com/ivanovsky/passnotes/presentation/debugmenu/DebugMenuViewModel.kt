@@ -7,8 +7,8 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.repository.SettingsRepository
 import com.ivanovsky.passnotes.data.entity.FSType
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
@@ -27,7 +27,7 @@ class DebugMenuViewModel(
     private val interactor: DebugMenuInteractor,
     private val errorInteractor: ErrorInteractor,
     private val resourceProvider: ResourceProvider,
-    private val settings: SettingsRepository,
+    private val settings: Settings,
     private val router: Router
 ) : ViewModel() {
 

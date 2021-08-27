@@ -5,8 +5,8 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.UiThread
 import com.ivanovsky.passnotes.data.ObserverBus
-import com.ivanovsky.passnotes.data.repository.SettingsRepository
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.ServiceState
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
@@ -15,7 +15,7 @@ import com.ivanovsky.passnotes.util.Logger
 
 class DatabaseLockInteractor(
     private val context: Context,
-    private val settings: SettingsRepository,
+    private val settings: Settings,
     private val lockUseCase: LockDatabaseUseCase
 ) : ObserverBus.DatabaseOpenObserver,
     ObserverBus.DatabaseCloseObserver {
@@ -50,7 +50,7 @@ class DatabaseLockInteractor(
 
         if (isDatabaseOpened &&
             activeScreens.size == 0 &&
-            settings.autoLockDelayInMs != null) {
+            settings.autoLockDelayInMs != -1) {
             startLockTimer()
         }
     }
@@ -79,7 +79,7 @@ class DatabaseLockInteractor(
     }
 
     private fun startLockTimer() {
-        val delay = settings.autoLockDelayInMs ?: return
+        val delay = settings.autoLockDelayInMs
 
         isTimerStarted = true
         handler.postDelayed(

@@ -311,21 +311,19 @@ public class KeepassNoteDao implements NoteDao {
     @NonNull
     @Override
     public OperationResult<UUID> update(Note note) {
-        UUID oldUid = note.getUid();
-        if (oldUid == null) {
+        UUID uid = note.getUid();
+        if (uid == null) {
             return OperationResult.error(newGenericError(MESSAGE_UID_IS_NULL));
         }
 
-        UUID newUid;
         synchronized (db.getLock()) {
-
             SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
             if (group == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
             }
 
             List<? extends SimpleEntry> entries =
-                    group.findEntries(entry -> oldUid.equals(entry.getUuid()), false);
+                    group.findEntries(entry -> uid.equals(entry.getUuid()), false);
             if (entries.size() == 0) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
             } else if (entries.size() > 1) {
@@ -333,16 +331,9 @@ public class KeepassNoteDao implements NoteDao {
             }
 
             SimpleEntry oldEntry = entries.get(0);
-            group.removeEntry(oldEntry);
+            SimpleEntry newEntry = createEntryFromNote(note);
 
-            // TODO: entry insertion can be reused from insert() method
-
-            SimpleEntry newEntry = group.addEntry(createEntryFromNote(note));
-            if (newEntry == null) {
-                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_ADD_ENTRY));
-            }
-
-            newUid = newEntry.getUuid();
+            updateEntryValues(oldEntry, newEntry);
 
             OperationResult<Boolean> commitResult = db.commit();
             if (commitResult.isFailed()) {
@@ -352,10 +343,35 @@ public class KeepassNoteDao implements NoteDao {
         }
 
         if (updateListener != null) {
-            updateListener.onNoteChanged(note.getGroupUid(), oldUid, newUid);
+            updateListener.onNoteChanged(note.getGroupUid(), uid, uid);
         }
 
-        return OperationResult.success(newUid);
+        return OperationResult.success(uid);
+    }
+
+    private void updateEntryValues(SimpleEntry oldEntry, SimpleEntry newEntry) {
+        oldEntry.setTitle(newEntry.getTitle());
+        oldEntry.setUsername(newEntry.getUsername());
+        oldEntry.setPassword(newEntry.getPassword());
+        oldEntry.setUrl(newEntry.getUrl());
+        oldEntry.setNotes(newEntry.getNotes());
+
+        List<String> oldNames = oldEntry.getPropertyNames();
+        for (String propertyName : oldNames) {
+            PropertyType type = parsePropertyType(propertyName);
+            if (!PropertyType.DEFAULT_TYPES.contains(type)) {
+                oldEntry.removeProperty(propertyName);
+            }
+        }
+
+        List<String> newNames = newEntry.getPropertyNames();
+        for (String propertyName : newNames) {
+            PropertyType type = parsePropertyType(propertyName);
+            if (!PropertyType.DEFAULT_TYPES.contains(type)) {
+                oldEntry.setProperty(propertyName, newEntry.getProperty(propertyName),
+                        newEntry.isPropertyProtected(propertyName));
+            }
+        }
     }
 
     @NonNull

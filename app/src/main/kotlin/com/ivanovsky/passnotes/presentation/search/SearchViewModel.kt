@@ -7,7 +7,10 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
-import com.ivanovsky.passnotes.presentation.Screens
+import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
+import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
+import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
+import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -60,9 +63,11 @@ class SearchViewModel(
 
     fun navigateBack() = router.exit()
 
+    fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
+
     fun onLockButtonClicked() {
         interactor.lockDatabase()
-        router.backTo(Screens.UnlockScreen())
+        router.backTo(UnlockScreen())
     }
 
     private fun searchData(query: String) {
@@ -135,7 +140,7 @@ class SearchViewModel(
         hideKeyboardEvent.call()
 
         router.navigateTo(
-            Screens.GroupsScreen(
+            GroupsScreen(
                 GroupsArgs(
                     groupUid = groupUid,
                     isCloseDatabaseOnExit = false
@@ -147,7 +152,7 @@ class SearchViewModel(
     private fun onNoteClicked(noteUid: UUID) {
         hideKeyboardEvent.call()
 
-        router.navigateTo(Screens.NoteScreen(noteUid))
+        router.navigateTo(NoteScreen(noteUid))
     }
 
     companion object {

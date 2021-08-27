@@ -50,7 +50,7 @@ class DatabaseLockInteractor(
 
         if (isDatabaseOpened &&
             activeScreens.size == 0 &&
-            settings.autoLockDelayInMs != null) {
+            settings.autoLockDelayInMs != -1) {
             startLockTimer()
         }
     }
@@ -79,7 +79,7 @@ class DatabaseLockInteractor(
     }
 
     private fun startLockTimer() {
-        val delay = settings.autoLockDelayInMs ?: return
+        val delay = settings.autoLockDelayInMs
 
         isTimerStarted = true
         handler.postDelayed(

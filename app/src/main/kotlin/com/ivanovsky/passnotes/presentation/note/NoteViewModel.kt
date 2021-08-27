@@ -12,6 +12,8 @@ import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
+import com.ivanovsky.passnotes.presentation.Screens
+import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
@@ -121,6 +123,8 @@ class NoteViewModel(
     }
 
     fun navigateBack() = router.exit()
+
+    fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
 
     private fun loadData() {
         val noteUid = this.noteUid ?: return

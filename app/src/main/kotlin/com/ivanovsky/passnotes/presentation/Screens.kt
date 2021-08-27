@@ -18,6 +18,9 @@ import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseFragment
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginFragment
+import com.ivanovsky.passnotes.presentation.settings.app.AppSettingsFragment
+import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsFragment
+import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsFragment
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListFragment
 import com.ivanovsky.passnotes.presentation.unlock.UnlockFragment
@@ -105,6 +108,22 @@ object Screens {
     class AboutScreen : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
             AboutFragment.newInstance()
+    }
+
+    // Settings
+    class MainSettingsScreen : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            MainSettingsFragment.newInstance()
+    }
+
+    class AppSettingsScreen : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            AppSettingsFragment.newInstance()
+    }
+
+    class DatabaseSettingsScreen : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            DatabaseSettingsFragment.newInstance()
     }
 
     // Debug

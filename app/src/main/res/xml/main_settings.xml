@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:title="@string/database">
+
+        <Preference
+            app:fragment="com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsFragment"
+            app:title="@string/database_settings"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="@string/application">
+
+        <Preference
+            app:fragment="com.ivanovsky.passnotes.presentation.settings.app.AppSettingsFragment"
+            app:title="@string/application_settings"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

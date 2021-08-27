@@ -57,7 +57,7 @@ class SearchFragment : Fragment() {
                 true
             }
             R.id.menu_settings -> {
-                // TODO: implement
+                viewModel.onSettingsButtonClicked()
                 true
             }
             else -> super.onOptionsItemSelected(item)

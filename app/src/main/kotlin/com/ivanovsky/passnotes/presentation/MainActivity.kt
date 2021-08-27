@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
 import com.github.terrakok.cicerone.NavigatorHolder
 import com.github.terrakok.cicerone.Router
 import com.github.terrakok.cicerone.androidx.AppNavigator
@@ -17,15 +19,19 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
+import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
 import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 
-class MainActivity : AppCompatActivity() {
+class MainActivity :
+    AppCompatActivity(),
+    PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
     private lateinit var drawer: DrawerLayout
     private lateinit var navigationView: NavigationView
 
     private val navigatorHolder: NavigatorHolder by inject()
     private val router: Router by inject()
+    private val settingsRouter: SettingsRouter by inject()
     private val navigator = AppNavigator(this, R.id.fragment_container)
 
     private val viewModel: UnlockViewModel by lazy {
@@ -106,6 +112,15 @@ class MainActivity : AppCompatActivity() {
 
             else -> false
         }
+    }
+
+    override fun onPreferenceStartFragment(
+        caller: PreferenceFragmentCompat?,
+        pref: Preference?
+    ): Boolean {
+        val settingsFragmentName = pref?.fragment ?: throw IllegalStateException()
+        settingsRouter.navigateTo(settingsFragmentName)
+        return true
     }
 
     companion object {

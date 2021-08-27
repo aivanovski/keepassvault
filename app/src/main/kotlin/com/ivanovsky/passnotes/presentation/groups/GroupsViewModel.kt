@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.presentation.Screens.GroupScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
+import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
 import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
@@ -298,9 +299,9 @@ class GroupsViewModel(
         }
     }
 
-    fun onSearchButtonClicked() {
-        router.navigateTo(SearchScreen())
-    }
+    fun onSearchButtonClicked() = router.navigateTo(SearchScreen())
+
+    fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
 
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->

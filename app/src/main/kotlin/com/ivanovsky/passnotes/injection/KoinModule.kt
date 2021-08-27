@@ -63,6 +63,7 @@ import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModel
 import com.ivanovsky.passnotes.presentation.selectdb.cells.factory.SelectDatabaseCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginViewModel
+import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
 import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
@@ -148,6 +149,7 @@ object KoinModule {
         single { Cicerone.create() }
         single { provideCiceroneRouter(get()) }
         single { provideCiceroneNavigatorHolder(get()) }
+        single { SettingsRouter(get()) }
 
         // ViewModels
         viewModel { StorageListViewModel(get(), get(), get(), get(), get(), get()) }

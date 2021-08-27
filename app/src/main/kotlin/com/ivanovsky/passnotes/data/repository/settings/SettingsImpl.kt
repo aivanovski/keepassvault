@@ -5,6 +5,10 @@ import android.content.SharedPreferences
 import androidx.annotation.StringRes
 import androidx.preference.PreferenceManager
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.DROPBOX_AUTH_TOKEN
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXTERNAL_STORAGE_CACHE_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.BOOLEAN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.INT
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.STRING
@@ -17,31 +21,44 @@ class SettingsImpl(
 ) : Settings {
 
     private val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-    private val nameResIdToPreferenceMap: Map<Int, Pref> = PREFS.associateBy { it.keyId }
+    private val nameResIdToPreferenceMap: Map<Int, Pref> = Pref.values().associateBy { it.keyId }
 
     override var isExternalStorageCacheEnabled: Boolean
-        get() = getBoolean(R.string.pref_is_external_storage_cache_enabled)
+        get() = getBoolean(IS_EXTERNAL_STORAGE_CACHE_ENABLED)
         set(value) {
-            putBoolean(R.string.pref_is_external_storage_cache_enabled, value)
+            putBoolean(IS_EXTERNAL_STORAGE_CACHE_ENABLED, value)
         }
 
     override var isLockNotificationVisible: Boolean
-        get() = getBoolean(R.string.pref_is_lock_notification_visible)
+        get() = getBoolean(IS_LOCK_NOTIFICATION_VISIBLE)
         set(value) {
-            putBoolean(R.string.pref_is_lock_notification_visible, value)
+            putBoolean(IS_LOCK_NOTIFICATION_VISIBLE, value)
         }
 
     override var autoLockDelayInMs: Int
-        get() = getInt(R.string.pref_auto_lock_delay_in_ms)
+        get() = getString(AUTO_LOCK_DELAY_IN_MS)?.toInt()
+            ?: (AUTO_LOCK_DELAY_IN_MS.defaultValue as String).toInt()
         set(value) {
-            putInt(R.string.pref_auto_lock_delay_in_ms, value)
+            putString(AUTO_LOCK_DELAY_IN_MS, value.toString())
         }
 
     override var dropboxAuthToken: String?
-        get() = getString(R.string.pref_dropbox_auth_token)
+        get() = getString(DROPBOX_AUTH_TOKEN)
         set(value) {
-            putString(R.string.pref_dropbox_auth_token, value)
+            putString(DROPBOX_AUTH_TOKEN, value)
         }
+
+    override fun initDefaultIfNeed(pref: Pref) {
+        if (preferences.contains(keyFor(pref))) {
+            return
+        }
+
+        when (pref.type) {
+            BOOLEAN -> putBoolean(pref, getDefaultValue(pref))
+            INT -> putInt(pref, getDefaultValue(pref))
+            STRING -> putString(pref, getDefaultValue(pref))
+        }
+    }
 
     fun clean() {
         val editor = preferences.edit()
@@ -49,33 +66,33 @@ class SettingsImpl(
         editor.apply()
     }
 
-    private fun getBoolean(@StringRes keyId: Int): Boolean {
-        return preferences.getBoolean(keyFor(keyId), getDefaultValue(keyId))
+    private fun getBoolean(pref: Pref): Boolean {
+        return preferences.getBoolean(keyFor(pref), getDefaultValue(pref))
     }
 
-    private fun getString(@StringRes keyId: Int): String? {
-        return preferences.getString(keyFor(keyId), getDefaultValue(keyId))
+    private fun getString(pref: Pref): String? {
+        return preferences.getString(keyFor(pref), getDefaultValue(pref))
     }
 
-    private fun getInt(@StringRes keyId: Int): Int {
-        return preferences.getInt(keyFor(keyId), getDefaultValue(keyId))
+    private fun getInt(pref: Pref): Int {
+        return preferences.getInt(keyFor(pref), getDefaultValue(pref))
     }
 
-    private fun putBoolean(@StringRes keyId: Int, value: Boolean) {
+    private fun putBoolean(pref: Pref, value: Boolean) {
         putValue {
-            putBoolean(keyFor(keyId), value)
+            putBoolean(keyFor(pref), value)
         }
     }
 
-    private fun putString(@StringRes keyId: Int, value: String?) {
+    private fun putString(pref: Pref, value: String?) {
         putValue {
-            putString(keyFor(keyId), value)
+            putString(keyFor(pref), value)
         }
     }
 
-    private fun putInt(@StringRes keyId: Int, value: Int) {
+    private fun putInt(pref: Pref, value: Int) {
         putValue {
-            putInt(keyFor(keyId), value)
+            putInt(keyFor(pref), value)
         }
     }
 
@@ -85,10 +102,10 @@ class SettingsImpl(
         editor.apply()
     }
 
-    private fun keyFor(@StringRes keyId: Int) = resourceProvider.getString(keyId)
+    private fun keyFor(pref: Pref) = resourceProvider.getString(pref.keyId)
 
-    private inline fun <reified T> getDefaultValue(@StringRes keyId: Int): T {
-        return nameResIdToPreferenceMap[keyId]?.defaultValue as T
+    private inline fun <reified T> getDefaultValue(pref: Pref): T {
+        return nameResIdToPreferenceMap[pref.keyId]?.defaultValue as T
     }
 
     enum class PrefType {
@@ -97,45 +114,35 @@ class SettingsImpl(
         STRING
     }
 
-    data class Pref(
+    enum class Pref(
         @StringRes val keyId: Int,
         val type: PrefType,
         val defaultValue: Any?
-    )
+    ) {
+        // Boolean prefs
+        IS_EXTERNAL_STORAGE_CACHE_ENABLED(
+            keyId = R.string.pref_is_external_storage_cache_enabled,
+            type = BOOLEAN,
+            defaultValue = false
+        ),
+        IS_LOCK_NOTIFICATION_VISIBLE(
+            keyId = R.string.pref_is_lock_notification_visible,
+            type = BOOLEAN,
+            defaultValue = true
+        ),
 
-    companion object {
-        private val LOG_TAG = SettingsImpl::class.simpleName
+        // Int prefs
+        AUTO_LOCK_DELAY_IN_MS(
+            keyId = R.string.pref_auto_lock_delay_in_ms,
+            type = STRING,
+            defaultValue = TimeUnit.MINUTES.toMillis(5).toString()
+        ),
 
-        private val DEFAULT_AUTO_LOCK_DELAY = TimeUnit.MINUTES
-            .toMillis(5)
-            .toInt()
-
-        private val PREFS = listOf(
-            // Boolean prefs
-            Pref(
-                keyId = R.string.pref_is_external_storage_cache_enabled,
-                type = BOOLEAN,
-                defaultValue = false
-            ),
-            Pref(
-                keyId = R.string.pref_is_lock_notification_visible,
-                type = BOOLEAN,
-                defaultValue = true
-            ),
-
-            // Int prefs
-            Pref(
-                keyId = R.string.pref_auto_lock_delay_in_ms,
-                type = INT,
-                defaultValue = DEFAULT_AUTO_LOCK_DELAY
-            ),
-
-            // String prefs
-            Pref(
-                keyId = R.string.pref_dropbox_auth_token,
-                type = STRING,
-                defaultValue = null
-            )
+        // String prefs
+        DROPBOX_AUTH_TOKEN(
+            keyId = R.string.pref_dropbox_auth_token,
+            type = STRING,
+            defaultValue = null
         )
     }
 }

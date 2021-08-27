@@ -89,6 +89,10 @@ class GroupsFragment : Fragment() {
                 viewModel.onSearchButtonClicked()
                 true
             }
+            R.id.menu_settings -> {
+                viewModel.onSettingsButtonClicked()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }

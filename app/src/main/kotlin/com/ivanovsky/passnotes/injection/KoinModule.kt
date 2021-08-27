@@ -29,6 +29,8 @@ import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
 import com.ivanovsky.passnotes.domain.interactor.selectdb.SelectDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
+import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
+import com.ivanovsky.passnotes.domain.interactor.settings.main.MainSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
@@ -64,6 +66,8 @@ import com.ivanovsky.passnotes.presentation.selectdb.cells.factory.SelectDatabas
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginViewModel
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
+import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsViewModel
+import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
 import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
@@ -123,6 +127,8 @@ object KoinModule {
         single { DatabaseLockInteractor(get(), get(), get()) }
         single { SelectDatabaseInteractor(get(), get(), get(), get()) }
         single { SearchInteractor(get(), get(), get(), get()) }
+        single { MainSettingsInteractor(get()) }
+        single { DatabaseSettingsInteractor(get(), get()) }
 
         // Cell factories
         single { DatabaseStatusCellModelFactory(get()) }
@@ -164,6 +170,8 @@ object KoinModule {
         viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }
         viewModel { SearchViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { AboutViewModel(get(), get()) }
+        viewModel { MainSettingsViewModel(get(), get()) }
+        viewModel { DatabaseSettingsViewModel(get(), get()) }
         factory { UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     }
 

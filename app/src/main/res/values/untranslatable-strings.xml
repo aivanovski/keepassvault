@@ -9,6 +9,10 @@
     <string name="pref_is_lock_notification_visible" translatable="false">isLockNotificationVisible</string>
     <string name="pref_is_external_storage_cache_enabled" translatable="false">isExternalStorageCacheEnabled</string>
 
+    <string name="pref_database_settings_fragment" translatable="false">databaseSettingsFragment</string>
+    <string name="pref_is_recycle_bin_enabled" translatable="false">isRecycleBinEnabled</string>
+    <string name="pref_progress">progress</string>
+
     <string-array name="pref_auto_lock_entries">
         <item>30 seconds</item>
         <item>1 minute</item>

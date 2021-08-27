@@ -17,6 +17,12 @@ public interface EncryptedDatabase {
     DatabaseStatus getStatus();
 
     @NonNull
+    OperationResult<EncryptedDatabaseConfig> getConfig();
+
+    @NonNull
+    OperationResult<Boolean> applyConfig(@NonNull EncryptedDatabaseConfig config);
+
+    @NonNull
     GroupRepository getGroupRepository();
 
     @NonNull

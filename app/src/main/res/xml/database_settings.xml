@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.ivanovsky.passnotes.presentation.core.widget.ProgressPreference
+        app:key="@string/pref_progress"
+        app:isPreferenceVisible="true"/>
+
+    <CheckBoxPreference
+        app:key="@string/pref_is_recycle_bin_enabled"
+        app:isPreferenceVisible="false"
+        app:title="@string/pref_is_recycle_bin_enabled_title"
+        app:summary="@string/pref_is_recycle_bin_enabled_summary"/>
+
+</PreferenceScreen>

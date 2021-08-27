@@ -6,6 +6,7 @@
         app:title="@string/database">
 
         <Preference
+            app:key="@string/pref_database_settings_fragment"
             app:fragment="com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsFragment"
             app:title="@string/database_settings"/>
 

@@ -5,6 +5,7 @@
 
     <string name="pref_dropbox_auth_token" translatable="false">dropboxAuthToken</string>
     <string name="pref_auto_lock_delay_in_ms" translatable="false">autoLockDelayInMs</string>
+    <string name="pref_auto_clear_clipboard_delay_in_ms" translatable="false">autoClearClipboardDelayInMs</string>
     <string name="pref_is_lock_notification_visible" translatable="false">isLockNotificationVisible</string>
     <string name="pref_is_external_storage_cache_enabled" translatable="false">isExternalStorageCacheEnabled</string>
 
@@ -31,4 +32,21 @@
         <item>3600000</item>
         <item>-1</item>
     </string-array>
+
+    <string-array name="pref_auto_clear_clipboard_entries">
+        <item>15 seconds</item>
+        <item>30 seconds</item>
+        <item>1 minute</item>
+        <item>2 minutes</item>
+        <item>5 minutes</item>
+    </string-array>
+
+    <string-array name="pref_auto_clear_clipboard_values">
+        <item>15000</item>
+        <item>30000</item>
+        <item>60000</item>
+        <item>120000</item>
+        <item>300000</item>
+    </string-array>
+
 </resources>

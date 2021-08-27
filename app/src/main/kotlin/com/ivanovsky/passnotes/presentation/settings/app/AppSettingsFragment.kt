@@ -6,6 +6,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.repository.settings.Settings
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
@@ -28,6 +29,7 @@ class AppSettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         settings.initDefaultIfNeed(IS_LOCK_NOTIFICATION_VISIBLE)
         settings.initDefaultIfNeed(AUTO_LOCK_DELAY_IN_MS)
+        settings.initDefaultIfNeed(AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS)
 
         setPreferencesFromResource(R.xml.application_settings, rootKey)
     }

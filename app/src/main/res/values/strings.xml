@@ -176,5 +176,7 @@
     <string name="pref_auto_lock_delay_in_ms_title">Database lock timeout</string>
     <string name="pref_auto_lock_delay_in_ms_summary">Interval after which database will be locked due to inactivity</string>
     <string name="pref_is_lock_notification_visible_title">Show notification with lock button</string>
+    <string name="pref_auto_clear_clipboard_delay_in_ms_title">Clear clipboard timeout</string>
+    <string name="pref_auto_clear_clipboard_delay_in_ms_summary">Interval after which clipboard will be cleared</string>
 
 </resources>

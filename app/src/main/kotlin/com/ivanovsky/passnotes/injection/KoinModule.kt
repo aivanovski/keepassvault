@@ -116,7 +116,7 @@ object KoinModule {
         single { NewDatabaseInteractor(get(), get(), get()) }
         single { GroupInteractor(get(), get(), get()) }
         single { DebugMenuInteractor(get(), get(), get(), get()) }
-        single { NoteInteractor(get(), get(), get(), get()) }
+        single { NoteInteractor(get(), get(), get(), get(), get()) }
         single { GroupsInteractor(get(), get(), get(), get(), get(), get()) }
         single { NoteEditorInteractor(get(), get()) }
         single { ServerLoginInteractor(get(), get(), get()) }

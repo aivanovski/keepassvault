@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.annotation.StringRes
 import androidx.preference.PreferenceManager
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.DROPBOX_AUTH_TOKEN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXTERNAL_STORAGE_CACHE_ENABLED
@@ -40,6 +41,13 @@ class SettingsImpl(
             ?: (AUTO_LOCK_DELAY_IN_MS.defaultValue as String).toInt()
         set(value) {
             putString(AUTO_LOCK_DELAY_IN_MS, value.toString())
+        }
+
+    override var autoClearClipboardDelayInMs: Int
+        get() = getString(AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS)?.toInt()
+            ?: (AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS.defaultValue as String).toInt()
+        set(value) {
+            putString(AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS, value.toString())
         }
 
     override var dropboxAuthToken: String?
@@ -136,6 +144,11 @@ class SettingsImpl(
             keyId = R.string.pref_auto_lock_delay_in_ms,
             type = STRING,
             defaultValue = TimeUnit.MINUTES.toMillis(5).toString()
+        ),
+        AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS(
+            keyId = R.string.pref_auto_clear_clipboard_delay_in_ms,
+            type = STRING,
+            defaultValue = TimeUnit.SECONDS.toMillis(30).toString()
         ),
 
         // String prefs

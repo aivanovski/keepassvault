@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.keepass;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
@@ -26,10 +27,13 @@ import com.ivanovsky.passnotes.util.Logger;
 import org.linguafranca.pwdb.Credentials;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
+import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.LinkedList;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_CONFIG_TYPE;
@@ -221,5 +225,29 @@ public class KeepassDatabase implements EncryptedDatabase {
 
     public SimpleDatabase getKeepassDatabase() {
         return db;
+    }
+
+    @Nullable
+    public SimpleGroup findGroupByUid(@NonNull UUID groupUid) {
+        SimpleGroup root = db.getRootGroup();
+        if (root == null) return null;
+
+        return findGroupByUid(groupUid, root);
+    }
+
+    @Nullable
+    public SimpleGroup findGroupByUid(@NonNull UUID groupUid, @NonNull SimpleGroup root) {
+        if (groupUid.equals(root.getUuid())) return root;
+
+        LinkedList<SimpleGroup> nextGroups = new LinkedList<>(root.getGroups());
+        SimpleGroup currentGroup;
+        while ((currentGroup = nextGroups.pollFirst()) != null) {
+            if (groupUid.equals(currentGroup.getUuid())) {
+                return currentGroup;
+            }
+            nextGroups.addAll(currentGroup.getGroups());
+        }
+
+        return null;
     }
 }

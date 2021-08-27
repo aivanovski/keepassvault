@@ -15,9 +15,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_COMPLETE_OPERATION;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP;
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_REMOVE_ROOT_GROUP;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNKNOWN_ERROR;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 
@@ -61,7 +61,8 @@ public class KeepassGroupDao implements GroupDao {
         List<Group> groups = new ArrayList<>();
 
         synchronized (db.getLock()) {
-            SimpleGroup parentGroup = db.getKeepassDatabase().findGroup(parentGroupUid);
+            SimpleGroup parentGroup = db.findGroupByUid(parentGroupUid);
+
             if (parentGroup == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
             }
@@ -131,7 +132,7 @@ public class KeepassGroupDao implements GroupDao {
 
         SimpleGroup newGroup;
         synchronized (db.getLock()) {
-            SimpleGroup parentGroup = keepassDb.findGroup(parentGroupUid);
+            SimpleGroup parentGroup = db.findGroupByUid(parentGroupUid);
             if (parentGroup == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
             }
@@ -156,20 +157,11 @@ public class KeepassGroupDao implements GroupDao {
     @NonNull
     @Override
     public OperationResult<Boolean> remove(UUID groupUid) {
-        SimpleDatabase keepassDb = db.getKeepassDatabase();
-
         synchronized (db.getLock()) {
-            SimpleGroup group = keepassDb.findGroup(groupUid);
-            if (group == null) {
-                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+            boolean deleted = db.getKeepassDatabase().deleteGroup(groupUid);
+            if (!deleted) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_COMPLETE_OPERATION));
             }
-
-            SimpleGroup parentGroup = group.getParent();
-            if (parentGroup == null) {
-                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_REMOVE_ROOT_GROUP));
-            }
-
-            parentGroup.removeGroup(group);
 
             OperationResult<Boolean> commitResult = db.commit();
             if (commitResult.isFailed()) {

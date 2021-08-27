@@ -24,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_NOT_FOUND;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_DUPLICATED_NOTE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ADD_ENTRY;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_COMPLETE_OPERATION;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_NOTE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL;
@@ -109,7 +110,7 @@ public class KeepassNoteDao implements NoteDao {
         List<Note> notes = new ArrayList<>();
 
         synchronized (db.getLock()) {
-            SimpleGroup group = db.getKeepassDatabase().findGroup(groupUid);
+            SimpleGroup group = db.findGroupByUid(groupUid);
             if (group == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
             }
@@ -205,7 +206,7 @@ public class KeepassNoteDao implements NoteDao {
         SimpleEntry newEntry;
 
         synchronized (db.getLock()) {
-            SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
+            SimpleGroup group = db.findGroupByUid(note.getGroupUid());
             if (group == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
             }
@@ -321,7 +322,7 @@ public class KeepassNoteDao implements NoteDao {
         }
 
         synchronized (db.getLock()) {
-            SimpleGroup group = db.getKeepassDatabase().findGroup(note.getGroupUid());
+            SimpleGroup group = db.findGroupByUid(note.getGroupUid());
             if (group == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
             }
@@ -379,26 +380,20 @@ public class KeepassNoteDao implements NoteDao {
     @NonNull
     @Override
     public OperationResult<Boolean> remove(UUID noteUid) {
-        SimpleGroup group;
-
+        boolean deleted;
+        Note note;
         synchronized (db.getLock()) {
-            SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
-
-            List<? extends SimpleEntry> entries = rootGroup.findEntries(
-                    entry -> entry.getUuid().equals(noteUid),
-                    true);
-            if (entries.size() != 1) {
-                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
+            OperationResult<Note> getNote = getNoteByUid(noteUid);
+            if (getNote.isFailed()) {
+                return getNote.takeError();
             }
 
-            SimpleEntry note = entries.get(0);
+            note = getNote.getObj();
 
-            group = note.getParent();
-            if (group == null) {
-                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+            deleted = db.getKeepassDatabase().deleteEntry(noteUid);
+            if (!deleted) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_COMPLETE_OPERATION));
             }
-
-            group.removeEntry(note);
 
             OperationResult<Boolean> commitResult = db.commit();
             if (commitResult.isFailed()) {
@@ -406,7 +401,7 @@ public class KeepassNoteDao implements NoteDao {
             }
         }
 
-        notifyNoteRemoved(group.getUuid(), noteUid);
+        notifyNoteRemoved(note.getGroupUid(), noteUid);
 
         return OperationResult.success(true);
     }

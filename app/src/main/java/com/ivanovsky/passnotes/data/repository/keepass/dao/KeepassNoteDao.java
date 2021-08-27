@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_NOT_FOUND;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_DUPLICATED_NOTE;
@@ -42,9 +43,9 @@ public class KeepassNoteDao implements NoteDao {
     private static final String PROPERTY_NOTES = "Notes";
 
     private final KeepassDatabase db;
-    private volatile OnNoteUpdateListener updateListener;
-    private volatile OnNoteInsertListener insertListener;
-    private volatile OnNoteRemoveListener removeListener;
+    private final List<OnNoteUpdateListener> updateListeners;
+    private final List<OnNoteInsertListener> insertListeners;
+    private final List<OnNoteRemoveListener> removeListeners;
 
     public interface OnNoteUpdateListener {
         void onNoteChanged(UUID groupUid, UUID oldNoteUid, UUID newNoteUid);
@@ -60,18 +61,21 @@ public class KeepassNoteDao implements NoteDao {
 
     public KeepassNoteDao(KeepassDatabase db) {
         this.db = db;
+        this.updateListeners = new CopyOnWriteArrayList<>();
+        this.insertListeners = new CopyOnWriteArrayList<>();
+        this.removeListeners = new CopyOnWriteArrayList<>();
     }
 
-    public void setOnNoteChangeListener(OnNoteUpdateListener updateListener) {
-        this.updateListener = updateListener;
+    public void addOnNoteChangeListener(OnNoteUpdateListener updateListener) {
+        updateListeners.add(updateListener);
     }
 
-    public void setOnNoteInsertListener(OnNoteInsertListener insertListener) {
-        this.insertListener = insertListener;
+    public void addOnNoteInsertListener(OnNoteInsertListener insertListener) {
+        insertListeners.add(insertListener);
     }
 
-    public void setOnNoteRemoveListener(OnNoteRemoveListener removeListener) {
-        this.removeListener = removeListener;
+    public void addOnNoteRemoveListener(OnNoteRemoveListener removeListener) {
+        removeListeners.add(removeListener);
     }
 
     @NonNull
@@ -222,8 +226,8 @@ public class KeepassNoteDao implements NoteDao {
 
         UUID newEntryUid = newEntry.getUuid();
 
-        if (notifyListener && insertListener != null) {
-            insertListener.onNoteCreated(singletonList(
+        if (notifyListener) {
+            notifyNoteInserted(singletonList(
                     new Pair<>(note.getGroupUid(), newEntryUid)));
         }
 
@@ -246,7 +250,7 @@ public class KeepassNoteDao implements NoteDao {
                 return commitResult.takeError();
             }
 
-            if (insertListener != null) {
+            if (insertListeners.size() != 0) {
                 List<Pair<UUID, UUID>> groupAndNoteUids = Stream.of(results)
                         .map(noteToResultPair -> new Pair<>(
                                 noteToResultPair.first.getGroupUid(),
@@ -254,7 +258,7 @@ public class KeepassNoteDao implements NoteDao {
                         ))
                         .collect(Collectors.toList());
 
-                insertListener.onNoteCreated(groupAndNoteUids);
+                notifyNoteInserted(groupAndNoteUids);
             }
 
             return OperationResult.success(true);
@@ -342,9 +346,7 @@ public class KeepassNoteDao implements NoteDao {
             }
         }
 
-        if (updateListener != null) {
-            updateListener.onNoteChanged(note.getGroupUid(), uid, uid);
-        }
+        notifyNoteUpdated(note.getGroupUid(), uid, uid);
 
         return OperationResult.success(uid);
     }
@@ -404,10 +406,26 @@ public class KeepassNoteDao implements NoteDao {
             }
         }
 
-        if (removeListener != null) {
-            removeListener.onNoteRemove(group.getUuid(), noteUid);
-        }
+        notifyNoteRemoved(group.getUuid(), noteUid);
 
         return OperationResult.success(true);
+    }
+
+    private void notifyNoteUpdated(UUID groupUid, UUID oldNoteUid, UUID newNoteUid) {
+        for (OnNoteUpdateListener listener : updateListeners) {
+            listener.onNoteChanged(groupUid, oldNoteUid, newNoteUid);
+        }
+    }
+
+    private void notifyNoteInserted(List<Pair<UUID, UUID>> groupAndNoteUids) {
+        for (OnNoteInsertListener listener : insertListeners) {
+            listener.onNoteCreated(groupAndNoteUids);
+        }
+    }
+
+    private void notifyNoteRemoved(UUID groupUid, UUID noteUid) {
+        for (OnNoteRemoveListener listener : removeListeners) {
+            listener.onNoteRemove(groupUid, noteUid);
+        }
     }
 }

@@ -13,6 +13,7 @@ import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP;
@@ -23,7 +24,7 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 public class KeepassGroupDao implements GroupDao {
 
     private final KeepassDatabase db;
-    private volatile OnGroupRemoveLister removeLister;
+    private final List<OnGroupRemoveLister> removeListeners;
 
     public interface OnGroupRemoveLister {
         void onGroupRemoved(UUID groupUid);
@@ -31,10 +32,11 @@ public class KeepassGroupDao implements GroupDao {
 
     public KeepassGroupDao(KeepassDatabase db) {
         this.db = db;
+        this.removeListeners = new CopyOnWriteArrayList<>();
     }
 
-    public void setOnGroupRemoveLister(OnGroupRemoveLister removeLister) {
-        this.removeLister = removeLister;
+    public void addOnGroupRemoveLister(OnGroupRemoveLister removeLister) {
+        removeListeners.add(removeLister);
     }
 
     @NonNull
@@ -175,10 +177,14 @@ public class KeepassGroupDao implements GroupDao {
             }
         }
 
-        if (removeLister != null) {
-            removeLister.onGroupRemoved(groupUid);
-        }
+        notifyOnGroupRemoved(groupUid);
 
         return OperationResult.success(true);
+    }
+
+    private void notifyOnGroupRemoved(UUID groupUid) {
+        for (OnGroupRemoveLister lister : removeListeners) {
+            lister.onGroupRemoved(groupUid);
+        }
     }
 }

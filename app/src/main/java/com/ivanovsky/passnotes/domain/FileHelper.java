@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.domain;
 
 import android.content.Context;
 
-import com.ivanovsky.passnotes.data.repository.SettingsRepository;
+import com.ivanovsky.passnotes.data.repository.settings.Settings;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
 
 import java.io.BufferedInputStream;
@@ -21,9 +21,9 @@ import androidx.annotation.Nullable;
 public class FileHelper {
 
     private final Context context;
-    private final SettingsRepository settings;
+    private final Settings settings;
 
-    public FileHelper(Context context, SettingsRepository settings) {
+    public FileHelper(Context context, Settings settings) {
         this.context = context;
         this.settings = settings;
     }

@@ -5,13 +5,13 @@ import com.dropbox.core.android.Auth
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.ServerCredentials
-import com.ivanovsky.passnotes.data.repository.SettingsRepository
 import com.ivanovsky.passnotes.data.repository.file.AuthType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator
 import com.ivanovsky.passnotes.data.repository.file.exception.IncorrectUseException
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 
 class DropboxAuthenticator(
-    private val settings: SettingsRepository
+    private val settings: Settings
 ) : FileSystemAuthenticator {
 
     fun getAuthToken(): String? {

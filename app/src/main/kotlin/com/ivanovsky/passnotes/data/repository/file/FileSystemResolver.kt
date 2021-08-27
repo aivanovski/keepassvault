@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.file
 
 import com.ivanovsky.passnotes.data.entity.FSAuthority
-import com.ivanovsky.passnotes.data.repository.SettingsRepository
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.PermissionHelper
@@ -13,12 +12,13 @@ import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientAdapte
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.webdav.WebDavClientV2
 import com.ivanovsky.passnotes.data.repository.file.webdav.WebdavAuthenticator
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import okhttp3.OkHttpClient
 
 class FileSystemResolver(
-    private val settings: SettingsRepository,
+    private val settings: Settings,
     private val remoteFileRepository: RemoteFileRepository,
     private val fileHelper: FileHelper,
     private val permissionHelper: PermissionHelper,

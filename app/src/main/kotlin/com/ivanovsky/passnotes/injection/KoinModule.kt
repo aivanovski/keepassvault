@@ -9,12 +9,13 @@ import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
-import com.ivanovsky.passnotes.data.repository.SettingsRepository
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
 import com.ivanovsky.passnotes.data.repository.db.converters.FSAuthorityTypeConverter
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.*
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
@@ -74,10 +75,10 @@ import org.koin.dsl.module
 object KoinModule {
 
     val appModule = module {
-        single { SettingsRepository(get()) }
+        single { ResourceProvider(get()) }
+        single { SettingsImpl(get(), get()) as Settings }
         single { FileHelper(get(), get()) }
         single { PermissionHelper(get()) }
-        single { ResourceProvider(get()) }
         single { ErrorInteractor(get()) }
         single { LocaleProvider(get()) }
         single { DispatcherProvider() }

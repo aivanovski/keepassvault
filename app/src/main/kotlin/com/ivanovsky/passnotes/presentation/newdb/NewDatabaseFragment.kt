@@ -8,6 +8,7 @@ import com.ivanovsky.passnotes.databinding.NewDatabaseFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class NewDatabaseFragment : FragmentWithDoneButton() {
@@ -59,6 +60,9 @@ class NewDatabaseFragment : FragmentWithDoneButton() {
         }
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
             hideKeyboard()
+        }
+        viewModel.showSnackBarEvent.observe(viewLifecycleOwner) {
+            showSnackbarMessage(it)
         }
     }
 

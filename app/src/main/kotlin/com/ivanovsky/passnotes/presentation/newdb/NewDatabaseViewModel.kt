@@ -20,9 +20,7 @@ import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.regex.Pattern
 
@@ -46,7 +44,9 @@ class NewDatabaseViewModel(
     val storageType = MutableLiveData<String>()
     val storagePath = MutableLiveData(resourceProvider.getString(R.string.not_selected))
     val doneButtonVisibility = MutableLiveData(true)
+    val isAddTemplates = MutableLiveData(true)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
+    val showSnackBarEvent = SingleLiveEvent<String>()
 
     private var selectedStorageDir: FileDescriptor? = null
 
@@ -54,6 +54,7 @@ class NewDatabaseViewModel(
         val filename = this.filename.value ?: return
         val password = this.password.value ?: return
         val confirmation = this.confirmation.value ?: return
+        val isAddTemplates = this.isAddTemplates.value ?: false
 
         if (!isFieldsValid(filename, password, confirmation)) {
             return
@@ -76,9 +77,7 @@ class NewDatabaseViewModel(
         )
 
         viewModelScope.launch {
-            val result = withContext(Dispatchers.Default) {
-                interactor.createNewDatabaseAndOpen(dbKey, dbFile)
-            }
+            val result = interactor.createNewDatabaseAndOpen(dbKey, dbFile, isAddTemplates)
 
             if (result.isSucceededOrDeferred) {
                 val created = result.obj
@@ -165,6 +164,12 @@ class NewDatabaseViewModel(
             }
         }
         router.navigateTo(StorageListScreen(Action.PICK_STORAGE))
+    }
+
+    fun onTemplatesInfoButtonClicked() {
+        showSnackBarEvent.call(
+            resourceProvider.getString(R.string.add_templates_info_message)
+        )
     }
 
     fun navigateBack() = router.exit()

@@ -39,6 +39,11 @@
         <item name="android:lines">1</item>
     </style>
 
+    <style name="Material.CheckBox">
+        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:textSize">@dimen/material_primary_text_size</item>
+    </style>
+
     <!-- TODO: create style according to new material guideline-->
     <style name="Material.ContainedButton" parent="@style/Widget.MaterialComponents.Button.UnelevatedButton">
         <item name="android:layout_height">36dp</item>
@@ -53,8 +58,8 @@
     <style name="Material.OutlinedButton" parent="@style/Widget.MaterialComponents.Button.OutlinedButton"></style>
 
     <style name="Material.BorderlessButton">
-        <item name="android:minWidth">48dp</item>
-        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">@dimen/borderless_icon_button_size</item>
+        <item name="android:minHeight">@dimen/borderless_icon_button_size</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 

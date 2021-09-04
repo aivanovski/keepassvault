@@ -104,13 +104,37 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+                <CheckBox
+                    android:id="@+id/addTemplatesCheckBox"
+                    style="@style/Material.CheckBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/element_margin"
+                    android:checked="@={viewModel.isAddTemplates}"
+                    android:minHeight="@dimen/borderless_icon_button_size"
+                    android:text="@string/add_note_templates"
+                    app:layout_constraintEnd_toStartOf="@id/templatesInfoIcon"
+                    app:layout_constraintStart_toEndOf="@id/guidelineStart"
+                    app:layout_constraintTop_toBottomOf="@id/storageLayout" />
+
+                <ImageButton
+                    android:id="@+id/templatesInfoIcon"
+                    style="@style/Material.BorderlessButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.onTemplatesInfoButtonClicked()}"
+                    app:layout_constraintBottom_toBottomOf="@id/addTemplatesCheckBox"
+                    app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+                    app:layout_constraintTop_toTopOf="@id/addTemplatesCheckBox"
+                    app:srcCompat="@drawable/ic_info_grey_600_24dp" />
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/fileExtensionLayout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/element_margin"
                     app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
-                    app:layout_constraintTop_toBottomOf="@id/storageLayout">
+                    app:layout_constraintTop_toBottomOf="@id/addTemplatesCheckBox">
 
                     <com.google.android.material.textfield.TextInputEditText
                         style="@style/Material.EditText.PrimarySingleLine"
@@ -130,7 +154,7 @@
                     app:errorText="@{viewModel.filenameError}"
                     app:layout_constraintEnd_toStartOf="@id/fileExtensionLayout"
                     app:layout_constraintStart_toEndOf="@id/guidelineStart"
-                    app:layout_constraintTop_toBottomOf="@id/storageLayout">
+                    app:layout_constraintTop_toBottomOf="@id/addTemplatesCheckBox">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/filename"

@@ -36,8 +36,7 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 
 public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
-    private static final String DEFAULT_DB_PATH = "default.kdbx";
-    private static final String DEFAULT_DB_PASSWORD = "123";
+    private static final String EMPTY_DB_PATH = "base.kdbx.xml";
 
     private volatile KeepassDatabase db;
     private final Context context;
@@ -134,7 +133,6 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
         OperationResult<Boolean> result = new OperationResult<>();
 
         synchronized (lock) {
-            Credentials defaultCredentials = new KdbxCreds(DEFAULT_DB_PASSWORD.getBytes());
             Credentials newCredentials = new KdbxCreds(key.getKey());
 
             InputStream in = null;
@@ -143,9 +141,9 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
             FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsAuthority());
 
             try {
-                in = new BufferedInputStream(context.getAssets().open(DEFAULT_DB_PATH));
+                in = new BufferedInputStream(context.getAssets().open(EMPTY_DB_PATH));
 
-                SimpleDatabase keepassDb = SimpleDatabase.load(defaultCredentials, in);
+                SimpleDatabase keepassDb = SimpleDatabase.loadXml(in);
 
                 OperationResult<OutputStream> outResult = provider.openFileForWrite(file,
                         OnConflictStrategy.CANCEL,

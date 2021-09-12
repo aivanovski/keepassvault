@@ -197,9 +197,9 @@ dependencies {
     implementation "androidx.multidex:multidex:2.0.1"
 
     // DI
-    implementation "org.koin:koin-android:$koinVersion"
-    implementation "org.koin:koin-core:$koinVersion"
-    implementation "org.koin:koin-androidx-viewmodel:$koinVersion"
+    implementation "io.insert-koin:koin-android:$koinVersion"
+    implementation "io.insert-koin:koin-core:$koinVersion"
+    implementation "io.insert-koin:koin-androidx-viewmodel:$koinVersion"
 
     // Room
     implementation "androidx.room:room-runtime:$roomVersion"

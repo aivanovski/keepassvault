@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.data.repository;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.ivanovsky.passnotes.data.entity.Group;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
@@ -33,4 +34,7 @@ public interface GroupRepository {
 
     @NonNull
     OperationResult<List<Group>> find(@NonNull String query);
+
+    @NonNull
+    OperationResult<Boolean> update(@NonNull Group group, @Nullable UUID newParentGroupUid);
 }

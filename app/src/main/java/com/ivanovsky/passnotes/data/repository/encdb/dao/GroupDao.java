@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.encdb.dao;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.ivanovsky.passnotes.data.entity.Group;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
@@ -24,4 +25,10 @@ public interface GroupDao {
 
     @NonNull
     OperationResult<Boolean> remove(UUID groupUid);
+
+    @NonNull
+    OperationResult<Group> getGroupByUid(@NonNull UUID groupUid);
+
+    @NonNull
+    OperationResult<Boolean> update(@NonNull Group group, @Nullable UUID newParentGroupUid);
 }

@@ -16,8 +16,8 @@
         style="@style/Material.DatabaseStatusText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@{viewModel.model.text}"
-        app:visible="@{viewModel.model.isVisible}"
+        android:text="@{viewModel.text}"
+        app:visible="@{viewModel.isVisible}"
         tools:text="@string/status_offline_mode" />
 
 </layout>

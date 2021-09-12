@@ -16,7 +16,7 @@
     <string name="status_read_only_mode">Displaying data in Read-Only mode</string>
 
     <!-- Menu and buttons -->
-    <string name="retry">retry</string>
+    <string name="retry">Retry</string>
     <string name="create">Create</string>
     <string name="done">Done</string>
     <string name="open_file">Open file</string>
@@ -30,6 +30,7 @@
     <string name="remove">Remove</string>
     <string name="add_templates">Add note templates</string>
     <string name="more_options">More options</string>
+    <string name="paste">Paste</string>
 
     <!-- Lock notification -->
     <string name="notification_channel">Quick Lock</string>
@@ -93,9 +94,12 @@
     <string name="add_templates_confirmation_message">Templates allows to display only important fields and create notes with pre-defined field names. Are you sure want to add templates to Database?</string>
     <string name="successfully_removed">Successfully removed</string>
     <string name="successfully_added">Successfully added</string>
+    <string name="successfully">Successfully</string>
+    <string name="selected_item_is_already_here">Selected item is already here</string>
     <string-array name="item_actions_entries">
         <item>Edit</item>
         <item>Remove</item>
+        <item>Cut</item>
     </string-array>
 
     <!-- New group screen -->

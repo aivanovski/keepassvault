@@ -76,6 +76,8 @@
     <string name="private_storage">Private storage</string>
     <string name="public_storage">Public storage</string>
     <string name="storage_is_not_selected">Storage is not selected</string>
+    <string name="add_note_templates">Add note templates</string>
+    <string name="add_templates_info_message">Templates allows to display only important fields and create notes with pre-defined field names.</string>
 
     <!-- Open file screen -->
     <string name="file_path">File path</string>

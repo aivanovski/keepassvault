@@ -35,4 +35,7 @@
     <dimen name="groups_grid_item_horizontal_padding">16dp</dimen>
     <dimen name="groups_grid_item_vertical_padding">8dp</dimen>
 
+    <!-- Buttons -->
+    <dimen name="borderless_icon_button_size">48dp</dimen>
+
 </resources>

@@ -10,7 +10,11 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
+import com.ivanovsky.passnotes.domain.entity.SelectionItem
+import com.ivanovsky.passnotes.domain.entity.SelectionItemType
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
+import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
+import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.presentation.Screens.GroupScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
@@ -28,6 +32,7 @@ import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode
@@ -37,7 +42,7 @@ import com.ivanovsky.passnotes.util.toUUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.UUID
 
 class GroupsViewModel(
     private val interactor: GroupsInteractor,
@@ -47,6 +52,7 @@ class GroupsViewModel(
     private val cellModelFactory: GroupsCellModelFactory,
     private val statusCellModelFactory: DatabaseStatusCellModelFactory,
     private val cellViewModelFactory: GroupsCellViewModelFactory,
+    private val selectionHolder: SelectionHolder,
     private val router: Router
 ) : BaseScreenViewModel(),
     ObserverBus.GroupDataSetObserver,
@@ -62,12 +68,15 @@ class GroupsViewModel(
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
 
-    val statusViewModel = MutableLiveData(
-        cellViewModelFactory.createCellViewModel(
-            model = statusCellModelFactory.createDefaultStatusCellModel(),
-            eventProvider = eventProvider
-        ) as DatabaseStatusCellViewModel
-    )
+    val statusViewModel = cellViewModelFactory.createCellViewModel(
+        model = statusCellModelFactory.createDefaultStatusCellModel(),
+        eventProvider = eventProvider
+    ) as DatabaseStatusCellViewModel
+
+    val optionPanelViewModel = cellViewModelFactory.createCellViewModel(
+        model = cellModelFactory.createDefaultOptionPanelCellModel(),
+        eventProvider = eventProvider
+    ) as OptionPanelCellViewModel
 
     val screenTitle = MutableLiveData(EMPTY)
     val isMenuVisible = MutableLiveData(false)
@@ -130,7 +139,7 @@ class GroupsViewModel(
     }
 
     fun loadData() {
-        hideMenu()
+        showLoading()
 
         viewModelScope.launch {
             templates = interactor.getTemplates()
@@ -184,6 +193,10 @@ class GroupsViewModel(
                 val message = errorInteractor.processAndGetMessage(data.error)
                 screenState.value = ScreenState.error(message)
             }
+
+            updateOptionPanelViewModel(
+                isVisible = selectionHolder.hasSelection() && data.isSucceededOrDeferred
+            )
         }
     }
 
@@ -235,6 +248,22 @@ class GroupsViewModel(
         showRemoveConfirmationDialogEvent.call(Pair(group, null))
     }
 
+    fun onCutGroupClicked(group: Group) {
+        val groupUid = group.uid ?: return
+        val currentGroupUid = getCurrentGroupUid() ?: return
+
+        selectionHolder.select(
+            action = ActionType.CUT,
+            selection = SelectionItem(
+                uid = groupUid,
+                parentUid = currentGroupUid,
+                type = SelectionItemType.GROUP_UID
+            )
+        )
+
+        updateOptionPanelViewModel(isVisible = true)
+    }
+
     fun onEditNoteClicked(note: Note) {
         router.navigateTo(
             NoteEditorScreen(
@@ -249,6 +278,22 @@ class GroupsViewModel(
 
     fun onRemoveNoteClicked(note: Note) {
         showRemoveConfirmationDialogEvent.call(Pair(null, note))
+    }
+
+    fun onCutNoteClicked(note: Note) {
+        val noteUid = note.uid ?: return
+        val currentGroupUid = getCurrentGroupUid() ?: return
+
+        selectionHolder.select(
+            action = ActionType.CUT,
+            selection = SelectionItem(
+                uid = noteUid,
+                parentUid = currentGroupUid,
+                type = SelectionItemType.NOTE_UID
+            )
+        )
+
+        updateOptionPanelViewModel(isVisible = true)
     }
 
     fun onRemoveConfirmed(group: Group?, note: Note?) {
@@ -281,8 +326,7 @@ class GroupsViewModel(
     }
 
     fun onAddTemplatesConfirmed() {
-        hideMenu()
-        screenState.value = ScreenState.loading()
+        showLoading()
 
         viewModelScope.launch {
             val isAdded = interactor.addTemplates()
@@ -325,6 +369,12 @@ class GroupsViewModel(
                     event.getString(NoteCellViewModel.LONG_CLICK_EVENT)?.toUUID()?.let {
                         onNoteLongClicked(it)
                     }
+                }
+                event.containsKey(OptionPanelCellViewModel.POSITIVE_BUTTON_CLICK_EVENT) -> {
+                    onPositiveOptionSelected()
+                }
+                event.containsKey(OptionPanelCellViewModel.NEGATIVE_BUTTON_CLICK_EVENT) -> {
+                    onNegativeOptionSelected()
                 }
             }
         }
@@ -386,8 +436,7 @@ class GroupsViewModel(
     }
 
     private fun removeGroup(groupUid: UUID) {
-        hideMenu()
-        screenState.value = ScreenState.loading()
+        showLoading()
 
         viewModelScope.launch {
             val removeResult = withContext(Dispatchers.Default) {
@@ -406,8 +455,7 @@ class GroupsViewModel(
     }
 
     private fun removeNote(groupUid: UUID, noteUid: UUID) {
-        hideMenu()
-        screenState.value = ScreenState.loading()
+        showLoading()
 
         viewModelScope.launch {
             val removeResult = withContext(Dispatchers.Default) {
@@ -425,11 +473,58 @@ class GroupsViewModel(
         }
     }
 
+    private fun hideStatusCell() {
+        updateStatusViewModel(DatabaseStatus.NORMAL)
+    }
+
     private fun updateStatusViewModel(status: DatabaseStatus) {
-        statusViewModel.value = cellViewModelFactory.createCellViewModel(
-            model = statusCellModelFactory.createStatusCellModel(status),
-            eventProvider = eventProvider
-        ) as DatabaseStatusCellViewModel
+        statusViewModel.setModel(statusCellModelFactory.createStatusCellModel(status))
+    }
+
+    private fun updateOptionPanelViewModel(isVisible: Boolean) {
+        val model = if (isVisible) {
+            cellModelFactory.createPasteOptionPanelCellModel()
+        } else {
+            cellModelFactory.createHiddenOptionPanelCellModel()
+        }
+
+        optionPanelViewModel.setModel(model)
+    }
+
+    private fun onPositiveOptionSelected() {
+        val currentGroupUid = getCurrentGroupUid() ?: return
+        val selection = selectionHolder.getSelection() ?: return
+        val action = selectionHolder.getAction() ?: return
+
+        if (selection.parentUid == currentGroupUid) {
+            showToastEvent.value = resourceProvider.getString(R.string.selected_item_is_already_here)
+            return
+        }
+
+        showLoading()
+
+        viewModelScope.launch {
+            val actionResult = interactor.doActionOnSelection(
+                selectedGroupUid = currentGroupUid,
+                action = action,
+                selection = selection
+            )
+            selectionHolder.clear()
+
+            if (actionResult.isSucceededOrDeferred) {
+                showToastEvent.call(resourceProvider.getString(R.string.successfully))
+                screenState.value = ScreenState.data()
+                showMenu()
+            } else {
+                val message = errorInteractor.processAndGetMessage(actionResult.error)
+                screenState.value = ScreenState.error(message)
+            }
+        }
+    }
+
+    private fun onNegativeOptionSelected() {
+        selectionHolder.clear()
+        updateOptionPanelViewModel(isVisible = false)
     }
 
     private fun hideMenu() {
@@ -438,5 +533,11 @@ class GroupsViewModel(
 
     private fun showMenu() {
         isMenuVisible.value = true
+    }
+
+    private fun showLoading() {
+        hideMenu()
+        hideStatusCell()
+        updateOptionPanelViewModel(isVisible = false)
     }
 }

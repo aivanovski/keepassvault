@@ -1,8 +1,19 @@
 package com.ivanovsky.passnotes.presentation.core.viewmodel
 
-import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
+import androidx.lifecycle.MutableLiveData
+import com.ivanovsky.passnotes.presentation.core.BaseMutableCellViewModel
 import com.ivanovsky.passnotes.presentation.core.model.DatabaseStatusCellModel
 
 class DatabaseStatusCellViewModel(
-    override val model: DatabaseStatusCellModel
-) : BaseCellViewModel(model)
+    initModel: DatabaseStatusCellModel
+) : BaseMutableCellViewModel<DatabaseStatusCellModel>(initModel) {
+
+    val text = MutableLiveData(initModel.text)
+    val isVisible = MutableLiveData(initModel.isVisible)
+
+    override fun setModel(newModel: DatabaseStatusCellModel) {
+        super.setModel(newModel)
+        text.value = newModel.text
+        isVisible.value = newModel.isVisible
+    }
+}

@@ -9,9 +9,11 @@ import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.DatabaseStatusCellModel
 import com.ivanovsky.passnotes.presentation.core.model.GroupCellModel
 import com.ivanovsky.passnotes.presentation.core.model.NoteCellModel
+import com.ivanovsky.passnotes.presentation.core.model.OptionPanelCellModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewModel
 
 class GroupsCellViewModelFactory(
     private val resourceProvider: ResourceProvider,
@@ -26,6 +28,7 @@ class GroupsCellViewModelFactory(
             is GroupCellModel -> GroupCellViewModel(model, eventProvider, resourceProvider)
             is NoteCellModel -> NoteCellViewModel(model, eventProvider, localeProvider)
             is DatabaseStatusCellModel -> DatabaseStatusCellViewModel(model)
+            is OptionPanelCellModel -> OptionPanelCellViewModel(model, eventProvider)
             else -> throwUnsupportedModelException(model)
         }
     }

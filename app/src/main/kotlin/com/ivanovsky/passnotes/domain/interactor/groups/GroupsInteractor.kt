@@ -8,9 +8,14 @@ import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
+import com.ivanovsky.passnotes.domain.entity.SelectionItem
+import com.ivanovsky.passnotes.domain.entity.SelectionItemType
+import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
+import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
+import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
 import java.util.*
 import kotlinx.coroutines.withContext
 
@@ -20,7 +25,9 @@ class GroupsInteractor(
     private val dispatchers: DispatcherProvider,
     private val lockUseCase: LockDatabaseUseCase,
     private val getStatusUseCase: GetDatabaseStatusUseCase,
-    private val addTemplatesUseCase: AddTemplatesUseCase
+    private val addTemplatesUseCase: AddTemplatesUseCase,
+    private val moveNoteUseCase: MoveNoteUseCase,
+    private val moveGroupUseCae: MoveGroupUseCase
 ) {
 
     fun getTemplates(): List<Template>? {
@@ -117,6 +124,27 @@ class GroupsInteractor(
 
     suspend fun addTemplates(): OperationResult<Boolean> =
         addTemplatesUseCase.addTemplates()
+
+    suspend fun doActionOnSelection(
+        selectedGroupUid: UUID,
+        action: SelectionHolder.ActionType,
+        selection: SelectionItem
+    ): OperationResult<Boolean> {
+        return when (action) {
+            SelectionHolder.ActionType.CUT -> {
+                when (selection.type) {
+                    SelectionItemType.NOTE_UID -> moveNoteUseCase.moveNote(
+                        selection.uid,
+                        selectedGroupUid
+                    )
+                    SelectionItemType.GROUP_UID -> moveGroupUseCae.moveGroup(
+                        selection.uid,
+                        selectedGroupUid
+                    )
+                }
+            }
+        }
+    }
 
     abstract class Item
     data class GroupItem(val group: Group, val noteCount: Int, val childGroupCount: Int) : Item()

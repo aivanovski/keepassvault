@@ -4,7 +4,7 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.extensions.getNameResId
 import com.ivanovsky.passnotes.presentation.core.model.DatabaseStatusCellModel
-import com.ivanovsky.passnotes.util.StringUtils
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class DatabaseStatusCellModelFactory(
     private val resourceProvider: ResourceProvider
@@ -12,14 +12,14 @@ class DatabaseStatusCellModelFactory(
 
     fun createDefaultStatusCellModel(): DatabaseStatusCellModel {
         return DatabaseStatusCellModel(
-            text = StringUtils.EMPTY,
-            isVisible = true
+            text = EMPTY,
+            isVisible = false
         )
     }
 
     fun createStatusCellModel(status: DatabaseStatus): DatabaseStatusCellModel {
         return DatabaseStatusCellModel(
-            text = status.getNameResId()?.let { resourceProvider.getString(it) } ?: StringUtils.EMPTY,
+            text = status.getNameResId()?.let { resourceProvider.getString(it) } ?: EMPTY,
             isVisible = (status != DatabaseStatus.NORMAL)
         )
     }

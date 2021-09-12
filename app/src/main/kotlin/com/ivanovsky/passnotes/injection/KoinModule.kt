@@ -18,6 +18,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.*
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
+import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor
@@ -39,6 +40,8 @@ import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
+import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
+import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.presentation.about.AboutViewModel
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
@@ -93,6 +96,7 @@ object KoinModule {
         single { NoteDiffer() }
         single { provideOkHttp() }
         single { DataCipherProvider(get()) }
+        single { SelectionHolder() }
 
         // Database
         single { provideAppDatabase(get(), get()) }
@@ -112,6 +116,8 @@ object KoinModule {
         single { GetDatabaseStatusUseCase(get(), get()) }
         single { AddTemplatesUseCase(get(), get(), get()) }
         single { GetDatabaseUseCase(get(), get()) }
+        single { MoveNoteUseCase(get(), get(), get()) }
+        single { MoveGroupUseCase(get(), get(), get()) }
 
         // Interactors
         single { FilePickerInteractor(get()) }
@@ -121,7 +127,7 @@ object KoinModule {
         single { GroupInteractor(get(), get(), get()) }
         single { DebugMenuInteractor(get(), get(), get(), get()) }
         single { NoteInteractor(get(), get(), get(), get(), get()) }
-        single { GroupsInteractor(get(), get(), get(), get(), get(), get()) }
+        single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
         single { NoteEditorInteractor(get(), get()) }
         single { ServerLoginInteractor(get(), get(), get()) }
         single { DatabaseLockInteractor(get(), get(), get()) }
@@ -133,7 +139,7 @@ object KoinModule {
         // Cell factories
         single { DatabaseStatusCellModelFactory(get()) }
 
-        single { GroupsCellModelFactory() }
+        single { GroupsCellModelFactory(get()) }
         single { GroupsCellViewModelFactory(get(), get()) }
 
         single { NoteEditorCellModelFactory(get()) }
@@ -164,7 +170,7 @@ object KoinModule {
         viewModel { GroupViewModel(get(), get(), get(), get()) }
         viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
         viewModel { NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-        viewModel { GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+        viewModel { GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
         viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }

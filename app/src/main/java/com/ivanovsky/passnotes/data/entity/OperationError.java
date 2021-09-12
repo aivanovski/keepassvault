@@ -29,6 +29,8 @@ public class OperationError {
     public static final String MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED = "Deferred operations are not supported";
     public static final String MESSAGE_FAILED_TO_FIND_CACHED_FILE = "Failed to find cached file";
     public static final String MESSAGE_FAILED_TO_FIND_ROOT_GROUP = "Failed to find root group";
+    public static final String MESSAGE_FAILED_TO_FIND_PARENT_GROUP = "Failed to find parent group";
+    public static final String MESSAGE_FAILED_TO_FIND_NEW_PARENT_GROUP = "Failed to find new parent group";
     public static final String MESSAGE_UID_IS_NULL = "Uid is null";
     public static final String MESSAGE_DUPLICATED_NOTE = "Duplicated note";
     public static final String MESSAGE_FAILED_TO_ADD_ENTRY = "Failed to add entry";
@@ -41,6 +43,7 @@ public class OperationError {
     public static final String MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED = "Write operation is not supported";
     public static final String MESSAGE_UNSUPPORTED_CONFIG_TYPE = "Unsupported config type";
     public static final String MESSAGE_FAILED_TO_COMPLETE_OPERATION = "Failed to complete operation";
+    public static final String MESSAGE_FAILED_TO_MOVE_GROUP_INSIDE_ITS_OWN_TREE = "Failed to move group inside its owdn tree";
 
     public static final String GENERIC_MESSAGE_NOT_FOUND = "%s not found";
     public static final String GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST = "Group '%s' already exists";

@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.keepass;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
@@ -13,9 +14,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
-
 public class KeepassGroupRepository implements GroupRepository {
 
     private final GroupDao dao;
@@ -27,20 +25,7 @@ public class KeepassGroupRepository implements GroupRepository {
     @NonNull
     @Override
     public OperationResult<Group> getGroupByUid(@NonNull UUID groupUid) {
-        OperationResult<List<Group>> groups = dao.getAll();
-        if (groups.isFailed()) {
-            return groups.takeError();
-        }
-
-        Group matchedGroup = Stream.of(groups.getObj())
-                .filter(group -> groupUid.equals(group.getUid()))
-                .findFirst()
-                .orElse(null);
-        if (matchedGroup == null) {
-            return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
-        }
-
-        return OperationResult.success(matchedGroup);
+        return dao.getGroupByUid(groupUid);
     }
 
     @NonNull
@@ -114,5 +99,11 @@ public class KeepassGroupRepository implements GroupRepository {
                 .collect(Collectors.toList());
 
         return OperationResult.success(matchedGroups);
+    }
+
+    @NonNull
+    @Override
+    public OperationResult<Boolean> update(@NonNull Group group, @Nullable UUID newParentGroupUid) {
+        return dao.update(group, newParentGroupUid);
     }
 }

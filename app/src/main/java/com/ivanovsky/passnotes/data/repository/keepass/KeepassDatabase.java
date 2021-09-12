@@ -24,6 +24,8 @@ import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
 import com.ivanovsky.passnotes.util.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.linguafranca.pwdb.Credentials;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
@@ -249,5 +251,21 @@ public class KeepassDatabase implements EncryptedDatabase {
         }
 
         return null;
+    }
+
+    @NonNull
+    public List<SimpleGroup> getAllGroupsFromTree(@NonNull SimpleGroup root) {
+        List<SimpleGroup> result = new ArrayList<>();
+        result.add(root);
+
+        LinkedList<SimpleGroup> nextGroups = new LinkedList<>(root.getGroups());
+
+        SimpleGroup currentGroup;
+        while ((currentGroup = nextGroups.pollFirst()) != null) {
+            result.add(currentGroup);
+            nextGroups.addAll(currentGroup.getGroups());
+        }
+
+        return result;
     }
 }

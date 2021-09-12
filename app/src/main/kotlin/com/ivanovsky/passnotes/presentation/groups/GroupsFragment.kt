@@ -189,9 +189,10 @@ class GroupsFragment : Fragment() {
 
         val dialog = ChooseOptionDialog.newInstance(null, entries.toList())
         dialog.onItemClickListener = { itemIdx ->
-            when (itemIdx) {
+            when (itemIdx) { // TODO: refactor, move menu creation to VM
                 0 -> viewModel.onEditGroupClicked(group)
                 1 -> viewModel.onRemoveGroupClicked(group)
+                2 -> viewModel.onCutGroupClicked(group)
             }
         }
         dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
@@ -202,9 +203,10 @@ class GroupsFragment : Fragment() {
 
         val dialog = ChooseOptionDialog.newInstance(null, entries.toList())
         dialog.onItemClickListener = { itemIdx ->
-            when (itemIdx) {
+            when (itemIdx) { // TODO: refactor, move menu creation to VM
                 0 -> viewModel.onEditNoteClicked(note)
                 1 -> viewModel.onRemoveNoteClicked(note)
+                2 -> viewModel.onCutNoteClicked(note)
             }
         }
         dialog.show(childFragmentManager, ChooseOptionDialog.TAG)

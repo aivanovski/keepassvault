@@ -1,26 +1,27 @@
-package com.ivanovsky.passnotes.presentation.group
+package com.ivanovsky.passnotes.presentation.group_editor
 
 import android.os.Bundle
 import android.view.*
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.databinding.GroupFragmentBinding
+import com.ivanovsky.passnotes.databinding.GroupEditorFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
+import com.ivanovsky.passnotes.presentation.core.extensions.getMandarotyArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
-import java.util.UUID
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class GroupFragment : FragmentWithDoneButton() {
+class GroupEditorFragment : FragmentWithDoneButton() {
 
-    private val viewModel: GroupViewModel by viewModel()
+    private val viewModel: GroupEditorViewModel by viewModel()
+    private val args: GroupEditorArgs by lazy { getMandarotyArgument(ARGS) }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         setupActionBar {
-            title = getString(R.string.new_group)
+            title = getScreenTitle()
             setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
         }
@@ -31,7 +32,7 @@ class GroupFragment : FragmentWithDoneButton() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return GroupFragmentBinding.inflate(inflater, container, false)
+        return GroupEditorFragmentBinding.inflate(inflater, container, false)
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
                 it.viewModel = viewModel
@@ -40,7 +41,7 @@ class GroupFragment : FragmentWithDoneButton() {
     }
 
     override fun onDoneMenuClicked() {
-        viewModel.createNewGroup()
+        viewModel.onDoneButtonClicked()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -60,23 +61,33 @@ class GroupFragment : FragmentWithDoneButton() {
 
         viewLifecycleOwner.lifecycle.addObserver(DatabaseInteractionWatcher(this))
 
+        subscribeToLiveData()
+
+        viewModel.start(args)
+    }
+
+    private fun subscribeToLiveData() {
         viewModel.doneButtonVisibility.observe(viewLifecycleOwner) { isVisible ->
             setDoneButtonVisibility(isVisible)
         }
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
             hideKeyboard()
         }
+    }
 
-        val parentGroupUid = arguments?.getSerializable(PARENT_GROUP_UID) as? UUID
-        viewModel.start(parentGroupUid)
+    private fun getScreenTitle(): String {
+        return when(args) {
+            is GroupEditorArgs.NewGroup -> getString(R.string.new_group)
+            is GroupEditorArgs.EditGroup -> getString(R.string.edit_group)
+        }
     }
 
     companion object {
 
-        private const val PARENT_GROUP_UID = "parentGroupUid"
+        private const val ARGS = "args"
 
-        fun newInstance(parentGroupUid: UUID?) = GroupFragment().withArguments {
-            putSerializable(PARENT_GROUP_UID, parentGroupUid)
+        fun newInstance(args: GroupEditorArgs) = GroupEditorFragment().withArguments {
+            putParcelable(ARGS, args)
         }
     }
 }

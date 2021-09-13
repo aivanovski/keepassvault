@@ -6,7 +6,8 @@ import com.ivanovsky.passnotes.presentation.about.AboutFragment
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuFragment
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment
 import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs
-import com.ivanovsky.passnotes.presentation.group.GroupFragment
+import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
+import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorFragment
 import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
 import com.ivanovsky.passnotes.presentation.groups.GroupsFragment
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseFragment
@@ -85,9 +86,9 @@ object Screens {
             GroupsFragment.newInstance(args)
     }
 
-    class GroupScreen(private val parentGroupUid: UUID) : FragmentScreen {
+    class GroupEditorScreen(private val args: GroupEditorArgs) : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
-            GroupFragment.newInstance(parentGroupUid)
+            GroupEditorFragment.newInstance(args)
     }
 
     class NoteEditorScreen(private val args: NoteEditorArgs) : FragmentScreen {

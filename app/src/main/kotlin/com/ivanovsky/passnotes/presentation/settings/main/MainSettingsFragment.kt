@@ -8,11 +8,12 @@ import androidx.preference.PreferenceFragmentCompat
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.core.BasePreferenceFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainSettingsFragment :
-    PreferenceFragmentCompat(),
+    BasePreferenceFragment(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
     private val router: Router by inject()
@@ -44,6 +45,11 @@ class MainSettingsFragment :
         subscribeToLiveData()
 
         viewModel.start()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        navigationViewModel.setNavigationEnabled(true)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

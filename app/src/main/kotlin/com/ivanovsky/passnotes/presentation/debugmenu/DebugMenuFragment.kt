@@ -8,16 +8,16 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.databinding.DebugMenuFragmentBinding
+import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class DebugMenuFragment : Fragment() {
+class DebugMenuFragment : BaseFragment() {
 
     private val viewModel: DebugMenuViewModel by viewModel()
 
@@ -67,6 +67,11 @@ class DebugMenuFragment : Fragment() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        navigationViewModel.setNavigationEnabled(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

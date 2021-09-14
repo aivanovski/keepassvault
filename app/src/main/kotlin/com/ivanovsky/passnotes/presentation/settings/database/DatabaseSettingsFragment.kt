@@ -5,17 +5,17 @@ import android.view.MenuItem
 import android.view.View
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.core.BasePreferenceFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ErrorDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.throwPreferenceNotFound
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class DatabaseSettingsFragment : PreferenceFragmentCompat() {
+class DatabaseSettingsFragment : BasePreferenceFragment() {
 
     private val router: Router by inject()
     private val viewModel: DatabaseSettingsViewModel by viewModel()
@@ -56,6 +56,11 @@ class DatabaseSettingsFragment : PreferenceFragmentCompat() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        navigationViewModel.setNavigationEnabled(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

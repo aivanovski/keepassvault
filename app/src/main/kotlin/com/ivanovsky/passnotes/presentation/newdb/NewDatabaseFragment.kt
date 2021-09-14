@@ -1,7 +1,10 @@
 package com.ivanovsky.passnotes.presentation.newdb
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.NewDatabaseFragmentBinding

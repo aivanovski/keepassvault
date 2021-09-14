@@ -5,13 +5,13 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.AboutFragmentBinding
+import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class AboutFragment : Fragment() {
+class AboutFragment : BaseFragment() {
 
     private val viewModel: AboutViewModel by viewModel()
 

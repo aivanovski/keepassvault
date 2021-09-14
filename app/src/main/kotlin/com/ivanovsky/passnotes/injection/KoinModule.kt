@@ -52,6 +52,7 @@ import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.navigation.NavigationMenuViewModel
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel
@@ -181,6 +182,7 @@ object KoinModule {
         viewModel { MainSettingsViewModel(get(), get()) }
         viewModel { DatabaseSettingsViewModel(get(), get()) }
         factory { UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+        factory { NavigationMenuViewModel(get()) }
     }
 
     private fun provideOkHttp(): OkHttpClient {

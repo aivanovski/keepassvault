@@ -226,19 +226,7 @@ class UnlockViewModel(
         }
     }
 
-    fun onSettingsMenuClicked() {
-        router.navigateTo(MainSettingsScreen())
-    }
-
-    fun onAboutMenuClicked() {
-        router.navigateTo(AboutScreen())
-    }
-
-    fun onDebugMenuClicked() {
-        router.navigateTo(DebugMenuScreen())
-    }
-
-    fun navigateToFilePicker() {
+    private fun navigateToFilePicker() {
         router.setResultListener(StorageListScreen.RESULT_KEY) { file ->
             if (file is FileDescriptor) {
                 onFilePicked(file)

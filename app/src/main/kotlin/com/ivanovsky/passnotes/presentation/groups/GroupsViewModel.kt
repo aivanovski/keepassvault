@@ -16,7 +16,7 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
-import com.ivanovsky.passnotes.presentation.Screens.GroupScreen
+import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
@@ -33,6 +33,7 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellVie
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewModel
+import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode
@@ -208,7 +209,13 @@ class GroupsViewModel(
     fun onCreateNewGroupClicked() {
         val currentGroupUid = getCurrentGroupUid() ?: return
 
-        router.navigateTo(GroupScreen(currentGroupUid))
+        router.navigateTo(
+            GroupEditorScreen(
+                GroupEditorArgs.NewGroup(
+                    parentGroupUid = currentGroupUid
+                )
+            )
+        )
     }
 
     fun onCreateNewNoteClicked() {
@@ -242,7 +249,13 @@ class GroupsViewModel(
     }
 
     fun onEditGroupClicked(group: Group) {
-        throw RuntimeException("Not implemented") // TODO: implement
+        router.navigateTo(
+            GroupEditorScreen(
+                GroupEditorArgs.EditGroup(
+                    groupUid = group.uid
+                )
+            )
+        )
     }
 
     fun onRemoveGroupClicked(group: Group) {

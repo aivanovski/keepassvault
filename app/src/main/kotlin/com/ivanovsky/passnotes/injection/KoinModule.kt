@@ -21,7 +21,7 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
-import com.ivanovsky.passnotes.domain.interactor.group.GroupInteractor
+import com.ivanovsky.passnotes.domain.interactor.group_editor.GroupEditorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
@@ -39,6 +39,7 @@ import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
+import com.ivanovsky.passnotes.domain.usecases.GetGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
@@ -47,7 +48,7 @@ import com.ivanovsky.passnotes.presentation.about.AboutViewModel
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
-import com.ivanovsky.passnotes.presentation.group.GroupViewModel
+import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
@@ -118,13 +119,14 @@ object KoinModule {
         single { GetDatabaseUseCase(get(), get()) }
         single { MoveNoteUseCase(get(), get(), get()) }
         single { MoveGroupUseCase(get(), get(), get()) }
+        single { GetGroupUseCase(get(), get()) }
 
         // Interactors
         single { FilePickerInteractor(get()) }
         single { UnlockInteractor(get(), get(), get(), get(), get()) }
         single { StorageListInteractor(get(), get()) }
         single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
-        single { GroupInteractor(get(), get(), get()) }
+        single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
         single { DebugMenuInteractor(get(), get(), get(), get()) }
         single { NoteInteractor(get(), get(), get(), get(), get()) }
         single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
@@ -167,7 +169,7 @@ object KoinModule {
         viewModel { StorageListViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { FilePickerViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
-        viewModel { GroupViewModel(get(), get(), get(), get()) }
+        viewModel { GroupEditorViewModel(get(), get(), get(), get()) }
         viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
         viewModel { NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }

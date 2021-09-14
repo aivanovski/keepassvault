@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
@@ -14,14 +13,16 @@ import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.dialog.ThreeButtonDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
-import java.util.Date
+import com.ivanovsky.passnotes.presentation.navigation.NavigationMenuViewModel
 import org.apache.commons.lang3.StringUtils.EMPTY
+import java.util.Date
 
-class UnlockFragment : Fragment() {
+class UnlockFragment : BaseFragment() {
 
     private lateinit var binding: UnlockFragmentBinding
     private val dateFormatProvider: DateFormatProvider by inject()
@@ -43,6 +44,10 @@ class UnlockFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         viewModel.onScreenStart()
+        navigationViewModel.setVisibleItems(
+            NavigationMenuViewModel.createNavigationItemsForBasicScreens()
+        )
+        navigationViewModel.setNavigationEnabled(true)
     }
 
     override fun onCreateView(

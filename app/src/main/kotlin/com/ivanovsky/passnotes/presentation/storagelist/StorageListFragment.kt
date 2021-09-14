@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
@@ -13,12 +12,13 @@ import com.ivanovsky.passnotes.data.repository.file.AuthType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.databinding.StorageListFragmentBinding
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class StorageListFragment : Fragment() {
+class StorageListFragment : BaseFragment() {
 
     private val viewModel: StorageListViewModel by viewModel()
     private val fileSystemResolver: FileSystemResolver by inject()

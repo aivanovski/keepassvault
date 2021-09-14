@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE
@@ -14,6 +13,7 @@ import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.databinding.SelectdbFragmentBinding
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.ThreeButtonDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandarotyArgument
@@ -25,7 +25,7 @@ import org.apache.commons.lang3.StringUtils
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class SelectDatabaseFragment : Fragment() {
+class SelectDatabaseFragment : BaseFragment() {
 
     private val args: SelectDatabaseArgs by lazy { getMandarotyArgument(ARGUMENTS)}
     private val dateFormatProvider: DateFormatProvider by inject()

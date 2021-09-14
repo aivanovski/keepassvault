@@ -7,11 +7,11 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
 import com.ivanovsky.passnotes.extensions.setItemVisibility
+import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
@@ -19,9 +19,9 @@ import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.util.StringUtils
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.*
+import java.util.UUID
 
-class NoteFragment : Fragment() {
+class NoteFragment : BaseFragment() {
 
     private val viewModel: NoteViewModel by viewModel()
     private var menu: Menu? = null
@@ -85,6 +85,11 @@ class NoteFragment : Fragment() {
                 it.viewModel = viewModel
             }
             .root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        navigationViewModel.setNavigationEnabled(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

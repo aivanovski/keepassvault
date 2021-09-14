@@ -3,9 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/menu_open_file"
+        android:id="@+id/menu_select_file"
         android:icon="@drawable/ic_folder_grey_600_24dp"
-        android:title="@string/open_file" />
+        android:title="@string/select_file" />
+
+    <item
+        android:id="@+id/menu_lock"
+        android:icon="@drawable/ic_lock_grey_600_24dp"
+        android:title="@string/lock_database" />
 
     <item
         android:id="@+id/menu_settings"

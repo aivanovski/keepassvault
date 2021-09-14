@@ -4,11 +4,10 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import androidx.fragment.app.Fragment
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.extensions.setItemVisibility
 
-abstract class FragmentWithDoneButton : Fragment() {
+abstract class FragmentWithDoneButton : BaseFragment() {
 
     private var menu: Menu? = null
     private var isDoneButtonVisible: Boolean? = null

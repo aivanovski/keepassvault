@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.presentation.settings.app
 
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.preference.PreferenceFragmentCompat
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.repository.settings.Settings
@@ -10,9 +9,10 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_C
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.core.BasePreferenceFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 
-class AppSettingsFragment : PreferenceFragmentCompat() {
+class AppSettingsFragment : BasePreferenceFragment() {
 
     private val settings: Settings by inject()
     private val router: Router by inject()
@@ -24,6 +24,11 @@ class AppSettingsFragment : PreferenceFragmentCompat() {
             setDisplayHomeAsUpEnabled(true)
             setHomeAsUpIndicator(null)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        navigationViewModel.setNavigationEnabled(true)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

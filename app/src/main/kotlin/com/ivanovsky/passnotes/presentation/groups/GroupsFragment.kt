@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ivanovsky.passnotes.R
@@ -18,6 +17,7 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
 import com.ivanovsky.passnotes.extensions.setItemVisibility
+import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandarotyArgument
@@ -25,9 +25,10 @@ import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
+import com.ivanovsky.passnotes.presentation.navigation.NavigationMenuViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class GroupsFragment : Fragment() {
+class GroupsFragment : BaseFragment() {
 
     private val viewModel: GroupsViewModel by viewModel()
 
@@ -104,6 +105,10 @@ class GroupsFragment : Fragment() {
         backCallback = requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             viewModel.onBackClicked()
         }
+        navigationViewModel.setVisibleItems(
+            NavigationMenuViewModel.createNavigationItemsForDbScreens()
+        )
+        navigationViewModel.setNavigationEnabled(true)
     }
 
     override fun onStop() {

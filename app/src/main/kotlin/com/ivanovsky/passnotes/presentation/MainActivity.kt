@@ -14,13 +14,13 @@ import com.github.terrakok.cicerone.NavigatorHolder
 import com.github.terrakok.cicerone.Router
 import com.github.terrakok.cicerone.androidx.AppNavigator
 import com.google.android.material.navigation.NavigationView
-import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
+import com.ivanovsky.passnotes.presentation.navigation.NavigationMenuViewModel
+import com.ivanovsky.passnotes.presentation.navigation.mode.NavigationItem
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
-import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 
 class MainActivity :
     AppCompatActivity(),
@@ -34,9 +34,9 @@ class MainActivity :
     private val settingsRouter: SettingsRouter by inject()
     private val navigator = AppNavigator(this, R.id.fragment_container)
 
-    private val viewModel: UnlockViewModel by lazy {
-        ViewModelProvider(this, UnlockViewModel.FACTORY)
-            .get(UnlockViewModel::class.java)
+    private val navigationViewModel: NavigationMenuViewModel by lazy {
+        ViewModelProvider(this, NavigationMenuViewModel.FACTORY)
+            .get(NavigationMenuViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,9 +53,7 @@ class MainActivity :
 
         navigationView.setNavigationItemSelectedListener { item -> onNavigationItemSelected(item) }
 
-        if (!BuildConfig.DEBUG) {
-            navigationView.menu.findItem(R.id.menu_debug_menu).isVisible = false
-        }
+        subscribeToLiveData()
     }
 
     override fun onPause() {
@@ -84,34 +82,38 @@ class MainActivity :
         }
     }
 
-    private fun onNavigationItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_open_file -> {
-                drawer.closeDrawer(GravityCompat.START)
-                viewModel.navigateToFilePicker()
-                true
-            }
-
-            R.id.menu_settings -> {
-                drawer.closeDrawer(GravityCompat.START)
-                viewModel.onSettingsMenuClicked()
-                true
-            }
-
-            R.id.menu_about -> {
-                drawer.closeDrawer(GravityCompat.START)
-                viewModel.onAboutMenuClicked()
-                true
-            }
-
-            R.id.menu_debug_menu -> {
-                drawer.closeDrawer(GravityCompat.START)
-                viewModel.onDebugMenuClicked()
-                true
-            }
-
-            else -> false
+    private fun subscribeToLiveData() {
+        navigationViewModel.isNavigationMenuEnabled.observe(this) {
+            setDrawerEnabled(it)
         }
+        navigationViewModel.visibleItems.observe(this) {
+            setVisibleNavigationItems(it)
+        }
+    }
+
+    private fun setDrawerEnabled(isEnabled: Boolean) {
+        if (isEnabled) {
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+        } else {
+            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+        }
+    }
+
+    private fun setVisibleNavigationItems(visibleItems: List<NavigationItem>) {
+        for (item in NavigationItem.values()) {
+            val isVisible = visibleItems.contains(item)
+            navigationView.menu.findItem(item.menuId).isVisible = isVisible
+        }
+    }
+
+    private fun onNavigationItemSelected(item: MenuItem): Boolean {
+        val navigationItem = NavigationItem.findByMenuId(item.itemId)
+            ?: throw IllegalStateException()
+
+        navigationViewModel.onMenuItemSelected(navigationItem)
+        drawer.closeDrawer(GravityCompat.START)
+
+        return true
     }
 
     override fun onPreferenceStartFragment(

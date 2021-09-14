@@ -58,9 +58,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/password"
-                android:text="@={viewModel.password}" />
+                android:text="@={viewModel.password}"
+                app:textTransformationMethod="@{viewModel.passwordTransformationMethod}" />
 
         </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageButton
+            android:id="@+id/visibilityButton"
+            style="@style/Material.BorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> viewModel.onPasswordVisibilityButtonClicked() }"
+            app:layout_constraintBottom_toBottomOf="@id/passwordLayout"
+            app:layout_constraintEnd_toEndOf="@id/passwordLayout"
+            app:layout_constraintTop_toTopOf="@id/passwordLayout"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            app:srcCompat="@drawable/ic_eye_grey_600_24dp" />
 
         <Button
             android:id="@+id/unlockButton"

@@ -34,6 +34,7 @@ import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
 import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
+import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
@@ -64,6 +65,7 @@ class UnlockViewModel(
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.loading())
     val password = MutableLiveData(EMPTY)
+    val passwordTransformationMethod = MutableLiveData(TextTransformationMethod.PASSWORD)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val showSnackbarMessage = SingleLiveEvent<String>()
     val fileCellViewModels = MutableLiveData<List<BaseCellViewModel>>()
@@ -243,6 +245,15 @@ class UnlockViewModel(
             }
         }
         router.navigateTo(StorageListScreen(Action.PICK_FILE))
+    }
+
+    fun onPasswordVisibilityButtonClicked() {
+        val currentTransformation = passwordTransformationMethod.value ?: return
+
+        passwordTransformationMethod.value = when (currentTransformation) {
+            TextTransformationMethod.PASSWORD -> TextTransformationMethod.PLANE_TEXT
+            TextTransformationMethod.PLANE_TEXT -> TextTransformationMethod.PASSWORD
+        }
     }
 
     private fun onFilePicked(file: FileDescriptor) {

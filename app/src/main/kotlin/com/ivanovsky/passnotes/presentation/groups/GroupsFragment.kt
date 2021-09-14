@@ -66,8 +66,10 @@ class GroupsFragment : Fragment() {
         viewModel.isMenuVisible.value?.let {
             menu.setItemVisibility(R.id.menu_lock, it)
             menu.setItemVisibility(R.id.menu_more, it)
-            menu.setItemVisibility(R.id.menu_add_templates, it)
             menu.setItemVisibility(R.id.menu_search, it)
+        }
+        viewModel.isAddTemplatesMenuVisible.value?.let {
+            menu.setItemVisibility(R.id.menu_add_templates, it)
         }
     }
 
@@ -137,8 +139,10 @@ class GroupsFragment : Fragment() {
         viewModel.isMenuVisible.observe(viewLifecycleOwner) {
             menu?.setItemVisibility(R.id.menu_lock, it)
             menu?.setItemVisibility(R.id.menu_more, it)
-            menu?.setItemVisibility(R.id.menu_add_templates, it)
             menu?.setItemVisibility(R.id.menu_search, it)
+        }
+        viewModel.isAddTemplatesMenuVisible.observe(viewLifecycleOwner) {
+            menu?.setItemVisibility(R.id.menu_add_templates, it)
         }
 
         viewModel.showNewEntryDialogEvent.observe(viewLifecycleOwner) { templates ->

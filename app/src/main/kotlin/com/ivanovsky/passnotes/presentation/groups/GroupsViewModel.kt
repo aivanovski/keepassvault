@@ -80,6 +80,7 @@ class GroupsViewModel(
 
     val screenTitle = MutableLiveData(EMPTY)
     val isMenuVisible = MutableLiveData(false)
+    val isAddTemplatesMenuVisible = MutableLiveData(false)
     val showToastEvent = SingleLiveEvent<String>()
     val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
     val showGroupActionsDialogEvent = SingleLiveEvent<Group>()
@@ -529,10 +530,12 @@ class GroupsViewModel(
 
     private fun hideMenu() {
         isMenuVisible.value = false
+        isAddTemplatesMenuVisible.value = false
     }
 
     private fun showMenu() {
         isMenuVisible.value = true
+        isAddTemplatesMenuVisible.value = templates.isNullOrEmpty()
     }
 
     private fun showLoading() {

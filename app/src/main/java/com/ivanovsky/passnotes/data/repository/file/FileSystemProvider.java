@@ -42,7 +42,4 @@ public interface FileSystemProvider {
     @NonNull
     OperationResult<FileDescriptor> getFile(@NonNull String path,
                                             @NonNull FSOptions options);
-
-    @NonNull
-    OperationResult<Boolean> isStoragePermissionRequired(@NonNull FileDescriptor file);
 }

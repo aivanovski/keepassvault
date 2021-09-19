@@ -826,10 +826,4 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     public FileSystemSyncProcessor getSyncProcessor() {
         return syncProcessor;
     }
-
-    @NonNull
-    @Override
-    public OperationResult<Boolean> isStoragePermissionRequired(@NonNull FileDescriptor file) {
-        return OperationResult.success(false);
-    }
 }

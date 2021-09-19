@@ -13,9 +13,4 @@ class FilePickerInteractor(private val fileSystemResolver: FileSystemResolver) {
     fun getParent(file: FileDescriptor): OperationResult<FileDescriptor> {
         return fileSystemResolver.resolveProvider(file.fsAuthority).getParent(file)
     }
-
-    fun isStoragePermissionRequired(file: FileDescriptor): OperationResult<Boolean> {
-        val provider = fileSystemResolver.resolveProvider(file.fsAuthority)
-        return provider.isStoragePermissionRequired(file)
-    }
 }

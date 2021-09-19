@@ -30,5 +30,8 @@ fun FileDescriptor.formatReadablePath(resourceProvider: ResourceProvider): Strin
             val url = fsAuthority.credentials?.serverUrl ?: ""
             url + path
         }
+        FSType.SAF -> {
+            path
+        }
     }
 }

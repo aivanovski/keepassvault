@@ -24,5 +24,9 @@
     <string name="db_opened" translatable="false">DB opened</string>
     <string name="db_closed" translatable="false">DB closed</string>
     <string name="entry_added" translatable="false">Entry added</string>
+    <string name="storage_access_framework" translatable="false">Storage Access Framework</string>
+    <string name="pick_file" translatable="false">Pick file</string>
+    <string name="check_exists" translatable="false">Check exists</string>
+    <string name="file_exits_with_str" translatable="false">File exists: %s</string>
 
 </resources>

@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.presentation.storagelist
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -16,6 +18,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.util.IntentUtils.createFilePickerIntent
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class StorageListFragment : BaseFragment() {
@@ -30,6 +33,13 @@ class StorageListFragment : BaseFragment() {
             title = getString(R.string.select_storage)
             setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == REQUEST_CODE_PICK_FILE && resultCode == Activity.RESULT_OK) {
+            val uri = data?.data ?: return
+            viewModel.onExternalStorageFileSelected(uri)
         }
     }
 
@@ -64,7 +74,7 @@ class StorageListFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        subscribeToEvents()
+        subscribeToLiveData()
 
         val requiredAction = arguments?.getSerializable(ARG_REQUIRED_ACTION) as? Action
             ?: requireArgument(ARG_REQUIRED_ACTION)
@@ -72,9 +82,12 @@ class StorageListFragment : BaseFragment() {
         viewModel.loadData(requiredAction)
     }
 
-    private fun subscribeToEvents() {
+    private fun subscribeToLiveData() {
         viewModel.showAuthActivityEvent.observe(viewLifecycleOwner) { fsAuthority ->
             showAuthActivity(fsAuthority)
+        }
+        viewModel.showSystemFilePickerEvent.observe(viewLifecycleOwner) {
+            showSystemFilePicker()
         }
     }
 
@@ -87,7 +100,13 @@ class StorageListFragment : BaseFragment() {
         }
     }
 
+    private fun showSystemFilePicker() {
+        startActivityForResult(createFilePickerIntent(), REQUEST_CODE_PICK_FILE)
+    }
+
     companion object {
+
+        private const val REQUEST_CODE_PICK_FILE = 1
 
         private const val ARG_REQUIRED_ACTION = "requiredAction"
 

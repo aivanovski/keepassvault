@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.debugmenu
 
+import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -38,6 +39,7 @@ class DebugMenuViewModel(
     val password = MutableLiveData(EMPTY)
     val debugServerUrlText = MutableLiveData(EMPTY)
     val debugCredentialsText = MutableLiveData(EMPTY)
+    val isPickFileVisible = MutableLiveData(false)
     val isDebugCredentialsVisible = MutableLiveData(false)
     val isWriteButtonEnabled = MutableLiveData(false)
     val isOpenDbButtonEnabled = MutableLiveData(false)
@@ -46,6 +48,7 @@ class DebugMenuViewModel(
     val isAddEntryButtonEnabled = MutableLiveData(false)
     val isExternalStorageEnabled = MutableLiveData(settings.isExternalStorageCacheEnabled)
     val showSnackbarEvent = SingleLiveEvent<String>()
+    val showSystemFilePickerEvent = SingleLiveEvent<Unit>()
 
     private var lastReadDescriptor: FileDescriptor? = null
     private var lastReadFile: File? = null
@@ -137,6 +140,27 @@ class DebugMenuViewModel(
 
     private fun defaultPasswordIfEmpty(password: String): String {
         return if (!password.isBlank()) password else DEFAULT_PASSWORD
+    }
+
+    fun onCheckExistsButtonClicked() {
+        val file = getSelectedFile() ?: return
+
+        screenState.value = ScreenState.data()
+
+        viewModelScope.launch {
+            val result = interactor.isFileExists(file)
+
+            if (result.isSucceededOrDeferred) {
+                val isFileExist = result.obj
+
+                showSnackbarEvent.call(
+                    resourceProvider.getString(R.string.file_exits_with_str, isFileExist.toString())
+                )
+            } else {
+                val message = errorInteractor.processAndGetMessage(result.error)
+                screenState.value = ScreenState.dataWithError(message)
+            }
+        }
     }
 
     fun onOpenDbButtonClicked() {
@@ -255,17 +279,23 @@ class DebugMenuViewModel(
                     R.string.credentials_with_str,
                     credsText
                 )
-
-                isDebugCredentialsVisible.value = true
-            }
-            else -> {
-                isDebugCredentialsVisible.value = false
             }
         }
+
+        isDebugCredentialsVisible.value = (fsType == FSType.WEBDAV)
+        isPickFileVisible.value = (fsType == FSType.SAF)
     }
 
     fun onExternalStorageCheckBoxChanged(isChecked: Boolean) {
         settings.isExternalStorageCacheEnabled = isChecked
+    }
+
+    fun onPickFileButtonClicked() {
+        showSystemFilePickerEvent.call()
+    }
+
+    fun onFilePicked(uri: Uri) {
+        filePath.value = uri.toString()
     }
 
     private fun getSelectedFile(): FileDescriptor? {
@@ -276,6 +306,7 @@ class DebugMenuViewModel(
 
         val fsAuthority = when (selectedFsType) {
             FSType.REGULAR_FS -> FSAuthority.REGULAR_FS_AUTHORITY
+            FSType.SAF -> FSAuthority.SAF_FS_AUTHORITY
             FSType.DROPBOX -> FSAuthority.DROPBOX_FS_AUTHORITY
             FSType.WEBDAV -> {
                 val creds = interactor.getDebugWebDavCredentials()

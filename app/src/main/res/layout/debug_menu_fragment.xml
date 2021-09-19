@@ -77,16 +77,30 @@
                     android:textSize="@dimen/material_primary_text_size"
                     app:layout_constraintTop_toBottomOf="@id/fileSystemDivider" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/pickFileButton"
+                    style="@style/Material.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/element_margin"
+                    android:layout_marginEnd="@dimen/element_margin"
+                    android:onClick="@{() -> viewModel.onPickFileButtonClicked()}"
+                    android:text="@string/pick_file"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/fileSystemSpinner"
+                    app:visible="@{viewModel.isPickFileVisible}" />
+
                 <TextView
                     android:id="@+id/debugServerUrl"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/group_margin"
-                    android:layout_marginTop="@dimen/element_margin"
                     android:layout_marginEnd="@dimen/group_margin"
                     android:text="@{viewModel.debugServerUrlText}"
                     android:textSize="@dimen/material_primary_text_size"
-                    app:layout_constraintTop_toBottomOf="@id/fileSystemSpinner"
+                    app:layout_constraintTop_toBottomOf="@id/pickFileButton"
                     app:visible="@{viewModel.isDebugCredentialsVisible}"
                     tools:text="@string/server_url_with_str"
                     tools:visibility="visible" />
@@ -115,7 +129,7 @@
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/filePath"
-                        style="@style/Material.EditText.PrimarySingleLine"
+                        style="@style/Material.EditText.PrimaryMultiLine"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/file_path"
@@ -165,6 +179,20 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/readButton" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/checkExistsButton"
+                    style="@style/Material.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginEnd="@dimen/element_margin"
+                    android:onClick="@{() -> viewModel.onCheckExistsButtonClicked()}"
+                    android:text="@string/check_exists"
+                    app:layout_constraintEnd_toStartOf="@id/writeButton"
+                    app:layout_constraintHorizontal_weight="1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/newButton" />
+
                 <TextView
                     android:id="@+id/dbText"
                     style="@style/Material.PrimaryText.SingleLine"
@@ -174,7 +202,7 @@
                     android:layout_marginTop="@dimen/group_margin"
                     android:text="@string/database_with_dots"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/newButton" />
+                    app:layout_constraintTop_toBottomOf="@+id/checkExistsButton" />
 
                 <View
                     android:id="@+id/dbDivider"

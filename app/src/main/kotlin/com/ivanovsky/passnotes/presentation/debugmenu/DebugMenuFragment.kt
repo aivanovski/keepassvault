@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.presentation.debugmenu
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -15,6 +17,7 @@ import com.ivanovsky.passnotes.databinding.DebugMenuFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
+import com.ivanovsky.passnotes.util.IntentUtils.createFilePickerIntent
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class DebugMenuFragment : BaseFragment() {
@@ -27,6 +30,13 @@ class DebugMenuFragment : BaseFragment() {
             title = getString(R.string.debug_menu)
             setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == REQUEST_CODE_PICK_FILE && resultCode == Activity.RESULT_OK) {
+            val uri = data?.data ?: return
+            viewModel.onFilePicked(uri)
         }
     }
 
@@ -77,8 +87,15 @@ class DebugMenuFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        subscribeToLiveData()
+    }
+
+    private fun subscribeToLiveData() {
         viewModel.showSnackbarEvent.observe(viewLifecycleOwner) { message ->
             showSnackbarMessage(message)
+        }
+        viewModel.showSystemFilePickerEvent.observe(viewLifecycleOwner) {
+            showSystemFilePicker()
         }
     }
 
@@ -94,10 +111,17 @@ class DebugMenuFragment : BaseFragment() {
         viewModel.onFileSystemSelected(fsType)
     }
 
+    private fun showSystemFilePicker() {
+        startActivityForResult(createFilePickerIntent(), REQUEST_CODE_PICK_FILE)
+    }
+
     companion object {
+
+        private const val REQUEST_CODE_PICK_FILE = 1
 
         private val FILE_SYSTEM_ITEMS = listOf(
             FSType.REGULAR_FS to R.string.device_file_system,
+            FSType.SAF to R.string.storage_access_framework,
             FSType.DROPBOX to R.string.dropbox,
             FSType.WEBDAV to R.string.webdav
         )

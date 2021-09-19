@@ -1,7 +1,9 @@
 package com.ivanovsky.passnotes.data.entity
 
+import android.net.Uri
 import android.os.Parcelable
 import com.ivanovsky.passnotes.util.FileUtils
+import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
 import java.io.File
 import kotlinx.android.parcel.Parcelize
 
@@ -15,6 +17,7 @@ data class FileDescriptor(
     val modified: Long? = null
 ) : Parcelable {
 
+    // TODO: (refactor) move to extension function
     val name = FileUtils.getFileNameFromPath(path)
 
     companion object {
@@ -26,8 +29,19 @@ data class FileDescriptor(
                 path = file.path,
                 uid = file.path,
                 isDirectory = file.isDirectory,
-                isRoot = file.path == "/",
+                isRoot = (file.path == ROOT_PATH),
                 modified = file.lastModified()
+            )
+        }
+
+        @JvmStatic
+        fun fromUri(uri: Uri): FileDescriptor {
+            return FileDescriptor(
+                fsAuthority = FSAuthority.SAF_FS_AUTHORITY,
+                path = uri.toString(),
+                uid = uri.toString(),
+                isDirectory = false,
+                isRoot = false
             )
         }
     }

@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.domain.interactor.storagelist
 
 import android.content.Context
-import android.os.Environment
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
@@ -13,6 +12,7 @@ import com.ivanovsky.passnotes.domain.entity.StorageOptionType.DROPBOX
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.EXTERNAL_STORAGE
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.PRIVATE_STORAGE
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.WEBDAV
+import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -22,13 +22,24 @@ class StorageListInteractor(
     private val fileSystemResolver: FileSystemResolver
 ) {
 
-    fun getAvailableStorageOptions(): List<StorageOption> {
-        return listOf(
-            createPrivateStorageOption(),
-            createExternalStorageOption(),
-            createDropboxOption(),
-            createWebDavOption()
-        )
+    fun getStorageOptions(action: Action): List<StorageOption> {
+        return when (action) {
+            Action.PICK_FILE -> {
+                listOf(
+                    createPrivateStorageOption(),
+                    createExternalStorageOption(),
+                    createDropboxOption(),
+                    createWebDavOption()
+                )
+            }
+            Action.PICK_STORAGE -> {
+                listOf(
+                    createPrivateStorageOption(),
+                    createDropboxOption(),
+                    createWebDavOption()
+                )
+            }
+        }
     }
 
     private fun createPrivateStorageOption(): StorageOption {
@@ -42,7 +53,7 @@ class StorageListInteractor(
     private fun createExternalStorageOption(): StorageOption {
         return StorageOption(
             EXTERNAL_STORAGE,
-            context.getString(R.string.external_storage),
+            context.getString(R.string.external_storage_system_picker),
             createExternalStorageDir()
         )
     }
@@ -68,7 +79,13 @@ class StorageListInteractor(
     }
 
     private fun createExternalStorageDir(): FileDescriptor {
-        return FileDescriptor.fromRegularFile(Environment.getExternalStorageDirectory())
+        return FileDescriptor(
+            fsAuthority = FSAuthority.SAF_FS_AUTHORITY,
+            path = ROOT_PATH,
+            uid = ROOT_PATH,
+            isDirectory = true,
+            isRoot = true
+        )
     }
 
     private fun createDropboxStorageDir(): FileDescriptor =

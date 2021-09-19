@@ -1,7 +1,5 @@
 package com.ivanovsky.passnotes.data.repository.file.regular;
 
-import android.Manifest;
-
 import androidx.annotation.NonNull;
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
@@ -12,7 +10,6 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
-import com.ivanovsky.passnotes.domain.PermissionHelper;
 import com.ivanovsky.passnotes.util.Logger;
 
 import java.io.BufferedInputStream;
@@ -35,16 +32,12 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOErr
 
 public class RegularFileSystemProvider implements FileSystemProvider {
 
-    private static final String SDCARD_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE;
-
-    private final PermissionHelper permissionHelper;
     private final Lock lock;
     private final FileSystemAuthenticator authenticator;
     private final FileSystemSyncProcessor syncProcessor;
 
-    public RegularFileSystemProvider(PermissionHelper permissionHelper) {
+    public RegularFileSystemProvider() {
         this.lock = new ReentrantLock();
-        this.permissionHelper = permissionHelper;
         this.authenticator = new RegularFileSystemAuthenticator();
         this.syncProcessor = new RegularFileSystemSyncProcessor();
     }
@@ -196,12 +189,5 @@ public class RegularFileSystemProvider implements FileSystemProvider {
         }
 
         return result;
-    }
-
-    @NonNull
-    @Override
-    public OperationResult<Boolean> isStoragePermissionRequired(@NonNull FileDescriptor file) {
-        // TODO: actually permission is required only for external storage
-        return OperationResult.success(!permissionHelper.isPermissionGranted(SDCARD_PERMISSION));
     }
 }

@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.presentation.filepicker
 
-import android.Manifest
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
@@ -40,6 +39,8 @@ class FilePickerViewModel(
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
     val doneButtonVisibility = MutableLiveData<Boolean>()
+    // TODO: (clean up or refactor) is not used right now, but but may be used in a future
+    //  (when application will support direct access to external storage)
     val requestPermissionEvent = SingleLiveEvent<String>()
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
 
@@ -117,17 +118,11 @@ class FilePickerViewModel(
         viewModelScope.launch {
             val dir = currentDir ?: rootFile
 
-            val permissionRequiredResult = interactor.isStoragePermissionRequired(dir)
-            val isPermissionRequired = permissionRequiredResult.resultOrFalse
-            if (!isPermissionRequired) {
-                val files = withContext(dispatchers.Default) {
-                    interactor.getFileList(dir)
-                }
-
-                onFilesLoaded(dir, files)
-            } else {
-                requestPermissionEvent.call(SDCARD_PERMISSION)
+            val files = withContext(dispatchers.IO) {
+                interactor.getFileList(dir)
             }
+
+            onFilesLoaded(dir, files)
         }
     }
 
@@ -142,7 +137,7 @@ class FilePickerViewModel(
 
             if (!dir.isRoot && isBrowsingEnabled) {
                 viewModelScope.launch {
-                    val parent = withContext(dispatchers.Default) {
+                    val parent = withContext(dispatchers.IO) {
                         interactor.getParent(currentDir)
                     }
 
@@ -264,8 +259,4 @@ class FilePickerViewModel(
     }
 
     private fun isAnyFileSelected(): Boolean = (selectedFile != null)
-
-    companion object {
-        private const val SDCARD_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE
-    }
 }

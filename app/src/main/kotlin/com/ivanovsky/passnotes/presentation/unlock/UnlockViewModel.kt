@@ -369,11 +369,10 @@ class UnlockViewModel(
         if (!BuildConfig.DEBUG) return
 
         val file = selectedFile ?: return
-
-        val name = FileUtils.getFileNameWithoutExtensionFromPath(file.path) ?: return
+        val fileNameWithoutExtension = FileUtils.removeFileExtensionsIfNeed(file.name)
 
         for (passwordRule in debugPasswordRules) {
-            if (passwordRule.pattern.matcher(name).matches()) {
+            if (passwordRule.pattern.matcher(fileNameWithoutExtension).matches()) {
                 password.value = passwordRule.password
             }
         }

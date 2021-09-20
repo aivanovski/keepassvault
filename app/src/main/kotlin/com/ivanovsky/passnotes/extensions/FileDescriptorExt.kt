@@ -14,6 +14,7 @@ fun FileDescriptor.toUsedFile(
         fsAuthority = fsAuthority,
         filePath = path,
         fileUid = uid,
+        fileName = name,
         addedTime = addedTime,
         lastAccessTime = lastAccessTime
     )

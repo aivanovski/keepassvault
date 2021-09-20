@@ -141,12 +141,40 @@ class SAFFileSystemProvider(
     }
 
     override fun getFile(path: String, options: FSOptions): OperationResult<FileDescriptor> {
+        val uri = Uri.parse(path)
+
+        val cursor = try {
+            context.contentResolver.query(uri, null, null, null, null)
+                ?: return OperationResult.error(failedToRetrieveData(uri))
+        } catch (e: SecurityException) {
+            Logger.printStackTrace(e)
+            return OperationResult.error(failedToGetAccessTo(uri))
+        } catch (e: Exception) {
+            Logger.printStackTrace(e)
+            return OperationResult.error(unknownError(e))
+        }
+
+        val name = cursor.use {
+            if (it.count == 0) {
+                return OperationResult.error(failedToRetrieveData(uri))
+            }
+
+            if (!it.columnNames.contains(OpenableColumns.DISPLAY_NAME)) {
+                return OperationResult.error(failedToFindColumn(OpenableColumns.DISPLAY_NAME))
+            }
+
+            val displayNameColumnIdx = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            it.moveToFirst()
+            it.getString(displayNameColumnIdx)
+        }
+
         return OperationResult.success(
             FileDescriptor(
                 fsAuthority = FSAuthority.SAF_FS_AUTHORITY,
                 path = path,
-                isDirectory = false,
                 uid = path,
+                name = name,
+                isDirectory = false,
                 isRoot = false,
                 modified = null
             )
@@ -205,6 +233,7 @@ class SAFFileSystemProvider(
             fsAuthority = FSAuthority.SAF_FS_AUTHORITY,
             path = ROOT_PATH,
             uid = ROOT_PATH,
+            name = ROOT_PATH,
             isDirectory = true,
             isRoot = true
         )

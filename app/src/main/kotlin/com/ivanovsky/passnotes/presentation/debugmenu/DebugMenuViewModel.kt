@@ -7,8 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
-import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.FSType
+import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -18,6 +18,7 @@ import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
+import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,6 +54,7 @@ class DebugMenuViewModel(
     private var lastReadDescriptor: FileDescriptor? = null
     private var lastReadFile: File? = null
     private var selectedFsType = FSType.REGULAR_FS
+    private var uriFileDescriptor: FileDescriptor? = null
 
     fun onReadButtonClicked() {
         val inFile = getSelectedFile() ?: return
@@ -295,7 +297,25 @@ class DebugMenuViewModel(
     }
 
     fun onFilePicked(uri: Uri) {
-        filePath.value = uri.toString()
+        val fsAuthority = getSelectedFsAuthority()
+        val path = uri.toString()
+
+        viewModelScope.launch {
+            val getFileResult = interactor.getFileByPath(path, fsAuthority)
+
+            if (getFileResult.isSucceededOrDeferred) {
+                val file = getFileResult.obj
+                uriFileDescriptor = file
+
+                filePath.value = file.path
+                showSnackbarEvent.call(
+                    resourceProvider.getString(R.string.successfully)
+                )
+            } else {
+                val message = errorInteractor.processAndGetMessage(getFileResult.error)
+                screenState.value = ScreenState.dataWithError(message)
+            }
+        }
     }
 
     private fun getSelectedFile(): FileDescriptor? {
@@ -304,7 +324,23 @@ class DebugMenuViewModel(
             return null
         }
 
-        val fsAuthority = when (selectedFsType) {
+        val fsAuthority = getSelectedFsAuthority()
+        return if (fsAuthority.type == FSType.SAF) {
+            uriFileDescriptor
+        } else {
+            FileDescriptor(
+                fsAuthority = fsAuthority,
+                path = filePath,
+                uid = filePath,
+                name = FileUtils.getFileNameFromPath(filePath),
+                isDirectory = false,
+                isRoot = false
+            )
+        }
+    }
+
+    private fun getSelectedFsAuthority(): FSAuthority {
+        return when (selectedFsType) {
             FSType.REGULAR_FS -> FSAuthority.REGULAR_FS_AUTHORITY
             FSType.SAF -> FSAuthority.SAF_FS_AUTHORITY
             FSType.DROPBOX -> FSAuthority.DROPBOX_FS_AUTHORITY
@@ -313,14 +349,6 @@ class DebugMenuViewModel(
                 FSAuthority(creds, selectedFsType)
             }
         }
-
-        return FileDescriptor(
-            fsAuthority = fsAuthority,
-            path = filePath,
-            uid = filePath,
-            isDirectory = false,
-            isRoot = false
-        )
     }
 
     fun navigateBack() = router.exit()

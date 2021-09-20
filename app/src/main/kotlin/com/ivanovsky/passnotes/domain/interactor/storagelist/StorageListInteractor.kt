@@ -3,10 +3,12 @@ package com.ivanovsky.passnotes.domain.interactor.storagelist
 import android.content.Context
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.entity.FSType
+import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
+import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.DROPBOX
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.EXTERNAL_STORAGE
@@ -14,12 +16,12 @@ import com.ivanovsky.passnotes.domain.entity.StorageOptionType.PRIVATE_STORAGE
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.WEBDAV
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class StorageListInteractor(
     private val context: Context,
-    private val fileSystemResolver: FileSystemResolver
+    private val fileSystemResolver: FileSystemResolver,
+    private val dispatchers: DispatcherProvider
 ) {
 
     fun getStorageOptions(action: Action): List<StorageOption> {
@@ -83,6 +85,7 @@ class StorageListInteractor(
             fsAuthority = FSAuthority.SAF_FS_AUTHORITY,
             path = ROOT_PATH,
             uid = ROOT_PATH,
+            name = ROOT_PATH,
             isDirectory = true,
             isRoot = true
         )
@@ -93,6 +96,7 @@ class StorageListInteractor(
             fsAuthority = FSAuthority.DROPBOX_FS_AUTHORITY,
             path = ROOT_PATH,
             uid = ROOT_PATH,
+            name = ROOT_PATH,
             isDirectory = true,
             isRoot = true
         )
@@ -105,13 +109,24 @@ class StorageListInteractor(
             ),
             path = ROOT_PATH,
             uid = ROOT_PATH,
+            name = ROOT_PATH,
             isDirectory = true,
             isRoot = true
         )
 
     suspend fun getRemoteFileSystemRoot(fsAuthority: FSAuthority): OperationResult<FileDescriptor> =
-        withContext(Dispatchers.IO) {
+        withContext(dispatchers.IO) {
             val provider = fileSystemResolver.resolveProvider(fsAuthority)
             provider.rootFile
+        }
+
+    suspend fun getFileByPath(
+        path: String,
+        fsAuthority: FSAuthority
+    ): OperationResult<FileDescriptor> =
+        withContext(dispatchers.IO) {
+            fileSystemResolver
+                .resolveProvider(fsAuthority)
+                .getFile(path, FSOptions.DEFAULT)
         }
 }

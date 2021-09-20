@@ -234,6 +234,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         return new FileDescriptor(fsAuthority,
                 path,
                 path,
+                FileUtils.getFileNameFromPath(path),
                 false,
                 false,
                 null);

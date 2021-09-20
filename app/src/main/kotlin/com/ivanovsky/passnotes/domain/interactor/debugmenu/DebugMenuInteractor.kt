@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.domain.interactor.debugmenu
 
+import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.OperationError.*
@@ -285,9 +286,18 @@ class DebugMenuInteractor(
 
     suspend fun isFileExists(file: FileDescriptor): OperationResult<Boolean> {
         return withContext(dispatchers.IO) {
-            fileSystemResolver.resolveProvider(file.fsAuthority).exists(file)
+            fileSystemResolver
+                .resolveProvider(file.fsAuthority)
+                .exists(file)
         }
     }
+
+    suspend fun getFileByPath(path: String, fsAuthority: FSAuthority): OperationResult<FileDescriptor> =
+        withContext(dispatchers.IO) {
+            fileSystemResolver
+                .resolveProvider(fsAuthority)
+                .getFile(path, FSOptions.DEFAULT)
+        }
 
     private fun generateNewGroupTitle(groupRepository: GroupRepository): String? {
         var title: String? = null

@@ -37,9 +37,13 @@ class StorageListFragment : BaseFragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == REQUEST_CODE_PICK_FILE && resultCode == Activity.RESULT_OK) {
-            val uri = data?.data ?: return
-            viewModel.onExternalStorageFileSelected(uri)
+        if (requestCode == REQUEST_CODE_PICK_FILE) {
+            if (resultCode == Activity.RESULT_OK) {
+                val uri = data?.data ?: return
+                viewModel.onExternalStorageFileSelected(uri)
+            } else {
+                viewModel.onExternalStorageFileSelectionCanceled()
+            }
         }
     }
 

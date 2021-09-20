@@ -99,8 +99,27 @@ class StorageListViewModel(
     }
 
     fun onExternalStorageFileSelected(uri: Uri) {
-        router.sendResult(StorageListScreen.RESULT_KEY, FileDescriptor.fromUri(uri))
-        router.exit()
+        val fsAuthority = selectedOption?.root?.fsAuthority ?: return
+
+        val path = uri.toString()
+
+        viewModelScope.launch {
+            val getFileResult = interactor.getFileByPath(path, fsAuthority)
+
+            if (getFileResult.isSucceededOrDeferred) {
+                val file = getFileResult.obj
+                router.sendResult(StorageListScreen.RESULT_KEY, file)
+                router.exit()
+            } else {
+                val message = errorInteractor.processAndGetMessage(getFileResult.error)
+                screenState.value = ScreenState.dataWithError(message)
+            }
+        }
+
+    }
+
+    fun onExternalStorageFileSelectionCanceled() {
+        screenState.value = ScreenState.data()
     }
 
     fun navigateBack() = router.exit()
@@ -169,6 +188,7 @@ class StorageListViewModel(
     }
 
     private fun onExternalStorageSelected() {
+        screenState.value = ScreenState.loading()
         showSystemFilePickerEvent.call()
     }
 

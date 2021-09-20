@@ -22,6 +22,7 @@ import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSFil
 import com.ivanovsky.passnotes.data.repository.file.remote.exception.InternalCacheException;
 import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSNetworkException;
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClient;
+import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.Logger;
 
 import java.io.BufferedInputStream;
@@ -148,6 +149,7 @@ public class DropboxClient implements RemoteApiClient {
         return new FileDescriptor(fsAuthority,
                 path,
                 metadata.getId(),
+                FileUtils.getFileNameFromPath(path),
                 false,
                 false,
                 modified);
@@ -160,6 +162,7 @@ public class DropboxClient implements RemoteApiClient {
         return new FileDescriptor(fsAuthority,
                 path,
                 metadata.getId(),
+                FileUtils.getFileNameFromPath(path),
                 true,
                 isRoot,
                 null);
@@ -202,6 +205,7 @@ public class DropboxClient implements RemoteApiClient {
 
     private FileDescriptor createRootDescriptor() {
         return new FileDescriptor(fsAuthority,
+                ROOT_PATH,
                 ROOT_PATH,
                 ROOT_PATH,
                 true,

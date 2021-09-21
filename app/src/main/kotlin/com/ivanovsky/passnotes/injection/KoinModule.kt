@@ -125,10 +125,10 @@ object KoinModule {
         // Interactors
         single { FilePickerInteractor(get()) }
         single { UnlockInteractor(get(), get(), get(), get(), get()) }
-        single { StorageListInteractor(get(), get()) }
+        single { StorageListInteractor(get(), get(), get()) }
         single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
         single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
-        single { DebugMenuInteractor(get(), get(), get(), get()) }
+        single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
         single { NoteInteractor(get(), get(), get(), get(), get()) }
         single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
         single { NoteEditorInteractor(get(), get()) }
@@ -167,7 +167,7 @@ object KoinModule {
         single { SettingsRouter(get()) }
 
         // ViewModels
-        viewModel { StorageListViewModel(get(), get(), get(), get(), get(), get()) }
+        viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
         viewModel { FilePickerViewModel(get(), get(), get(), get(), get(), get()) }
         viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
         viewModel { GroupEditorViewModel(get(), get(), get(), get()) }

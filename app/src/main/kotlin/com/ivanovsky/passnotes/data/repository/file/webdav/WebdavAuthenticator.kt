@@ -14,7 +14,7 @@ class WebdavAuthenticator(
 
     private val fsAuthority = AtomicReference(initialAuthority)
 
-    override fun getAuthType() = AuthType.INTERNAL
+    override fun getAuthType() = AuthType.CREDENTIALS
 
     override fun getFsAuthority(): FSAuthority = fsAuthority.get()
 

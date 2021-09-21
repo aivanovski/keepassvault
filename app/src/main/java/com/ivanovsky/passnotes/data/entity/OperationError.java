@@ -47,6 +47,10 @@ public class OperationError {
 
     public static final String GENERIC_MESSAGE_NOT_FOUND = "%s not found";
     public static final String GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST = "Group '%s' already exists";
+    public static final String GENERIC_MESSAGE_FAILED_TO_RETRIEVE_DATA_BY_URI = "Failed to retrive data by uri: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_FIND_COLUMN = "Failed to find column: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_GET_ACCESS_RIGHT_TO_URI = "Failed to get access to: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_FIND_FILE = "Failed to find file: %s";
 
     private Type type;
     private String message;
@@ -99,6 +103,12 @@ public class OperationError {
     public static OperationError newFileNotFoundError() {
         OperationError error = new OperationError(Type.FILE_NOT_FOUND_ERROR);
         error.message = MESSAGE_FILE_NOT_FOUND;
+        return error;
+    }
+
+    public static OperationError newFileNotFoundError(String message) {
+        OperationError error = new OperationError(Type.FILE_NOT_FOUND_ERROR);
+        error.message = message;
         return error;
     }
 

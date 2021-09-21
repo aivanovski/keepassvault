@@ -83,7 +83,9 @@ class UnlockInteractor(
                 open
             }
 
-            updateFileAccessTime(file)
+            if (result.isSucceededOrDeferred) {
+                updateFileAccessTime(file)
+            }
 
             result.takeStatusWith(true)
         }

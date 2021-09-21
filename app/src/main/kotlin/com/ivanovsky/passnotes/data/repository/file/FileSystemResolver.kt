@@ -1,15 +1,16 @@
 package com.ivanovsky.passnotes.data.repository.file
 
+import android.content.Context
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.domain.FileHelper
-import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.repository.file.dropbox.DropboxAuthenticator
 import com.ivanovsky.passnotes.data.repository.file.dropbox.DropboxClient
 import com.ivanovsky.passnotes.data.repository.file.regular.RegularFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientAdapter
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteFileSystemProvider
+import com.ivanovsky.passnotes.data.repository.file.saf.SAFFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.webdav.WebDavClientV2
 import com.ivanovsky.passnotes.data.repository.file.webdav.WebdavAuthenticator
 import com.ivanovsky.passnotes.data.repository.settings.Settings
@@ -18,10 +19,10 @@ import kotlin.concurrent.withLock
 import okhttp3.OkHttpClient
 
 class FileSystemResolver(
+    private val context: Context,
     private val settings: Settings,
     private val remoteFileRepository: RemoteFileRepository,
     private val fileHelper: FileHelper,
-    private val permissionHelper: PermissionHelper,
     private val httpClient: OkHttpClient
 ) {
 
@@ -52,7 +53,7 @@ class FileSystemResolver(
     private fun instantiateProvider(fsAuthority: FSAuthority): FileSystemProvider {
         return when (fsAuthority.type) {
             FSType.REGULAR_FS -> {
-                RegularFileSystemProvider(permissionHelper)
+                RegularFileSystemProvider()
             }
             FSType.DROPBOX -> {
                 val authenticator = DropboxAuthenticator(settings)
@@ -74,6 +75,9 @@ class FileSystemResolver(
                     fileHelper,
                     fsAuthority
                 )
+            }
+            FSType.SAF -> {
+                SAFFileSystemProvider(context)
             }
         }
     }

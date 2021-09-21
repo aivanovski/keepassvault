@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.data.entity
 
 import androidx.room.ColumnInfo
-import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -19,6 +18,9 @@ data class UsedFile(
 
     @ColumnInfo(name = "file_uid")
     val fileUid: String,
+
+    @ColumnInfo(name = "file_name")
+    val fileName: String,
 
     @ColumnInfo(name = "added_time")
     val addedTime: Long,

@@ -19,10 +19,7 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.Screens.AboutScreen
-import com.ivanovsky.passnotes.presentation.Screens.DebugMenuScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
-import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NewDatabaseScreen
 import com.ivanovsky.passnotes.presentation.Screens.SelectDatabaseScreen
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
@@ -372,11 +369,10 @@ class UnlockViewModel(
         if (!BuildConfig.DEBUG) return
 
         val file = selectedFile ?: return
-
-        val name = FileUtils.getFileNameWithoutExtensionFromPath(file.path) ?: return
+        val fileNameWithoutExtension = FileUtils.removeFileExtensionsIfNeed(file.name)
 
         for (passwordRule in debugPasswordRules) {
-            if (passwordRule.pattern.matcher(name).matches()) {
+            if (passwordRule.pattern.matcher(fileNameWithoutExtension).matches()) {
                 password.value = passwordRule.password
             }
         }

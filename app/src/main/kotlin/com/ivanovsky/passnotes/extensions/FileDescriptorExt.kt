@@ -14,6 +14,7 @@ fun FileDescriptor.toUsedFile(
         fsAuthority = fsAuthority,
         filePath = path,
         fileUid = uid,
+        fileName = name,
         addedTime = addedTime,
         lastAccessTime = lastAccessTime
     )
@@ -29,6 +30,9 @@ fun FileDescriptor.formatReadablePath(resourceProvider: ResourceProvider): Strin
         FSType.WEBDAV -> {
             val url = fsAuthority.credentials?.serverUrl ?: ""
             url + path
+        }
+        FSType.SAF -> {
+            path
         }
     }
 }

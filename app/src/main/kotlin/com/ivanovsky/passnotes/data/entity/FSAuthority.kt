@@ -9,10 +9,12 @@ data class FSAuthority(
     val type: FSType
 ) : Parcelable {
 
+    // TODO: (refactor) move to extension function
     val isRequireCredentials: Boolean = (credentials == null)
 
     companion object {
         val REGULAR_FS_AUTHORITY = FSAuthority(null, FSType.REGULAR_FS)
         val DROPBOX_FS_AUTHORITY = FSAuthority(null, FSType.DROPBOX)
+        val SAF_FS_AUTHORITY = FSAuthority(null, FSType.SAF)
     }
 }

@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.domain.interactor.debugmenu
 
+import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.OperationError.*
@@ -10,12 +11,14 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
 import com.ivanovsky.passnotes.util.InputOutputUtils
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileOutputStreamOrNull
 import com.ivanovsky.passnotes.util.Logger
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -24,7 +27,8 @@ class DebugMenuInteractor(
     private val fileSystemResolver: FileSystemResolver,
     private val dbRepository: EncryptedDatabaseRepository,
     private val fileHelper: FileHelper,
-    private val getDebugCredentialsUseCase: GetDebugCredentialsUseCase
+    private val getDebugCredentialsUseCase: GetDebugCredentialsUseCase,
+    private val dispatchers: DispatcherProvider
 ) {
 
     fun getDebugWebDavCredentials() = getDebugCredentialsUseCase.getDebugWebDavCredentials()
@@ -279,6 +283,21 @@ class DebugMenuInteractor(
 
         return insertResult.takeStatusWith(true)
     }
+
+    suspend fun isFileExists(file: FileDescriptor): OperationResult<Boolean> {
+        return withContext(dispatchers.IO) {
+            fileSystemResolver
+                .resolveProvider(file.fsAuthority)
+                .exists(file)
+        }
+    }
+
+    suspend fun getFileByPath(path: String, fsAuthority: FSAuthority): OperationResult<FileDescriptor> =
+        withContext(dispatchers.IO) {
+            fileSystemResolver
+                .resolveProvider(fsAuthority)
+                .getFile(path, FSOptions.DEFAULT)
+        }
 
     private fun generateNewGroupTitle(groupRepository: GroupRepository): String? {
         var title: String? = null

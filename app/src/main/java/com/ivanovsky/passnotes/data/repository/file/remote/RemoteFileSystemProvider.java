@@ -234,6 +234,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         return new FileDescriptor(fsAuthority,
                 path,
                 path,
+                FileUtils.getFileNameFromPath(path),
                 false,
                 false,
                 null);
@@ -825,11 +826,5 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     @Override
     public FileSystemSyncProcessor getSyncProcessor() {
         return syncProcessor;
-    }
-
-    @NonNull
-    @Override
-    public OperationResult<Boolean> isStoragePermissionRequired(@NonNull FileDescriptor file) {
-        return OperationResult.success(false);
     }
 }

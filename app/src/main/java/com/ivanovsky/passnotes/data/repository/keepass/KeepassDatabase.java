@@ -4,10 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_CONFIG_TYPE;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newAuthError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
@@ -40,6 +36,11 @@ import org.linguafranca.pwdb.Credentials;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
+
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_CONFIG_TYPE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newAuthError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 
 public class KeepassDatabase implements EncryptedDatabase {
 

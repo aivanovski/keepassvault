@@ -32,5 +32,9 @@ public interface EncryptedDatabase {
     TemplateRepository getTemplateRepository();
 
     @NonNull
+    OperationResult<Boolean> changeKey(@NonNull EncryptedDatabaseKey oldKey,
+                                       @NonNull EncryptedDatabaseKey newKey);
+
+    @NonNull
     OperationResult<Boolean> commit();
 }

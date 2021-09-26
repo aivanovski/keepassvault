@@ -2,12 +2,20 @@ package com.ivanovsky.passnotes.data.repository.keepass;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_CONFIG_TYPE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newAuthError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.repository.GroupRepository;
+import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.TemplateRepository;
+import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseConfig;
+import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
+import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.encdb.exception.FailedToWriteDBException;
 import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
@@ -15,36 +23,26 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassGroupDao;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao;
-import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
-import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
-import com.ivanovsky.passnotes.data.repository.GroupRepository;
-import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
 import com.ivanovsky.passnotes.util.Logger;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import org.linguafranca.pwdb.Credentials;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.LinkedList;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_CONFIG_TYPE;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
-
 public class KeepassDatabase implements EncryptedDatabase {
 
-    private final byte[] key;
+    private EncryptedDatabaseKey key;
     private final FileDescriptor file;
     private final KeepassGroupRepository groupRepository;
     private final KeepassNoteRepository noteRepository;
@@ -64,7 +62,7 @@ public class KeepassDatabase implements EncryptedDatabase {
                            FileDescriptor file,
                            InputStream in,
                            OperationResult<?> inResult,
-                           byte[] key) throws EncryptedDatabaseException {
+                           EncryptedDatabaseKey key) throws EncryptedDatabaseException {
         this.fileSystemResolver = fileSystemResolver;
         this.statusUseCase = statusUseCase;
         this.observerBus = observerBus;
@@ -86,10 +84,10 @@ public class KeepassDatabase implements EncryptedDatabase {
     }
 
     private SimpleDatabase readDatabaseFile(InputStream in,
-                                            byte[] key) throws EncryptedDatabaseException {
+                                            EncryptedDatabaseKey key) throws EncryptedDatabaseException {
         SimpleDatabase result;
 
-        Credentials credentials = new KdbxCreds(key);
+        Credentials credentials = new KdbxCreds(key.getKey());
 
         synchronized (lock) {
             try {
@@ -181,7 +179,7 @@ public class KeepassDatabase implements EncryptedDatabase {
         synchronized (lock) {
             FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsAuthority());
 
-            Credentials credentials = new KdbxCreds(key);
+            Credentials credentials = new KdbxCreds(key.getKey());
 
             FileDescriptor updatedFile = file.copy(file.getFsAuthority(),
                     file.getPath(),
@@ -264,6 +262,23 @@ public class KeepassDatabase implements EncryptedDatabase {
         while ((currentGroup = nextGroups.pollFirst()) != null) {
             result.add(currentGroup);
             nextGroups.addAll(currentGroup.getGroups());
+        }
+
+        return result;
+    }
+
+    @NonNull
+    @Override
+    public OperationResult<Boolean> changeKey(@NonNull EncryptedDatabaseKey oldKey,
+                                              @NonNull EncryptedDatabaseKey newKey) {
+        OperationResult<Boolean> result;
+        synchronized (lock) {
+            if (oldKey.equals(key)) {
+                key = newKey;
+                result = commit();
+            } else {
+                result = OperationResult.error(newAuthError());
+            }
         }
 
         return result;

@@ -11,7 +11,8 @@
 
     <string name="pref_database_settings_fragment" translatable="false">databaseSettingsFragment</string>
     <string name="pref_is_recycle_bin_enabled" translatable="false">isRecycleBinEnabled</string>
-    <string name="pref_progress">progress</string>
+    <string name="pref_change_password" translatable="false">changePassword</string>
+    <string name="pref_progress" translatable="false">progress</string>
 
     <string-array name="pref_auto_lock_entries">
         <item>30 seconds</item>

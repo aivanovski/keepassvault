@@ -31,6 +31,7 @@
     <string name="add_templates">Add note templates</string>
     <string name="more_options">More options</string>
     <string name="paste">Paste</string>
+    <string name="apply">Apply</string>
 
     <!-- Lock notification -->
     <string name="notification_channel">Quick Lock</string>
@@ -190,5 +191,7 @@
     <!-- DatabaseSettings screen -->
     <string name="pref_is_recycle_bin_enabled_title">Use Recycle bin</string>
     <string name="pref_is_recycle_bin_enabled_summary">Moves groups and notes to "Recycle bin" group before deleting</string>
+    <string name="new_password">New password</string>
+    <string name="change_password">Change password</string>
 
 </resources>

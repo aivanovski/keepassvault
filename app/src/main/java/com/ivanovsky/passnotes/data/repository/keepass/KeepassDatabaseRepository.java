@@ -111,7 +111,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
             try {
                 db = new KeepassDatabase(fileSystemResolver, statusUseCase, observerBus,
-                        options, file, in, inResult, key.getKey());
+                        options, file, in, inResult, key);
                 result = inResult.takeStatusWith(db);
             } catch (EncryptedDatabaseException e) {
                 Logger.printStackTrace(e);

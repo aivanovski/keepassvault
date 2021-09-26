@@ -204,6 +204,8 @@ class NewDatabaseViewModel(
     companion object {
 
         private val FILE_NAME_PATTERN = Pattern.compile("[\\w-_]{1,50}")
-        private val PASSWORD_PATTERN = Pattern.compile("[\\w@#$!%^&+=]{4,20}")
+        // TODO: Refactor, create Validator entity which will be able to validate
+        //  different text
+        val PASSWORD_PATTERN = Pattern.compile("[\\w@#$!%^&+=]{4,20}")
     }
 }

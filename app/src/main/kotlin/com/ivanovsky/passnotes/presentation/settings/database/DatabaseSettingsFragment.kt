@@ -13,6 +13,8 @@ import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ErrorDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.throwPreferenceNotFound
+import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordDialog
+import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordPreference
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class DatabaseSettingsFragment : BasePreferenceFragment() {
@@ -45,6 +47,15 @@ class DatabaseSettingsFragment : BasePreferenceFragment() {
 
             viewModel.onRecycleBinEnabledChanged(isEnabled)
             true
+        }
+    }
+
+    override fun onDisplayPreferenceDialog(preference: Preference?) {
+        if (preference is ChangePasswordPreference) {
+            val dialog = ChangePasswordDialog.newInstance()
+            dialog.show(childFragmentManager, ChangePasswordDialog.TAG)
+        } else {
+            super.onDisplayPreferenceDialog(preference)
         }
     }
 

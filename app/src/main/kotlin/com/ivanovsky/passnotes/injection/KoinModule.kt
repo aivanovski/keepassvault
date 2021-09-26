@@ -72,6 +72,7 @@ import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginViewModel
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
 import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsViewModel
+import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordDialogViewModel
 import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
 import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
@@ -181,6 +182,7 @@ object KoinModule {
         viewModel { AboutViewModel(get(), get()) }
         viewModel { MainSettingsViewModel(get(), get()) }
         viewModel { DatabaseSettingsViewModel(get(), get()) }
+        viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
         factory { UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
         factory { NavigationMenuViewModel(get()) }
     }

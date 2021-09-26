@@ -25,6 +25,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassGroupDao;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase;
+import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
 import com.ivanovsky.passnotes.util.Logger;
 import java.io.IOException;
@@ -184,6 +185,7 @@ public class KeepassDatabase implements EncryptedDatabase {
             FileDescriptor updatedFile = file.copy(file.getFsAuthority(),
                     file.getPath(),
                     file.getUid(),
+                    FileUtils.getFileNameFromPath(file.getPath()),
                     file.isDirectory(),
                     file.isRoot(),
                     System.currentTimeMillis());

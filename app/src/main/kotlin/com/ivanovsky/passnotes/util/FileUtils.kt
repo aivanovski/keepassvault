@@ -40,12 +40,17 @@ object FileUtils {
 
     @JvmStatic
     fun getFileNameWithoutExtensionFromPath(filePath: String): String? {
-        var result: String? = null
         val fileName = getFileNameFromPath(filePath)
+        return removeFileExtensionsIfNeed(fileName)
+    }
+
+    @JvmStatic
+    fun removeFileExtensionsIfNeed(fileName: String): String {
         val idx = fileName.lastIndexOf(".")
-        if (idx > 0 && idx + 1 < fileName.length) {
-            result = fileName.substring(0, idx)
+        return if (idx > 0 && idx + 1 < fileName.length) {
+            fileName.substring(0, idx)
+        } else {
+            ""
         }
-        return result
     }
 }

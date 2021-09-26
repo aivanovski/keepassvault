@@ -234,6 +234,7 @@ class WebDavClientV2(
             fsAuthority = fsAuthority,
             path = path,
             uid = path,
+            name = FileUtils.getFileNameFromPath(path),
             isDirectory = isDirectory,
             isRoot = (path == ROOT_PATH),
             modified = modified.time

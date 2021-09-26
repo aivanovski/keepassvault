@@ -8,6 +8,7 @@ fun UsedFile.toFileDescriptor(): FileDescriptor =
         fsAuthority = fsAuthority,
         path = filePath,
         uid = fileUid,
+        name = fileName,
         isDirectory = false,
         isRoot = false,
         modified = null

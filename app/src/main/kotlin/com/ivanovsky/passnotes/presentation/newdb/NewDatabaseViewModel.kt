@@ -193,6 +193,9 @@ class NewDatabaseViewModel(
             FSType.WEBDAV -> {
                 storageType.value = resourceProvider.getString(R.string.webdav)
             }
+            FSType.SAF -> {
+                storageType.value = resourceProvider.getString(R.string.public_storage)
+            }
         }
 
         storagePath.value = selectedFile.path

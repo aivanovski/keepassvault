@@ -10,7 +10,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Decrypt keys
+          name: Decrypt encrypted data
           command: |
             mkdir -p keys
             echo $KEYSTORE_DEBUG | base64 --decode >> keys/debug.keystore.gpg
@@ -18,11 +18,15 @@ jobs:
 
             echo $KEYSTORE_RELEASE | base64 --decode >> keys/release.keystore.gpg
             gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/release.keystore -d ./keys/release.keystore.gpg
+
+            echo $GOOGLE_SERVICES_JSON | base64 --decode >> app/google-services.json.gpg
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./app/google-services.json -d ./app/google-services.json.gpg
       - run:
-          name: Validate keys
+          name: Validate decrypted data
           command: |
             echo "3a15a7065ed4a62a747af2e3477b0a3e1940a7bc2946df638b902bcb186998e7 *keys/debug.keystore" | sha256sum --check
             echo "36a3bb8b7bda141b414c2df7fac7dcd09a2775769c561e562d2b43f7b246bfa5 *keys/release.keystore" | sha256sum --check
+            echo "4c259d0e1b031108e3fa682353f7ca450827644422c736334f1b3f24cb10bc62 *app/google-services.json" | sha256sum --check
       - run:
           name: Run tests
           command: ./gradlew app:testDebugUnitTest

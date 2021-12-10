@@ -1,8 +1,9 @@
-apply from: '../config.gradle'
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
+apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: 'com.google.gms.google-services'
 
 def versionMajor = 0
 def versionMinor = 8
@@ -17,6 +18,7 @@ def PROPERTY_KEYSTORE_ALIAS = 'KEYSTORE_ALIAS'
 def PROPERTY_DEBUG_WEBDAV_URL = 'DEBUG_WEBDAV_URL'
 def PROPERTY_DEBUG_WEBDAV_USERNAME = 'DEBUG_WEBDAV_USERNAME'
 def PROPERTY_DEBUG_WEBDAV_PASSWORD = 'DEBUG_WEBDAV_PASSWORD'
+def PROPERTY_IS_CRASHLYTICS_ENABLED = 'IS_CRASHLYTICS_ENABLED'
 
 project.ext.customProps = new Properties()
 if (PROPERTIES_FILE.exists()) {
@@ -52,6 +54,9 @@ android {
         def dropboxAppSecret = getCustomProperty(PROPERTY_DROPBOX_APP_SECRET)
         buildConfigField "String", "DROPBOX_APP_KEY", "\"$dropboxAppKey\""
         buildConfigField "String", "DROPBOX_APP_SECRET", "\"$dropboxAppSecret\""
+
+        def isCrashlyticsEnabled = getCustomProperty(PROPERTY_IS_CRASHLYTICS_ENABLED) ?: "true"
+        buildConfigField "boolean", "IS_CRASHLYTICS_ENABLED", "$isCrashlyticsEnabled"
     }
 
     buildFeatures {
@@ -251,4 +256,7 @@ dependencies {
 
     //Cicerone
     implementation "com.github.terrakok:cicerone:$ciceroneVersion"
+
+    // Firebase Crashlytics
+    implementation "com.google.firebase:firebase-crashlytics:$crashlyticsVersion"
 }

@@ -8,7 +8,7 @@ import com.ivanovsky.passnotes.databinding.FilePickerFragmentBinding
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
-import com.ivanovsky.passnotes.presentation.core.extensions.getMandarotyArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
@@ -21,7 +21,7 @@ class FilePickerFragment : FragmentWithDoneButton() {
 
     private val viewModel: FilePickerViewModel by viewModel()
     private val permissionHelper: PermissionHelper by inject()
-    private val args by lazy { getMandarotyArgument<FilePickerArgs>(ARGUMENTS) }
+    private val args by lazy { getMandatoryArgument<FilePickerArgs>(ARGUMENTS) }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)

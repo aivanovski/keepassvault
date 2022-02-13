@@ -11,7 +11,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.util.InputMethodUtils
 
-fun <T : Parcelable> Fragment.getMandarotyArgument(key: String): T {
+fun <T : Parcelable> Fragment.getMandatoryArgument(key: String): T {
     return arguments?.getParcelable(key) ?: requireArgument(key)
 }
 

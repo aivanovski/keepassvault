@@ -20,7 +20,7 @@ import com.ivanovsky.passnotes.extensions.setItemVisibility
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
-import com.ivanovsky.passnotes.presentation.core.extensions.getMandarotyArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
@@ -32,7 +32,7 @@ class GroupsFragment : BaseFragment() {
 
     private val viewModel: GroupsViewModel by viewModel()
 
-    private val args by lazy { getMandarotyArgument<GroupsArgs>(ARGUMENTS) }
+    private val args by lazy { getMandatoryArgument<GroupsArgs>(ARGUMENTS) }
 
     private lateinit var binding: GroupsFragmentBinding
     private var backCallback: OnBackPressedCallback? = null

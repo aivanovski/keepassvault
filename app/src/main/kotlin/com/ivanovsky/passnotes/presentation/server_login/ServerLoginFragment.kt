@@ -9,7 +9,7 @@ import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.ServerLoginFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
-import com.ivanovsky.passnotes.presentation.core.extensions.getMandarotyArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
@@ -18,7 +18,7 @@ import org.koin.core.parameter.parametersOf
 
 class ServerLoginFragment : FragmentWithDoneButton() {
 
-    private val args by lazy { getMandarotyArgument<ServerLoginArgs>(ARGUMENTS) }
+    private val args by lazy { getMandatoryArgument<ServerLoginArgs>(ARGUMENTS) }
 
     private val viewModel: ServerLoginViewModel by viewModel {
         parametersOf(args)

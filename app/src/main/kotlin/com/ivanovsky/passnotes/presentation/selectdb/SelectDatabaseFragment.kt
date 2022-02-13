@@ -16,7 +16,7 @@ import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.ThreeButtonDialog
-import com.ivanovsky.passnotes.presentation.core.extensions.getMandarotyArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import java.util.Date
@@ -27,7 +27,7 @@ import org.koin.core.parameter.parametersOf
 
 class SelectDatabaseFragment : BaseFragment() {
 
-    private val args: SelectDatabaseArgs by lazy { getMandarotyArgument(ARGUMENTS)}
+    private val args: SelectDatabaseArgs by lazy { getMandatoryArgument(ARGUMENTS)}
     private val dateFormatProvider: DateFormatProvider by inject()
 
     private val viewModel: SelectDatabaseViewModel by viewModel {

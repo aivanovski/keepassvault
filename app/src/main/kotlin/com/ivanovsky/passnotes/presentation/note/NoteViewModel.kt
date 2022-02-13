@@ -12,7 +12,6 @@ import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
-import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
@@ -27,7 +26,7 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellVie
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode
+import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.formatAccordingLocale
@@ -97,7 +96,7 @@ class NoteViewModel(
         router.navigateTo(
             NoteEditorScreen(
                 NoteEditorArgs(
-                    launchMode = LaunchMode.EDIT,
+                    mode = NoteEditorMode.EDIT,
                     noteUid = note.uid,
                     title = note.title
                 )

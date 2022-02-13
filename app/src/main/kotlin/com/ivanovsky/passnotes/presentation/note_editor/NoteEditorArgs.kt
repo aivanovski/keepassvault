@@ -7,7 +7,7 @@ import java.util.*
 
 @Parcelize
 data class NoteEditorArgs(
-    val launchMode: LaunchMode,
+    val mode: NoteEditorMode,
     val groupUid: UUID? = null,
     val noteUid: UUID? = null,
     val template: Template? = null,

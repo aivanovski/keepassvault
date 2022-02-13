@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.presentation.note_editor
 
-enum class LaunchMode {
+enum class NoteEditorMode {
     NEW,
     EDIT
 }

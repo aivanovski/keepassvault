@@ -65,7 +65,7 @@ class NoteEditorViewModel(
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val showToastEvent = SingleLiveEvent<String>()
 
-    private lateinit var launchMode: LaunchMode
+    private lateinit var mode: NoteEditorMode
     private var groupUid: UUID? = null
     private var noteUid: UUID? = null
     private var note: Note? = null
@@ -76,12 +76,12 @@ class NoteEditorViewModel(
     }
 
     fun start(args: NoteEditorArgs) {
-        launchMode = args.launchMode
+        mode = args.mode
         noteUid = args.noteUid
         groupUid = args.groupUid
         template = args.template
 
-        if (launchMode == LaunchMode.NEW) {
+        if (mode == NoteEditorMode.NEW) {
             val models = modelFactory.createModelsForNewNote(args.template)
             val viewModels = viewModelFactory.createCellViewModels(models, eventProvider)
             setCellElements(viewModels)
@@ -89,7 +89,7 @@ class NoteEditorViewModel(
             isDoneButtonVisible.value = true
             screenState.value = ScreenState.data()
 
-        } else if (launchMode == LaunchMode.EDIT) {
+        } else if (mode == NoteEditorMode.EDIT) {
             isDoneButtonVisible.value = false
             screenState.value = ScreenState.loading()
 
@@ -103,7 +103,7 @@ class NoteEditorViewModel(
             return
         }
 
-        if (launchMode == LaunchMode.NEW) {
+        if (mode == NoteEditorMode.NEW) {
             val groupUid = this.groupUid ?: return
 
             val note = createNewNoteFromCells(groupUid, template)
@@ -124,7 +124,7 @@ class NoteEditorViewModel(
                     screenState.value = ScreenState.dataWithError(message)
                 }
             }
-        } else if (launchMode == LaunchMode.EDIT) {
+        } else if (mode == NoteEditorMode.EDIT) {
             val sourceNote = note ?: return
             val sourceTemplate = template
 
@@ -161,15 +161,15 @@ class NoteEditorViewModel(
     fun onBackClicked() {
         val properties = createPropertiesFromCells()
 
-        when (launchMode) {
-            LaunchMode.NEW -> {
+        when (mode) {
+            NoteEditorMode.NEW -> {
                 if (properties.isEmpty() || isAllDefaultAndEmpty(properties)) {
                     finishScreen()
                 } else {
                     showDiscardDialogEvent.call(resources.getString(R.string.discard_changes))
                 }
             }
-            LaunchMode.EDIT -> {
+            NoteEditorMode.EDIT -> {
                 val sourceNote = note ?: return
                 val sourceTemplate = template
 

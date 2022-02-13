@@ -36,7 +36,7 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewMo
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.note_editor.LaunchMode
+import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toUUID
@@ -224,7 +224,7 @@ class GroupsViewModel(
         router.navigateTo(
             NoteEditorScreen(
                 NoteEditorArgs(
-                    launchMode = LaunchMode.NEW,
+                    mode = NoteEditorMode.NEW,
                     groupUid = currentGroupUid,
                     template = null,
                     title = resourceProvider.getString(R.string.new_note)
@@ -239,7 +239,7 @@ class GroupsViewModel(
         router.navigateTo(
             NoteEditorScreen(
                 NoteEditorArgs(
-                    launchMode = LaunchMode.NEW,
+                    mode = NoteEditorMode.NEW,
                     groupUid = currentGroupUid,
                     template = template,
                     title = resourceProvider.getString(R.string.new_note)
@@ -282,7 +282,7 @@ class GroupsViewModel(
         router.navigateTo(
             NoteEditorScreen(
                 NoteEditorArgs(
-                    launchMode = LaunchMode.EDIT,
+                    mode = NoteEditorMode.EDIT,
                     noteUid = note.uid,
                     title = note.title
                 )

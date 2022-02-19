@@ -79,6 +79,12 @@ class PassnotesAutofillService : AutofillService() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        Logger.d(TAG, "onDestroy:")
+        job.cancel()
+    }
+
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
         Logger.d(TAG, "onSaveRequest:")
     }

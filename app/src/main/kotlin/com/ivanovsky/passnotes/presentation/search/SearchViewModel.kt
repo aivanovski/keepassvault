@@ -1,16 +1,22 @@
 package com.ivanovsky.passnotes.presentation.search
 
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
+import com.ivanovsky.passnotes.injection.GlobalInjector
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -19,13 +25,15 @@ import com.ivanovsky.passnotes.presentation.core.binding.OnTextChangeListener
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
-import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
+import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellModelFactory
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.toUUID
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.core.parameter.parametersOf
 import java.util.UUID
 
 class SearchViewModel(
@@ -34,7 +42,8 @@ class SearchViewModel(
     private val resourceProvider: ResourceProvider,
     private val cellModelFactory: SearchCellModelFactory,
     private val cellViewModelFactory: SearchCellViewModelFactory,
-    private val router: Router
+    private val router: Router,
+    private val args: SearchScreenArgs
 ) : BaseScreenViewModel() {
 
     val screenStateHandler = DefaultScreenStateHandler()
@@ -49,6 +58,8 @@ class SearchViewModel(
         .add(GroupCellViewModel::class, R.layout.cell_group)
 
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
+    val setAutofillResponse = SingleLiveEvent<Pair<Note, AutofillStructure>>()
+
     val searchTextListener = object : OnTextChangeListener {
         override fun onTextChanged(text: String) {
             searchData(text)
@@ -67,7 +78,7 @@ class SearchViewModel(
 
     fun onLockButtonClicked() {
         interactor.lockDatabase()
-        router.backTo(UnlockScreen())
+        router.backTo(UnlockScreen(UnlockScreenArgs(args.appMode)))
     }
 
     private fun searchData(query: String) {
@@ -141,7 +152,8 @@ class SearchViewModel(
 
         router.navigateTo(
             GroupsScreen(
-                GroupsArgs(
+                GroupsScreenArgs(
+                    appMode = args.appMode,
                     groupUid = groupUid,
                     isCloseDatabaseOnExit = false
                 )
@@ -150,9 +162,40 @@ class SearchViewModel(
     }
 
     private fun onNoteClicked(noteUid: UUID) {
-        hideKeyboardEvent.call()
+        when (args.appMode) {
+            ApplicationLaunchMode.NORMAL -> {
+                hideKeyboardEvent.call()
+                router.navigateTo(NoteScreen(noteUid))
+            }
+            ApplicationLaunchMode.AUTOFILL_SELECTION -> {
+                val structure = args.autofillStructure ?: return
 
-        router.navigateTo(NoteScreen(noteUid))
+                screenState.value = ScreenState.loading()
+
+                viewModelScope.launch {
+                    val getNoteResult = interactor.getNoteByUid(noteUid)
+                    if (getNoteResult.isSucceededOrDeferred) {
+                        val note = getNoteResult.obj
+                        setAutofillResponse.call(Pair(note, structure))
+                    } else {
+                        val message = errorInteractor.processAndGetMessage(getNoteResult.error)
+                        screenState.value = ScreenState.dataWithError(message)
+                    }
+                }
+            }
+            ApplicationLaunchMode.AUTOFILL_AUTHORIZATION -> {
+                throwIncorrectLaunchMode(args.appMode)
+            }
+        }
+    }
+
+    class Factory(private val args: SearchScreenArgs) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return GlobalInjector.get<SearchViewModel>(
+                parametersOf(args)
+            ) as T
+        }
     }
 
     companion object {

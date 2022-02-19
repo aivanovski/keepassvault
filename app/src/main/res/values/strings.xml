@@ -38,6 +38,11 @@
     <string name="notification_channel_description">Button to lock opened database</string>
     <string name="notification_text">Database is opened</string>
 
+    <!-- Autofill -->
+    <string name="sign_in_with_app">Sign in with %s</string>
+    <string name="select_entry_with_dots">Select entry…</string>
+    <string name="autofill_service_name">PassNotes Autofill</string>
+
     <!-- Common for error -->
     <string name="error_was_occurred">Error was occurred</string>
     <string name="network_error_was_occurred_check_internet_connection">Network error was occurred, check internet connection</string>

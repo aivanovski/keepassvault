@@ -16,7 +16,7 @@ ext.extractPasswordRules = { Properties props ->
 
 ext {
     android = [
-            minSdk    : 17,
+            minSdk    : 21,
             targetSdk : 29,
             compileSdk: 30,
             buildTools: '30.0.0'

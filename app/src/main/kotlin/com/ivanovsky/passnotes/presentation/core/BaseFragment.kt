@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.presentation.core
 
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.ivanovsky.passnotes.presentation.navigation.NavigationMenuViewModel
+import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 
 abstract class BaseFragment : Fragment() {
 

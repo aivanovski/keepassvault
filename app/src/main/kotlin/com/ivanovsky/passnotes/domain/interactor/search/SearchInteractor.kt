@@ -6,14 +6,17 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
+import com.ivanovsky.passnotes.domain.usecases.GetNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import kotlinx.coroutines.withContext
+import java.util.UUID
 
 class SearchInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
     private val dispatchers: DispatcherProvider,
     private val getDbUseCase: GetDatabaseUseCase,
-    private val lockUseCase: LockDatabaseUseCase
+    private val getNoteUseCase: GetNoteUseCase,
+    private val lockUseCase: LockDatabaseUseCase,
 ) {
 
     suspend fun find(query: String): OperationResult<List<Item>> {
@@ -67,6 +70,9 @@ class SearchInteractor(
             OperationResult.success(items)
         }
     }
+
+    suspend fun getNoteByUid(noteUid: UUID): OperationResult<Note> =
+        getNoteUseCase.getNoteByUid(noteUid)
 
     fun lockDatabase() {
         lockUseCase.lockIfNeed()

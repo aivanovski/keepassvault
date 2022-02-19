@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.presentation.navigation.mode
+package com.ivanovsky.passnotes.presentation.main.navigation.model
 
 import androidx.annotation.IdRes
 import com.ivanovsky.passnotes.R

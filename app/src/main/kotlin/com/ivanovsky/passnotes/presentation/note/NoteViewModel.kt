@@ -12,6 +12,7 @@ import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
@@ -28,6 +29,8 @@ import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
+import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.formatAccordingLocale
 import kotlinx.coroutines.Dispatchers
@@ -114,11 +117,13 @@ class NoteViewModel(
 
     fun onLockButtonClicked() {
         interactor.lockDatabase()
-        router.backTo(UnlockScreen())
+        // TODO(autofill): fix launch mode
+        router.backTo(UnlockScreen(UnlockScreenArgs(ApplicationLaunchMode.NORMAL)))
     }
 
     fun onSearchButtonClicked() {
-        router.navigateTo(SearchScreen())
+        // TODO(autofill): fix launch mode
+        router.navigateTo(SearchScreen(SearchScreenArgs(ApplicationLaunchMode.NORMAL)))
     }
 
     fun navigateBack() = router.exit()

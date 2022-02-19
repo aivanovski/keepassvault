@@ -19,10 +19,12 @@ import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.*
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
+import com.ivanovsky.passnotes.domain.interactor.autofill.AutofillInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.domain.interactor.group_editor.GroupEditorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
+import com.ivanovsky.passnotes.domain.interactor.main.MainInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
@@ -37,22 +39,29 @@ import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase
+import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetGroupUseCase
+import com.ivanovsky.passnotes.domain.usecases.GetNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
+import com.ivanovsky.passnotes.domain.usecases.IsDatabaseOpenedUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.presentation.about.AboutViewModel
+import com.ivanovsky.passnotes.presentation.autofill.AutofillViewFactory
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorViewModel
+import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.navigation.NavigationMenuViewModel
+import com.ivanovsky.passnotes.presentation.main.MainScreenArgs
+import com.ivanovsky.passnotes.presentation.main.MainViewModel
+import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel
@@ -60,6 +69,7 @@ import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.search.SearchViewModel
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellModelFactory
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellViewModelFactory
@@ -75,6 +85,7 @@ import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsVi
 import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordDialogViewModel
 import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
 import com.ivanovsky.passnotes.util.Logger
@@ -122,10 +133,13 @@ object KoinModule {
         single { MoveNoteUseCase(get(), get(), get()) }
         single { MoveGroupUseCase(get(), get(), get()) }
         single { GetGroupUseCase(get(), get()) }
+        single { IsDatabaseOpenedUseCase(get()) }
+        single { GetNoteUseCase(get(), get()) }
+        single { FindNoteForAutofillUseCase(get(), get()) }
 
         // Interactors
         single { FilePickerInteractor(get()) }
-        single { UnlockInteractor(get(), get(), get(), get(), get()) }
+        single { UnlockInteractor(get(), get(), get(), get(), get(), get()) }
         single { StorageListInteractor(get(), get(), get()) }
         single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
         single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
@@ -136,9 +150,14 @@ object KoinModule {
         single { ServerLoginInteractor(get(), get(), get()) }
         single { DatabaseLockInteractor(get(), get(), get()) }
         single { SelectDatabaseInteractor(get(), get(), get(), get()) }
-        single { SearchInteractor(get(), get(), get(), get()) }
+        single { SearchInteractor(get(), get(), get(), get(), get()) }
         single { MainSettingsInteractor(get()) }
         single { DatabaseSettingsInteractor(get(), get()) }
+        single { AutofillInteractor(get(), get()) }
+        single { MainInteractor(get()) }
+
+        // Autofill
+        single { AutofillViewFactory(get(), get()) }
 
         // Cell factories
         single { DatabaseStatusCellModelFactory(get()) }
@@ -174,17 +193,18 @@ object KoinModule {
         viewModel { GroupEditorViewModel(get(), get(), get(), get()) }
         viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
         viewModel { NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-        viewModel { GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+        factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
         viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
         viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }
-        viewModel { SearchViewModel(get(), get(), get(), get(), get(), get()) }
+        factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), args) }
         viewModel { AboutViewModel(get(), get()) }
         viewModel { MainSettingsViewModel(get(), get()) }
         viewModel { DatabaseSettingsViewModel(get(), get()) }
         viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
-        factory { UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+        factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
         factory { NavigationMenuViewModel(get()) }
+        factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }
     }
 
     private fun provideOkHttp(): OkHttpClient {

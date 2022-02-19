@@ -1,5 +1,8 @@
 package com.ivanovsky.passnotes.presentation.search
 
+import android.app.Activity
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -7,17 +10,32 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.autofill.AutofillManager
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.databinding.SearchFragmentBinding
+import com.ivanovsky.passnotes.injection.GlobalInjector
+import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
 class SearchFragment : BaseFragment() {
 
-    private val viewModel: SearchViewModel by viewModel()
+    private val viewModel: SearchViewModel by lazy {
+        ViewModelProvider(
+            this,
+            SearchViewModel.Factory(
+                args = getMandatoryArgument(ARGUMENTS)
+            )
+        )
+            .get(SearchViewModel::class.java)
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -71,12 +89,45 @@ class SearchFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        subscribeToEvents()
+    }
+
+    private fun subscribeToEvents() {
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
             hideKeyboard()
         }
+        viewModel.setAutofillResponse.observe(viewLifecycleOwner) {
+            setAutofillResult(it.first, it.second)
+        }
+    }
+
+    private fun setAutofillResult(note: Note, structure: AutofillStructure) {
+        if (Build.VERSION.SDK_INT < 26) {
+            return
+        }
+
+        val factory = AutofillResponseFactory(requireContext(), GlobalInjector.get())
+        val response = factory.createResponseWithNote(note, structure)
+
+        val result = Intent()
+            .apply {
+                putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, response)
+            }
+
+        requireActivity()
+            .apply {
+                setResult(Activity.RESULT_OK, result)
+                finish()
+            }
     }
 
     companion object {
-        fun newInstance(): SearchFragment = SearchFragment()
+
+        private const val ARGUMENTS = "arguments"
+
+        fun newInstance(args: SearchScreenArgs): SearchFragment = SearchFragment()
+            .withArguments {
+                putParcelable(ARGUMENTS, args)
+            }
     }
 }

@@ -1,6 +1,8 @@
 package com.ivanovsky.passnotes.presentation.groups
 
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
@@ -16,6 +18,7 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
+import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
@@ -38,11 +41,14 @@ import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactor
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
+import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toUUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.parameter.parametersOf
 import java.util.UUID
 
 class GroupsViewModel(
@@ -54,7 +60,8 @@ class GroupsViewModel(
     private val statusCellModelFactory: DatabaseStatusCellModelFactory,
     private val cellViewModelFactory: GroupsCellViewModelFactory,
     private val selectionHolder: SelectionHolder,
-    private val router: Router
+    private val router: Router,
+    private val args: GroupsScreenArgs
 ) : BaseScreenViewModel(),
     ObserverBus.GroupDataSetObserver,
     ObserverBus.NoteDataSetChanged,
@@ -91,9 +98,8 @@ class GroupsViewModel(
 
     private var currentDataItems: List<GroupsInteractor.Item>? = null
     private var rootGroupUid: UUID? = null
-    private var groupUid: UUID? = null
+    private var groupUid: UUID? = args.groupUid
     private var templates: List<Template>? = null
-    private var args: GroupsArgs? = null
 
     init {
         observerBus.register(this)
@@ -122,17 +128,14 @@ class GroupsViewModel(
     }
 
     override fun onDatabaseClosed() {
-        router.backTo(UnlockScreen())
+        router.backTo(UnlockScreen(UnlockScreenArgs(appMode = args.appMode)))
     }
 
     override fun onDatabaseStatusChanged(status: DatabaseStatus) {
         updateStatusViewModel(status)
     }
 
-    fun start(args: GroupsArgs) {
-        this.args = args
-        this.groupUid = args.groupUid
-
+    fun start() {
         if (groupUid == null) {
             screenTitle.value = resourceProvider.getString(R.string.groups)
         }
@@ -322,9 +325,7 @@ class GroupsViewModel(
     }
 
     fun onBackClicked() {
-        val isCloseDatabase = args?.isCloseDatabaseOnExit ?: return
-
-        if (isCloseDatabase) {
+        if (args.isCloseDatabaseOnExit) {
             interactor.closeDatabase()
         }
         router.exit()
@@ -332,7 +333,7 @@ class GroupsViewModel(
 
     fun onLockButtonClicked() {
         interactor.closeDatabase()
-        router.backTo(UnlockScreen())
+        router.backTo(UnlockScreen(UnlockScreenArgs(appMode = args.appMode)))
     }
 
     fun onAddTemplatesClicked() {
@@ -357,7 +358,7 @@ class GroupsViewModel(
         }
     }
 
-    fun onSearchButtonClicked() = router.navigateTo(SearchScreen())
+    fun onSearchButtonClicked() = router.navigateTo(SearchScreen(SearchScreenArgs(appMode = args.appMode)))
 
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
 
@@ -397,7 +398,8 @@ class GroupsViewModel(
     private fun onGroupClicked(groupUid: UUID) {
         router.navigateTo(
             GroupsScreen(
-                GroupsArgs(
+                GroupsScreenArgs(
+                    appMode = args.appMode,
                     groupUid = groupUid,
                     isCloseDatabaseOnExit = false
                 )
@@ -555,5 +557,15 @@ class GroupsViewModel(
         hideMenu()
         hideStatusCell()
         updateOptionPanelViewModel(isVisible = false)
+    }
+
+    class Factory(private val args: GroupsScreenArgs) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return GlobalInjector.get<GroupsViewModel>(
+                parametersOf(args)
+            ) as T
+        }
     }
 }

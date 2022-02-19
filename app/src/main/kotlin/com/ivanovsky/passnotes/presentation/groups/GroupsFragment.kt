@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ivanovsky.passnotes.R
@@ -25,14 +26,19 @@ import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
-import com.ivanovsky.passnotes.presentation.navigation.NavigationMenuViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 
 class GroupsFragment : BaseFragment() {
 
-    private val viewModel: GroupsViewModel by viewModel()
-
-    private val args by lazy { getMandatoryArgument<GroupsArgs>(ARGUMENTS) }
+    private val viewModel: GroupsViewModel by lazy {
+        ViewModelProvider(
+            this,
+            GroupsViewModel.Factory(
+                args = getMandatoryArgument(ARGUMENTS)
+            )
+        )
+            .get(GroupsViewModel::class.java)
+    }
 
     private lateinit var binding: GroupsFragmentBinding
     private var backCallback: OnBackPressedCallback? = null
@@ -128,7 +134,7 @@ class GroupsFragment : BaseFragment() {
 
         subscribeToLiveData()
 
-        viewModel.start(args)
+        viewModel.start()
     }
 
     private fun subscribeToLiveData() {
@@ -258,8 +264,9 @@ class GroupsFragment : BaseFragment() {
 
         private const val COLUMN_COUNT = 3
 
-        fun newInstance(args: GroupsArgs) = GroupsFragment().withArguments {
-            putParcelable(ARGUMENTS, args)
-        }
+        fun newInstance(args: GroupsScreenArgs) = GroupsFragment()
+            .withArguments {
+                putParcelable(ARGUMENTS, args)
+            }
     }
 }

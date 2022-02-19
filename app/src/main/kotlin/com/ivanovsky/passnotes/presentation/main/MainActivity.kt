@@ -1,5 +1,6 @@
-package com.ivanovsky.passnotes.presentation
+package com.ivanovsky.passnotes.presentation.main
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -16,10 +17,12 @@ import com.github.terrakok.cicerone.androidx.AppNavigator
 import com.google.android.material.navigation.NavigationView
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
-import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
+import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryExtra
 import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
-import com.ivanovsky.passnotes.presentation.navigation.NavigationMenuViewModel
-import com.ivanovsky.passnotes.presentation.navigation.mode.NavigationItem
+import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
+import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
 
 class MainActivity :
@@ -30,13 +33,21 @@ class MainActivity :
     private lateinit var navigationView: NavigationView
 
     private val navigatorHolder: NavigatorHolder by inject()
-    private val router: Router by inject()
     private val settingsRouter: SettingsRouter by inject()
     private val navigator = AppNavigator(this, R.id.fragment_container)
+    private val args by lazy {
+        getMandatoryExtra<Bundle>(ARGUMENTS_BUNDLE).getParcelable(ARGUMENTS) as? MainScreenArgs
+            ?: throw IllegalStateException()
+    }
 
     private val navigationViewModel: NavigationMenuViewModel by lazy {
         ViewModelProvider(this, NavigationMenuViewModel.FACTORY)
             .get(NavigationMenuViewModel::class.java)
+    }
+
+    private val viewModel: MainViewModel by lazy {
+        ViewModelProvider(this, MainViewModel.Factory(args))
+            .get(MainViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,7 +60,7 @@ class MainActivity :
         drawer = findViewById(R.id.drawer_layout)
         navigationView = findViewById(R.id.navigation_view)
 
-        router.newRootScreen(UnlockScreen())
+        viewModel.navigateToRootScreen()
 
         navigationView.setNavigationItemSelectedListener { item -> onNavigationItemSelected(item) }
 
@@ -127,8 +138,69 @@ class MainActivity :
 
     companion object {
 
-        fun createStartIntent(context: Context): Intent {
+        private const val ARGUMENTS = "arguments"
+        private const val ARGUMENTS_BUNDLE = "arguments_bundle"
+
+        private const val AUTOFILL_AUTHENTICATION_REQUEST_CODE = 1001
+        private const val AUTOFILL_SELECTION_REQUEST_CODE = 1002
+
+        fun createStartIntent(
+            context: Context,
+            args: MainScreenArgs
+        ): Intent {
             return Intent(context, MainActivity::class.java)
+                .apply {
+                    // Wrap arguments with Bundle in order to make it work
+                    // when application is launched from autofill
+                    val args = Bundle()
+                        .apply {
+                            putParcelable(
+                                ARGUMENTS,
+                                args
+                            )
+                        }
+
+                    putExtra(ARGUMENTS_BUNDLE, args)
+                }
+        }
+
+        fun createAutofillAuthenticationPendingIntent(
+            context: Context,
+            autofillStructure: AutofillStructure
+        ): PendingIntent {
+            val intent = createStartIntent(
+                context,
+                MainScreenArgs(
+                    appMode = ApplicationLaunchMode.AUTOFILL_AUTHORIZATION,
+                    autofillStructure = autofillStructure
+                )
+            )
+            return PendingIntent.getActivity(
+                context,
+                AUTOFILL_AUTHENTICATION_REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_CANCEL_CURRENT
+            )
+        }
+
+        fun createAutofillSelectionPendingIntent(
+            context: Context,
+            autofillStructure: AutofillStructure
+        ): PendingIntent {
+            val intent = createStartIntent(
+                context,
+                MainScreenArgs(
+                    appMode = ApplicationLaunchMode.AUTOFILL_SELECTION,
+                    autofillStructure = autofillStructure
+                )
+            )
+
+            return PendingIntent.getActivity(
+                context,
+                AUTOFILL_SELECTION_REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_CANCEL_CURRENT
+            )
         }
     }
 }

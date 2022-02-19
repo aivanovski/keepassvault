@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
@@ -19,10 +20,12 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NewDatabaseScreen
 import com.ivanovsky.passnotes.presentation.Screens.SelectDatabaseScreen
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -30,7 +33,7 @@ import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
-import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
+import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
@@ -43,6 +46,7 @@ import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.parameter.parametersOf
 import java.util.ArrayList
 import java.util.regex.Pattern
 
@@ -54,7 +58,8 @@ class UnlockViewModel(
     private val dispatchers: DispatcherProvider,
     private val modelFactory: UnlockCellModelFactory,
     private val viewModelFactory: UnlockCellViewModelFactory,
-    private val router: Router
+    private val router: Router,
+    private val args: UnlockScreenArgs
 ) : ViewModel(),
     ObserverBus.UsedFileDataSetObserver,
     ObserverBus.UsedFileContentObserver {
@@ -65,6 +70,7 @@ class UnlockViewModel(
     val passwordTransformationMethod = MutableLiveData(TextTransformationMethod.PASSWORD)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val showSnackbarMessage = SingleLiveEvent<String>()
+    val setAutofillAuthResponse = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
     val fileCellViewModels = MutableLiveData<List<BaseCellViewModel>>()
 
     val fileCellTypes = ViewModelTypes()
@@ -204,21 +210,43 @@ class UnlockViewModel(
             val open = interactor.openDatabase(key, selectedFile)
 
             if (open.isSucceededOrDeferred) {
+                onDatabaseUnlocked()
+            } else {
+                screenState.value = ScreenState.dataWithError(
+                    errorText = errorInteractor.processAndGetMessage(open.error)
+                )
+            }
+        }
+    }
+
+    private suspend fun onDatabaseUnlocked() {
+        when (args.appMode) {
+            ApplicationLaunchMode.AUTOFILL_AUTHORIZATION -> {
+                val structure = args.autofillStructure ?: return
+
+                val autofillNoteResult = interactor.findNoteForAutofill(structure)
+                if (autofillNoteResult.isSucceeded) {
+                    val note = autofillNoteResult.obj
+
+                    setAutofillAuthResponse.call(Pair(note, structure))
+                } else {
+                    val message = errorInteractor.processAndGetMessage(autofillNoteResult.error)
+                    screenState.value = ScreenState.error(message)
+                }
+            }
+            else -> {
                 clearEnteredPassword()
 
                 router.newChain(
                     GroupsScreen(
-                        GroupsArgs(
+                        GroupsScreenArgs(
+                            appMode = args.appMode,
                             groupUid = null,
                             isCloseDatabaseOnExit = true
                         )
                     )
                 )
                 screenState.value = ScreenState.data()
-            } else {
-                screenState.value = ScreenState.dataWithError(
-                    errorText = errorInteractor.processAndGetMessage(open.error)
-                )
             }
         }
     }
@@ -414,6 +442,18 @@ class UnlockViewModel(
         password.value = EMPTY
     }
 
+    class Factory(
+        private val args: UnlockScreenArgs
+    ) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return GlobalInjector.get<UnlockViewModel>(
+                parametersOf(args)
+            ) as T
+        }
+    }
+
     companion object {
 
         private const val FAB_ITEM_NEW_FILE = 0
@@ -423,12 +463,5 @@ class UnlockViewModel(
             FAB_ITEM_NEW_FILE to R.string.new_file,
             FAB_ITEM_OPEN_FILE to R.string.open_file
         )
-
-        @Suppress("UNCHECKED_CAST")
-        val FACTORY = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return GlobalInjector.get<UnlockViewModel>() as T
-            }
-        }
     }
 }

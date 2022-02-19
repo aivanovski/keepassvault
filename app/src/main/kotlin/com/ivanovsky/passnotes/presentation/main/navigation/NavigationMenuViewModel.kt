@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.presentation.navigation
+package com.ivanovsky.passnotes.presentation.main.navigation
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -6,16 +6,18 @@ import androidx.lifecycle.ViewModelProvider
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.injection.GlobalInjector
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.AboutScreen
 import com.ivanovsky.passnotes.presentation.Screens.DebugMenuScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
-import com.ivanovsky.passnotes.presentation.navigation.mode.NavigationItem
-import com.ivanovsky.passnotes.presentation.navigation.mode.NavigationItem.ABOUT
-import com.ivanovsky.passnotes.presentation.navigation.mode.NavigationItem.DEBUG_MENU
-import com.ivanovsky.passnotes.presentation.navigation.mode.NavigationItem.LOCK
-import com.ivanovsky.passnotes.presentation.navigation.mode.NavigationItem.SETTINGS
-import com.ivanovsky.passnotes.presentation.navigation.mode.NavigationItem.SELECT_FILE
+import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem
+import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.ABOUT
+import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.DEBUG_MENU
+import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.LOCK
+import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.SETTINGS
+import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.SELECT_FILE
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 
 class NavigationMenuViewModel(
     private val router: Router
@@ -35,10 +37,10 @@ class NavigationMenuViewModel(
     fun onMenuItemSelected(item: NavigationItem) {
         when (item) {
             SELECT_FILE -> {
-                router.backTo(UnlockScreen())
+                router.backTo(UnlockScreen(UnlockScreenArgs(ApplicationLaunchMode.NORMAL)))
             }
             LOCK -> {
-                router.backTo(UnlockScreen())
+                router.backTo(UnlockScreen(UnlockScreenArgs(ApplicationLaunchMode.NORMAL)))
             }
             SETTINGS -> {
                 router.navigateTo(MainSettingsScreen())

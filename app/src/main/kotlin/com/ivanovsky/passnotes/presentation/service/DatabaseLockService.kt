@@ -13,7 +13,7 @@ import androidx.core.app.NotificationCompat
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.entity.ServiceState
 import com.ivanovsky.passnotes.extensions.getNotificationManager
-import com.ivanovsky.passnotes.presentation.MainActivity
+import com.ivanovsky.passnotes.presentation.main.MainActivity
 import java.util.concurrent.atomic.AtomicReference
 
 class DatabaseLockService : Service() {

@@ -94,7 +94,9 @@ class UnlockInteractor(
             result.takeStatusWith(true)
         }
 
-    suspend fun findNoteForAutofill(structure: AutofillStructure): OperationResult<Note?> =
+    suspend fun findNoteForAutofill(
+        structure: AutofillStructure
+    ): OperationResult<Pair<Boolean, Note?>> =
         autofillUseCase.findNoteForAutofill(structure)
 
     private fun updateFileAccessTime(file: FileDescriptor) {

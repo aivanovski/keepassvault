@@ -90,8 +90,11 @@ class AutofillStructureParser {
             parseViewNode(result, node.getChildAt(i))
 
             Logger.d(
-                TAG, "check: className=${node.className}, canBeEnded=${result.hasWebDomain()}, " +
-                    "resultHasData=${result.hasFieldsToFill()}"
+                TAG,
+                "check: className=%s, result.hasWebDomain=%s, result.hasFieldsToFill=%s",
+                node.className,
+                result.hasWebDomain(),
+                result.hasFieldsToFill()
             )
 
             if (result.hasWebDomain() && result.hasFieldsToFill()) {
@@ -99,7 +102,11 @@ class AutofillStructureParser {
             }
         }
 
-        return false
+        return result.hasFieldsToFill()
+    }
+
+    private fun MutableAutofillStructure.hasFieldsToFill(): Boolean {
+        return username != null && password != null
     }
 
     private fun MutableAutofillStructure.hasWebDomain(): Boolean {

@@ -8,10 +8,6 @@ data class MutableAutofillStructure(
     var password: HintData? = null
 ) {
 
-    fun hasFieldsToFill(): Boolean {
-        return username != null && password != null
-    }
-
     fun toAutofillStructure(): AutofillStructure {
         return AutofillStructure(
             isWebView,

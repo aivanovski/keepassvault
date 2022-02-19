@@ -226,7 +226,7 @@ class UnlockViewModel(
 
                 val autofillNoteResult = interactor.findNoteForAutofill(structure)
                 if (autofillNoteResult.isSucceeded) {
-                    val note = autofillNoteResult.obj
+                    val note = autofillNoteResult.obj.second
 
                     setAutofillAuthResponse.call(Pair(note, structure))
                 } else {

@@ -61,7 +61,7 @@ class PassnotesAutofillService : AutofillService() {
         scope.launch {
             val findNoteResult = interactor.findNoteForAutofill(structure)
             if (findNoteResult.isSucceeded) {
-                val note = findNoteResult.obj
+                val note = findNoteResult.obj.second
 
                 if (note != null) {
                     Logger.d(TAG, "Show note and selection")
@@ -73,7 +73,7 @@ class PassnotesAutofillService : AutofillService() {
                     callback.onSuccess(response)
                 }
             } else {
-                Logger.d(TAG, "Nothing to show")
+                Logger.d(TAG, "Error has occurred, nothing to show")
                 callback.onSuccess(null)
             }
         }

@@ -84,6 +84,19 @@ public class KeepassNoteDao implements NoteDao {
                 return allGroupsResult.takeError();
             }
 
+            OperationResult<Group> rootGroupResult = db.getGroupRepository().getRootGroup();
+            if (rootGroupResult.isFailed()) {
+                return rootGroupResult.takeError();
+            }
+
+            Group rootGroup = rootGroupResult.getObj();
+            OperationResult<List<Note>> rootNotesResult = getNotesByGroupUid(rootGroup.getUid());
+            if (rootNotesResult.isFailed()) {
+                return rootNotesResult.takeError();
+            }
+
+            allNotes.addAll(rootNotesResult.getObj());
+
             List<Group> allGroups = allGroupsResult.getObj();
             for (Group group : allGroups) {
                 OperationResult<List<Note>> notesResult = getNotesByGroupUid(group.getUid());

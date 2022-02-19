@@ -13,6 +13,10 @@ public class OperationResult<T> {
     private OperationError error;
 
     public static <T> OperationResult<T> success(T obj) {
+        if (obj == null) {
+            throw new IllegalArgumentException(
+                    "Object inside " + OperationResult.class.getSimpleName() + " can't be null");
+        }
         OperationResult<T> result = new OperationResult<>();
         result.setObj(obj);
         return result;

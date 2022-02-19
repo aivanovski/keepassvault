@@ -15,4 +15,14 @@ abstract class BaseFragment : Fragment() {
         super.onStart()
         navigationViewModel.setNavigationEnabled(false)
     }
+
+    /**
+     * Called when user clicks the back button.
+     *
+     * @return `true` to prevent back click from being propagated further, or `false` to indicate
+     * that back click should be handled by [android.app.Activity]
+     */
+    open fun onBackPressed(): Boolean {
+        return false
+    }
 }

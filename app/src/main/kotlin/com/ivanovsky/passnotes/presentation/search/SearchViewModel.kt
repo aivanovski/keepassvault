@@ -11,7 +11,9 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_AUTHORIZATION
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_SELECTION
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.NORMAL
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
@@ -57,8 +59,10 @@ class SearchViewModel(
         .add(NoteCellViewModel::class, R.layout.cell_note)
         .add(GroupCellViewModel::class, R.layout.cell_group)
 
+    val isMoreMenuVisible = MutableLiveData(args.appMode == NORMAL)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val setAutofillResponse = SingleLiveEvent<Pair<Note, AutofillStructure>>()
+    val closeAppEvent = SingleLiveEvent<Unit>()
 
     val searchTextListener = object : OnTextChangeListener {
         override fun onTextChanged(text: String) {
@@ -70,15 +74,45 @@ class SearchViewModel(
 
     init {
         subscribeToEvents()
-    }
 
-    fun navigateBack() = router.exit()
+        if (args.appMode == AUTOFILL_AUTHORIZATION) {
+            throwIncorrectLaunchMode(args.appMode)
+        }
+    }
 
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
 
+    fun onHomeMenuClicked() {
+        when (args.appMode) {
+            AUTOFILL_SELECTION -> {
+                closeAppEvent.call(Unit)
+            }
+            else -> {
+                router.exit()
+            }
+        }
+    }
+
+    fun onBackButtonClicked(): Boolean {
+        return when (args.appMode) {
+            AUTOFILL_SELECTION -> {
+                closeAppEvent.call(Unit)
+                true
+            }
+            else -> false
+        }
+    }
+
     fun onLockButtonClicked() {
         interactor.lockDatabase()
-        router.backTo(UnlockScreen(UnlockScreenArgs(args.appMode)))
+        when (args.appMode) {
+            AUTOFILL_SELECTION -> {
+                closeAppEvent.call(Unit)
+            }
+            else -> {
+                router.backTo(UnlockScreen(UnlockScreenArgs(args.appMode)))
+            }
+        }
     }
 
     private fun searchData(query: String) {
@@ -148,6 +182,7 @@ class SearchViewModel(
     }
 
     private fun onGroupClicked(groupUid: UUID) {
+        // TODO(autofill): args.autofillStructure should be passed to Groups screen
         hideKeyboardEvent.call()
 
         router.navigateTo(
@@ -163,11 +198,7 @@ class SearchViewModel(
 
     private fun onNoteClicked(noteUid: UUID) {
         when (args.appMode) {
-            ApplicationLaunchMode.NORMAL -> {
-                hideKeyboardEvent.call()
-                router.navigateTo(NoteScreen(noteUid))
-            }
-            ApplicationLaunchMode.AUTOFILL_SELECTION -> {
+            AUTOFILL_SELECTION -> {
                 val structure = args.autofillStructure ?: return
 
                 screenState.value = ScreenState.loading()
@@ -183,8 +214,9 @@ class SearchViewModel(
                     }
                 }
             }
-            ApplicationLaunchMode.AUTOFILL_AUTHORIZATION -> {
-                throwIncorrectLaunchMode(args.appMode)
+            else -> {
+                hideKeyboardEvent.call()
+                router.navigateTo(NoteScreen(noteUid))
             }
         }
     }

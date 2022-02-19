@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -19,6 +20,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
+import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryExtra
 import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
@@ -65,6 +67,15 @@ class MainActivity :
         navigationView.setNavigationItemSelectedListener { item -> onNavigationItemSelected(item) }
 
         subscribeToLiveData()
+    }
+
+    override fun onBackPressed() {
+        val handledByFragment = supportFragmentManager.fragments.any { fragment ->
+            fragment is BaseFragment && fragment.onBackPressed()
+        }
+        if (!handledByFragment) {
+            super.onBackPressed()
+        }
     }
 
     override fun onPause() {

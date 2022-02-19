@@ -16,6 +16,7 @@ import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.databinding.SearchFragmentBinding
+import com.ivanovsky.passnotes.extensions.setItemVisibility
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
@@ -27,6 +28,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
 class SearchFragment : BaseFragment() {
 
+    private var menu: Menu? = null
     private val viewModel: SearchViewModel by lazy {
         ViewModelProvider(
             this,
@@ -47,8 +49,18 @@ class SearchFragment : BaseFragment() {
         }
     }
 
+    override fun onBackPressed(): Boolean {
+        return viewModel.onBackButtonClicked()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        this.menu = menu
+
         inflater.inflate(R.menu.search, menu)
+
+        viewModel.isMoreMenuVisible.value?.let {
+            menu.setItemVisibility(R.id.menu_more, it)
+        }
     }
 
     override fun onCreateView(
@@ -67,7 +79,7 @@ class SearchFragment : BaseFragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                viewModel.navigateBack()
+                viewModel.onHomeMenuClicked()
                 true
             }
             R.id.menu_lock -> {
@@ -89,7 +101,14 @@ class SearchFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        subscribeToData()
         subscribeToEvents()
+    }
+
+    private fun subscribeToData() {
+        viewModel.isMoreMenuVisible.observe(viewLifecycleOwner) {
+            menu?.setItemVisibility(R.id.menu_more, it)
+        }
     }
 
     private fun subscribeToEvents() {
@@ -98,6 +117,9 @@ class SearchFragment : BaseFragment() {
         }
         viewModel.setAutofillResponse.observe(viewLifecycleOwner) {
             setAutofillResult(it.first, it.second)
+        }
+        viewModel.closeAppEvent.observe(viewLifecycleOwner) {
+            requireActivity().finish()
         }
     }
 

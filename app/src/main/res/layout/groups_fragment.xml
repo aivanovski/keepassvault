@@ -74,9 +74,8 @@
             android:onClick="@{() -> viewModel.onAddButtonClicked()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}"
-            app:srcCompat="@drawable/ic_add_white_24dp" />
+            app:srcCompat="@drawable/ic_add_white_24dp"
+            app:visible="@{viewModel.isFabButtonVisible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

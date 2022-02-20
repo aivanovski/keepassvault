@@ -21,6 +21,7 @@ import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
@@ -49,10 +50,6 @@ class SearchFragment : BaseFragment() {
         }
     }
 
-    override fun onBackPressed(): Boolean {
-        return viewModel.onBackButtonClicked()
-    }
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         this.menu = menu
 
@@ -79,7 +76,7 @@ class SearchFragment : BaseFragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                viewModel.onHomeMenuClicked()
+                viewModel.onBackClicked()
                 true
             }
             R.id.menu_lock -> {
@@ -118,8 +115,8 @@ class SearchFragment : BaseFragment() {
         viewModel.setAutofillResponse.observe(viewLifecycleOwner) {
             setAutofillResult(it.first, it.second)
         }
-        viewModel.closeAppEvent.observe(viewLifecycleOwner) {
-            requireActivity().finish()
+        viewModel.finishActivityEvent.observe(viewLifecycleOwner) {
+            finishActivity()
         }
     }
 

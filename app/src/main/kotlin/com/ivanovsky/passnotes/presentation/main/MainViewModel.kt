@@ -33,7 +33,8 @@ class MainViewModel(
                     GroupsScreenArgs(
                         appMode = args.appMode,
                         groupUid = null,
-                        isCloseDatabaseOnExit = true
+                        isCloseDatabaseOnExit = false,
+                        autofillStructure = args.autofillStructure
                     )
                 ),
                 SearchScreen(

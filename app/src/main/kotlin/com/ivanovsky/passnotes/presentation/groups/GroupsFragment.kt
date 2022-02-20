@@ -7,8 +7,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.addCallback
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
@@ -21,6 +19,7 @@ import com.ivanovsky.passnotes.extensions.setItemVisibility
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
+import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
@@ -41,12 +40,16 @@ class GroupsFragment : BaseFragment() {
     }
 
     private lateinit var binding: GroupsFragmentBinding
-    private var backCallback: OnBackPressedCallback? = null
     private var menu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+    }
+
+    override fun onBackPressed(): Boolean {
+        viewModel.onBackClicked()
+        return true
     }
 
     override fun onCreateView(
@@ -108,19 +111,10 @@ class GroupsFragment : BaseFragment() {
 
     override fun onStart() {
         super.onStart()
-        backCallback = requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            viewModel.onBackClicked()
-        }
         navigationViewModel.setVisibleItems(
             NavigationMenuViewModel.createNavigationItemsForDbScreens()
         )
         navigationViewModel.setNavigationEnabled(true)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        backCallback?.remove()
-        backCallback = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -133,6 +127,7 @@ class GroupsFragment : BaseFragment() {
         }
 
         subscribeToLiveData()
+        subscribeToEvents()
 
         viewModel.start()
     }
@@ -146,7 +141,6 @@ class GroupsFragment : BaseFragment() {
                 title = it
             }
         }
-
         viewModel.isMenuVisible.observe(viewLifecycleOwner) {
             menu?.setItemVisibility(R.id.menu_lock, it)
             menu?.setItemVisibility(R.id.menu_more, it)
@@ -155,7 +149,9 @@ class GroupsFragment : BaseFragment() {
         viewModel.isAddTemplatesMenuVisible.observe(viewLifecycleOwner) {
             menu?.setItemVisibility(R.id.menu_add_templates, it)
         }
+    }
 
+    private fun subscribeToEvents() {
         viewModel.showNewEntryDialogEvent.observe(viewLifecycleOwner) { templates ->
             showNewEntryDialog(templates)
         }
@@ -170,6 +166,9 @@ class GroupsFragment : BaseFragment() {
         }
         viewModel.showAddTemplatesDialogEvent.observe(viewLifecycleOwner) {
             showAddTemplatesDialog()
+        }
+        viewModel.finishActivityEvent.observe(viewLifecycleOwner) {
+            finishActivity()
         }
     }
 

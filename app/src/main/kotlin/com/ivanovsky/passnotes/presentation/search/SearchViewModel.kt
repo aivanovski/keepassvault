@@ -62,7 +62,7 @@ class SearchViewModel(
     val isMoreMenuVisible = MutableLiveData(args.appMode == NORMAL)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val setAutofillResponse = SingleLiveEvent<Pair<Note, AutofillStructure>>()
-    val closeAppEvent = SingleLiveEvent<Unit>()
+    val finishActivityEvent = SingleLiveEvent<Unit>()
 
     val searchTextListener = object : OnTextChangeListener {
         override fun onTextChanged(text: String) {
@@ -80,34 +80,15 @@ class SearchViewModel(
         }
     }
 
+    fun onBackClicked() = router.exit()
+
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
-
-    fun onHomeMenuClicked() {
-        when (args.appMode) {
-            AUTOFILL_SELECTION -> {
-                closeAppEvent.call(Unit)
-            }
-            else -> {
-                router.exit()
-            }
-        }
-    }
-
-    fun onBackButtonClicked(): Boolean {
-        return when (args.appMode) {
-            AUTOFILL_SELECTION -> {
-                closeAppEvent.call(Unit)
-                true
-            }
-            else -> false
-        }
-    }
 
     fun onLockButtonClicked() {
         interactor.lockDatabase()
         when (args.appMode) {
             AUTOFILL_SELECTION -> {
-                closeAppEvent.call(Unit)
+                finishActivityEvent.call()
             }
             else -> {
                 router.backTo(UnlockScreen(UnlockScreenArgs(args.appMode)))

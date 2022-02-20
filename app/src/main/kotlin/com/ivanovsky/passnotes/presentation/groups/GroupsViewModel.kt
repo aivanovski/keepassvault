@@ -19,6 +19,7 @@ import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
@@ -28,6 +29,7 @@ import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingType
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
@@ -89,12 +91,14 @@ class GroupsViewModel(
     val screenTitle = MutableLiveData(EMPTY)
     val isMenuVisible = MutableLiveData(false)
     val isAddTemplatesMenuVisible = MutableLiveData(false)
+    val isFabButtonVisible = MutableLiveData(false)
     val showToastEvent = SingleLiveEvent<String>()
     val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
     val showGroupActionsDialogEvent = SingleLiveEvent<Group>()
     val showNoteActionsDialogEvent = SingleLiveEvent<Note>()
     val showRemoveConfirmationDialogEvent = SingleLiveEvent<Pair<Group?, Note?>>()
     val showAddTemplatesDialogEvent = SingleLiveEvent<Unit>()
+    val finishActivityEvent = SingleLiveEvent<Unit>()
 
     private var currentDataItems: List<GroupsInteractor.Item>? = null
     private var rootGroupUid: UUID? = null
@@ -128,7 +132,14 @@ class GroupsViewModel(
     }
 
     override fun onDatabaseClosed() {
-        router.backTo(UnlockScreen(UnlockScreenArgs(appMode = args.appMode)))
+        router.backTo(
+            UnlockScreen(
+                UnlockScreenArgs(
+                    appMode = args.appMode,
+                    autofillStructure = args.autofillStructure
+                )
+            )
+        )
     }
 
     override fun onDatabaseStatusChanged(status: DatabaseStatus) {
@@ -144,7 +155,7 @@ class GroupsViewModel(
     }
 
     fun loadData() {
-        showLoading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             templates = interactor.getTemplates()
@@ -183,10 +194,10 @@ class GroupsViewModel(
                     val viewModels =
                         cellViewModelFactory.createCellViewModels(models, eventProvider)
                     setCellElements(viewModels)
-                    screenState.value = ScreenState.data()
+                    setScreenState(ScreenState.data())
                 } else {
                     val emptyText = resourceProvider.getString(R.string.no_items)
-                    screenState.value = ScreenState.empty(emptyText)
+                    setScreenState(ScreenState.empty(emptyText))
                 }
 
                 if (status.isSucceededOrDeferred) {
@@ -196,7 +207,7 @@ class GroupsViewModel(
                 showMenu()
             } else {
                 val message = errorInteractor.processAndGetMessage(data.error)
-                screenState.value = ScreenState.error(message)
+                setScreenState(ScreenState.error(message))
             }
 
             updateOptionPanelViewModel(
@@ -326,14 +337,33 @@ class GroupsViewModel(
 
     fun onBackClicked() {
         if (args.isCloseDatabaseOnExit) {
-            interactor.closeDatabase()
+            interactor.lockDatabase()
         }
-        router.exit()
+
+        if (args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION) {
+            finishActivityEvent.call()
+        } else {
+            router.exit()
+        }
     }
 
     fun onLockButtonClicked() {
-        interactor.closeDatabase()
-        router.backTo(UnlockScreen(UnlockScreenArgs(appMode = args.appMode)))
+        interactor.lockDatabase()
+        when (args.appMode) {
+            ApplicationLaunchMode.AUTOFILL_SELECTION -> {
+                finishActivityEvent.call()
+            }
+            else -> {
+                router.backTo(
+                    UnlockScreen(
+                        UnlockScreenArgs(
+                            appMode = args.appMode,
+                            autofillStructure = args.autofillStructure
+                        )
+                    )
+                )
+            }
+        }
     }
 
     fun onAddTemplatesClicked() {
@@ -341,24 +371,33 @@ class GroupsViewModel(
     }
 
     fun onAddTemplatesConfirmed() {
-        showLoading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val isAdded = interactor.addTemplates()
 
             if (isAdded.isSucceededOrDeferred) {
-                screenState.value = ScreenState.data()
+                setScreenState(ScreenState.data())
                 showToastEvent.call(resourceProvider.getString(R.string.successfully_added))
 
                 showMenu()
             } else {
                 val message = errorInteractor.processAndGetMessage(isAdded.error)
-                screenState.value = ScreenState.error(message)
+                setScreenState(ScreenState.error(message))
             }
         }
     }
 
-    fun onSearchButtonClicked() = router.navigateTo(SearchScreen(SearchScreenArgs(appMode = args.appMode)))
+    fun onSearchButtonClicked() {
+        router.navigateTo(
+            SearchScreen(
+                SearchScreenArgs(
+                    appMode = args.appMode,
+                    autofillStructure = args.autofillStructure
+                )
+            )
+        )
+    }
 
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
 
@@ -401,7 +440,8 @@ class GroupsViewModel(
                 GroupsScreenArgs(
                     appMode = args.appMode,
                     groupUid = groupUid,
-                    isCloseDatabaseOnExit = false
+                    isCloseDatabaseOnExit = false,
+                    autofillStructure = args.autofillStructure
                 )
             )
         )
@@ -452,7 +492,7 @@ class GroupsViewModel(
     }
 
     private fun removeGroup(groupUid: UUID) {
-        showLoading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val removeResult = withContext(Dispatchers.Default) {
@@ -465,13 +505,13 @@ class GroupsViewModel(
                 showMenu()
             } else {
                 val message = errorInteractor.processAndGetMessage(removeResult.error)
-                screenState.value = ScreenState.error(message)
+                setScreenState(ScreenState.error(message))
             }
         }
     }
 
     private fun removeNote(groupUid: UUID, noteUid: UUID) {
-        showLoading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val removeResult = withContext(Dispatchers.Default) {
@@ -484,7 +524,7 @@ class GroupsViewModel(
                 showMenu()
             } else {
                 val message = errorInteractor.processAndGetMessage(removeResult.error)
-                screenState.value = ScreenState.error(message)
+                setScreenState(ScreenState.error(message))
             }
         }
     }
@@ -513,11 +553,12 @@ class GroupsViewModel(
         val action = selectionHolder.getAction() ?: return
 
         if (selection.parentUid == currentGroupUid) {
-            showToastEvent.value = resourceProvider.getString(R.string.selected_item_is_already_here)
+            showToastEvent.value =
+                resourceProvider.getString(R.string.selected_item_is_already_here)
             return
         }
 
-        showLoading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val actionResult = interactor.doActionOnSelection(
@@ -529,11 +570,11 @@ class GroupsViewModel(
 
             if (actionResult.isSucceededOrDeferred) {
                 showToastEvent.call(resourceProvider.getString(R.string.successfully))
-                screenState.value = ScreenState.data()
+                setScreenState(ScreenState.data())
                 showMenu()
             } else {
                 val message = errorInteractor.processAndGetMessage(actionResult.error)
-                screenState.value = ScreenState.error(message)
+                setScreenState(ScreenState.error(message))
             }
         }
     }
@@ -553,10 +594,24 @@ class GroupsViewModel(
         isAddTemplatesMenuVisible.value = templates.isNullOrEmpty()
     }
 
-    private fun showLoading() {
-        hideMenu()
-        hideStatusCell()
-        updateOptionPanelViewModel(isVisible = false)
+    private fun setScreenState(state: ScreenState) {
+        screenState.value = state
+        updateFabButtonVisibility()
+
+        when (state.screenDisplayingType) {
+            ScreenDisplayingType.LOADING -> {
+                hideMenu()
+                hideStatusCell()
+                updateOptionPanelViewModel(isVisible = false)
+            }
+        }
+    }
+
+    private fun updateFabButtonVisibility() {
+        val screenState = this.screenState.value ?: return
+
+        isFabButtonVisible.value = (screenState.isDisplayingData &&
+            args.appMode == ApplicationLaunchMode.NORMAL)
     }
 
     class Factory(private val args: GroupsScreenArgs) : ViewModelProvider.Factory {

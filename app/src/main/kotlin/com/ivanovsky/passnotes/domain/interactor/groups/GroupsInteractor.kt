@@ -115,7 +115,7 @@ class GroupsInteractor(
         }
     }
 
-    fun closeDatabase() {
+    fun lockDatabase() {
         lockUseCase.lockIfNeed()
     }
 

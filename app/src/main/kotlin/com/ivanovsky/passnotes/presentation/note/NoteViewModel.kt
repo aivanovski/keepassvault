@@ -1,6 +1,9 @@
 package com.ivanovsky.passnotes.presentation.note
 
+import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
@@ -12,11 +15,13 @@ import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
+import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -36,6 +41,7 @@ import com.ivanovsky.passnotes.util.formatAccordingLocale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.parameter.parametersOf
 import java.util.*
 
 class NoteViewModel(
@@ -47,7 +53,8 @@ class NoteViewModel(
     private val cellModelFactory: NoteCellModelFactory,
     private val cellViewModelFactory: NoteCellViewModelFactory,
     private val router: Router,
-    private val statusCellModelFactory: DatabaseStatusCellModelFactory
+    private val statusCellModelFactory: DatabaseStatusCellModelFactory,
+    private val args: NoteScreenArgs
 ) : BaseScreenViewModel(),
     ObserverBus.NoteContentObserver,
     ObserverBus.DatabaseStatusObserver {
@@ -60,8 +67,11 @@ class NoteViewModel(
 
     val actionBarTitle = MutableLiveData<String>()
     val modifiedText = MutableLiveData<String>()
+    val menuItems = MutableLiveData<List<ScreenMenuItem>>(emptyList())
+    val isFabButtonVisible = MutableLiveData(false)
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
-    val isMenuVisible = MutableLiveData(false)
+    val finishActivityEvent = SingleLiveEvent<Unit>()
+    val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
 
     val statusViewModel = MutableLiveData(
         cellViewModelFactory.createCellViewModel(
@@ -71,7 +81,7 @@ class NoteViewModel(
     )
 
     private var note: Note? = null
-    private var noteUid: UUID? = null
+    private var noteUid: UUID = args.noteUid
 
     init {
         observerBus.register(this)
@@ -85,12 +95,6 @@ class NoteViewModel(
     override fun onCleared() {
         super.onCleared()
         observerBus.unregister(this)
-    }
-
-    fun start(noteUid: UUID) {
-        this.noteUid = noteUid
-
-        loadData()
     }
 
     fun onFabButtonClicked() {
@@ -117,23 +121,51 @@ class NoteViewModel(
 
     fun onLockButtonClicked() {
         interactor.lockDatabase()
-        // TODO(autofill): fix launch mode
-        router.backTo(UnlockScreen(UnlockScreenArgs(ApplicationLaunchMode.NORMAL)))
+        when (args.appMode) {
+            ApplicationLaunchMode.AUTOFILL_SELECTION -> {
+                finishActivityEvent.call()
+            }
+            else -> {
+                router.backTo(
+                    UnlockScreen(
+                        UnlockScreenArgs(
+                            appMode = args.appMode,
+                            autofillStructure = args.autofillStructure
+                        )
+                    )
+                )
+            }
+        }
     }
 
     fun onSearchButtonClicked() {
-        // TODO(autofill): fix launch mode
-        router.navigateTo(SearchScreen(SearchScreenArgs(ApplicationLaunchMode.NORMAL)))
+        router.navigateTo(
+            SearchScreen(
+                SearchScreenArgs(
+                    appMode = args.appMode,
+                    autofillStructure = args.autofillStructure
+                )
+            )
+        )
     }
 
     fun navigateBack() = router.exit()
 
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
 
-    private fun loadData() {
-        val noteUid = this.noteUid ?: return
+    fun onSelectButtonClicked() {
+        val autofillStructure = args.autofillStructure ?: return
 
-        isMenuVisible.value = false
+        if (args.appMode != ApplicationLaunchMode.AUTOFILL_SELECTION) {
+            return
+        }
+
+        sendAutofillResponseEvent.call(Pair(note, autofillStructure))
+    }
+
+    fun loadData() {
+        menuItems.value = getVisibleMenuItems()
+        isFabButtonVisible.value = getFabButtonVisibility()
 
         viewModelScope.launch {
             val result = withContext(Dispatchers.Default) {
@@ -164,12 +196,13 @@ class NoteViewModel(
                     updateStatusViewModel(status.obj)
                 }
 
-                isMenuVisible.value = true
                 screenState.value = ScreenState.data()
+                menuItems.value = getVisibleMenuItems()
             } else {
                 val message = errorInteractor.processAndGetMessage(result.error)
                 screenState.value = ScreenState.error(message)
             }
+            isFabButtonVisible.value = getFabButtonVisibility()
         }
     }
 
@@ -200,5 +233,51 @@ class NoteViewModel(
             model = statusCellModelFactory.createStatusCellModel(status),
             eventProvider = eventProvider
         ) as DatabaseStatusCellViewModel
+    }
+
+    private fun getVisibleMenuItems(): List<ScreenMenuItem> {
+        val screenState = this.screenState.value ?: return emptyList()
+
+        return when {
+            screenState.isDisplayingData && args.appMode == ApplicationLaunchMode.NORMAL -> {
+                listOf(
+                    ScreenMenuItem.LOCK,
+                    ScreenMenuItem.SEARCH,
+                    ScreenMenuItem.SETTINGS
+                )
+            }
+            screenState.isDisplayingData && args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
+                listOf(
+                    ScreenMenuItem.SELECT,
+                    ScreenMenuItem.LOCK,
+                    ScreenMenuItem.SEARCH
+                )
+            }
+            else -> emptyList()
+        }
+    }
+
+    private fun getFabButtonVisibility(): Boolean {
+        val screenState = this.screenState.value ?: return false
+
+        return screenState.isDisplayingData &&
+            args.appMode == ApplicationLaunchMode.NORMAL
+    }
+
+    class Factory(private val args: NoteScreenArgs) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return GlobalInjector.get<NoteViewModel>(
+                parametersOf(args)
+            ) as T
+        }
+    }
+
+    enum class ScreenMenuItem(@IdRes val id: Int) {
+        SELECT(R.id.menu_select),
+        LOCK(R.id.menu_lock),
+        SEARCH(R.id.menu_search),
+        SETTINGS(R.id.menu_settings)
     }
 }

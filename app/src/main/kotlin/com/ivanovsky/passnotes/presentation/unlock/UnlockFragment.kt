@@ -23,8 +23,10 @@ import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.dialog.ThreeButtonDialog
+import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
+import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
@@ -95,8 +97,9 @@ class UnlockFragment : BaseFragment() {
         viewModel.showResolveConflictDialog.observe(viewLifecycleOwner) { info ->
             showResolveConflictDialog(info)
         }
-        viewModel.setAutofillAuthResponse.observe(viewLifecycleOwner) { (note, structure) ->
-            setAutofillAuthResult(note, structure)
+        viewModel.sendAutofillResponseEvent.observe(viewLifecycleOwner) { (note, structure) ->
+            sendAutofillResult(note, structure)
+            finishActivity()
         }
     }
 
@@ -136,27 +139,6 @@ class UnlockFragment : BaseFragment() {
             }
 
         dialog.show(childFragmentManager, ThreeButtonDialog.TAG)
-    }
-
-    private fun setAutofillAuthResult(note: Note?, structure: AutofillStructure) {
-        if (Build.VERSION.SDK_INT < 26) {
-            return
-        }
-
-        val factory = AutofillResponseFactory(requireContext(), GlobalInjector.get())
-        val response = if (note != null) {
-            factory.createResponseWithNoteAndSelection(note, structure)
-        } else {
-            factory.createResponseWithSelection(structure)
-        }
-
-        val result = Intent()
-            .apply {
-                putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, response)
-            }
-
-        requireActivity().setResult(Activity.RESULT_OK, result)
-        requireActivity().finish()
     }
 
     companion object {

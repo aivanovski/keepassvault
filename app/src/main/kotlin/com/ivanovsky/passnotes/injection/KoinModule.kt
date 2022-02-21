@@ -63,6 +63,7 @@ import com.ivanovsky.passnotes.presentation.main.MainScreenArgs
 import com.ivanovsky.passnotes.presentation.main.MainViewModel
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseViewModel
+import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
@@ -192,7 +193,7 @@ object KoinModule {
         viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
         viewModel { GroupEditorViewModel(get(), get(), get(), get()) }
         viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
-        viewModel { NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+        factory { (args: NoteScreenArgs) -> NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
         factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
         viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
         viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }

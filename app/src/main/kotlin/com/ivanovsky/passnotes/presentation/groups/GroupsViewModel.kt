@@ -41,6 +41,7 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewMo
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
@@ -464,7 +465,15 @@ class GroupsViewModel(
     }
 
     private fun onNoteClicked(noteUid: UUID) {
-        router.navigateTo(NoteScreen(noteUid))
+        router.navigateTo(
+            NoteScreen(
+                NoteScreenArgs(
+                    appMode = args.appMode,
+                    noteUid = noteUid,
+                    autofillStructure = args.autofillStructure
+                )
+            )
+        )
     }
 
     private fun onNoteLongClicked(noteUid: UUID) {
@@ -596,7 +605,7 @@ class GroupsViewModel(
 
     private fun setScreenState(state: ScreenState) {
         screenState.value = state
-        updateFabButtonVisibility()
+        isFabButtonVisible.value = getFabButtonVisibility()
 
         when (state.screenDisplayingType) {
             ScreenDisplayingType.LOADING -> {
@@ -607,11 +616,11 @@ class GroupsViewModel(
         }
     }
 
-    private fun updateFabButtonVisibility() {
-        val screenState = this.screenState.value ?: return
+    private fun getFabButtonVisibility(): Boolean {
+        val screenState = this.screenState.value ?: return false
 
-        isFabButtonVisible.value = (screenState.isDisplayingData &&
-            args.appMode == ApplicationLaunchMode.NORMAL)
+        return screenState.isDisplayingData &&
+            args.appMode == ApplicationLaunchMode.NORMAL
     }
 
     class Factory(private val args: GroupsScreenArgs) : ViewModelProvider.Factory {

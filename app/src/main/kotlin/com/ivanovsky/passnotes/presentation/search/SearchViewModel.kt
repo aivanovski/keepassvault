@@ -28,6 +28,7 @@ import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
+import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellModelFactory
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
@@ -61,7 +62,7 @@ class SearchViewModel(
 
     val isMoreMenuVisible = MutableLiveData(args.appMode == NORMAL)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
-    val setAutofillResponse = SingleLiveEvent<Pair<Note, AutofillStructure>>()
+    val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note, AutofillStructure>>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
 
     val searchTextListener = object : OnTextChangeListener {
@@ -163,7 +164,6 @@ class SearchViewModel(
     }
 
     private fun onGroupClicked(groupUid: UUID) {
-        // TODO(autofill): args.autofillStructure should be passed to Groups screen
         hideKeyboardEvent.call()
 
         router.navigateTo(
@@ -171,7 +171,8 @@ class SearchViewModel(
                 GroupsScreenArgs(
                     appMode = args.appMode,
                     groupUid = groupUid,
-                    isCloseDatabaseOnExit = false
+                    isCloseDatabaseOnExit = false,
+                    autofillStructure = args.autofillStructure
                 )
             )
         )
@@ -188,7 +189,7 @@ class SearchViewModel(
                     val getNoteResult = interactor.getNoteByUid(noteUid)
                     if (getNoteResult.isSucceededOrDeferred) {
                         val note = getNoteResult.obj
-                        setAutofillResponse.call(Pair(note, structure))
+                        sendAutofillResponseEvent.call(Pair(note, structure))
                     } else {
                         val message = errorInteractor.processAndGetMessage(getNoteResult.error)
                         screenState.value = ScreenState.dataWithError(message)
@@ -197,7 +198,15 @@ class SearchViewModel(
             }
             else -> {
                 hideKeyboardEvent.call()
-                router.navigateTo(NoteScreen(noteUid))
+                router.navigateTo(
+                    NoteScreen(
+                        NoteScreenArgs(
+                            appMode = args.appMode,
+                            noteUid = noteUid,
+                            autofillStructure = args.autofillStructure
+                        )
+                    )
+                )
             }
         }
     }

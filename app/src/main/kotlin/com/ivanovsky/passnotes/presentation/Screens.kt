@@ -12,6 +12,7 @@ import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.groups.GroupsFragment
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseFragment
 import com.ivanovsky.passnotes.presentation.note.NoteFragment
+import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorFragment
 import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
@@ -27,7 +28,6 @@ import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListFragment
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockFragment
-import java.util.UUID
 
 object Screens {
     class UnlockScreen(private val args: UnlockScreenArgs) : FragmentScreen {
@@ -98,9 +98,9 @@ object Screens {
             NoteEditorFragment.newInstance(args)
     }
 
-    class NoteScreen(private val noteUid: UUID) : FragmentScreen {
+    class NoteScreen(private val args: NoteScreenArgs) : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
-            NoteFragment.newInstance(noteUid)
+            NoteFragment.newInstance(args)
     }
 
     class SearchScreen(private val args: SearchScreenArgs) : FragmentScreen {

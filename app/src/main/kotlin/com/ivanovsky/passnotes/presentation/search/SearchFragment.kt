@@ -1,8 +1,5 @@
 package com.ivanovsky.passnotes.presentation.search
 
-import android.app.Activity
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -10,20 +7,16 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.autofill.AutofillManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.databinding.SearchFragmentBinding
 import com.ivanovsky.passnotes.extensions.setItemVisibility
-import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
-import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
+import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
@@ -112,32 +105,13 @@ class SearchFragment : BaseFragment() {
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
             hideKeyboard()
         }
-        viewModel.setAutofillResponse.observe(viewLifecycleOwner) {
-            setAutofillResult(it.first, it.second)
+        viewModel.sendAutofillResponseEvent.observe(viewLifecycleOwner) { (note, structure) ->
+            sendAutofillResult(note, structure)
+            finishActivity()
         }
         viewModel.finishActivityEvent.observe(viewLifecycleOwner) {
             finishActivity()
         }
-    }
-
-    private fun setAutofillResult(note: Note, structure: AutofillStructure) {
-        if (Build.VERSION.SDK_INT < 26) {
-            return
-        }
-
-        val factory = AutofillResponseFactory(requireContext(), GlobalInjector.get())
-        val response = factory.createResponseWithNote(note, structure)
-
-        val result = Intent()
-            .apply {
-                putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, response)
-            }
-
-        requireActivity()
-            .apply {
-                setResult(Activity.RESULT_OK, result)
-                finish()
-            }
     }
 
     companion object {

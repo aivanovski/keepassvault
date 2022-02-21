@@ -32,6 +32,7 @@
     <string name="more_options">More options</string>
     <string name="paste">Paste</string>
     <string name="apply">Apply</string>
+    <string name="select">Select</string>
 
     <!-- Lock notification -->
     <string name="notification_channel">Quick Lock</string>

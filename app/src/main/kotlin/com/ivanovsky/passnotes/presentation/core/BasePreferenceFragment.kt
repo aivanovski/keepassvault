@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.presentation.core
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceFragmentCompat
-import com.ivanovsky.passnotes.presentation.navigation.NavigationMenuViewModel
+import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 
 abstract class BasePreferenceFragment : PreferenceFragmentCompat() {
 

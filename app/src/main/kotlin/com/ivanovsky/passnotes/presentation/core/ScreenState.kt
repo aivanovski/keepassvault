@@ -8,7 +8,8 @@ data class ScreenState(
 ) {
 
     val isDisplayingData: Boolean
-        get() = screenDisplayingType == ScreenDisplayingType.DATA
+        get() = (screenDisplayingType == ScreenDisplayingType.DATA ||
+            screenDisplayingType == ScreenDisplayingType.DATA_WITH_ERROR)
 
     val isDisplayingLoading: Boolean
         get() = screenDisplayingType == ScreenDisplayingType.LOADING
@@ -57,5 +58,4 @@ data class ScreenState(
             )
         }
     }
-
 }

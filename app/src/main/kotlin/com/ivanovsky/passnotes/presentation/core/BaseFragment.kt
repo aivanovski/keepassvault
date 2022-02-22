@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.presentation.core
 
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.ivanovsky.passnotes.presentation.navigation.NavigationMenuViewModel
+import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 
 abstract class BaseFragment : Fragment() {
 
@@ -14,5 +14,15 @@ abstract class BaseFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         navigationViewModel.setNavigationEnabled(false)
+    }
+
+    /**
+     * Called when user clicks the back button.
+     *
+     * @return `true` to prevent back click from being propagated further, or `false` to indicate
+     * that back click should be handled by [android.app.Activity]
+     */
+    open fun onBackPressed(): Boolean {
+        return false
     }
 }

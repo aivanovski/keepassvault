@@ -4,11 +4,14 @@
     <dimen name="element_margin">16dp</dimen>
     <dimen name="half_margin">8dp</dimen>
     <dimen name="quarter_margin">4dp</dimen>
+    <dimen name="tiny_margin">2dp</dimen>
 
     <dimen name="material_primary_text_size">16sp</dimen>
     <dimen name="material_secondary_text_size">14sp</dimen>
     <dimen name="material_header_text_size">22sp</dimen>
     <dimen name="material_small_text_size">10sp</dimen>
+
+    <dimen name="autofill_icon_size">36dp</dimen>
 
     <!-- text fields parameters -->
     <dimen name="material_edit_text_primary_text_size">@dimen/material_primary_text_size</dimen>

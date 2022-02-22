@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.domain.interactor.unlock
 
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_RECORD_IS_ALREADY_EXISTS
 import com.ivanovsky.passnotes.data.entity.OperationError.Type.NETWORK_IO_ERROR
@@ -15,8 +16,10 @@ import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import kotlinx.coroutines.withContext
 
 class UnlockInteractor(
@@ -24,6 +27,7 @@ class UnlockInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
     private val dispatchers: DispatcherProvider,
     private val getFilesUseCase: GetRecentlyOpenedFilesUseCase,
+    private val autofillUseCase: FindNoteForAutofillUseCase,
     private val syncUseCases: SyncUseCases
 ) {
 
@@ -89,6 +93,11 @@ class UnlockInteractor(
 
             result.takeStatusWith(true)
         }
+
+    suspend fun findNoteForAutofill(
+        structure: AutofillStructure
+    ): OperationResult<Pair<Boolean, Note?>> =
+        autofillUseCase.findNoteForAutofill(structure)
 
     private fun updateFileAccessTime(file: FileDescriptor) {
         val usedFile = fileRepository.findByUid(file.uid, file.fsAuthority)

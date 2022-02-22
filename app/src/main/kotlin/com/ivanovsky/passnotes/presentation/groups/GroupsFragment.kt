@@ -7,8 +7,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.addCallback
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ivanovsky.passnotes.R
@@ -20,27 +19,37 @@ import com.ivanovsky.passnotes.extensions.setItemVisibility
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
+import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
-import com.ivanovsky.passnotes.presentation.navigation.NavigationMenuViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 
 class GroupsFragment : BaseFragment() {
 
-    private val viewModel: GroupsViewModel by viewModel()
-
-    private val args by lazy { getMandatoryArgument<GroupsArgs>(ARGUMENTS) }
+    private val viewModel: GroupsViewModel by lazy {
+        ViewModelProvider(
+            this,
+            GroupsViewModel.Factory(
+                args = getMandatoryArgument(ARGUMENTS)
+            )
+        )
+            .get(GroupsViewModel::class.java)
+    }
 
     private lateinit var binding: GroupsFragmentBinding
-    private var backCallback: OnBackPressedCallback? = null
     private var menu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+    }
+
+    override fun onBackPressed(): Boolean {
+        viewModel.onBackClicked()
+        return true
     }
 
     override fun onCreateView(
@@ -102,19 +111,10 @@ class GroupsFragment : BaseFragment() {
 
     override fun onStart() {
         super.onStart()
-        backCallback = requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            viewModel.onBackClicked()
-        }
         navigationViewModel.setVisibleItems(
             NavigationMenuViewModel.createNavigationItemsForDbScreens()
         )
         navigationViewModel.setNavigationEnabled(true)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        backCallback?.remove()
-        backCallback = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -127,8 +127,9 @@ class GroupsFragment : BaseFragment() {
         }
 
         subscribeToLiveData()
+        subscribeToEvents()
 
-        viewModel.start(args)
+        viewModel.start()
     }
 
     private fun subscribeToLiveData() {
@@ -140,7 +141,6 @@ class GroupsFragment : BaseFragment() {
                 title = it
             }
         }
-
         viewModel.isMenuVisible.observe(viewLifecycleOwner) {
             menu?.setItemVisibility(R.id.menu_lock, it)
             menu?.setItemVisibility(R.id.menu_more, it)
@@ -149,7 +149,9 @@ class GroupsFragment : BaseFragment() {
         viewModel.isAddTemplatesMenuVisible.observe(viewLifecycleOwner) {
             menu?.setItemVisibility(R.id.menu_add_templates, it)
         }
+    }
 
+    private fun subscribeToEvents() {
         viewModel.showNewEntryDialogEvent.observe(viewLifecycleOwner) { templates ->
             showNewEntryDialog(templates)
         }
@@ -164,6 +166,9 @@ class GroupsFragment : BaseFragment() {
         }
         viewModel.showAddTemplatesDialogEvent.observe(viewLifecycleOwner) {
             showAddTemplatesDialog()
+        }
+        viewModel.finishActivityEvent.observe(viewLifecycleOwner) {
+            finishActivity()
         }
     }
 
@@ -258,8 +263,9 @@ class GroupsFragment : BaseFragment() {
 
         private const val COLUMN_COUNT = 3
 
-        fun newInstance(args: GroupsArgs) = GroupsFragment().withArguments {
-            putParcelable(ARGUMENTS, args)
-        }
+        fun newInstance(args: GroupsScreenArgs) = GroupsFragment()
+            .withArguments {
+                putParcelable(ARGUMENTS, args)
+            }
     }
 }

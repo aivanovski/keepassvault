@@ -5,6 +5,8 @@ import com.ivanovsky.passnotes.data.entity.Property.Companion.PROPERTY_NAME_TEMP
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.entity.filter.*
 
+// TODO: In some scenarios strategies with including and excluding logic can't be mixed
+//  in one filter, so there should be a way to avoid it
 class PropertyFilter private constructor(
     private val filters: List<PropertyFilterStrategy>
 ) {
@@ -73,6 +75,11 @@ class PropertyFilter private constructor(
             return this
         }
 
+        fun excludeByType(vararg types: PropertyType): Builder {
+            filters.add(ExcludeByTypeStrategy(*types))
+            return this
+        }
+
         fun filterTemplateUid(): Builder {
             return filterByName(PROPERTY_NAME_TEMPLATE_UID)
         }
@@ -131,6 +138,24 @@ class PropertyFilter private constructor(
             TEMPLATE_INDICATOR_FILTER
                 .apply(properties)
                 .firstOrNull()
+
+        fun filterUserName(properties: List<Property>): Property? =
+            USER_NAME_FILTER
+                .apply(properties)
+                .firstOrNull()
+
+        fun filterPassword(properties: List<Property>): Property? =
+            PASSWORD_FILTER
+                .apply(properties)
+                .firstOrNull()
+
+        private val PASSWORD_FILTER = Builder()
+            .filterByType(PropertyType.PASSWORD)
+            .build()
+
+        private val USER_NAME_FILTER = Builder()
+            .filterByType(PropertyType.USER_NAME)
+            .build()
 
         private val INCLUDE_TITLE_FILTER = Builder()
             .filterTitle()

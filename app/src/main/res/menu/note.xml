@@ -4,29 +4,25 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/menu_select"
+        android:title="@string/select"
+        app:showAsAction="always"/>
+
+    <item
         android:id="@+id/menu_lock"
         android:icon="@drawable/ic_lock_white_24dp"
         android:title="@string/lock"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_search"
         android:icon="@drawable/ic_search_white_24dp"
         android:title="@string/search"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/menu_more"
-        android:icon="@drawable/ic_more_vert_white_24dp"
-        android:title="@string/more_options"
-        app:showAsAction="always">
-
-        <menu>
-            <item
-                android:id="@+id/menu_settings"
-                android:title="@string/settings" />
-        </menu>
-
-    </item>
+        android:id="@+id/menu_settings"
+        android:title="@string/settings"
+        app:showAsAction="never"/>
 
 </menu>

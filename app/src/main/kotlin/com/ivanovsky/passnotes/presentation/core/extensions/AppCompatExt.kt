@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.core.extensions
 
+import android.os.Parcelable
 import androidx.annotation.IdRes
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +12,10 @@ fun AppCompatActivity.initActionBar(@IdRes toolbarId: Int, action: (ActionBar.()
     }
 }
 
-fun AppCompatActivity.requireExtraValue(argumentName: String): Nothing {
-    throw IllegalStateException("require extra argument with name: $argumentName")
+fun <T : Parcelable> AppCompatActivity.getMandatoryExtra(key: String): T {
+    return intent.extras?.getParcelable(key) ?: requireExtraArgument(key)
+}
+
+fun AppCompatActivity.requireExtraArgument(argumentName: String): Nothing {
+    throw IllegalStateException("${this::class.simpleName} requires argument with name: $argumentName")
 }

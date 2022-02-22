@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
@@ -19,10 +20,13 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_AUTHORIZATION
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NewDatabaseScreen
 import com.ivanovsky.passnotes.presentation.Screens.SelectDatabaseScreen
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -30,7 +34,7 @@ import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
-import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
+import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
@@ -43,6 +47,7 @@ import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.parameter.parametersOf
 import java.util.ArrayList
 import java.util.regex.Pattern
 
@@ -54,7 +59,8 @@ class UnlockViewModel(
     private val dispatchers: DispatcherProvider,
     private val modelFactory: UnlockCellModelFactory,
     private val viewModelFactory: UnlockCellViewModelFactory,
-    private val router: Router
+    private val router: Router,
+    private val args: UnlockScreenArgs
 ) : ViewModel(),
     ObserverBus.UsedFileDataSetObserver,
     ObserverBus.UsedFileContentObserver {
@@ -65,7 +71,9 @@ class UnlockViewModel(
     val passwordTransformationMethod = MutableLiveData(TextTransformationMethod.PASSWORD)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val showSnackbarMessage = SingleLiveEvent<String>()
+    val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
     val fileCellViewModels = MutableLiveData<List<BaseCellViewModel>>()
+    val isFabButtonVisible = MutableLiveData(false)
 
     val fileCellTypes = ViewModelTypes()
         .add(DatabaseCellViewModel::class, R.layout.cell_database)
@@ -114,6 +122,7 @@ class UnlockViewModel(
 
     fun loadData(resetSelection: Boolean) {
         screenState.value = ScreenState.loading()
+        isFabButtonVisible.value = getFabButtonVisibility()
 
         viewModelScope.launch {
             val result = interactor.getRecentlyOpenedFiles()
@@ -143,6 +152,7 @@ class UnlockViewModel(
                 val message = errorInteractor.processAndGetMessage(result.error)
                 screenState.value = ScreenState.error(message)
             }
+            isFabButtonVisible.value = getFabButtonVisibility()
         }
     }
 
@@ -151,6 +161,7 @@ class UnlockViewModel(
         val lastState = screenState.value ?: return
 
         screenState.value = ScreenState.loading()
+        isFabButtonVisible.value = getFabButtonVisibility()
 
         viewModelScope.launch {
             val conflict = interactor.getSyncConflictInfo(selectFile)
@@ -162,6 +173,7 @@ class UnlockViewModel(
                     errorText = errorInteractor.processAndGetMessage(conflict.error)
                 )
             }
+            isFabButtonVisible.value = getFabButtonVisibility()
         }
     }
 
@@ -169,6 +181,7 @@ class UnlockViewModel(
         val selectFile = selectedFile ?: return
 
         screenState.value = ScreenState.loading()
+        isFabButtonVisible.value = getFabButtonVisibility()
 
         viewModelScope.launch {
             val resolvedConflict = interactor.resolveConflict(selectFile, resolutionStrategy)
@@ -179,6 +192,7 @@ class UnlockViewModel(
                 screenState.value = ScreenState.dataWithError(
                     errorText = errorInteractor.processAndGetMessage(resolvedConflict.error)
                 )
+                isFabButtonVisible.value = getFabButtonVisibility()
             }
         }
     }
@@ -197,6 +211,7 @@ class UnlockViewModel(
 
         hideKeyboardEvent.call()
         screenState.value = ScreenState.loading()
+        isFabButtonVisible.value = getFabButtonVisibility()
 
         val key = KeepassDatabaseKey(password)
 
@@ -204,21 +219,47 @@ class UnlockViewModel(
             val open = interactor.openDatabase(key, selectedFile)
 
             if (open.isSucceededOrDeferred) {
-                clearEnteredPassword()
-
-                router.newChain(
-                    GroupsScreen(
-                        GroupsArgs(
-                            groupUid = null,
-                            isCloseDatabaseOnExit = true
-                        )
-                    )
-                )
-                screenState.value = ScreenState.data()
+                onDatabaseUnlocked()
             } else {
                 screenState.value = ScreenState.dataWithError(
                     errorText = errorInteractor.processAndGetMessage(open.error)
                 )
+                isFabButtonVisible.value = getFabButtonVisibility()
+            }
+        }
+    }
+
+    private suspend fun onDatabaseUnlocked() {
+        when (args.appMode) {
+            AUTOFILL_AUTHORIZATION -> {
+                val structure = args.autofillStructure ?: return
+
+                val autofillNoteResult = interactor.findNoteForAutofill(structure)
+                if (autofillNoteResult.isSucceeded) {
+                    val note = autofillNoteResult.obj.second
+
+                    sendAutofillResponseEvent.call(Pair(note, structure))
+                } else {
+                    val message = errorInteractor.processAndGetMessage(autofillNoteResult.error)
+                    screenState.value = ScreenState.error(message)
+                    isFabButtonVisible.value = getFabButtonVisibility()
+                }
+            }
+            else -> {
+                clearEnteredPassword()
+
+                router.newChain(
+                    GroupsScreen(
+                        GroupsScreenArgs(
+                            appMode = args.appMode,
+                            groupUid = null,
+                            isCloseDatabaseOnExit = true,
+                            autofillStructure = args.autofillStructure
+                        )
+                    )
+                )
+                screenState.value = ScreenState.data()
+                isFabButtonVisible.value = getFabButtonVisibility()
             }
         }
     }
@@ -244,6 +285,7 @@ class UnlockViewModel(
     private fun onFilePicked(file: FileDescriptor) {
         //called when user select file from built-in file picker
         screenState.value = ScreenState.loading()
+        isFabButtonVisible.value = getFabButtonVisibility()
 
         val usedFile = file.toUsedFile(addedTime = System.currentTimeMillis())
 
@@ -257,6 +299,7 @@ class UnlockViewModel(
 
             } else {
                 screenState.value = ScreenState.data()
+                isFabButtonVisible.value = getFabButtonVisibility()
 
                 val message = errorInteractor.processAndGetMessage(result.error)
                 showSnackbarMessage.call(message)
@@ -320,6 +363,7 @@ class UnlockViewModel(
                 if (closeResult.isFailed) {
                     val message = errorInteractor.processAndGetMessage(closeResult.error)
                     screenState.value = ScreenState.error(message)
+                    isFabButtonVisible.value = getFabButtonVisibility()
                 }
             }
         }
@@ -397,6 +441,7 @@ class UnlockViewModel(
                 errorText = resourceProvider.getString(R.string.file_update_conflict_message),
                 errorButtonText = resourceProvider.getString(R.string.resolve)
             )
+            isFabButtonVisible.value = getFabButtonVisibility()
         }
     }
 
@@ -414,6 +459,25 @@ class UnlockViewModel(
         password.value = EMPTY
     }
 
+    private fun getFabButtonVisibility(): Boolean {
+        val screenState = this.screenState.value ?: return false
+
+        return screenState.isDisplayingData &&
+            args.appMode == ApplicationLaunchMode.NORMAL
+    }
+
+    class Factory(
+        private val args: UnlockScreenArgs
+    ) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return GlobalInjector.get<UnlockViewModel>(
+                parametersOf(args)
+            ) as T
+        }
+    }
+
     companion object {
 
         private const val FAB_ITEM_NEW_FILE = 0
@@ -423,12 +487,5 @@ class UnlockViewModel(
             FAB_ITEM_NEW_FILE to R.string.new_file,
             FAB_ITEM_OPEN_FILE to R.string.open_file
         )
-
-        @Suppress("UNCHECKED_CAST")
-        val FACTORY = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return GlobalInjector.get<UnlockViewModel>() as T
-            }
-        }
     }
 }

@@ -7,23 +7,33 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
 import com.ivanovsky.passnotes.extensions.setItemVisibility
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
-import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
+import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.note.NoteViewModel.ScreenMenuItem
 import com.ivanovsky.passnotes.util.StringUtils
-import org.koin.androidx.viewmodel.ext.android.viewModel
-import java.util.UUID
 
 class NoteFragment : BaseFragment() {
 
-    private val viewModel: NoteViewModel by viewModel()
+    private val viewModel: NoteViewModel by lazy {
+        ViewModelProvider(
+            this,
+            NoteViewModel.Factory(
+                args = getMandatoryArgument(ARGUMENTS)
+            )
+        )
+            .get(NoteViewModel::class.java)
+    }
     private var menu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,10 +55,8 @@ class NoteFragment : BaseFragment() {
 
         inflater.inflate(R.menu.note, menu)
 
-        viewModel.isMenuVisible.value?.let {
-            menu.setItemVisibility(R.id.menu_lock, it)
-            menu.setItemVisibility(R.id.menu_search, it)
-            menu.setItemVisibility(R.id.menu_more, it)
+        viewModel.menuItems.value?.let {
+            updateMenuVisibility(it)
         }
     }
 
@@ -68,6 +76,10 @@ class NoteFragment : BaseFragment() {
             }
             R.id.menu_settings -> {
                 viewModel.onSettingsButtonClicked()
+                true
+            }
+            R.id.menu_select -> {
+                viewModel.onSelectButtonClicked()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -97,35 +109,52 @@ class NoteFragment : BaseFragment() {
         viewLifecycleOwner.lifecycle.addObserver(DatabaseInteractionWatcher(this))
 
         subscribeToLiveData()
+        subscribeToEvents()
 
-        val noteUid = arguments?.getSerializable(ARG_NOTE_UID) as? UUID
-            ?: requireArgument(ARG_NOTE_UID)
-
-        viewModel.start(noteUid)
+        viewModel.loadData()
     }
 
     private fun subscribeToLiveData() {
-        viewModel.isMenuVisible.observe(viewLifecycleOwner) {
-            menu?.setItemVisibility(R.id.menu_lock, it)
-            menu?.setItemVisibility(R.id.menu_search, it)
-            menu?.setItemVisibility(R.id.menu_more, it)
+        viewModel.menuItems.observe(viewLifecycleOwner) {
+            updateMenuVisibility(it)
         }
         viewModel.actionBarTitle.observe(viewLifecycleOwner) { actionBarTitle ->
             setupActionBar {
                 title = actionBarTitle
             }
         }
+    }
+
+    private fun subscribeToEvents() {
         viewModel.showSnackbarMessageEvent.observe(viewLifecycleOwner) { message ->
             showSnackbarMessage(message)
         }
+        viewModel.finishActivityEvent.observe(viewLifecycleOwner) {
+            finishActivity()
+        }
+        viewModel.sendAutofillResponseEvent.observe(viewLifecycleOwner) { (note, structure) ->
+            sendAutofillResult(note, structure)
+            finishActivity()
+        }
+    }
+
+    private fun updateMenuVisibility(visibleItems: List<ScreenMenuItem>) {
+        ScreenMenuItem.values()
+            .forEach { item ->
+                menu?.setItemVisibility(
+                    id = item.id,
+                    isVisible = visibleItems.contains(item)
+                )
+            }
     }
 
     companion object {
 
-        private const val ARG_NOTE_UID = "noteUid"
+        private const val ARGUMENTS = "arguments"
 
-        fun newInstance(noteUid: UUID) = NoteFragment().withArguments {
-            putSerializable(ARG_NOTE_UID, noteUid)
-        }
+        fun newInstance(args: NoteScreenArgs) = NoteFragment()
+            .withArguments {
+                putParcelable(ARGUMENTS, args)
+            }
     }
 }

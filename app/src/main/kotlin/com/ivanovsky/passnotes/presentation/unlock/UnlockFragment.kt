@@ -1,24 +1,36 @@
 package com.ivanovsky.passnotes.presentation.unlock
 
+import android.app.Activity
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.autofill.AutofillManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding
 import com.ivanovsky.passnotes.domain.DateFormatProvider
+import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.dialog.ThreeButtonDialog
+import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
+import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
+import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
-import com.ivanovsky.passnotes.presentation.navigation.NavigationMenuViewModel
+import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 import org.apache.commons.lang3.StringUtils.EMPTY
 import java.util.Date
 
@@ -26,9 +38,13 @@ class UnlockFragment : BaseFragment() {
 
     private lateinit var binding: UnlockFragmentBinding
     private val dateFormatProvider: DateFormatProvider by inject()
-
     private val viewModel: UnlockViewModel by lazy {
-        ViewModelProvider(requireActivity(), UnlockViewModel.FACTORY)
+        ViewModelProvider(
+            this,
+            UnlockViewModel.Factory(
+                args = getMandatoryArgument(ARGUMENTS)
+            )
+        )
             .get(UnlockViewModel::class.java)
     }
 
@@ -81,6 +97,10 @@ class UnlockFragment : BaseFragment() {
         viewModel.showResolveConflictDialog.observe(viewLifecycleOwner) { info ->
             showResolveConflictDialog(info)
         }
+        viewModel.sendAutofillResponseEvent.observe(viewLifecycleOwner) { (note, structure) ->
+            sendAutofillResult(note, structure)
+            finishActivity()
+        }
     }
 
     private fun showResolveConflictDialog(info: SyncConflictInfo) {
@@ -122,6 +142,12 @@ class UnlockFragment : BaseFragment() {
     }
 
     companion object {
-        fun newInstance() = UnlockFragment()
+
+        private const val ARGUMENTS = "arguments"
+
+        fun newInstance(args: UnlockScreenArgs): UnlockFragment = UnlockFragment()
+            .withArguments {
+                putParcelable(ARGUMENTS, args)
+            }
     }
 }

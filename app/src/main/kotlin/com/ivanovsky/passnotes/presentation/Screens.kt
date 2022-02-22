@@ -8,12 +8,14 @@ import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment
 import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorFragment
-import com.ivanovsky.passnotes.presentation.groups.GroupsArgs
+import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.groups.GroupsFragment
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseFragment
 import com.ivanovsky.passnotes.presentation.note.NoteFragment
+import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorFragment
+import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.search.SearchFragment
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseFragment
@@ -24,13 +26,13 @@ import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsFr
 import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsFragment
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListFragment
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockFragment
-import java.util.UUID
 
 object Screens {
-    class UnlockScreen : FragmentScreen {
+    class UnlockScreen(private val args: UnlockScreenArgs) : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
-            UnlockFragment.newInstance()
+            UnlockFragment.newInstance(args)
     }
 
     class SelectDatabaseScreen(private val args: SelectDatabaseArgs) : FragmentScreen {
@@ -81,7 +83,7 @@ object Screens {
     }
 
     // View Notes and Groups
-    class GroupsScreen(private val args: GroupsArgs) : FragmentScreen {
+    class GroupsScreen(private val args: GroupsScreenArgs) : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
             GroupsFragment.newInstance(args)
     }
@@ -96,14 +98,14 @@ object Screens {
             NoteEditorFragment.newInstance(args)
     }
 
-    class NoteScreen(private val noteUid: UUID) : FragmentScreen {
+    class NoteScreen(private val args: NoteScreenArgs) : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
-            NoteFragment.newInstance(noteUid)
+            NoteFragment.newInstance(args)
     }
 
-    class SearchScreen : FragmentScreen {
+    class SearchScreen(private val args: SearchScreenArgs) : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
-            SearchFragment.newInstance()
+            SearchFragment.newInstance(args)
     }
 
     class AboutScreen : FragmentScreen {

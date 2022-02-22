@@ -6,8 +6,13 @@ import android.os.Build
 import android.text.InputType
 import android.view.View
 import androidx.annotation.RequiresApi
-import com.ivanovsky.passnotes.presentation.autofill.model.HintType
-import com.ivanovsky.passnotes.presentation.autofill.model.HintData
+import com.ivanovsky.passnotes.presentation.autofill.extensions.getNodesByFieldType
+import com.ivanovsky.passnotes.presentation.autofill.extensions.hasFields
+import com.ivanovsky.passnotes.presentation.autofill.extensions.toField
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillFieldType
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillSourceType
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillNode
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.autofill.model.MutableAutofillStructure
 import com.ivanovsky.passnotes.util.Logger
 import java.util.Locale
@@ -15,35 +20,37 @@ import java.util.Locale
 @RequiresApi(api = 26)
 class AutofillStructureParser {
 
-    fun parse(structure: AssistStructure): MutableAutofillStructure? {
-        val result = MutableAutofillStructure()
+    fun parse(sourceStructure: AssistStructure): AutofillStructure? {
+        val structure = MutableAutofillStructure()
 
-        for (windowNode in structure.getWindowNodes()) {
+        for (windowNode in sourceStructure.getWindowNodes()) {
             val applicationId = windowNode.title.toString().split("/").firstOrNull()
 
             if (applicationId?.contains("PopupWindow:") == false) {
-                if (parseViewNode(result, windowNode.rootViewNode)) {
-                    Logger.d(TAG, "result: $result")
-                    return result
-                }
+                structure.applicationId = applicationId
+
+                parseViewNode(structure, windowNode.rootViewNode)
+
+                val result = processResult(structure)
+                Logger.d(TAG, "structure: $structure")
+                Logger.d(TAG, "result: $result")
+
+                return result
             }
         }
 
         return null
     }
 
-    private fun AssistStructure.getWindowNodes(): List<AssistStructure.WindowNode> {
-        return (0 until windowNodeCount).map { getWindowNodeAt(it) }
-    }
-
-    private fun parseViewNode(result: MutableAutofillStructure, node: ViewNode): Boolean {
+    private fun parseViewNode(result: MutableAutofillStructure, node: ViewNode) {
         Logger.d(
             TAG,
-            "parseViewNode: className=%s, autofillHints=%s, htmlAttributes=%s, inputType=0x%s",
+            "parseViewNode: className=%s, autofillHints=%s, htmlAttributes=%s, inputType=0x%s, hint=%s",
             node.className,
             node.autofillHints?.toList(),
             node.htmlInfo?.attributes,
-            Integer.toHexString(node.inputType)
+            Integer.toHexString(node.inputType),
+            node.hint
         )
 
         if (node.className == "android.webkit.WebView") {
@@ -60,29 +67,29 @@ class AutofillStructureParser {
         }
 
         if (node.visibility != View.VISIBLE) {
-            return false
+            return
         }
 
         if (node.autofillId != null) {
-            val autofillHintData = getHintDataByAutofillHint(node)
-            if (autofillHintData != null) {
-                fillResult(result, autofillHintData)
-                Logger.d(TAG, "    data: $autofillHintData")
-                return true
+            val nodeFromAutofill = getAutofillNodeByAutofillHint(node)
+            if (nodeFromAutofill != null) {
+                Logger.d(TAG, "    dataFromAutofill: $nodeFromAutofill")
+                result.nodes.add(nodeFromAutofill)
+                return
             }
 
-            val htmlHintData = getHintDataByHtmlAttributes(node)
-            if (htmlHintData != null) {
-                fillResult(result, htmlHintData)
-                Logger.d(TAG, "    data: $htmlHintData")
-                return true
+            val nodeFromHtml = getAutofillNodeByHtmlAttributes(node)
+            if (nodeFromHtml != null) {
+                Logger.d(TAG, "    dataFromHtml: $nodeFromHtml")
+                result.nodes.add(nodeFromHtml)
+                return
             }
 
-            val inputHintData = getHintDataByInputType(node)
-            if (inputHintData != null) {
-                fillResult(result, inputHintData)
-                Logger.d(TAG, "    data: $inputHintData")
-                return true
+            val nodeFromInputType = getAutofillNodeByInputType(node)
+            if (nodeFromInputType != null) {
+                Logger.d(TAG, "    dataFromInputType: $nodeFromInputType")
+                result.nodes.add(nodeFromInputType)
+                return
             }
         }
 
@@ -94,19 +101,51 @@ class AutofillStructureParser {
                 "check: className=%s, result.hasWebDomain=%s, result.hasFieldsToFill=%s",
                 node.className,
                 result.hasWebDomain(),
-                result.hasFieldsToFill()
+                result.hasFields()
             )
-
-            if (result.hasWebDomain() && result.hasFieldsToFill()) {
-                return true
-            }
         }
-
-        return result.hasFieldsToFill()
     }
 
-    private fun MutableAutofillStructure.hasFieldsToFill(): Boolean {
-        return username != null && password != null
+    private fun processResult(result: MutableAutofillStructure): AutofillStructure? {
+        if (!result.hasFields()) {
+            return null
+        }
+
+        val username = chooseBestNode(result.getNodesByFieldType(AutofillFieldType.USERNAME))
+        val password = chooseBestNode(result.getNodesByFieldType(AutofillFieldType.PASSWORD))
+
+        if (username == null || password == null) {
+            return null
+        }
+
+        return AutofillStructure(
+            isWebView = result.isWebView,
+            webDomain = result.webDomain,
+            webScheme = result.webScheme,
+            username = username.toField(),
+            password = password.toField()
+        )
+    }
+
+    private fun chooseBestNode(nodes: List<AutofillNode>): AutofillNode? {
+        if (nodes.size == 1) {
+            return nodes.first()
+        }
+
+        return nodes.map { node ->
+            val autofillScore = getAutofillNodeByAutofillHint(node.node)?.sourceType?.priority ?: 0
+            val htmlScore = getAutofillNodeByHtmlAttributes(node.node)?.sourceType?.priority ?: 0
+            val inputTypeScore = getAutofillNodeByInputType(node.node)?.sourceType?.priority ?: 0
+            val hintScore = getAutofillNodeByEditTextHint(node.node)?.sourceType?.priority ?: 0
+
+            Pair(autofillScore + htmlScore + inputTypeScore + hintScore, node)
+        }
+            .maxByOrNull { it.first }
+            ?.second
+    }
+
+    private fun AssistStructure.getWindowNodes(): List<AssistStructure.WindowNode> {
+        return (0 until windowNodeCount).map { getWindowNodeAt(it) }
     }
 
     private fun MutableAutofillStructure.hasWebDomain(): Boolean {
@@ -119,15 +158,7 @@ class AutofillStructureParser {
         return id != null || value != null // TODO(autofill): check content inside id and value
     }
 
-    private fun ViewNode.getHintData(type: HintType): HintData? {
-        return if (hasValidData()) {
-            HintData(type, autofillId, autofillValue)
-        } else {
-            null
-        }
-    }
-
-    private fun getHintDataByAutofillHint(node: ViewNode): HintData? {
+    private fun getAutofillNodeByAutofillHint(node: ViewNode): AutofillNode? {
         val hints = node.autofillHints ?: return null
 
         if (!node.hasValidData()) {
@@ -136,25 +167,21 @@ class AutofillStructureParser {
 
         for (hint in hints) {
             when {
-                isAutofillHintMatchUsername(hint) -> return node.getHintData(HintType.USERNAME)
-                isAutofillHintMatchPassword(hint) -> return node.getHintData(HintType.PASSWORD)
+                isAutofillHintMatchUsername(hint) -> return AutofillNode(
+                    AutofillFieldType.USERNAME,
+                    AutofillSourceType.AUTOFILL_HINT,
+                    node
+                )
+                isAutofillHintMatchPassword(hint) -> return AutofillNode(
+                    AutofillFieldType.PASSWORD,
+                    AutofillSourceType.AUTOFILL_HINT,
+                    node
+                )
                 // TODO(autofill): add more options
             }
         }
 
         return null
-    }
-
-    private fun fillResult(result: MutableAutofillStructure, hintData: HintData) {
-        when (hintData.type) {
-            HintType.PASSWORD -> {
-                result.password = hintData
-            }
-            HintType.USERNAME -> {
-                result.username = hintData
-            }
-            // TODO(autofill): add more options
-        }
     }
 
     private fun isAutofillHintMatchUsername(hint: String): Boolean {
@@ -168,7 +195,7 @@ class AutofillStructureParser {
         return hint.contains(View.AUTOFILL_HINT_PASSWORD, true)
     }
 
-    private fun getHintDataByHtmlAttributes(node: ViewNode): HintData? {
+    private fun getAutofillNodeByHtmlAttributes(node: ViewNode): AutofillNode? {
         val nodeHtml = node.htmlInfo ?: return null
 
         if (!node.hasValidData()) {
@@ -192,10 +219,18 @@ class AutofillStructureParser {
                 name.equals("tel", ignoreCase = true)
                     || name.equals("email", ignoreCase = true)
                     || name.equals("text", ignoreCase = true) -> {
-                    return node.getHintData(HintType.USERNAME)
+                    return AutofillNode(
+                        AutofillFieldType.USERNAME,
+                        AutofillSourceType.HTML_ATTRIBUTE,
+                        node
+                    )
                 }
                 name.equals("password", ignoreCase = true) -> {
-                    return node.getHintData(HintType.PASSWORD)
+                    return AutofillNode(
+                        AutofillFieldType.PASSWORD,
+                        AutofillSourceType.HTML_ATTRIBUTE,
+                        node
+                    )
                 }
             }
         }
@@ -209,7 +244,7 @@ class AutofillStructureParser {
         }
     }
 
-    private fun getHintDataByInputType(node: ViewNode): HintData? {
+    private fun getAutofillNodeByInputType(node: ViewNode): AutofillNode? {
         val inputType = node.inputType
 
         if (!node.hasValidData()) {
@@ -217,8 +252,16 @@ class AutofillStructureParser {
         }
 
         return when {
-            isInputTypeMatchUsername(inputType) -> node.getHintData(HintType.USERNAME)
-            isInputTypeMatchPassword(inputType) -> node.getHintData(HintType.PASSWORD)
+            isInputTypeMatchUsername(inputType) -> AutofillNode(
+                AutofillFieldType.USERNAME,
+                AutofillSourceType.INPUT_TYPE,
+                node
+            )
+            isInputTypeMatchPassword(inputType) -> AutofillNode(
+                AutofillFieldType.PASSWORD,
+                AutofillSourceType.INPUT_TYPE,
+                node
+            )
             else -> null
         }
     }
@@ -250,6 +293,33 @@ class AutofillStructureParser {
             )) ||
             (getInputTypeClass(inputType) == InputType.TYPE_CLASS_NUMBER &&
                 isInputTypeMatchWith(inputType, InputType.TYPE_NUMBER_VARIATION_PASSWORD))
+    }
+
+    private fun getAutofillNodeByEditTextHint(node: ViewNode): AutofillNode? {
+        if (!node.hasValidData()) {
+            return null
+        }
+
+        val hint = node.hint ?: return null
+
+        return when {
+            hint.contains("username", ignoreCase = true) ||
+                hint.contains("email", ignoreCase = true) -> {
+                AutofillNode(
+                    AutofillFieldType.USERNAME,
+                    AutofillSourceType.EDIT_TEXT_HINT,
+                    node
+                )
+            }
+            hint.contentEquals("password", ignoreCase = true) -> {
+                AutofillNode(
+                    AutofillFieldType.USERNAME,
+                    AutofillSourceType.EDIT_TEXT_HINT,
+                    node
+                )
+            }
+            else -> null
+        }
     }
 
     companion object {

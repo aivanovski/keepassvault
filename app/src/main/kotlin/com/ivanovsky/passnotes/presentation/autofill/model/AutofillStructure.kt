@@ -8,8 +8,8 @@ data class AutofillStructure(
     val isWebView: Boolean,
     val webDomain: String?,
     val webScheme: String?,
-    val username: HintData?,
-    val password: HintData?
+    val username: AutofillField?,
+    val password: AutofillField?
 ) : Parcelable {
 
     fun hasFieldsToFill(): Boolean {

@@ -6,8 +6,8 @@ import android.view.autofill.AutofillValue
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class HintData(
-    val type: HintType?,
+data class AutofillField(
+    val type: AutofillFieldType?,
     val autofillId: AutofillId?,
     val autofillValue: AutofillValue?
 ) : Parcelable

@@ -41,7 +41,7 @@ class PassnotesAutofillService : AutofillService() {
             return
         }
 
-        val structure = AutofillStructureParser().parse(latestStructure)?.toAutofillStructure()
+        val structure = AutofillStructureParser().parse(latestStructure)
         if (structure == null) {
             callback.onSuccess(null)
             return

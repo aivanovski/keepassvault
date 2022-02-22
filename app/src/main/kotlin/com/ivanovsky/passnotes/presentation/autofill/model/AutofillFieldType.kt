@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.presentation.autofill.model
 
-enum class HintType {
+enum class AutofillFieldType {
     USERNAME,
     PASSWORD,
     // TODO(autofill): implement other types

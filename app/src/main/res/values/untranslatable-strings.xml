@@ -14,6 +14,8 @@
     <string name="pref_change_password" translatable="false">changePassword</string>
     <string name="pref_progress" translatable="false">progress</string>
 
+    <string name="pref_logging_type" translatable="false">loggingType</string>
+
     <string-array name="pref_auto_lock_entries">
         <item>30 seconds</item>
         <item>1 minute</item>

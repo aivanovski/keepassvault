@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes
 import androidx.multidex.MultiDexApplication
 import com.facebook.stetho.Stetho
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.ivanovsky.passnotes.domain.LoggerInitializer
 import com.ivanovsky.passnotes.injection.KoinModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -17,12 +18,18 @@ class App : MultiDexApplication() {
         FirebaseCrashlytics.getInstance()
             .setCrashlyticsCollectionEnabled(BuildConfig.IS_CRASHLYTICS_ENABLED)
 
+        val loggerInteractor = LoggerInitializer(this)
+            .apply {
+                initialize()
+            }
+
+        // TODO: remove from project
         Stetho.initializeWithDefaults(this)
 
         startKoin {
             androidLogger()
             androidContext(this@App)
-            modules(KoinModule.appModule)
+            modules(KoinModule.buildModule(loggerInteractor))
         }
     }
 

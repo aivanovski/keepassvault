@@ -4,16 +4,19 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.StringRes
 import androidx.preference.PreferenceManager
+import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.DROPBOX_AUTH_TOKEN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXTERNAL_STORAGE_CACHE_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.LOGGING_TYPE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.BOOLEAN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.INT
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.STRING
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.LoggingType
 import java.util.concurrent.TimeUnit
 
 class SettingsImpl(
@@ -54,6 +57,15 @@ class SettingsImpl(
         get() = getString(DROPBOX_AUTH_TOKEN)
         set(value) {
             putString(DROPBOX_AUTH_TOKEN, value)
+        }
+
+    override var loggingType: LoggingType
+        get() {
+            return getString(LOGGING_TYPE)?.let { LoggingType.getByName(it) }
+                ?: if (BuildConfig.DEBUG) LoggingType.DEBUG else LoggingType.RELEASE
+        }
+        set(value) {
+            putString(LOGGING_TYPE, value.name)
         }
 
     override fun initDefaultIfNeed(pref: Pref) {
@@ -154,6 +166,11 @@ class SettingsImpl(
         // String prefs
         DROPBOX_AUTH_TOKEN(
             keyId = R.string.pref_dropbox_auth_token,
+            type = STRING,
+            defaultValue = null
+        ),
+        LOGGING_TYPE(
+            keyId = R.string.pref_logging_type,
             type = STRING,
             defaultValue = null
         )

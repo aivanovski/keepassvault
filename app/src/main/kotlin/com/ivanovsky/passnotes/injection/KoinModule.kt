@@ -97,116 +97,119 @@ import org.koin.dsl.module
 
 object KoinModule {
 
-    val appModule = module {
-        single { ResourceProvider(get()) }
-        single { SettingsImpl(get(), get()) as Settings }
-        single { FileHelper(get(), get()) }
-        single { PermissionHelper(get()) }
-        single { ErrorInteractor(get()) }
-        single { LocaleProvider(get()) }
-        single { DispatcherProvider() }
-        single { ObserverBus() }
-        single { ClipboardHelper(get()) }
-        single { DateFormatProvider(get()) }
-        single { NoteDiffer() }
-        single { provideOkHttp() }
-        single { DataCipherProvider(get()) }
-        single { SelectionHolder() }
+    fun buildModule(loggerInitializer: LoggerInitializer) =
+        module {
+            single { loggerInitializer }
+            single { ResourceProvider(get()) }
+            single { SettingsImpl(get(), get()) as Settings }
+            single { FileHelper(get(), get()) }
+            single { PermissionHelper(get()) }
+            single { ErrorInteractor(get()) }
+            single { LocaleProvider(get()) }
+            single { DispatcherProvider() }
+            single { ObserverBus() }
+            single { ClipboardHelper(get()) }
+            single { DateFormatProvider(get()) }
+            single { NoteDiffer() }
+            single { provideOkHttp() }
+            single { DataCipherProvider(get()) }
+            single { SelectionHolder() }
 
-        // Database
-        single { provideAppDatabase(get(), get()) }
-        single { provideRemoteFileRepository(get()) }
-        single { provideUsedFileRepository(get(), get()) }
+            // Database
+            single { provideAppDatabase(get(), get()) }
+            single { provideRemoteFileRepository(get()) }
+            single { provideUsedFileRepository(get(), get()) }
 
-        // Files, Keepass
-        single { FileSystemResolver(get(), get(), get(), get(), get()) }
-        single { KeepassDatabaseRepository(get(), get(), get(), get(), get()) as EncryptedDatabaseRepository }
+            // Files, Keepass
+            single { FileSystemResolver(get(), get(), get(), get(), get()) }
+            single { KeepassDatabaseRepository(get(), get(), get(), get(), get()) as EncryptedDatabaseRepository }
 
-        // Use Cases
-        single { GetDebugCredentialsUseCase() }
-        single { LockDatabaseUseCase() }
-        single { GetRecentlyOpenedFilesUseCase(get(), get()) }
-        single { SyncUseCases(get(), get()) }
-        single { DetermineDatabaseStatusUseCase() }
-        single { GetDatabaseStatusUseCase(get(), get()) }
-        single { AddTemplatesUseCase(get(), get(), get()) }
-        single { GetDatabaseUseCase(get(), get()) }
-        single { MoveNoteUseCase(get(), get(), get()) }
-        single { MoveGroupUseCase(get(), get(), get()) }
-        single { GetGroupUseCase(get(), get()) }
-        single { IsDatabaseOpenedUseCase(get()) }
-        single { GetNoteUseCase(get(), get()) }
-        single { FindNoteForAutofillUseCase(get(), get()) }
+            // Use Cases
+            single { GetDebugCredentialsUseCase() }
+            single { LockDatabaseUseCase() }
+            single { GetRecentlyOpenedFilesUseCase(get(), get()) }
+            single { SyncUseCases(get(), get()) }
+            single { DetermineDatabaseStatusUseCase() }
+            single { GetDatabaseStatusUseCase(get(), get()) }
+            single { AddTemplatesUseCase(get(), get(), get()) }
+            single { GetDatabaseUseCase(get(), get()) }
+            single { MoveNoteUseCase(get(), get(), get()) }
+            single { MoveGroupUseCase(get(), get(), get()) }
+            single { GetGroupUseCase(get(), get()) }
+            single { IsDatabaseOpenedUseCase(get()) }
+            single { GetNoteUseCase(get(), get()) }
+            single { FindNoteForAutofillUseCase(get(), get()) }
 
-        // Interactors
-        single { FilePickerInteractor(get()) }
-        single { UnlockInteractor(get(), get(), get(), get(), get(), get()) }
-        single { StorageListInteractor(get(), get(), get()) }
-        single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
-        single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
-        single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
-        single { NoteInteractor(get(), get(), get(), get(), get()) }
-        single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
-        single { NoteEditorInteractor(get(), get()) }
-        single { ServerLoginInteractor(get(), get(), get()) }
-        single { DatabaseLockInteractor(get(), get(), get()) }
-        single { SelectDatabaseInteractor(get(), get(), get(), get()) }
-        single { SearchInteractor(get(), get(), get(), get(), get()) }
-        single { MainSettingsInteractor(get()) }
-        single { DatabaseSettingsInteractor(get(), get()) }
-        single { AutofillInteractor(get(), get()) }
-        single { MainInteractor(get()) }
+            // Interactors
+            single { FilePickerInteractor(get()) }
+            single { UnlockInteractor(get(), get(), get(), get(), get(), get()) }
+            single { StorageListInteractor(get(), get(), get()) }
+            single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
+            single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
+            single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
+            single { NoteInteractor(get(), get(), get(), get(), get()) }
+            single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
+            single { NoteEditorInteractor(get(), get()) }
+            single { ServerLoginInteractor(get(), get(), get()) }
+            single { DatabaseLockInteractor(get(), get(), get()) }
+            single { SelectDatabaseInteractor(get(), get(), get(), get()) }
+            single { SearchInteractor(get(), get(), get(), get(), get()) }
+            single { MainSettingsInteractor(get()) }
+            single { DatabaseSettingsInteractor(get(), get()) }
+            single { AutofillInteractor(get(), get()) }
+            single { MainInteractor(get()) }
 
-        // Autofill
-        single { AutofillViewFactory(get(), get()) }
+            // Autofill
+            single { AutofillViewFactory(get(), get()) }
 
-        // Cell factories
-        single { DatabaseStatusCellModelFactory(get()) }
+            // Cell factories
+            single { DatabaseStatusCellModelFactory(get()) }
 
-        single { GroupsCellModelFactory(get()) }
-        single { GroupsCellViewModelFactory(get(), get()) }
+            single { GroupsCellModelFactory(get()) }
+            single { GroupsCellViewModelFactory(get(), get()) }
 
-        single { NoteEditorCellModelFactory(get()) }
-        single { NoteEditorCellViewModelFactory(get()) }
+            single { NoteEditorCellModelFactory(get()) }
+            single { NoteEditorCellViewModelFactory(get()) }
 
-        single { SelectDatabaseCellModelFactory(get()) }
-        single { SelectDatabaseCellViewModelFactory() }
+            single { SelectDatabaseCellModelFactory(get()) }
+            single { SelectDatabaseCellViewModelFactory() }
 
-        single { UnlockCellModelFactory(get()) }
-        single { UnlockCellViewModelFactory() }
+            single { UnlockCellModelFactory(get()) }
+            single { UnlockCellViewModelFactory() }
 
-        single { SearchCellModelFactory() }
-        single { SearchCellViewModelFactory(get(), get()) }
+            single { SearchCellModelFactory() }
+            single { SearchCellViewModelFactory(get(), get()) }
 
-        single { NoteCellModelFactory() }
-        single { NoteCellViewModelFactory() }
+            single { NoteCellModelFactory() }
+            single { NoteCellViewModelFactory() }
 
-        // Cicerone
-        single { Cicerone.create() }
-        single { provideCiceroneRouter(get()) }
-        single { provideCiceroneNavigatorHolder(get()) }
-        single { SettingsRouter(get()) }
+            // Cicerone
+            single { Cicerone.create() }
+            single { provideCiceroneRouter(get()) }
+            single { provideCiceroneNavigatorHolder(get()) }
+            single { SettingsRouter(get()) }
 
-        // ViewModels
-        viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
-        viewModel { FilePickerViewModel(get(), get(), get(), get(), get(), get()) }
-        viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
-        viewModel { GroupEditorViewModel(get(), get(), get(), get()) }
-        viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
-        factory { (args: NoteScreenArgs) -> NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
-        factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
-        viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
-        viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
-        viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }
-        factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), args) }
-        viewModel { AboutViewModel(get(), get()) }
-        viewModel { MainSettingsViewModel(get(), get()) }
-        viewModel { DatabaseSettingsViewModel(get(), get()) }
-        viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
-        factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
-        factory { NavigationMenuViewModel(get()) }
-        factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }
-    }
+            // ViewModels
+            viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
+            viewModel { FilePickerViewModel(get(), get(), get(), get(), get(), get()) }
+            viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
+            viewModel { GroupEditorViewModel(get(), get(), get(), get()) }
+            viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
+            factory { (args: NoteScreenArgs) -> NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+            viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
+            viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), args) }
+            viewModel { AboutViewModel(get(), get()) }
+            viewModel { MainSettingsViewModel(get(), get()) }
+            viewModel { DatabaseSettingsViewModel(get(), get()) }
+            viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
+            factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { NavigationMenuViewModel(get()) }
+            factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }
+
+        }
 
     private fun provideOkHttp(): OkHttpClient {
         val builder = OkHttpClient.Builder()

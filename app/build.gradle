@@ -147,6 +147,8 @@ def okHttpVersion = '4.9.1'
 def apacheCommonsLangVersion = '3.0'
 def sardineAndroidVersion = 'v0.8'
 def ciceroneVersion = '7.0'
+def timberVersion = '5.0.1'
+def treessenceVersion = "1.0.5"
 
 // Test
 def jUnitVersion = '4.13'
@@ -259,4 +261,8 @@ dependencies {
 
     // Firebase Crashlytics
     implementation "com.google.firebase:firebase-crashlytics:$crashlyticsVersion"
+
+    // Timber
+    implementation "com.jakewharton.timber:timber:$timberVersion"
+    implementation "com.github.bastienpaulfr:Treessence:$treessenceVersion"
 }

@@ -41,4 +41,7 @@
     <!-- Buttons -->
     <dimen name="borderless_icon_button_size">48dp</dimen>
 
+    <!-- Dialogs -->
+    <dimen name="min_dialog_width">300dp</dimen>
+
 </resources>

@@ -5,7 +5,7 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryStringArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
 class ErrorDialog : DialogFragment() {
@@ -13,7 +13,7 @@ class ErrorDialog : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return AlertDialog.Builder(requireContext())
             .setTitle(R.string.error_was_occurred)
-            .setMessage(getMandatoryArgument(ARG_MESSAGE))
+            .setMessage(getMandatoryStringArgument(ARG_MESSAGE))
             .create()
     }
 

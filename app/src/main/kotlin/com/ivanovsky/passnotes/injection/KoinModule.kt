@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.room.Room
 import com.github.terrakok.cicerone.Cicerone
 import com.github.terrakok.cicerone.Router
-import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
@@ -32,6 +31,7 @@ import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
 import com.ivanovsky.passnotes.domain.interactor.selectdb.SelectDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
+import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.main.MainSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
@@ -82,6 +82,7 @@ import com.ivanovsky.passnotes.presentation.selectdb.cells.factory.SelectDatabas
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginViewModel
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
+import com.ivanovsky.passnotes.presentation.settings.app.AppSettingsViewModel
 import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsViewModel
 import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordDialogViewModel
 import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsViewModel
@@ -98,9 +99,9 @@ import timber.log.Timber
 
 object KoinModule {
 
-    fun buildModule(loggerInitializer: LoggerInitializer) =
+    fun buildModule(loggerInteractor: LoggerInteractor) =
         module {
-            single { loggerInitializer }
+            single { loggerInteractor }
             single { ResourceProvider(get()) }
             single { SettingsImpl(get(), get()) as Settings }
             single { FileHelper(get(), get()) }
@@ -157,6 +158,7 @@ object KoinModule {
             single { SearchInteractor(get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
             single { DatabaseSettingsInteractor(get(), get()) }
+            single { AppSettingsInteractor(get(), get()) }
             single { AutofillInteractor(get(), get()) }
             single { MainInteractor(get()) }
 
@@ -204,12 +206,12 @@ object KoinModule {
             factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), args) }
             viewModel { AboutViewModel(get(), get()) }
             viewModel { MainSettingsViewModel(get(), get()) }
+            viewModel { AppSettingsViewModel(get(), get(), get(), get(), get()) }
             viewModel { DatabaseSettingsViewModel(get(), get()) }
             viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
             factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
             factory { NavigationMenuViewModel(get()) }
             factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }
-
         }
 
     private fun provideOkHttp(): OkHttpClient {

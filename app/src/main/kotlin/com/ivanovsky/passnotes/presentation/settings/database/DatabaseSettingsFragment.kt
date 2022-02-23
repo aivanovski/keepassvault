@@ -10,11 +10,11 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BasePreferenceFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
-import com.ivanovsky.passnotes.presentation.core.dialog.ErrorDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.showErrorDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.throwPreferenceNotFound
 import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordDialog
-import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordPreference
+import com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class DatabaseSettingsFragment : BasePreferenceFragment() {
@@ -24,6 +24,7 @@ class DatabaseSettingsFragment : BasePreferenceFragment() {
 
     private lateinit var isRecycleBinEnabledPref: CheckBoxPreference
     private lateinit var progressPref: Preference
+    private lateinit var changePasswordPref: Preference
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -41,6 +42,8 @@ class DatabaseSettingsFragment : BasePreferenceFragment() {
             ?: throwPreferenceNotFound(R.string.pref_progress)
         isRecycleBinEnabledPref = findPreference(getString(R.string.pref_is_recycle_bin_enabled))
             ?: throwPreferenceNotFound(R.string.pref_is_recycle_bin_enabled)
+        changePasswordPref = findPreference(getString(R.string.pref_change_password))
+            ?: throwPreferenceNotFound(R.string.pref_change_password)
 
         isRecycleBinEnabledPref.setOnPreferenceChangeListener { _, newValue ->
             val isEnabled = (newValue as? Boolean) ?: false
@@ -51,7 +54,8 @@ class DatabaseSettingsFragment : BasePreferenceFragment() {
     }
 
     override fun onDisplayPreferenceDialog(preference: Preference?) {
-        if (preference is ChangePasswordPreference) {
+        if (preference is CustomDialogPreference &&
+            preference.key == getString(R.string.pref_change_password)) {
             val dialog = ChangePasswordDialog.newInstance()
             dialog.show(childFragmentManager, ChangePasswordDialog.TAG)
         } else {
@@ -87,8 +91,8 @@ class DatabaseSettingsFragment : BasePreferenceFragment() {
         viewModel.isLoading.observe(viewLifecycleOwner) {
             setProgressVisible(it)
         }
-        viewModel.errorMessage.observe(viewLifecycleOwner) {
-            showError(it)
+        viewModel.showErrorDialogEvent.observe(viewLifecycleOwner) {
+            showErrorDialog(it)
         }
         viewModel.isRecycleBinEnabled.observe(viewLifecycleOwner) {
             isRecycleBinEnabledPref.isChecked = it
@@ -98,11 +102,7 @@ class DatabaseSettingsFragment : BasePreferenceFragment() {
     private fun setProgressVisible(isVisible: Boolean) {
         progressPref.isVisible = isVisible
         isRecycleBinEnabledPref.isVisible = !isVisible
-    }
-
-    private fun showError(message: String) {
-        val dialog = ErrorDialog.newInstance(message)
-        dialog.show(childFragmentManager, ErrorDialog.TAG)
+        changePasswordPref.isVisible = !isVisible
     }
 
     companion object {

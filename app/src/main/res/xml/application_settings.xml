@@ -2,22 +2,57 @@
 <PreferenceScreen
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <SwitchPreferenceCompat
-        app:key="@string/pref_is_lock_notification_visible"
-        app:title="@string/pref_is_lock_notification_visible_title" />
+    <com.ivanovsky.passnotes.presentation.core.widget.ProgressPreference
+        app:isPreferenceVisible="false"
+        app:key="@string/pref_progress" />
 
-    <ListPreference
-        app:key="@string/pref_auto_lock_delay_in_ms"
-        app:title="@string/pref_auto_lock_delay_in_ms_title"
-        app:summary="@string/pref_auto_lock_delay_in_ms_summary"
-        app:entries="@array/pref_auto_lock_entries"
-        app:entryValues="@array/pref_auto_lock_values"/>
+    <PreferenceCategory
+        app:key="@string/pref_category_general"
+        app:title="@string/general">
 
-    <ListPreference
-        app:key="@string/pref_auto_clear_clipboard_delay_in_ms"
-        app:title="@string/pref_auto_clear_clipboard_delay_in_ms_title"
-        app:summary="@string/pref_auto_clear_clipboard_delay_in_ms_summary"
-        app:entries="@array/pref_auto_clear_clipboard_entries"
-        app:entryValues="@array/pref_auto_clear_clipboard_values"/>
+        <ListPreference
+            app:entries="@array/pref_auto_lock_entries"
+            app:entryValues="@array/pref_auto_lock_values"
+            app:key="@string/pref_auto_lock_delay_in_ms"
+            app:summary="@string/pref_auto_lock_delay_in_ms_summary"
+            app:title="@string/pref_auto_lock_delay_in_ms_title" />
+
+        <ListPreference
+            app:entries="@array/pref_auto_clear_clipboard_entries"
+            app:entryValues="@array/pref_auto_clear_clipboard_values"
+            app:key="@string/pref_auto_clear_clipboard_delay_in_ms"
+            app:summary="@string/pref_auto_clear_clipboard_delay_in_ms_summary"
+            app:title="@string/pref_auto_clear_clipboard_delay_in_ms_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="@string/pref_category_notifications"
+        app:title="@string/notifications">
+
+        <SwitchPreferenceCompat
+            app:key="@string/pref_is_lock_notification_visible"
+            app:title="@string/pref_is_lock_notification_visible_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="@string/pref_category_logging"
+        app:title="@string/logging">
+
+        <SwitchPreferenceCompat
+            app:key="@string/pref_is_file_log_enabled"
+            app:summary="@string/pref_is_file_log_enabled_summary"
+            app:title="@string/pref_is_file_log_enabled_title" />
+
+        <com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
+            app:key="@string/pref_send_log_file"
+            app:title="@string/pref_send_log_file_title" />
+
+        <com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
+            app:key="@string/pref_remove_log_files"
+            app:title="@string/pref_remove_log_files_title" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

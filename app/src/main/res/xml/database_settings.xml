@@ -12,8 +12,9 @@
         app:title="@string/pref_is_recycle_bin_enabled_title"
         app:summary="@string/pref_is_recycle_bin_enabled_summary"/>
 
-    <com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordPreference
+    <com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
         app:key="@string/pref_change_password"
+        app:isPreferenceVisible="false"
         app:title="@string/change_password"/>
 
 </PreferenceScreen>

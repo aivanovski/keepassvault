@@ -8,13 +8,17 @@
     <string name="pref_auto_clear_clipboard_delay_in_ms" translatable="false">autoClearClipboardDelayInMs</string>
     <string name="pref_is_lock_notification_visible" translatable="false">isLockNotificationVisible</string>
     <string name="pref_is_external_storage_cache_enabled" translatable="false">isExternalStorageCacheEnabled</string>
+    <string name="pref_is_file_log_enabled" translatable="false">isLogToFileEnabled</string>
 
     <string name="pref_database_settings_fragment" translatable="false">databaseSettingsFragment</string>
     <string name="pref_is_recycle_bin_enabled" translatable="false">isRecycleBinEnabled</string>
     <string name="pref_change_password" translatable="false">changePassword</string>
     <string name="pref_progress" translatable="false">progress</string>
-
-    <string name="pref_logging_type" translatable="false">loggingType</string>
+    <string name="pref_send_log_file" translatable="false">sendLogFile</string>
+    <string name="pref_remove_log_files" translatable="false">removeLogFiles</string>
+    <string name="pref_category_general" translatable="false">categoryGeneral</string>
+    <string name="pref_category_notifications" translatable="false">categoryNotifications</string>
+    <string name="pref_category_logging" translatable="false">categoryLogging</string>
 
     <string-array name="pref_auto_lock_entries">
         <item>30 seconds</item>

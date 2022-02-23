@@ -17,10 +17,15 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
+import com.ivanovsky.passnotes.presentation.core.dialog.ErrorDialog
 import com.ivanovsky.passnotes.util.InputMethodUtils
 
 fun <T : Parcelable> Fragment.getMandatoryArgument(key: String): T {
     return arguments?.getParcelable(key) ?: requireArgument(key)
+}
+
+fun Fragment.getMandatoryStringArgument(key: String): String {
+    return arguments?.getString(key) ?: requireArgument(key)
 }
 
 fun <T : Fragment> T.withArguments(initBlock: Bundle.() -> Unit): T {
@@ -82,6 +87,11 @@ fun Fragment.sendAutofillResult(note: Note?, structure: AutofillStructure) {
         }
 
     requireActivity().setResult(Activity.RESULT_OK, result)
+}
+
+fun Fragment.showErrorDialog(message: String) {
+    val dialog = ErrorDialog.newInstance(message)
+    dialog.show(childFragmentManager, ErrorDialog.TAG)
 }
 
 private fun Fragment.findViewForSnackbar(): View? {

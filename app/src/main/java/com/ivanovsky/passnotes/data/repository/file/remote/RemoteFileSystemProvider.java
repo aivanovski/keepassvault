@@ -25,7 +25,6 @@ import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
 import com.ivanovsky.passnotes.extensions.RemoteFileMetadataExtKt;
 import com.ivanovsky.passnotes.util.DateUtils;
 import com.ivanovsky.passnotes.util.FileUtils;
-import com.ivanovsky.passnotes.util.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,6 +51,8 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOErr
 import static com.ivanovsky.passnotes.util.DateUtils.anyLastTimestamp;
 import static com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull;
 import static com.ivanovsky.passnotes.util.ObjectUtils.isNotEquals;
+
+import timber.log.Timber;
 
 public class RemoteFileSystemProvider implements FileSystemProvider {
 
@@ -299,7 +300,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         remotePath);
 
                 if (startProcessingUnit(unit)) {
-                    Logger.d(TAG, "Downloading new file: remote=%s, local=%s", remotePath, destinationPath);
+                    Timber.d("Downloading new file: remote=%s, local=%s", remotePath, destinationPath);
 
                     metadata = client.downloadFileOrThrow(remotePath, destinationPath);
 
@@ -334,7 +335,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                             remotePath);
 
                     if (startProcessingUnit(unit)) {
-                        Logger.d(TAG, "Updating cached file: remote=%s, local=%s", remotePath, cachedFile.getLocalPath());
+                        Timber.d("Updating cached file: remote=%s, local=%s", remotePath, cachedFile.getLocalPath());
 
                         metadata = client.downloadFileOrThrow(remotePath, cachedFile.getLocalPath());
 
@@ -362,7 +363,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                 }
             } else {
                 // local revision is the same as in the server
-                Logger.d(TAG, "Local cached file is up to date: remote=%s, local=%s",
+                Timber.d("Local cached file is up to date: remote=%s, local=%s",
                         remotePath, cachedFile.getLocalPath());
 
                 cachedFile.setRemotePath(metadata.getPath());
@@ -525,7 +526,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         cachedFile.getUid(),
                         cachedFile.getRemotePath());
 
-                Logger.d(TAG, "Uploading to new file: remote=%s, local=%s",
+                Timber.d("Uploading to new file: remote=%s, local=%s",
                         cachedFile.getRemotePath(), cachedFile.getLocalPath());
 
                 if (startProcessingUnit(unit)) {
@@ -564,7 +565,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                                 cachedFile.getUid(),
                                 cachedFile.getRemotePath());
 
-                        Logger.d(TAG, "Uploading to existing file: remote=%s, local=%s",
+                        Timber.d("Uploading to existing file: remote=%s, local=%s",
                                 cachedFile.getRemotePath(), cachedFile.getLocalPath());
 
                         if (startProcessingUnit(unit)) {
@@ -637,7 +638,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
         CountDownLatch latch;
 
-        Logger.d(TAG, "Waiting until operation finished: fileUid=" + fileUid +
+        Timber.d("Waiting until operation finished: fileUid=" + fileUid +
                 ", remotePath=" + remotePath);
 
         unitProcessingLock.lock();
@@ -654,12 +655,12 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         }
 
         if (latch != null) {
-            Logger.d(TAG, "Awaiting on latch: 0x" + Integer.toHexString(latch.hashCode()));
+            Timber.d("Awaiting on latch: 0x" + Integer.toHexString(latch.hashCode()));
 
             latch.await(MAX_AWAITING_TIMEOUT_IN_SEC, TimeUnit.SECONDS);
         }
 
-        Logger.d(TAG, "Waiting finished: fileUid=" + fileUid +
+        Timber.d("Waiting finished: fileUid=" + fileUid +
                 ", remotePath=" + remotePath);
     }
 
@@ -684,7 +685,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     }
 
     public void onFileUploadFailed(RemoteFile file, UUID processingUnitUid) {
-        Logger.d(TAG, "onFileUploadFailed: unitUid=%s, file=%s", processingUnitUid, file);
+        Timber.d("onFileUploadFailed: unitUid=%s, file=%s", processingUnitUid, file);
 
         file.setUploadFailed(true);
 
@@ -695,7 +696,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
     public void onFileUploadFinished(RemoteFile file, RemoteFileMetadata metadata,
                                      UUID processingUnitUid) {
-        Logger.d(TAG, "onFileUploadFinished: unitUid=%s, file=%s", processingUnitUid, file);
+        Timber.d("onFileUploadFinished: unitUid=%s, file=%s", processingUnitUid, file);
 
         Long modifiedTimestamp = anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified());
 
@@ -715,7 +716,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     }
 
     public void onOfflineWriteFailed(RemoteFile file, UUID processingUnitUid) {
-        Logger.d(TAG, "onOfflineWriteFailed: unitUid=%s, file=%s", processingUnitUid, file);
+        Timber.d("onOfflineWriteFailed: unitUid=%s, file=%s", processingUnitUid, file);
 
         cache.update(file);
 
@@ -723,7 +724,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     }
 
     public void onOfflineWriteFinished(RemoteFile file, UUID processingUnitUid) {
-        Logger.d(TAG, "onOfflineWriteFinished: unitUid=%s, file=%s", processingUnitUid, file);
+        Timber.d("onOfflineWriteFinished: unitUid=%s, file=%s", processingUnitUid, file);
 
         cache.update(file);
 
@@ -735,7 +736,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
         unitProcessingLock.lock();
 
-        Logger.d(TAG, "Starting processing unit: %s", unit);
+        Timber.d("Starting processing unit: %s", unit);
 
         try {
             boolean running = true;
@@ -753,7 +754,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
                         unitProcessingLock.lock();
                     } catch (InterruptedException e) {
-                        Logger.d(TAG, "Can't await job finish, timeout has occurred.");
+                        Timber.d("Can't await job finish, timeout has occurred.");
                         running = false;
                     }
                 }
@@ -815,7 +816,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         } catch (RemoteFSFileNotFoundException e) {
             result.setObj(false);
         } catch (RemoteFSException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             result.setError(createOperationErrorFromException(e));
         }
 

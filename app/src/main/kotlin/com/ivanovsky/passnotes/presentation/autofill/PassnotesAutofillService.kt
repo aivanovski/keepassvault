@@ -11,10 +11,10 @@ import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.interactor.autofill.AutofillInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector.get
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
-import com.ivanovsky.passnotes.util.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @RequiresApi(26)
 class PassnotesAutofillService : AutofillService() {
@@ -31,7 +31,7 @@ class PassnotesAutofillService : AutofillService() {
         cancellationSignal: CancellationSignal,
         callback: FillCallback
     ) {
-        Logger.d(TAG, "onFillRequest:")
+        Timber.d("onFillRequest:")
 
         val fillContexts = request.fillContexts
 
@@ -64,16 +64,16 @@ class PassnotesAutofillService : AutofillService() {
                 val note = findNoteResult.obj.second
 
                 if (note != null) {
-                    Logger.d(TAG, "Show note and selection")
+                    Timber.d("Show note and selection")
                     val response = responseFactory.createResponseWithNoteAndSelection(note, structure)
                     callback.onSuccess(response)
                 } else {
-                    Logger.d(TAG, "Show selection")
+                    Timber.d("Show selection")
                     val response = responseFactory.createResponseWithSelection(structure)
                     callback.onSuccess(response)
                 }
             } else {
-                Logger.d(TAG, "Error has occurred, nothing to show")
+                Timber.d("Error has occurred, nothing to show")
                 callback.onSuccess(null)
             }
         }
@@ -81,12 +81,12 @@ class PassnotesAutofillService : AutofillService() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Logger.d(TAG, "onDestroy:")
+        Timber.d("onDestroy:")
         job.cancel()
     }
 
     override fun onSaveRequest(request: SaveRequest, callback: SaveCallback) {
-        Logger.d(TAG, "onSaveRequest:")
+        Timber.d("onSaveRequest:")
     }
 
     companion object {

@@ -14,7 +14,7 @@ import com.ivanovsky.passnotes.presentation.autofill.model.AutofillSourceType
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillNode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.autofill.model.MutableAutofillStructure
-import com.ivanovsky.passnotes.util.Logger
+import timber.log.Timber
 import java.util.Locale
 
 @RequiresApi(api = 26)
@@ -32,8 +32,8 @@ class AutofillStructureParser {
                 parseViewNode(structure, windowNode.rootViewNode)
 
                 val result = processResult(structure)
-                Logger.d(TAG, "structure: $structure")
-                Logger.d(TAG, "result: $result")
+                Timber.d("structure: $structure")
+                Timber.d("result: $result")
 
                 return result
             }
@@ -43,8 +43,7 @@ class AutofillStructureParser {
     }
 
     private fun parseViewNode(result: MutableAutofillStructure, node: ViewNode) {
-        Logger.d(
-            TAG,
+        Timber.d(
             "parseViewNode: className=%s, autofillHints=%s, htmlAttributes=%s, inputType=0x%s, hint=%s",
             node.className,
             node.autofillHints?.toList(),
@@ -59,11 +58,11 @@ class AutofillStructureParser {
 
         if (node.webDomain?.isNotEmpty() == true) {
             result.webDomain = node.webDomain
-            Logger.d(TAG, "Autofill domain: ${node.webDomain}")
+            Timber.d("Autofill domain: ${node.webDomain}")
         }
         if (Build.VERSION.SDK_INT >= 28 && node.webScheme?.isNotEmpty() == true) {
             result.webScheme = node.webScheme
-            Logger.d(TAG, "Autofill scheme: ${node.webScheme}")
+            Timber.d("Autofill scheme: ${node.webScheme}")
         }
 
         if (node.visibility != View.VISIBLE) {
@@ -73,21 +72,21 @@ class AutofillStructureParser {
         if (node.autofillId != null) {
             val nodeFromAutofill = getAutofillNodeByAutofillHint(node)
             if (nodeFromAutofill != null) {
-                Logger.d(TAG, "    dataFromAutofill: $nodeFromAutofill")
+                Timber.d("    dataFromAutofill: $nodeFromAutofill")
                 result.nodes.add(nodeFromAutofill)
                 return
             }
 
             val nodeFromHtml = getAutofillNodeByHtmlAttributes(node)
             if (nodeFromHtml != null) {
-                Logger.d(TAG, "    dataFromHtml: $nodeFromHtml")
+                Timber.d("    dataFromHtml: $nodeFromHtml")
                 result.nodes.add(nodeFromHtml)
                 return
             }
 
             val nodeFromInputType = getAutofillNodeByInputType(node)
             if (nodeFromInputType != null) {
-                Logger.d(TAG, "    dataFromInputType: $nodeFromInputType")
+                Timber.d("    dataFromInputType: $nodeFromInputType")
                 result.nodes.add(nodeFromInputType)
                 return
             }
@@ -96,8 +95,7 @@ class AutofillStructureParser {
         for (i in 0 until node.childCount) {
             parseViewNode(result, node.getChildAt(i))
 
-            Logger.d(
-                TAG,
+            Timber.d(
                 "check: className=%s, result.hasWebDomain=%s, result.hasFieldsToFill=%s",
                 node.className,
                 result.hasWebDomain(),

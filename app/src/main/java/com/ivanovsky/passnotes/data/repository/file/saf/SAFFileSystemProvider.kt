@@ -17,7 +17,7 @@ import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
-import com.ivanovsky.passnotes.util.Logger
+import timber.log.Timber
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.io.OutputStream
@@ -60,13 +60,13 @@ class SAFFileSystemProvider(
             val stream = context.contentResolver.openInputStream(uri)
             OperationResult.success(stream)
         } catch (e: FileNotFoundException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             OperationResult.error(failedToFindFile(uri))
         } catch (e: SecurityException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             OperationResult.error(failedToGetAccessTo(uri))
         } catch (e: Exception) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             OperationResult.error(unknownError(e))
         }
     }
@@ -85,10 +85,10 @@ class SAFFileSystemProvider(
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                 )
             } catch (e: SecurityException) {
-                Logger.printStackTrace(e)
+                Timber.d(e)
                 return OperationResult.error(failedToGetAccessTo(uri))
             } catch (e: Exception) {
-                Logger.printStackTrace(e)
+                Timber.d(e)
                 return OperationResult.error(unknownError(e))
             }
         }
@@ -96,13 +96,13 @@ class SAFFileSystemProvider(
         val stream = try {
             context.contentResolver.openOutputStream(uri)
         } catch (e: FileNotFoundException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             return OperationResult.error(failedToFindFile(uri))
         } catch (e: SecurityException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             return OperationResult.error(failedToGetAccessTo(uri))
         } catch (e: Exception) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             return OperationResult.error(unknownError(e))
         } ?: return OperationResult.error(failedToGetAccessTo(uri))
 
@@ -116,10 +116,10 @@ class SAFFileSystemProvider(
             context.contentResolver.query(uri, null, null, null, null)
                 ?: return OperationResult.error(failedToRetrieveData(uri))
         } catch (e: SecurityException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             return OperationResult.error(failedToGetAccessTo(uri))
         } catch (e: Exception) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             return OperationResult.error(unknownError(e))
         }
 
@@ -147,10 +147,10 @@ class SAFFileSystemProvider(
             context.contentResolver.query(uri, null, null, null, null)
                 ?: return OperationResult.error(failedToRetrieveData(uri))
         } catch (e: SecurityException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             return OperationResult.error(failedToGetAccessTo(uri))
         } catch (e: Exception) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             return OperationResult.error(unknownError(e))
         }
 

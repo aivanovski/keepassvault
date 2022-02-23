@@ -17,8 +17,8 @@ import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredential
 import com.ivanovsky.passnotes.util.InputOutputUtils
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileOutputStreamOrNull
-import com.ivanovsky.passnotes.util.Logger
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
@@ -56,7 +56,7 @@ class DebugMenuInteractor(
                         InputOutputUtils.copy(content, destinationStream, true)
                         result.obj = Pair(descriptor, destinationFile)
                     } catch (e: Exception) {
-                        Logger.printStackTrace(e)
+                        Timber.d(e)
                         result.error = newGenericIOError(e.toString())
                     }
                 } else {
@@ -182,7 +182,7 @@ class DebugMenuInteractor(
             InputOutputUtils.copy(inStream, outStream, true)
             result.obj = true
         } catch (e: Exception) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             result.error = newGenericIOError(e.toString())
         }
 
@@ -212,7 +212,7 @@ class DebugMenuInteractor(
                     InputOutputUtils.copy(inStream, outStream, true)
                     result.obj = Pair(outFile, inFile)
                 } catch (e: Exception) {
-                    Logger.printStackTrace(e)
+                    Timber.d(e)
                     result.error = newGenericIOError(e.toString())
                 }
             } else {

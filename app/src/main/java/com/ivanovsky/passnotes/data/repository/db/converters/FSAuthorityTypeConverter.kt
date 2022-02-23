@@ -6,9 +6,9 @@ import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.ServerCredentials
-import com.ivanovsky.passnotes.util.Logger
 import org.json.JSONException
 import org.json.JSONObject
+import timber.log.Timber
 
 @ProvidedTypeConverter
 class FSAuthorityTypeConverter(
@@ -57,8 +57,8 @@ class FSAuthorityTypeConverter(
                 password = credsObj.optString(PASSWORD)
             )
         } catch (e: JSONException) {
-            Logger.e(TAG, "Unable to parse decoded credentials: exception=%s", e)
-            Logger.printStackTrace(e)
+            Timber.e("Unable to parse decoded credentials: exception=%s", e)
+            Timber.d(e)
         }
 
         return null

@@ -3,11 +3,11 @@ package com.ivanovsky.passnotes.data.repository.file.webdav
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.ServerCredentials
-import com.ivanovsky.passnotes.util.Logger
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import com.thegrizzlylabs.sardineandroid.impl.SardineException
 import java.io.IOException
 import okhttp3.OkHttpClient
+import timber.log.Timber
 
 class WebDavNetworkLayer(
     httpClient: OkHttpClient
@@ -23,17 +23,17 @@ class WebDavNetworkLayer(
         try {
             return OperationResult.success(call.invoke(webDavClient))
         } catch (exception: SardineException) {
-            Logger.printStackTrace(exception)
+            Timber.d(exception)
             return when (exception.statusCode) {
                 HTTP_UNAUTHORIZED -> OperationResult.error(OperationError.newAuthError())
                 HTTP_NOT_FOUND -> OperationResult.error(OperationError.newFileNotFoundError())
                 else -> OperationResult.error(OperationError.newRemoteApiError(exception.message))
             }
         } catch (exception: IOException) {
-            Logger.printStackTrace(exception)
+            Timber.d(exception)
             return OperationResult.error(OperationError.newNetworkIOError())
         } catch (exception: Exception) {
-            Logger.printStackTrace(exception)
+            Timber.d(exception)
             return OperationResult.error(OperationError.newGenericError(OperationError.MESSAGE_UNKNOWN_ERROR))
         }
     }

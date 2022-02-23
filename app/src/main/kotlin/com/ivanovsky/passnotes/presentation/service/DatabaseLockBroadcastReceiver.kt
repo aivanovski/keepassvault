@@ -7,9 +7,9 @@ import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
-import com.ivanovsky.passnotes.util.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class DatabaseLockBroadcastReceiver : BroadcastReceiver() {
 
@@ -19,12 +19,12 @@ class DatabaseLockBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         CoroutineScope(dispatchers.IO).launch {
-            Logger.d(TAG, "Closing database")
+            Timber.d("Closing database")
 
             val lock = lockDatabaseUseCase.lockIfNeed()
             if (lock.isFailed) {
                 val message = errorInteractor.processAndGetMessage(lock.error)
-                Logger.d(TAG, "Unable to close database: %s", message)
+                Timber.d("Unable to close database: %s", message)
             }
         }
     }

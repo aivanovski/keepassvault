@@ -23,7 +23,6 @@ import com.ivanovsky.passnotes.data.repository.file.remote.exception.InternalCac
 import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSNetworkException;
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClient;
 import com.ivanovsky.passnotes.util.FileUtils;
-import com.ivanovsky.passnotes.util.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -38,6 +37,8 @@ import androidx.annotation.NonNull;
 import static com.ivanovsky.passnotes.util.DateUtils.anyLastTimestamp;
 import static com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH;
 import static com.ivanovsky.passnotes.util.FileUtils.getParentPath;
+
+import timber.log.Timber;
 
 public class DropboxClient implements RemoteApiClient {
 
@@ -93,11 +94,11 @@ public class DropboxClient implements RemoteApiClient {
                 throw new RemoteFSApiException("Failed to load file list");
             }
         } catch (NetworkIOException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new RemoteFSNetworkException();
 
         } catch (DbxException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new RemoteFSApiException("Failed to load file list");
         }
 
@@ -189,11 +190,11 @@ public class DropboxClient implements RemoteApiClient {
 
                 result = createDescriptorFromMetadata((FolderMetadata) metadata);
             } catch (NetworkIOException e) {
-                Logger.printStackTrace(e);
+                Timber.d(e);
                 throw new RemoteFSNetworkException();
 
             } catch (DbxException e) {
-                Logger.printStackTrace(e);
+                Timber.d(e);
                 throw new RemoteFSApiException(ERROR_FILE_DOES_NOT_EXIST);
             }
         } else {
@@ -230,11 +231,11 @@ public class DropboxClient implements RemoteApiClient {
 
             result = createRootDescriptor();
         } catch (NetworkIOException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new RemoteFSNetworkException();
 
         } catch (DbxException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new RemoteFSApiException(ERROR_FILE_DOES_NOT_EXIST);
         }
 
@@ -257,18 +258,18 @@ public class DropboxClient implements RemoteApiClient {
                 throw new RemoteFSApiException(String.format(ERROR_SPECIFIED_FILE_HAS_INCORRECT_METADATA, file.getPath()));
             }
         } catch (NetworkIOException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new RemoteFSNetworkException();
         } catch (GetMetadataErrorException e) {
             if (e.getMessage().contains(PATH_NOT_FOUND_MESSAGE)) {
                 throw new RemoteFSFileNotFoundException(file.getPath());
             } else {
-                Logger.printStackTrace(e);
+                Timber.d(e);
                 throw new RemoteFSApiException(ERROR_INCORRECT_MESSAGE_FROM_SERVER);
             }
 
         } catch (DbxException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new RemoteFSApiException(e.getMessage());
         }
 
@@ -285,26 +286,26 @@ public class DropboxClient implements RemoteApiClient {
         try {
             out = new FileOutputStream(new File(destinationPath));
 
-            Logger.d(TAG, "Downloading dropbox file " + remotePath +
+            Timber.d("Downloading dropbox file " + remotePath +
                     " into " + destinationPath);
 
             result = client.files().download(remotePath).download(out);
 
             out.flush();
         } catch (IOException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new InternalCacheException();
 
         } catch (NetworkIOException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new RemoteFSNetworkException();
 
         } catch (DownloadErrorException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new RemoteFSApiException(e.errorValue.toString());
 
         } catch (DbxException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new RemoteFSApiException(e.getMessage());
 
         } finally {
@@ -312,7 +313,7 @@ public class DropboxClient implements RemoteApiClient {
                 try {
                     out.close();
                 } catch (IOException e) {
-                    Logger.printStackTrace(e);
+                    Timber.d(e);
                 }
             }
         }
@@ -331,15 +332,15 @@ public class DropboxClient implements RemoteApiClient {
                     .withMode(WriteMode.OVERWRITE)
                     .uploadAndFinish(new BufferedInputStream(new FileInputStream(localPath)));
         } catch (NetworkIOException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new RemoteFSNetworkException();
 
         } catch (DbxException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new RemoteFSApiException(e.getMessage());
 
         } catch (IOException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             throw new InternalCacheException();
         }
 

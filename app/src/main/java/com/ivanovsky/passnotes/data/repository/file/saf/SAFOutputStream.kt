@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.file.saf
 
-import com.ivanovsky.passnotes.util.Logger
+import timber.log.Timber
 import java.io.IOException
 import java.io.OutputStream
 import java.util.concurrent.atomic.AtomicBoolean
@@ -22,7 +22,7 @@ class SAFOutputStream(
             destination.write(b)
             isFlushed.set(false)
         } catch (e: IOException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             isFailed.set(true)
             throw IOException(e)
         }
@@ -37,7 +37,7 @@ class SAFOutputStream(
             destination.flush()
             isFlushed.set(true)
         } catch (e: IOException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             isFailed.set(true)
             throw IOException(e)
         }
@@ -56,7 +56,7 @@ class SAFOutputStream(
             destination.close()
             isClosed.set(true)
         } catch (e: IOException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             isFailed.set(true)
             throw IOException(e)
         }

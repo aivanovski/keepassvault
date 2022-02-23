@@ -89,11 +89,12 @@ import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
-import com.ivanovsky.passnotes.util.Logger
+import okhttp3.OkHttp
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
+import timber.log.Timber
 
 object KoinModule {
 
@@ -214,15 +215,13 @@ object KoinModule {
     private fun provideOkHttp(): OkHttpClient {
         val builder = OkHttpClient.Builder()
 
-        if (BuildConfig.DEBUG) {
-            val interceptor = HttpLoggingInterceptor {
-                Logger.d("OkHttp", it)
-            }.apply {
-                setLevel(HttpLoggingInterceptor.Level.BASIC)
-            }
-
-            builder.addInterceptor(interceptor)
+        val interceptor = HttpLoggingInterceptor {
+            Timber.tag(OkHttp::class.java.simpleName).d(it)
+        }.apply {
+            setLevel(HttpLoggingInterceptor.Level.BASIC)
         }
+
+        builder.addInterceptor(interceptor)
 
         return builder.build()
     }

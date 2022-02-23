@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.data.crypto.keyprovider
 import android.content.Context
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.KEY_ALIAS
-import com.ivanovsky.passnotes.util.Logger
+import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -58,7 +58,7 @@ class FileSecretKeyProvider(
                 }
             }
         } catch (e: Exception) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
         }
 
         return keyStore
@@ -81,11 +81,11 @@ class FileSecretKeyProvider(
                 )
                 result = true
             } catch (e: Exception) {
-                Logger.printStackTrace(e)
+                Timber.d(e)
             }
         }
 
-        Logger.d(TAG, "Saving key store, success: $result")
+        Timber.d("Saving key store, success: $result")
 
         return result
     }
@@ -102,10 +102,10 @@ class FileSecretKeyProvider(
                 key = entry.secretKey
             }
         } catch (e: Exception) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
         }
 
-        Logger.d(TAG, "Load secret key from key store with algorithm: " + key?.algorithm)
+        Timber.d("Load secret key from key store with algorithm: " + key?.algorithm)
 
         return key
     }
@@ -118,10 +118,10 @@ class FileSecretKeyProvider(
             keyGenerator?.init(DataCipherConstants.KEY_SIZE)
             key = keyGenerator?.generateKey()
         } catch (e: NoSuchAlgorithmException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
         }
 
-        Logger.d(TAG, "Generate new secret key with algorithm: " + key?.algorithm)
+        Timber.d(TAG, "Generate new secret key with algorithm: " + key?.algorithm)
 
         return key
     }

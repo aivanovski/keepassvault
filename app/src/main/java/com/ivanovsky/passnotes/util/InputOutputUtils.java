@@ -13,6 +13,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
+import timber.log.Timber;
+
 public class InputOutputUtils {
 
     private static final int BUFFER_SIZE = 1024 * 8;
@@ -23,7 +25,7 @@ public class InputOutputUtils {
         try {
             result = new FileInputStream(file);
         } catch (FileNotFoundException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
         }
 
         return result;
@@ -35,7 +37,7 @@ public class InputOutputUtils {
         try {
             result = new FileOutputStream(file);
         } catch (FileNotFoundException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
         }
 
         return result;
@@ -56,13 +58,13 @@ public class InputOutputUtils {
 
             result = sb.toString();
         } catch (IOException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    Logger.printStackTrace(e);
+                    Timber.d(e);
                 }
             }
         }
@@ -85,13 +87,13 @@ public class InputOutputUtils {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    Logger.printStackTrace(e);
+                    Timber.d(e);
                 }
 
                 try {
                     out.close();
                 } catch (IOException e) {
-                    Logger.printStackTrace(e);
+                    Timber.d(e);
                 }
             }
         }
@@ -122,7 +124,7 @@ public class InputOutputUtils {
         try {
             out.close();
         } catch (IOException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
         }
     }
 
@@ -134,7 +136,7 @@ public class InputOutputUtils {
         try {
             in.close();
         } catch (IOException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
         }
     }
 

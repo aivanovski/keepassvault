@@ -10,7 +10,6 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
-import com.ivanovsky.passnotes.util.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -29,6 +28,8 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_NO
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
+
+import timber.log.Timber;
 
 public class RegularFileSystemProvider implements FileSystemProvider {
 
@@ -134,7 +135,7 @@ public class RegularFileSystemProvider implements FileSystemProvider {
             InputStream in = new BufferedInputStream(new FileInputStream(file.getPath()));
             result.setObj(in);
         } catch (FileNotFoundException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             result.setError(newGenericIOError(e.getMessage()));
         } finally {
             lock.unlock();
@@ -159,7 +160,7 @@ public class RegularFileSystemProvider implements FileSystemProvider {
             OutputStream out = new BufferedOutputStream(new FileOutputStream(file.getPath()));
             result.setObj(out);
         } catch (FileNotFoundException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
             result.setError(newGenericIOError(e.getMessage()));
         } finally {
             lock.unlock();

@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.room.Room
 import com.github.terrakok.cicerone.Cicerone
 import com.github.terrakok.cicerone.Router
-import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
@@ -32,6 +31,7 @@ import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
 import com.ivanovsky.passnotes.domain.interactor.selectdb.SelectDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
+import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.main.MainSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
@@ -82,6 +82,7 @@ import com.ivanovsky.passnotes.presentation.selectdb.cells.factory.SelectDatabas
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginViewModel
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
+import com.ivanovsky.passnotes.presentation.settings.app.AppSettingsViewModel
 import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsViewModel
 import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordDialogViewModel
 import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsViewModel
@@ -89,137 +90,140 @@ import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
-import com.ivanovsky.passnotes.util.Logger
+import okhttp3.OkHttp
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
+import timber.log.Timber
 
 object KoinModule {
 
-    val appModule = module {
-        single { ResourceProvider(get()) }
-        single { SettingsImpl(get(), get()) as Settings }
-        single { FileHelper(get(), get()) }
-        single { PermissionHelper(get()) }
-        single { ErrorInteractor(get()) }
-        single { LocaleProvider(get()) }
-        single { DispatcherProvider() }
-        single { ObserverBus() }
-        single { ClipboardHelper(get()) }
-        single { DateFormatProvider(get()) }
-        single { NoteDiffer() }
-        single { provideOkHttp() }
-        single { DataCipherProvider(get()) }
-        single { SelectionHolder() }
+    fun buildModule(loggerInteractor: LoggerInteractor) =
+        module {
+            single { loggerInteractor }
+            single { ResourceProvider(get()) }
+            single { SettingsImpl(get(), get()) as Settings }
+            single { FileHelper(get(), get()) }
+            single { PermissionHelper(get()) }
+            single { ErrorInteractor(get()) }
+            single { LocaleProvider(get()) }
+            single { DispatcherProvider() }
+            single { ObserverBus() }
+            single { ClipboardHelper(get()) }
+            single { DateFormatProvider(get()) }
+            single { NoteDiffer() }
+            single { provideOkHttp() }
+            single { DataCipherProvider(get()) }
+            single { SelectionHolder() }
 
-        // Database
-        single { provideAppDatabase(get(), get()) }
-        single { provideRemoteFileRepository(get()) }
-        single { provideUsedFileRepository(get(), get()) }
+            // Database
+            single { provideAppDatabase(get(), get()) }
+            single { provideRemoteFileRepository(get()) }
+            single { provideUsedFileRepository(get(), get()) }
 
-        // Files, Keepass
-        single { FileSystemResolver(get(), get(), get(), get(), get()) }
-        single { KeepassDatabaseRepository(get(), get(), get(), get(), get()) as EncryptedDatabaseRepository }
+            // Files, Keepass
+            single { FileSystemResolver(get(), get(), get(), get(), get()) }
+            single { KeepassDatabaseRepository(get(), get(), get(), get(), get()) as EncryptedDatabaseRepository }
 
-        // Use Cases
-        single { GetDebugCredentialsUseCase() }
-        single { LockDatabaseUseCase() }
-        single { GetRecentlyOpenedFilesUseCase(get(), get()) }
-        single { SyncUseCases(get(), get()) }
-        single { DetermineDatabaseStatusUseCase() }
-        single { GetDatabaseStatusUseCase(get(), get()) }
-        single { AddTemplatesUseCase(get(), get(), get()) }
-        single { GetDatabaseUseCase(get(), get()) }
-        single { MoveNoteUseCase(get(), get(), get()) }
-        single { MoveGroupUseCase(get(), get(), get()) }
-        single { GetGroupUseCase(get(), get()) }
-        single { IsDatabaseOpenedUseCase(get()) }
-        single { GetNoteUseCase(get(), get()) }
-        single { FindNoteForAutofillUseCase(get(), get()) }
+            // Use Cases
+            single { GetDebugCredentialsUseCase() }
+            single { LockDatabaseUseCase() }
+            single { GetRecentlyOpenedFilesUseCase(get(), get()) }
+            single { SyncUseCases(get(), get()) }
+            single { DetermineDatabaseStatusUseCase() }
+            single { GetDatabaseStatusUseCase(get(), get()) }
+            single { AddTemplatesUseCase(get(), get(), get()) }
+            single { GetDatabaseUseCase(get(), get()) }
+            single { MoveNoteUseCase(get(), get(), get()) }
+            single { MoveGroupUseCase(get(), get(), get()) }
+            single { GetGroupUseCase(get(), get()) }
+            single { IsDatabaseOpenedUseCase(get()) }
+            single { GetNoteUseCase(get(), get()) }
+            single { FindNoteForAutofillUseCase(get(), get()) }
 
-        // Interactors
-        single { FilePickerInteractor(get()) }
-        single { UnlockInteractor(get(), get(), get(), get(), get(), get()) }
-        single { StorageListInteractor(get(), get(), get()) }
-        single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
-        single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
-        single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
-        single { NoteInteractor(get(), get(), get(), get(), get()) }
-        single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
-        single { NoteEditorInteractor(get(), get()) }
-        single { ServerLoginInteractor(get(), get(), get()) }
-        single { DatabaseLockInteractor(get(), get(), get()) }
-        single { SelectDatabaseInteractor(get(), get(), get(), get()) }
-        single { SearchInteractor(get(), get(), get(), get(), get()) }
-        single { MainSettingsInteractor(get()) }
-        single { DatabaseSettingsInteractor(get(), get()) }
-        single { AutofillInteractor(get(), get()) }
-        single { MainInteractor(get()) }
+            // Interactors
+            single { FilePickerInteractor(get()) }
+            single { UnlockInteractor(get(), get(), get(), get(), get(), get()) }
+            single { StorageListInteractor(get(), get(), get()) }
+            single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
+            single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
+            single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
+            single { NoteInteractor(get(), get(), get(), get(), get()) }
+            single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
+            single { NoteEditorInteractor(get(), get()) }
+            single { ServerLoginInteractor(get(), get(), get()) }
+            single { DatabaseLockInteractor(get(), get(), get()) }
+            single { SelectDatabaseInteractor(get(), get(), get(), get()) }
+            single { SearchInteractor(get(), get(), get(), get(), get()) }
+            single { MainSettingsInteractor(get()) }
+            single { DatabaseSettingsInteractor(get(), get()) }
+            single { AppSettingsInteractor(get(), get()) }
+            single { AutofillInteractor(get(), get()) }
+            single { MainInteractor(get()) }
 
-        // Autofill
-        single { AutofillViewFactory(get(), get()) }
+            // Autofill
+            single { AutofillViewFactory(get(), get()) }
 
-        // Cell factories
-        single { DatabaseStatusCellModelFactory(get()) }
+            // Cell factories
+            single { DatabaseStatusCellModelFactory(get()) }
 
-        single { GroupsCellModelFactory(get()) }
-        single { GroupsCellViewModelFactory(get(), get()) }
+            single { GroupsCellModelFactory(get()) }
+            single { GroupsCellViewModelFactory(get(), get()) }
 
-        single { NoteEditorCellModelFactory(get()) }
-        single { NoteEditorCellViewModelFactory(get()) }
+            single { NoteEditorCellModelFactory(get()) }
+            single { NoteEditorCellViewModelFactory(get()) }
 
-        single { SelectDatabaseCellModelFactory(get()) }
-        single { SelectDatabaseCellViewModelFactory() }
+            single { SelectDatabaseCellModelFactory(get()) }
+            single { SelectDatabaseCellViewModelFactory() }
 
-        single { UnlockCellModelFactory(get()) }
-        single { UnlockCellViewModelFactory() }
+            single { UnlockCellModelFactory(get()) }
+            single { UnlockCellViewModelFactory() }
 
-        single { SearchCellModelFactory() }
-        single { SearchCellViewModelFactory(get(), get()) }
+            single { SearchCellModelFactory() }
+            single { SearchCellViewModelFactory(get(), get()) }
 
-        single { NoteCellModelFactory() }
-        single { NoteCellViewModelFactory() }
+            single { NoteCellModelFactory() }
+            single { NoteCellViewModelFactory() }
 
-        // Cicerone
-        single { Cicerone.create() }
-        single { provideCiceroneRouter(get()) }
-        single { provideCiceroneNavigatorHolder(get()) }
-        single { SettingsRouter(get()) }
+            // Cicerone
+            single { Cicerone.create() }
+            single { provideCiceroneRouter(get()) }
+            single { provideCiceroneNavigatorHolder(get()) }
+            single { SettingsRouter(get()) }
 
-        // ViewModels
-        viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
-        viewModel { FilePickerViewModel(get(), get(), get(), get(), get(), get()) }
-        viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
-        viewModel { GroupEditorViewModel(get(), get(), get(), get()) }
-        viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
-        factory { (args: NoteScreenArgs) -> NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
-        factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
-        viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
-        viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
-        viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }
-        factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), args) }
-        viewModel { AboutViewModel(get(), get()) }
-        viewModel { MainSettingsViewModel(get(), get()) }
-        viewModel { DatabaseSettingsViewModel(get(), get()) }
-        viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
-        factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
-        factory { NavigationMenuViewModel(get()) }
-        factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }
-    }
+            // ViewModels
+            viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
+            viewModel { FilePickerViewModel(get(), get(), get(), get(), get(), get()) }
+            viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
+            viewModel { GroupEditorViewModel(get(), get(), get(), get()) }
+            viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
+            factory { (args: NoteScreenArgs) -> NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+            viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
+            viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), args) }
+            viewModel { AboutViewModel(get(), get()) }
+            viewModel { MainSettingsViewModel(get(), get()) }
+            viewModel { AppSettingsViewModel(get(), get(), get(), get(), get()) }
+            viewModel { DatabaseSettingsViewModel(get(), get()) }
+            viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
+            factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { NavigationMenuViewModel(get()) }
+            factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }
+        }
 
     private fun provideOkHttp(): OkHttpClient {
         val builder = OkHttpClient.Builder()
 
-        if (BuildConfig.DEBUG) {
-            val interceptor = HttpLoggingInterceptor {
-                Logger.d("OkHttp", it)
-            }.apply {
-                setLevel(HttpLoggingInterceptor.Level.BASIC)
-            }
-
-            builder.addInterceptor(interceptor)
+        val interceptor = HttpLoggingInterceptor {
+            Timber.tag(OkHttp::class.java.simpleName).d(it)
+        }.apply {
+            setLevel(HttpLoggingInterceptor.Level.BASIC)
         }
+
+        builder.addInterceptor(interceptor)
 
         return builder.build()
     }

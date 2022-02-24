@@ -11,7 +11,7 @@ import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.ServiceState
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.presentation.service.DatabaseLockService
-import com.ivanovsky.passnotes.util.Logger
+import timber.log.Timber
 
 class DatabaseLockInteractor(
     private val context: Context,
@@ -72,7 +72,7 @@ class DatabaseLockInteractor(
     private fun cancelLockTimer() {
         if (isTimerStarted) {
             isTimerStarted = false
-            Logger.d(TAG, "Auto-Lock timer cancelled")
+            Timber.d("Auto-Lock timer cancelled")
         }
 
         handler.removeCallbacksAndMessages(null)
@@ -85,13 +85,13 @@ class DatabaseLockInteractor(
         handler.postDelayed(
             {
                 isTimerStarted = false
-                Logger.d(TAG, "Lock database by timer")
+                Timber.d("Lock database by timer")
                 lockUseCase.lockIfNeed()
             },
             delay.toLong()
         )
 
-        Logger.d(TAG, "Auto-Lock timer started with delay: %s milliseconds", delay)
+        Timber.d("Auto-Lock timer started with delay: %s milliseconds", delay)
     }
 
     companion object {

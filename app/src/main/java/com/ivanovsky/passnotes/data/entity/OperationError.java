@@ -44,6 +44,7 @@ public class OperationError {
     public static final String MESSAGE_UNSUPPORTED_CONFIG_TYPE = "Unsupported config type";
     public static final String MESSAGE_FAILED_TO_COMPLETE_OPERATION = "Failed to complete operation";
     public static final String MESSAGE_FAILED_TO_MOVE_GROUP_INSIDE_ITS_OWN_TREE = "Failed to move group inside its owdn tree";
+    public static final String MESSAGE_FAILED_TO_REMOVE_FILE = "Failed to remove file";
 
     public static final String GENERIC_MESSAGE_NOT_FOUND = "%s not found";
     public static final String GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST = "Group '%s' already exists";

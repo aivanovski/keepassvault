@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.data.repository.file.remote;
 
 import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.repository.file.BaseRemoteFileOutputStream;
-import com.ivanovsky.passnotes.util.Logger;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -11,6 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
+
+import timber.log.Timber;
 
 public class OfflineFileOutputStream extends BaseRemoteFileOutputStream {
 
@@ -39,7 +40,7 @@ public class OfflineFileOutputStream extends BaseRemoteFileOutputStream {
             out.write(b);
             flushed = false;
         } catch (IOException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
 
             failed = true;
 
@@ -55,7 +56,7 @@ public class OfflineFileOutputStream extends BaseRemoteFileOutputStream {
             out.flush();
             flushed = true;
         } catch (IOException e) {
-            Logger.printStackTrace(e);
+            Timber.d(e);
 
             failed = true;
 

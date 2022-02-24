@@ -8,6 +8,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseConfig
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class DatabaseSettingsViewModel(
@@ -17,7 +18,7 @@ class DatabaseSettingsViewModel(
 
     val isLoading = MutableLiveData(true)
     val isRecycleBinEnabled = MutableLiveData(false)
-    val errorMessage = SingleLiveEvent<String>()
+    val showErrorDialogEvent = SingleLiveEvent<String>()
 
     private var config: EncryptedDatabaseConfig? = null
 
@@ -33,7 +34,7 @@ class DatabaseSettingsViewModel(
                 isLoading.value = false
             } else {
                 val message = errorInteractor.processAndGetMessage(getConfig.error)
-                errorMessage.call(message)
+                showErrorDialogEvent.call(message)
             }
         }
     }
@@ -56,7 +57,7 @@ class DatabaseSettingsViewModel(
             } else {
                 isRecycleBinEnabled.value = isRecycleBinEnabled.value
                 val message = errorInteractor.processAndGetMessage(applyConfig.error)
-                errorMessage.call(message)
+                showErrorDialogEvent.call(message)
             }
         }
     }

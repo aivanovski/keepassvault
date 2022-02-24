@@ -8,7 +8,7 @@ import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.ANDROID_KEY_STORE
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.KEY_ALGORITHM
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.KEY_ALIAS
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.KEY_SIZE
-import com.ivanovsky.passnotes.util.Logger
+import timber.log.Timber
 import java.lang.Exception
 import java.security.GeneralSecurityException
 import java.security.KeyStore
@@ -45,7 +45,7 @@ class KeyStoreSecretKeyProvider : SecretKeyProvider {
             store?.load(null)
             keyStore = store
         } catch (e: Exception) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
         }
 
         return keyStore
@@ -67,10 +67,10 @@ class KeyStoreSecretKeyProvider : SecretKeyProvider {
                 key = entry.secretKey
             }
         } catch (e: Exception) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
         }
 
-        Logger.d(TAG, "Load secret key from key store with algorithm: " + key?.algorithm)
+        Timber.d("Load secret key from key store with algorithm: " + key?.algorithm)
 
         return key
     }
@@ -92,10 +92,10 @@ class KeyStoreSecretKeyProvider : SecretKeyProvider {
 
             key = keyGenerator?.generateKey()
         } catch (e: GeneralSecurityException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
         }
 
-        Logger.d(TAG, "Generate new secret key with algorithm: " + key?.algorithm)
+        Timber.d("Generate new secret key with algorithm: " + key?.algorithm)
 
         return key
     }

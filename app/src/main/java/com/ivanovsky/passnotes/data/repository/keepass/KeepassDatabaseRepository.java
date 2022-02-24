@@ -21,7 +21,6 @@ import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase;
-import com.ivanovsky.passnotes.util.Logger;
 
 import org.linguafranca.pwdb.Credentials;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
@@ -33,6 +32,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
+
+import timber.log.Timber;
 
 public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
@@ -114,7 +115,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
                         options, file, in, inResult, key);
                 result = inResult.takeStatusWith(db);
             } catch (EncryptedDatabaseException e) {
-                Logger.printStackTrace(e);
+                Timber.d(e);
                 result = OperationResult.error(newDbError(e.getMessage()));
             }
         }
@@ -158,7 +159,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
                     result.setError(outResult.getError());
                 }
             } catch (Exception e) {
-                Logger.printStackTrace(e);
+                Timber.d(e);
 
             } finally {
                 if (in != null) {
@@ -166,7 +167,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
                         in.close();
                     } catch (IOException e) {
                         // TODO: should be handled or not?
-                        Logger.printStackTrace(e);
+                        Timber.d(e);
                     }
                 }
                 if (out != null) {
@@ -174,7 +175,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
                         out.close();
                     } catch (IOException e) {
                         // TODO: should be handled or not?
-                        Logger.printStackTrace(e);
+                        Timber.d(e);
                     }
                 }
             }

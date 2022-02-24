@@ -19,7 +19,6 @@ import com.ivanovsky.passnotes.domain.FileHelper;
 import com.ivanovsky.passnotes.domain.SyncStrategyResolver;
 import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
-import com.ivanovsky.passnotes.util.Logger;
 import com.ivanovsky.passnotes.util.LongExtKt;
 
 import java.io.File;
@@ -41,6 +40,8 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError;
 import static com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull;
+
+import timber.log.Timber;
 
 public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
@@ -245,7 +246,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
                     result.setError(newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE));
                 }
             } catch (IOException e) {
-                Logger.printStackTrace(e);
+                Timber.d(e);
                 result.setError(newNetworkIOError());
             }
         } else {
@@ -270,7 +271,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
                     result.setError(newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_FILE));
                 }
             } catch (IOException e) {
-                Logger.printStackTrace(e);
+                Timber.d(e);
 
                 result.setError(newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_FILE));
             }

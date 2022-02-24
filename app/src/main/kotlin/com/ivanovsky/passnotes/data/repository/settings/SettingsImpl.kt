@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_C
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.DROPBOX_AUTH_TOKEN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXTERNAL_STORAGE_CACHE_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.BOOLEAN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.INT
@@ -34,6 +35,12 @@ class SettingsImpl(
         get() = getBoolean(IS_LOCK_NOTIFICATION_VISIBLE)
         set(value) {
             putBoolean(IS_LOCK_NOTIFICATION_VISIBLE, value)
+        }
+
+    override var isFileLogEnabled: Boolean
+        get() = getBoolean(IS_FILE_LOG_ENABLED)
+        set(value) {
+            putBoolean(IS_FILE_LOG_ENABLED, value)
         }
 
     override var autoLockDelayInMs: Int
@@ -137,6 +144,11 @@ class SettingsImpl(
             keyId = R.string.pref_is_lock_notification_visible,
             type = BOOLEAN,
             defaultValue = true
+        ),
+        IS_FILE_LOG_ENABLED(
+            keyId = R.string.pref_is_file_log_enabled,
+            type = BOOLEAN,
+            defaultValue = false
         ),
 
         // Int prefs

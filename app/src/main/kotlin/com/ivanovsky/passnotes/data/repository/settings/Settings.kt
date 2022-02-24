@@ -8,5 +8,6 @@ interface Settings {
     var autoClearClipboardDelayInMs: Int
     var isLockNotificationVisible: Boolean
     var dropboxAuthToken: String?
+    var isFileLogEnabled: Boolean
     fun initDefaultIfNeed(pref: Pref)
 }

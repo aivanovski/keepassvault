@@ -135,4 +135,9 @@ public class FileHelper {
 
         InputOutputUtils.copy(in, out, true);
     }
+
+    @NonNull
+    public File getFilesDir() {
+        return context.getFilesDir();
+    }
 }

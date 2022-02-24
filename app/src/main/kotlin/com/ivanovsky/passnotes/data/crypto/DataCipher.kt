@@ -6,7 +6,7 @@ import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.ANDROID_KEY_STORE
 import com.ivanovsky.passnotes.data.crypto.entity.CipherTransformation
 import com.ivanovsky.passnotes.data.crypto.entity.SecretData
 import com.ivanovsky.passnotes.data.crypto.keyprovider.SecretKeyProvider
-import com.ivanovsky.passnotes.util.Logger
+import timber.log.Timber
 import java.security.GeneralSecurityException
 import java.security.InvalidKeyException
 import java.security.KeyStore
@@ -32,7 +32,7 @@ class DataCipher(
                 val encodedBytes = cipher.doFinal(data.toByteArray())
                 result = SecretData(toBase64String(initVector), toBase64String(encodedBytes))
             } catch (e: GeneralSecurityException) {
-                Logger.printStackTrace(e)
+                Timber.d(e)
             }
         }
 
@@ -55,7 +55,7 @@ class DataCipher(
                     result = String(decodedBytes, Charsets.UTF_8)
                 }
             } catch (e: GeneralSecurityException) {
-                Logger.printStackTrace(e)
+                Timber.d(e)
             }
         }
 
@@ -65,7 +65,7 @@ class DataCipher(
     private fun initCipherForEncode(): Cipher? {
         var cipher: Cipher? = null
 
-        Logger.d(TAG, "initCipherForEncode()")
+        Timber.d("initCipherForEncode()")
 
         val key = getOrCreateSecretKey()
         if (key != null) {
@@ -78,7 +78,7 @@ class DataCipher(
     private fun initCipherForDecode(initVector: ByteArray): Cipher? {
         var cipher: Cipher? = null
 
-        Logger.d(TAG, "initCipherForDecode()")
+        Timber.d("initCipherForDecode()")
 
         val key = getOrLoadSecretKey()
         if (key != null) {
@@ -118,7 +118,7 @@ class DataCipher(
 
             result = cipher
         } catch (e: InvalidKeyException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
         }
 
         return result

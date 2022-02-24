@@ -23,7 +23,7 @@ import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase;
 import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
-import com.ivanovsky.passnotes.util.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -41,6 +41,8 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPO
 import static com.ivanovsky.passnotes.data.entity.OperationError.newAuthError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
+
+import timber.log.Timber;
 
 public class KeepassDatabase implements EncryptedDatabase {
 
@@ -95,14 +97,14 @@ public class KeepassDatabase implements EncryptedDatabase {
             try {
                 result = SimpleDatabase.load(credentials, in);
             } catch (IllegalStateException e) {
-                Logger.printStackTrace(e);
+                Timber.d(e);
                 throw new EncryptedDatabaseException(e);
 
             } catch (IOException e) {
                 throw new FailedToWriteDBException();
 
             } catch (Exception e) {
-                Logger.printStackTrace(e);
+                Timber.d(e);
                 throw new EncryptedDatabaseException(e);
 
             } finally {

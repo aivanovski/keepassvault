@@ -15,7 +15,6 @@ import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientV2
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
 import com.ivanovsky.passnotes.util.InputOutputUtils
-import com.ivanovsky.passnotes.util.Logger
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.thegrizzlylabs.sardineandroid.DavResource
 import java.io.File
@@ -23,6 +22,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 import okhttp3.OkHttpClient
+import timber.log.Timber
 
 class WebDavClientV2(
     private val authenticator: WebdavAuthenticator,
@@ -38,7 +38,7 @@ class WebDavClientV2(
     private var fsAuthority = authenticator.getFsAuthority()
 
     override fun listFiles(dir: FileDescriptor): OperationResult<List<FileDescriptor>> {
-        Logger.d(TAG, "listFiles: dir=$dir")
+        Timber.d("listFiles: dir=$dir")
 
         if (!dir.isDirectory) {
             return OperationResult.error(newFileAccessError(MESSAGE_FILE_IS_NOT_A_DIRECTORY))
@@ -53,7 +53,7 @@ class WebDavClientV2(
     }
 
     override fun getParent(file: FileDescriptor): OperationResult<FileDescriptor> {
-        Logger.d(TAG, "getParent: file=$file")
+        Timber.d("getParent: file=$file")
 
         val checkAuthority = checkFsAuthority(file)
         if (checkAuthority.isFailed) {
@@ -75,7 +75,7 @@ class WebDavClientV2(
     }
 
     override fun getRoot(): OperationResult<FileDescriptor> {
-        Logger.d(TAG, "getRoot:")
+        Timber.d("getRoot:")
         val files = fetchFileList(EMPTY)
         if (files.isFailed) {
             return files.takeError()
@@ -97,7 +97,7 @@ class WebDavClientV2(
     }
 
     private fun getFileMetadata(path: String): OperationResult<RemoteFileMetadata> {
-        Logger.d(TAG, "getFileMetadata: path=%s", path)
+        Timber.d("getFileMetadata: path=%s", path)
         val metadata = fetchDavResource(path)
         if (metadata.isFailed) {
             return metadata.takeError()
@@ -122,7 +122,7 @@ class WebDavClientV2(
             val out = FileOutputStream(File(destinationPath))
             InputOutputUtils.copy(input.obj, out, true, cancellation)
         } catch (e: IOException) {
-            Logger.printStackTrace(e)
+            Timber.d(e)
             cancellation.set(true)
             return OperationResult.error(newGenericError(MESSAGE_IO_ERROR))
         }
@@ -175,7 +175,7 @@ class WebDavClientV2(
         }
 
         val url = formatUrl(path)
-        Logger.d(TAG, "fetchFileList: url=%s, cred=%s", url, fsAuthority.credentials)
+        Timber.d("fetchFileList: url=%s, cred=%s", url, fsAuthority.credentials)
         val files = webDavClient.execute { client ->
             client
                 .list(url)
@@ -194,7 +194,7 @@ class WebDavClientV2(
             return checkCreds.takeError()
         }
 
-        Logger.d(TAG, "fetchDavResource: path=%s", path)
+        Timber.d("fetchDavResource: path=%s", path)
         val data = webDavClient.execute { client ->
             client
                 .list(formatUrl(path))

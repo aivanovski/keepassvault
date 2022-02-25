@@ -33,7 +33,7 @@ class SecretInputView(
             field = value
         }
 
-    var text: String
+    var inputText: String
         get() = getTextFromView()
         set(value) {
             setTextToView(value, isNotifyListener = true)
@@ -143,7 +143,7 @@ class SecretInputView(
         @JvmStatic
         @InverseBindingAdapter(attribute = "text")
         fun getText(view: SecretInputView): String {
-            return view.text
+            return view.inputText
         }
 
         @JvmStatic

@@ -13,10 +13,10 @@ class FindNoteForAutofillUseCase(
     private val dispatchers: DispatcherProvider
 ) {
 
-    suspend fun findNoteForAutofill(structure: AutofillStructure): OperationResult<Pair<Boolean, Note?>> =
+    suspend fun findNoteForAutofill(structure: AutofillStructure): OperationResult<Note?> =
         withContext(dispatchers.IO) {
             if (structure.webDomain.isNullOrEmpty()) {
-                return@withContext OperationResult.success(Pair(false, null))
+                return@withContext OperationResult.success(null)
             }
 
             val getDbResult = getDbUseCase.getDatabase()
@@ -34,7 +34,7 @@ class FindNoteForAutofillUseCase(
 
             val note = findNotesResult.obj.firstOrNull()
 
-            OperationResult.success(Pair(note != null, note))
+            OperationResult.success(note)
         }
 
     private fun getCleanWebDomain(webDomain: String): String {

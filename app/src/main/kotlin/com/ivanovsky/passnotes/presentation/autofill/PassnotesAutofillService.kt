@@ -61,7 +61,7 @@ class PassnotesAutofillService : AutofillService() {
         scope.launch {
             val findNoteResult = interactor.findNoteForAutofill(structure)
             if (findNoteResult.isSucceeded) {
-                val note = findNoteResult.obj.second
+                val note = findNoteResult.obj
 
                 if (note != null) {
                     Timber.d("Show note and selection")

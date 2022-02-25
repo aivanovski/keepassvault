@@ -1,22 +1,13 @@
 package com.ivanovsky.passnotes.data.entity;
 
-import androidx.annotation.NonNull;
-
-import static com.ivanovsky.passnotes.data.entity.OperationStatus.DEFERRED;
-import static com.ivanovsky.passnotes.data.entity.OperationStatus.FAILED;
-import static com.ivanovsky.passnotes.data.entity.OperationStatus.SUCCEEDED;
-
 public class OperationResult<T> {
 
     private boolean deferred;
+    private boolean succeeded;
     private T obj;
     private OperationError error;
 
     public static <T> OperationResult<T> success(T obj) {
-        if (obj == null) {
-            throw new IllegalArgumentException(
-                    "Object inside " + OperationResult.class.getSimpleName() + " can't be null");
-        }
         OperationResult<T> result = new OperationResult<>();
         result.setObj(obj);
         return result;
@@ -30,9 +21,10 @@ public class OperationResult<T> {
 
     public static <T> OperationResult<T> deferred(T obj, OperationError error) {
         OperationResult<T> result = new OperationResult<>();
-        result.deferred = true;
-        result.setObj(obj);
-        result.setError(error);
+        result.succeeded = (obj != null);
+        result.deferred = (obj != null);
+        result.obj = obj;
+        result.error = error;
         return result;
     }
 
@@ -41,15 +33,18 @@ public class OperationResult<T> {
 
     public void setObj(T obj) {
         this.obj = obj;
+        succeeded = true;
     }
 
     public void setDeferredObj(T obj) {
         this.obj = obj;
+        succeeded = true;
         deferred = true;
     }
 
     public void setError(OperationError error) {
         this.error = error;
+        succeeded = false;
     }
 
     public T getObj() {
@@ -58,6 +53,7 @@ public class OperationResult<T> {
 
     public void from(OperationResult<T> src) {
         this.obj = src.obj;
+        this.succeeded = src.succeeded;
         this.deferred = src.deferred;
         this.error = src.error;
     }
@@ -73,6 +69,7 @@ public class OperationResult<T> {
 
         if (isSucceededOrDeferred()) {
             newResult.obj = newObj;
+            newResult.succeeded = succeeded;
             newResult.deferred = deferred;
         } else {
             newResult.error = error;
@@ -86,42 +83,22 @@ public class OperationResult<T> {
     }
 
     public boolean isSucceeded() {
-        return getStatus() == SUCCEEDED;
+        return succeeded;
     }
 
     public boolean isDeferred() {
-        return getStatus() == DEFERRED;
+        return deferred;
     }
 
     public boolean isFailed() {
-        return getStatus() == FAILED;
+        return !succeeded;
     }
 
     public boolean isFailedDueToNetwork() {
-        return getStatus() == FAILED && error.getType() == OperationError.Type.NETWORK_IO_ERROR;
+        return isFailed() && error.getType() == OperationError.Type.NETWORK_IO_ERROR;
     }
 
     public boolean isSucceededOrDeferred() {
-        OperationStatus status = getStatus();
-        return status == SUCCEEDED || status == DEFERRED;
-    }
-
-    public boolean getResultOrFalse() {
-        return (obj instanceof Boolean) ? (Boolean) obj : false;
-    }
-
-    @NonNull
-    public OperationStatus getStatus() {
-        OperationStatus status;
-
-        if (deferred) {
-            status = DEFERRED;
-        } else if (obj != null) {
-            status = SUCCEEDED;
-        } else {
-            status = FAILED;
-        }
-
-        return status;
+        return isSucceeded() || isDeferred();
     }
 }

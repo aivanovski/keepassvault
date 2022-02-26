@@ -254,7 +254,8 @@ class UnlockViewModel(
                             appMode = args.appMode,
                             groupUid = null,
                             isCloseDatabaseOnExit = true,
-                            autofillStructure = args.autofillStructure
+                            autofillStructure = args.autofillStructure,
+                            note = args.note
                         )
                     )
                 )

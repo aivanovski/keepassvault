@@ -117,9 +117,9 @@ class AutofillStructureParser {
         }
 
         return AutofillStructure(
+            applicationId = result.applicationId,
             isWebView = result.isWebView,
             webDomain = result.webDomain,
-            webScheme = result.webScheme,
             username = username.toField(),
             password = password.toField()
         )

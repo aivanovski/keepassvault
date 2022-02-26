@@ -5,9 +5,9 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class AutofillStructure(
+    val applicationId: String?,
     val isWebView: Boolean,
     val webDomain: String?,
-    val webScheme: String?,
     val username: AutofillField?,
     val password: AutofillField?
 ) : Parcelable {

@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.note_editor.factory
 
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.TemplateFieldType
@@ -28,39 +29,47 @@ class NoteEditorCellModelFactory(
     private val resourceProvider: ResourceProvider
 ) {
 
-    fun createModelsForNewNote(template: Template?): List<BaseCellModel> {
-        return if (template == null) {
-            listOf(
-                createTitleCell(EMPTY),
-                createUserNameCell(EMPTY),
-                createPasswordCell(EMPTY),
-                createUrlCell(EMPTY),
-                createNotesCell(EMPTY)
-            )
-        } else {
-            val models = mutableListOf<BaseCellModel>()
+    fun createDefaultModels(): List<BaseCellModel> {
+        return listOf(
+            createTitleCell(EMPTY),
+            createUserNameCell(EMPTY),
+            createPasswordCell(EMPTY),
+            createUrlCell(EMPTY),
+            createNotesCell(EMPTY)
+        )
+    }
 
-            models.add(createTitleCell(EMPTY))
+    fun createModelsFromTemplate(template: Template): List<BaseCellModel> {
+        val models = mutableListOf<BaseCellModel>()
 
-            for (field in template.fields) {
-                val isProtected = (field.type == TemplateFieldType.PROTECTED_INLINE)
+        models.add(createTitleCell(EMPTY))
 
-                models.add(
-                    ExtendedTextPropertyCellModel(
-                        id = template.uid.toString() + "_" + field.title,
-                        name = field.title,
-                        value = EMPTY,
-                        isProtected = isProtected,
-                        isCollapsed = true,
-                        inputType = TEXT
-                    )
+        for (field in template.fields) {
+            val isProtected = (field.type == TemplateFieldType.PROTECTED_INLINE)
+
+            models.add(
+                ExtendedTextPropertyCellModel(
+                    id = template.uid.toString() + "_" + field.title,
+                    name = field.title,
+                    value = EMPTY,
+                    isProtected = isProtected,
+                    isCollapsed = true,
+                    inputType = TEXT
                 )
-            }
-
-            models.add(createSpaceCell())
-
-            models
+            )
         }
+
+        models.add(createSpaceCell())
+
+        return models
+    }
+
+    fun createModelsFromProperties(properties: List<Property>): List<BaseCellModel> {
+        return createModels(
+            uid = null,
+            title = EMPTY,
+            properties = properties
+        )
     }
 
     fun createModelsForNote(note: Note, template: Template?): List<BaseCellModel> {
@@ -72,7 +81,7 @@ class NoteEditorCellModelFactory(
                 createModelsForNoteWithTemplate(note, template)
             }
             else -> {
-                createModelsForNote(note)
+                createModels(note.uid, note.title, note.properties)
             }
         }
     }
@@ -211,7 +220,7 @@ class NoteEditorCellModelFactory(
         return models
     }
 
-    private fun createModelsForNote(note: Note): List<BaseCellModel> {
+    private fun createModels(uid: UUID?, title: String, properties: List<Property>): List<BaseCellModel> {
         val models = mutableListOf<BaseCellModel>()
 
         val visibleProperties = PropertyMap.mapByType(
@@ -219,7 +228,7 @@ class NoteEditorCellModelFactory(
                 .visible()
                 .sortedByType()
                 .build()
-                .apply(note.properties)
+                .apply(properties)
         )
 
         val userName = visibleProperties.get(PropertyType.USER_NAME)?.value ?: EMPTY
@@ -232,16 +241,20 @@ class NoteEditorCellModelFactory(
             .notEmptyName()
             .excludeDefaultTypes()
             .build()
-            .apply(note.properties)
+            .apply(properties)
 
-        models.add(createTitleCell(note.title))
+        models.add(createTitleCell(title))
         models.add(createUserNameCell(userName))
         models.add(createPasswordCell(password))
         models.add(createUrlCell(url))
         models.add(createNotesCell(notes))
 
         for (property in otherProperties) {
-            val cellId = note.uid.toString() + "_" + (property.name ?: EMPTY)
+            val cellId = if (uid != null) {
+                uid.toString() + "_" + (property.name ?: EMPTY)
+            } else {
+                generateCellIdForProperty(property)
+            }
             models.add(
                 ExtendedTextPropertyCellModel(
                     id = cellId,
@@ -257,6 +270,10 @@ class NoteEditorCellModelFactory(
         models.add(createSpaceCell())
 
         return models
+    }
+
+    private fun generateCellIdForProperty(property: Property): String {
+        return UUID.randomUUID().toString() + "_" + (property.name ?: EMPTY)
     }
 
     private fun createCellByPropertyType(type: PropertyType, value: String): BaseCellModel {

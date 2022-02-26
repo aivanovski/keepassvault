@@ -37,6 +37,7 @@ import com.ivanovsky.passnotes.domain.interactor.settings.main.MainSettingsInter
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
+import com.ivanovsky.passnotes.domain.usecases.AutofillNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
@@ -141,6 +142,7 @@ object KoinModule {
             single { IsDatabaseOpenedUseCase(get()) }
             single { GetNoteUseCase(get(), get()) }
             single { FindNoteForAutofillUseCase(get(), get()) }
+            single { AutofillNoteUseCase(get()) }
 
             // Interactors
             single { FilePickerInteractor(get()) }

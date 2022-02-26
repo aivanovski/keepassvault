@@ -17,6 +17,7 @@ import com.github.terrakok.cicerone.Router
 import com.github.terrakok.cicerone.androidx.AppNavigator
 import com.google.android.material.navigation.NavigationView
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.NoteCandidate
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
@@ -154,6 +155,7 @@ class MainActivity :
 
         private const val AUTOFILL_AUTHENTICATION_REQUEST_CODE = 1001
         private const val AUTOFILL_SELECTION_REQUEST_CODE = 1002
+        private const val AUTOFILL_SAVE_RESULT_REQUEST_CODE = 1003
 
         fun createStartIntent(
             context: Context,
@@ -209,6 +211,39 @@ class MainActivity :
             return PendingIntent.getActivity(
                 context,
                 AUTOFILL_SELECTION_REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_CANCEL_CURRENT
+            )
+        }
+
+        fun createAutofillSaveResultIntent(
+            context: Context,
+            note: NoteCandidate
+        ): Intent {
+            return createStartIntent(
+                context,
+                MainScreenArgs(
+                    appMode = ApplicationLaunchMode.NORMAL,
+                    note = note
+                )
+            )
+        }
+
+        fun createAutofillSaveResultPendingIntent(
+            context: Context,
+            note: NoteCandidate
+        ): PendingIntent {
+            val intent = createStartIntent(
+                context,
+                MainScreenArgs(
+                    appMode = ApplicationLaunchMode.NORMAL,
+                    note = note
+                )
+            )
+
+            return PendingIntent.getActivity(
+                context,
+                AUTOFILL_SAVE_RESULT_REQUEST_CODE,
                 intent,
                 PendingIntent.FLAG_CANCEL_CURRENT
             )

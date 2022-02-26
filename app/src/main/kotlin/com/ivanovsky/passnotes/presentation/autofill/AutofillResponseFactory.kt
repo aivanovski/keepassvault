@@ -4,12 +4,15 @@ import android.content.Context
 import android.os.Build
 import android.service.autofill.Dataset
 import android.service.autofill.FillResponse
+import android.service.autofill.SaveInfo
 import android.view.autofill.AutofillId
 import android.view.autofill.AutofillValue
 import androidx.annotation.RequiresApi
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
+import com.ivanovsky.passnotes.presentation.autofill.extensions.getFields
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillFieldType
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.main.MainActivity
 import com.ivanovsky.passnotes.util.StringUtils
@@ -25,10 +28,11 @@ class AutofillResponseFactory(
 
         return FillResponse.Builder()
             .setAuthentication(
-                structure.getAllAutofillIds().toTypedArray(),
+                structure.getAutofillIds().toTypedArray(),
                 intent.intentSender,
                 viewFactory.createUnlockView()
             )
+            .setSaveInfo(createSaveInfo(structure))
             .build()
     }
 
@@ -37,18 +41,11 @@ class AutofillResponseFactory(
 
         return FillResponse.Builder()
             .setAuthentication(
-                structure.getAllAutofillIds().toTypedArray(),
+                structure.getAutofillIds().toTypedArray(),
                 intent.intentSender,
                 viewFactory.createSelectionView()
             )
-            .build()
-    }
-
-    fun createResponseWithNote(note: Note, structure: AutofillStructure): FillResponse? {
-        val dataSet = buildDatasetForNote(note, structure) ?: return null
-
-        return FillResponse.Builder()
-            .addDataset(dataSet)
+            .setSaveInfo(createSaveInfo(structure))
             .build()
     }
 
@@ -136,8 +133,26 @@ class AutofillResponseFactory(
         return StringUtils.EMPTY
     }
 
-    private fun AutofillStructure.getAllAutofillIds(): List<AutofillId> {
-        return listOfNotNull(username?.autofillId, password?.autofillId)
+    private fun createSaveInfo(structure: AutofillStructure): SaveInfo {
+        val type = structure
+            .getFields()
+            .mapNotNull { field ->
+                when (field.type) {
+                    AutofillFieldType.USERNAME -> SaveInfo.SAVE_DATA_TYPE_USERNAME
+                    AutofillFieldType.PASSWORD -> SaveInfo.SAVE_DATA_TYPE_PASSWORD
+                    else -> null
+                }
+            }
+            .sum()
+
+        val fields = structure.getAutofillIds().toTypedArray()
+
+        return SaveInfo.Builder(type, fields)
+            .build()
+    }
+
+    private fun AutofillStructure.getAutofillIds(): List<AutofillId> {
+        return getFields().mapNotNull { it.autofillId }
     }
 
     companion object {

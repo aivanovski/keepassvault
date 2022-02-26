@@ -83,7 +83,11 @@ class NoteEditorViewModel(
         template = args.template
 
         if (mode == NoteEditorMode.NEW) {
-            val models = modelFactory.createModelsForNewNote(args.template)
+            val models = when {
+                args.template != null -> modelFactory.createModelsFromTemplate(args.template)
+                args.properties != null -> modelFactory.createModelsFromProperties(args.properties)
+                else -> modelFactory.createDefaultModels()
+            }
             val viewModels = viewModelFactory.createCellViewModels(models, eventProvider)
             setCellElements(viewModels)
 

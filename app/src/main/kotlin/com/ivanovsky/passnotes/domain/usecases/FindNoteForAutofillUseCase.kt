@@ -15,7 +15,7 @@ class FindNoteForAutofillUseCase(
 
     suspend fun findNoteForAutofill(structure: AutofillStructure): OperationResult<Note?> =
         withContext(dispatchers.IO) {
-            if (structure.webDomain.isNullOrEmpty()) {
+            if (structure.webDomain.isNullOrEmpty() && structure.applicationId.isNullOrEmpty()) {
                 return@withContext OperationResult.success(null)
             }
 
@@ -25,16 +25,34 @@ class FindNoteForAutofillUseCase(
             }
 
             val db = getDbResult.obj
-            val domain = getCleanWebDomain(structure.webDomain)
+            val domain = structure.webDomain?.let { getCleanWebDomain(it) }
+            val applicationId = structure.applicationId
 
-            val findNotesResult = db.noteRepository.find(domain)
-            if (findNotesResult.isFailed) {
-                return@withContext findNotesResult.takeError()
+            if (applicationId != null) {
+                val findResult = db.noteRepository.find(applicationId)
+                if (findResult.isFailed) {
+                    return@withContext findResult.takeError()
+                }
+
+                val notes = findResult.obj
+                if (notes.isNotEmpty()) {
+                    return@withContext OperationResult.success(notes.firstOrNull())
+                }
             }
 
-            val note = findNotesResult.obj.firstOrNull()
+            if (domain != null) {
+                val findResult = db.noteRepository.find(domain)
+                if (findResult.isFailed) {
+                    return@withContext findResult.takeError()
+                }
 
-            OperationResult.success(note)
+                val notes = findResult.obj
+                if (notes.isNotEmpty()) {
+                    return@withContext OperationResult.success(notes.firstOrNull())
+                }
+            }
+
+            OperationResult.success(null)
         }
 
     private fun getCleanWebDomain(webDomain: String): String {

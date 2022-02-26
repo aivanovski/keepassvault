@@ -85,7 +85,7 @@ class GroupsViewModel(
     ) as DatabaseStatusCellViewModel
 
     val optionPanelViewModel = cellViewModelFactory.createCellViewModel(
-        model = cellModelFactory.createDefaultOptionPanelCellModel(),
+        model = cellModelFactory.createOptionPanelCellModel(OptionPanelState.HIDDEN),
         eventProvider = eventProvider
     ) as OptionPanelCellViewModel
 
@@ -105,6 +105,7 @@ class GroupsViewModel(
     private var rootGroupUid: UUID? = null
     private var groupUid: UUID? = args.groupUid
     private var templates: List<Template>? = null
+    private var isAutofillSavingCancelled = false
 
     init {
         observerBus.register(this)
@@ -211,9 +212,7 @@ class GroupsViewModel(
                 setScreenState(ScreenState.error(message))
             }
 
-            updateOptionPanelViewModel(
-                isVisible = selectionHolder.hasSelection() && data.isSucceededOrDeferred
-            )
+            updateOptionPanelState()
         }
     }
 
@@ -290,7 +289,7 @@ class GroupsViewModel(
             )
         )
 
-        updateOptionPanelViewModel(isVisible = true)
+        updateOptionPanelState()
     }
 
     fun onEditNoteClicked(note: Note) {
@@ -322,7 +321,7 @@ class GroupsViewModel(
             )
         )
 
-        updateOptionPanelViewModel(isVisible = true)
+        updateOptionPanelState()
     }
 
     fun onRemoveConfirmed(group: Group?, note: Note?) {
@@ -546,17 +545,38 @@ class GroupsViewModel(
         statusViewModel.setModel(statusCellModelFactory.createStatusCellModel(status))
     }
 
-    private fun updateOptionPanelViewModel(isVisible: Boolean) {
-        val model = if (isVisible) {
-            cellModelFactory.createPasteOptionPanelCellModel()
-        } else {
-            cellModelFactory.createHiddenOptionPanelCellModel()
-        }
+    private fun updateOptionPanelState() {
+        optionPanelViewModel.setModel(
+            cellModelFactory.createOptionPanelCellModel(
+                state = getCurrentOptionPanelState()
+            )
+        )
+    }
 
-        optionPanelViewModel.setModel(model)
+    private fun getCurrentOptionPanelState(): OptionPanelState {
+        val screenState = this.screenState.value ?: return OptionPanelState.HIDDEN
+
+        return when {
+            !screenState.isDisplayingData -> OptionPanelState.HIDDEN
+            args.note != null && !isAutofillSavingCancelled -> OptionPanelState.SAVE_AUTOFILL_DATA
+            selectionHolder.hasSelection() -> OptionPanelState.PASTE
+            else -> OptionPanelState.HIDDEN
+        }
     }
 
     private fun onPositiveOptionSelected() {
+        when (getCurrentOptionPanelState()) {
+            OptionPanelState.PASTE -> {
+                onPasteButtonClicked()
+            }
+            OptionPanelState.SAVE_AUTOFILL_DATA -> {
+                onSaveAutofillNoteClicked()
+            }
+            else -> {}
+        }
+    }
+
+    private fun onPasteButtonClicked() {
         val currentGroupUid = getCurrentGroupUid() ?: return
         val selection = selectionHolder.getSelection() ?: return
         val action = selectionHolder.getAction() ?: return
@@ -588,9 +608,30 @@ class GroupsViewModel(
         }
     }
 
+    private fun onSaveAutofillNoteClicked() {
+        isAutofillSavingCancelled = true
+        router.navigateTo(
+            NoteEditorScreen(
+                NoteEditorArgs(
+                    mode = NoteEditorMode.NEW,
+                    groupUid = getCurrentGroupUid(),
+                    properties = args.note?.properties
+                )
+            )
+        )
+    }
+
     private fun onNegativeOptionSelected() {
-        selectionHolder.clear()
-        updateOptionPanelViewModel(isVisible = false)
+        when (getCurrentOptionPanelState()) {
+            OptionPanelState.PASTE -> {
+                selectionHolder.clear()
+            }
+            OptionPanelState.SAVE_AUTOFILL_DATA -> {
+                isAutofillSavingCancelled = true
+            }
+            else -> {}
+        }
+        updateOptionPanelState()
     }
 
     private fun hideMenu() {
@@ -611,7 +652,7 @@ class GroupsViewModel(
             ScreenDisplayingType.LOADING -> {
                 hideMenu()
                 hideStatusCell()
-                updateOptionPanelViewModel(isVisible = false)
+                updateOptionPanelState()
             }
         }
     }
@@ -621,6 +662,12 @@ class GroupsViewModel(
 
         return screenState.isDisplayingData &&
             args.appMode == ApplicationLaunchMode.NORMAL
+    }
+
+    enum class OptionPanelState {
+        HIDDEN,
+        PASTE,
+        SAVE_AUTOFILL_DATA
     }
 
     class Factory(private val args: GroupsScreenArgs) : ViewModelProvider.Factory {

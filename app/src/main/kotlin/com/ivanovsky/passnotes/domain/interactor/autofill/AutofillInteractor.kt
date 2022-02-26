@@ -15,5 +15,4 @@ class AutofillInteractor(
 
     suspend fun findNoteForAutofill(structure: AutofillStructure): OperationResult<Note?> =
         findNoteUseCase.findNoteForAutofill(structure)
-
 }

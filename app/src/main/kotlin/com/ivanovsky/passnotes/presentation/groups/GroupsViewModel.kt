@@ -160,7 +160,7 @@ class GroupsViewModel(
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            templates = interactor.getTemplates()
+            templates = interactor.getTemplates().obj
 
             val data = withContext(Dispatchers.IO) {
                 groupUid.let {

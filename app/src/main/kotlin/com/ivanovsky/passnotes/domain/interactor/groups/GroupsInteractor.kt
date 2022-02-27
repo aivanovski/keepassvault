@@ -16,8 +16,8 @@ import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
-import java.util.*
 import kotlinx.coroutines.withContext
+import java.util.UUID
 
 class GroupsInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
@@ -30,9 +30,10 @@ class GroupsInteractor(
     private val moveGroupUseCae: MoveGroupUseCase
 ) {
 
-    fun getTemplates(): List<Template>? {
-        return dbRepo.templateRepository?.templates
-    }
+    suspend fun getTemplates(): OperationResult<List<Template>> =
+        withContext(dispatchers.IO) {
+            dbRepo.templateRepository.getTemplates()
+        }
 
     fun getRootUid(): UUID? {
         val rootResult = dbRepo.groupRepository.rootGroup

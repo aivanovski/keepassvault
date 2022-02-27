@@ -5,12 +5,15 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
+import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
-import java.util.*
+import kotlinx.coroutines.withContext
+import java.util.UUID
 
 class NoteEditorInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
     private val updateNoteUseCase: UpdateNoteUseCase,
+    private val dispatchers: DispatcherProvider,
     private val observerBus: ObserverBus,
 ) {
 
@@ -32,8 +35,16 @@ class NoteEditorInteractor(
     suspend fun updateNote(note: Note): OperationResult<Unit> =
         updateNoteUseCase.updateNote(note)
 
-    fun loadTemplate(templateUid: UUID): Template? {
-        val templates = dbRepo.templateRepository?.templates ?: return null
-        return templates.firstOrNull { template -> template.uid == templateUid }
-    }
+    suspend fun loadTemplate(templateUid: UUID): OperationResult<Template?> =
+        withContext(dispatchers.IO) {
+            val getTemplatesResult = dbRepo.templateRepository.getTemplates()
+            if (getTemplatesResult.isFailed) {
+                return@withContext getTemplatesResult.takeError()
+            }
+
+            val templates = getTemplatesResult.obj
+            val template = templates.firstOrNull { template -> template.uid == templateUid }
+
+            OperationResult.success(template)
+        }
 }

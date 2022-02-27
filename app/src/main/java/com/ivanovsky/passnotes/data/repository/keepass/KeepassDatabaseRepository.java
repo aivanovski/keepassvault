@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
+import com.ivanovsky.passnotes.data.repository.RepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.TemplateRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
@@ -30,6 +31,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 
@@ -40,12 +43,16 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     private static final String EMPTY_DB_PATH = "base.kdbx.xml";
 
     private volatile KeepassDatabase db;
+    @NonNull
+    private final TemplateRepositoryWrapper templateRepositoryWrapper;
     private final Context context;
     private final FileSystemResolver fileSystemResolver;
     private final DatabaseLockInteractor lockInteractor;
     private final DetermineDatabaseStatusUseCase statusUseCase;
     private final ObserverBus observerBus;
     private final Object lock;
+    @NonNull
+    private final List<RepositoryWrapper> repositoryWrappers;
 
     public KeepassDatabaseRepository(Context context,
                                      FileSystemResolver fileSystemResolver,
@@ -58,6 +65,11 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
         this.statusUseCase = statusUseCase;
         this.observerBus = observerBus;
         this.lock = new Object();
+        templateRepositoryWrapper = new TemplateRepositoryWrapper();
+
+        repositoryWrappers = Arrays.asList(
+                templateRepositoryWrapper
+        );
     }
 
     @Override
@@ -82,9 +94,10 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
         return db.getGroupRepository();
     }
 
+    @NonNull
     @Override
     public TemplateRepository getTemplateRepository() {
-        return db.getTemplateRepository();
+        return templateRepositoryWrapper;
     }
 
     @NonNull
@@ -199,11 +212,19 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     }
 
     private void onDatabaseOpened(FSOptions fsOptions, DatabaseStatus status) {
+        for (RepositoryWrapper wrapper : repositoryWrappers) {
+            wrapper.onDatabaseOpened(db);
+        }
+
         lockInteractor.onDatabaseOpened(fsOptions, status);
         observerBus.notifyDatabaseOpened(fsOptions, status);
     }
 
     private void onDatabaseClosed() {
+        for (RepositoryWrapper wrapper : repositoryWrappers) {
+            wrapper.onDatabaseClosed();
+        }
+
         lockInteractor.onDatabaseClosed();
         observerBus.notifyDatabaseClosed();
     }

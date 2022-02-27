@@ -274,9 +274,7 @@ class NoteEditorViewModel(
 
                 val note = noteResult.obj
 
-                template = withContext(dispatchers.IO) {
-                    loadTemplate(note)
-                }
+                template = loadTemplate(note)
 
                 val models = modelFactory.createModelsForNote(note, template)
                 val viewModels = viewModelFactory.createCellViewModels(models, eventProvider)
@@ -291,22 +289,24 @@ class NoteEditorViewModel(
         }
     }
 
-    private fun loadTemplate(note: Note): Template? {
-        val filter = PropertyFilter.Builder()
-            .filterTemplateUid()
-            .build()
+    private suspend fun loadTemplate(note: Note): Template? =
+        withContext(dispatchers.IO) {
+            val filter = PropertyFilter.Builder()
+                .filterTemplateUid()
+                .build()
 
-        val templateUid = filter.apply(note.properties)
-            .firstOrNull()
-            ?.value
-            ?.toUUID()
+            val templateUid = filter.apply(note.properties)
+                .firstOrNull()
+                ?.value
+                ?.toUUID()
 
-        return if (templateUid != null) {
-            interactor.loadTemplate(templateUid)
-        } else {
-            null
+            if (templateUid != null) {
+                val loadTemplateResult = interactor.loadTemplate(templateUid)
+                loadTemplateResult.obj
+            } else {
+                null
+            }
         }
-    }
 
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->

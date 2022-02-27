@@ -187,13 +187,21 @@ class SearchViewModel(
 
                 viewModelScope.launch {
                     val getNoteResult = interactor.getNoteByUid(noteUid)
-                    if (getNoteResult.isSucceededOrDeferred) {
-                        val note = getNoteResult.obj
-                        sendAutofillResponseEvent.call(Pair(note, structure))
-                    } else {
+                    if (getNoteResult.isFailed) {
                         val message = errorInteractor.processAndGetMessage(getNoteResult.error)
                         screenState.value = ScreenState.dataWithError(message)
+                        return@launch
                     }
+
+                    val note = getNoteResult.obj
+                    val updateResult = interactor.updateNoteWithAutofillData(note, structure)
+                    if (updateResult.isFailed) {
+                        val message = errorInteractor.processAndGetMessage(updateResult.error)
+                        screenState.value = ScreenState.dataWithError(message)
+                        return@launch
+                    }
+
+                    sendAutofillResponseEvent.call(Pair(note, structure))
                 }
             }
             else -> {

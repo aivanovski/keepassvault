@@ -8,8 +8,10 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.ClipboardHelper
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
+import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import java.util.UUID
 
 class NoteInteractor(
@@ -17,6 +19,7 @@ class NoteInteractor(
     private val clipboardHelper: ClipboardHelper,
     private val lockUseCase: LockDatabaseUseCase,
     private val getStatusUseCase: GetDatabaseStatusUseCase,
+    private val autofillUseCase: UpdateNoteWithAutofillDataUseCase,
     private val settings: Settings
 ) {
 
@@ -41,4 +44,10 @@ class NoteInteractor(
 
     suspend fun getDatabaseStatus(): OperationResult<DatabaseStatus> =
         getStatusUseCase.getDatabaseStatus()
+
+    suspend fun updateNoteWithAutofillData(
+        note: Note,
+        structure: AutofillStructure
+    ): OperationResult<Boolean> =
+        autofillUseCase.updateNoteWithAutofillData(note, structure)
 }

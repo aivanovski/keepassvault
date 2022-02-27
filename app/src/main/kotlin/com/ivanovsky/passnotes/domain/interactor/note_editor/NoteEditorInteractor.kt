@@ -5,11 +5,13 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
+import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
 import java.util.*
 
 class NoteEditorInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
-    private val observerBus: ObserverBus
+    private val updateNoteUseCase: UpdateNoteUseCase,
+    private val observerBus: ObserverBus,
 ) {
 
     fun createNewNote(note: Note): OperationResult<Unit> {
@@ -27,20 +29,8 @@ class NoteEditorInteractor(
         return dbRepo.noteRepository.getNoteByUid(uid)
     }
 
-    fun updateNote(note: Note): OperationResult<Unit> {
-        val updateResult = dbRepo.noteRepository.update(note)
-        if (updateResult.isFailed) {
-            return updateResult.takeError()
-        }
-
-        val groupUid = note.groupUid
-        val oldUid = note.uid
-        val newUid = updateResult.obj
-
-        observerBus.notifyNoteContentChanged(groupUid, oldUid, newUid)
-
-        return updateResult.takeStatusWith(Unit)
-    }
+    suspend fun updateNote(note: Note): OperationResult<Unit> =
+        updateNoteUseCase.updateNote(note)
 
     fun loadTemplate(templateUid: UUID): Template? {
         val templates = dbRepo.templateRepository?.templates ?: return null

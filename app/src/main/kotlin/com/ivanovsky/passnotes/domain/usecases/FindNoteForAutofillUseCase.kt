@@ -28,6 +28,8 @@ class FindNoteForAutofillUseCase(
             val domain = structure.webDomain?.let { getCleanWebDomain(it) }
             val applicationId = structure.applicationId
 
+            // TODO(autofill): to improve search, autofill-properties should be also checked after
+            //  noteRepository.find()
             if (applicationId != null) {
                 val findResult = db.noteRepository.find(applicationId)
                 if (findResult.isFailed) {

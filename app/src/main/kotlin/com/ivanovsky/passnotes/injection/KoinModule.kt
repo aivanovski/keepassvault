@@ -37,7 +37,7 @@ import com.ivanovsky.passnotes.domain.interactor.settings.main.MainSettingsInter
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
-import com.ivanovsky.passnotes.domain.usecases.AutofillNoteUseCase
+import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
@@ -50,6 +50,7 @@ import com.ivanovsky.passnotes.domain.usecases.IsDatabaseOpenedUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
+import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
 import com.ivanovsky.passnotes.presentation.about.AboutViewModel
 import com.ivanovsky.passnotes.presentation.autofill.AutofillViewFactory
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
@@ -142,7 +143,8 @@ object KoinModule {
             single { IsDatabaseOpenedUseCase(get()) }
             single { GetNoteUseCase(get(), get()) }
             single { FindNoteForAutofillUseCase(get(), get()) }
-            single { AutofillNoteUseCase(get()) }
+            single { UpdateNoteWithAutofillDataUseCase(get(), get(), get()) }
+            single { UpdateNoteUseCase(get(), get(), get()) }
 
             // Interactors
             single { FilePickerInteractor(get()) }
@@ -151,13 +153,13 @@ object KoinModule {
             single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
             single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
-            single { NoteInteractor(get(), get(), get(), get(), get()) }
+            single { NoteInteractor(get(), get(), get(), get(), get(), get()) }
             single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
-            single { NoteEditorInteractor(get(), get()) }
+            single { NoteEditorInteractor(get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
             single { DatabaseLockInteractor(get(), get(), get()) }
             single { SelectDatabaseInteractor(get(), get(), get(), get()) }
-            single { SearchInteractor(get(), get(), get(), get(), get()) }
+            single { SearchInteractor(get(), get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
             single { DatabaseSettingsInteractor(get(), get()) }
             single { AppSettingsInteractor(get(), get()) }

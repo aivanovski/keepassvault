@@ -160,7 +160,23 @@ class NoteViewModel(
             return
         }
 
-        sendAutofillResponseEvent.call(Pair(note, autofillStructure))
+        val note = this.note
+        if (note == null) {
+            sendAutofillResponseEvent.call(Pair(null, autofillStructure))
+            return
+        }
+
+        screenState.value = ScreenState.loading()
+
+        viewModelScope.launch {
+            val updateResult = interactor.updateNoteWithAutofillData(note, autofillStructure)
+            if (updateResult.isSucceededOrDeferred) {
+                sendAutofillResponseEvent.call(Pair(note, autofillStructure))
+            } else {
+               val message = errorInteractor.processAndGetMessage(updateResult.error)
+               screenState.value = ScreenState.dataWithError(message)
+            }
+        }
     }
 
     fun loadData() {

@@ -619,7 +619,7 @@ class GroupsViewModel(
     private fun getFabButtonVisibility(): Boolean {
         val screenState = this.screenState.value ?: return false
 
-        return screenState.isDisplayingData &&
+        return (screenState.isDisplayingData || screenState.isDisplayingEmptyState) &&
             args.appMode == ApplicationLaunchMode.NORMAL
     }
 

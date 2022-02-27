@@ -47,7 +47,7 @@ class PassnotesAutofillService : AutofillService() {
             return
         }
 
-        val structure = AutofillStructureParser().parse(latestStructure)
+        val structure = AutofillStructureParser(this).parse(latestStructure)
         if (structure == null) {
             callback.onSuccess(null)
             return
@@ -100,7 +100,7 @@ class PassnotesAutofillService : AutofillService() {
             return
         }
 
-        val structure = AutofillStructureParser().parse(latestStructure)
+        val structure = AutofillStructureParser(this).parse(latestStructure)
         if (structure == null) {
             callback.onSuccess()
             return

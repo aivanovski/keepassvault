@@ -4,6 +4,7 @@ import androidx.annotation.RequiresApi
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillField
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillNode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillFieldType
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.autofill.model.MutableAutofillStructure
 
 fun MutableAutofillStructure.getNodesByFieldType(type: AutofillFieldType): List<AutofillNode> {
@@ -14,6 +15,10 @@ fun MutableAutofillStructure.hasFields(): Boolean {
     val usernames = getNodesByFieldType(AutofillFieldType.USERNAME)
     val passwords = getNodesByFieldType(AutofillFieldType.PASSWORD)
     return usernames.isNotEmpty() && passwords.isNotEmpty()
+}
+
+fun AutofillStructure.getFields(): List<AutofillField> {
+    return listOfNotNull(username, password)
 }
 
 @RequiresApi(api = 26)

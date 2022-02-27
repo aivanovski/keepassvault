@@ -50,7 +50,8 @@ class MainViewModel(
                 UnlockScreen(
                     UnlockScreenArgs(
                         appMode = args.appMode,
-                        autofillStructure = args.autofillStructure
+                        autofillStructure = args.autofillStructure,
+                        note = args.note
                     )
                 )
             )

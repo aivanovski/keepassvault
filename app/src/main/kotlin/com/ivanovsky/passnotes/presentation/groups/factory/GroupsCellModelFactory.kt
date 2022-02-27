@@ -8,6 +8,8 @@ import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.GroupCellModel
 import com.ivanovsky.passnotes.presentation.core.model.NoteCellModel
 import com.ivanovsky.passnotes.presentation.core.model.OptionPanelCellModel
+import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.OptionPanelState
+import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.OptionPanelState.*
 import com.ivanovsky.passnotes.util.StringUtils
 
 class GroupsCellModelFactory(
@@ -36,29 +38,33 @@ class GroupsCellModelFactory(
         }
     }
 
-    fun createDefaultOptionPanelCellModel(): OptionPanelCellModel {
-        return createHiddenOptionPanelCellModel()
-    }
-
-    fun createPasteOptionPanelCellModel(): OptionPanelCellModel {
-        return OptionPanelCellModel(
-            id = PASTE_CELL_ID,
-            positiveText = resourceProvider.getString(R.string.paste),
-            negativeText = resourceProvider.getString(R.string.cancel),
-            isVisible = true
-        )
-    }
-
-    fun createHiddenOptionPanelCellModel(): OptionPanelCellModel {
-        return OptionPanelCellModel(
-            id = StringUtils.EMPTY,
-            positiveText = StringUtils.EMPTY,
-            negativeText = StringUtils.EMPTY,
-            isVisible = false
-        )
+    fun createOptionPanelCellModel(state: OptionPanelState): OptionPanelCellModel {
+        return when (state) {
+            PASTE -> OptionPanelCellModel(
+                id = OPTION_PANEL_CELL_ID,
+                positiveText = resourceProvider.getString(R.string.paste),
+                negativeText = resourceProvider.getString(R.string.cancel),
+                message = StringUtils.EMPTY,
+                isVisible = true
+            )
+            SAVE_AUTOFILL_DATA -> OptionPanelCellModel(
+                id = OPTION_PANEL_CELL_ID,
+                positiveText = resourceProvider.getString(R.string.yes),
+                negativeText = resourceProvider.getString(R.string.discard),
+                message = resourceProvider.getString(R.string.autofill_save_note_message),
+                isVisible = true
+            )
+            HIDDEN -> OptionPanelCellModel(
+                id = OPTION_PANEL_CELL_ID,
+                positiveText = StringUtils.EMPTY,
+                negativeText = StringUtils.EMPTY,
+                message = StringUtils.EMPTY,
+                isVisible = false
+            )
+        }
     }
 
     companion object {
-        val PASTE_CELL_ID = "pasteCellId"
+        private const val OPTION_PANEL_CELL_ID = "optionPanelCellId"
     }
 }

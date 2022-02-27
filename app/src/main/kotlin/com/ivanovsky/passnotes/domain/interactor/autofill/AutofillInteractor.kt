@@ -13,7 +13,6 @@ class AutofillInteractor(
 
     fun isDatabaseOpened(): Boolean = dbOpenedUseCase.isDatabaseOpened()
 
-    suspend fun findNoteForAutofill(structure: AutofillStructure): OperationResult<Pair<Boolean, Note?>> =
+    suspend fun findNoteForAutofill(structure: AutofillStructure): OperationResult<Note?> =
         findNoteUseCase.findNoteForAutofill(structure)
-
 }

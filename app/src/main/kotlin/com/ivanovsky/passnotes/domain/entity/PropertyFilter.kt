@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.domain.entity
 
 import com.ivanovsky.passnotes.data.entity.Property
+import com.ivanovsky.passnotes.data.entity.Property.Companion.PROPERTY_NAME_AUTOFILL_APP_ID
 import com.ivanovsky.passnotes.data.entity.Property.Companion.PROPERTY_NAME_TEMPLATE_UID
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.entity.filter.*
@@ -82,6 +83,14 @@ class PropertyFilter private constructor(
 
         fun filterTemplateUid(): Builder {
             return filterByName(PROPERTY_NAME_TEMPLATE_UID)
+        }
+
+        fun filterAutofillAppId(): Builder {
+            return filterByName(PROPERTY_NAME_AUTOFILL_APP_ID)
+        }
+
+        fun filterUrl(): Builder {
+            return filterByType(PropertyType.URL)
         }
 
         fun excludeDefaultTypes(): Builder {

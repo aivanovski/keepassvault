@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.autofill
 
 import android.app.assist.AssistStructure
 import android.app.assist.AssistStructure.ViewNode
+import android.content.Context
 import android.os.Build
 import android.text.InputType
 import android.view.View
@@ -18,13 +19,19 @@ import timber.log.Timber
 import java.util.Locale
 
 @RequiresApi(api = 26)
-class AutofillStructureParser {
+class AutofillStructureParser(
+    private val context: Context
+) {
 
     fun parse(sourceStructure: AssistStructure): AutofillStructure? {
         val structure = MutableAutofillStructure()
 
         for (windowNode in sourceStructure.getWindowNodes()) {
             val applicationId = windowNode.title.toString().split("/").firstOrNull()
+
+            if (applicationId == context.packageName) {
+                continue
+            }
 
             if (applicationId?.contains("PopupWindow:") == false) {
                 structure.applicationId = applicationId
@@ -117,9 +124,9 @@ class AutofillStructureParser {
         }
 
         return AutofillStructure(
+            applicationId = result.applicationId,
             isWebView = result.isWebView,
             webDomain = result.webDomain,
-            webScheme = result.webScheme,
             username = username.toField(),
             password = password.toField()
         )

@@ -31,6 +31,7 @@ import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
 import com.ivanovsky.passnotes.domain.interactor.selectdb.SelectDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
+import com.ivanovsky.passnotes.domain.interactor.service.LockServiceInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.main.MainSettingsInteractor
@@ -165,6 +166,7 @@ object KoinModule {
             single { AppSettingsInteractor(get(), get()) }
             single { AutofillInteractor(get(), get()) }
             single { MainInteractor(get()) }
+            single { LockServiceInteractor(get(), get(), get(), get(), get(), get()) }
 
             // Autofill
             single { AutofillViewFactory(get(), get()) }

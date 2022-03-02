@@ -123,6 +123,12 @@ public class KeepassDatabase implements EncryptedDatabase {
 
     @NonNull
     @Override
+    public FileDescriptor getFile() {
+        return file;
+    }
+
+    @NonNull
+    @Override
     public DatabaseStatus getStatus() {
         return status.get();
     }

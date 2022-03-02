@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository.encdb;
 
 import androidx.annotation.NonNull;
 
+import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
@@ -12,6 +13,9 @@ public interface EncryptedDatabase {
 
     @NonNull
     Object getLock();
+
+    @NonNull
+    FileDescriptor getFile();
 
     @NonNull
     DatabaseStatus getStatus();

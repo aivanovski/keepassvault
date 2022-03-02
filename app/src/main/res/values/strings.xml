@@ -37,7 +37,9 @@
     <!-- Lock notification -->
     <string name="notification_channel">Quick Lock</string>
     <string name="notification_channel_description">Button to lock opened database</string>
-    <string name="notification_text">Database is opened</string>
+    <string name="notification_text_normal">Database is opened</string>
+    <string name="notification_text_unsent_changes">Database is opened, unsent changes</string>
+    <string name="notification_text_sending">Sending changes…</string>
 
     <!-- Autofill -->
     <string name="sign_in_with_app">Sign in with %s</string>

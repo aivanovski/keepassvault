@@ -491,6 +491,13 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
             return openCachedFileForWrite(file, null);
         }
 
+        if (options.isDelayedWriteOverNetwork()) {
+            RemoteFile cachedFile = cache.getByUid(file.getUid());
+            if (cachedFile != null) {
+                return openCachedFileForWrite(file, null);
+            }
+        }
+
         try {
             RemoteFileMetadata metadata;
 

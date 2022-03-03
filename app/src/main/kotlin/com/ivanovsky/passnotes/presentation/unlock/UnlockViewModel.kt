@@ -9,9 +9,12 @@ import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
+import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
+import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
+import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
@@ -63,7 +66,8 @@ class UnlockViewModel(
     private val args: UnlockScreenArgs
 ) : ViewModel(),
     ObserverBus.UsedFileDataSetObserver,
-    ObserverBus.UsedFileContentObserver {
+    ObserverBus.UsedFileContentObserver,
+    ObserverBus.SyncProgressStatusObserver {
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.loading())
@@ -397,16 +401,16 @@ class UnlockViewModel(
         setSelectedFileCell(
             modelFactory.createFileCellModel(
                 file = file,
-                syncStatus = null,
+                syncState = null,
                 isNextButtonVisible = files.size > 1,
                 onFileClicked = { navigateToSelectDatabaseScreen() }
             )
         )
 
         viewModelScope.launch {
-            val syncStatus = interactor.getSyncStatus(file)
+            val syncState = interactor.getSyncState(file)
 
-            onSyncStatusReceived(file, syncStatus)
+            onSyncStateReceived(file, syncState)
         }
     }
 
@@ -423,7 +427,22 @@ class UnlockViewModel(
         }
     }
 
-    private fun onSyncStatusReceived(file: FileDescriptor, syncStatus: SyncStatus) {
+    override fun onSyncProgressStatusChanged(
+        fsAuthority: FSAuthority,
+        uid: String,
+        status: SyncProgressStatus
+    ) {
+        val selectedFile = this.selectedFile ?: return
+
+        if (selectedFile.uid == uid && selectedFile.fsAuthority == fsAuthority) {
+            viewModelScope.launch {
+                val syncState = interactor.getSyncState(selectedFile)
+                onSyncStateReceived(selectedFile, syncState)
+            }
+        }
+    }
+
+    private fun onSyncStateReceived(file: FileDescriptor, syncState: SyncState) {
         if (file != selectedFile) return
 
         val files = recentlyUsedFiles ?: return
@@ -431,13 +450,13 @@ class UnlockViewModel(
         setSelectedFileCell(
             modelFactory.createFileCellModel(
                 file = file,
-                syncStatus = syncStatus,
+                syncState = syncState,
                 isNextButtonVisible = files.size > 1,
                 onFileClicked = { navigateToSelectDatabaseScreen() }
             )
         )
 
-        if (syncStatus == SyncStatus.CONFLICT) {
+        if (syncState.status == SyncStatus.CONFLICT) {
             screenState.value = ScreenState.dataWithError(
                 errorText = resourceProvider.getString(R.string.file_update_conflict_message),
                 errorButtonText = resourceProvider.getString(R.string.resolve)

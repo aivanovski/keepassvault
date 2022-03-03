@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.file
 
 import android.content.Context
+import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.domain.FileHelper
@@ -23,6 +24,7 @@ class FileSystemResolver(
     private val settings: Settings,
     private val remoteFileRepository: RemoteFileRepository,
     private val fileHelper: FileHelper,
+    private val observerBus: ObserverBus,
     private val httpClient: OkHttpClient
 ) {
 
@@ -62,6 +64,7 @@ class FileSystemResolver(
                     DropboxClient(authenticator),
                     remoteFileRepository,
                     fileHelper,
+                    observerBus,
                     fsAuthority
                 )
             }
@@ -73,6 +76,7 @@ class FileSystemResolver(
                     client,
                     remoteFileRepository,
                     fileHelper,
+                    observerBus,
                     fsAuthority
                 )
             }

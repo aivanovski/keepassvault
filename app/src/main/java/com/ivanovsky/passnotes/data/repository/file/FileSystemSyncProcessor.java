@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo;
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy;
+import com.ivanovsky.passnotes.data.entity.SyncProgressStatus;
 import com.ivanovsky.passnotes.data.entity.SyncStatus;
 
 import java.util.List;
@@ -15,6 +16,9 @@ public interface FileSystemSyncProcessor {
 
     @NonNull
     List<FileDescriptor> getLocallyModifiedFiles();
+
+    @NonNull
+    SyncProgressStatus getSyncProgressStatusForFile(@NonNull String uid);
 
     @NonNull
     SyncStatus getSyncStatusForFile(@NonNull String uid);

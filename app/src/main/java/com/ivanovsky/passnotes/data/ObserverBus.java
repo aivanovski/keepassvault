@@ -7,6 +7,9 @@ import androidx.annotation.NonNull;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.ivanovsky.passnotes.data.entity.FSAuthority;
+import com.ivanovsky.passnotes.data.entity.FileDescriptor;
+import com.ivanovsky.passnotes.data.entity.SyncProgressStatus;
 import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 import com.ivanovsky.passnotes.util.ReflectionUtils;
@@ -56,6 +59,12 @@ public class ObserverBus {
 
     public interface DatabaseStatusObserver extends Observer {
         void onDatabaseStatusChanged(@NonNull DatabaseStatus status);
+    }
+
+    public interface SyncProgressStatusObserver extends Observer {
+        void onSyncProgressStatusChanged(@NonNull FSAuthority fsAuthority,
+                                         @NonNull String uid,
+                                         @NonNull SyncProgressStatus status);
     }
 
     public ObserverBus() {
@@ -120,6 +129,14 @@ public class ObserverBus {
     public void notifyDatabaseStatusChanged(DatabaseStatus status) {
         for (DatabaseStatusObserver observer : filterObservers(DatabaseStatusObserver.class)) {
             handler.post(() -> observer.onDatabaseStatusChanged(status));
+        }
+    }
+
+    public void notifySyncProgressStatusChanged(@NonNull FSAuthority fsAuthority,
+                                                @NonNull String uid,
+                                                @NonNull SyncProgressStatus status) {
+        for (SyncProgressStatusObserver observer : filterObservers(SyncProgressStatusObserver.class)) {
+            handler.post(() -> observer.onSyncProgressStatusChanged(fsAuthority, uid, status));
         }
     }
 

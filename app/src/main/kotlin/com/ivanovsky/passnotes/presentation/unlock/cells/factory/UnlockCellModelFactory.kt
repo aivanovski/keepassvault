@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.presentation.unlock.cells.factory
 
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
+import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.extensions.formatReadablePath
@@ -14,41 +16,50 @@ class UnlockCellModelFactory(
 
     fun createFileCellModel(
         file: FileDescriptor,
-        syncStatus: SyncStatus?,
+        syncState: SyncState?,
         isNextButtonVisible: Boolean,
         onFileClicked: (file: FileDescriptor) -> Unit
     ): DatabaseCellModel {
-        val isStatusVisible = (syncStatus != SyncStatus.CONFLICT)
+        val isStatusVisible = (syncState?.status != SyncStatus.CONFLICT)
 
         return DatabaseCellModel(
             id = file.uid,
             name = file.name,
             path = file.formatReadablePath(resourceProvider),
-            status = formatSyncStatus(syncStatus),
+            status = formatSyncState(syncState),
             isStatusVisible = isStatusVisible,
             isNextButtonVisible = isNextButtonVisible,
             onClicked = { onFileClicked.invoke(file) }
         )
     }
 
-    private fun formatSyncStatus(syncStatus: SyncStatus?): String {
-        return when (syncStatus) {
-            SyncStatus.NO_CHANGES -> {
+    private fun formatSyncState(state: SyncState?): String {
+        return when {
+            state?.progress == SyncProgressStatus.SYNCING -> {
+                resourceProvider.getString(R.string.syncing)
+            }
+            state?.progress == SyncProgressStatus.DOWNLOADING -> {
+                resourceProvider.getString(R.string.downloading)
+            }
+            state?.progress == SyncProgressStatus.UPLOADING -> {
+                resourceProvider.getString(R.string.uploading)
+            }
+            state?.status == SyncStatus.NO_CHANGES -> {
                 resourceProvider.getString(R.string.file_is_up_to_date)
             }
-            SyncStatus.LOCAL_CHANGES -> {
+            state?.status == SyncStatus.LOCAL_CHANGES -> {
                 resourceProvider.getString(R.string.unsent_changes)
             }
-            SyncStatus.REMOTE_CHANGES -> {
+            state?.status == SyncStatus.REMOTE_CHANGES -> {
                 resourceProvider.getString(R.string.new_version_of_file_is_available)
             }
-            SyncStatus.LOCAL_CHANGES_NO_NETWORK -> {
+            state?.status == SyncStatus.LOCAL_CHANGES_NO_NETWORK -> {
                 resourceProvider.getString(R.string.unsent_changes_and_offline_mode)
             }
-            SyncStatus.NO_NETWORK -> {
+            state?.status == SyncStatus.NO_NETWORK -> {
                 resourceProvider.getString(R.string.offline_mode)
             }
-            SyncStatus.CONFLICT -> EMPTY
+            state?.status == SyncStatus.CONFLICT -> EMPTY
             else -> {
                 resourceProvider.getString(
                     R.string.text_with_dots,

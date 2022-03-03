@@ -35,11 +35,11 @@
     <string name="select">Select</string>
 
     <!-- Lock notification -->
-    <string name="notification_channel">Quick Lock</string>
-    <string name="notification_channel_description">Button to lock opened database</string>
-    <string name="notification_text_normal">Database is opened</string>
-    <string name="notification_text_unsent_changes">Database is opened, unsent changes</string>
-    <string name="notification_text_sending">Sending changes…</string>
+    <string name="lock_notification_channel">Quick Lock</string>
+    <string name="lock_notification_channel_description">Button to lock opened database</string>
+    <string name="lock_notification_text_normal">Database is opened</string>
+    <string name="lock_notification_text_not_synchronized">Database is opened, not synchronized</string>
+    <string name="lock_notification_text_synchronizing">Synchronizing</string>
 
     <!-- Autofill -->
     <string name="sign_in_with_app">Sign in with %s</string>
@@ -72,6 +72,9 @@
     <string name="offline_mode">Offline mode</string>
     <string name="checking">Checking</string>
     <string name="conflict">Conflict</string>
+    <string name="syncing">Syncing</string>
+    <string name="downloading">Downloading</string>
+    <string name="uploading">Uploading</string>
 
     <!-- New database screen -->
     <string name="new_database">New database</string>

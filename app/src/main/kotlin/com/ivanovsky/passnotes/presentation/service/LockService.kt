@@ -109,7 +109,7 @@ class LockService : Service(), ObserverBus.DatabaseStatusObserver {
 
     private fun runSyncAndLockCommand(file: FileDescriptor) {
         scope.launch {
-            start(getString(R.string.notification_text_sending))
+            start(getString(R.string.lock_notification_text_synchronizing))
 
             val syncResult = interactor.syncAndLock(file)
 
@@ -144,10 +144,10 @@ class LockService : Service(), ObserverBus.DatabaseStatusObserver {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 getChannelId(),
-                getString(R.string.notification_channel),
+                getString(R.string.lock_notification_channel),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = getString(R.string.notification_channel_description)
+                description = getString(R.string.lock_notification_channel_description)
             }
 
             getNotificationManager().createNotificationChannel(channel)
@@ -186,9 +186,9 @@ class LockService : Service(), ObserverBus.DatabaseStatusObserver {
 
     private fun getMessageByDatabaseStatus(status: DatabaseStatus): String {
         return if (status == DatabaseStatus.DELAYED_CHANGES) {
-            getString(R.string.notification_text_unsent_changes)
+            getString(R.string.lock_notification_text_not_synchronized)
         } else {
-            getString(R.string.notification_text_normal)
+            getString(R.string.lock_notification_text_normal)
         }
     }
 

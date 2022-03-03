@@ -126,7 +126,7 @@ object KoinModule {
             single { provideUsedFileRepository(get(), get()) }
 
             // Files, Keepass
-            single { FileSystemResolver(get(), get(), get(), get(), get()) }
+            single { FileSystemResolver(get(), get(), get(), get(), get(), get()) }
             single { KeepassDatabaseRepository(get(), get(), get(), get(), get()) as EncryptedDatabaseRepository }
 
             // Use Cases
@@ -166,7 +166,7 @@ object KoinModule {
             single { AppSettingsInteractor(get(), get()) }
             single { AutofillInteractor(get(), get()) }
             single { MainInteractor(get()) }
-            single { LockServiceInteractor(get(), get(), get(), get(), get(), get()) }
+            single { LockServiceInteractor(get(), get(), get(), get(), get()) }
 
             // Autofill
             single { AutofillViewFactory(get(), get()) }
@@ -208,7 +208,7 @@ object KoinModule {
             factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
             viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
-            viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }
+            viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), get(), args) }
             factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), args) }
             viewModel { AboutViewModel(get(), get()) }
             viewModel { MainSettingsViewModel(get(), get()) }

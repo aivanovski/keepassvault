@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.domain.interactor.unlock
 
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_RECORD_IS_ALREADY_EXISTS
@@ -50,8 +51,8 @@ class UnlockInteractor(
     suspend fun getSyncConflictInfo(file: FileDescriptor): OperationResult<SyncConflictInfo> =
         syncUseCases.getSyncConflictInfo(file)
 
-    suspend fun getSyncStatus(file: FileDescriptor): SyncStatus =
-        syncUseCases.getSyncStatus(file)
+    suspend fun getSyncState(file: FileDescriptor): SyncState =
+        syncUseCases.getSyncState(file)
 
     suspend fun resolveConflict(
         file: FileDescriptor,
@@ -64,9 +65,9 @@ class UnlockInteractor(
         file: FileDescriptor
     ): OperationResult<Boolean> =
         withContext(dispatchers.IO) {
-            val syncStatus = syncUseCases.getSyncStatus(file)
+            val syncState = syncUseCases.getSyncState(file)
 
-            if (syncStatus == SyncStatus.LOCAL_CHANGES || syncStatus == SyncStatus.REMOTE_CHANGES) {
+            if (syncState.status == SyncStatus.LOCAL_CHANGES || syncState.status == SyncStatus.REMOTE_CHANGES) {
                 val syncResult = syncUseCases.processSync(file)
                 if (syncResult.isFailed && syncResult.error.type != NETWORK_IO_ERROR) {
                     return@withContext syncResult.takeError()

@@ -66,13 +66,13 @@
     <string name="unlock">Unlock</string>
     <string name="empty_file_name">No filename</string>
     <string name="file_is_up_to_date">File is up to date</string>
-    <string name="unsent_changes">Unsent changes</string>
     <string name="new_version_of_file_is_available">New version of file is available</string>
-    <string name="unsent_changes_and_offline_mode">Unsent changes, offline mode</string>
+    <string name="not_synchronized_and_offline_mode">Not synchronized, offline mode</string>
     <string name="offline_mode">Offline mode</string>
     <string name="checking">Checking</string>
     <string name="conflict">Conflict</string>
-    <string name="syncing">Syncing</string>
+    <string name="not_synchronized">Not synchronized</string>
+    <string name="synchronizing">Synchronizing</string>
     <string name="downloading">Downloading</string>
     <string name="uploading">Uploading</string>
 

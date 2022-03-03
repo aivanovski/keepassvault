@@ -36,7 +36,7 @@ class UnlockCellModelFactory(
     private fun formatSyncState(state: SyncState?): String {
         return when {
             state?.progress == SyncProgressStatus.SYNCING -> {
-                resourceProvider.getString(R.string.syncing)
+                resourceProvider.getString(R.string.synchronizing)
             }
             state?.progress == SyncProgressStatus.DOWNLOADING -> {
                 resourceProvider.getString(R.string.downloading)
@@ -48,13 +48,13 @@ class UnlockCellModelFactory(
                 resourceProvider.getString(R.string.file_is_up_to_date)
             }
             state?.status == SyncStatus.LOCAL_CHANGES -> {
-                resourceProvider.getString(R.string.unsent_changes)
+                resourceProvider.getString(R.string.not_synchronized)
             }
             state?.status == SyncStatus.REMOTE_CHANGES -> {
                 resourceProvider.getString(R.string.new_version_of_file_is_available)
             }
             state?.status == SyncStatus.LOCAL_CHANGES_NO_NETWORK -> {
-                resourceProvider.getString(R.string.unsent_changes_and_offline_mode)
+                resourceProvider.getString(R.string.not_synchronized_and_offline_mode)
             }
             state?.status == SyncStatus.NO_NETWORK -> {
                 resourceProvider.getString(R.string.offline_mode)

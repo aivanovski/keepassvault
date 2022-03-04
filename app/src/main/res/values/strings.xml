@@ -35,9 +35,11 @@
     <string name="select">Select</string>
 
     <!-- Lock notification -->
-    <string name="notification_channel">Quick Lock</string>
-    <string name="notification_channel_description">Button to lock opened database</string>
-    <string name="notification_text">Database is opened</string>
+    <string name="lock_notification_channel">Quick Lock</string>
+    <string name="lock_notification_channel_description">Button to lock opened database</string>
+    <string name="lock_notification_text_normal">Database is opened</string>
+    <string name="lock_notification_text_not_synchronized">Database is opened, not synchronized</string>
+    <string name="lock_notification_text_synchronizing">Synchronizing</string>
 
     <!-- Autofill -->
     <string name="sign_in_with_app">Sign in with %s</string>
@@ -64,12 +66,15 @@
     <string name="unlock">Unlock</string>
     <string name="empty_file_name">No filename</string>
     <string name="file_is_up_to_date">File is up to date</string>
-    <string name="unsent_changes">Unsent changes</string>
     <string name="new_version_of_file_is_available">New version of file is available</string>
-    <string name="unsent_changes_and_offline_mode">Unsent changes, offline mode</string>
+    <string name="not_synchronized_and_offline_mode">Not synchronized, offline mode</string>
     <string name="offline_mode">Offline mode</string>
     <string name="checking">Checking</string>
     <string name="conflict">Conflict</string>
+    <string name="not_synchronized">Not synchronized</string>
+    <string name="synchronizing">Synchronizing</string>
+    <string name="downloading">Downloading</string>
+    <string name="uploading">Uploading</string>
 
     <!-- New database screen -->
     <string name="new_database">New database</string>
@@ -198,6 +203,8 @@
     <string name="pref_is_file_log_enabled_summary">Application will write all logs to file that can be attached to issue at Github page</string>
     <string name="pref_send_log_file_title">Send log file</string>
     <string name="pref_remove_log_files_title">Clear logs</string>
+    <string name="pref_is_postponed_sync_enabled_title">Postponed synchronization</string>
+    <string name="pref_is_postponed_sync_enabled_summary">Synchronization via network will be postponed until database will be locked</string>
     <string name="general">General</string>
     <string name="notifications">Notifications</string>
     <string name="logging">Logging</string>

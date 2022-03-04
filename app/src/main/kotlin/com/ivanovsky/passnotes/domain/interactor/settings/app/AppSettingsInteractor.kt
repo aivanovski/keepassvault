@@ -6,16 +6,22 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.LoggerInteractor
+import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import kotlinx.coroutines.withContext
 import java.io.File
 
 class AppSettingsInteractor(
     private val loggerInteractor: LoggerInteractor,
-    private val dispatchers: DispatcherProvider
+    private val dispatchers: DispatcherProvider,
+    private val lockUseCase: LockDatabaseUseCase
 ) {
 
     fun reInitializeLogging() {
         loggerInteractor.initialize()
+    }
+
+    fun lockDatabase() {
+        lockUseCase.lockIfNeed()
     }
 
     suspend fun getLogFile(): OperationResult<File> =

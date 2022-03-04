@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_USE_
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
+import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
@@ -16,9 +17,11 @@ class RegularFileSystemSyncProcessor : FileSystemSyncProcessor {
         return mutableListOf()
     }
 
-    override fun getSyncStatusForFile(uid: String): SyncStatus {
-        return SyncStatus.NO_CHANGES
-    }
+    override fun getSyncProgressStatusForFile(uid: String): SyncProgressStatus =
+        SyncProgressStatus.IDLE
+
+    override fun getSyncStatusForFile(uid: String): SyncStatus =
+        SyncStatus.NO_CHANGES
 
     override fun getSyncConflictForFile(uid: String): OperationResult<SyncConflictInfo> {
         return OperationResult.error(newGenericError(MESSAGE_INCORRECT_USE_CASE))

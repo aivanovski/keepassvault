@@ -18,6 +18,7 @@ public interface EncryptedDatabaseRepository {
 
     GroupRepository getGroupRepository();
 
+    @NonNull
     TemplateRepository getTemplateRepository();
 
     @NonNull

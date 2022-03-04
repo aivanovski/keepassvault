@@ -16,22 +16,22 @@ class AddTemplatesUseCase(
     private val observerBus: ObserverBus
 ) {
 
-    suspend fun addTemplates(): OperationResult<Boolean> {
-        return withContext(dispatchers.IO) {
-            val isAdd = dbRepo.templateRepository.addTemplates(createDefaultTemplates())
+    suspend fun addTemplates(): OperationResult<Boolean> =
+        withContext(dispatchers.IO) {
+            val addTemplatesResult = dbRepo.templateRepository.addTemplates(createDefaultTemplates())
 
-            if (isAdd.isSucceededOrDeferred) {
+            if (addTemplatesResult.isSucceededOrDeferred) {
                 observerBus.notifyGroupDataSetChanged()
 
-                val templateGroupUid = dbRepo.templateRepository.templateGroupUid
-                if (templateGroupUid != null) {
+                val getTemplateGroupUidResult = dbRepo.templateRepository.getTemplateGroupUid()
+                if (getTemplateGroupUidResult.isSucceededOrDeferred) {
+                    val templateGroupUid = getTemplateGroupUidResult.obj
                     observerBus.notifyNoteDataSetChanged(templateGroupUid)
                 }
             }
 
-            isAdd
+            addTemplatesResult
         }
-    }
 
     private fun createDefaultTemplates(): List<Template> {
         return listOf(

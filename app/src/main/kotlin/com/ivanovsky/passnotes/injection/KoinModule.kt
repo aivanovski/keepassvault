@@ -31,6 +31,7 @@ import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
 import com.ivanovsky.passnotes.domain.interactor.selectdb.SelectDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
+import com.ivanovsky.passnotes.domain.interactor.service.LockServiceInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.main.MainSettingsInteractor
@@ -125,7 +126,7 @@ object KoinModule {
             single { provideUsedFileRepository(get(), get()) }
 
             // Files, Keepass
-            single { FileSystemResolver(get(), get(), get(), get(), get()) }
+            single { FileSystemResolver(get(), get(), get(), get(), get(), get()) }
             single { KeepassDatabaseRepository(get(), get(), get(), get(), get()) as EncryptedDatabaseRepository }
 
             // Use Cases
@@ -148,23 +149,24 @@ object KoinModule {
 
             // Interactors
             single { FilePickerInteractor(get()) }
-            single { UnlockInteractor(get(), get(), get(), get(), get(), get()) }
+            single { UnlockInteractor(get(), get(), get(), get(), get(), get(), get()) }
             single { StorageListInteractor(get(), get(), get()) }
             single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
             single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
             single { NoteInteractor(get(), get(), get(), get(), get(), get()) }
             single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
-            single { NoteEditorInteractor(get(), get(), get()) }
+            single { NoteEditorInteractor(get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
             single { DatabaseLockInteractor(get(), get(), get()) }
             single { SelectDatabaseInteractor(get(), get(), get(), get()) }
             single { SearchInteractor(get(), get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
             single { DatabaseSettingsInteractor(get(), get()) }
-            single { AppSettingsInteractor(get(), get()) }
+            single { AppSettingsInteractor(get(), get(), get()) }
             single { AutofillInteractor(get(), get()) }
             single { MainInteractor(get()) }
+            single { LockServiceInteractor(get(), get(), get(), get(), get()) }
 
             // Autofill
             single { AutofillViewFactory(get(), get()) }
@@ -206,7 +208,7 @@ object KoinModule {
             factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
             viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
-            viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), args) }
+            viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), get(), args) }
             factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), args) }
             viewModel { AboutViewModel(get(), get()) }
             viewModel { MainSettingsViewModel(get(), get()) }

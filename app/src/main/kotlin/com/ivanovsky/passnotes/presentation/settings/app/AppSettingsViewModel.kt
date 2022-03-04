@@ -10,7 +10,6 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -36,7 +35,6 @@ class AppSettingsViewModel(
         isRemoveLogFilesEnabled.value = settings.isFileLogEnabled
 
         viewModelScope.launch {
-            delay(1000)
             isLoading.value = false
         }
     }
@@ -45,6 +43,10 @@ class AppSettingsViewModel(
         isSendLogFileEnabled.value = isEnabled
         isRemoveLogFilesEnabled.value = isEnabled
         interactor.reInitializeLogging()
+    }
+
+    fun onPostponedSyncEnabledChanged(isEnabled: Boolean) {
+        interactor.lockDatabase()
     }
 
     fun onSendLongFileClicked() {

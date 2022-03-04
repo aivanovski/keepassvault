@@ -2,9 +2,9 @@ package com.ivanovsky.passnotes.domain.usecases
 
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
-import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
 import com.ivanovsky.passnotes.domain.DispatcherProvider
@@ -22,11 +22,14 @@ class SyncUseCases(
                 .getSyncConflictForFile(file.uid)
         }
 
-    suspend fun getSyncStatus(file: FileDescriptor): SyncStatus =
+    suspend fun getSyncState(file: FileDescriptor): SyncState =
         withContext(dispatchers.IO) {
-            fileSystemResolver
-                .resolveSyncProcessor(file.fsAuthority)
-                .getSyncStatusForFile(file.uid)
+            val syncProcessor = fileSystemResolver.resolveSyncProcessor(file.fsAuthority)
+
+            val status = syncProcessor.getSyncStatusForFile(file.uid)
+            val progress = syncProcessor.getSyncProgressStatusForFile(file.uid)
+
+            SyncState(status, progress)
         }
 
     suspend fun resolveConflict(

@@ -51,7 +51,7 @@ class SyncStrategyResolver {
         remoteModified: Long?
     ): SyncResolution {
         return when {
-            remoteModified.isNewerThan(localModified) && localModified == cachedRemoteModified -> {
+            remoteModified.isNewerThan(localModified) -> {
                 SyncResolution.REMOTE
             }
             localModified.isNewerThan(remoteModified) -> {

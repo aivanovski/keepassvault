@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.data.repository.file.remote;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
 import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
@@ -15,6 +16,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
+import com.ivanovsky.passnotes.data.repository.file.RemoteFileInputStream;
 import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSApiException;
 import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSAuthException;
 import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSException;
@@ -49,7 +51,6 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newDbVersionCon
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError;
 import static com.ivanovsky.passnotes.util.DateUtils.anyLastTimestamp;
-import static com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull;
 import static com.ivanovsky.passnotes.util.ObjectUtils.isNotEquals;
 
 import timber.log.Timber;
@@ -79,6 +80,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                                     RemoteApiClient client,
                                     RemoteFileRepository remoteFileRepository,
                                     FileHelper fileHelper,
+                                    ObserverBus observerBus,
                                     FSAuthority fsAuthority) {
         this.authenticator = authenticator;
         this.client = client;
@@ -87,7 +89,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         this.processingUidToLatch = new HashMap<>();
         this.unitProcessingLock = new ReentrantLock();
         this.fileHelper = fileHelper;
-        this.syncProcessor = new RemoteFileSyncProcessor(this, cache, fileHelper);
+        this.syncProcessor = new RemoteFileSyncProcessor(this, cache, fileHelper, observerBus, fsAuthority);
         this.fsAuthority = fsAuthority;
     }
 
@@ -257,11 +259,13 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
             return OperationResult.error(newGenericIOError(message));
         }
 
-        try {
-            return OperationResult.deferred(new FileInputStream(cachedFile.getLocalPath()), error);
-        } catch (FileNotFoundException e) {
-            return OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+        OperationResult<FileInputStream> streamResult = openFileInputStream(cachedFile.getLocalPath());
+        if (streamResult.isFailed()) {
+            return streamResult.takeError();
         }
+
+        FileInputStream stream = streamResult.getObj();
+        return OperationResult.deferred(new RemoteFileInputStream(cachedFile.getLocalPath(), stream), error);
     }
 
     @NonNull
@@ -321,7 +325,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         cache.put(cachedFile);
                     }
 
-                    result.setObj(new FileInputStream(destinationPath));
+                    result.from(openFile(destinationPath));
                 } else {
                     result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
                 }
@@ -353,7 +357,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
                         cache.update(cachedFile);
 
-                        result.setObj(new FileInputStream(cachedFile.getLocalPath()));
+                        result.from(openFile(cachedFile.getLocalPath()));
                     } else {
                         result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
                     }
@@ -378,11 +382,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
                 cache.update(cachedFile);
 
-                result.setObj(new FileInputStream(cachedFile.getLocalPath()));
+                result.from(openFile(cachedFile.getLocalPath()));
             }
-        } catch (FileNotFoundException e) {
-            result.setError(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
-
         } catch (RemoteFSNetworkException e) {
             // use cached file
             RemoteFile cachedFile = cache.getByUid(file.getUid());
@@ -393,12 +394,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         cachedFile.getRemotePath());
 
                 if (startProcessingUnit(unit)) {
-                    InputStream fileStream = newFileInputStreamOrNull(new File(cachedFile.getLocalPath()));
-                    if (fileStream != null) {
-                        result.setDeferredObj(fileStream);
-                    } else {
-                        result.setError(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
-                    }
+                    result.from(openFile(cachedFile.getLocalPath()));
                 } else {
                     result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
                 }
@@ -489,6 +485,13 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
         if (options.isCacheOnly()) {
             return openCachedFileForWrite(file, null);
+        }
+
+        if (options.isPostponedSyncEnabled()) {
+            RemoteFile cachedFile = cache.getByUid(file.getUid());
+            if (cachedFile != null) {
+                return openCachedFileForWrite(file, null);
+            }
         }
 
         try {
@@ -827,5 +830,51 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     @Override
     public FileSystemSyncProcessor getSyncProcessor() {
         return syncProcessor;
+    }
+
+    OperationResult<RemoteFileMetadata> getFileMetadata(FileDescriptor file) {
+        if (client instanceof RemoteApiClientAdapter) {
+            RemoteApiClientAdapter clientAdapter = (RemoteApiClientAdapter) client;
+            return clientAdapter.getBaseClient().getFileMetadata(file);
+        }
+
+        // TODO: deprecated RemoteApiClient usage
+        OperationResult<RemoteFileMetadata> result = new OperationResult<>();
+
+        try {
+            result.setObj(client.getFileMetadataOrThrow(file));
+        } catch (RemoteFSException e) {
+            result.setError(createOperationErrorFromException(e));
+        }
+
+        return result;
+
+    }
+
+    private OperationResult<FileInputStream> openFileInputStream(String path) {
+        File file = new File(path);
+
+        if (!file.exists()) {
+            return OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+        }
+
+        FileInputStream stream;
+        try {
+            stream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            return OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+        }
+
+        return OperationResult.success(stream);
+    }
+
+    private OperationResult<InputStream> openFile(String path) {
+        OperationResult<FileInputStream> streamResult = openFileInputStream(path);
+        if (streamResult.isFailed()) {
+            return streamResult.takeError();
+        }
+
+        FileInputStream stream = streamResult.getObj();
+        return OperationResult.success(new RemoteFileInputStream(path, stream));
     }
 }

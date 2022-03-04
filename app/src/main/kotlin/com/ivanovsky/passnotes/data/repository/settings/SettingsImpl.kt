@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.DROPBO
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXTERNAL_STORAGE_CACHE_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.BOOLEAN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.INT
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.STRING
@@ -29,6 +30,12 @@ class SettingsImpl(
         get() = getBoolean(IS_EXTERNAL_STORAGE_CACHE_ENABLED)
         set(value) {
             putBoolean(IS_EXTERNAL_STORAGE_CACHE_ENABLED, value)
+        }
+
+    override var isPostponedSyncEnabled: Boolean
+        get() = getBoolean(IS_POSTPONED_SYNC_ENABLED)
+        set(value) {
+            putBoolean(IS_POSTPONED_SYNC_ENABLED, value)
         }
 
     override var isLockNotificationVisible: Boolean
@@ -149,6 +156,11 @@ class SettingsImpl(
             keyId = R.string.pref_is_file_log_enabled,
             type = BOOLEAN,
             defaultValue = false
+        ),
+        IS_POSTPONED_SYNC_ENABLED(
+            keyId = R.string.pref_is_postponed_sync_enabled,
+            type = BOOLEAN,
+            defaultValue = true
         ),
 
         // Int prefs

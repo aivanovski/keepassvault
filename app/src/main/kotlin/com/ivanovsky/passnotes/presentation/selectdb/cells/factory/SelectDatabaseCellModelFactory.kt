@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.presentation.selectdb.cells.factory
 
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
+import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.extensions.formatReadablePath
@@ -22,8 +24,8 @@ class SelectDatabaseCellModelFactory(
                 uid,
                 createDatabaseFileCell(
                     file = file,
-                    fileUid = uid,
-                    syncStatus = null
+                    cellUid = uid,
+                    syncState = null
                 )
             )
         }
@@ -32,47 +34,56 @@ class SelectDatabaseCellModelFactory(
 
     fun createCellModel(
         file: FileDescriptor,
-        fileUid: UUID,
-        syncStatus: SyncStatus?
+        cellUid: UUID,
+        syncState: SyncState?
     ): BaseCellModel =
         createDatabaseFileCell(
             file = file,
-            fileUid = fileUid,
-            syncStatus = syncStatus
+            cellUid = cellUid,
+            syncState = syncState
         )
 
     private fun createDatabaseFileCell(
         file: FileDescriptor,
-        fileUid: UUID,
-        syncStatus: SyncStatus?
+        cellUid: UUID,
+        syncState: SyncState?
     ): BaseCellModel =
         DatabaseFileCellModel(
-            id = fileUid,
+            id = cellUid,
             name = file.name,
             path = file.formatReadablePath(resourceProvider),
-            status = formatSyncStatus(syncStatus),
+            status = formatSyncStatus(syncState),
             isRemoveButtonVisible = true,
-            isResolveButtonVisible = (syncStatus == SyncStatus.CONFLICT)
+            isResolveButtonVisible = (syncState?.status == SyncStatus.CONFLICT)
         )
 
-    private fun formatSyncStatus(syncStatus: SyncStatus?): String {
-        return when (syncStatus) {
-            SyncStatus.NO_CHANGES -> {
+    private fun formatSyncStatus(state: SyncState?): String {
+        return when {
+            state?.progress == SyncProgressStatus.SYNCING -> {
+                resourceProvider.getString(R.string.synchronizing)
+            }
+            state?.progress == SyncProgressStatus.DOWNLOADING -> {
+                resourceProvider.getString(R.string.downloading)
+            }
+            state?.progress == SyncProgressStatus.UPLOADING -> {
+                resourceProvider.getString(R.string.uploading)
+            }
+            state?.status == SyncStatus.NO_CHANGES -> {
                 resourceProvider.getString(R.string.file_is_up_to_date)
             }
-            SyncStatus.LOCAL_CHANGES -> {
-                resourceProvider.getString(R.string.unsent_changes)
+            state?.status == SyncStatus.LOCAL_CHANGES -> {
+                resourceProvider.getString(R.string.not_synchronized)
             }
-            SyncStatus.REMOTE_CHANGES -> {
+            state?.status == SyncStatus.REMOTE_CHANGES -> {
                 resourceProvider.getString(R.string.new_version_of_file_is_available)
             }
-            SyncStatus.LOCAL_CHANGES_NO_NETWORK -> {
-                resourceProvider.getString(R.string.unsent_changes_and_offline_mode)
+            state?.status == SyncStatus.LOCAL_CHANGES_NO_NETWORK -> {
+                resourceProvider.getString(R.string.not_synchronized_and_offline_mode)
             }
-            SyncStatus.NO_NETWORK -> {
+            state?.status == SyncStatus.NO_NETWORK -> {
                 resourceProvider.getString(R.string.offline_mode)
             }
-            SyncStatus.CONFLICT -> {
+            state?.status == SyncStatus.CONFLICT -> {
                 resourceProvider.getString(R.string.conflict)
             }
             else -> {

@@ -49,7 +49,7 @@
         </activity>
 
         <!-- Services -->
-        <service android:name=".presentation.service.DatabaseLockService"/>
+        <service android:name=".presentation.service.LockService"/>
 
         <service
             android:name=".presentation.autofill.PassnotesAutofillService"

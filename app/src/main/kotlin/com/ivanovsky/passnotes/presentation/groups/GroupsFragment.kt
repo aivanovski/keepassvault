@@ -10,12 +10,15 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.GridLayoutManager
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
 import com.ivanovsky.passnotes.extensions.setItemVisibility
+import com.ivanovsky.passnotes.injection.GlobalInjector
+import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
@@ -38,6 +41,7 @@ class GroupsFragment : BaseFragment() {
         )
             .get(GroupsViewModel::class.java)
     }
+    private val router: Router by inject()
 
     private lateinit var binding: GroupsFragmentBinding
     private var menu: Menu? = null
@@ -169,6 +173,9 @@ class GroupsFragment : BaseFragment() {
         }
         viewModel.finishActivityEvent.observe(viewLifecycleOwner) {
             finishActivity()
+        }
+        viewModel.showUnlockScreenEvent.observe(viewLifecycleOwner) {
+            router.backTo(it)
         }
     }
 

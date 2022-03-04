@@ -11,7 +11,7 @@ import com.ivanovsky.passnotes.data.repository.TemplateRepository
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst.TEMPLATE_GROUP_NAME
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassGroupDao
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 
 class KeepassTemplateRepository(
@@ -43,12 +43,12 @@ class KeepassTemplateRepository(
         }
     }
 
-    override fun getTemplateGroupUid(): UUID? {
-        return templateGroupUidRef.get()
+    override fun getTemplateGroupUid(): OperationResult<UUID?> {
+        return OperationResult.success(templateGroupUidRef.get())
     }
 
-    override fun getTemplates(): List<Template>? {
-        return templatesRef.get()
+    override fun getTemplates(): OperationResult<List<Template>> {
+        return OperationResult.success(templatesRef.get() ?: emptyList())
     }
 
     override fun addTemplates(templates: List<Template>): OperationResult<Boolean> {

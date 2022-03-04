@@ -4,10 +4,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
+import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
-import com.ivanovsky.passnotes.data.entity.SyncStatus
+import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
+import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.selectdb.SelectDatabaseInteractor
@@ -31,11 +34,13 @@ class SelectDatabaseViewModel(
     private val interactor: SelectDatabaseInteractor,
     private val errorInteractor: ErrorInteractor,
     private val resourceProvider: ResourceProvider,
+    private val observerBus: ObserverBus,
     private val router: Router,
     private val modelFactory: SelectDatabaseCellModelFactory,
     private val viewModelFactory: SelectDatabaseCellViewModelFactory,
     private val args: SelectDatabaseArgs
-) : BaseScreenViewModel() {
+) : BaseScreenViewModel(),
+    ObserverBus.SyncProgressStatusObserver {
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
@@ -46,11 +51,38 @@ class SelectDatabaseViewModel(
     val showRemoveConfirmationDialogEvent = SingleLiveEvent<Pair<UUID, FileDescriptor>>()
     val showResolveConflictDialog = SingleLiveEvent<Pair<UUID, SyncConflictInfo>>()
 
-    private var uidToFileMap = mutableMapOf<UUID, FileDescriptor>()
+    private var cellUidToFileMap = mutableMapOf<UUID, FileDescriptor>()
     private var cellModels = mutableMapOf<UUID, BaseCellModel>()
 
     init {
         subscribeToEvents()
+        observerBus.register(this)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        observerBus.unregister(this)
+    }
+
+    override fun onSyncProgressStatusChanged(
+        fsAuthority: FSAuthority,
+        uid: String,
+        status: SyncProgressStatus
+    ) {
+        val entry = cellUidToFileMap.entries.firstOrNull { it.value.uid == uid } ?: return
+        val cellUid = entry.key
+        val file = entry.value
+
+        viewModelScope.launch {
+            val state = interactor.getSyncState(file)
+
+            cellModels[cellUid] = modelFactory.createCellModel(
+                file = file,
+                cellUid = cellUid,
+                syncState = state
+            )
+            setCellModels(cellModels.values.toList())
+        }
     }
 
     fun loadData() {
@@ -62,28 +94,28 @@ class SelectDatabaseViewModel(
                 val files = getFiles.obj
 
                 if (files.isNotEmpty()) {
-                    val uidsAndFiles = files
+                    val cellUidsAndFiles = files
                         .map { file -> Pair(UUID.randomUUID(), file) }
 
-                    uidToFileMap = uidsAndFiles.toLinkedMap()
-                    cellModels = modelFactory.createCellModels(uidsAndFiles)
+                    cellUidToFileMap = cellUidsAndFiles.toLinkedMap()
+                    cellModels = modelFactory.createCellModels(cellUidsAndFiles)
                     setCellModels(cellModels.values.toList())
 
                     screenState.value = ScreenState.data()
 
-                    for ((uid, file) in uidsAndFiles) {
-                        val syncStatus = suspendCoroutine<SyncStatus> { continuation ->
+                    for ((cellUid, file) in cellUidsAndFiles) {
+                        val syncState = suspendCoroutine<SyncState> { continuation ->
                             launch {
-                                val status = interactor.getSyncStatus(file)
-                                continuation.resumeWith(Result.success(status))
+                                val state = interactor.getSyncState(file)
+                                continuation.resumeWith(Result.success(state))
                             }
                         }
 
-                        if (cellModels.containsKey(uid)) {
-                            cellModels[uid] = modelFactory.createCellModel(
+                        if (cellModels.containsKey(cellUid)) {
+                            cellModels[cellUid] = modelFactory.createCellModel(
                                 file = file,
-                                fileUid = uid,
-                                syncStatus = syncStatus
+                                cellUid = cellUid,
+                                syncState = syncState
                             )
 
                             setCellModels(cellModels.values.toList())
@@ -101,10 +133,10 @@ class SelectDatabaseViewModel(
     }
 
     fun onRemoveConfirmed(uid: UUID) {
-        val file = uidToFileMap[uid] ?: return
+        val file = cellUidToFileMap[uid] ?: return
 
         cellModels.remove(uid)
-        uidToFileMap.remove(uid)
+        cellUidToFileMap.remove(uid)
 
         setCellModels(cellModels.values.toList())
 
@@ -120,7 +152,7 @@ class SelectDatabaseViewModel(
     }
 
     fun onResolveConflictConfirmed(uid: UUID, resolutionStrategy: ConflictResolutionStrategy) {
-        val file = uidToFileMap[uid] ?: return
+        val file = cellUidToFileMap[uid] ?: return
 
         screenState.value = ScreenState.loading()
 
@@ -166,7 +198,7 @@ class SelectDatabaseViewModel(
     }
 
     private fun onFileClicked(uid: UUID) {
-        val file = uidToFileMap[uid] ?: return
+        val file = cellUidToFileMap[uid] ?: return
 
         if (file != args.selectedFile) {
             router.sendResult(SelectDatabaseScreen.RESULT_KEY, file)
@@ -177,13 +209,13 @@ class SelectDatabaseViewModel(
     }
 
     private fun onRemoveButtonClicked(uid: UUID) {
-        val file = uidToFileMap[uid] ?: return
+        val file = cellUidToFileMap[uid] ?: return
 
         showRemoveConfirmationDialogEvent.call(Pair(uid, file))
     }
 
     private fun onResolveButtonClicked(uid: UUID) {
-        val file = uidToFileMap[uid] ?: return
+        val file = cellUidToFileMap[uid] ?: return
 
         screenState.value = ScreenState.loading()
 

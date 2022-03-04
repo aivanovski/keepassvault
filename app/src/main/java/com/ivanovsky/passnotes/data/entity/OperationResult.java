@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.data.entity;
 
+import androidx.annotation.NonNull;
+
 public class OperationResult<T> {
 
     private boolean deferred;
@@ -100,5 +102,20 @@ public class OperationResult<T> {
 
     public boolean isSucceededOrDeferred() {
         return isSucceeded() || isDeferred();
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(OperationResult.class.getSimpleName());
+        sb.append("(");
+
+        sb.append("succeeded=").append(succeeded).append(", ");
+        sb.append("deferred=").append(deferred).append(", ");
+        sb.append("obj=").append(obj).append(", ");
+        sb.append("error=").append(error);
+
+        sb.append(")");
+        return sb.toString();
     }
 }

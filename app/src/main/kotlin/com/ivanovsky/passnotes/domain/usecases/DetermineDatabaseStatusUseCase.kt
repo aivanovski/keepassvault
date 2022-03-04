@@ -12,7 +12,8 @@ class DetermineDatabaseStatusUseCase {
     ): DatabaseStatus {
         return when {
             !fsOptions.isWriteEnabled -> DatabaseStatus.READ_ONLY
-            operation.isDeferred -> DatabaseStatus.CACHED
+            operation.isDeferred && !fsOptions.isPostponedSyncEnabled -> DatabaseStatus.CACHED
+            operation.isDeferred && fsOptions.isPostponedSyncEnabled -> DatabaseStatus.POSTPONED_CHANGES
             else -> DatabaseStatus.NORMAL
         }
     }

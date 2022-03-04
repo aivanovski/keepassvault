@@ -4,6 +4,7 @@ import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
+import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.domain.DispatcherProvider
@@ -43,8 +44,8 @@ class SelectDatabaseInteractor(
     suspend fun getSyncConflictInfo(file: FileDescriptor): OperationResult<SyncConflictInfo> =
         syncUseCases.getSyncConflictInfo(file)
 
-    suspend fun getSyncStatus(file: FileDescriptor): SyncStatus =
-        syncUseCases.getSyncStatus(file)
+    suspend fun getSyncState(file: FileDescriptor): SyncState =
+        syncUseCases.getSyncState(file)
 
     suspend fun resolveConflict(
         file: FileDescriptor,

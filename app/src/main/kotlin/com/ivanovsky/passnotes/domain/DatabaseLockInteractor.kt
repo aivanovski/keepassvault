@@ -80,7 +80,7 @@ class DatabaseLockInteractor(
     private fun startServiceIfNeed() {
         val status = databaseStatus.get()
         if (LockService.getCurrentState() == ServiceState.STOPPED &&
-            (settings.isLockNotificationVisible || status == DatabaseStatus.DELAYED_CHANGES)) {
+            (settings.isLockNotificationVisible || status == DatabaseStatus.POSTPONED_CHANGES)) {
             scope.launch {
                 LockService.runCommand(context, LockServiceCommand.ShowNotification)
             }

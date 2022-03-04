@@ -100,6 +100,7 @@ class GroupsViewModel(
     val showRemoveConfirmationDialogEvent = SingleLiveEvent<Pair<Group?, Note?>>()
     val showAddTemplatesDialogEvent = SingleLiveEvent<Unit>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
+    val showUnlockScreenEvent = SingleLiveEvent<UnlockScreen>()
 
     private var currentDataItems: List<GroupsInteractor.Item>? = null
     private var rootGroupUid: UUID? = null
@@ -134,7 +135,7 @@ class GroupsViewModel(
     }
 
     override fun onDatabaseClosed() {
-        router.backTo(
+        showUnlockScreenEvent.call(
             UnlockScreen(
                 UnlockScreenArgs(
                     appMode = args.appMode,

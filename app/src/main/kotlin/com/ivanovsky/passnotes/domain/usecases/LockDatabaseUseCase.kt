@@ -19,7 +19,7 @@ class LockDatabaseUseCase {
         val db = dbRepository.database ?: return OperationResult.success(Unit)
 
         val status = db.status
-        if (status == DatabaseStatus.DELAYED_CHANGES) {
+        if (status == DatabaseStatus.POSTPONED_CHANGES) {
             LockService.runCommand(context, LockServiceCommand.SyncAndLock(db.file))
             return OperationResult.success(Unit)
         }

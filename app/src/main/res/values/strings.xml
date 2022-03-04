@@ -203,6 +203,8 @@
     <string name="pref_is_file_log_enabled_summary">Application will write all logs to file that can be attached to issue at Github page</string>
     <string name="pref_send_log_file_title">Send log file</string>
     <string name="pref_remove_log_files_title">Clear logs</string>
+    <string name="pref_is_postponed_sync_enabled_title">Postponed synchronization</string>
+    <string name="pref_is_postponed_sync_enabled_summary">Synchronization via network will be postponed until database will be locked</string>
     <string name="general">General</string>
     <string name="notifications">Notifications</string>
     <string name="logging">Logging</string>

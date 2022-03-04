@@ -16,6 +16,7 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
@@ -29,7 +30,8 @@ class UnlockInteractor(
     private val dispatchers: DispatcherProvider,
     private val getFilesUseCase: GetRecentlyOpenedFilesUseCase,
     private val autofillUseCase: FindNoteForAutofillUseCase,
-    private val syncUseCases: SyncUseCases
+    private val syncUseCases: SyncUseCases,
+    private val settings: Settings
 ) {
 
     fun hasActiveDatabase(): Boolean {
@@ -74,7 +76,10 @@ class UnlockInteractor(
                 }
             }
 
-            val open = dbRepo.open(key, file, FSOptions.DEFAULT)
+            val fsOptions = FSOptions.DEFAULT.copy(
+                isPostponedSyncEnabled = settings.isPostponedSyncEnabled
+            )
+            val open = dbRepo.open(key, file, fsOptions)
 
             val result = if (open.isFailed &&
                 open.error.type == OperationError.Type.DB_VERSION_CONFLICT_ERROR) {

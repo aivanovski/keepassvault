@@ -4,5 +4,5 @@ enum class DatabaseStatus {
     NORMAL,
     READ_ONLY,
     CACHED,
-    DELAYED_CHANGES
+    POSTPONED_CHANGES
 }

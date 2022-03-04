@@ -149,7 +149,7 @@ object KoinModule {
 
             // Interactors
             single { FilePickerInteractor(get()) }
-            single { UnlockInteractor(get(), get(), get(), get(), get(), get()) }
+            single { UnlockInteractor(get(), get(), get(), get(), get(), get(), get()) }
             single { StorageListInteractor(get(), get(), get()) }
             single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
@@ -163,7 +163,7 @@ object KoinModule {
             single { SearchInteractor(get(), get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
             single { DatabaseSettingsInteractor(get(), get()) }
-            single { AppSettingsInteractor(get(), get()) }
+            single { AppSettingsInteractor(get(), get(), get()) }
             single { AutofillInteractor(get(), get()) }
             single { MainInteractor(get()) }
             single { LockServiceInteractor(get(), get(), get(), get(), get()) }

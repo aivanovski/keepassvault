@@ -20,7 +20,7 @@ class DatabaseStatusCellModelFactory(
     fun createStatusCellModel(status: DatabaseStatus): DatabaseStatusCellModel {
         return DatabaseStatusCellModel(
             text = status.getNameResId()?.let { resourceProvider.getString(it) } ?: EMPTY,
-            isVisible = (status != DatabaseStatus.NORMAL && status != DatabaseStatus.DELAYED_CHANGES)
+            isVisible = (status != DatabaseStatus.NORMAL && status != DatabaseStatus.POSTPONED_CHANGES)
         )
     }
 }

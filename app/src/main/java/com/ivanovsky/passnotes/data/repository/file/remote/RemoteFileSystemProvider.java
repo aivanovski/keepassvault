@@ -51,7 +51,6 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newDbVersionCon
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError;
 import static com.ivanovsky.passnotes.util.DateUtils.anyLastTimestamp;
-import static com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull;
 import static com.ivanovsky.passnotes.util.ObjectUtils.isNotEquals;
 
 import timber.log.Timber;
@@ -488,7 +487,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
             return openCachedFileForWrite(file, null);
         }
 
-        if (options.isDelayedWriteOverNetwork()) {
+        if (options.isPostponedSyncEnabled()) {
             RemoteFile cachedFile = cache.getByUid(file.getUid());
             if (cachedFile != null) {
                 return openCachedFileForWrite(file, null);

@@ -4,7 +4,7 @@ data class FSOptions(
     val isCacheEnabled: Boolean,
     val isCacheOnly: Boolean,
     val isWriteEnabled: Boolean,
-    val isDelayedWriteOverNetwork: Boolean
+    val isPostponedSyncEnabled: Boolean
 ) {
 
     companion object {
@@ -13,28 +13,28 @@ data class FSOptions(
             isCacheEnabled = true,
             isCacheOnly = false,
             isWriteEnabled = false,
-            isDelayedWriteOverNetwork = false
+            isPostponedSyncEnabled = false
         )
 
         val NO_CACHE = FSOptions(
             isCacheEnabled = false,
             isCacheOnly = false,
             isWriteEnabled = true,
-            isDelayedWriteOverNetwork = false
+            isPostponedSyncEnabled = false
         )
 
         val CACHE_ONLY = FSOptions(
             isCacheEnabled = true,
             isCacheOnly = true,
             isWriteEnabled = true,
-            isDelayedWriteOverNetwork = false
+            isPostponedSyncEnabled = false
         )
 
         val DEFAULT = FSOptions(
             isCacheEnabled = true,
             isCacheOnly = false,
             isWriteEnabled = true,
-            isDelayedWriteOverNetwork = true
+            isPostponedSyncEnabled = false
         )
 
         @JvmStatic

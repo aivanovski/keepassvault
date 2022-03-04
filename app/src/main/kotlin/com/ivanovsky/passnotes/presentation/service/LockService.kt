@@ -185,7 +185,7 @@ class LockService : Service(), ObserverBus.DatabaseStatusObserver {
     private fun isRunning() = (getCurrentState() != ServiceState.STOPPED)
 
     private fun getMessageByDatabaseStatus(status: DatabaseStatus): String {
-        return if (status == DatabaseStatus.DELAYED_CHANGES) {
+        return if (status == DatabaseStatus.POSTPONED_CHANGES) {
             getString(R.string.lock_notification_text_not_synchronized)
         } else {
             getString(R.string.lock_notification_text_normal)

@@ -10,6 +10,11 @@
         app:key="@string/pref_category_general"
         app:title="@string/general">
 
+        <SwitchPreferenceCompat
+            app:key="@string/pref_is_postponed_sync_enabled"
+            app:title="@string/pref_is_postponed_sync_enabled_title"
+            app:summary="@string/pref_is_postponed_sync_enabled_summary"/>
+
         <ListPreference
             app:entries="@array/pref_auto_lock_entries"
             app:entryValues="@array/pref_auto_lock_values"

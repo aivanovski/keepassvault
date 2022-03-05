@@ -12,6 +12,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
+import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.WidgetSecretInputBinding
 import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -57,7 +58,8 @@ class SecretInputView(
 
     init {
         val inflater = LayoutInflater.from(context)
-        binding = WidgetSecretInputBinding.inflate(inflater, this, true)
+        val view = inflater.inflate(R.layout.widget_secret_input, this, true)
+        binding = WidgetSecretInputBinding.bind(view)
 
         binding.visibilityButton.setOnClickListener {
             toggleTextVisibility()

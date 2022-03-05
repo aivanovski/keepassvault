@@ -12,6 +12,7 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_COMPLETE_OPERATION;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_NOTE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericError;
@@ -20,6 +21,8 @@ import com.ivanovsky.passnotes.data.entity.Property;
 import com.ivanovsky.passnotes.data.entity.PropertyType;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
+import com.ivanovsky.passnotes.extensions.SimpleDatabaseExtensionsKt;
+
 import java.util.ArrayList;
 import static java.util.Collections.singletonList;
 import java.util.Date;
@@ -303,21 +306,22 @@ public class KeepassNoteDao implements NoteDao {
     @NonNull
     @Override
     public OperationResult<Note> getNoteByUid(UUID noteUid) {
-        SimpleEntry note;
+        Note note;
         synchronized (db.getLock()) {
             SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
+            if (rootGroup == null) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_ROOT_GROUP));
+            }
 
-            List<? extends SimpleEntry> entries = rootGroup.findEntries(
-                    entry -> entry.getUuid().equals(noteUid),
-                    true);
-            if (entries.size() == 0) {
+            SimpleEntry entry = SimpleDatabaseExtensionsKt.findEntryByUid(rootGroup, true, noteUid);
+            if (entry == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
             }
 
-            note = entries.get(0);
+            note = createNoteFromEntry(entry);
         }
 
-        return OperationResult.success(createNoteFromEntry(note));
+        return OperationResult.success(note);
     }
 
     @NonNull
@@ -332,7 +336,7 @@ public class KeepassNoteDao implements NoteDao {
         boolean isInTheSameGroup;
         Note currentNote;
         synchronized (db.getLock()) {
-            OperationResult<Note> getNoteResult = db.getNoteRepository().getNoteByUid(newNote.getUid());
+            OperationResult<Note> getNoteResult = getNoteByUid(newNote.getUid());
             if (getNoteResult.isFailed()) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
             }
@@ -346,7 +350,8 @@ public class KeepassNoteDao implements NoteDao {
             }
 
             List<? extends SimpleEntry> entries =
-                    group.findEntries(entry -> currentUid.equals(entry.getUuid()), false);
+                    SimpleDatabaseExtensionsKt.findEntries(group, false,
+                            entry -> currentUid.equals(entry.getUuid()));
             if (entries.size() == 0) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
             } else if (entries.size() > 1) {

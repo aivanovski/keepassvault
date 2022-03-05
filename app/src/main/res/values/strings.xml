@@ -124,6 +124,7 @@
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
     <string name="default_">Natural order</string>
+    <string name="list_groups_first">List groups first</string>
 
     <!-- Group editor screen -->
     <string name="new_group">New group</string>

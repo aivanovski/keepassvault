@@ -12,6 +12,7 @@
     <string name="pref_is_postponed_sync_enabled">isPostponedSyncEnabled</string>
     <string name="pref_sort_type">sortType</string>
     <string name="pref_sort_direction">sortDirection</string>
+    <string name="pref_is_groups_at_start_enabled">isGroupsAtStartEnabled</string>
 
     <string name="pref_database_settings_fragment" translatable="false">databaseSettingsFragment</string>
     <string name="pref_is_recycle_bin_enabled" translatable="false">isRecycleBinEnabled</string>

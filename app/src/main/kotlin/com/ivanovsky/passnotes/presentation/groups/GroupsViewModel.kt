@@ -167,7 +167,9 @@ class GroupsViewModel(
     }
 
     override fun onSettingsChanged(pref: SettingsImpl.Pref) {
-        if (pref == SettingsImpl.Pref.SORT_TYPE || pref == SettingsImpl.Pref.SORT_DIRECTION) {
+        if (pref == SettingsImpl.Pref.SORT_TYPE ||
+            pref == SettingsImpl.Pref.SORT_DIRECTION ||
+            pref == SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED) {
             loadData()
         }
     }
@@ -212,7 +214,12 @@ class GroupsViewModel(
             val status = interactor.getDatabaseStatus()
 
             if (data.isSucceededOrDeferred) {
-                val dataItems = sortDataItems(data.obj, settings.sortType, settings.sortDirection)
+                val dataItems = sortDataItems(
+                    data.obj,
+                    settings.sortType,
+                    settings.sortDirection,
+                    settings.isGroupsAtStartEnabled
+                )
                 currentDataItems = dataItems
 
                 if (dataItems.isNotEmpty()) {
@@ -720,29 +727,30 @@ class GroupsViewModel(
     private suspend fun sortDataItems(
         items: List<GroupsInteractor.Item>,
         sortType: SortType,
-        direction: SortDirection
+        direction: SortDirection,
+        isGroupsAtStart: Boolean
     ): List<GroupsInteractor.Item> =
         withContext(dispatchers.IO) {
             when (sortType) {
                 SortType.DEFAULT -> SortByDefaultOrderStrategy().sort(
                     items,
                     direction,
-                    isGroupsAtStart = false
+                    isGroupsAtStart = isGroupsAtStart
                 )
                 SortType.TITLE -> SortByTitleStrategy().sort(
                     items,
                     direction,
-                    isGroupsAtStart = false
+                    isGroupsAtStart = isGroupsAtStart
                 )
                 SortType.CREATION_DATE -> SortByDateStrategy(Type.CREATION_DATE).sort(
                     items,
                     direction,
-                    isGroupsAtStart = false
+                    isGroupsAtStart = isGroupsAtStart
                 )
                 SortType.MODIFICATION_DATE -> SortByDateStrategy(Type.MODIFICATION_DATE).sort(
                     items,
                     direction,
-                    isGroupsAtStart = false
+                    isGroupsAtStart = isGroupsAtStart
                 )
             }
         }

@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.groups.dialog
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.entity.SortDirection
@@ -9,13 +10,9 @@ class SortAndViewDialogViewModel(
     private val settings: Settings
 ) : ViewModel() {
 
-    private var selectedSortType = SortType.default()
-    private var selectedSortDirection = SortDirection.default()
-
-    init {
-        selectedSortType = settings.sortType
-        selectedSortDirection = settings.sortDirection
-    }
+    val isGroupsAtStartEnabled = MutableLiveData(settings.isGroupsAtStartEnabled)
+    private var selectedSortType = settings.sortType
+    private var selectedSortDirection = settings.sortDirection
 
     fun isSortTypeChecked(sortType: SortType): Boolean {
         return sortType == selectedSortType
@@ -37,5 +34,9 @@ class SortAndViewDialogViewModel(
             selectedSortDirection = sortDirection
             settings.sortDirection = sortDirection
         }
+    }
+
+    fun onGroupsAtStartChanged(isChecked: Boolean) {
+        settings.isGroupsAtStartEnabled = isChecked
     }
 }

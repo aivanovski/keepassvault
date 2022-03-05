@@ -74,12 +74,14 @@ class GroupsInteractor(
 
         val items = mutableListOf<Item>()
         for (group in groups) {
-            val noteCountResult = dbRepo.noteRepository.getNoteCountByGroupUid(group.uid)
+            val groupUid = group.uid ?: continue
+
+            val noteCountResult = dbRepo.noteRepository.getNoteCountByGroupUid(groupUid)
             if (noteCountResult.isFailed) {
                 return noteCountResult.takeError()
             }
 
-            val childGroupCountResult = dbRepo.groupRepository.getChildGroupsCount(group.uid)
+            val childGroupCountResult = dbRepo.groupRepository.getChildGroupsCount(groupUid)
             if (childGroupCountResult.isFailed) {
                 return childGroupCountResult.takeError()
             }

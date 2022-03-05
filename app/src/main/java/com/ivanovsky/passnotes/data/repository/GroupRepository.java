@@ -21,16 +21,16 @@ public interface GroupRepository {
     OperationResult<Group> getRootGroup();
 
     @NonNull
-    OperationResult<List<Group>> getChildGroups(UUID parentGroupUid);
+    OperationResult<List<Group>> getChildGroups(@NonNull UUID parentGroupUid);
 
     @NonNull
-    OperationResult<Integer> getChildGroupsCount(UUID parentGroupUid);
+    OperationResult<Integer> getChildGroupsCount(@NonNull UUID parentGroupUid);
 
     @NonNull
-    OperationResult<UUID> insert(Group group, UUID parentGroupUid);
+    OperationResult<UUID> insert(@NonNull Group group, @NonNull UUID parentGroupUid);
 
     @NonNull
-    OperationResult<Boolean> remove(UUID groupUid);
+    OperationResult<Boolean> remove(@NonNull UUID groupUid);
 
     @NonNull
     OperationResult<List<Group>> find(@NonNull String query);

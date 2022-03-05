@@ -42,13 +42,13 @@ public class KeepassGroupRepository implements GroupRepository {
 
     @NonNull
     @Override
-    public OperationResult<List<Group>> getChildGroups(UUID parentGroupUid) {
+    public OperationResult<List<Group>> getChildGroups(@NonNull UUID parentGroupUid) {
         return dao.getChildGroups(parentGroupUid);
     }
 
     @NonNull
     @Override
-    public OperationResult<Integer> getChildGroupsCount(UUID parentGroupUid) {
+    public OperationResult<Integer> getChildGroupsCount(@NonNull UUID parentGroupUid) {
         OperationResult<List<Group>> childGroupsResult = getChildGroups(parentGroupUid);
         if (childGroupsResult.isFailed()) {
             return childGroupsResult.takeError();
@@ -60,13 +60,13 @@ public class KeepassGroupRepository implements GroupRepository {
 
     @NonNull
     @Override
-    public OperationResult<UUID> insert(Group group, UUID parentGroupUid) {
+    public OperationResult<UUID> insert(@NonNull Group group, @NonNull UUID parentGroupUid) {
         return dao.insert(group, parentGroupUid);
     }
 
     @NonNull
     @Override
-    public OperationResult<Boolean> remove(UUID groupUid) {
+    public OperationResult<Boolean> remove(@NonNull UUID groupUid) {
         return dao.remove(groupUid);
     }
 

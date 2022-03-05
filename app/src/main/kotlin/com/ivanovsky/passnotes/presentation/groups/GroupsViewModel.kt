@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.groups
 
+import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -10,10 +11,16 @@ import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
+import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
+import com.ivanovsky.passnotes.data.repository.settings.Settings
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
+import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
+import com.ivanovsky.passnotes.domain.entity.SortDirection
+import com.ivanovsky.passnotes.domain.entity.SortType
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
@@ -34,6 +41,7 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
+import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
@@ -41,6 +49,10 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewMo
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.groups.sorting.SortByDateStrategy
+import com.ivanovsky.passnotes.presentation.groups.sorting.SortByDateStrategy.Type
+import com.ivanovsky.passnotes.presentation.groups.sorting.SortByDefaultOrderStrategy
+import com.ivanovsky.passnotes.presentation.groups.sorting.SortByTitleStrategy
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
@@ -58,6 +70,8 @@ class GroupsViewModel(
     private val interactor: GroupsInteractor,
     private val errorInteractor: ErrorInteractor,
     private val observerBus: ObserverBus,
+    private val settings: Settings,
+    private val dispatchers: DispatcherProvider,
     private val resourceProvider: ResourceProvider,
     private val cellModelFactory: GroupsCellModelFactory,
     private val statusCellModelFactory: DatabaseStatusCellModelFactory,
@@ -70,11 +84,12 @@ class GroupsViewModel(
     ObserverBus.NoteDataSetChanged,
     ObserverBus.NoteContentObserver,
     ObserverBus.DatabaseCloseObserver,
-    ObserverBus.DatabaseStatusObserver {
+    ObserverBus.DatabaseStatusObserver,
+    OnSettingsChangeListener {
 
     val viewTypes = ViewModelTypes()
-        .add(NoteCellViewModel::class, R.layout.grid_cell_note)
-        .add(GroupCellViewModel::class, R.layout.grid_cell_group)
+        .add(NoteCellViewModel::class, R.layout.cell_note)
+        .add(GroupCellViewModel::class, R.layout.cell_group)
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
@@ -90,8 +105,7 @@ class GroupsViewModel(
     ) as OptionPanelCellViewModel
 
     val screenTitle = MutableLiveData(EMPTY)
-    val isMenuVisible = MutableLiveData(false)
-    val isAddTemplatesMenuVisible = MutableLiveData(false)
+    val visibleMenuItems = MutableLiveData<List<GroupsMenuItem>>(emptyList())
     val isFabButtonVisible = MutableLiveData(false)
     val showToastEvent = SingleLiveEvent<String>()
     val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
@@ -101,6 +115,7 @@ class GroupsViewModel(
     val showAddTemplatesDialogEvent = SingleLiveEvent<Unit>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
     val showUnlockScreenEvent = SingleLiveEvent<UnlockScreen>()
+    val showSortAndViewDialogEvent = SingleLiveEvent<Unit>()
 
     private var currentDataItems: List<GroupsInteractor.Item>? = null
     private var rootGroupUid: UUID? = null
@@ -110,12 +125,14 @@ class GroupsViewModel(
 
     init {
         observerBus.register(this)
+        settings.register(this)
         subscribeToEvents()
     }
 
     override fun onCleared() {
         super.onCleared()
         observerBus.unregister(this)
+        settings.register(this)
     }
 
     override fun onGroupDataSetChanged() {
@@ -147,6 +164,12 @@ class GroupsViewModel(
 
     override fun onDatabaseStatusChanged(status: DatabaseStatus) {
         updateStatusViewModel(status)
+    }
+
+    override fun onSettingsChanged(pref: SettingsImpl.Pref) {
+        if (pref == SettingsImpl.Pref.SORT_TYPE || pref == SettingsImpl.Pref.SORT_DIRECTION) {
+            loadData()
+        }
     }
 
     fun start() {
@@ -189,7 +212,7 @@ class GroupsViewModel(
             val status = interactor.getDatabaseStatus()
 
             if (data.isSucceededOrDeferred) {
-                val dataItems = data.obj
+                val dataItems = sortDataItems(data.obj, settings.sortType, settings.sortDirection)
                 currentDataItems = dataItems
 
                 if (dataItems.isNotEmpty()) {
@@ -207,7 +230,7 @@ class GroupsViewModel(
                     updateStatusViewModel(status.obj)
                 }
 
-                showMenu()
+                visibleMenuItems.value = getVisibleMenuItems()
             } else {
                 val message = errorInteractor.processAndGetMessage(data.error)
                 setScreenState(ScreenState.error(message))
@@ -383,7 +406,7 @@ class GroupsViewModel(
                 setScreenState(ScreenState.data())
                 showToastEvent.call(resourceProvider.getString(R.string.successfully_added))
 
-                showMenu()
+                visibleMenuItems.value = getVisibleMenuItems()
             } else {
                 val message = errorInteractor.processAndGetMessage(isAdded.error)
                 setScreenState(ScreenState.error(message))
@@ -400,6 +423,10 @@ class GroupsViewModel(
                 )
             )
         )
+    }
+
+    fun onSortAndViewButtonClicked() {
+        showSortAndViewDialogEvent.call()
     }
 
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
@@ -513,7 +540,7 @@ class GroupsViewModel(
             if (removeResult.isSucceededOrDeferred) {
                 showToastEvent.call(resourceProvider.getString(R.string.successfully_removed))
 
-                showMenu()
+                visibleMenuItems.value = getVisibleMenuItems()
             } else {
                 val message = errorInteractor.processAndGetMessage(removeResult.error)
                 setScreenState(ScreenState.error(message))
@@ -532,7 +559,7 @@ class GroupsViewModel(
             if (removeResult.isSucceededOrDeferred) {
                 showToastEvent.call(resourceProvider.getString(R.string.successfully_removed))
 
-                showMenu()
+                visibleMenuItems.value = getVisibleMenuItems()
             } else {
                 val message = errorInteractor.processAndGetMessage(removeResult.error)
                 setScreenState(ScreenState.error(message))
@@ -603,7 +630,7 @@ class GroupsViewModel(
             if (actionResult.isSucceededOrDeferred) {
                 showToastEvent.call(resourceProvider.getString(R.string.successfully))
                 setScreenState(ScreenState.data())
-                showMenu()
+                visibleMenuItems.value = getVisibleMenuItems()
             } else {
                 val message = errorInteractor.processAndGetMessage(actionResult.error)
                 setScreenState(ScreenState.error(message))
@@ -632,19 +659,10 @@ class GroupsViewModel(
             OptionPanelState.SAVE_AUTOFILL_DATA -> {
                 isAutofillSavingCancelled = true
             }
-            else -> {}
+            else -> {
+            }
         }
         updateOptionPanelState()
-    }
-
-    private fun hideMenu() {
-        isMenuVisible.value = false
-        isAddTemplatesMenuVisible.value = false
-    }
-
-    private fun showMenu() {
-        isMenuVisible.value = true
-        isAddTemplatesMenuVisible.value = templates.isNullOrEmpty()
     }
 
     private fun setScreenState(state: ScreenState) {
@@ -653,7 +671,7 @@ class GroupsViewModel(
 
         when (state.screenDisplayingType) {
             ScreenDisplayingType.LOADING -> {
-                hideMenu()
+                visibleMenuItems.value = getVisibleMenuItems()
                 hideStatusCell()
                 updateOptionPanelState()
             }
@@ -666,6 +684,68 @@ class GroupsViewModel(
         return (screenState.isDisplayingData || screenState.isDisplayingEmptyState) &&
             args.appMode == ApplicationLaunchMode.NORMAL
     }
+
+    private fun getVisibleMenuItems(): List<GroupsMenuItem> {
+        val screenState = this.screenState.value ?: return emptyList()
+
+        val isShowMenu = (screenState.isDisplayingData || screenState.isDisplayingEmptyState)
+
+        return when {
+            isShowMenu && args.appMode == ApplicationLaunchMode.NORMAL -> {
+                val items = mutableListOf(
+                    GroupsMenuItem.SEARCH,
+                    GroupsMenuItem.LOCK,
+                    GroupsMenuItem.VIEW_MODE,
+                    GroupsMenuItem.SETTINGS
+                )
+
+                if (templates.isNullOrEmpty()) {
+                    items.add(GroupsMenuItem.ADD_TEMPLATES)
+                }
+
+                items
+            }
+            isShowMenu && args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
+                listOf(
+                    GroupsMenuItem.SEARCH,
+                    GroupsMenuItem.LOCK,
+                    GroupsMenuItem.VIEW_MODE,
+                    GroupsMenuItem.SETTINGS
+                )
+            }
+            else -> emptyList()
+        }
+    }
+
+    private suspend fun sortDataItems(
+        items: List<GroupsInteractor.Item>,
+        sortType: SortType,
+        direction: SortDirection
+    ): List<GroupsInteractor.Item> =
+        withContext(dispatchers.IO) {
+            when (sortType) {
+                SortType.DEFAULT -> SortByDefaultOrderStrategy().sort(
+                    items,
+                    direction,
+                    isGroupsAtStart = false
+                )
+                SortType.TITLE -> SortByTitleStrategy().sort(
+                    items,
+                    direction,
+                    isGroupsAtStart = false
+                )
+                SortType.CREATION_DATE -> SortByDateStrategy(Type.CREATION_DATE).sort(
+                    items,
+                    direction,
+                    isGroupsAtStart = false
+                )
+                SortType.MODIFICATION_DATE -> SortByDateStrategy(Type.MODIFICATION_DATE).sort(
+                    items,
+                    direction,
+                    isGroupsAtStart = false
+                )
+            }
+        }
 
     enum class OptionPanelState {
         HIDDEN,
@@ -681,5 +761,13 @@ class GroupsViewModel(
                 parametersOf(args)
             ) as T
         }
+    }
+
+    enum class GroupsMenuItem(@IdRes override val menuId: Int) : ScreenMenuItem {
+        SEARCH(R.id.menu_search),
+        LOCK(R.id.menu_lock),
+        VIEW_MODE(R.id.menu_sort_and_view),
+        ADD_TEMPLATES(R.id.menu_add_templates),
+        SETTINGS(R.id.menu_settings)
     }
 }

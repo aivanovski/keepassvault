@@ -11,7 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
-import com.ivanovsky.passnotes.extensions.setItemVisibility
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
@@ -19,8 +18,9 @@ import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
+import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
-import com.ivanovsky.passnotes.presentation.note.NoteViewModel.ScreenMenuItem
+import com.ivanovsky.passnotes.presentation.note.NoteViewModel.NoteMenuItem
 import com.ivanovsky.passnotes.util.StringUtils
 
 class NoteFragment : BaseFragment() {
@@ -55,8 +55,12 @@ class NoteFragment : BaseFragment() {
 
         inflater.inflate(R.menu.note, menu)
 
-        viewModel.menuItems.value?.let {
-            updateMenuVisibility(it)
+        viewModel.visibleMenuItems.value?.let { visibleItems ->
+            updateMenuItemVisibility(
+                menu = menu,
+                visibleItems = visibleItems,
+                allScreenItems = NoteMenuItem.values().toList()
+            )
         }
     }
 
@@ -115,8 +119,14 @@ class NoteFragment : BaseFragment() {
     }
 
     private fun subscribeToLiveData() {
-        viewModel.menuItems.observe(viewLifecycleOwner) {
-            updateMenuVisibility(it)
+        viewModel.visibleMenuItems.observe(viewLifecycleOwner) { visibleItems ->
+            menu?.let { menu ->
+                updateMenuItemVisibility(
+                    menu = menu,
+                    visibleItems = visibleItems,
+                    allScreenItems = NoteMenuItem.values().toList()
+                )
+            }
         }
         viewModel.actionBarTitle.observe(viewLifecycleOwner) { actionBarTitle ->
             setupActionBar {
@@ -136,16 +146,6 @@ class NoteFragment : BaseFragment() {
             sendAutofillResult(note, structure)
             finishActivity()
         }
-    }
-
-    private fun updateMenuVisibility(visibleItems: List<ScreenMenuItem>) {
-        ScreenMenuItem.values()
-            .forEach { item ->
-                menu?.setItemVisibility(
-                    id = item.id,
-                    isVisible = visibleItems.contains(item)
-                )
-            }
     }
 
     companion object {

@@ -51,12 +51,14 @@
             app:layout_constraintTop_toBottomOf="@id/statusView"
             app:viewModel="@{viewModel.optionPanelViewModel}" />
 
-        <androidx.recyclerview.widget.RecyclerView
+        <com.ivanovsky.passnotes.presentation.core.widget.DecoratedRecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            android:orientation="vertical"
+            app:isShowDividers="true"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/optionPanelView"
             app:screenState="@{viewModel.screenState}"

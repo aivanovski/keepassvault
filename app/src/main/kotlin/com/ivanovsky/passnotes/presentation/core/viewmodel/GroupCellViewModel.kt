@@ -15,6 +15,7 @@ class GroupCellViewModel(
 
     val title = model.group.title
     val description = formatCountsForGroup(model.noteCount, model.childGroupCount)
+    val isDescriptionVisible = description.isNotEmpty()
 
     fun onClicked() {
         eventProvider.send((CLICK_EVENT to model.id).toEvent())

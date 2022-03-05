@@ -9,15 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
-import androidx.recyclerview.widget.GridLayoutManager
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
-import com.ivanovsky.passnotes.extensions.setItemVisibility
-import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
@@ -26,8 +23,11 @@ import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
+import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.GroupsMenuItem
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
+import com.ivanovsky.passnotes.presentation.groups.dialog.SortAndViewDialog
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 
 class GroupsFragment : BaseFragment() {
@@ -67,8 +67,6 @@ class GroupsFragment : BaseFragment() {
                 it.viewModel = viewModel
             }
 
-        setupRecyclerView()
-
         return binding.root
     }
 
@@ -77,13 +75,12 @@ class GroupsFragment : BaseFragment() {
 
         inflater.inflate(R.menu.groups, menu)
 
-        viewModel.isMenuVisible.value?.let {
-            menu.setItemVisibility(R.id.menu_lock, it)
-            menu.setItemVisibility(R.id.menu_more, it)
-            menu.setItemVisibility(R.id.menu_search, it)
-        }
-        viewModel.isAddTemplatesMenuVisible.value?.let {
-            menu.setItemVisibility(R.id.menu_add_templates, it)
+        viewModel.visibleMenuItems.value?.let { visibleItems ->
+            updateMenuItemVisibility(
+                menu = menu,
+                visibleItems = visibleItems,
+                allScreenItems = GroupsMenuItem.values().toList()
+            )
         }
     }
 
@@ -107,6 +104,10 @@ class GroupsFragment : BaseFragment() {
             }
             R.id.menu_settings -> {
                 viewModel.onSettingsButtonClicked()
+                true
+            }
+            R.id.menu_sort_and_view -> {
+                viewModel.onSortAndViewButtonClicked()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -145,13 +146,14 @@ class GroupsFragment : BaseFragment() {
                 title = it
             }
         }
-        viewModel.isMenuVisible.observe(viewLifecycleOwner) {
-            menu?.setItemVisibility(R.id.menu_lock, it)
-            menu?.setItemVisibility(R.id.menu_more, it)
-            menu?.setItemVisibility(R.id.menu_search, it)
-        }
-        viewModel.isAddTemplatesMenuVisible.observe(viewLifecycleOwner) {
-            menu?.setItemVisibility(R.id.menu_add_templates, it)
+        viewModel.visibleMenuItems.observe(viewLifecycleOwner) { visibleItems ->
+            menu?.let { menu ->
+                updateMenuItemVisibility(
+                    menu = menu,
+                    visibleItems = visibleItems,
+                    allScreenItems = GroupsMenuItem.values().toList()
+                )
+            }
         }
     }
 
@@ -177,11 +179,8 @@ class GroupsFragment : BaseFragment() {
         viewModel.showUnlockScreenEvent.observe(viewLifecycleOwner) {
             router.backTo(it)
         }
-    }
-
-    private fun setupRecyclerView() {
-        (binding.recyclerView.layoutManager as? GridLayoutManager)?.let {
-            it.spanCount = COLUMN_COUNT
+        viewModel.showSortAndViewDialogEvent.observe(viewLifecycleOwner) {
+            showSortAndViewDialog()
         }
     }
 
@@ -264,11 +263,14 @@ class GroupsFragment : BaseFragment() {
         dialog.show(childFragmentManager, ConfirmationDialog.TAG)
     }
 
+    private fun showSortAndViewDialog() {
+        val dialog = SortAndViewDialog.newInstance()
+        dialog.show(childFragmentManager, SortAndViewDialog.TAG)
+    }
+
     companion object {
 
         private const val ARGUMENTS = "arguments"
-
-        private const val COLUMN_COUNT = 3
 
         fun newInstance(args: GroupsScreenArgs) = GroupsFragment()
             .withArguments {

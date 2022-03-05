@@ -128,10 +128,10 @@ class GroupEditorViewModel(
         doneButtonVisibility.value = false
         screenState.value = ScreenState.loading()
 
-        val newGroup = Group().apply {
+        val newGroup = Group(
+            uid = group.uid,
             title = newTitle
-            uid = group.uid
-        }
+        )
 
         viewModelScope.launch {
             val updateResult = interactor.updateGroup(newGroup)

@@ -124,12 +124,7 @@ public class KeepassGroupDao implements GroupDao {
     }
 
     private Group createGroupFromKeepassGroup(SimpleGroup keepassGroup) {
-        Group result = new Group();
-
-        result.setUid(keepassGroup.getUuid());
-        result.setTitle(keepassGroup.getName());
-
-        return result;
+        return new Group(keepassGroup.getUuid(), keepassGroup.getName());
     }
 
     @NonNull

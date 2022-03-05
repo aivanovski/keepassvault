@@ -182,7 +182,7 @@ class GroupsViewModel(
             groupUid?.let {
                 val group = interactor.getGroup(it)
                 if (group.isSucceededOrDeferred) {
-                    screenTitle.value = group.obj.title ?: ""
+                    screenTitle.value = group.obj.title
                 }
             }
 
@@ -264,10 +264,12 @@ class GroupsViewModel(
     }
 
     fun onEditGroupClicked(group: Group) {
+        val groupUid = group.uid ?: return
+
         router.navigateTo(
             GroupEditorScreen(
                 GroupEditorArgs.EditGroup(
-                    groupUid = group.uid
+                    groupUid = groupUid
                 )
             )
         )

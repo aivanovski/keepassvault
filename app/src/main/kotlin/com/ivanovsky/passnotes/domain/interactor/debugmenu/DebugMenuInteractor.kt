@@ -272,9 +272,9 @@ class DebugMenuInteractor(
         }
 
         val rootGroupUid = rootGroupResult.obj.uid
-        val newGroup = Group()
-
-        newGroup.title = newGroupTitle
+        val newGroup = Group(
+            title = newGroupTitle
+        )
 
         val insertResult = db.groupRepository.insert(newGroup, rootGroupUid)
         if (insertResult.isFailed) {

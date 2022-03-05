@@ -72,9 +72,9 @@ class KeepassTemplateRepository(
             )
         }
 
-        val templateGroup = Group().apply {
+        val templateGroup = Group(
             title = TEMPLATE_GROUP_NAME
-        }
+        )
         val insertGroupResult = groupDao.insert(templateGroup, rootGroup.uid)
         if (insertGroupResult.isFailed) {
             return insertGroupResult.takeError()

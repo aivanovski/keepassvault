@@ -33,16 +33,19 @@ class GroupEditorInteractor(
                 )
             }
 
-            val group = Group()
-            group.title = title
+            val group = Group(
+                title = title
+            )
 
             val insertResult = dbRepo.groupRepository.insert(group, parentUid)
             if (insertResult.isFailed) {
                 return@withContext insertResult.takeError()
             }
 
+            val uid = insertResult.obj
+
             observerBus.notifyGroupDataSetChanged()
-            insertResult.takeStatusWith(group)
+            insertResult.takeStatusWith(group.copy(uid = uid))
         }
     }
 

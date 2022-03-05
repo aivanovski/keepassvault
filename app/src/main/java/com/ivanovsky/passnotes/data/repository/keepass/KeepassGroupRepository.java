@@ -60,18 +60,8 @@ public class KeepassGroupRepository implements GroupRepository {
 
     @NonNull
     @Override
-    public OperationResult<Boolean> insert(Group group, UUID parentGroupUid) {
-        OperationResult<Boolean> result = new OperationResult<>();
-
-        OperationResult<UUID> insertResult = dao.insert(group, parentGroupUid);
-        if (insertResult.getObj() != null) {
-            group.setUid(insertResult.getObj());
-            result.setObj(true);
-        } else {
-            result.setError(insertResult.getError());
-        }
-
-        return result;
+    public OperationResult<UUID> insert(Group group, UUID parentGroupUid) {
+        return dao.insert(group, parentGroupUid);
     }
 
     @NonNull

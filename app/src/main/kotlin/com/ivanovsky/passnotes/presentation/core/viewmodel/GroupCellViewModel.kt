@@ -13,7 +13,7 @@ class GroupCellViewModel(
     private val resourceProvider: ResourceProvider
 ) : BaseCellViewModel(model) {
 
-    val title = model.group.title ?: ""
+    val title = model.group.title
     val description = formatCountsForGroup(model.noteCount, model.childGroupCount)
 
     fun onClicked() {

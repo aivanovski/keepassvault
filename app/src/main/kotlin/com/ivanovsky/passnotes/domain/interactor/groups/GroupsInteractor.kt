@@ -3,6 +3,9 @@ package com.ivanovsky.passnotes.domain.interactor.groups
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP
+import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
@@ -51,6 +54,7 @@ class GroupsInteractor(
         }
 
         val groupUid = rootGroupResult.obj.uid
+            ?: return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_ROOT_GROUP))
 
         return getGroupData(groupUid)
     }

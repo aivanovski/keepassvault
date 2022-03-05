@@ -147,7 +147,7 @@ def lifecycleVersion = '2.2.0'
 def androidXVersion = '1.2.0'
 
 def annimonStreamApiVersion = '1.1.4'
-def dropboxVersion = '3.0.11'
+def dropboxVersion = '5.1.1'
 def okHttpVersion = '4.9.1'
 def apacheCommonsLangVersion = '3.0'
 def sardineAndroidVersion = 'v0.8'

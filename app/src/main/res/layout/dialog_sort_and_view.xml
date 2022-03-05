@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="com.ivanovsky.passnotes.domain.entity.SortType" />
+
+        <import type="com.ivanovsky.passnotes.domain.entity.SortDirection" />
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.groups.dialog.SortAndViewDialogViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="@dimen/min_dialog_width"
+        tools:layout_width="300dp">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineStart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="@dimen/group_margin" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineEnd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="@dimen/group_margin" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineTop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_begin="@dimen/group_margin" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guidelineBottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_end="@dimen/group_margin" />
+
+        <TextView
+            android:id="@+id/sortTypeTitle"
+            style="@style/Material.PrimaryText.SingleLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{String.format(@string/text_with_colon, @string/sort_by)}"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/guidelineStart"
+            app:layout_constraintTop_toTopOf="@id/guidelineTop"
+            tools:text="Sort by:" />
+
+        <RadioGroup
+            android:id="@+id/sortTypeGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="@id/guidelineStart"
+            app:layout_constraintTop_toBottomOf="@id/sortTypeTitle">
+
+            <RadioButton
+                android:id="@+id/sortTypeDefault"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="@{viewModel.isSortTypeChecked(SortType.DEFAULT)}"
+                android:onCheckedChanged="@{(v, checked) -> viewModel.onSortTypeChanged(checked, SortType.DEFAULT)}"
+                android:text="@string/default_"
+                android:textSize="@dimen/material_small_text_size" />
+
+            <RadioButton
+                android:id="@+id/sortTypeUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="@{viewModel.isSortTypeChecked(SortType.TITLE)}"
+                android:onCheckedChanged="@{(v, checked) -> viewModel.onSortTypeChanged(checked, SortType.TITLE)}"
+                android:text="@string/title"
+                android:textSize="@dimen/material_small_text_size" />
+
+            <RadioButton
+                android:id="@+id/sortTypeModificationDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="@{viewModel.isSortTypeChecked(SortType.MODIFICATION_DATE)}"
+                android:onCheckedChanged="@{(v, checked) -> viewModel.onSortTypeChanged(checked, SortType.MODIFICATION_DATE)}"
+                android:text="@string/modification"
+                android:textSize="@dimen/material_small_text_size" />
+
+            <RadioButton
+                android:id="@+id/sortTypeCreationDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="@{viewModel.isSortTypeChecked(SortType.CREATION_DATE)}"
+                android:onCheckedChanged="@{(v, checked) -> viewModel.onSortTypeChanged(checked, SortType.CREATION_DATE)}"
+                android:text="@string/creation"
+                android:textSize="@dimen/material_small_text_size" />
+
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/sortDirectionTitle"
+            style="@style/Material.PrimaryText.SingleLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/quarter_margin"
+            android:text="@{String.format(@string/text_with_colon, @string/sort_order)}"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@id/guidelineStart"
+            app:layout_constraintTop_toBottomOf="@id/sortTypeGroup"
+            tools:text="Sort order:" />
+
+        <RadioGroup
+            android:id="@+id/sortDirectionGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="@id/guidelineBottom"
+            app:layout_constraintStart_toStartOf="@id/guidelineStart"
+            app:layout_constraintTop_toBottomOf="@id/sortDirectionTitle">
+
+            <RadioButton
+                android:id="@+id/sortDirectionAsc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="@{viewModel.isSortDirectionChecked(SortDirection.ASCENDING)}"
+                android:onCheckedChanged="@{(v, checked) -> viewModel.onSortDirectionChanged(checked, SortDirection.ASCENDING)}"
+                android:text="@string/ascending"
+                android:textSize="@dimen/material_small_text_size" />
+
+            <RadioButton
+                android:id="@+id/sortDirectionDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/element_margin"
+                android:checked="@{viewModel.isSortDirectionChecked(SortDirection.DESCENDING)}"
+                android:onCheckedChanged="@{(v, checked) -> viewModel.onSortDirectionChanged(checked, SortDirection.DESCENDING)}"
+                android:text="@string/descending"
+                android:textSize="@dimen/material_small_text_size" />
+
+        </RadioGroup>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

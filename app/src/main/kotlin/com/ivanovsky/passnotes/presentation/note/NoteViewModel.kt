@@ -28,6 +28,7 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
+import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
@@ -67,7 +68,7 @@ class NoteViewModel(
 
     val actionBarTitle = MutableLiveData<String>()
     val modifiedText = MutableLiveData<String>()
-    val menuItems = MutableLiveData<List<ScreenMenuItem>>(emptyList())
+    val visibleMenuItems = MutableLiveData<List<NoteMenuItem>>(emptyList())
     val isFabButtonVisible = MutableLiveData(false)
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
@@ -180,7 +181,7 @@ class NoteViewModel(
     }
 
     fun loadData() {
-        menuItems.value = getVisibleMenuItems()
+        visibleMenuItems.value = getVisibleMenuItems()
         isFabButtonVisible.value = getFabButtonVisibility()
 
         viewModelScope.launch {
@@ -213,7 +214,7 @@ class NoteViewModel(
                 }
 
                 screenState.value = ScreenState.data()
-                menuItems.value = getVisibleMenuItems()
+                visibleMenuItems.value = getVisibleMenuItems()
             } else {
                 val message = errorInteractor.processAndGetMessage(result.error)
                 screenState.value = ScreenState.error(message)
@@ -251,22 +252,22 @@ class NoteViewModel(
         ) as DatabaseStatusCellViewModel
     }
 
-    private fun getVisibleMenuItems(): List<ScreenMenuItem> {
+    private fun getVisibleMenuItems(): List<NoteMenuItem> {
         val screenState = this.screenState.value ?: return emptyList()
 
         return when {
             screenState.isDisplayingData && args.appMode == ApplicationLaunchMode.NORMAL -> {
                 listOf(
-                    ScreenMenuItem.LOCK,
-                    ScreenMenuItem.SEARCH,
-                    ScreenMenuItem.SETTINGS
+                    NoteMenuItem.LOCK,
+                    NoteMenuItem.SEARCH,
+                    NoteMenuItem.SETTINGS
                 )
             }
             screenState.isDisplayingData && args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
                 listOf(
-                    ScreenMenuItem.SELECT,
-                    ScreenMenuItem.LOCK,
-                    ScreenMenuItem.SEARCH
+                    NoteMenuItem.SELECT,
+                    NoteMenuItem.LOCK,
+                    NoteMenuItem.SEARCH
                 )
             }
             else -> emptyList()
@@ -290,7 +291,7 @@ class NoteViewModel(
         }
     }
 
-    enum class ScreenMenuItem(@IdRes val id: Int) {
+    enum class NoteMenuItem(@IdRes override val menuId: Int) : ScreenMenuItem {
         SELECT(R.id.menu_select),
         LOCK(R.id.menu_lock),
         SEARCH(R.id.menu_search),

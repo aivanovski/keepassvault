@@ -60,6 +60,7 @@ import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel
+import com.ivanovsky.passnotes.presentation.groups.dialog.SortAndViewDialogViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.main.MainScreenArgs
@@ -205,7 +206,7 @@ object KoinModule {
             viewModel { GroupEditorViewModel(get(), get(), get(), get()) }
             viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
             factory { (args: NoteScreenArgs) -> NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
-            factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
             viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
             viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), get(), args) }
@@ -215,6 +216,7 @@ object KoinModule {
             viewModel { AppSettingsViewModel(get(), get(), get(), get(), get()) }
             viewModel { DatabaseSettingsViewModel(get(), get()) }
             viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
+            viewModel { SortAndViewDialogViewModel(get()) }
             factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
             factory { NavigationMenuViewModel(get()) }
             factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }

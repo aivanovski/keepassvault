@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.data.repository.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Handler
+import android.os.Looper
 import androidx.annotation.StringRes
 import androidx.preference.PreferenceManager
 import com.ivanovsky.passnotes.R
@@ -12,10 +14,15 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXT
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_DIRECTION
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_TYPE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.BOOLEAN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.INT
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.STRING
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.SortDirection
+import com.ivanovsky.passnotes.domain.entity.SortType
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 
 class SettingsImpl(
@@ -23,8 +30,17 @@ class SettingsImpl(
     context: Context
 ) : Settings {
 
+    private val handler = Handler(Looper.getMainLooper())
+    private val listeners = CopyOnWriteArrayList<OnSettingsChangeListener>()
     private val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+
     private val nameResIdToPreferenceMap: Map<Int, Pref> = Pref.values().associateBy { it.keyId }
+    private val keyToPreferenceMap: Map<String, Pref> = Pref.values()
+        .associateBy { resourceProvider.getString(it.keyId) }
+
+    private val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        onPreferenceChanged(key)
+    }
 
     override var isExternalStorageCacheEnabled: Boolean
         get() = getBoolean(IS_EXTERNAL_STORAGE_CACHE_ENABLED)
@@ -70,6 +86,28 @@ class SettingsImpl(
             putString(DROPBOX_AUTH_TOKEN, value)
         }
 
+    override var sortType: SortType
+        get() {
+            return getString(SORT_TYPE)?.let { SortType.getByName(it) }
+                ?: SortType.default()
+        }
+        set(value) {
+            putString(SORT_TYPE, value.name)
+        }
+
+    override var sortDirection: SortDirection
+        get() {
+            return getString(SORT_DIRECTION)?.let { SortDirection.getByName(it) }
+                ?: SortDirection.default()
+        }
+        set(value) {
+            putString(SORT_DIRECTION, value.name)
+        }
+
+    init {
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+    }
+
     override fun initDefaultIfNeed(pref: Pref) {
         if (preferences.contains(keyFor(pref))) {
             return
@@ -82,10 +120,28 @@ class SettingsImpl(
         }
     }
 
+    override fun register(listener: OnSettingsChangeListener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener)
+        }
+    }
+
+    override fun unregister(listener: OnSettingsChangeListener) {
+        listeners.remove(listener)
+    }
+
     fun clean() {
         val editor = preferences.edit()
         editor.clear()
         editor.apply()
+    }
+
+    private fun onPreferenceChanged(key: String) {
+        val pref = keyToPreferenceMap[key] ?: return
+
+        listeners.forEach { listener ->
+            handler.post { listener.onSettingsChanged(pref) }
+        }
     }
 
     private fun getBoolean(pref: Pref): Boolean {
@@ -136,6 +192,7 @@ class SettingsImpl(
         STRING
     }
 
+    // TODO: Refactor, rename and move to separate file
     enum class Pref(
         @StringRes val keyId: Int,
         val type: PrefType,
@@ -178,6 +235,16 @@ class SettingsImpl(
         // String prefs
         DROPBOX_AUTH_TOKEN(
             keyId = R.string.pref_dropbox_auth_token,
+            type = STRING,
+            defaultValue = null
+        ),
+        SORT_TYPE(
+            keyId = R.string.pref_sort_type,
+            type = STRING,
+            defaultValue = null
+        ),
+        SORT_DIRECTION(
+            keyId = R.string.pref_sort_direction,
             type = STRING,
             defaultValue = null
         )

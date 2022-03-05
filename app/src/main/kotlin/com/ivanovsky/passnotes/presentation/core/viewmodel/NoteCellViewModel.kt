@@ -19,11 +19,17 @@ class NoteCellViewModel(
     val title = model.note.title
     val description = formatDescription(model.note)
     val date = model.note.modified.formatAccordingLocale(localeProvider.getSystemLocale())
+    val isDescriptionVisible = description.isNotEmpty()
+    val maxTitleLine = if (description.isNotEmpty()) {
+        TITLE_MAX_LINES_WITH_DESCRIPTION
+    } else {
+        TITLE_MAX_LINES_WITHOUT_DESCRIPTION
+    }
 
     private fun formatDescription(note: Note): String {
         val filteredProperties = PROPERTY_FILTER.apply(note.properties)
         return if (filteredProperties.isNotEmpty()) {
-            filteredProperties[0].value ?: ""
+            filteredProperties.first().value ?: ""
         } else {
             ""
         }
@@ -38,6 +44,9 @@ class NoteCellViewModel(
     }
 
     companion object {
+        private const val TITLE_MAX_LINES_WITH_DESCRIPTION = 1
+        private const val TITLE_MAX_LINES_WITHOUT_DESCRIPTION = 2
+
         val CLICK_EVENT = NoteCellViewModel::class.qualifiedName + "_clickEvent"
         val LONG_CLICK_EVENT = NoteCellViewModel::class.qualifiedName + "_longClickEvent"
 

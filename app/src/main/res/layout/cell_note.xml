@@ -14,7 +14,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         style="@style/Material.Layout.Selectable"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/material_list_item_height_two_line"
+        android:layout_height="wrap_content"
         android:onClick="@{() -> viewModel.onClicked()}"
         app:onLongClick="@{() -> viewModel.onLongClicked()}">
 
@@ -33,41 +33,43 @@
             app:layout_constraintGuide_end="@dimen/element_margin" />
 
         <TextView
-            android:id="@+id/primaryText"
+            android:id="@+id/title"
             style="@style/Material.ListItem.PrimaryText.SingleLine"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_margin="@dimen/half_margin"
+            android:maxLines="@{viewModel.maxTitleLine}"
             android:text="@{viewModel.title}"
-            app:layout_constraintBottom_toTopOf="@id/secondaryText"
             app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
             app:layout_constraintStart_toEndOf="@id/guidelineStart"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_chainStyle="packed"
             tools:text="Title" />
 
         <TextView
-            android:id="@+id/secondaryText"
+            android:id="@+id/description"
             style="@style/Material.ListItem.SecondaryText.SingleLine"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/quarter_margin"
-            android:layout_marginEnd="@dimen/element_margin"
             android:text="@{viewModel.description}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/date"
-            app:layout_constraintStart_toStartOf="@id/primaryText"
-            app:layout_constraintTop_toBottomOf="@+id/primaryText"
-            tools:text="username" />
+            app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+            app:layout_constraintStart_toStartOf="@id/title"
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            app:visible="@{viewModel.isDescriptionVisible}"
+            tools:text="username"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/date"
             style="@style/Material.ListItem.SecondaryText.SingleLine"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/quarter_margin"
+            android:layout_marginBottom="@dimen/half_margin"
             android:text="@{viewModel.date}"
-            app:layout_constraintBottom_toBottomOf="@id/secondaryText"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
-            app:layout_constraintTop_toTopOf="@id/secondaryText"
+            app:layout_constraintTop_toBottomOf="@+id/description"
             tools:text="30 july 18:06" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.domain.interactor.groups
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -151,7 +150,7 @@ class GroupsInteractor(
         }
     }
 
-    abstract class Item
+    sealed class Item
     data class GroupItem(val group: Group, val noteCount: Int, val childGroupCount: Int) : Item()
     data class NoteItem(val note: Note) : Item()
 }

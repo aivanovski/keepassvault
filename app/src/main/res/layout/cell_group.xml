@@ -52,14 +52,14 @@
             app:srcCompat="@drawable/ic_folder_white_24dp" />
 
         <TextView
-            android:id="@+id/primaryText"
+            android:id="@+id/title"
             style="@style/Material.ListItem.PrimaryText.SingleLine"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/element_margin"
             android:text="@{viewModel.title}"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/secondaryText"
+            app:layout_constraintBottom_toTopOf="@id/description"
             app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
             app:layout_constraintStart_toEndOf="@id/iconBackground"
             app:layout_constraintTop_toTopOf="parent"
@@ -67,7 +67,7 @@
             tools:text="Title" />
 
         <TextView
-            android:id="@+id/secondaryText"
+            android:id="@+id/description"
             style="@style/Material.ListItem.SecondaryText.SingleLine"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -75,9 +75,11 @@
             android:text="@{viewModel.description}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
-            app:layout_constraintStart_toStartOf="@id/primaryText"
-            app:layout_constraintTop_toBottomOf="@+id/primaryText"
-            tools:text="6 notes" />
+            app:layout_constraintStart_toStartOf="@id/title"
+            app:layout_constraintTop_toBottomOf="@+id/title"
+            app:visible="@{viewModel.isDescriptionVisible}"
+            tools:text="6 notes"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

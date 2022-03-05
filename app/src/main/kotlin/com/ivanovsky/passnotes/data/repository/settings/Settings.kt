@@ -14,6 +14,7 @@ interface Settings {
     var isFileLogEnabled: Boolean
     var sortType: SortType
     var sortDirection: SortDirection
+    var isGroupsAtStartEnabled: Boolean
     fun initDefaultIfNeed(pref: Pref)
     fun register(listener: OnSettingsChangeListener)
     fun unregister(listener: OnSettingsChangeListener)

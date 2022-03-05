@@ -12,6 +12,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_L
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.DROPBOX_AUTH_TOKEN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXTERNAL_STORAGE_CACHE_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_DIRECTION
@@ -102,6 +103,12 @@ class SettingsImpl(
         }
         set(value) {
             putString(SORT_DIRECTION, value.name)
+        }
+
+    override var isGroupsAtStartEnabled: Boolean
+        get() = getBoolean(IS_GROUPS_AT_START_ENABLED)
+        set(value) {
+            putBoolean(IS_GROUPS_AT_START_ENABLED, value)
         }
 
     init {
@@ -216,6 +223,11 @@ class SettingsImpl(
         ),
         IS_POSTPONED_SYNC_ENABLED(
             keyId = R.string.pref_is_postponed_sync_enabled,
+            type = BOOLEAN,
+            defaultValue = true
+        ),
+        IS_GROUPS_AT_START_ENABLED(
+            keyId = R.string.pref_is_groups_at_start_enabled,
             type = BOOLEAN,
             defaultValue = true
         ),

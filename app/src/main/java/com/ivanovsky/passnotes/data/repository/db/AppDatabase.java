@@ -10,13 +10,13 @@ import com.ivanovsky.passnotes.data.repository.db.dao.RemoteFileDao;
 import com.ivanovsky.passnotes.data.repository.db.dao.UsedFileDao;
 import com.ivanovsky.passnotes.data.entity.UsedFile;
 
-//TODO: param exportSchema should be true, this should be fixed before release
-@Database(entities = {
-        UsedFile.class,
-        RemoteFile.class
-},
-        version = 1,
-        exportSchema = false)
+@Database(
+        entities = {
+                UsedFile.class,
+                RemoteFile.class
+        },
+        version = 1
+)
 @TypeConverters(FSAuthorityTypeConverter.class)
 public abstract class AppDatabase extends RoomDatabase {
 

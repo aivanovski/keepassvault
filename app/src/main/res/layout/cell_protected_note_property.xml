@@ -8,7 +8,7 @@
 
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.core.viewmodel.NotePropertyCellViewModel" />
+            type="com.ivanovsky.passnotes.presentation.core.viewmodel.ProtectedNotePropertyCellViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -29,7 +29,7 @@
             app:layout_constraintVertical_chainStyle="packed"
             tools:text="User Name" />
 
-        <TextView
+        <com.ivanovsky.passnotes.presentation.core.widget.SecureTextView
             android:id="@+id/value"
             style="@style/Material.PrimaryText"
             android:layout_width="0dp"
@@ -37,11 +37,24 @@
             android:layout_marginStart="@dimen/element_margin"
             android:layout_marginEnd="@dimen/element_margin"
             android:text="@{viewModel.model.value}"
+            app:isTextHidden="@{viewModel.isValueHidden}"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/copyButton"
+            app:layout_constraintEnd_toStartOf="@id/visibilityButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/name"
-            tools:text="default@gmail.com" />
+            tools:text="default@gmail.com dksajdsklj kldjadkljasdkldjakslsdajksajdksjaklsds ksjdkasjd klajs dkasjkdlsasdjklasdjkasj dkajsdkl asjd aklsdsj kdsasjdk sajdkl ,jsda kljasdlk" />
+
+        <ImageButton
+            android:id="@+id/visibilityButton"
+            style="@style/Material.BorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/half_margin"
+            android:onClick="@{() -> viewModel.onVisibilityButtonClicked()}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/copyButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_eye_grey_600_24dp" />
 
         <ImageButton
             android:id="@+id/copyButton"
@@ -53,8 +66,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_copy_grey_600_24dp"
-            app:visible="@{viewModel.model.copyButtonVisible}"
-            tools:visibility="visible" />
+            app:visible="@{viewModel.model.copyButtonVisible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

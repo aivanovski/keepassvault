@@ -12,7 +12,6 @@ class App : MultiDexApplication() {
 
     override fun onCreate() {
         super.onCreate()
-        appInstance = this
 
         FirebaseCrashlytics.getInstance()
             .setCrashlyticsCollectionEnabled(BuildConfig.IS_CRASHLYTICS_ENABLED)
@@ -27,11 +26,5 @@ class App : MultiDexApplication() {
             androidContext(this@App)
             modules(KoinModule.buildModule(loggerInteractor))
         }
-    }
-
-    companion object {
-
-        @JvmStatic
-        lateinit var appInstance: App
     }
 }

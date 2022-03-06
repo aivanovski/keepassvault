@@ -1,4 +1,4 @@
-# Passnotes
+# KPassnotes
 Android client for KeePass databases
 
 # License

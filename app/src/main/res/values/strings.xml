@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="app_name">PassNotes</string>
+    <string name="app_name">KPassNotes</string>
 
     <!-- Common for all screens -->
     <string name="dropbox">Dropbox</string>
@@ -45,7 +45,7 @@
     <!-- Autofill -->
     <string name="sign_in_with_app">Sign in with %s</string>
     <string name="select_entry_with_dots">Select entry…</string>
-    <string name="autofill_service_name">PassNotes Autofill</string>
+    <string name="autofill_service_name">KPassNotes Autofill</string>
     <string name="autofill_save_note_message">Save previously entered data for autofill suggestions?</string>
 
     <!-- Common for error -->

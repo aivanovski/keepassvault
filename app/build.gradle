@@ -7,7 +7,7 @@ apply plugin: 'com.google.gms.google-services'
 
 def versionMajor = 0
 def versionMinor = 10
-def versionPatch = 1
+def versionPatch = 2
 
 def PROPERTIES_FILE = file("../project.properties")
 

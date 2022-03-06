@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes
 
 import androidx.multidex.MultiDexApplication
-import com.facebook.stetho.Stetho
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.ivanovsky.passnotes.domain.LoggerInteractor
 import com.ivanovsky.passnotes.injection.KoinModule
@@ -22,9 +21,6 @@ class App : MultiDexApplication() {
             .apply {
                 initialize()
             }
-
-        // TODO: remove from project
-        Stetho.initializeWithDefaults(this)
 
         startKoin {
             androidLogger()

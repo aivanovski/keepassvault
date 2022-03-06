@@ -257,9 +257,6 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
 
-    // Stetho
-    implementation "com.facebook.stetho:stetho:1.5.1"
-
     // WebDAV client
     implementation "com.github.thegrizzlylabs:sardine-android:$sardineAndroidVersion"
 

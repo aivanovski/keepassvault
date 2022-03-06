@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.util;
 
+import androidx.annotation.Nullable;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,8 +12,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.Nullable;
 
 import timber.log.Timber;
 

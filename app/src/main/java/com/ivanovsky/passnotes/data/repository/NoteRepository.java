@@ -11,22 +11,22 @@ import java.util.UUID;
 public interface NoteRepository {
 
     @NonNull
-    OperationResult<List<Note>> getNotesByGroupUid(UUID groupUid);
+    OperationResult<List<Note>> getNotesByGroupUid(@NonNull UUID groupUid);
 
     @NonNull
-    OperationResult<Integer> getNoteCountByGroupUid(UUID groupUid);
+    OperationResult<Integer> getNoteCountByGroupUid(@NonNull UUID groupUid);
 
     @NonNull
-    OperationResult<UUID> insert(Note note);
+    OperationResult<UUID> insert(@NonNull Note note);
 
     @NonNull
-    OperationResult<Note> getNoteByUid(UUID uid);
+    OperationResult<Note> getNoteByUid(@NonNull UUID uid);
 
     @NonNull
-    OperationResult<UUID> update(Note note);
+    OperationResult<UUID> update(@NonNull Note note);
 
     @NonNull
-    OperationResult<Boolean> remove(UUID noteUid);
+    OperationResult<Boolean> remove(@NonNull UUID noteUid);
 
     @NonNull
     OperationResult<List<Note>> find(@NonNull String query);

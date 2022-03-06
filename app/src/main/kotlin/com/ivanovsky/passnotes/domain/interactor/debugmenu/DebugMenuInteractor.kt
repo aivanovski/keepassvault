@@ -272,6 +272,10 @@ class DebugMenuInteractor(
         }
 
         val rootGroupUid = rootGroupResult.obj.uid
+        if (rootGroupUid == null) {
+            return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_ROOT_GROUP))
+        }
+
         val newGroup = Group(
             title = newGroupTitle
         )

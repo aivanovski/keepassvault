@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.presentation.core.model
 
-data class NotePropertyCellModel(
+data class ProtectedNotePropertyCellModel(
     override val id: String,
     val name: String,
     val value: String,

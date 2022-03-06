@@ -6,8 +6,10 @@ import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.DatabaseStatusCellModel
 import com.ivanovsky.passnotes.presentation.core.model.NotePropertyCellModel
+import com.ivanovsky.passnotes.presentation.core.model.ProtectedNotePropertyCellModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NotePropertyCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.ProtectedNotePropertyCellViewModel
 
 class NoteCellViewModelFactory : CellViewModelFactory {
 
@@ -17,6 +19,10 @@ class NoteCellViewModelFactory : CellViewModelFactory {
     ): BaseCellViewModel {
         return when (model) {
             is NotePropertyCellModel -> NotePropertyCellViewModel(
+                model,
+                eventProvider
+            )
+            is ProtectedNotePropertyCellModel -> ProtectedNotePropertyCellViewModel(
                 model,
                 eventProvider
             )

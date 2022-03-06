@@ -18,10 +18,6 @@ public class ErrorInteractor {
         return getMessage(error);
     }
 
-    public ErrorProcessingResult process(OperationError error) {
-        return new ErrorProcessingResult(getMessage(error), getResolution(error));
-    }
-
     private String getMessage(OperationError error) {
         String message;
 
@@ -32,15 +28,6 @@ public class ErrorInteractor {
         }
 
         return message;
-    }
-
-    private ErrorResolution getResolution(OperationError error) {
-        switch (error.getType()) {
-            case NETWORK_IO_ERROR:
-                return ErrorResolution.RETRY;
-            default:
-                return ErrorResolution.NOTHING;
-        }
     }
 
     private String getDefaultMessageForOperationErrorType(OperationError.Type type) {

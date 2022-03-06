@@ -8,9 +8,12 @@ import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
+import com.ivanovsky.passnotes.data.repository.GroupRepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
+import com.ivanovsky.passnotes.data.repository.NoteRepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.RepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.TemplateRepository;
+import com.ivanovsky.passnotes.data.repository.TemplateRepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
@@ -45,6 +48,10 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     private volatile KeepassDatabase db;
     @NonNull
     private final TemplateRepositoryWrapper templateRepositoryWrapper;
+    @NonNull
+    private final GroupRepositoryWrapper groupRepositoryWrapper;
+    @NonNull
+    private final NoteRepositoryWrapper noteRepositoryWrapper;
     private final Context context;
     private final FileSystemResolver fileSystemResolver;
     private final DatabaseLockInteractor lockInteractor;
@@ -66,9 +73,13 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
         this.observerBus = observerBus;
         this.lock = new Object();
         templateRepositoryWrapper = new TemplateRepositoryWrapper();
+        groupRepositoryWrapper = new GroupRepositoryWrapper();
+        noteRepositoryWrapper = new NoteRepositoryWrapper();
 
         repositoryWrappers = Arrays.asList(
-                templateRepositoryWrapper
+                templateRepositoryWrapper,
+                groupRepositoryWrapper,
+                noteRepositoryWrapper
         );
     }
 
@@ -84,14 +95,12 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
     @Override
     public NoteRepository getNoteRepository() {
-        // TODO: should be rewritten with wrapper
-        return db.getNoteRepository();
+        return noteRepositoryWrapper;
     }
 
     @Override
     public GroupRepository getGroupRepository() {
-        // TODO: should be rewritten with wrapper
-        return db.getGroupRepository();
+        return groupRepositoryWrapper;
     }
 
     @NonNull

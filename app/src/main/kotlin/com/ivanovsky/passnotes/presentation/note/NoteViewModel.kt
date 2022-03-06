@@ -31,6 +31,7 @@ import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModel
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NotePropertyCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.ProtectedNotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
@@ -62,6 +63,7 @@ class NoteViewModel(
 
     val viewTypes = ViewModelTypes()
         .add(NotePropertyCellViewModel::class, R.layout.cell_note_property)
+        .add(ProtectedNotePropertyCellViewModel::class, R.layout.cell_protected_note_property)
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())

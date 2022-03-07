@@ -1,12 +1,10 @@
 package com.ivanovsky.passnotes.presentation.core.adapter
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ivanovsky.passnotes.BR
@@ -18,18 +16,23 @@ class ViewModelsAdapter(
     private val viewTypes: ViewModelTypes
 ) : RecyclerView.Adapter<ViewModelsAdapter.ViewHolder>() {
 
-    private val differ = AsyncListDiffer<BaseCellViewModel>(this, ViewModelsDiffCallback())
+    private val items = mutableListOf<BaseCellViewModel>()
 
     fun updateItems(newItems: List<BaseCellViewModel>) {
-        differ.submitList(newItems)
+        val diffCallback = ViewModelsDiffCallback(items, newItems)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+
+        items.clear()
+        items.addAll(newItems)
+        diffResult.dispatchUpdatesTo(this)
     }
 
     override fun getItemCount(): Int {
-        return differ.currentList.size
+        return items.size
     }
 
     override fun getItemViewType(position: Int): Int {
-        val type = differ.currentList[position]::class
+        val type = items[position]::class
         return viewTypes.getViewType(type)
     }
 
@@ -42,7 +45,7 @@ class ViewModelsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val viewModel = differ.currentList[position]
+        val viewModel = items[position]
         if (holder.viewModel != null && holder.viewModel == viewModel) {
             return
         }
@@ -71,23 +74,25 @@ class ViewModelsAdapter(
         var viewModel: BaseCellViewModel? = null
     ) : RecyclerView.ViewHolder(binding.root)
 
-    class ViewModelsDiffCallback : DiffUtil.ItemCallback<BaseCellViewModel>() {
+    class ViewModelsDiffCallback(
+        private val oldItems: List<BaseCellViewModel>,
+        private val newItems: List<BaseCellViewModel>
+    ) : DiffUtil.Callback() {
 
-        override fun areItemsTheSame(
-            oldItem: BaseCellViewModel,
-            newItem: BaseCellViewModel
-        ): Boolean =
-            if (oldItem.model.id != null && newItem.model.id != null) {
-                oldItem.model.id == newItem.model.id
+        override fun getOldListSize(): Int = oldItems.size
+
+        override fun getNewListSize(): Int = newItems.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return if (oldItems[oldItemPosition].model.id != null && newItems[newItemPosition].model.id != null) {
+                oldItems[oldItemPosition].model.id == newItems[newItemPosition].model.id
             } else {
-                oldItem.model == newItem.model
+                oldItems[oldItemPosition].model == newItems[newItemPosition].model
             }
+        }
 
-        @SuppressLint("DiffUtilEquals")
-        override fun areContentsTheSame(
-            oldItem: BaseCellViewModel,
-            newItem: BaseCellViewModel
-        ): Boolean =
-            (oldItem.model == newItem.model)
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldItems[oldItemPosition].model == newItems[newItemPosition].model
+        }
     }
 }

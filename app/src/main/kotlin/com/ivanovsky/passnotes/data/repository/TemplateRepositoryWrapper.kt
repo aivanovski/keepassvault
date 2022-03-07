@@ -20,4 +20,12 @@ class TemplateRepositoryWrapper : RepositoryWrapperWithDatabase(), TemplateRepos
         val db = getDatabase() ?: return noDatabaseError()
         return db.templateRepository.addTemplates(templates)
     }
+
+    override fun addTemplates(
+        templates: List<Template>,
+        doCommit: Boolean
+    ): OperationResult<Boolean> {
+        val db = getDatabase() ?: return noDatabaseError()
+        return db.templateRepository.addTemplates(templates, doCommit)
+    }
 }

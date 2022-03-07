@@ -40,7 +40,6 @@ import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
-import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
@@ -128,14 +127,13 @@ object KoinModule {
 
             // Files, Keepass
             single { FileSystemResolver(get(), get(), get(), get(), get(), get()) }
-            single { KeepassDatabaseRepository(get(), get(), get(), get(), get()) as EncryptedDatabaseRepository }
+            single { KeepassDatabaseRepository(get(), get(), get(), get()) as EncryptedDatabaseRepository }
 
             // Use Cases
             single { GetDebugCredentialsUseCase() }
             single { LockDatabaseUseCase() }
             single { GetRecentlyOpenedFilesUseCase(get(), get()) }
             single { SyncUseCases(get(), get()) }
-            single { DetermineDatabaseStatusUseCase() }
             single { GetDatabaseStatusUseCase(get(), get()) }
             single { AddTemplatesUseCase(get(), get(), get()) }
             single { GetDatabaseUseCase(get(), get()) }

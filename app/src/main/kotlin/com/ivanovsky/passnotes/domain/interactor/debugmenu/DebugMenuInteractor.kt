@@ -154,7 +154,7 @@ class DebugMenuInteractor(
             val dbDescriptor = FileDescriptor.fromRegularFile(dbFile)
             val key = KeepassDatabaseKey(password)
 
-            val creationResult = dbRepository.createNew(key, dbDescriptor)
+            val creationResult = dbRepository.createNew(key, dbDescriptor, false)
             if (creationResult.isSucceededOrDeferred) {
                 val dbStream = newFileInputStreamOrNull(dbFile)
                 if (dbStream != null) {

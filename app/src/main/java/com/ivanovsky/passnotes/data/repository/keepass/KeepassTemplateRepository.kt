@@ -52,6 +52,10 @@ class KeepassTemplateRepository(
     }
 
     override fun addTemplates(templates: List<Template>): OperationResult<Boolean> {
+        return addTemplates(templates, true)
+    }
+
+    override fun addTemplates(templates: List<Template>, doCommit: Boolean): OperationResult<Boolean> {
         val rootGroupResult = groupDao.rootGroup
         if (rootGroupResult.isFailed) {
             return rootGroupResult.takeError()
@@ -75,14 +79,14 @@ class KeepassTemplateRepository(
         val templateGroup = Group(
             title = TEMPLATE_GROUP_NAME
         )
-        val insertGroupResult = groupDao.insert(templateGroup, rootGroup.uid)
+        val insertGroupResult = groupDao.insert(templateGroup, rootGroup.uid, doCommit)
         if (insertGroupResult.isFailed) {
             return insertGroupResult.takeError()
         }
 
         val templateGroupUid = insertGroupResult.obj
         val notes = templates.map { TemplateNoteFactory.createTemplateNote(it, templateGroupUid) }
-        val insertNotesResult = noteDao.insert(notes)
+        val insertNotesResult = noteDao.insert(notes, doCommit)
         if (insertNotesResult.isFailed) {
             return insertNotesResult.takeError()
         }

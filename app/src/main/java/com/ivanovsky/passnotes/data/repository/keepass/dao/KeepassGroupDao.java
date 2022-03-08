@@ -134,7 +134,7 @@ public class KeepassGroupDao implements GroupDao {
     }
 
     @NonNull
-    private OperationResult<UUID> insert(Group group, UUID parentGroupUid, boolean doCommit) {
+    public OperationResult<UUID> insert(Group group, UUID parentGroupUid, boolean doCommit) {
         SimpleDatabase keepassDb = db.getKeepassDatabase();
 
         SimpleGroup newGroup;

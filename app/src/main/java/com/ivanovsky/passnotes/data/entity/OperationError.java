@@ -21,6 +21,7 @@ public class OperationError {
     public static final String MESSAGE_RECORD_IS_ALREADY_EXISTS = "Record is already exists";
     public static final String MESSAGE_FILE_IS_ALREADY_EXISTS = "File is already exists";
     public static final String MESSAGE_FAILED_TO_OPEN_DB_FILE = "Failed to open DB file";
+    public static final String MESSAGE_FAILED_TO_OPEN_DEFAULT_DB_FILE = "Failed to open default DB file";
     public static final String MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE = "Local version conflicts with remote";
     public static final String MESSAGE_FAILED_TO_FIND_FILE = "Failed to find file";
     public static final String MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE = "Failed to access to private storage";

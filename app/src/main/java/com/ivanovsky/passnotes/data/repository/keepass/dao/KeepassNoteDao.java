@@ -248,6 +248,11 @@ public class KeepassNoteDao implements NoteDao {
     @NonNull
     @Override
     public OperationResult<Boolean> insert(List<Note> notes) {
+        return insert(notes, true);
+    }
+
+    @NonNull
+    public OperationResult<Boolean> insert(List<Note> notes, boolean doCommit) {
         List<Pair<Note, OperationResult<UUID>>> results = Stream.of(notes)
                 .map(note -> new Pair<>(note, insert(note, false, false)))
                 .collect(Collectors.toList());
@@ -256,9 +261,11 @@ public class KeepassNoteDao implements NoteDao {
                 .allMatch(noteToResultPair -> noteToResultPair.second.isSucceededOrDeferred());
 
         if (success) {
-            OperationResult<Boolean> commitResult = db.commit();
-            if (commitResult.isFailed()) {
-                return commitResult.takeError();
+            if (doCommit) {
+                OperationResult<Boolean> commitResult = db.commit();
+                if (commitResult.isFailed()) {
+                    return commitResult.takeError();
+                }
             }
 
             if (insertListeners.size() != 0) {

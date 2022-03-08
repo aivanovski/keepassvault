@@ -39,7 +39,7 @@ class NewDatabaseInteractor(
                 return@withContext OperationResult.error(newFileIsAlreadyExistsError())
             }
 
-            val creationResult = dbRepo.createNew(key, file)
+            val creationResult = dbRepo.createNew(key, file, isAddTemplates)
             if (creationResult.isFailed) {
                 return@withContext creationResult.takeError()
             } else if (creationResult.isDeferred) {
@@ -51,13 +51,6 @@ class NewDatabaseInteractor(
             val openResult = dbRepo.open(key, file, FSOptions.DEFAULT)
             if (openResult.isFailed) {
                 return@withContext openResult.takeError()
-            }
-
-            if (isAddTemplates) {
-                val addTemplatesResult = addTemplatesUseCase.addTemplates()
-                if (addTemplatesResult.isFailed) {
-                    return@withContext addTemplatesResult.takeError()
-                }
             }
 
             val getFileResult = getFile(file)

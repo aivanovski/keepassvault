@@ -1,5 +1,8 @@
 package com.ivanovsky.passnotes.data.repository.keepass;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_OPEN_DEFAULT_DB_FILE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericError;
+
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -14,7 +17,6 @@ import com.ivanovsky.passnotes.data.repository.NoteRepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.RepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.TemplateRepository;
 import com.ivanovsky.passnotes.data.repository.TemplateRepositoryWrapper;
-import com.ivanovsky.passnotes.data.repository.encdb.exception.EncryptedDatabaseException;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
@@ -24,20 +26,12 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
-import com.ivanovsky.passnotes.domain.usecases.DetermineDatabaseStatusUseCase;
-
-import org.linguafranca.pwdb.Credentials;
-import org.linguafranca.pwdb.kdbx.KdbxCreds;
-import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
-
-import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 
 import timber.log.Timber;
 
@@ -55,7 +49,6 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     private final Context context;
     private final FileSystemResolver fileSystemResolver;
     private final DatabaseLockInteractor lockInteractor;
-    private final DetermineDatabaseStatusUseCase statusUseCase;
     private final ObserverBus observerBus;
     private final Object lock;
     @NonNull
@@ -64,12 +57,10 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     public KeepassDatabaseRepository(Context context,
                                      FileSystemResolver fileSystemResolver,
                                      DatabaseLockInteractor lockInteractor,
-                                     DetermineDatabaseStatusUseCase statusUseCase,
                                      ObserverBus observerBus) {
         this.context = context;
         this.fileSystemResolver = fileSystemResolver;
         this.lockInteractor = lockInteractor;
-        this.statusUseCase = statusUseCase;
         this.observerBus = observerBus;
         this.lock = new Object();
         templateRepositoryWrapper = new TemplateRepositoryWrapper();
@@ -123,23 +114,26 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
                 close();
             }
 
-            OperationResult<InputStream> inResult = fsProvider.openFileForRead(file,
+            OperationResult<InputStream> inputResult = fsProvider.openFileForRead(file,
                     OnConflictStrategy.CANCEL,
                     options);
-            if (inResult.isFailed()) {
-                return inResult.takeError();
+            if (inputResult.isFailed()) {
+                return inputResult.takeError();
             }
 
-            InputStream in = inResult.getObj();
-
-            try {
-                db = new KeepassDatabase(fileSystemResolver, statusUseCase, observerBus,
-                        options, file, in, inResult, key);
-                result = inResult.takeStatusWith(db);
-            } catch (EncryptedDatabaseException e) {
-                Timber.d(e);
-                result = OperationResult.error(newDbError(e.getMessage()));
+            OperationResult<KeepassDatabase> openResult = KeepassDatabase.open(fsProvider,
+                    options,
+                    file,
+                    inputResult,
+                    key,
+                    observerBus::notifyDatabaseStatusChanged);
+            if (openResult.isFailed()) {
+                return openResult.takeError();
             }
+
+            db = openResult.getObj();
+
+            result = openResult.takeStatusWith(db);
         }
 
         if (db != null) {
@@ -152,55 +146,50 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     @NonNull
     @Override
     public OperationResult<Boolean> createNew(@NonNull EncryptedDatabaseKey key,
-                                              @NonNull FileDescriptor file) {
-        OperationResult<Boolean> result = new OperationResult<>();
+                                              @NonNull FileDescriptor file,
+                                              boolean addTemplates) {
+        OperationResult<Boolean> result;
 
         synchronized (lock) {
-            Credentials newCredentials = new KdbxCreds(key.getKey());
+            FileSystemProvider fsProvider = fileSystemResolver.resolveProvider(file.getFsAuthority());
 
-            InputStream in = null;
-            OutputStream out = null;
-
-            FileSystemProvider provider = fileSystemResolver.resolveProvider(file.getFsAuthority());
-
+            OperationResult<InputStream> input;
             try {
-                in = new BufferedInputStream(context.getAssets().open(EMPTY_DB_PATH));
-
-                SimpleDatabase keepassDb = SimpleDatabase.loadXml(in);
-
-                OperationResult<OutputStream> outResult = provider.openFileForWrite(file,
-                        OnConflictStrategy.CANCEL,
-                        FSOptions.defaultOptions());
-                if (outResult.isSucceededOrDeferred()) {
-                    out = outResult.getObj();
-
-                    keepassDb.save(newCredentials, out);
-
-                    result.setObj(true);
-                } else {
-                    result.setError(outResult.getError());
-                }
-            } catch (Exception e) {
+                // 'in' will be closed in KeepassDatabase.open()
+                InputStream in = new BufferedInputStream(context.getAssets().open(EMPTY_DB_PATH));
+                input = OperationResult.success(in);
+            } catch (IOException e) {
                 Timber.d(e);
+                return OperationResult.error(newGenericError(MESSAGE_FAILED_TO_OPEN_DEFAULT_DB_FILE));
+            }
 
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-                        // TODO: should be handled or not?
-                        Timber.d(e);
-                    }
-                }
-                if (out != null) {
-                    try {
-                        out.close();
-                    } catch (IOException e) {
-                        // TODO: should be handled or not?
-                        Timber.d(e);
-                    }
+            EncryptedDatabaseKey unencryptedKey = new DefaultDatabaseKey();
+            OperationResult<KeepassDatabase> openResult = KeepassDatabase.open(fsProvider,
+                    FSOptions.defaultOptions(),
+                    file,
+                    input,
+                    unencryptedKey,
+                    null);
+            if (openResult.isFailed()) {
+                return openResult.takeError();
+            }
+
+            KeepassDatabase db = openResult.getObj();
+            if (addTemplates) {
+                OperationResult<Boolean> addTemplateResult = db.getTemplateRepository()
+                        .addTemplates(TemplateFactory.createDefaultTemplates(), false);
+                if (addTemplateResult.isFailed()) {
+                    return addTemplateResult.takeError();
                 }
             }
+
+            // 'changeKey' will invoke commit
+            OperationResult<Boolean> changeKeyResult = db.changeKey(unencryptedKey, key);
+            if (changeKeyResult.isFailed()) {
+                return changeKeyResult.takeError();
+            }
+
+            result = changeKeyResult;
         }
 
         return result;

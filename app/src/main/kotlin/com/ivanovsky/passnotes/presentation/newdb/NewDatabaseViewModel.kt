@@ -20,6 +20,7 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
+import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import java.io.File
@@ -73,9 +74,7 @@ class NewDatabaseViewModel(
         screenState.value = ScreenState.loading()
 
         val dbKey = KeepassDatabaseKey(password)
-        val dbFile = storageDir.copy(
-            path = storageDir.path + "/" + "$filename.kdbx"
-        )
+        val dbFile = createDbFileDescriptor(storageDir)
 
         viewModelScope.launch {
             val result = interactor.createNewDatabaseAndOpen(dbKey, dbFile, isAddTemplates)
@@ -201,6 +200,21 @@ class NewDatabaseViewModel(
         }
 
         storagePath.value = selectedFile.path
+    }
+
+    private fun createDbFileDescriptor(dir: FileDescriptor): FileDescriptor {
+        val name = this.filename.value ?: throw IllegalStateException()
+        val path = dir.path + File.separator + name  + ".kdbx"
+
+        return FileDescriptor(
+            fsAuthority = dir.fsAuthority,
+            path = path,
+            uid = path,
+            name = FileUtils.getFileNameFromPath(path),
+            isDirectory = false,
+            isRoot = false,
+            modified = null
+        )
     }
 
     companion object {

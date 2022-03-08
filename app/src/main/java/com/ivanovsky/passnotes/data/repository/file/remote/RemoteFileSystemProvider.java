@@ -273,6 +273,9 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     public OperationResult<InputStream> openFileForRead(@NonNull FileDescriptor file,
                                                         @NonNull OnConflictStrategy onConflictStrategy,
                                                         @NonNull FSOptions options) {
+        Timber.d("openFileForRead: file=%s, conflictStrategy=%s, fsOptions=%s",
+                file, onConflictStrategy, options);
+
         OperationResult<InputStream> result = new OperationResult<>();
 
         File destinationDir = fileHelper.getRemoteFilesDir();
@@ -472,6 +475,10 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     public OperationResult<OutputStream> openFileForWrite(@NonNull FileDescriptor file,
                                                           @NonNull OnConflictStrategy onConflict,
                                                           @NonNull FSOptions options) {
+
+        Timber.d("openFileForWrite: file=%s, conflictStrategy=%s, fsOptions=%s",
+                file, onConflict, options);
+
         if (!options.isWriteEnabled()) {
             return OperationResult.error(newGenericIOError(MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED));
         }
@@ -529,7 +536,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         cachedFile.getUid(),
                         cachedFile.getRemotePath());
 
-                Timber.d("Uploading to new file: remote=%s, local=%s",
+                Timber.d("openFileForWrite: Uploading to new file: remote=%s, local=%s",
                         cachedFile.getRemotePath(), cachedFile.getLocalPath());
 
                 if (startProcessingUnit(unit)) {
@@ -545,12 +552,23 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
             } else {
                 // re-write existing file
                 String uid = metadata.getUid();
+                RemoteFile cachedFile = cache.getByUid(uid);
+
                 String remotePath = metadata.getPath();
-                Date localModified = new Date(file.getModified());
                 Date serverModified = metadata.getServerModified();
                 Date clientModified = metadata.getClientModified();
 
-                RemoteFile cachedFile = cache.getByUid(uid);
+                Date localModified;
+                if (cachedFile != null) {
+                    localModified = new Date(cachedFile.getLastModificationTimestamp());
+                } else if (file.getModified() != null) {
+                    localModified = new Date(file.getModified());
+                } else {
+                    localModified = null;
+                }
+
+                Timber.d("re-writing existing file: cachedFile=%s", cachedFile);
+
                 if (canResolveMergeConflict(localModified, serverModified, clientModified, onConflict)) {
                     if (cachedFile == null) {
                         cachedFile = new RemoteFile();
@@ -792,11 +810,14 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                                             Date serverModified,
                                             Date clientModified,
                                             OnConflictStrategy onConflictStrategy) {
+        Timber.d("canResolveMergeConflict: localModified=%s, serverModified=%s, clientModified=%s, strategy=%s",
+                localModified, serverModified, clientModified, onConflictStrategy);
+
         boolean result;
 
         Date lastServerModified = DateUtils.anyLast(serverModified, clientModified);
         if (lastServerModified != null && localModified != null) {
-            if (localModified.after(lastServerModified)) {
+            if (localModified.after(lastServerModified) || localModified.equals(lastServerModified)) {
                 result = true;
             } else {
                 result = (onConflictStrategy == OnConflictStrategy.REWRITE);

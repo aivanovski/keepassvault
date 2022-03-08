@@ -28,7 +28,8 @@ public interface EncryptedDatabaseRepository {
 
     @NonNull
     OperationResult<Boolean> createNew(@NonNull EncryptedDatabaseKey key,
-                                       @NonNull FileDescriptor file);
+                                       @NonNull FileDescriptor file,
+                                       boolean addTemplates);
 
     @NonNull
     OperationResult<Boolean> close();

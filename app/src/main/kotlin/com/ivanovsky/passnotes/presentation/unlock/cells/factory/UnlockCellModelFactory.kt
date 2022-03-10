@@ -20,7 +20,8 @@ class UnlockCellModelFactory(
         isNextButtonVisible: Boolean,
         onFileClicked: (file: FileDescriptor) -> Unit
     ): DatabaseCellModel {
-        val isStatusVisible = (syncState?.status != SyncStatus.CONFLICT)
+        val isStatusVisible =
+            (syncState?.status != SyncStatus.CONFLICT &&syncState?.status != SyncStatus.ERROR)
 
         return DatabaseCellModel(
             id = file.uid,
@@ -59,7 +60,7 @@ class UnlockCellModelFactory(
             state?.status == SyncStatus.NO_NETWORK -> {
                 resourceProvider.getString(R.string.offline_mode)
             }
-            state?.status == SyncStatus.CONFLICT -> EMPTY
+            state?.status == SyncStatus.CONFLICT || state?.status == SyncStatus.ERROR -> EMPTY
             else -> {
                 resourceProvider.getString(
                     R.string.text_with_dots,

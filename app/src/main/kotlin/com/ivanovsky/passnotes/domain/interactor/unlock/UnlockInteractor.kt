@@ -20,6 +20,7 @@ import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
+import com.ivanovsky.passnotes.domain.usecases.RemoveUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import kotlinx.coroutines.withContext
@@ -29,6 +30,7 @@ class UnlockInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
     private val dispatchers: DispatcherProvider,
     private val getFilesUseCase: GetRecentlyOpenedFilesUseCase,
+    private val removeFileUseCase: RemoveUsedFileUseCase,
     private val autofillUseCase: FindNoteForAutofillUseCase,
     private val syncUseCases: SyncUseCases,
     private val settings: Settings
@@ -49,6 +51,9 @@ class UnlockInteractor(
 
     suspend fun getRecentlyOpenedFiles(): OperationResult<List<FileDescriptor>> =
         getFilesUseCase.getRecentlyOpenedFiles()
+
+    suspend fun removeFromUsedFiles(file: FileDescriptor): OperationResult<Boolean> =
+        removeFileUseCase.removeUsedFile(file.uid, file.fsAuthority)
 
     suspend fun getSyncConflictInfo(file: FileDescriptor): OperationResult<SyncConflictInfo> =
         syncUseCases.getSyncConflictInfo(file)

@@ -86,6 +86,9 @@ class SelectDatabaseCellModelFactory(
             state?.status == SyncStatus.CONFLICT -> {
                 resourceProvider.getString(R.string.conflict)
             }
+            state?.status == SyncStatus.ERROR -> {
+                resourceProvider.getString(R.string.error)
+            }
             else -> {
                 resourceProvider.getString(
                     R.string.text_with_dots,

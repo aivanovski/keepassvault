@@ -128,7 +128,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
                     return SyncStatus.NO_NETWORK;
                 }
             } else {
-                return SyncStatus.CONFLICT;
+                return SyncStatus.ERROR;
             }
         }
 

@@ -53,6 +53,7 @@ public class OperationError {
     public static final String GENERIC_MESSAGE_FAILED_TO_FIND_COLUMN = "Failed to find column: %s";
     public static final String GENERIC_MESSAGE_FAILED_TO_GET_ACCESS_RIGHT_TO_URI = "Failed to get access to: %s";
     public static final String GENERIC_MESSAGE_FAILED_TO_FIND_FILE = "Failed to find file: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID = "Failed to find '%s' in db: uid=%s";
 
     private Type type;
     private String message;

@@ -29,7 +29,7 @@ class ServerLoginFragment : FragmentWithDoneButton() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         setupActionBar {
-            title = getString(R.string.add_new_server)
+            title = getString(R.string.enter_server_credentials)
             setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
         }

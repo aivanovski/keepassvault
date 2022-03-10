@@ -15,7 +15,8 @@ class TextPropertyCellViewModel(
     private val resourceProvider: ResourceProvider
 ) : BaseCellViewModel(model), PropertyViewModel {
 
-    val text = MutableLiveData(model.value)
+    // Somehow "MutableLiveData<String>" fixes error in 2-way data-binding
+    val text: MutableLiveData<String> = MutableLiveData(model.value)
     val error = MutableLiveData<String?>(null)
 
     override fun createProperty(): Property {

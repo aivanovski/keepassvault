@@ -20,7 +20,8 @@ class ExtendedTextPropertyCellViewModel(
     private val resourceProvider: ResourceProvider
 ) : BaseCellViewModel(model), PropertyViewModel {
 
-    val primaryText = MutableLiveData(
+    // Somehow "MutableLiveData<String>" fixes error in 2-way data-binding
+    val primaryText: MutableLiveData<String> = MutableLiveData(
         if (model.isCollapsed) {
             model.value
         } else {

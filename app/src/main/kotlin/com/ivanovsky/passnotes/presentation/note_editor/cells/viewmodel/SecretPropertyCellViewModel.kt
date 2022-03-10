@@ -16,7 +16,8 @@ class SecretPropertyCellViewModel(
     private val resourceProvider: ResourceProvider
 ) : BaseCellViewModel(model), PropertyViewModel {
 
-    val secretText = MutableLiveData(model.value)
+    // Somehow "MutableLiveData<String>" fixes error in 2-way data-binding
+    val secretText: MutableLiveData<String> = MutableLiveData(model.value)
     val confirmationText = MutableLiveData(model.value)
     val confirmationError = MutableLiveData<String?>(null)
     val secretTransformationMethod = MutableLiveData(TextTransformationMethod.PASSWORD)

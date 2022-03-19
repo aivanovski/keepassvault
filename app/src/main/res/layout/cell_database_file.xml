@@ -53,6 +53,7 @@
             android:layout_marginTop="@dimen/half_margin"
             android:layout_marginEnd="@dimen/element_margin"
             android:text="@{viewModel.model.status}"
+            android:textColor="@{viewModel.model.statusColor}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/filename"
             app:layout_constraintTop_toBottomOf="@id/path"

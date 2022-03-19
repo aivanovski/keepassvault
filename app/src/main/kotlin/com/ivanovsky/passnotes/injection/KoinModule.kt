@@ -49,6 +49,7 @@ import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
 import com.ivanovsky.passnotes.domain.usecases.IsDatabaseOpenedUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
+import com.ivanovsky.passnotes.domain.usecases.RemoveUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
 import com.ivanovsky.passnotes.presentation.about.AboutViewModel
@@ -145,10 +146,11 @@ object KoinModule {
             single { FindNoteForAutofillUseCase(get(), get()) }
             single { UpdateNoteWithAutofillDataUseCase(get(), get(), get()) }
             single { UpdateNoteUseCase(get(), get(), get()) }
+            single { RemoveUsedFileUseCase(get(), get()) }
 
             // Interactors
             single { FilePickerInteractor(get()) }
-            single { UnlockInteractor(get(), get(), get(), get(), get(), get(), get()) }
+            single { UnlockInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
             single { StorageListInteractor(get(), get(), get()) }
             single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
@@ -158,7 +160,7 @@ object KoinModule {
             single { NoteEditorInteractor(get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
             single { DatabaseLockInteractor(get(), get(), get()) }
-            single { SelectDatabaseInteractor(get(), get(), get(), get()) }
+            single { SelectDatabaseInteractor(get(), get(), get()) }
             single { SearchInteractor(get(), get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
             single { DatabaseSettingsInteractor(get(), get()) }

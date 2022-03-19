@@ -36,7 +36,7 @@ public class ErrorInteractor {
             case NETWORK_IO_ERROR:
                 return context.getString(R.string.network_error_was_occurred_check_internet_connection);
             default:
-                return context.getString(R.string.error_was_occurred);
+                return context.getString(R.string.error_has_been_occurred);
         }
     }
 

@@ -8,6 +8,7 @@ data class DatabaseFileCellModel(
     val name: String,
     val path: String,
     val status: String,
+    val statusColor: Int,
     val isRemoveButtonVisible: Boolean,
     val isResolveButtonVisible: Boolean
 ) : BaseCellModel()

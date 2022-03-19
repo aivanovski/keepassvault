@@ -93,7 +93,7 @@ class NewDatabaseViewModel(
                         )
                     )
                 } else {
-                    val errorText = resourceProvider.getString(R.string.error_was_occurred)
+                    val errorText = resourceProvider.getString(R.string.error_has_been_occurred)
                     screenState.value = ScreenState.dataWithError(errorText)
                     doneButtonVisibility.value = true
                 }

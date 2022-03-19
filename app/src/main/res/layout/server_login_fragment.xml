@@ -10,118 +10,124 @@
             type="com.ivanovsky.passnotes.presentation.server_login.ServerLoginViewModel" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/rootLayout"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
-            android:id="@+id/errorPanelView"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/rootLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            android:layout_height="match_parent">
 
-        <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fillViewport="true"
-            app:layout_constraintTop_toBottomOf="@id/errorPanelView"
-            app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
+                android:id="@+id/errorPanelView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:screenState="@{viewModel.screenState}"
+                app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/guidelineStart"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    app:layout_constraintGuide_begin="@dimen/element_margin" />
+            <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:screenState="@{viewModel.screenState}"
+                app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
-                <androidx.constraintlayout.widget.Guideline
-                    android:id="@+id/guidelineEnd"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    app:layout_constraintGuide_end="@dimen/element_margin" />
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fillViewport="true"
+                app:layout_constraintTop_toBottomOf="@id/errorPanelView"
+                app:screenState="@{viewModel.screenState}"
+                app:screenStateHandler="@{viewModel.screenStateHandler}">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/urlLayout"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/group_margin"
-                    app:errorText="@{viewModel.urlError}"
-                    app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
-                    app:layout_constraintStart_toEndOf="@id/guidelineStart"
-                    app:layout_constraintTop_toTopOf="parent">
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/url"
-                        style="@style/Material.EditText.PrimaryMultiLine"
-                        android:layout_width="match_parent"
+                    <androidx.constraintlayout.widget.Guideline
+                        android:id="@+id/guidelineStart"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:hint="@string/server_url"
-                        android:imeOptions="actionNext"
-                        android:inputType="text"
-                        android:text="@={viewModel.url}" />
+                        android:orientation="vertical"
+                        app:layout_constraintGuide_begin="@dimen/element_margin" />
 
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/usernameLayout"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/element_margin"
-                    app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
-                    app:layout_constraintStart_toEndOf="@id/guidelineStart"
-                    app:layout_constraintTop_toBottomOf="@id/urlLayout">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/username"
-                        style="@style/Material.EditText.PrimarySingleLine"
-                        android:layout_width="match_parent"
+                    <androidx.constraintlayout.widget.Guideline
+                        android:id="@+id/guidelineEnd"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:hint="@string/username"
-                        android:imeOptions="actionNext"
-                        android:inputType="text"
-                        android:text="@={viewModel.username}" />
+                        android:orientation="vertical"
+                        app:layout_constraintGuide_end="@dimen/element_margin" />
 
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/passwordLayout"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/element_margin"
-                    app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
-                    app:layout_constraintStart_toEndOf="@id/guidelineStart"
-                    app:layout_constraintTop_toBottomOf="@id/usernameLayout">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/password"
-                        style="@style/Material.EditText.Password"
-                        android:layout_width="match_parent"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/urlLayout"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:hint="@string/password"
-                        android:imeOptions="actionDone"
-                        android:text="@={viewModel.password}" />
+                        android:layout_marginTop="@dimen/group_margin"
+                        app:errorText="@{viewModel.urlError}"
+                        app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+                        app:layout_constraintStart_toEndOf="@id/guidelineStart"
+                        app:layout_constraintTop_toTopOf="parent">
 
-                </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/url"
+                            style="@style/Material.EditText.PrimaryMultiLine"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/server_url"
+                            android:imeOptions="actionNext"
+                            android:inputType="text"
+                            android:text="@={viewModel.url}" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    </com.google.android.material.textfield.TextInputLayout>
 
-        </ScrollView>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/usernameLayout"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/element_margin"
+                        app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+                        app:layout_constraintStart_toEndOf="@id/guidelineStart"
+                        app:layout_constraintTop_toBottomOf="@id/urlLayout">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/username"
+                            style="@style/Material.EditText.PrimarySingleLine"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/username"
+                            android:imeOptions="actionNext"
+                            android:inputType="text"
+                            android:text="@={viewModel.username}" />
 
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/passwordLayout"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/element_margin"
+                        app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+                        app:layout_constraintStart_toEndOf="@id/guidelineStart"
+                        app:layout_constraintTop_toBottomOf="@id/usernameLayout">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/password"
+                            style="@style/Material.EditText.Password"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/password"
+                            android:imeOptions="actionDone"
+                            android:text="@={viewModel.password}" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </ScrollView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
 </layout>

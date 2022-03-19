@@ -53,9 +53,20 @@ class SelectDatabaseCellModelFactory(
             name = file.name,
             path = file.formatReadablePath(resourceProvider),
             status = formatSyncStatus(syncState),
+            statusColor = getSyncStatusColor(syncState),
             isRemoveButtonVisible = true,
             isResolveButtonVisible = (syncState?.status == SyncStatus.CONFLICT)
         )
+
+    private fun getSyncStatusColor(state: SyncState?): Int {
+        return if (state?.status == SyncStatus.CONFLICT ||
+            state?.status == SyncStatus.ERROR ||
+            state?.status == SyncStatus.AUTH_ERROR) {
+            resourceProvider.getColor(R.color.error_text)
+        } else {
+            resourceProvider.getColor(R.color.primary_text)
+        }
+    }
 
     private fun formatSyncStatus(state: SyncState?): String {
         return when {
@@ -82,6 +93,12 @@ class SelectDatabaseCellModelFactory(
             }
             state?.status == SyncStatus.NO_NETWORK -> {
                 resourceProvider.getString(R.string.offline_mode)
+            }
+            state?.status == SyncStatus.ERROR -> {
+                resourceProvider.getString(R.string.error)
+            }
+            state?.status == SyncStatus.AUTH_ERROR -> {
+                resourceProvider.getString(R.string.unauthorised)
             }
             state?.status == SyncStatus.CONFLICT -> {
                 resourceProvider.getString(R.string.conflict)

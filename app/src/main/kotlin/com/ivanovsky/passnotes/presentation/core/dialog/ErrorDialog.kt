@@ -12,7 +12,7 @@ class ErrorDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return AlertDialog.Builder(requireContext())
-            .setTitle(R.string.error_was_occurred)
+            .setTitle(R.string.error_has_been_occurred)
             .setMessage(getMandatoryStringArgument(ARG_MESSAGE))
             .create()
     }

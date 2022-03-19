@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.domain.interactor.unlock
 
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
+import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.Note
@@ -20,6 +21,7 @@ import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
+import com.ivanovsky.passnotes.domain.usecases.RemoveUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import kotlinx.coroutines.withContext
@@ -29,6 +31,7 @@ class UnlockInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
     private val dispatchers: DispatcherProvider,
     private val getFilesUseCase: GetRecentlyOpenedFilesUseCase,
+    private val removeFileUseCase: RemoveUsedFileUseCase,
     private val autofillUseCase: FindNoteForAutofillUseCase,
     private val syncUseCases: SyncUseCases,
     private val settings: Settings
@@ -49,6 +52,9 @@ class UnlockInteractor(
 
     suspend fun getRecentlyOpenedFiles(): OperationResult<List<FileDescriptor>> =
         getFilesUseCase.getRecentlyOpenedFiles()
+
+    suspend fun removeFromUsedFiles(file: FileDescriptor): OperationResult<Boolean> =
+        removeFileUseCase.removeUsedFile(file.uid, file.fsAuthority)
 
     suspend fun getSyncConflictInfo(file: FileDescriptor): OperationResult<SyncConflictInfo> =
         syncUseCases.getSyncConflictInfo(file)
@@ -82,7 +88,8 @@ class UnlockInteractor(
             val open = dbRepo.open(key, file, fsOptions)
 
             val result = if (open.isFailed &&
-                open.error.type == OperationError.Type.DB_VERSION_CONFLICT_ERROR) {
+                (open.error.type == OperationError.Type.DB_VERSION_CONFLICT_ERROR ||
+                    open.error.type == OperationError.Type.AUTH_ERROR)) {
                 val cachedDb = dbRepo.open(key, file, FSOptions.CACHE_ONLY)
                 if (cachedDb.isSucceededOrDeferred) {
                     cachedDb
@@ -115,6 +122,32 @@ class UnlockInteractor(
             fileRepository.update(updatedFile)
         }
     }
+
+    suspend fun updateUsedFileFsAuthority(
+        fileUid: String,
+        oldFsAuthority: FSAuthority,
+        newFsAuthority: FSAuthority
+    ): OperationResult<UsedFile> =
+        withContext(dispatchers.IO) {
+            val usedFile = fileRepository.findByUid(fileUid, oldFsAuthority)
+                ?: return@withContext OperationResult.error(
+                    newDbError(
+                        String.format(
+                            OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
+                            UsedFile::class.simpleName,
+                            fileUid
+                        )
+                    )
+                )
+
+            val updatedFile = usedFile.copy(
+                fsAuthority = newFsAuthority
+            )
+
+            fileRepository.update(updatedFile)
+
+            OperationResult.success(updatedFile)
+        }
 
     fun saveUsedFileWithoutAccessTime(file: UsedFile): OperationResult<Boolean> {
         val result = OperationResult<Boolean>()

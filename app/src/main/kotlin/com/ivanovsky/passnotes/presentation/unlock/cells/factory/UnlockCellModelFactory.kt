@@ -59,7 +59,15 @@ class UnlockCellModelFactory(
             state?.status == SyncStatus.NO_NETWORK -> {
                 resourceProvider.getString(R.string.offline_mode)
             }
-            state?.status == SyncStatus.CONFLICT -> EMPTY
+            state?.status == SyncStatus.ERROR -> {
+                resourceProvider.getString(R.string.error_offline_mode)
+            }
+            state?.status == SyncStatus.AUTH_ERROR -> {
+                resourceProvider.getString(R.string.auth_error_offline_mode)
+            }
+            state?.status == SyncStatus.CONFLICT -> {
+                EMPTY
+            }
             else -> {
                 resourceProvider.getString(
                     R.string.text_with_dots,

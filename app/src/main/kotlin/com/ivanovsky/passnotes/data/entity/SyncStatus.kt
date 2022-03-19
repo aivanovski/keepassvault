@@ -6,5 +6,7 @@ enum class SyncStatus {
     LOCAL_CHANGES_NO_NETWORK,
     REMOTE_CHANGES,
     NO_NETWORK,
-    CONFLICT
+    ERROR,
+    CONFLICT,
+    AUTH_ERROR
 }

@@ -118,15 +118,16 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
                 cachedFile.getRemotePath(),
                 FSOptions.noCache());
         if (getFile.isFailed()) {
-            boolean networkError =
-                    (getFile.getError().getType() == OperationError.Type.NETWORK_IO_ERROR);
+            OperationError.Type errorType = getFile.getError().getType();
 
-            if (networkError) {
+            if (errorType == OperationError.Type.NETWORK_IO_ERROR) {
                 if (cachedFile.isLocallyModified()) {
                     return SyncStatus.LOCAL_CHANGES_NO_NETWORK;
                 } else {
                     return SyncStatus.NO_NETWORK;
                 }
+            } else if (errorType == OperationError.Type.AUTH_ERROR) {
+                return SyncStatus.AUTH_ERROR;
             } else {
                 return SyncStatus.ERROR;
             }

@@ -25,6 +25,7 @@ import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_AUTHORIZATION
+import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NewDatabaseScreen
 import com.ivanovsky.passnotes.presentation.Screens.SelectDatabaseScreen
@@ -40,6 +41,7 @@ import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingAction
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
+import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
@@ -170,6 +172,9 @@ class UnlockViewModel(
             }
             ErrorPanelButtonAction.REMOVE_FILE -> {
                 onRemoveFileButtonClicked()
+            }
+            ErrorPanelButtonAction.AUTHORISATION -> {
+                onLoginButtonClicked()
             }
         }
     }
@@ -464,6 +469,13 @@ class UnlockViewModel(
                 )
                 errorPanelButtonAction = ErrorPanelButtonAction.REMOVE_FILE
             }
+            SyncStatus.AUTH_ERROR -> {
+                screenState.value = ScreenState.dataWithError(
+                    errorText = resourceProvider.getString(R.string.sync_auth_error_message),
+                    errorButtonText = resourceProvider.getString(R.string.login)
+                )
+                errorPanelButtonAction = ErrorPanelButtonAction.AUTHORISATION
+            }
             else -> {
                 errorPanelButtonAction = null
             }
@@ -511,6 +523,54 @@ class UnlockViewModel(
         }
     }
 
+    private fun onLoginButtonClicked() {
+        val selectedFile = selectedFile ?: return
+        val oldFsAuthority = selectedFile.fsAuthority
+
+        router.setResultListener(Screens.ServerLoginScreen.RESULT_KEY) { newFsAuthority ->
+            if (newFsAuthority is FSAuthority) {
+                onServerLoginSuccess(
+                    fileUid = selectedFile.uid,
+                    oldFSAuthority = oldFsAuthority,
+                    newFsAuthority = newFsAuthority
+                )
+            }
+        }
+        router.navigateTo(
+            Screens.ServerLoginScreen(
+                ServerLoginArgs(
+                    fsAuthority = oldFsAuthority
+                )
+            )
+        )
+    }
+
+    private fun onServerLoginSuccess(
+        fileUid: String,
+        oldFSAuthority: FSAuthority,
+        newFsAuthority: FSAuthority
+    ) {
+        screenState.value = ScreenState.loading()
+        isFabButtonVisible.value = getFabButtonVisibility()
+
+        viewModelScope.launch {
+            val updateResult = interactor.updateUsedFileFsAuthority(
+                fileUid,
+                oldFSAuthority,
+                newFsAuthority
+            )
+
+            if (updateResult.isFailed) {
+                val message = errorInteractor.processAndGetMessage(updateResult.error)
+                screenState.value = ScreenState.dataWithError(message)
+                isFabButtonVisible.value = getFabButtonVisibility()
+                return@launch
+            }
+
+            loadData(resetSelection = false)
+        }
+    }
+
     private fun setSelectedFileCell(model: DatabaseCellModel) {
         fileCellViewModels.value = listOf(
             viewModelFactory.createCellViewModel(model, EventProviderImpl())
@@ -534,7 +594,8 @@ class UnlockViewModel(
 
     private enum class ErrorPanelButtonAction {
         RESOLVE_CONFLICT,
-        REMOVE_FILE
+        REMOVE_FILE,
+        AUTHORISATION
     }
 
     class Factory(

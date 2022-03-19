@@ -27,10 +27,6 @@ class WebdavAuthenticator(
     }
 
     override fun setCredentials(credentials: ServerCredentials?) {
-        if (!initialAuthority.isRequireCredentials) {
-            throw IllegalStateException()
-        }
-
         fsAuthority.set(
             fsAuthority.get().copy(
                 credentials = credentials

@@ -83,11 +83,14 @@ class SelectDatabaseCellModelFactory(
             state?.status == SyncStatus.NO_NETWORK -> {
                 resourceProvider.getString(R.string.offline_mode)
             }
-            state?.status == SyncStatus.CONFLICT -> {
-                resourceProvider.getString(R.string.conflict)
-            }
             state?.status == SyncStatus.ERROR -> {
                 resourceProvider.getString(R.string.error)
+            }
+            state?.status == SyncStatus.AUTH_ERROR -> {
+                resourceProvider.getString(R.string.unauthorised)
+            }
+            state?.status == SyncStatus.CONFLICT -> {
+                resourceProvider.getString(R.string.conflict)
             }
             else -> {
                 resourceProvider.getString(

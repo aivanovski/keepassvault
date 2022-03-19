@@ -34,6 +34,7 @@
     <string name="apply">Apply</string>
     <string name="select">Select</string>
     <string name="sort_and_view">Sort &amp; View</string>
+    <string name="login">Login</string>
 
     <!-- Lock notification -->
     <string name="lock_notification_channel">Quick Lock</string>
@@ -54,9 +55,8 @@
     <string name="file_is_already_exist">File is already exist</string>
     <string name="empty_field">Empty field</string>
     <string name="sync_conflict_message">There is a conflict between version of local and remote databases. Please resolve this conflict before accessing database</string>
-    <string name="sync_auth_error_message">Application is unable to authenticate with remote server</string>
+    <string name="sync_auth_error_message">Application is unable to authenticate on remote server</string>
     <string name="sync_error_message">Error has been occurred, file can\'t be synchronized with remote server. Please try to remove this file and add it again</string>
-
 
     <!-- Resolve Conflict Dialog -->
     <string name="resolve_conflict_dialog_message">There is a conflict between version of local and remote databases. Please resolve this conflict before accessing database.\n\nTHIS ACTION MAY CAUSE TO DATA LOSS!\n\nLocal file was modified at:\n%1$s\nRemote file was modified at:\n%2$s\n\nPlease specify which version you want to use?</string>
@@ -79,6 +79,9 @@
     <string name="downloading">Downloading</string>
     <string name="uploading">Uploading</string>
     <string name="error">Error</string>
+    <string name="error_offline_mode">Error, offline mode</string>
+    <string name="auth_error_offline_mode">Unauthorised, offline mode</string>
+    <string name="unauthorised">Unauthorised</string>
 
     <!-- New database screen -->
     <string name="new_database">New database</string>

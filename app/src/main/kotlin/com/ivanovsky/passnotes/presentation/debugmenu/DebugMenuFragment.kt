@@ -17,7 +17,11 @@ import com.ivanovsky.passnotes.databinding.DebugMenuFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
-import com.ivanovsky.passnotes.util.IntentUtils.createFilePickerIntent
+import com.ivanovsky.passnotes.util.FileUtils
+import com.ivanovsky.passnotes.util.FileUtils.DEFAULT_DB_NAME
+import com.ivanovsky.passnotes.util.IntentUtils
+import com.ivanovsky.passnotes.util.IntentUtils.newCreateFileIntent
+import com.ivanovsky.passnotes.util.IntentUtils.newOpenFileIntent
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class DebugMenuFragment : BaseFragment() {
@@ -97,6 +101,9 @@ class DebugMenuFragment : BaseFragment() {
         viewModel.showSystemFilePickerEvent.observe(viewLifecycleOwner) {
             showSystemFilePicker()
         }
+        viewModel.showSystemFileCreatorEvent.observe(viewLifecycleOwner) {
+            showSystemFileCreator()
+        }
     }
 
     private fun createFileSystemSpinnerAdapter(): ArrayAdapter<String> {
@@ -112,7 +119,11 @@ class DebugMenuFragment : BaseFragment() {
     }
 
     private fun showSystemFilePicker() {
-        startActivityForResult(createFilePickerIntent(), REQUEST_CODE_PICK_FILE)
+        startActivityForResult(newOpenFileIntent(), REQUEST_CODE_PICK_FILE)
+    }
+
+    private fun showSystemFileCreator() {
+        startActivityForResult(newCreateFileIntent(DEFAULT_DB_NAME), REQUEST_CODE_PICK_FILE)
     }
 
     companion object {

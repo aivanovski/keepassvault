@@ -4,6 +4,7 @@ object FileUtils {
 
     const val ROOT_PATH = "/"
     const val SEPARATOR = "/"
+    const val DEFAULT_DB_NAME = "database.kdbx"
 
     @JvmStatic
     fun removeSeparatorIfNeed(path: String): String {

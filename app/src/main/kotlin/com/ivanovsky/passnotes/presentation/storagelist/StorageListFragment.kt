@@ -18,7 +18,9 @@ import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
-import com.ivanovsky.passnotes.util.IntentUtils.createFilePickerIntent
+import com.ivanovsky.passnotes.util.FileUtils.DEFAULT_DB_NAME
+import com.ivanovsky.passnotes.util.IntentUtils.newCreateFileIntent
+import com.ivanovsky.passnotes.util.IntentUtils.newOpenFileIntent
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class StorageListFragment : BaseFragment() {
@@ -93,6 +95,9 @@ class StorageListFragment : BaseFragment() {
         viewModel.showSystemFilePickerEvent.observe(viewLifecycleOwner) {
             showSystemFilePicker()
         }
+        viewModel.showSystemFileCreatorEvent.observe(viewLifecycleOwner) {
+            showSystemFileCreator()
+        }
     }
 
     private fun showAuthActivity(fsAuthority: FSAuthority) {
@@ -105,7 +110,11 @@ class StorageListFragment : BaseFragment() {
     }
 
     private fun showSystemFilePicker() {
-        startActivityForResult(createFilePickerIntent(), REQUEST_CODE_PICK_FILE)
+        startActivityForResult(newOpenFileIntent(), REQUEST_CODE_PICK_FILE)
+    }
+
+    private fun showSystemFileCreator() {
+        startActivityForResult(newCreateFileIntent(DEFAULT_DB_NAME), REQUEST_CODE_PICK_FILE)
     }
 
     companion object {

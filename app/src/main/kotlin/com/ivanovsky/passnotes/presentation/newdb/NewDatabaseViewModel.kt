@@ -21,6 +21,7 @@ import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.util.FileUtils
+import com.ivanovsky.passnotes.util.FileUtils.removeFileExtensionsIfNeed
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import java.io.File
@@ -49,8 +50,9 @@ class NewDatabaseViewModel(
     val isAddTemplates = MutableLiveData(true)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val showSnackBarEvent = SingleLiveEvent<String>()
+    val isFilenameEnabled = MutableLiveData(true)
 
-    private var selectedStorageDir: FileDescriptor? = null
+    private var selectedStorage: SelectedStorage? = null
 
     fun createNewDatabaseFile() {
         val filename = this.filename.value ?: return
@@ -62,8 +64,7 @@ class NewDatabaseViewModel(
             return
         }
 
-        val storageDir = selectedStorageDir
-        if (storageDir == null) {
+        if (selectedStorage == null) {
             val errorText = resourceProvider.getString(R.string.storage_is_not_selected)
             screenState.value = ScreenState.dataWithError(errorText)
             return
@@ -74,7 +75,7 @@ class NewDatabaseViewModel(
         screenState.value = ScreenState.loading()
 
         val dbKey = KeepassDatabaseKey(password)
-        val dbFile = createDbFileDescriptor(storageDir)
+        val dbFile = createDbFile()
 
         viewModelScope.launch {
             val result = interactor.createNewDatabaseAndOpen(dbKey, dbFile, isAddTemplates)
@@ -176,45 +177,62 @@ class NewDatabaseViewModel(
     fun navigateBack() = router.exit()
 
     private fun onStorageSelected(selectedFile: FileDescriptor) {
-        selectedStorageDir = selectedFile
-
         when (selectedFile.fsAuthority.type) {
             FSType.REGULAR_FS -> {
-                val file = File(selectedFile.path)
+                selectedStorage = SelectedStorage.ParentDir(selectedFile)
 
-                if (fileHelper.isLocatedInPrivateStorage(file)) {
+                if (fileHelper.isLocatedInPrivateStorage(File(selectedFile.path))) {
                     storageType.value = resourceProvider.getString(R.string.private_storage)
                 } else {
                     storageType.value = resourceProvider.getString(R.string.public_storage)
                 }
             }
             FSType.DROPBOX -> {
+                selectedStorage = SelectedStorage.ParentDir(selectedFile)
                 storageType.value = resourceProvider.getString(R.string.dropbox)
             }
             FSType.WEBDAV -> {
+                selectedStorage = SelectedStorage.ParentDir(selectedFile)
                 storageType.value = resourceProvider.getString(R.string.webdav)
             }
             FSType.SAF -> {
+                selectedStorage = SelectedStorage.File(selectedFile)
                 storageType.value = resourceProvider.getString(R.string.public_storage)
+                filename.value = removeFileExtensionsIfNeed(selectedFile.name)
             }
         }
 
         storagePath.value = selectedFile.path
+        isFilenameEnabled.value = (selectedFile.fsAuthority.type != FSType.SAF)
     }
 
-    private fun createDbFileDescriptor(dir: FileDescriptor): FileDescriptor {
-        val name = this.filename.value ?: throw IllegalStateException()
-        val path = dir.path + File.separator + name  + ".kdbx"
+    private fun createDbFile(): FileDescriptor {
+        val selectedStorage = selectedStorage ?: throw IllegalStateException()
 
-        return FileDescriptor(
-            fsAuthority = dir.fsAuthority,
-            path = path,
-            uid = path,
-            name = FileUtils.getFileNameFromPath(path),
-            isDirectory = false,
-            isRoot = false,
-            modified = null
-        )
+        return when (selectedStorage) {
+            is SelectedStorage.ParentDir -> {
+                val name = this.filename.value ?: throw IllegalStateException()
+                val path = selectedStorage.dir.path + File.separator + name + ".kdbx"
+
+                FileDescriptor(
+                    fsAuthority = selectedStorage.dir.fsAuthority,
+                    path = path,
+                    uid = path,
+                    name = FileUtils.getFileNameFromPath(path),
+                    isDirectory = false,
+                    isRoot = false,
+                    modified = null
+                )
+            }
+            is SelectedStorage.File -> {
+                selectedStorage.file
+            }
+        }
+    }
+
+    private sealed interface SelectedStorage {
+        data class ParentDir(val dir: FileDescriptor) : SelectedStorage
+        data class File(val file: FileDescriptor) : SelectedStorage
     }
 
     companion object {

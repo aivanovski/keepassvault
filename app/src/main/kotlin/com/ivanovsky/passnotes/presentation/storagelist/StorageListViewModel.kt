@@ -50,6 +50,7 @@ class StorageListViewModel(
     val screenState = MutableLiveData(ScreenState.notInitialized())
     val showAuthActivityEvent = SingleLiveEvent<FSAuthority>()
     val showSystemFilePickerEvent = SingleLiveEvent<Unit>()
+    val showSystemFileCreatorEvent = SingleLiveEvent<Unit>()
 
     private val cellFactory = StorageListCellFactory()
     private var storageOptions: List<StorageOption>? = null
@@ -188,8 +189,18 @@ class StorageListViewModel(
     }
 
     private fun onExternalStorageSelected() {
+        val action = requestedAction ?: return
+
         screenState.value = ScreenState.loading()
-        showSystemFilePickerEvent.call()
+
+        when (action) {
+            Action.PICK_FILE -> {
+                showSystemFilePickerEvent.call()
+            }
+            Action.PICK_STORAGE -> {
+                showSystemFileCreatorEvent.call()
+            }
+        }
     }
 
     private fun onRemoteFileStorageSelected(root: FileDescriptor) {

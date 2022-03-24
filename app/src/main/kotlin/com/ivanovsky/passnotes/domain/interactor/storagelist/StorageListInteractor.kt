@@ -37,6 +37,7 @@ class StorageListInteractor(
             Action.PICK_STORAGE -> {
                 listOf(
                     createPrivateStorageOption(),
+                    createExternalStorageOption(),
                     // createDropboxOption(),
                     createWebDavOption()
                 )

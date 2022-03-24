@@ -41,7 +41,7 @@ class DebugMenuViewModel(
     val password = MutableLiveData(EMPTY)
     val debugServerUrlText = MutableLiveData(EMPTY)
     val debugCredentialsText = MutableLiveData(EMPTY)
-    val isPickFileVisible = MutableLiveData(false)
+    val isSAFButtonsVisible = MutableLiveData(false)
     val isDebugCredentialsVisible = MutableLiveData(false)
     val isWriteButtonEnabled = MutableLiveData(false)
     val isOpenDbButtonEnabled = MutableLiveData(false)
@@ -51,6 +51,7 @@ class DebugMenuViewModel(
     val isExternalStorageEnabled = MutableLiveData(settings.isExternalStorageCacheEnabled)
     val showSnackbarEvent = SingleLiveEvent<String>()
     val showSystemFilePickerEvent = SingleLiveEvent<Unit>()
+    val showSystemFileCreatorEvent = SingleLiveEvent<Unit>()
 
     private var lastReadDescriptor: FileDescriptor? = null
     private var lastReadFile: File? = null
@@ -287,7 +288,7 @@ class DebugMenuViewModel(
         }
 
         isDebugCredentialsVisible.value = (fsType == FSType.WEBDAV)
-        isPickFileVisible.value = (fsType == FSType.SAF)
+        isSAFButtonsVisible.value = (fsType == FSType.SAF)
     }
 
     fun onExternalStorageCheckBoxChanged(isChecked: Boolean) {
@@ -296,6 +297,10 @@ class DebugMenuViewModel(
 
     fun onPickFileButtonClicked() {
         showSystemFilePickerEvent.call()
+    }
+
+    fun onCreateFileButtonClicked() {
+        showSystemFileCreatorEvent.call()
     }
 
     fun onFilePicked(uri: Uri) {

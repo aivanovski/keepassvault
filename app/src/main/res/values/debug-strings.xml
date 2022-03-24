@@ -28,5 +28,6 @@
     <string name="pick_file" translatable="false">Pick file</string>
     <string name="check_exists" translatable="false">Check exists</string>
     <string name="file_exits_with_str" translatable="false">File exists: %s</string>
+    <string name="create_file" translatable="false">Create file</string>
 
 </resources>

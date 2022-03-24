@@ -93,7 +93,7 @@
 
                     <TextView
                         android:id="@+id/storagePath"
-                        style="@style/Material.PrimaryText.SingleLine"
+                        style="@style/Material.PrimaryText"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:text="@{viewModel.storagePath}"
@@ -165,7 +165,8 @@
                         android:imeOptions="actionNext"
                         android:inputType="text"
                         android:nextFocusForward="@id/password"
-                        android:text="@={viewModel.filename}" />
+                        android:text="@={viewModel.filename}"
+                        android:enabled="@{viewModel.isFilenameEnabled}"/>
 
                 </com.google.android.material.textfield.TextInputLayout>
 

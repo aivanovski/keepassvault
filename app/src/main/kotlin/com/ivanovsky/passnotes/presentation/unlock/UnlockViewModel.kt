@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.unlock
 
+import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -37,6 +38,7 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
@@ -80,6 +82,7 @@ class UnlockViewModel(
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
     val fileCellViewModels = MutableLiveData<List<BaseCellViewModel>>()
     val isFabButtonVisible = MutableLiveData(false)
+    val visibleMenuItems = MutableLiveData<List<UnlockMenuItem>>(emptyList())
 
     val fileCellTypes = ViewModelTypes()
         .add(DatabaseCellViewModel::class, R.layout.cell_database)
@@ -128,8 +131,7 @@ class UnlockViewModel(
     }
 
     fun loadData(resetSelection: Boolean) {
-        screenState.value = ScreenState.loading()
-        isFabButtonVisible.value = getFabButtonVisibility()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val result = interactor.getRecentlyOpenedFiles()
@@ -150,16 +152,15 @@ class UnlockViewModel(
                         removeSelectedFileCell()
                     }
 
-                    screenState.value = ScreenState.data()
+                    setScreenState(ScreenState.data())
                 } else {
                     val emptyText = resourceProvider.getString(R.string.no_databases)
-                    screenState.value = ScreenState.empty(emptyText)
+                    setScreenState(ScreenState.empty(emptyText))
                 }
             } else {
                 val message = errorInteractor.processAndGetMessage(result.error)
-                screenState.value = ScreenState.error(message)
+                setScreenState(ScreenState.error(message))
             }
-            isFabButtonVisible.value = getFabButtonVisibility()
         }
     }
 
@@ -182,8 +183,7 @@ class UnlockViewModel(
     fun onResolveConflictConfirmed(resolutionStrategy: ConflictResolutionStrategy) {
         val selectFile = selectedFile ?: return
 
-        screenState.value = ScreenState.loading()
-        isFabButtonVisible.value = getFabButtonVisibility()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val resolvedConflict = interactor.resolveConflict(selectFile, resolutionStrategy)
@@ -191,10 +191,11 @@ class UnlockViewModel(
             if (resolvedConflict.isSucceeded) {
                 loadData(resetSelection = false)
             } else {
-                screenState.value = ScreenState.dataWithError(
-                    errorText = errorInteractor.processAndGetMessage(resolvedConflict.error)
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = errorInteractor.processAndGetMessage(resolvedConflict.error)
+                    )
                 )
-                isFabButtonVisible.value = getFabButtonVisibility()
             }
         }
     }
@@ -212,8 +213,7 @@ class UnlockViewModel(
         val selectedFile = selectedFile ?: return
 
         hideKeyboardEvent.call()
-        screenState.value = ScreenState.loading()
-        isFabButtonVisible.value = getFabButtonVisibility()
+        setScreenState(ScreenState.loading())
 
         val key = KeepassDatabaseKey(password)
 
@@ -223,12 +223,17 @@ class UnlockViewModel(
             if (open.isSucceededOrDeferred) {
                 onDatabaseUnlocked()
             } else {
-                screenState.value = ScreenState.dataWithError(
-                    errorText = errorInteractor.processAndGetMessage(open.error)
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = errorInteractor.processAndGetMessage(open.error)
+                    )
                 )
-                isFabButtonVisible.value = getFabButtonVisibility()
             }
         }
+    }
+
+    fun onRefreshButtonClicked() {
+        loadData(resetSelection = false)
     }
 
     private suspend fun onDatabaseUnlocked() {
@@ -242,9 +247,11 @@ class UnlockViewModel(
 
                     sendAutofillResponseEvent.call(Pair(note, structure))
                 } else {
-                    val message = errorInteractor.processAndGetMessage(autofillNoteResult.error)
-                    screenState.value = ScreenState.error(message)
-                    isFabButtonVisible.value = getFabButtonVisibility()
+                    setScreenState(
+                        ScreenState.dataWithError(
+                            errorText = errorInteractor.processAndGetMessage(autofillNoteResult.error)
+                        )
+                    )
                 }
             }
             else -> {
@@ -261,8 +268,7 @@ class UnlockViewModel(
                         )
                     )
                 )
-                screenState.value = ScreenState.data()
-                isFabButtonVisible.value = getFabButtonVisibility()
+                setScreenState(ScreenState.data())
             }
         }
     }
@@ -287,8 +293,7 @@ class UnlockViewModel(
 
     private fun onFilePicked(file: FileDescriptor) {
         //called when user select file from built-in file picker
-        screenState.value = ScreenState.loading()
-        isFabButtonVisible.value = getFabButtonVisibility()
+        setScreenState(ScreenState.loading())
 
         val usedFile = file.toUsedFile(addedTime = System.currentTimeMillis())
 
@@ -301,8 +306,7 @@ class UnlockViewModel(
                 loadData(resetSelection = false)
 
             } else {
-                screenState.value = ScreenState.data()
-                isFabButtonVisible.value = getFabButtonVisibility()
+                setScreenState(ScreenState.data())
 
                 val message = errorInteractor.processAndGetMessage(result.error)
                 showSnackbarMessage.call(message)
@@ -365,8 +369,7 @@ class UnlockViewModel(
 
                 if (closeResult.isFailed) {
                     val message = errorInteractor.processAndGetMessage(closeResult.error)
-                    screenState.value = ScreenState.error(message)
-                    isFabButtonVisible.value = getFabButtonVisibility()
+                    setScreenState(ScreenState.error(message))
                 }
             }
         }
@@ -456,23 +459,29 @@ class UnlockViewModel(
 
         when (syncState.status) {
             SyncStatus.CONFLICT -> {
-                screenState.value = ScreenState.dataWithError(
-                    errorText = resourceProvider.getString(R.string.sync_conflict_message),
-                    errorButtonText = resourceProvider.getString(R.string.resolve)
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = resourceProvider.getString(R.string.sync_conflict_message),
+                        errorButtonText = resourceProvider.getString(R.string.resolve)
+                    )
                 )
                 errorPanelButtonAction = ErrorPanelButtonAction.RESOLVE_CONFLICT
             }
             SyncStatus.ERROR -> {
-                screenState.value = ScreenState.dataWithError(
-                    errorText = resourceProvider.getString(R.string.sync_error_message),
-                    errorButtonText = resourceProvider.getString(R.string.remove)
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = resourceProvider.getString(R.string.sync_error_message),
+                        errorButtonText = resourceProvider.getString(R.string.remove)
+                    )
                 )
                 errorPanelButtonAction = ErrorPanelButtonAction.REMOVE_FILE
             }
             SyncStatus.AUTH_ERROR -> {
-                screenState.value = ScreenState.dataWithError(
-                    errorText = resourceProvider.getString(R.string.sync_auth_error_message),
-                    errorButtonText = resourceProvider.getString(R.string.login)
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = resourceProvider.getString(R.string.sync_auth_error_message),
+                        errorButtonText = resourceProvider.getString(R.string.login)
+                    )
                 )
                 errorPanelButtonAction = ErrorPanelButtonAction.AUTHORISATION
             }
@@ -480,27 +489,26 @@ class UnlockViewModel(
                 errorPanelButtonAction = null
             }
         }
-        isFabButtonVisible.value = getFabButtonVisibility()
     }
 
     private fun onResolveConflictButtonClicked() {
         val selectedFile = selectedFile ?: return
         val lastState = screenState.value ?: return
 
-        screenState.value = ScreenState.loading()
-        isFabButtonVisible.value = getFabButtonVisibility()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val conflict = interactor.getSyncConflictInfo(selectedFile)
             if (conflict.isSucceeded) {
                 showResolveConflictDialog.call(conflict.obj)
-                screenState.value = lastState
+                setScreenState(lastState)
             } else {
-                screenState.value = ScreenState.dataWithError(
-                    errorText = errorInteractor.processAndGetMessage(conflict.error)
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = errorInteractor.processAndGetMessage(conflict.error)
+                    )
                 )
             }
-            isFabButtonVisible.value = getFabButtonVisibility()
         }
     }
 
@@ -508,14 +516,12 @@ class UnlockViewModel(
         val selectedFile = selectedFile ?: return
         val lastState = screenState.value ?: return
 
-        screenState.value = ScreenState.loading()
-        isFabButtonVisible.value = getFabButtonVisibility()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val removeResult = interactor.removeFromUsedFiles(selectedFile)
             if (removeResult.isFailed) {
-                screenState.value = lastState
-                isFabButtonVisible.value = getFabButtonVisibility()
+                setScreenState(lastState)
                 return@launch
             }
 
@@ -550,8 +556,7 @@ class UnlockViewModel(
         oldFSAuthority: FSAuthority,
         newFsAuthority: FSAuthority
     ) {
-        screenState.value = ScreenState.loading()
-        isFabButtonVisible.value = getFabButtonVisibility()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val updateResult = interactor.updateUsedFileFsAuthority(
@@ -562,8 +567,7 @@ class UnlockViewModel(
 
             if (updateResult.isFailed) {
                 val message = errorInteractor.processAndGetMessage(updateResult.error)
-                screenState.value = ScreenState.dataWithError(message)
-                isFabButtonVisible.value = getFabButtonVisibility()
+                setScreenState(ScreenState.dataWithError(message))
                 return@launch
             }
 
@@ -585,11 +589,27 @@ class UnlockViewModel(
         password.value = EMPTY
     }
 
+    private fun setScreenState(state: ScreenState) {
+        screenState.value = state
+        isFabButtonVisible.value = getFabButtonVisibility()
+        visibleMenuItems.value = getVisibleMenuItems()
+    }
+
     private fun getFabButtonVisibility(): Boolean {
         val screenState = this.screenState.value ?: return false
 
         return (screenState.isDisplayingData || screenState.isDisplayingEmptyState) &&
             args.appMode == ApplicationLaunchMode.NORMAL
+    }
+
+    private fun getVisibleMenuItems(): List<UnlockMenuItem> {
+        val screenState = this.screenState.value ?: return emptyList()
+
+        return if (screenState.isDisplayingData) {
+            listOf(UnlockMenuItem.REFRESH)
+        } else {
+            emptyList()
+        }
     }
 
     private enum class ErrorPanelButtonAction {
@@ -608,6 +628,10 @@ class UnlockViewModel(
                 parametersOf(args)
             ) as T
         }
+    }
+
+    enum class UnlockMenuItem(@IdRes override val menuId: Int) : ScreenMenuItem {
+        REFRESH(R.id.menu_refresh)
     }
 
     companion object {

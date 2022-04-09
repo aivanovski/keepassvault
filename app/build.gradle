@@ -269,7 +269,4 @@ dependencies {
     // Timber
     implementation "com.jakewharton.timber:timber:$timberVersion"
     implementation "com.github.bastienpaulfr:Treessence:$treessenceVersion"
-
-    // Soft-Input-Lifecycle
-    implementation "com.github.aivanovski:soft-input-lifecycle:0.2.0"
 }

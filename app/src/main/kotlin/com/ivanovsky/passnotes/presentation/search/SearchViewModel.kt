@@ -85,11 +85,18 @@ class SearchViewModel(
         isKeyboardVisibleEvent.value = true
     }
 
-    fun onBackClicked() = router.exit()
+    fun onBackClicked() {
+        isKeyboardVisibleEvent.value = false
+        router.exit()
+    }
 
-    fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
+    fun onSettingsButtonClicked() {
+        isKeyboardVisibleEvent.value = false
+        router.navigateTo(MainSettingsScreen())
+    }
 
     fun onLockButtonClicked() {
+        isKeyboardVisibleEvent.value = false
         interactor.lockDatabase()
         when (args.appMode) {
             AUTOFILL_SELECTION -> {

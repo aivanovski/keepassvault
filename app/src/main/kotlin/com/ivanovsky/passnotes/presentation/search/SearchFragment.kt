@@ -9,8 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
-import com.github.ai.lifecycle.SoftInputLifecycleOwner
-import com.github.ai.lifecycle.WindowFocusLiveData.Companion.asWindowFocusLiveData
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.SearchFragmentBinding
 import com.ivanovsky.passnotes.extensions.setItemVisibility
@@ -108,12 +106,7 @@ class SearchFragment : BaseFragment() {
     }
 
     private fun subscribeToEvents() {
-        val keyboardLifecycle = SoftInputLifecycleOwner(
-            viewLifecycleOwner,
-            binding.searchText.asWindowFocusLiveData()
-        )
-
-        viewModel.isKeyboardVisibleEvent.observe(keyboardLifecycle) { isVisible ->
+        viewModel.isKeyboardVisibleEvent.observe(viewLifecycleOwner) { isVisible ->
             if (isVisible) {
                 binding.searchText.requestFocus()
                 showKeyboard(binding.searchText)

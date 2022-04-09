@@ -56,6 +56,12 @@ fun Fragment.hideKeyboard() {
     InputMethodUtils.hideSoftInput(activity)
 }
 
+fun Fragment.showKeyboard(view: View) {
+    val activity = this.activity ?: return
+
+    InputMethodUtils.showSoftInput(activity, view)
+}
+
 fun Fragment.finishActivity() {
     activity?.finish()
 }

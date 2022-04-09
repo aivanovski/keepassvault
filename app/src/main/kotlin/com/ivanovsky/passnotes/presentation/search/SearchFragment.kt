@@ -9,6 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
+import com.github.ai.lifecycle.SoftInputLifecycleOwner
+import com.github.ai.lifecycle.WindowFocusLiveData.Companion.asWindowFocusLiveData
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.SearchFragmentBinding
 import com.ivanovsky.passnotes.extensions.setItemVisibility
@@ -18,11 +20,13 @@ import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.showKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
 class SearchFragment : BaseFragment() {
 
     private var menu: Menu? = null
+    private lateinit var binding: SearchFragmentBinding
     private val viewModel: SearchViewModel by lazy {
         ViewModelProvider(
             this,
@@ -58,12 +62,12 @@ class SearchFragment : BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return SearchFragmentBinding.inflate(inflater, container, false)
+        binding = SearchFragmentBinding.inflate(inflater, container, false)
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
                 it.viewModel = viewModel
             }
-            .root
+        return binding.root
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -93,6 +97,8 @@ class SearchFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         subscribeToData()
         subscribeToEvents()
+
+        viewModel.onScreenCreated()
     }
 
     private fun subscribeToData() {
@@ -102,8 +108,18 @@ class SearchFragment : BaseFragment() {
     }
 
     private fun subscribeToEvents() {
-        viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
-            hideKeyboard()
+        val keyboardLifecycle = SoftInputLifecycleOwner(
+            viewLifecycleOwner,
+            binding.searchText.asWindowFocusLiveData()
+        )
+
+        viewModel.isKeyboardVisibleEvent.observe(keyboardLifecycle) { isVisible ->
+            if (isVisible) {
+                binding.searchText.requestFocus()
+                showKeyboard(binding.searchText)
+            } else {
+                hideKeyboard()
+            }
         }
         viewModel.sendAutofillResponseEvent.observe(viewLifecycleOwner) { (note, structure) ->
             sendAutofillResult(note, structure)

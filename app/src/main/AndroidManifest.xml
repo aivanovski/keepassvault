@@ -6,7 +6,7 @@
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:name=".App"
@@ -21,6 +21,7 @@
         <!-- Activities -->
         <activity
             android:name=".presentation.StartActivity"
+            android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,13 +31,15 @@
 
         <activity
             android:name=".presentation.main.MainActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize"
-            android:launchMode="singleTask" />
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name="com.dropbox.core.android.AuthActivity"
             android:configChanges="orientation|keyboard"
+            android:exported="true"
             android:launchMode="singleTask">
             <intent-filter>
 
@@ -50,7 +53,9 @@
         </activity>
 
         <!-- Services -->
-        <service android:name=".presentation.service.LockService"/>
+        <service
+            android:name=".presentation.service.LockService"
+            android:exported="false" />
 
         <service
             android:name=".presentation.autofill.PassnotesAutofillService"
@@ -66,7 +71,9 @@
         </service>
 
         <!-- Broadcast Receivers -->
-        <receiver android:name=".presentation.service.DatabaseLockBroadcastReceiver"/>
+        <receiver
+            android:name=".presentation.service.DatabaseLockBroadcastReceiver"
+            android:exported="false" />
 
         <!-- Providers -->
         <provider

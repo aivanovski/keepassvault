@@ -1,6 +1,8 @@
 package com.ivanovsky.passnotes.util
 
+import android.app.PendingIntent
 import android.content.Intent
+import android.os.Build
 
 object IntentUtils {
 
@@ -16,6 +18,22 @@ object IntentUtils {
             type = "*/*"
             putExtra(Intent.EXTRA_TITLE, filename)
             addCategory(Intent.CATEGORY_OPENABLE)
+        }
+    }
+
+    fun defaultPendingIntentFlags(): Int {
+        return if (Build.VERSION.SDK_INT >= 23) {
+            PendingIntent.FLAG_IMMUTABLE
+        } else {
+            0
+        }
+    }
+
+    fun immutablePendingIntentFlags(vararg flags: Int): Int {
+        return if (Build.VERSION.SDK_INT >= 23) {
+            PendingIntent.FLAG_IMMUTABLE + flags.sum()
+        } else {
+            flags.sum()
         }
     }
 }

@@ -22,6 +22,7 @@ import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.main.MainActivity
 import com.ivanovsky.passnotes.presentation.main.MainScreenArgs
 import com.ivanovsky.passnotes.presentation.service.model.LockServiceCommand
+import com.ivanovsky.passnotes.util.IntentUtils.defaultPendingIntentFlags
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -155,8 +156,18 @@ class LockService : Service(), ObserverBus.DatabaseStatusObserver {
             getNotificationManager().createNotificationChannel(channel)
         }
 
-        val contentIntent = PendingIntent.getActivity(this, 0, createContentIntent(), 0)
-        val actionIntent = PendingIntent.getBroadcast(this, 0, createLockButtonIntent(), 0)
+        val contentIntent = PendingIntent.getActivity(
+            this,
+            0,
+            createContentIntent(),
+            defaultPendingIntentFlags()
+        )
+        val actionIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            createLockButtonIntent(),
+            defaultPendingIntentFlags()
+        )
 
         val builder = NotificationCompat.Builder(this, getChannelId())
             .setContentTitle(getString(R.string.app_name))

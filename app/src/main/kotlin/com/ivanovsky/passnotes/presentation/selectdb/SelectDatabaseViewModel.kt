@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.selectdb
 
+import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
@@ -20,6 +21,7 @@ import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.selectdb.cells.viewmodel.DatabaseFileCellViewModel
 import com.ivanovsky.passnotes.presentation.selectdb.cells.factory.SelectDatabaseCellModelFactory
@@ -50,6 +52,7 @@ class SelectDatabaseViewModel(
 
     val showRemoveConfirmationDialogEvent = SingleLiveEvent<Pair<UUID, FileDescriptor>>()
     val showResolveConflictDialog = SingleLiveEvent<Pair<UUID, SyncConflictInfo>>()
+    val visibleMenuItems = MutableLiveData<List<SelectDatabaseMenuItem>>(emptyList())
 
     private var cellUidToFileMap = mutableMapOf<UUID, FileDescriptor>()
     private var cellModels = mutableMapOf<UUID, BaseCellModel>()
@@ -87,6 +90,7 @@ class SelectDatabaseViewModel(
 
     fun loadData() {
         screenState.value = ScreenState.loading()
+        visibleMenuItems.value = getVisibleMenuItems()
 
         viewModelScope.launch {
             val getFiles = interactor.getRecentlyOpenedFiles()
@@ -102,6 +106,7 @@ class SelectDatabaseViewModel(
                     setCellModels(cellModels.values.toList())
 
                     screenState.value = ScreenState.data()
+                    visibleMenuItems.value = getVisibleMenuItems()
 
                     for ((cellUid, file) in cellUidsAndFiles) {
                         val syncState = suspendCoroutine<SyncState> { continuation ->
@@ -129,6 +134,7 @@ class SelectDatabaseViewModel(
                 val message = errorInteractor.processAndGetMessage(getFiles.error)
                 screenState.value = ScreenState.error(message)
             }
+            visibleMenuItems.value = getVisibleMenuItems()
         }
     }
 
@@ -148,6 +154,7 @@ class SelectDatabaseViewModel(
                 val message = errorInteractor.processAndGetMessage(remove.error)
                 screenState.value = ScreenState.error(message)
             }
+            visibleMenuItems.value = getVisibleMenuItems()
         }
     }
 
@@ -155,6 +162,7 @@ class SelectDatabaseViewModel(
         val file = cellUidToFileMap[uid] ?: return
 
         screenState.value = ScreenState.loading()
+        visibleMenuItems.value = getVisibleMenuItems()
 
         viewModelScope.launch {
             val resolvedConflict = interactor.resolveConflict(file, resolutionStrategy)
@@ -166,7 +174,12 @@ class SelectDatabaseViewModel(
                     errorText = errorInteractor.processAndGetMessage(resolvedConflict.error)
                 )
             }
+            visibleMenuItems.value = getVisibleMenuItems()
         }
+    }
+
+    fun onRefreshButtonClicked() {
+        loadData()
     }
 
     fun navigateBack() = router.exit()
@@ -218,6 +231,7 @@ class SelectDatabaseViewModel(
         val file = cellUidToFileMap[uid] ?: return
 
         screenState.value = ScreenState.loading()
+        visibleMenuItems.value = getVisibleMenuItems()
 
         viewModelScope.launch {
             val conflict = interactor.getSyncConflictInfo(file)
@@ -229,7 +243,22 @@ class SelectDatabaseViewModel(
                     errorText = errorInteractor.processAndGetMessage(conflict.error)
                 )
             }
+            visibleMenuItems.value = getVisibleMenuItems()
         }
+    }
+
+    private fun getVisibleMenuItems(): List<SelectDatabaseMenuItem> {
+        val screenState = this.screenState.value ?: return emptyList()
+
+        return if (screenState.isDisplayingData) {
+            listOf(SelectDatabaseMenuItem.REFRESH)
+        } else {
+            emptyList()
+        }
+    }
+
+    enum class SelectDatabaseMenuItem(@IdRes override val menuId: Int) : ScreenMenuItem {
+        REFRESH(R.id.menu_refresh)
     }
 
     companion object {

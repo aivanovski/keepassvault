@@ -35,6 +35,7 @@
     <string name="select">Select</string>
     <string name="sort_and_view">Sort &amp; View</string>
     <string name="login">Login</string>
+    <string name="refresh">Refresh</string>
 
     <!-- Lock notification -->
     <string name="lock_notification_channel">Quick Lock</string>

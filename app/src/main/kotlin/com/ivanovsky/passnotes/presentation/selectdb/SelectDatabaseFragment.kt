@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.presentation.selectdb
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -18,7 +20,9 @@ import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.ThreeButtonDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseViewModel.SelectDatabaseMenuItem
 import java.util.Date
 import java.util.UUID
 import org.apache.commons.lang3.StringUtils
@@ -29,6 +33,7 @@ class SelectDatabaseFragment : BaseFragment() {
 
     private val args: SelectDatabaseArgs by lazy { getMandatoryArgument(ARGUMENTS)}
     private val dateFormatProvider: DateFormatProvider by inject()
+    private var menu: Menu? = null
 
     private val viewModel: SelectDatabaseViewModel by viewModel {
         parametersOf(args)
@@ -36,10 +41,25 @@ class SelectDatabaseFragment : BaseFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        setHasOptionsMenu(true)
         setupActionBar {
             title = getString(R.string.select_database)
             setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        this.menu = menu
+
+        inflater.inflate(R.menu.select_database, menu)
+
+        viewModel.visibleMenuItems.value?.let {
+            updateMenuItemVisibility(
+                menu = menu,
+                visibleItems = it,
+                allScreenItems = SelectDatabaseMenuItem.values().toList()
+            )
         }
     }
 
@@ -69,15 +89,27 @@ class SelectDatabaseFragment : BaseFragment() {
                 viewModel.navigateBack()
                 true
             }
+            R.id.menu_refresh -> {
+                viewModel.onRefreshButtonClicked()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun subscribeToLiveData() {
+        viewModel.visibleMenuItems.observe(viewLifecycleOwner) { visibleItems ->
+            menu?.let { menu ->
+                updateMenuItemVisibility(
+                    menu = menu,
+                    visibleItems = visibleItems,
+                    allScreenItems = SelectDatabaseMenuItem.values().toList()
+                )
+            }
+        }
         viewModel.showRemoveConfirmationDialogEvent.observe(viewLifecycleOwner) { (uid, file) ->
             showRemoveConfirmationDialog(uid, file)
         }
-
         viewModel.showResolveConflictDialog.observe(viewLifecycleOwner) { (uid, info) ->
             showResolveConflictDialog(uid, info)
         }

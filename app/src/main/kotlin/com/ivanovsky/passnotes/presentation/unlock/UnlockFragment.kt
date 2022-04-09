@@ -1,26 +1,21 @@
 package com.ivanovsky.passnotes.presentation.unlock
 
-import android.app.Activity
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.autofill.AutofillManager
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE
-import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding
 import com.ivanovsky.passnotes.domain.DateFormatProvider
-import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
-import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
-import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.dialog.ThreeButtonDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
@@ -29,14 +24,17 @@ import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
+import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
+import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel.UnlockMenuItem
 import org.apache.commons.lang3.StringUtils.EMPTY
 import java.util.Date
 
 class UnlockFragment : BaseFragment() {
 
     private lateinit var binding: UnlockFragmentBinding
+    private var menu: Menu? = null
     private val dateFormatProvider: DateFormatProvider by inject()
     private val viewModel: UnlockViewModel by lazy {
         ViewModelProvider(
@@ -57,13 +55,23 @@ class UnlockFragment : BaseFragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        viewModel.onScreenStart()
-        navigationViewModel.setVisibleItems(
-            NavigationMenuViewModel.createNavigationItemsForBasicScreens()
-        )
-        navigationViewModel.setNavigationEnabled(true)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        this.menu = menu
+
+        inflater.inflate(R.menu.unlock, menu)
+
+        viewModel.visibleMenuItems.value?.let {
+            updateMenuItemVisibility(
+                menu = menu,
+                visibleItems = it,
+                allScreenItems = UnlockMenuItem.values().toList()
+            )
+        }
     }
 
     override fun onCreateView(
@@ -80,11 +88,43 @@ class UnlockFragment : BaseFragment() {
         return binding.root
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_refresh -> {
+                viewModel.onRefreshButtonClicked()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.onScreenStart()
+        navigationViewModel.setVisibleItems(
+            NavigationMenuViewModel.createNavigationItemsForBasicScreens()
+        )
+        navigationViewModel.setNavigationEnabled(true)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        subscribeToLiveData()
         subscribeToLiveEvents()
 
         viewModel.loadData(resetSelection = false)
+    }
+
+    private fun subscribeToLiveData() {
+        viewModel.visibleMenuItems.observe(viewLifecycleOwner) { visibleItems ->
+            menu?.let { menu ->
+                updateMenuItemVisibility(
+                    menu = menu,
+                    visibleItems = visibleItems,
+                    allScreenItems = UnlockMenuItem.values().toList()
+                )
+            }
+        }
     }
 
     private fun subscribeToLiveEvents() {

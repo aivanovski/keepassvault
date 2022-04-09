@@ -61,7 +61,7 @@ class SearchViewModel(
         .add(GroupCellViewModel::class, R.layout.cell_group)
 
     val isMoreMenuVisible = MutableLiveData(args.appMode == NORMAL)
-    val hideKeyboardEvent = SingleLiveEvent<Unit>()
+    val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note, AutofillStructure>>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
 
@@ -81,11 +81,22 @@ class SearchViewModel(
         }
     }
 
-    fun onBackClicked() = router.exit()
+    fun onScreenCreated() {
+        isKeyboardVisibleEvent.value = true
+    }
 
-    fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
+    fun onBackClicked() {
+        isKeyboardVisibleEvent.value = false
+        router.exit()
+    }
+
+    fun onSettingsButtonClicked() {
+        isKeyboardVisibleEvent.value = false
+        router.navigateTo(MainSettingsScreen())
+    }
 
     fun onLockButtonClicked() {
+        isKeyboardVisibleEvent.value = false
         interactor.lockDatabase()
         when (args.appMode) {
             AUTOFILL_SELECTION -> {
@@ -164,7 +175,7 @@ class SearchViewModel(
     }
 
     private fun onGroupClicked(groupUid: UUID) {
-        hideKeyboardEvent.call()
+        isKeyboardVisibleEvent.value = false
 
         router.navigateTo(
             GroupsScreen(
@@ -179,6 +190,8 @@ class SearchViewModel(
     }
 
     private fun onNoteClicked(noteUid: UUID) {
+        isKeyboardVisibleEvent.value = false
+
         when (args.appMode) {
             AUTOFILL_SELECTION -> {
                 val structure = args.autofillStructure ?: return
@@ -205,7 +218,6 @@ class SearchViewModel(
                 }
             }
             else -> {
-                hideKeyboardEvent.call()
                 router.navigateTo(
                     NoteScreen(
                         NoteScreenArgs(

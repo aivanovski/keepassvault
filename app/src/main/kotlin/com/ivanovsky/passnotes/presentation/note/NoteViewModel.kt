@@ -227,10 +227,17 @@ class NoteViewModel(
 
     private fun subscribeToCellEvents() {
         eventProvider.subscribe(this) { event ->
-            if (event.containsKey(NotePropertyCellViewModel.COPY_BUTTON_CLICK_EVENT)) {
-                val text = event.getString(NotePropertyCellViewModel.COPY_BUTTON_CLICK_EVENT)
-                    ?: EMPTY
-                onCopyButtonClicked(text)
+            when {
+                event.containsKey(NotePropertyCellViewModel.COPY_BUTTON_CLICK_EVENT) -> {
+                    val text = event.getString(NotePropertyCellViewModel.COPY_BUTTON_CLICK_EVENT)
+                        ?: EMPTY
+                    onCopyButtonClicked(text)
+                }
+                event.containsKey(ProtectedNotePropertyCellViewModel.COPY_BUTTON_CLICK_EVENT) -> {
+                    val text = event.getString(ProtectedNotePropertyCellViewModel.COPY_BUTTON_CLICK_EVENT)
+                        ?: EMPTY
+                    onCopyButtonClicked(text)
+                }
             }
         }
     }

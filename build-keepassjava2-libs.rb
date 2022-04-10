@@ -4,6 +4,7 @@ KEEPASS_JAVA_URL = 'https://github.com/jorabin/KeePassJava2.git'.freeze
 
 PATCH1 = '/keepassjava2-patches/0001-replace-apache-codecs.patch'.freeze
 PATCH2 = '/keepassjava2-patches/0002-protected-properties.patch'.freeze
+PATCH3 = '/keepassjava2-patches/0003-fix-recycle-bin-detection.patch'.freeze
 
 SUCCESS = 'success'.freeze
 FAILURE = 'failure'.freeze
@@ -104,6 +105,7 @@ def main
   # apply pathces
   apply_patch("#{current_path + PATCH1}")
   apply_patch("#{current_path + PATCH2}")
+  apply_patch("#{current_path + PATCH3}")
 
   # build Release libraries
   database_aar_release = "#{current_path}/libs/KeePassJava2-database/build/outputs/aar/KeePassJava2-database-release.aar"

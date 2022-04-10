@@ -38,6 +38,21 @@ def clone_keepass_java_project
   path
 end
 
+def checkout_tag(repo_path, tag_name)
+  puts "Checkout tag: #{tag_name}"
+  branch_name = "#{tag_name}-branch"
+  `cd "#{repo_path}"`
+
+  branches = `cd "#{repo_path}" && git branch`.gsub('*', '').split("\n").map(&:strip)
+
+  if !branches.index(branch_name).nil?
+    # If branch already exist
+    `cd "#{repo_path}" && git checkout --force master && git branch -d #{branch_name}`
+  end
+
+  `cd "#{repo_path}" && git checkout "tags/#{tag_name}" -b "#{branch_name}"`
+end
+
 def copy_sources(src_path, dst_path)
   puts "copy sources from: #{src_path} to #{dst_path}"
   `[ -d #{dst_path} ] && rm -r "#{dst_path}"`
@@ -79,6 +94,7 @@ def main
 
   # clone KeePassJava2 project from github
   keepass_java_path = clone_keepass_java_project
+  checkout_tag(keepass_java_path, 'KeePassJava2-2.1.4')
 
   # copy sources to the libs/*
   copy_sources("#{keepass_java_path}/database/src/main/java/", "#{current_path}/libs/KeePassJava2-database/src/main/java")

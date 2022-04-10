@@ -4,7 +4,6 @@ android {
 	def ext = rootProject.extensions.ext
 
 	compileSdkVersion ext.android.compileSdk
-	buildToolsVersion ext.android.buildTools
 
 	defaultConfig {
 		minSdkVersion ext.android.minSdk

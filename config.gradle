@@ -17,8 +17,8 @@ ext.extractPasswordRules = { Properties props ->
 ext {
     android = [
             minSdk    : 21,
-            targetSdk : 29,
-            compileSdk: 30
+            targetSdk : 31,
+            compileSdk: 31
     ]
 
     kotlinVersion = '1.5.0'

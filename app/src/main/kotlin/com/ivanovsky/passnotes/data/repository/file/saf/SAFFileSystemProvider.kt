@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.data.repository.file.saf
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.provider.OpenableColumns
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
@@ -56,6 +55,11 @@ class SAFFileSystemProvider(
     ): OperationResult<InputStream> {
         val uri = file.getUri()
 
+        val permissionResult = takePermission(uri)
+        if (permissionResult.isFailed) {
+            return permissionResult.takeError()
+        }
+
         return try {
             val stream = context.contentResolver.openInputStream(uri)
             OperationResult.success(stream)
@@ -78,19 +82,9 @@ class SAFFileSystemProvider(
     ): OperationResult<OutputStream> {
         val uri = file.getUri()
 
-        if (Build.VERSION.SDK_INT >= 19) {
-            try {
-                context.contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
-            } catch (e: SecurityException) {
-                Timber.d(e)
-                return OperationResult.error(failedToGetAccessTo(uri))
-            } catch (e: Exception) {
-                Timber.d(e)
-                return OperationResult.error(unknownError(e))
-            }
+        val permissionResult = takePermission(uri)
+        if (permissionResult.isFailed) {
+            return permissionResult.takeError()
         }
 
         val stream = try {
@@ -179,6 +173,22 @@ class SAFFileSystemProvider(
                 modified = null
             )
         )
+    }
+
+    private fun takePermission(uri: Uri): OperationResult<Unit> {
+        return try {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+            OperationResult.success(Unit)
+        } catch (e: SecurityException) {
+            Timber.d(e)
+            OperationResult.error(failedToGetAccessTo(uri))
+        } catch (e: Exception) {
+            Timber.d(e)
+            OperationResult.error(unknownError(e))
+        }
     }
 
     private fun failedToFindColumn(columnName: String): OperationError {

@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -13,7 +12,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.github.terrakok.cicerone.NavigatorHolder
-import com.github.terrakok.cicerone.Router
 import com.github.terrakok.cicerone.androidx.AppNavigator
 import com.google.android.material.navigation.NavigationView
 import com.ivanovsky.passnotes.R
@@ -27,6 +25,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
+import com.ivanovsky.passnotes.util.IntentUtils.immutablePendingIntentFlags
 
 class MainActivity :
     AppCompatActivity(),
@@ -192,7 +191,7 @@ class MainActivity :
                 context,
                 AUTOFILL_AUTHENTICATION_REQUEST_CODE,
                 intent,
-                PendingIntent.FLAG_CANCEL_CURRENT
+                immutablePendingIntentFlags(PendingIntent.FLAG_CANCEL_CURRENT)
             )
         }
 
@@ -212,7 +211,7 @@ class MainActivity :
                 context,
                 AUTOFILL_SELECTION_REQUEST_CODE,
                 intent,
-                PendingIntent.FLAG_CANCEL_CURRENT
+                immutablePendingIntentFlags(PendingIntent.FLAG_CANCEL_CURRENT)
             )
         }
 
@@ -245,7 +244,7 @@ class MainActivity :
                 context,
                 AUTOFILL_SAVE_RESULT_REQUEST_CODE,
                 intent,
-                PendingIntent.FLAG_CANCEL_CURRENT
+                immutablePendingIntentFlags(PendingIntent.FLAG_CANCEL_CURRENT)
             )
         }
     }

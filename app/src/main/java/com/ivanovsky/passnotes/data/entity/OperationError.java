@@ -65,6 +65,13 @@ public class OperationError {
         return error;
     }
 
+    public static OperationError newDbError(String message, Exception exception) {
+        OperationError error = new OperationError(Type.DB_ERROR);
+        error.message = message;
+        error.throwable = exception;
+        return error;
+    }
+
     public static OperationError newFailedToGetDbError() {
         OperationError error = new OperationError(Type.DB_ERROR);
         error.message = MESSAGE_FAILED_TO_GET_DATABASE;

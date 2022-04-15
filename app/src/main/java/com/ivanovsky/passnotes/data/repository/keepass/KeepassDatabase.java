@@ -40,6 +40,8 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.newAuthError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
 
+import android.text.TextUtils;
+
 import timber.log.Timber;
 
 public class KeepassDatabase implements EncryptedDatabase {
@@ -90,13 +92,21 @@ public class KeepassDatabase implements EncryptedDatabase {
             } else {
                 db = SimpleDatabase.load(new KdbxCreds(key.getKey()), stream);
             }
-        } catch (IOException e) {
-            return OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_OPEN_DB_FILE));
-
         } catch (Exception e) {
             Timber.d(e);
-            return OperationResult.error(newDbError(MESSAGE_FAILED_TO_OPEN_DB_FILE));
 
+            String message;
+            if (!TextUtils.isEmpty(e.getMessage())) {
+                message = e.getMessage();
+            } else {
+                message = MESSAGE_FAILED_TO_OPEN_DB_FILE;
+            }
+
+            if (e instanceof IOException) {
+                return OperationResult.error(newGenericIOError(message, e));
+            } else {
+                return OperationResult.error(newDbError(message, e));
+            }
         } finally {
             InputOutputUtils.close(stream);
         }

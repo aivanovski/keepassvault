@@ -57,7 +57,9 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/filename"
             app:layout_constraintTop_toBottomOf="@id/path"
-            tools:text="Checking...." />
+            app:visible="@{viewModel.model.isStatusVisible}"
+            tools:text="Checking...."
+            tools:visibility="visible" />
 
         <Button
             android:id="@+id/resolveButton"
@@ -71,6 +73,7 @@
             android:textSize="@dimen/material_secondary_text_size"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/status"
+            app:layout_goneMarginTop="@dimen/half_margin"
             app:visible="@{viewModel.model.isResolveButtonVisible}"
             tools:visibility="visible" />
 
@@ -86,6 +89,7 @@
             android:textSize="@dimen/material_secondary_text_size"
             app:layout_constraintEnd_toStartOf="@id/resolveButton"
             app:layout_constraintTop_toBottomOf="@id/status"
+            app:layout_goneMarginTop="@dimen/half_margin"
             app:visible="@{viewModel.model.isRemoveButtonVisible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

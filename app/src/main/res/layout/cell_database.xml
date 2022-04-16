@@ -15,7 +15,8 @@
         style="@style/Material.Layout.Selectable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> viewModel.onClicked()}">
+        android:onClick="@{() -> viewModel.onClicked()}"
+        android:paddingBottom="@dimen/half_margin">
 
         <TextView
             android:id="@+id/filename"
@@ -52,7 +53,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/half_margin"
             android:layout_marginEnd="@dimen/element_margin"
-            android:layout_marginBottom="@dimen/half_margin"
             android:text="@{viewModel.model.status}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/filename"

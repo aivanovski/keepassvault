@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.selectdb.cells.factory
 
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
@@ -47,16 +48,21 @@ class SelectDatabaseCellModelFactory(
         file: FileDescriptor,
         cellUid: UUID,
         syncState: SyncState?
-    ): BaseCellModel =
-        DatabaseFileCellModel(
+    ): BaseCellModel {
+        val fsType = file.fsAuthority.type
+        val isStatusVisible = (fsType != FSType.REGULAR_FS && fsType != FSType.SAF)
+
+        return DatabaseFileCellModel(
             id = cellUid,
             name = file.name,
             path = file.formatReadablePath(resourceProvider),
             status = formatSyncStatus(syncState),
             statusColor = getSyncStatusColor(syncState),
+            isStatusVisible = isStatusVisible,
             isRemoveButtonVisible = true,
             isResolveButtonVisible = (syncState?.status == SyncStatus.CONFLICT)
         )
+    }
 
     private fun getSyncStatusColor(state: SyncState?): Int {
         return if (state?.status == SyncStatus.CONFLICT ||

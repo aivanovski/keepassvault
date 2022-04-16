@@ -1,12 +1,12 @@
 package com.ivanovsky.passnotes.presentation.groups.sorting
 
+import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.domain.entity.SortDirection
-import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 
 interface SortStrategy {
     fun sort(
-        items: List<GroupsInteractor.Item>,
+        items: List<EncryptedDatabaseEntry>,
         direction: SortDirection,
         isGroupsAtStart: Boolean
-    ): List<GroupsInteractor.Item>
+    ): List<EncryptedDatabaseEntry>
 }

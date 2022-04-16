@@ -1,10 +1,8 @@
 package com.ivanovsky.passnotes.domain.interactor.groups
 
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.Group
-import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP
-import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
@@ -46,19 +44,18 @@ class GroupsInteractor(
         return rootResult.obj.uid
     }
 
-    fun getRootGroupData(): OperationResult<List<Item>> {
+    fun getRootGroupData(): OperationResult<List<EncryptedDatabaseEntry>> {
         val rootGroupResult = dbRepo.groupRepository.rootGroup
         if (rootGroupResult.isFailed) {
             return rootGroupResult.takeError()
         }
 
         val groupUid = rootGroupResult.obj.uid
-            ?: return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_ROOT_GROUP))
 
         return getGroupData(groupUid)
     }
 
-    fun getGroupData(groupUid: UUID): OperationResult<List<Item>> {
+    fun getGroupData(groupUid: UUID): OperationResult<List<EncryptedDatabaseEntry>> {
         val groupsResult = dbRepo.groupRepository.getChildGroups(groupUid)
         if (groupsResult.isFailed) {
             return groupsResult.takeError()
@@ -72,12 +69,7 @@ class GroupsInteractor(
         val groups = groupsResult.obj
         val notes = notesResult.obj
 
-        val items = mutableListOf<Item>()
-
-        items.addAll(groups.map { GroupItem(it) })
-        items.addAll(notes.map { NoteItem(it) })
-
-        return OperationResult.success(items)
+        return OperationResult.success(groups + notes)
     }
 
     fun removeGroup(groupUid: UUID): OperationResult<Unit> {
@@ -132,8 +124,4 @@ class GroupsInteractor(
             }
         }
     }
-
-    sealed class Item
-    data class GroupItem(val group: Group) : Item()
-    data class NoteItem(val note: Note) : Item()
 }

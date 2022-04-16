@@ -1,8 +1,10 @@
 package com.ivanovsky.passnotes.presentation.groups.factory
 
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
+import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.presentation.core.factory.CellModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.GroupCellModel
@@ -14,25 +16,26 @@ import com.ivanovsky.passnotes.util.StringUtils
 
 class GroupsCellModelFactory(
     private val resourceProvider: ResourceProvider
-) : CellModelFactory<List<GroupsInteractor.Item>> {
+) : CellModelFactory<List<EncryptedDatabaseEntry>> {
 
-    override fun createCellModels(data: List<GroupsInteractor.Item>): List<BaseCellModel> {
+    override fun createCellModels(data: List<EncryptedDatabaseEntry>): List<BaseCellModel> {
         return data.map { item ->
             when (item) {
-                is GroupsInteractor.GroupItem -> {
+                is Group -> {
                     GroupCellModel(
-                        id = item.group.uid.toString(),
-                        group = item.group,
-                        noteCount = item.group.noteCount,
-                        childGroupCount = item.group.groupCount
+                        id = item.uid.toString(),
+                        group = item,
+                        noteCount = item.noteCount,
+                        childGroupCount = item.groupCount
                     )
                 }
-                is GroupsInteractor.NoteItem -> {
+                is Note -> {
                     NoteCellModel(
-                        id = item.note.uid?.toString() ?: "",
-                        note = item.note
+                        id = item.uid?.toString() ?: "",
+                        note = item
                     )
                 }
+                else -> throw IllegalStateException()
             }
         }
     }

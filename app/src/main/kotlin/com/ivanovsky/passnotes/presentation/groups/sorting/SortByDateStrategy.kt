@@ -1,24 +1,26 @@
 package com.ivanovsky.passnotes.presentation.groups.sorting
 
+import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
+import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.domain.entity.SortDirection
-import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 
 class SortByDateStrategy(
     private val type: Type
 ) : SortStrategy {
 
     override fun sort(
-        items: List<GroupsInteractor.Item>,
+        items: List<EncryptedDatabaseEntry>,
         direction: SortDirection,
         isGroupsAtStart: Boolean
-    ): List<GroupsInteractor.Item> {
-        val groups = items.filterIsInstance(GroupsInteractor.GroupItem::class.java)
+    ): List<EncryptedDatabaseEntry> {
+        val groups = items.filterIsInstance(Group::class.java)
 
-        val notes = items.filterIsInstance(GroupsInteractor.NoteItem::class.java)
+        val notes = items.filterIsInstance(Note::class.java)
             .map { item ->
                 val date = when (type) {
-                    Type.CREATION_DATE -> item.note.created
-                    Type.MODIFICATION_DATE -> item.note.modified
+                    Type.CREATION_DATE -> item.created
+                    Type.MODIFICATION_DATE -> item.modified
                 }
                 Pair(date, item)
             }

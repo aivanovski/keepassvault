@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
@@ -117,7 +118,7 @@ class GroupsViewModel(
     val showUnlockScreenEvent = SingleLiveEvent<UnlockScreen>()
     val showSortAndViewDialogEvent = SingleLiveEvent<Unit>()
 
-    private var currentDataItems: List<GroupsInteractor.Item>? = null
+    private var currentDataItems: List<EncryptedDatabaseEntry>? = null
     private var rootGroupUid: UUID? = null
     private var groupUid: UUID? = args.groupUid
     private var templates: List<Template>? = null
@@ -294,12 +295,10 @@ class GroupsViewModel(
     }
 
     fun onEditGroupClicked(group: Group) {
-        val groupUid = group.uid ?: return
-
         router.navigateTo(
             GroupEditorScreen(
                 GroupEditorArgs.EditGroup(
-                    groupUid = groupUid
+                    groupUid = group.uid
                 )
             )
         )
@@ -310,13 +309,12 @@ class GroupsViewModel(
     }
 
     fun onCutGroupClicked(group: Group) {
-        val groupUid = group.uid ?: return
         val currentGroupUid = getCurrentGroupUid() ?: return
 
         selectionHolder.select(
             action = ActionType.CUT,
             selection = SelectionItem(
-                uid = groupUid,
+                uid = group.uid,
                 parentUid = currentGroupUid,
                 type = SelectionItemType.GROUP_UID
             )
@@ -492,12 +490,12 @@ class GroupsViewModel(
 
     private fun findGroupInItems(groupUid: UUID): Group? {
         return (currentDataItems?.firstOrNull { item ->
-            if (item is GroupsInteractor.GroupItem) {
-                item.group.uid == groupUid
+            if (item is Group) {
+                item.uid == groupUid
             } else {
                 false
             }
-        } as? GroupsInteractor.GroupItem)?.group
+        } as? Group)
     }
 
     private fun onNoteClicked(noteUid: UUID) {
@@ -520,12 +518,12 @@ class GroupsViewModel(
 
     private fun findNoteInItems(noteUid: UUID): Note? {
         return (currentDataItems?.firstOrNull { item ->
-            if (item is GroupsInteractor.NoteItem) {
-                item.note.uid == noteUid
+            if (item is Note) {
+                item.uid == noteUid
             } else {
                 false
             }
-        } as? GroupsInteractor.NoteItem)?.note
+        } as? Note)
     }
 
     private fun getCurrentGroupUid(): UUID? {
@@ -725,11 +723,11 @@ class GroupsViewModel(
     }
 
     private suspend fun sortDataItems(
-        items: List<GroupsInteractor.Item>,
+        items: List<EncryptedDatabaseEntry>,
         sortType: SortType,
         direction: SortDirection,
         isGroupsAtStart: Boolean
-    ): List<GroupsInteractor.Item> =
+    ): List<EncryptedDatabaseEntry> =
         withContext(dispatchers.IO) {
             when (sortType) {
                 SortType.DEFAULT -> SortByDefaultOrderStrategy().sort(

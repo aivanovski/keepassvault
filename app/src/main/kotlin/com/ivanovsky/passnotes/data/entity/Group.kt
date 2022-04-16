@@ -11,4 +11,4 @@ data class Group(
     val title: String,
     val groupCount: Int,
     val noteCount: Int
-) : Parcelable
+) : EncryptedDatabaseEntry, Parcelable

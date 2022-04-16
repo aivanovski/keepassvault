@@ -2,7 +2,7 @@
 
 package com.ivanovsky.passnotes.data.repository.keepass
 
-import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -76,10 +76,10 @@ class KeepassTemplateRepository(
             )
         }
 
-        val templateGroup = Group(
+        val templateGroup = GroupEntity(
             title = TEMPLATE_GROUP_NAME
         )
-        val insertGroupResult = groupDao.insert(templateGroup, rootGroup.uid, doCommit)
+        val insertGroupResult = groupDao.insert(templateGroup, doCommit)
         if (insertGroupResult.isFailed) {
             return insertGroupResult.takeError()
         }

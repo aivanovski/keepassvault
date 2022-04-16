@@ -8,23 +8,22 @@ import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
-import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
-import com.ivanovsky.passnotes.domain.entity.SortDirection
-import com.ivanovsky.passnotes.domain.entity.SortType
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
+import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
@@ -49,10 +48,6 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewMo
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.groups.sorting.SortByDateStrategy
-import com.ivanovsky.passnotes.presentation.groups.sorting.SortByDateStrategy.Type
-import com.ivanovsky.passnotes.presentation.groups.sorting.SortByDefaultOrderStrategy
-import com.ivanovsky.passnotes.presentation.groups.sorting.SortByTitleStrategy
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
@@ -71,7 +66,6 @@ class GroupsViewModel(
     private val errorInteractor: ErrorInteractor,
     private val observerBus: ObserverBus,
     private val settings: Settings,
-    private val dispatchers: DispatcherProvider,
     private val resourceProvider: ResourceProvider,
     private val cellModelFactory: GroupsCellModelFactory,
     private val statusCellModelFactory: DatabaseStatusCellModelFactory,
@@ -117,7 +111,7 @@ class GroupsViewModel(
     val showUnlockScreenEvent = SingleLiveEvent<UnlockScreen>()
     val showSortAndViewDialogEvent = SingleLiveEvent<Unit>()
 
-    private var currentDataItems: List<GroupsInteractor.Item>? = null
+    private var currentDataItems: List<EncryptedDatabaseEntry>? = null
     private var rootGroupUid: UUID? = null
     private var groupUid: UUID? = args.groupUid
     private var templates: List<Template>? = null
@@ -214,12 +208,7 @@ class GroupsViewModel(
             val status = interactor.getDatabaseStatus()
 
             if (data.isSucceededOrDeferred) {
-                val dataItems = sortDataItems(
-                    data.obj,
-                    settings.sortType,
-                    settings.sortDirection,
-                    settings.isGroupsAtStartEnabled
-                )
+                val dataItems = interactor.sortData(data.obj)
                 currentDataItems = dataItems
 
                 if (dataItems.isNotEmpty()) {
@@ -294,12 +283,10 @@ class GroupsViewModel(
     }
 
     fun onEditGroupClicked(group: Group) {
-        val groupUid = group.uid ?: return
-
         router.navigateTo(
             GroupEditorScreen(
                 GroupEditorArgs.EditGroup(
-                    groupUid = groupUid
+                    groupUid = group.uid
                 )
             )
         )
@@ -310,13 +297,12 @@ class GroupsViewModel(
     }
 
     fun onCutGroupClicked(group: Group) {
-        val groupUid = group.uid ?: return
         val currentGroupUid = getCurrentGroupUid() ?: return
 
         selectionHolder.select(
             action = ActionType.CUT,
             selection = SelectionItem(
-                uid = groupUid,
+                uid = group.uid,
                 parentUid = currentGroupUid,
                 type = SelectionItemType.GROUP_UID
             )
@@ -492,12 +478,12 @@ class GroupsViewModel(
 
     private fun findGroupInItems(groupUid: UUID): Group? {
         return (currentDataItems?.firstOrNull { item ->
-            if (item is GroupsInteractor.GroupItem) {
-                item.group.uid == groupUid
+            if (item is Group) {
+                item.uid == groupUid
             } else {
                 false
             }
-        } as? GroupsInteractor.GroupItem)?.group
+        } as? Group)
     }
 
     private fun onNoteClicked(noteUid: UUID) {
@@ -520,12 +506,12 @@ class GroupsViewModel(
 
     private fun findNoteInItems(noteUid: UUID): Note? {
         return (currentDataItems?.firstOrNull { item ->
-            if (item is GroupsInteractor.NoteItem) {
-                item.note.uid == noteUid
+            if (item is Note) {
+                item.uid == noteUid
             } else {
                 false
             }
-        } as? GroupsInteractor.NoteItem)?.note
+        } as? Note)
     }
 
     private fun getCurrentGroupUid(): UUID? {
@@ -723,37 +709,6 @@ class GroupsViewModel(
             else -> emptyList()
         }
     }
-
-    private suspend fun sortDataItems(
-        items: List<GroupsInteractor.Item>,
-        sortType: SortType,
-        direction: SortDirection,
-        isGroupsAtStart: Boolean
-    ): List<GroupsInteractor.Item> =
-        withContext(dispatchers.IO) {
-            when (sortType) {
-                SortType.DEFAULT -> SortByDefaultOrderStrategy().sort(
-                    items,
-                    direction,
-                    isGroupsAtStart = isGroupsAtStart
-                )
-                SortType.TITLE -> SortByTitleStrategy().sort(
-                    items,
-                    direction,
-                    isGroupsAtStart = isGroupsAtStart
-                )
-                SortType.CREATION_DATE -> SortByDateStrategy(Type.CREATION_DATE).sort(
-                    items,
-                    direction,
-                    isGroupsAtStart = isGroupsAtStart
-                )
-                SortType.MODIFICATION_DATE -> SortByDateStrategy(Type.MODIFICATION_DATE).sort(
-                    items,
-                    direction,
-                    isGroupsAtStart = isGroupsAtStart
-                )
-            }
-        }
 
     enum class OptionPanelState {
         HIDDEN,

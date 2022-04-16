@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.data.repository
 
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import java.util.UUID
 
@@ -26,14 +27,9 @@ class GroupRepositoryWrapper : RepositoryWrapperWithDatabase(), GroupRepository 
         return db.groupRepository.getChildGroups(parentGroupUid)
     }
 
-    override fun getChildGroupsCount(parentGroupUid: UUID): OperationResult<Int> {
+    override fun insert(group: GroupEntity): OperationResult<UUID> {
         val db = getDatabase() ?: return noDatabaseError()
-        return db.groupRepository.getChildGroupsCount(parentGroupUid)
-    }
-
-    override fun insert(group: Group, parentGroupUid: UUID): OperationResult<UUID> {
-        val db = getDatabase() ?: return noDatabaseError()
-        return db.groupRepository.insert(group, parentGroupUid)
+        return db.groupRepository.insert(group)
     }
 
     override fun remove(groupUid: UUID): OperationResult<Boolean> {
@@ -46,8 +42,8 @@ class GroupRepositoryWrapper : RepositoryWrapperWithDatabase(), GroupRepository 
         return db.groupRepository.find(query)
     }
 
-    override fun update(group: Group, newParentGroupUid: UUID?): OperationResult<Boolean> {
+    override fun update(group: GroupEntity): OperationResult<Boolean> {
         val db = getDatabase() ?: return noDatabaseError()
-        return db.groupRepository.update(group, newParentGroupUid)
+        return db.groupRepository.update(group)
     }
 }

@@ -11,11 +11,6 @@ class NoteRepositoryWrapper : RepositoryWrapperWithDatabase(), NoteRepository {
         return db.noteRepository.getNotesByGroupUid(groupUid)
     }
 
-    override fun getNoteCountByGroupUid(groupUid: UUID): OperationResult<Int> {
-        val db = getDatabase() ?: return noDatabaseError()
-        return db.noteRepository.getNoteCountByGroupUid(groupUid)
-    }
-
     override fun insert(note: Note): OperationResult<UUID> {
         val db = getDatabase() ?: return noDatabaseError()
         return db.noteRepository.insert(note)

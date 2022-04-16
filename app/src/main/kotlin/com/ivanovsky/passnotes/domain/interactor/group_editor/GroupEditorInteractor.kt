@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.domain.interactor.group_editor
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
@@ -33,11 +34,12 @@ class GroupEditorInteractor(
                 )
             }
 
-            val group = Group(
+            val group = GroupEntity(
+                parentUid = parentUid,
                 title = title
             )
 
-            val insertResult = dbRepo.groupRepository.insert(group, parentUid)
+            val insertResult = dbRepo.groupRepository.insert(group)
             if (insertResult.isFailed) {
                 return@withContext insertResult.takeError()
             }
@@ -45,11 +47,20 @@ class GroupEditorInteractor(
             val uid = insertResult.obj
 
             observerBus.notifyGroupDataSetChanged()
-            insertResult.takeStatusWith(group.copy(uid = uid))
+
+            val result = Group(
+                uid = uid,
+                parentUid = parentUid,
+                title = title,
+                groupCount = 0,
+                noteCount = 0
+            )
+
+            insertResult.takeStatusWith(result)
         }
     }
 
-    suspend fun updateGroup(group: Group): OperationResult<Boolean> {
+    suspend fun updateGroup(group: GroupEntity): OperationResult<Boolean> {
         return withContext(dispatchers.IO) {
             val getDbResult = getDbUseCase.getDatabase()
             if (getDbResult.isFailed) {
@@ -57,7 +68,7 @@ class GroupEditorInteractor(
             }
 
             val db = getDbResult.obj
-            db.groupRepository.update(group, null)
+            db.groupRepository.update(group)
         }
     }
 

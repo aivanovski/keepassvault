@@ -1,10 +1,8 @@
 package com.ivanovsky.passnotes.domain.interactor.groups
 
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.Group
-import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP
-import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
@@ -18,6 +16,7 @@ import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
+import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
@@ -29,7 +28,8 @@ class GroupsInteractor(
     private val getStatusUseCase: GetDatabaseStatusUseCase,
     private val addTemplatesUseCase: AddTemplatesUseCase,
     private val moveNoteUseCase: MoveNoteUseCase,
-    private val moveGroupUseCae: MoveGroupUseCase
+    private val moveGroupUseCae: MoveGroupUseCase,
+    private val sortUseCase: SortGroupsAndNotesUseCase
 ) {
 
     suspend fun getTemplates(): OperationResult<List<Template>> =
@@ -46,19 +46,18 @@ class GroupsInteractor(
         return rootResult.obj.uid
     }
 
-    fun getRootGroupData(): OperationResult<List<Item>> {
+    fun getRootGroupData(): OperationResult<List<EncryptedDatabaseEntry>> {
         val rootGroupResult = dbRepo.groupRepository.rootGroup
         if (rootGroupResult.isFailed) {
             return rootGroupResult.takeError()
         }
 
         val groupUid = rootGroupResult.obj.uid
-            ?: return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_ROOT_GROUP))
 
         return getGroupData(groupUid)
     }
 
-    fun getGroupData(groupUid: UUID): OperationResult<List<Item>> {
+    fun getGroupData(groupUid: UUID): OperationResult<List<EncryptedDatabaseEntry>> {
         val groupsResult = dbRepo.groupRepository.getChildGroups(groupUid)
         if (groupsResult.isFailed) {
             return groupsResult.takeError()
@@ -72,32 +71,13 @@ class GroupsInteractor(
         val groups = groupsResult.obj
         val notes = notesResult.obj
 
-        val items = mutableListOf<Item>()
-        for (group in groups) {
-            val groupUid = group.uid ?: continue
-
-            val noteCountResult = dbRepo.noteRepository.getNoteCountByGroupUid(groupUid)
-            if (noteCountResult.isFailed) {
-                return noteCountResult.takeError()
-            }
-
-            val childGroupCountResult = dbRepo.groupRepository.getChildGroupsCount(groupUid)
-            if (childGroupCountResult.isFailed) {
-                return childGroupCountResult.takeError()
-            }
-
-            val noteCount = noteCountResult.obj
-            val childGroupCount = childGroupCountResult.obj
-
-            items.add(GroupItem(group, noteCount, childGroupCount))
-        }
-
-        for (note in notes) {
-            items.add(NoteItem(note))
-        }
-
-        return OperationResult.success(items)
+        return OperationResult.success(groups + notes)
     }
+
+    suspend fun sortData(
+        data: List<EncryptedDatabaseEntry>
+    ): List<EncryptedDatabaseEntry> =
+        sortUseCase.sortGroupsAndNotesAccordingToSettings(data)
 
     fun removeGroup(groupUid: UUID): OperationResult<Unit> {
         val removeResult = dbRepo.groupRepository.remove(groupUid)
@@ -151,8 +131,4 @@ class GroupsInteractor(
             }
         }
     }
-
-    sealed class Item
-    data class GroupItem(val group: Group, val noteCount: Int, val childGroupCount: Int) : Item()
-    data class NoteItem(val note: Note) : Item()
 }

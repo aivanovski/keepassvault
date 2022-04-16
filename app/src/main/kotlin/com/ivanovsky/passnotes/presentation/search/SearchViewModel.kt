@@ -133,10 +133,10 @@ class SearchViewModel(
 
             val findResult = interactor.find(query)
             if (findResult.isSucceededOrDeferred) {
-                val items = findResult.obj
+                val items = interactor.sort(findResult.obj)
 
                 if (items.isNotEmpty()) {
-                    val cellModels = cellModelFactory.createCellModels(findResult.obj)
+                    val cellModels = cellModelFactory.createCellModels(items)
                     val cellViewModels = cellViewModelFactory.createCellViewModels(
                         models = cellModels,
                         eventProvider = eventProvider
@@ -241,6 +241,6 @@ class SearchViewModel(
     }
 
     companion object {
-        private const val SEARCH_DELAY = 500L
+        private const val SEARCH_DELAY = 300L
     }
 }

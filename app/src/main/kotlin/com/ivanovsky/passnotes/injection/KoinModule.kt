@@ -50,6 +50,7 @@ import com.ivanovsky.passnotes.domain.usecases.IsDatabaseOpenedUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveUsedFileUseCase
+import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
 import com.ivanovsky.passnotes.presentation.about.AboutViewModel
@@ -147,6 +148,7 @@ object KoinModule {
             single { UpdateNoteWithAutofillDataUseCase(get(), get(), get()) }
             single { UpdateNoteUseCase(get(), get(), get()) }
             single { RemoveUsedFileUseCase(get(), get()) }
+            single { SortGroupsAndNotesUseCase(get(), get()) }
 
             // Interactors
             single { FilePickerInteractor(get()) }
@@ -156,7 +158,7 @@ object KoinModule {
             single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
             single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
             single { NoteInteractor(get(), get(), get(), get(), get(), get()) }
-            single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
+            single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
             single { NoteEditorInteractor(get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
             single { DatabaseLockInteractor(get(), get(), get()) }
@@ -206,7 +208,7 @@ object KoinModule {
             viewModel { GroupEditorViewModel(get(), get(), get(), get()) }
             viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
             factory { (args: NoteScreenArgs) -> NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
-            factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
             viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
             viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), get(), args) }

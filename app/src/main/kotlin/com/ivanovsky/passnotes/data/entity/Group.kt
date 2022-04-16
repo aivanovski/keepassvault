@@ -6,6 +6,9 @@ import java.util.UUID
 
 @Parcelize
 data class Group(
-    val uid: UUID? = null,
-    val title: String
-) : Parcelable
+    val uid: UUID,
+    val parentUid: UUID?,
+    val title: String,
+    val groupCount: Int,
+    val noteCount: Int
+) : EncryptedDatabaseEntry, Parcelable

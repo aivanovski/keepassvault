@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.domain.interactor.debugmenu
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.OperationError.*
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
@@ -272,15 +273,12 @@ class DebugMenuInteractor(
         }
 
         val rootGroupUid = rootGroupResult.obj.uid
-        if (rootGroupUid == null) {
-            return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_ROOT_GROUP))
-        }
-
-        val newGroup = Group(
+        val newGroup = GroupEntity(
+            parentUid = rootGroupUid,
             title = newGroupTitle
         )
 
-        val insertResult = db.groupRepository.insert(newGroup, rootGroupUid)
+        val insertResult = db.groupRepository.insert(newGroup)
         if (insertResult.isFailed) {
             return insertResult.takeError()
         }

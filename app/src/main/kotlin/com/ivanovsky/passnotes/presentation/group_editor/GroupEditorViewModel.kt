@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.group_editor.GroupEditorInteractor
@@ -128,7 +129,7 @@ class GroupEditorViewModel(
         doneButtonVisibility.value = false
         screenState.value = ScreenState.loading()
 
-        val newGroup = Group(
+        val newGroup = GroupEntity(
             uid = group.uid,
             title = newTitle
         )

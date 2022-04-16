@@ -14,9 +14,6 @@ public interface NoteRepository {
     OperationResult<List<Note>> getNotesByGroupUid(@NonNull UUID groupUid);
 
     @NonNull
-    OperationResult<Integer> getNoteCountByGroupUid(@NonNull UUID groupUid);
-
-    @NonNull
     OperationResult<UUID> insert(@NonNull Note note);
 
     @NonNull

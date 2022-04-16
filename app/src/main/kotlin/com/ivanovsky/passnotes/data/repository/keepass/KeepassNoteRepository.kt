@@ -13,17 +13,6 @@ class KeepassNoteRepository(private val dao: NoteDao) : NoteRepository {
         return dao.getNotesByGroupUid(groupUid)
     }
 
-    override fun getNoteCountByGroupUid(groupUid: UUID): OperationResult<Int> {
-        val getNotesResult = dao.getNotesByGroupUid(groupUid)
-        if (getNotesResult.isFailed) {
-            return getNotesResult.takeError()
-        }
-
-        val notes = getNotesResult.obj
-
-        return OperationResult.success(notes.size)
-    }
-
     override fun insert(note: Note): OperationResult<UUID> {
         return dao.insert(note)
     }

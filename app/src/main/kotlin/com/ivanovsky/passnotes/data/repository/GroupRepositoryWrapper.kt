@@ -27,11 +27,6 @@ class GroupRepositoryWrapper : RepositoryWrapperWithDatabase(), GroupRepository 
         return db.groupRepository.getChildGroups(parentGroupUid)
     }
 
-    override fun getChildGroupsCount(parentGroupUid: UUID): OperationResult<Int> {
-        val db = getDatabase() ?: return noDatabaseError()
-        return db.groupRepository.getChildGroupsCount(parentGroupUid)
-    }
-
     override fun insert(group: GroupEntity): OperationResult<UUID> {
         val db = getDatabase() ?: return noDatabaseError()
         return db.groupRepository.insert(group)

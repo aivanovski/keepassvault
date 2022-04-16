@@ -17,14 +17,14 @@ class GroupsCellModelFactory(
 ) : CellModelFactory<List<GroupsInteractor.Item>> {
 
     override fun createCellModels(data: List<GroupsInteractor.Item>): List<BaseCellModel> {
-        return data.mapNotNull { item ->
+        return data.map { item ->
             when (item) {
                 is GroupsInteractor.GroupItem -> {
                     GroupCellModel(
                         id = item.group.uid.toString(),
                         group = item.group,
-                        noteCount = item.noteCount,
-                        childGroupCount = item.childGroupCount
+                        noteCount = item.group.noteCount,
+                        childGroupCount = item.group.groupCount
                     )
                 }
                 is GroupsInteractor.NoteItem -> {
@@ -33,7 +33,6 @@ class GroupsCellModelFactory(
                         note = item.note
                     )
                 }
-                else -> null
             }
         }
     }

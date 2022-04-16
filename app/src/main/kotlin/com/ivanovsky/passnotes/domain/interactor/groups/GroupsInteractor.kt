@@ -73,28 +73,9 @@ class GroupsInteractor(
         val notes = notesResult.obj
 
         val items = mutableListOf<Item>()
-        for (group in groups) {
-            val groupUid = group.uid ?: continue
 
-            val noteCountResult = dbRepo.noteRepository.getNoteCountByGroupUid(groupUid)
-            if (noteCountResult.isFailed) {
-                return noteCountResult.takeError()
-            }
-
-            val childGroupCountResult = dbRepo.groupRepository.getChildGroupsCount(groupUid)
-            if (childGroupCountResult.isFailed) {
-                return childGroupCountResult.takeError()
-            }
-
-            val noteCount = noteCountResult.obj
-            val childGroupCount = childGroupCountResult.obj
-
-            items.add(GroupItem(group, noteCount, childGroupCount))
-        }
-
-        for (note in notes) {
-            items.add(NoteItem(note))
-        }
+        items.addAll(groups.map { GroupItem(it) })
+        items.addAll(notes.map { NoteItem(it) })
 
         return OperationResult.success(items)
     }
@@ -153,6 +134,6 @@ class GroupsInteractor(
     }
 
     sealed class Item
-    data class GroupItem(val group: Group, val noteCount: Int, val childGroupCount: Int) : Item()
+    data class GroupItem(val group: Group) : Item()
     data class NoteItem(val note: Note) : Item()
 }

@@ -21,8 +21,8 @@ class SearchCellModelFactory : CellModelFactory<List<Item>> {
                     GroupCellModel(
                         id = item.group.uid.toString(),
                         group = item.group,
-                        noteCount = item.noteCount,
-                        childGroupCount = item.childGroupCount
+                        noteCount = item.group.noteCount,
+                        childGroupCount = item.group.groupCount
                     )
                 }
             }

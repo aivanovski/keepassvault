@@ -24,9 +24,6 @@ public interface GroupRepository {
     OperationResult<List<Group>> getChildGroups(@NonNull UUID parentGroupUid);
 
     @NonNull
-    OperationResult<Integer> getChildGroupsCount(@NonNull UUID parentGroupUid);
-
-    @NonNull
     OperationResult<UUID> insert(@NonNull GroupEntity group);
 
     @NonNull

@@ -48,18 +48,6 @@ public class KeepassGroupRepository implements GroupRepository {
 
     @NonNull
     @Override
-    public OperationResult<Integer> getChildGroupsCount(@NonNull UUID parentGroupUid) {
-        OperationResult<List<Group>> childGroupsResult = getChildGroups(parentGroupUid);
-        if (childGroupsResult.isFailed()) {
-            return childGroupsResult.takeError();
-        }
-
-        List<Group> groups = childGroupsResult.getObj();
-        return childGroupsResult.takeStatusWith(groups.size());
-    }
-
-    @NonNull
-    @Override
     public OperationResult<UUID> insert(@NonNull GroupEntity group) {
         return dao.insert(group);
     }

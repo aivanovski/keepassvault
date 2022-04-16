@@ -45,31 +45,7 @@ class SearchInteractor(
 
             val items = mutableListOf<Item>()
 
-            for (group in groups) {
-                val groupUid = group.uid ?: continue
-
-                val noteCountResult = dbRepo.noteRepository.getNoteCountByGroupUid(groupUid)
-                if (noteCountResult.isFailed) {
-                    return@withContext noteCountResult.takeError()
-                }
-
-                val childGroupCountResult = dbRepo.groupRepository.getChildGroupsCount(groupUid)
-                if (childGroupCountResult.isFailed) {
-                    return@withContext childGroupCountResult.takeError()
-                }
-
-                val noteCount = noteCountResult.obj
-                val childGroupCount = childGroupCountResult.obj
-
-                items.add(
-                    Item.GroupItem(
-                        group = group,
-                        noteCount = noteCount,
-                        childGroupCount = childGroupCount
-                    )
-                )
-            }
-
+            items.addAll(groups.map { Item.GroupItem(it) })
             items.addAll(notes.map { Item.NoteItem(it) })
 
             OperationResult.success(items)
@@ -91,10 +67,6 @@ class SearchInteractor(
 
     sealed class Item {
         data class NoteItem(val note: Note) : Item()
-        data class GroupItem(
-            val group: Group,
-            val noteCount: Int,
-            val childGroupCount: Int
-        ) : Item()
+        data class GroupItem(val group: Group) : Item()
     }
 }

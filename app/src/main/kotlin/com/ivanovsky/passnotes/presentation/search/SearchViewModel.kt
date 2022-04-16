@@ -241,6 +241,6 @@ class SearchViewModel(
     }
 
     companion object {
-        private const val SEARCH_DELAY = 500L
+        private const val SEARCH_DELAY = 300L
     }
 }

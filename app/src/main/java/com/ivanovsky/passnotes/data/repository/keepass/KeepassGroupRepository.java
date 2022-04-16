@@ -1,10 +1,10 @@
 package com.ivanovsky.passnotes.data.repository.keepass;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
+import com.ivanovsky.passnotes.data.entity.GroupEntity;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
@@ -60,8 +60,8 @@ public class KeepassGroupRepository implements GroupRepository {
 
     @NonNull
     @Override
-    public OperationResult<UUID> insert(@NonNull Group group, @NonNull UUID parentGroupUid) {
-        return dao.insert(group, parentGroupUid);
+    public OperationResult<UUID> insert(@NonNull GroupEntity group) {
+        return dao.insert(group);
     }
 
     @NonNull
@@ -93,7 +93,7 @@ public class KeepassGroupRepository implements GroupRepository {
 
     @NonNull
     @Override
-    public OperationResult<Boolean> update(@NonNull Group group, @Nullable UUID newParentGroupUid) {
-        return dao.update(group, newParentGroupUid);
+    public OperationResult<Boolean> update(@NonNull GroupEntity group) {
+        return dao.update(group);
     }
 }

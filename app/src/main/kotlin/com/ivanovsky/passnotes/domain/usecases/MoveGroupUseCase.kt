@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.domain.usecases
 
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import kotlinx.coroutines.withContext
@@ -26,7 +27,12 @@ class MoveGroupUseCase(
            }
 
            val group = getGroupResult.obj
-           val moveResult = db.groupRepository.update(group, newParentGroupUid)
+           val newGroup = GroupEntity(
+               uid = groupUid,
+               parentUid = newParentGroupUid,
+               title = group.title
+           )
+           val moveResult = db.groupRepository.update(newGroup)
            if (moveResult.isFailed) {
                return@withContext moveResult.takeError();
            }

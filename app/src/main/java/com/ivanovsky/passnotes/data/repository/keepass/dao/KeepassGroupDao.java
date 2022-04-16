@@ -1,10 +1,9 @@
 package com.ivanovsky.passnotes.data.repository.keepass.dao;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.annimon.stream.Stream;
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_MOVE_GROUP_INSIDE_ITS_OWN_TREE;
+import com.ivanovsky.passnotes.data.entity.GroupEntity;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
@@ -25,6 +24,9 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_NEW_PARENT_GROUP;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_PARENT_GROUP;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_MOVE_GROUP_INSIDE_ITS_OWN_TREE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_PARENT_UID_IS_NULL;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNKNOWN_ERROR;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 
@@ -124,22 +126,32 @@ public class KeepassGroupDao implements GroupDao {
     }
 
     private Group createGroupFromKeepassGroup(SimpleGroup keepassGroup) {
-        return new Group(keepassGroup.getUuid(), keepassGroup.getName());
+        UUID parentGroupUid = null;
+        if (keepassGroup.getParent() != null) {
+            parentGroupUid = keepassGroup.getParent().getUuid();
+        }
+
+        return new Group(keepassGroup.getUuid(), parentGroupUid, keepassGroup.getName(),
+                keepassGroup.getGroupsCount(), keepassGroup.getEntriesCount());
     }
 
     @NonNull
     @Override
-    public OperationResult<UUID> insert(Group group, UUID parentGroupUid) {
-        return insert(group, parentGroupUid, true);
+    public OperationResult<UUID> insert(GroupEntity group) {
+        return insert(group, true);
     }
 
     @NonNull
-    public OperationResult<UUID> insert(Group group, UUID parentGroupUid, boolean doCommit) {
+    public OperationResult<UUID> insert(GroupEntity group, boolean doCommit) {
         SimpleDatabase keepassDb = db.getKeepassDatabase();
 
         SimpleGroup newGroup;
         synchronized (db.getLock()) {
-            SimpleGroup parentGroup = db.findGroupByUid(parentGroupUid);
+            if (group.getParentUid() == null) {
+                return OperationResult.error(newDbError(MESSAGE_PARENT_UID_IS_NULL));
+            }
+
+            SimpleGroup parentGroup = db.findGroupByUid(group.getParentUid());
             if (parentGroup == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
             }
@@ -207,11 +219,15 @@ public class KeepassGroupDao implements GroupDao {
 
     @NonNull
     @Override
-    public OperationResult<Boolean> update(@NonNull Group group, @Nullable UUID newParentGroupUid) {
+    public OperationResult<Boolean> update(@NonNull GroupEntity group) {
         UUID groupUid = group.getUid();
 
         synchronized (db.getLock()) {
-            if (newParentGroupUid == null) {
+            if (group.getParentUid() == null) {
+                if (group.getUid() == null) {
+                    return OperationResult.error(newDbError(MESSAGE_UID_IS_NULL));
+                }
+
                 SimpleGroup dbGroup = db.findGroupByUid(group.getUid());
                 if (dbGroup == null) {
                     return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
@@ -219,7 +235,7 @@ public class KeepassGroupDao implements GroupDao {
 
                 dbGroup.setName(group.getTitle());
             } else {
-                OperationResult<Boolean> isInsideItselfResult = isGroupInsideGroupTree(newParentGroupUid, groupUid);
+                OperationResult<Boolean> isInsideItselfResult = isGroupInsideGroupTree(group.getParentUid(), groupUid);
                 if (isInsideItselfResult.isFailed()) {
                     return isInsideItselfResult.takeError();
                 }
@@ -242,7 +258,7 @@ public class KeepassGroupDao implements GroupDao {
                 if (rootGroup.getUuid().equals(groupUid)) {
                     oldParentGroup = rootGroup;
                 }
-                if (rootGroup.getUuid().equals(newParentGroupUid)) {
+                if (rootGroup.getUuid().equals(group.getParentUid())) {
                     newParentGroup = rootGroup;
                 }
 
@@ -256,7 +272,7 @@ public class KeepassGroupDao implements GroupDao {
                     }
 
                     if (newParentGroup == null
-                            && currentGroup.getUuid().equals(newParentGroupUid)) {
+                            && currentGroup.getUuid().equals(group.getParentUid())) {
                         newParentGroup = currentGroup;
                     }
 

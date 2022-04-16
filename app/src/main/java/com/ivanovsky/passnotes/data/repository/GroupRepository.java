@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.data.repository;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.ivanovsky.passnotes.data.entity.Group;
+import com.ivanovsky.passnotes.data.entity.GroupEntity;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public interface GroupRepository {
     OperationResult<Integer> getChildGroupsCount(@NonNull UUID parentGroupUid);
 
     @NonNull
-    OperationResult<UUID> insert(@NonNull Group group, @NonNull UUID parentGroupUid);
+    OperationResult<UUID> insert(@NonNull GroupEntity group);
 
     @NonNull
     OperationResult<Boolean> remove(@NonNull UUID groupUid);
@@ -36,5 +36,5 @@ public interface GroupRepository {
     OperationResult<List<Group>> find(@NonNull String query);
 
     @NonNull
-    OperationResult<Boolean> update(@NonNull Group group, @Nullable UUID newParentGroupUid);
+    OperationResult<Boolean> update(@NonNull GroupEntity group);
 }

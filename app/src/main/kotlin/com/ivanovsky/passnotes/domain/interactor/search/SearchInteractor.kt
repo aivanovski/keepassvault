@@ -1,28 +1,28 @@
 package com.ivanovsky.passnotes.domain.interactor.search
 
-import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
+import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
 class SearchInteractor(
-    private val dbRepo: EncryptedDatabaseRepository,
     private val dispatchers: DispatcherProvider,
     private val getDbUseCase: GetDatabaseUseCase,
     private val getNoteUseCase: GetNoteUseCase,
     private val autofillUseCase: UpdateNoteWithAutofillDataUseCase,
-    private val lockUseCase: LockDatabaseUseCase
+    private val lockUseCase: LockDatabaseUseCase,
+    private val sortUseCase: SortGroupsAndNotesUseCase
 ) {
 
-    suspend fun find(query: String): OperationResult<List<Item>> {
+    suspend fun find(query: String): OperationResult<List<EncryptedDatabaseEntry>> {
         return withContext(dispatchers.IO) {
             val dbResult = getDbUseCase.getDatabase()
             if (dbResult.isFailed) {
@@ -40,17 +40,17 @@ class SearchInteractor(
                 return@withContext groupsResult.takeError()
             }
 
-            val notes = notesResult.obj
             val groups = groupsResult.obj
+            val notes = notesResult.obj
 
-            val items = mutableListOf<Item>()
-
-            items.addAll(groups.map { Item.GroupItem(it) })
-            items.addAll(notes.map { Item.NoteItem(it) })
-
-            OperationResult.success(items)
+            OperationResult.success(groups + notes)
         }
     }
+
+    suspend fun sort(
+        items: List<EncryptedDatabaseEntry>
+    ): List<EncryptedDatabaseEntry> =
+        sortUseCase.sortGroupsAndNotesAccordingToSettings(items)
 
     suspend fun getNoteByUid(noteUid: UUID): OperationResult<Note> =
         getNoteUseCase.getNoteByUid(noteUid)
@@ -63,10 +63,5 @@ class SearchInteractor(
 
     fun lockDatabase() {
         lockUseCase.lockIfNeed()
-    }
-
-    sealed class Item {
-        data class NoteItem(val note: Note) : Item()
-        data class GroupItem(val group: Group) : Item()
     }
 }

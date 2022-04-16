@@ -15,17 +15,15 @@ import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
-import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
-import com.ivanovsky.passnotes.domain.entity.SortDirection
-import com.ivanovsky.passnotes.domain.entity.SortType
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
+import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
@@ -50,10 +48,6 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewMo
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.groups.sorting.SortByDateStrategy
-import com.ivanovsky.passnotes.presentation.groups.sorting.SortByDateStrategy.Type
-import com.ivanovsky.passnotes.presentation.groups.sorting.SortByDefaultOrderStrategy
-import com.ivanovsky.passnotes.presentation.groups.sorting.SortByTitleStrategy
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
@@ -72,7 +66,6 @@ class GroupsViewModel(
     private val errorInteractor: ErrorInteractor,
     private val observerBus: ObserverBus,
     private val settings: Settings,
-    private val dispatchers: DispatcherProvider,
     private val resourceProvider: ResourceProvider,
     private val cellModelFactory: GroupsCellModelFactory,
     private val statusCellModelFactory: DatabaseStatusCellModelFactory,
@@ -215,12 +208,7 @@ class GroupsViewModel(
             val status = interactor.getDatabaseStatus()
 
             if (data.isSucceededOrDeferred) {
-                val dataItems = sortDataItems(
-                    data.obj,
-                    settings.sortType,
-                    settings.sortDirection,
-                    settings.isGroupsAtStartEnabled
-                )
+                val dataItems = interactor.sortData(data.obj)
                 currentDataItems = dataItems
 
                 if (dataItems.isNotEmpty()) {
@@ -721,37 +709,6 @@ class GroupsViewModel(
             else -> emptyList()
         }
     }
-
-    private suspend fun sortDataItems(
-        items: List<EncryptedDatabaseEntry>,
-        sortType: SortType,
-        direction: SortDirection,
-        isGroupsAtStart: Boolean
-    ): List<EncryptedDatabaseEntry> =
-        withContext(dispatchers.IO) {
-            when (sortType) {
-                SortType.DEFAULT -> SortByDefaultOrderStrategy().sort(
-                    items,
-                    direction,
-                    isGroupsAtStart = isGroupsAtStart
-                )
-                SortType.TITLE -> SortByTitleStrategy().sort(
-                    items,
-                    direction,
-                    isGroupsAtStart = isGroupsAtStart
-                )
-                SortType.CREATION_DATE -> SortByDateStrategy(Type.CREATION_DATE).sort(
-                    items,
-                    direction,
-                    isGroupsAtStart = isGroupsAtStart
-                )
-                SortType.MODIFICATION_DATE -> SortByDateStrategy(Type.MODIFICATION_DATE).sort(
-                    items,
-                    direction,
-                    isGroupsAtStart = isGroupsAtStart
-                )
-            }
-        }
 
     enum class OptionPanelState {
         HIDDEN,

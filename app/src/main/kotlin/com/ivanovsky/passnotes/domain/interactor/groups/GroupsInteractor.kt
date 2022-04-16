@@ -16,6 +16,7 @@ import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
+import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
@@ -27,7 +28,8 @@ class GroupsInteractor(
     private val getStatusUseCase: GetDatabaseStatusUseCase,
     private val addTemplatesUseCase: AddTemplatesUseCase,
     private val moveNoteUseCase: MoveNoteUseCase,
-    private val moveGroupUseCae: MoveGroupUseCase
+    private val moveGroupUseCae: MoveGroupUseCase,
+    private val sortUseCase: SortGroupsAndNotesUseCase
 ) {
 
     suspend fun getTemplates(): OperationResult<List<Template>> =
@@ -71,6 +73,11 @@ class GroupsInteractor(
 
         return OperationResult.success(groups + notes)
     }
+
+    suspend fun sortData(
+        data: List<EncryptedDatabaseEntry>
+    ): List<EncryptedDatabaseEntry> =
+        sortUseCase.sortGroupsAndNotesAccordingToSettings(data)
 
     fun removeGroup(groupUid: UUID): OperationResult<Unit> {
         val removeResult = dbRepo.groupRepository.remove(groupUid)

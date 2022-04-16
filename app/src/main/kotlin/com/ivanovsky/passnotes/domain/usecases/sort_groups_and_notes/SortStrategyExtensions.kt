@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.presentation.groups.sorting
+package com.ivanovsky.passnotes.domain.usecases.sort_groups_and_notes
 
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.Group

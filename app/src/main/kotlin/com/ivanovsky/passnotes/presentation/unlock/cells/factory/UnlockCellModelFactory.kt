@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.unlock.cells.factory
 
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
@@ -20,7 +21,9 @@ class UnlockCellModelFactory(
         isNextButtonVisible: Boolean,
         onFileClicked: (file: FileDescriptor) -> Unit
     ): DatabaseCellModel {
-        val isStatusVisible = (syncState?.status != SyncStatus.CONFLICT)
+        val fsType = file.fsAuthority.type
+        val isStatusVisible =
+            (fsType != FSType.SAF && fsType != FSType.REGULAR_FS && syncState?.status != SyncStatus.CONFLICT)
 
         return DatabaseCellModel(
             id = file.uid,

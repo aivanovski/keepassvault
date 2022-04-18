@@ -76,9 +76,10 @@
                         style="@style/Material.SecondaryText.SingleLine"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/storage_type"
+                        android:text="@{String.format(@string/text_with_colon, @string/storage_type)}"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Storage type:" />
 
                     <TextView
                         android:id="@+id/storageType"

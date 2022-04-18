@@ -83,6 +83,7 @@
     <string name="error_offline_mode">Error, offline mode</string>
     <string name="auth_error_offline_mode">Unauthorised, offline mode</string>
     <string name="unauthorised">Unauthorised</string>
+    <string name="change">Change</string>
 
     <!-- New database screen -->
     <string name="new_database">New database</string>

@@ -6,6 +6,7 @@ import com.github.terrakok.cicerone.Cicerone
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
+import com.ivanovsky.passnotes.data.crypto.DataCipherProviderImpl
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
@@ -108,7 +109,8 @@ object KoinModule {
         module {
             single { loggerInteractor }
             single { ResourceProvider(get()) }
-            single { SettingsImpl(get(), get()) as Settings }
+            single<Settings> { SettingsImpl(get(), get()) }
+            single<DataCipherProvider> { DataCipherProviderImpl(get()) }
             single { FileHelper(get(), get()) }
             single { PermissionHelper(get()) }
             single { ErrorInteractor(get()) }
@@ -119,7 +121,6 @@ object KoinModule {
             single { DateFormatProvider(get()) }
             single { NoteDiffer() }
             single { provideOkHttp() }
-            single { DataCipherProvider(get()) }
             single { SelectionHolder() }
 
             // Database
@@ -129,7 +130,7 @@ object KoinModule {
 
             // Files, Keepass
             single { FileSystemResolver(get(), get(), get(), get(), get(), get()) }
-            single { KeepassDatabaseRepository(get(), get(), get(), get()) as EncryptedDatabaseRepository }
+            single<EncryptedDatabaseRepository> { KeepassDatabaseRepository(get(), get(), get(), get()) }
 
             // Use Cases
             single { GetDebugCredentialsUseCase() }

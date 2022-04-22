@@ -46,7 +46,7 @@ class FSAuthorityTypeConverter(
     }
 
     private fun parseEncodedCredentials(encodedText: String): ServerCredentials? {
-        val decodedText = cipherProvider.cipher.decode(encodedText)
+        val decodedText = cipherProvider.getCipher().decode(encodedText)
 
         try {
             val credsObj = JSONObject(decodedText ?: encodedText)
@@ -72,14 +72,12 @@ class FSAuthorityTypeConverter(
         creds.put(PASSWORD, credentials.password)
 
         val text = creds.toString()
-        val encodedText = cipherProvider.cipher.encode(text)?.toString()
+        val encodedText = cipherProvider.getCipher().encode(text)
 
         return encodedText ?: text
     }
 
     companion object {
-        private val TAG = FSAuthorityTypeConverter::class.simpleName
-
         private const val CREDENTIALS = "credentials"
         private const val SERVER_URL = "serverUrl"
         private const val USERNAME = "username"

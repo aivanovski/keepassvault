@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
+import com.ivanovsky.passnotes.TestData.PLAIN_TEXT
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.ANDROID_KEY_STORE
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.KEY_ALIAS
 import com.ivanovsky.passnotes.data.crypto.entity.CipherTransformation.AES_CBC_PKCS5
 import com.ivanovsky.passnotes.data.crypto.entity.CipherTransformation.AES_CBC_PKCS7
-import com.ivanovsky.passnotes.data.crypto.entity.SecretData
 import com.ivanovsky.passnotes.data.crypto.keyprovider.FileSecretKeyProvider
 import com.ivanovsky.passnotes.data.crypto.keyprovider.FileSecretKeyProvider.Companion.KEY_STORE_FILE_NAME
 import com.ivanovsky.passnotes.data.crypto.keyprovider.KeyStoreSecretKeyProvider
@@ -25,23 +25,23 @@ import org.junit.runner.RunWith
 class DataCipherTest {
 
     private lateinit var context: Context
-    private lateinit var ciphers: List<DataCipher>
+    private lateinit var ciphers: List<DataCipherImpl>
 
     private lateinit var fileKeyProvider: SecretKeyProvider
-    private lateinit var fileCipher: DataCipher
+    private lateinit var fileCipher: DataCipherImpl
 
     private lateinit var keyStoreKeyProvider: SecretKeyProvider
-    private lateinit var keyStoreCipher: DataCipher
+    private lateinit var keyStoreCipher: DataCipherImpl
 
     @Before
     fun setup() {
         context = InstrumentationRegistry.getInstrumentation().targetContext
 
         keyStoreKeyProvider = KeyStoreSecretKeyProvider()
-        keyStoreCipher = DataCipher(keyStoreKeyProvider, AES_CBC_PKCS7)
+        keyStoreCipher = DataCipherImpl(keyStoreKeyProvider, AES_CBC_PKCS7)
 
         fileKeyProvider = FileSecretKeyProvider(context)
-        fileCipher = DataCipher(fileKeyProvider, AES_CBC_PKCS5)
+        fileCipher = DataCipherImpl(fileKeyProvider, AES_CBC_PKCS5)
 
         ciphers = listOf(keyStoreCipher, fileCipher)
 
@@ -73,17 +73,14 @@ class DataCipherTest {
     @Test
     fun keyShouldBeLoaded() {
         // Arrange
-        val storePreEncoded = DataCipher(KeyStoreSecretKeyProvider(), AES_CBC_PKCS7)
-            .encode(PLAIN_TEXT)
-            ?: throw IllegalStateException()
-
-        val filePreEncoded = DataCipher(FileSecretKeyProvider(context), AES_CBC_PKCS5)
-            .encode(PLAIN_TEXT)
-            ?: throw IllegalStateException()
+        val storePreEncoded = DataCipherImpl(KeyStoreSecretKeyProvider(), AES_CBC_PKCS7).encode(PLAIN_TEXT)
+        val filePreEncoded = DataCipherImpl(FileSecretKeyProvider(context), AES_CBC_PKCS5).encode(PLAIN_TEXT)
         assertThat(keyStoreKeyProvider.isKeyExist()).isTrue()
         assertThat(fileKeyProvider.isKeyExist()).isTrue()
 
         // Act
+        requireNotNull(storePreEncoded)
+        requireNotNull(filePreEncoded)
         val keyStoreCipherResult = keyStoreCipher.decode(storePreEncoded)
         val fileCipherResult = fileCipher.decode(filePreEncoded)
 
@@ -99,8 +96,8 @@ class DataCipherTest {
         assertThat(fileKeyProvider.isKeyExist()).isFalse()
 
         // Act
-        val keyStoreCipherResult = keyStoreCipher.encode(PLAIN_TEXT)?.toString()
-        val fileCipherResult = fileCipher.encode(PLAIN_TEXT)?.toString()
+        val keyStoreCipherResult = keyStoreCipher.encode(PLAIN_TEXT)
+        val fileCipherResult = fileCipher.encode(PLAIN_TEXT)
 
         // Assert
         assertThat(keyStoreCipherResult).isNotEmpty()
@@ -165,18 +162,11 @@ class DataCipherTest {
     }
 
     private fun DataCipher.encodeAndDecode(text: String): String? {
-        val encoded = encode(text)?.toString() ?: return null
-
-        val encodedData = SecretData.parse(encoded) ?: return null
-
-        return decode(encodedData)
+        val encoded = encode(text) ?: return null
+        return decode(encoded)
     }
 
     private fun getKeyFile(): File {
         return File(context.filesDir, KEY_STORE_FILE_NAME)
-    }
-
-    companion object {
-        private const val PLAIN_TEXT = "abc123_000xzyDEE@#-+=frt|/.,"
     }
 }

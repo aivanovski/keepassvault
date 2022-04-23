@@ -3,12 +3,14 @@ package com.ivanovsky.passnotes.extensions
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.domain.ResourceProvider
 
 fun FileDescriptor.toUsedFile(
     addedTime: Long,
-    lastAccessTime: Long? = null
+    lastAccessTime: Long? = null,
+    keyType: KeyType = KeyType.PASSWORD
 ): UsedFile =
     UsedFile(
         fsAuthority = fsAuthority,
@@ -16,7 +18,8 @@ fun FileDescriptor.toUsedFile(
         fileUid = uid,
         fileName = name,
         addedTime = addedTime,
-        lastAccessTime = lastAccessTime
+        lastAccessTime = lastAccessTime,
+        keyType = keyType
     )
 
 fun FileDescriptor.formatReadablePath(resourceProvider: ResourceProvider): String {

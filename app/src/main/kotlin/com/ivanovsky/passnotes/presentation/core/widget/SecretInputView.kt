@@ -40,9 +40,9 @@ class SecretInputView(
             setTextToView(value, isNotifyListener = true)
         }
 
-    var hint: String = EMPTY
+    var hint: String? = null
         set(value) {
-            setHintToView(value)
+            setHintToView(value ?: EMPTY)
             field = value
         }
 

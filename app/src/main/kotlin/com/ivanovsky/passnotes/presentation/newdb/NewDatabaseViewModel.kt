@@ -7,7 +7,7 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.FSType
-import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -74,7 +74,7 @@ class NewDatabaseViewModel(
         doneButtonVisibility.value = false
         screenState.value = ScreenState.loading()
 
-        val dbKey = KeepassDatabaseKey(password)
+        val dbKey = PasswordKeepassKey(password)
         val dbFile = createDbFile()
 
         viewModelScope.launch {

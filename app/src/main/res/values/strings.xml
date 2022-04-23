@@ -84,6 +84,9 @@
     <string name="auth_error_offline_mode">Unauthorised, offline mode</string>
     <string name="unauthorised">Unauthorised</string>
     <string name="change">Change</string>
+    <string name="unlock_type">Unlock type</string>
+    <string name="key_file">Key file</string>
+    <string name="key_file_is_not_selected">Key file is not selected</string>
 
     <!-- New database screen -->
     <string name="new_database">New database</string>

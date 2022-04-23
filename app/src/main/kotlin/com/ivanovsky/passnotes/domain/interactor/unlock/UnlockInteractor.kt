@@ -15,12 +15,16 @@ import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
+import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
-import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
+import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
+import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
+import com.ivanovsky.passnotes.domain.usecases.GetUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
@@ -29,11 +33,13 @@ import kotlinx.coroutines.withContext
 class UnlockInteractor(
     private val fileRepository: UsedFileRepository,
     private val dbRepo: EncryptedDatabaseRepository,
-    private val dispatchers: DispatcherProvider,
+    private val fileSystemResolver: FileSystemResolver,
     private val getFilesUseCase: GetRecentlyOpenedFilesUseCase,
     private val removeFileUseCase: RemoveUsedFileUseCase,
     private val autofillUseCase: FindNoteForAutofillUseCase,
     private val syncUseCases: SyncUseCases,
+    private val getUsedFileUseCase: GetUsedFileUseCase,
+    private val dispatchers: DispatcherProvider,
     private val settings: Settings
 ) {
 
@@ -50,7 +56,7 @@ class UnlockInteractor(
         return closeResult.takeStatusWith(Unit)
     }
 
-    suspend fun getRecentlyOpenedFiles(): OperationResult<List<FileDescriptor>> =
+    suspend fun getRecentlyOpenedFiles(): OperationResult<List<UsedFile>> =
         getFilesUseCase.getRecentlyOpenedFiles()
 
     suspend fun removeFromUsedFiles(file: FileDescriptor): OperationResult<Boolean> =
@@ -69,7 +75,7 @@ class UnlockInteractor(
         syncUseCases.resolveConflict(file, resolutionStrategy)
 
     suspend fun openDatabase(
-        key: KeepassDatabaseKey,
+        key: EncryptedDatabaseKey,
         file: FileDescriptor
     ): OperationResult<Boolean> =
         withContext(dispatchers.IO) {
@@ -101,7 +107,7 @@ class UnlockInteractor(
             }
 
             if (result.isSucceededOrDeferred) {
-                updateFileAccessTime(file)
+                updateUsedFile(file, key)
             }
 
             result.takeStatusWith(true)
@@ -112,12 +118,32 @@ class UnlockInteractor(
     ): OperationResult<Note?> =
         autofillUseCase.findNoteForAutofill(structure)
 
-    private fun updateFileAccessTime(file: FileDescriptor) {
+    private fun updateUsedFile(file: FileDescriptor, key: EncryptedDatabaseKey) {
         val usedFile = fileRepository.findByUid(file.uid, file.fsAuthority)
         if (usedFile != null) {
-            val updatedFile = usedFile.copy(
-                lastAccessTime = System.currentTimeMillis()
-            )
+            val updatedFile = when (key) {
+                is PasswordKeepassKey -> {
+                    usedFile.copy(
+                        lastAccessTime = System.currentTimeMillis(),
+                        keyType = key.type,
+                        keyFileFsAuthority = null,
+                        keyFilePath = null,
+                        keyFileUid = null,
+                        keyFileName = null
+                    )
+                }
+                is FileKeepassKey -> {
+                    usedFile.copy(
+                        lastAccessTime = System.currentTimeMillis(),
+                        keyType = key.type,
+                        keyFileFsAuthority = key.file.fsAuthority,
+                        keyFilePath = key.file.path,
+                        keyFileUid = key.file.uid,
+                        keyFileName = key.file.name
+                    )
+                }
+                else -> throw IllegalStateException()
+            }
 
             fileRepository.update(updatedFile)
         }
@@ -129,18 +155,13 @@ class UnlockInteractor(
         newFsAuthority: FSAuthority
     ): OperationResult<UsedFile> =
         withContext(dispatchers.IO) {
-            val usedFile = fileRepository.findByUid(fileUid, oldFsAuthority)
-                ?: return@withContext OperationResult.error(
-                    newDbError(
-                        String.format(
-                            OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
-                            UsedFile::class.simpleName,
-                            fileUid
-                        )
-                    )
-                )
+            val getFileResult = getUsedFileUseCase.getUsedFile(fileUid, oldFsAuthority)
+            if (getFileResult.isFailed) {
+                return@withContext getFileResult.takeError()
+            }
 
-            val updatedFile = usedFile.copy(
+            val file = getFileResult.obj
+            val updatedFile = file.copy(
                 fsAuthority = newFsAuthority
             )
 
@@ -169,7 +190,19 @@ class UnlockInteractor(
         return result
     }
 
-    companion object {
-        private val TAG = UnlockInteractor::class.simpleName
-    }
+    suspend fun getUsedFile(
+        fileUid: String,
+        fsAuthority: FSAuthority
+    ): OperationResult<UsedFile> =
+        getUsedFileUseCase.getUsedFile(fileUid, fsAuthority)
+
+    suspend fun getFile(
+        path: String,
+        fsAuthority: FSAuthority
+    ): OperationResult<FileDescriptor> =
+        withContext(dispatchers.IO) {
+            fileSystemResolver
+                .resolveProvider(fsAuthority)
+                .getFile(path, FSOptions.READ_ONLY)
+        }
 }

@@ -16,24 +16,38 @@ class FSAuthorityTypeConverter(
 ) {
 
     @TypeConverter
-    fun fromDatabaseValue(value: String): FSAuthority {
-        val obj = JSONObject(value)
-
-        val creds = obj.optString(CREDENTIALS)
-        val credentials = if (creds.isNotEmpty()) {
-            parseEncodedCredentials(creds)
-        } else {
-            null
+    fun fromDatabaseValue(value: String?): FSAuthority? {
+        if (value.isNullOrEmpty()) {
+            return null
         }
 
-        return FSAuthority(
-            credentials = credentials,
-            type = FSType.findByValue(obj.optString(FS_TYPE)) ?: FSType.REGULAR_FS
-        )
+        try {
+            val obj = JSONObject(value)
+
+            val creds = obj.optString(CREDENTIALS)
+            val credentials = if (creds.isNotEmpty()) {
+                parseEncodedCredentials(creds)
+            } else {
+                null
+            }
+
+            return FSAuthority(
+                credentials = credentials,
+                type = FSType.findByValue(obj.optString(FS_TYPE)) ?: FSType.REGULAR_FS
+            )
+        } catch (e: JSONException) {
+            Timber.e("Failed to parse ${FSAuthority::class.simpleName} object: exception=%s", e)
+            Timber.d(e)
+            return null
+        }
     }
 
     @TypeConverter
-    fun toDatabaseValue(fsAuthority: FSAuthority): String {
+    fun toDatabaseValue(fsAuthority: FSAuthority?): String? {
+        if (fsAuthority == null) {
+            return null
+        }
+
         val obj = JSONObject()
 
         if (fsAuthority.credentials != null) {
@@ -57,7 +71,7 @@ class FSAuthorityTypeConverter(
                 password = credsObj.optString(PASSWORD)
             )
         } catch (e: JSONException) {
-            Timber.e("Unable to parse decoded credentials: exception=%s", e)
+            Timber.e("Failed to parse ${ServerCredentials::class.simpleName} object: exception=%s", e)
             Timber.d(e)
         }
 

@@ -47,6 +47,7 @@ import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
+import com.ivanovsky.passnotes.domain.usecases.GetUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.IsDatabaseOpenedUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
@@ -150,10 +151,11 @@ object KoinModule {
             single { UpdateNoteUseCase(get(), get(), get()) }
             single { RemoveUsedFileUseCase(get(), get()) }
             single { SortGroupsAndNotesUseCase(get(), get()) }
+            single { GetUsedFileUseCase(get(), get()) }
 
             // Interactors
             single { FilePickerInteractor(get()) }
-            single { UnlockInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
+            single { UnlockInteractor(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
             single { StorageListInteractor(get(), get(), get()) }
             single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get(), get()) }
@@ -163,7 +165,7 @@ object KoinModule {
             single { NoteEditorInteractor(get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
             single { DatabaseLockInteractor(get(), get(), get()) }
-            single { SelectDatabaseInteractor(get(), get(), get()) }
+            single { SelectDatabaseInteractor(get(), get(), get(), get()) }
             single { SearchInteractor(get(), get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
             single { DatabaseSettingsInteractor(get(), get()) }
@@ -220,7 +222,7 @@ object KoinModule {
             viewModel { DatabaseSettingsViewModel(get(), get()) }
             viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
             viewModel { SortAndViewDialogViewModel(get()) }
-            factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             factory { NavigationMenuViewModel(get()) }
             factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }
         }

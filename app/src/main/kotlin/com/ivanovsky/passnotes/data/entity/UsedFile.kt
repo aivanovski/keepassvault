@@ -3,8 +3,11 @@ package com.ivanovsky.passnotes.data.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import com.ivanovsky.passnotes.data.repository.db.converters.KeyTypeConverter
 
 @Entity(tableName = "used_file")
+@TypeConverters(KeyTypeConverter::class)
 data class UsedFile(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
@@ -26,5 +29,20 @@ data class UsedFile(
     val addedTime: Long,
 
     @ColumnInfo(name = "last_access_time")
-    val lastAccessTime: Long? = null
+    val lastAccessTime: Long? = null,
+
+    @ColumnInfo(name = "key_type")
+    val keyType: KeyType,
+
+    @ColumnInfo(name = "key_file_fs_authority")
+    val keyFileFsAuthority: FSAuthority? = null,
+
+    @ColumnInfo(name = "key_file_path")
+    val keyFilePath: String? = null,
+
+    @ColumnInfo(name = "key_file_uid")
+    val keyFileUid: String? = null,
+
+    @ColumnInfo(name = "key_file_name")
+    val keyFileName: String? = null
 )

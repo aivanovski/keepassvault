@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
 import com.ivanovsky.passnotes.data.entity.FSType
+import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.ServerCredentials
 import com.ivanovsky.passnotes.dateInMillis
 import com.ivanovsky.passnotes.initInMemoryDatabase
@@ -116,7 +117,8 @@ class UsedFileDaoTest {
             filePath = "/firsFilePath",
             fileUid = "firstFileUir",
             fileName = "firstFileName",
-            addedTime = dateInMillis(2018, 1, 1)
+            addedTime = dateInMillis(2018, 1, 1),
+            keyType = KeyType.PASSWORD
         )
 
         private val SECOND_FILE = UsedFile(
@@ -133,7 +135,8 @@ class UsedFileDaoTest {
             fileUid = "secondFileUId",
             fileName = "secondFileName",
             addedTime = dateInMillis(2018, 2, 2),
-            lastAccessTime = dateInMillis(2018, 3, 3)
+            lastAccessTime = dateInMillis(2018, 3, 3),
+            keyType = KeyType.KEY_FILE
         )
     }
 }

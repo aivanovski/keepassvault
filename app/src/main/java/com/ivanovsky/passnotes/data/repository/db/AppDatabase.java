@@ -15,7 +15,7 @@ import com.ivanovsky.passnotes.data.entity.UsedFile;
                 UsedFile.class,
                 RemoteFile.class
         },
-        version = 1
+        version = 2
 )
 @TypeConverters(FSAuthorityTypeConverter.class)
 public abstract class AppDatabase extends RoomDatabase {

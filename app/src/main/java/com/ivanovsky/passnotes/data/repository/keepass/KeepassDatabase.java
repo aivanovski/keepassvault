@@ -90,7 +90,14 @@ public class KeepassDatabase implements EncryptedDatabase {
             if (key instanceof DefaultDatabaseKey) {
                 db = SimpleDatabase.loadXml(stream);
             } else {
-                db = SimpleDatabase.load(new KdbxCreds(key.getKey()), stream);
+                OperationResult<byte[]> getKeyResult = key.getKey();
+                if (getKeyResult.isFailed()) {
+                    return getKeyResult.takeError();
+                }
+
+                byte[] keyBytes = getKeyResult.getObj();
+
+                db = SimpleDatabase.load(new KdbxCreds(keyBytes), stream);
             }
         } catch (Exception e) {
             Timber.d(e);
@@ -235,7 +242,12 @@ public class KeepassDatabase implements EncryptedDatabase {
         OperationResult<Boolean> result = new OperationResult<>();
 
         synchronized (lock) {
-            Credentials credentials = new KdbxCreds(key.getKey());
+            OperationResult<byte[]> getKeyResult = key.getKey();
+            if (getKeyResult.isFailed()) {
+                return getKeyResult.takeError();
+            }
+
+            byte[] keyBytes = getKeyResult.getObj();
 
             FileDescriptor updatedFile = file.copy(file.getFsAuthority(),
                     file.getPath(),
@@ -257,7 +269,7 @@ public class KeepassDatabase implements EncryptedDatabase {
                 out = outResult.getObj();
 
                 // method 'SimpleDatabase.save' closes output stream after work is done
-                db.save(credentials, out);
+                db.save(new KdbxCreds(keyBytes), out);
 
                 if (outResult.isDeferred()) {
                     result.setDeferredObj(true);

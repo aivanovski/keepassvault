@@ -4,12 +4,14 @@ import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 
-class DefaultDatabaseKey : EncryptedDatabaseKey {
+data class PasswordKeepassKey(
+    private val password: String
+) : EncryptedDatabaseKey {
 
     override val type: KeyType
-        get() = throw IllegalStateException()
+        get() = KeyType.PASSWORD
 
     override fun getKey(): OperationResult<ByteArray> {
-        throw IllegalStateException()
+        return OperationResult.success(password.toByteArray())
     }
 }

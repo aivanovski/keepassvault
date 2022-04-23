@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.extensions
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.UsedFile
 
-fun UsedFile.toFileDescriptor(): FileDescriptor =
+fun UsedFile.getFileDescriptor(): FileDescriptor =
     FileDescriptor(
         fsAuthority = fsAuthority,
         path = filePath,
@@ -13,3 +13,22 @@ fun UsedFile.toFileDescriptor(): FileDescriptor =
         isRoot = false,
         modified = null
     )
+
+fun UsedFile.getKeyFileDescriptor(): FileDescriptor? {
+    return if (keyFileFsAuthority != null &&
+        keyFilePath != null &&
+        keyFileUid != null &&
+        keyFileName != null
+    ) {
+        FileDescriptor(
+            fsAuthority = keyFileFsAuthority,
+            path = keyFilePath,
+            uid = keyFileUid,
+            name = keyFileName,
+            isDirectory = false,
+            isRoot = false
+        )
+    } else {
+        null
+    }
+}

@@ -5,6 +5,8 @@
 
     <data>
 
+        <import type="com.ivanovsky.passnotes.data.entity.KeyType" />
+
         <variable
             name="viewModel"
             type="com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel" />
@@ -19,8 +21,8 @@
             android:id="@+id/errorPanelView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:onButtonClicked="@{() -> viewModel.onErrorPanelButtonClicked()}"
             app:layout_constraintTop_toTopOf="parent"
+            app:onButtonClicked="@{() -> viewModel.onErrorPanelButtonClicked()}"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
@@ -41,52 +43,66 @@
             app:viewModels="@{viewModel.fileCellViewModels}"
             app:viewTypes="@{viewModel.fileCellTypes}" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/passwordLayout"
+        <com.ivanovsky.passnotes.presentation.core.widget.MaterialSpinner
+            android:id="@+id/keyTypeSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/element_margin"
+            android:layout_marginStart="@dimen/element_margin"
             android:layout_marginTop="@dimen/element_margin"
-            android:layout_marginRight="@dimen/element_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            app:hint="@{@string/unlock_type}"
+            app:item="@{viewModel.selectedKeyTypeTitle}"
+            app:items="@{viewModel.allKeyTypes}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/databaseFileContainer"
+            app:onItemSelected="@{(item) -> viewModel.onKeyTypeSelected(item)}"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <LinearLayout
+            android:id="@+id/keyInputLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:layout_marginTop="@dimen/element_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/keyTypeSpinner"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}">
 
-            <com.google.android.material.textfield.TextInputEditText
+            <com.ivanovsky.passnotes.presentation.core.widget.SecretInputView
                 android:id="@+id/password"
-                style="@style/Material.EditText.Password"
+                hint="@{@string/password}"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/password"
-                android:text="@={viewModel.password}"
-                app:textTransformationMethod="@{viewModel.passwordTransformationMethod}" />
+                app:text="@={viewModel.password}"
+                app:visible="@{viewModel.selectedKeyType == KeyType.PASSWORD}" />
 
-        </com.google.android.material.textfield.TextInputLayout>
+            <com.ivanovsky.passnotes.presentation.core.widget.SelectorView
+                android:id="@+id/keyFileSelector"
+                hint="@{@string/key_file}"
+                onChangeClicked="@{() -> viewModel.onChangeKeyFileButtonClicked()}"
+                text="@{viewModel.selectedKeyFileTitle}"
+                textColor="@{viewModel.selectedKeyFileTitleColor}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:visible="@{viewModel.selectedKeyType == KeyType.KEY_FILE}" />
 
-        <ImageButton
-            android:id="@+id/visibilityButton"
-            style="@style/Material.BorderlessButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="@{() -> viewModel.onPasswordVisibilityButtonClicked() }"
-            app:layout_constraintBottom_toBottomOf="@id/passwordLayout"
-            app:layout_constraintEnd_toEndOf="@id/passwordLayout"
-            app:layout_constraintTop_toTopOf="@id/passwordLayout"
-            app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}"
-            app:srcCompat="@drawable/ic_eye_grey_600_24dp" />
+        </LinearLayout>
 
         <Button
             android:id="@+id/unlockButton"
             style="@style/Material.ContainedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/element_margin"
+            android:layout_marginStart="@dimen/element_margin"
             android:layout_marginTop="@dimen/element_margin"
-            android:layout_marginRight="@dimen/element_margin"
+            android:layout_marginEnd="@dimen/element_margin"
             android:onClick="@{() -> viewModel.onUnlockButtonClicked()}"
             android:text="@string/unlock"
-            app:layout_constraintTop_toBottomOf="@id/passwordLayout"
+            app:layout_constraintTop_toBottomOf="@id/keyInputLayout"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
@@ -96,13 +112,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/material_fab_margin"
-            android:layout_marginRight="@dimen/material_fab_margin"
             android:layout_marginBottom="@dimen/half_margin"
+            app:fabItems="@{viewModel.fabItems}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:visible="@{viewModel.isFabButtonVisible}"
-            app:fabItems="@{viewModel.fabItems}"
-            app:onFabItemClicked="@{viewModel.fabClickListener}" />
+            app:onFabItemClicked="@{viewModel.fabClickListener}"
+            app:visible="@{viewModel.isFabButtonVisible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

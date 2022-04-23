@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.domain.interactor.settings.database
 
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseConfig
-import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import kotlinx.coroutines.withContext
@@ -42,8 +42,8 @@ class DatabaseSettingsInteractor(
             }
 
             getDb.obj.changeKey(
-                KeepassDatabaseKey(oldPassword),
-                KeepassDatabaseKey(newPassword)
+                PasswordKeepassKey(oldPassword),
+                PasswordKeepassKey(newPassword)
             )
         }
     }

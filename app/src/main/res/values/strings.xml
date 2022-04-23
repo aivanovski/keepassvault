@@ -9,8 +9,8 @@
     <string name="no_items">No items</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
-    <string name="text_with_colon">%s:</string>
-    <string name="text_with_dots">%s...</string>
+    <string name="text_with_colon" translatable="false">%s:</string>
+    <string name="text_with_dots" translatable="false">%s...</string>
     <string name="remove_confirmation_message">Are you sure want to remove %1$s "%2$s" ?</string>
     <string name="status_offline_mode">Displaying data in Offline mode</string>
     <string name="status_read_only_mode">Displaying data in Read-Only mode</string>
@@ -83,6 +83,10 @@
     <string name="error_offline_mode">Error, offline mode</string>
     <string name="auth_error_offline_mode">Unauthorised, offline mode</string>
     <string name="unauthorised">Unauthorised</string>
+    <string name="change">Change</string>
+    <string name="unlock_type">Unlock type</string>
+    <string name="key_file">Key file</string>
+    <string name="key_file_is_not_selected">Key file is not selected</string>
 
     <!-- New database screen -->
     <string name="new_database">New database</string>
@@ -92,7 +96,7 @@
     <string name="field_contains_illegal_character">Field contains illegal character</string>
     <string name="you_entered_two_different_passwords_please_try_again">You entered two different passwords. Please try again.</string>
     <string name="this_field_should_match_password">This field should match password</string>
-    <string name="storage_type">Storage type:</string>
+    <string name="storage_type">Storage type</string>
     <string name="not_selected">Not selected</string>
     <string name="dot_kdbx">.kdbx</string>
     <string name="private_storage">Private storage</string>

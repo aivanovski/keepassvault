@@ -5,18 +5,32 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncState
+import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
+import com.ivanovsky.passnotes.extensions.getFileDescriptor
+import kotlinx.coroutines.withContext
 
 class SelectDatabaseInteractor(
     private val getFilesUseCase: GetRecentlyOpenedFilesUseCase,
     private val removeFileUseCase: RemoveUsedFileUseCase,
-    private val syncUseCases: SyncUseCases
+    private val syncUseCases: SyncUseCases,
+    private val dispatchers: DispatcherProvider
 ) {
 
     suspend fun getRecentlyOpenedFiles(): OperationResult<List<FileDescriptor>> =
-        getFilesUseCase.getRecentlyOpenedFiles()
+        withContext(dispatchers.IO) {
+            val getFilesResult = getFilesUseCase.getRecentlyOpenedFiles()
+            if (getFilesResult.isFailed) {
+                return@withContext getFilesResult.takeError()
+            }
+
+            val files = getFilesResult.obj
+                .map { it.getFileDescriptor() }
+
+            OperationResult.success(files)
+        }
 
     suspend fun removeFromUsedFiles(file: FileDescriptor): OperationResult<Boolean> =
         removeFileUseCase.removeUsedFile(file.uid, file.fsAuthority)

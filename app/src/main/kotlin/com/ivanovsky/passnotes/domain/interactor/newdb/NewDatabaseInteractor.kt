@@ -7,7 +7,7 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
-import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.extensions.toUsedFile
@@ -22,7 +22,7 @@ class NewDatabaseInteractor(
 ) {
 
     suspend fun createNewDatabaseAndOpen(
-        key: KeepassDatabaseKey,
+        key: PasswordKeepassKey,
         file: FileDescriptor,
         isAddTemplates: Boolean
     ): OperationResult<Boolean> {

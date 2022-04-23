@@ -11,7 +11,7 @@ import com.ivanovsky.passnotes.data.repository.GroupRepository
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
-import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseKey
+import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
@@ -153,7 +153,7 @@ class DebugMenuInteractor(
         val dbFile = fileHelper.generateDestinationFileForRemoteFile()
         if (dbFile != null) {
             val dbDescriptor = FileDescriptor.fromRegularFile(dbFile)
-            val key = KeepassDatabaseKey(password)
+            val key = PasswordKeepassKey(password)
 
             val creationResult = dbRepository.createNew(key, dbDescriptor, false)
             if (creationResult.isSucceededOrDeferred) {
@@ -229,7 +229,7 @@ class DebugMenuInteractor(
     fun openDbFile(password: String, file: File): OperationResult<Boolean> {
         val result = OperationResult<Boolean>()
 
-        val key = KeepassDatabaseKey(password)
+        val key = PasswordKeepassKey(password)
 
         val openResult = dbRepository.open(key, FileDescriptor.fromRegularFile(file), FSOptions.DEFAULT)
         if (openResult.isSucceededOrDeferred) {

@@ -1,13 +1,16 @@
 package com.ivanovsky.passnotes
 
 import androidx.room.Room
+import androidx.room.migration.AutoMigrationSpec
+import androidx.room.testing.MigrationTestHelper
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ivanovsky.passnotes.data.crypto.DataCipher
 import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
 import com.ivanovsky.passnotes.data.repository.db.converters.FSAuthorityTypeConverter
 import com.ivanovsky.passnotes.utils.TestDataCipher
-import java.util.*
+import java.util.Calendar
 
 fun dateInMillis(year: Int, month: Int, day: Int): Long {
     val cal = Calendar.getInstance()
@@ -32,3 +35,11 @@ fun initInMemoryDatabase(): AppDatabase {
         .addTypeConverter(FSAuthorityTypeConverter(cipherProvider))
         .build()
 }
+
+fun initMigrationHelper(): MigrationTestHelper =
+    MigrationTestHelper(
+        InstrumentationRegistry.getInstrumentation(),
+        AppDatabase::class.java,
+        emptyList<AutoMigrationSpec>(),
+        FrameworkSQLiteOpenHelperFactory()
+    )

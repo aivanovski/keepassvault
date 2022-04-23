@@ -1,5 +1,14 @@
 # KPassnotes
-Android client for KeePass databases
+Another Android client app for KeePass databases.
+
+**This app is orientated for my personal use. It may have some bugs, so please make a backups before use it.**
+
+# Features
+- Synchronization with WebDav server (by default sync is done in background and user doesn't have to wait  when file will be uploaded to the remote server)
+- Create databases, entries and groups
+- Support for .kdb and .kdbx files (version 2-3, under the hood it uses [KeePassJava2](https://github.com/jorabin/KeePassJava2) to manipulate with KeePass files)
+- Dynamic templates (compatible with other android applications: [KeePassDX](https://github.com/Kunzisoft/KeePassDX), [keepass2android](https://github.com/PhilippC/keepass2android))
+- Autofill for Android >= 8.0
 
 # License
 ```

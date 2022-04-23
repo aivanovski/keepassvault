@@ -125,7 +125,7 @@ object KoinModule {
             single { SelectionHolder() }
 
             // Database
-            single { provideAppDatabase(get(), get()) }
+            single { AppDatabase.buildDatabase(get(), get()) }
             single { provideRemoteFileRepository(get()) }
             single { provideUsedFileRepository(get(), get()) }
 
@@ -246,19 +246,6 @@ object KoinModule {
 
     private fun provideUsedFileRepository(database: AppDatabase, observerBus: ObserverBus) =
         UsedFileRepository(database.usedFileDao, observerBus)
-
-    private fun provideAppDatabase(
-        context: Context,
-        cipherProvider: DataCipherProvider
-    ): AppDatabase {
-        return Room.databaseBuilder(
-            context.applicationContext,
-            AppDatabase::class.java,
-            AppDatabase.FILE_NAME
-        )
-            .addTypeConverter(FSAuthorityTypeConverter(cipherProvider))
-            .build()
-    }
 
     private fun provideCiceroneRouter(cicerone: Cicerone<Router>) =
         cicerone.router

@@ -118,7 +118,18 @@ class UsedFileDaoTest {
             fileUid = "firstFileUir",
             fileName = "firstFileName",
             addedTime = dateInMillis(2018, 1, 1),
-            keyType = KeyType.PASSWORD
+            keyType = KeyType.PASSWORD,
+            keyFileFsAuthority = FSAuthority(
+                credentials = ServerCredentials(
+                    serverUrl = "keyFileServerUrl",
+                    username = "keyFilUsername",
+                    password = "keyFilePassword"
+                ),
+                type = FSType.REGULAR_FS
+            ),
+            keyFilePath = "firstKeyFilePath",
+            keyFileUid = "firstKeyFileUid",
+            keyFileName = "firstKeyFileName"
         )
 
         private val SECOND_FILE = UsedFile(

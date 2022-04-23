@@ -336,7 +336,8 @@ class UnlockViewModel(
                     }
                 } else {
                     selectedKeyFileTitle.value = resourceProvider.getString(R.string.not_selected)
-                    selectedKeyFileTitleColor.value = resourceProvider.getColor(R.color.primary_text)
+                    selectedKeyFileTitleColor.value =
+                        resourceProvider.getColor(R.color.primary_text)
                 }
             }
         }
@@ -407,16 +408,16 @@ class UnlockViewModel(
         )
 
         viewModelScope.launch {
-            val result = withContext(dispatchers.Default) {
-                interactor.saveUsedFileWithoutAccessTime(usedFile)
-            }
+            val saveResult = interactor.saveUsedFileWithoutAccessTime(usedFile)
 
-            if (result.isSucceededOrDeferred) {
+            if (saveResult.isSucceededOrDeferred) {
+                selectedUsedFile = saveResult.obj
+
                 loadData(resetSelection = false)
             } else {
                 setScreenState(ScreenState.data())
 
-                val message = errorInteractor.processAndGetMessage(result.error)
+                val message = errorInteractor.processAndGetMessage(saveResult.error)
                 showSnackbarMessage.call(message)
             }
         }

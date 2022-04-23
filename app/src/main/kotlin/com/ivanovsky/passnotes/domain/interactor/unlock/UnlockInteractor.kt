@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_RECORD_IS_ALREADY_EXISTS
 import com.ivanovsky.passnotes.data.entity.OperationError.Type.NETWORK_IO_ERROR
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
@@ -170,25 +171,30 @@ class UnlockInteractor(
             OperationResult.success(updatedFile)
         }
 
-    fun saveUsedFileWithoutAccessTime(file: UsedFile): OperationResult<Boolean> {
-        val result = OperationResult<Boolean>()
+    suspend fun saveUsedFileWithoutAccessTime(file: UsedFile): OperationResult<UsedFile> =
+        withContext(dispatchers.IO) {
+            val existingFile = fileRepository.findByUid(file.fileUid, file.fsAuthority)
+            if (existingFile != null) {
+                return@withContext OperationResult.error(
+                    newDbError(MESSAGE_RECORD_IS_ALREADY_EXISTS)
+                )
+            }
 
-        val existing = fileRepository.findByUid(file.fileUid, file.fsAuthority)
-        if (existing == null) {
-            val newFile = file.copy(
-                lastAccessTime = null
-            )
+            fileRepository.insert(file.copy(lastAccessTime = null))
 
-            fileRepository.insert(newFile)
+            val insertedFile = fileRepository.findByUid(file.fileUid, file.fsAuthority)
+                ?: return@withContext OperationResult.error(
+                    newDbError(
+                        String.format(
+                            GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
+                            UsedFile::class.simpleName,
+                            file.fileUid
+                        )
+                    )
+                )
 
-            result.obj = true
-        } else {
-            result.obj = false
-            result.error = newDbError(MESSAGE_RECORD_IS_ALREADY_EXISTS)
+            OperationResult.success(insertedFile)
         }
-
-        return result
-    }
 
     suspend fun getUsedFile(
         fileUid: String,

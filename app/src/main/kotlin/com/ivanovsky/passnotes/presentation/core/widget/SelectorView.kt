@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.res.ResourcesCompat
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.WidgetSelectorBinding
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -17,6 +18,12 @@ class SelectorView(
         get() = getTextFromView()
         set(value) {
             setTextToView(value)
+        }
+
+    var textColor: Int?
+        get() = getTextColorFromView()
+        set(value) {
+            setTextColorToView(value)
         }
 
     var hint: String?
@@ -53,6 +60,15 @@ class SelectorView(
 
     private fun getHintFromView(): String {
         return binding.hint.text.toString()
+    }
+
+    private fun getTextColorFromView(): Int {
+        return binding.text.currentTextColor
+    }
+
+    private fun setTextColorToView(color: Int?) {
+        val defaultColor = ResourcesCompat.getColor(resources, R.color.primary_text, null)
+        return binding.text.setTextColor(color ?: defaultColor)
     }
 
     interface OnChangeButtonClickListener {

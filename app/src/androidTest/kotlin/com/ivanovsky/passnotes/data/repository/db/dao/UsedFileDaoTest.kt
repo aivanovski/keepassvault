@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.db.dao
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
@@ -9,7 +10,6 @@ import com.ivanovsky.passnotes.data.entity.ServerCredentials
 import com.ivanovsky.passnotes.dateInMillis
 import com.ivanovsky.passnotes.initInMemoryDatabase
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,74 +32,108 @@ class UsedFileDaoTest {
     }
 
     @Test
-    fun insert_shouldWork() {
-        // Arrange
-        val file = createFirstFile()
+    fun getAll_shouldReturnAllFiles() {
+        // arrange
+        dao.insert(FIRST_FILE)
+        dao.insert(SECOND_FILE)
 
-        // Act
-        val id = dao.insert(file)
+        // act
+        val files = dao.all
 
-        // Assert
-        val values = dao.all
-        assertEquals(id, 1L)
-        assertEquals(values.size, 1)
-        assertEquals(values[0], file)
+        // assert
+        assertThat(files).isEqualTo(listOf(FIRST_FILE, SECOND_FILE))
     }
 
     @Test
-    fun update_shouldWork() {
-        // Arrange
-        val file = createFirstFile()
-        val modifiedFile = createSecondFile().copy(
-            id = file.id
-        )
+    fun getById_shouldReturnFile() {
+        // arrange
+        dao.insert(FIRST_FILE)
+        dao.insert(SECOND_FILE)
 
-        // Act
-        dao.insert(file)
-        dao.update(modifiedFile)
+        // act
+        val file = dao.getById(SECOND_FILE_ID)
 
-        // Assert
-        val values = dao.all
-        assertEquals(values[0], modifiedFile)
+        // assert
+        assertThat(file).isEqualTo(SECOND_FILE)
     }
 
-    private fun createFirstFile() =
-        UsedFile(
-            id = 1,
-            fsAuthority = FIRST_AUTHORITY,
-            filePath = "/firsFilePath",
-            fileUid = "firstFileUir",
-            addedTime = dateInMillis(2018, 1, 1)
-        )
+    @Test
+    fun insert_shouldInsertFile() {
+        // Arrange
+        assertThat(dao.all).isEmpty()
 
-    private fun createSecondFile() =
-        UsedFile(
-            id = 2,
-            fsAuthority = SECOND_AUTHORITY,
-            filePath = "/secondFilePath",
-            fileUid = "secondFileUId",
-            addedTime = dateInMillis(2018, 2, 2),
-            lastAccessTime = dateInMillis(2018, 3, 3)
+        // Act
+        val id = dao.insert(FIRST_FILE)
+
+        // Assert
+        assertThat(id).isEqualTo(FIRST_FILE_ID.toLong())
+        assertThat(dao.all).isEqualTo(listOf(FIRST_FILE))
+    }
+
+    @Test
+    fun update_shouldUpdateFile() {
+        // Arrange
+        dao.insert(FIRST_FILE)
+
+        // Act
+        val updatedFile = SECOND_FILE.copy(
+            id = FIRST_FILE_ID
         )
+        dao.update(updatedFile)
+
+        // Assert
+        assertThat(dao.all).isEqualTo(listOf(updatedFile))
+    }
+
+    @Test
+    fun remove_shouldRemoveFile() {
+        // arrange
+        dao.insert(FIRST_FILE)
+        dao.insert(SECOND_FILE)
+
+        // act
+        dao.remove(FIRST_FILE_ID)
+
+        // assert
+        assertThat(dao.all).isEqualTo(listOf(SECOND_FILE))
+    }
 
     companion object {
 
-        private val FIRST_AUTHORITY = FSAuthority(
-            credentials = ServerCredentials(
-                serverUrl = "firstServerUrl",
-                username = "firstUsername",
-                password = "firstPassword"
+        private const val FIRST_FILE_ID = 1
+        private const val SECOND_FILE_ID = 2
+
+        private val FIRST_FILE = UsedFile(
+            id = FIRST_FILE_ID,
+            fsAuthority = FSAuthority(
+                credentials = ServerCredentials(
+                    serverUrl = "firstServerUrl",
+                    username = "firstUsername",
+                    password = "firstPassword"
+                ),
+                type = FSType.REGULAR_FS
             ),
-            type = FSType.REGULAR_FS
+            filePath = "/firsFilePath",
+            fileUid = "firstFileUir",
+            fileName = "firstFileName",
+            addedTime = dateInMillis(2018, 1, 1)
         )
 
-        private val SECOND_AUTHORITY = FSAuthority(
-            credentials = ServerCredentials(
-                serverUrl = "secondServerUrl",
-                username = "secondUsername",
-                password = "secondPassword"
+        private val SECOND_FILE = UsedFile(
+            id = SECOND_FILE_ID,
+            fsAuthority = FSAuthority(
+                credentials = ServerCredentials(
+                    serverUrl = "secondServerUrl",
+                    username = "secondUsername",
+                    password = "secondPassword"
+                ),
+                type = FSType.DROPBOX
             ),
-            type = FSType.DROPBOX
+            filePath = "/secondFilePath",
+            fileUid = "secondFileUId",
+            fileName = "secondFileName",
+            addedTime = dateInMillis(2018, 2, 2),
+            lastAccessTime = dateInMillis(2018, 3, 3)
         )
     }
 }

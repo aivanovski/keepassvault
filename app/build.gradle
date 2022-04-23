@@ -144,7 +144,7 @@ android {
 }
 
 def koinVersion = '2.0.1'
-def roomVersion = '2.3.0'
+def roomVersion = '2.4.2'
 def lifecycleVersion = '2.2.0'
 def androidXVersion = '1.2.0'
 
@@ -160,12 +160,13 @@ def treessenceVersion = "1.0.5"
 // Test
 def jUnitVersion = '4.13'
 def robolectricVersion = '4.3'
-def androidXTestVersion = '1.1.0'
+def androidXRulesVersion = '1.4.0'
+def androidXJunitVersion = '1.1.3'
 def mockkVersion = '1.11.0'
-def truthVersion = '1.0'
+def truthVersion = '1.1.3'
 def androidXArchVersion = '2.1.0'
 def androidXCoreVersion = '1.2.0'
-def roomTesting = '2.0.0'
+def roomTesting = '2.4.2'
 
 dependencies {
     // Test dependencies
@@ -178,8 +179,8 @@ dependencies {
     testImplementation "org.robolectric:shadows-multidex:$robolectricVersion"
 
     // Android test dependencies
-    androidTestImplementation "androidx.test.ext:junit:$androidXTestVersion"
-    androidTestImplementation "androidx.test:rules:$androidXTestVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidXJunitVersion"
+    androidTestImplementation "androidx.test:rules:$androidXRulesVersion"
     androidTestImplementation "androidx.room:room-testing:$roomTesting"
     androidTestImplementation "com.google.truth:truth:$truthVersion"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"

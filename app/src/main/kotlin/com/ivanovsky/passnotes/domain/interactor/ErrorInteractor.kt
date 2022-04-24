@@ -21,6 +21,9 @@ class ErrorInteractor(private val context: Context) {
             OperationError.Type.NETWORK_IO_ERROR -> {
                 context.getString(R.string.network_error_message)
             }
+            OperationError.Type.FILE_PERMISSION_ERROR -> {
+                context.getString(R.string.file_permission_error_message)
+            }
             else -> {
                 if (!error.message.isNullOrEmpty()) {
                     error.message

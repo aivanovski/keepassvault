@@ -20,6 +20,7 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
+import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.FileUtils.removeFileExtensionsIfNeed
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -165,7 +166,7 @@ class NewDatabaseViewModel(
                 onStorageSelected(file)
             }
         }
-        router.navigateTo(StorageListScreen(Action.PICK_STORAGE))
+        router.navigateTo(StorageListScreen(StorageListArgs(Action.PICK_STORAGE)))
     }
 
     fun onTemplatesInfoButtonClicked() {

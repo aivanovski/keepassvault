@@ -1,9 +1,8 @@
-package com.ivanovsky.passnotes.presentation.filepicker.model
+package com.ivanovsky.passnotes.presentation.filepicker
 
 import android.os.Parcelable
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.presentation.filepicker.Action
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class FilePickerArgs(

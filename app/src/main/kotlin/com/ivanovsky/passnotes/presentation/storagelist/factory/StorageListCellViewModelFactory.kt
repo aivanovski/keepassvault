@@ -1,13 +1,15 @@
-package com.ivanovsky.passnotes.presentation.storagelist
+package com.ivanovsky.passnotes.presentation.storagelist.factory
 
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.SingleTextCellModel
+import com.ivanovsky.passnotes.presentation.core.model.TwoTextWithIconCellModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SingleTextCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.TwoTextWithIconCellViewModel
 
-class StorageListCellFactory : CellViewModelFactory {
+class StorageListCellViewModelFactory : CellViewModelFactory {
 
     override fun createCellViewModel(
         model: BaseCellModel,
@@ -15,6 +17,7 @@ class StorageListCellFactory : CellViewModelFactory {
     ): BaseCellViewModel {
         return when (model) {
             is SingleTextCellModel -> SingleTextCellViewModel(model, eventProvider)
+            is TwoTextWithIconCellModel -> TwoTextWithIconCellViewModel(model, eventProvider)
             else -> throwUnsupportedModelException(model)
         }
     }

@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.domain.interactor.storagelist
 
 import android.content.Context
+import android.os.Environment
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
@@ -12,6 +13,7 @@ import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.DROPBOX
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.EXTERNAL_STORAGE
+import com.ivanovsky.passnotes.domain.entity.StorageOptionType.SAF_STORAGE
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.PRIVATE_STORAGE
 import com.ivanovsky.passnotes.domain.entity.StorageOptionType.WEBDAV
 import com.ivanovsky.passnotes.presentation.storagelist.Action
@@ -29,6 +31,7 @@ class StorageListInteractor(
             Action.PICK_FILE -> {
                 listOf(
                     createPrivateStorageOption(),
+                    createSafStorageOption(),
                     createExternalStorageOption(),
                     // createDropboxOption(),
                     createWebDavOption()
@@ -37,6 +40,7 @@ class StorageListInteractor(
             Action.PICK_STORAGE -> {
                 listOf(
                     createPrivateStorageOption(),
+                    createSafStorageOption(),
                     createExternalStorageOption(),
                     // createDropboxOption(),
                     createWebDavOption()
@@ -53,9 +57,19 @@ class StorageListInteractor(
         )
     }
 
+    @Suppress("DEPRECATION")
     private fun createExternalStorageOption(): StorageOption {
         return StorageOption(
             EXTERNAL_STORAGE,
+            context.getString(R.string.external_storage_app_picker),
+            FileDescriptor.fromRegularFile(Environment.getExternalStorageDirectory())
+                .copy(isRoot = true)
+        )
+    }
+
+    private fun createSafStorageOption(): StorageOption {
+        return StorageOption(
+            SAF_STORAGE,
             context.getString(R.string.external_storage_system_picker),
             createExternalStorageDir()
         )
@@ -115,10 +129,13 @@ class StorageListInteractor(
             isRoot = true
         )
 
-    suspend fun getRemoteFileSystemRoot(fsAuthority: FSAuthority): OperationResult<FileDescriptor> =
+    suspend fun getFileSystemRoot(
+        fsAuthority: FSAuthority
+    ): OperationResult<FileDescriptor> =
         withContext(dispatchers.IO) {
-            val provider = fileSystemResolver.resolveProvider(fsAuthority)
-            provider.rootFile
+            fileSystemResolver
+                .resolveProvider(fsAuthority)
+                .rootFile
         }
 
     suspend fun getFileByPath(

@@ -23,7 +23,6 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
-import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
@@ -719,7 +718,7 @@ class GroupsViewModel(
     class Factory(private val args: GroupsScreenArgs) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return GlobalInjector.get<GroupsViewModel>(
                 parametersOf(args)
             ) as T

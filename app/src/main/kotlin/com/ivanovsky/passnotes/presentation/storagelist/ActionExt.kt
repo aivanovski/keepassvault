@@ -1,6 +1,4 @@
-package com.ivanovsky.passnotes.presentation.storagelist.converter
-
-import com.ivanovsky.passnotes.presentation.storagelist.Action
+package com.ivanovsky.passnotes.presentation.storagelist
 
 fun Action.toFilePickerAction(): com.ivanovsky.passnotes.presentation.filepicker.Action {
     return when (this) {

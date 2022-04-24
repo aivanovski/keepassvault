@@ -26,8 +26,22 @@
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
+            android:id="@+id/screenStateView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <TextView
+            android:id="@+id/currentPath"
+            style="@style/Material.SecondaryText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/material_error_panel_background"
+            android:paddingHorizontal="@dimen/element_margin"
+            android:paddingVertical="@dimen/half_margin"
+            android:text="@{viewModel.currentPath}"
+            app:layout_constraintTop_toBottomOf="@+id/errorPanelView"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
@@ -39,7 +53,7 @@
             app:isShowDividers="true"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/errorPanelView"
+            app:layout_constraintTop_toBottomOf="@id/currentPath"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}"
             app:viewModels="@{viewModel.cellViewModels}"

@@ -1,7 +1,5 @@
 package com.ivanovsky.passnotes.injection
 
-import android.content.Context
-import androidx.room.Room
 import com.github.terrakok.cicerone.Cicerone
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.data.ObserverBus
@@ -12,7 +10,6 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
-import com.ivanovsky.passnotes.data.repository.db.converters.FSAuthorityTypeConverter
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.settings.Settings
@@ -60,6 +57,9 @@ import com.ivanovsky.passnotes.presentation.autofill.AutofillViewFactory
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
+import com.ivanovsky.passnotes.presentation.filepicker.factory.FilePickerCellModelFactory
+import com.ivanovsky.passnotes.presentation.filepicker.factory.FilePickerCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel
@@ -93,7 +93,10 @@ import com.ivanovsky.passnotes.presentation.settings.app.AppSettingsViewModel
 import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsViewModel
 import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordDialogViewModel
 import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsViewModel
+import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
+import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
+import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
@@ -154,7 +157,7 @@ object KoinModule {
             single { GetUsedFileUseCase(get(), get()) }
 
             // Interactors
-            single { FilePickerInteractor(get()) }
+            single { FilePickerInteractor(get(), get()) }
             single { UnlockInteractor(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
             single { StorageListInteractor(get(), get(), get()) }
             single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
@@ -198,6 +201,12 @@ object KoinModule {
             single { NoteCellModelFactory() }
             single { NoteCellViewModelFactory() }
 
+            single { FilePickerCellModelFactory() }
+            single { FilePickerCellViewModelFactory() }
+
+            single { StorageListCellModelFactory(get()) }
+            single { StorageListCellViewModelFactory() }
+
             // Cicerone
             single { Cicerone.create() }
             single { provideCiceroneRouter(get()) }
@@ -205,8 +214,8 @@ object KoinModule {
             single { SettingsRouter(get()) }
 
             // ViewModels
-            viewModel { StorageListViewModel(get(), get(), get(), get(), get()) }
-            viewModel { FilePickerViewModel(get(), get(), get(), get(), get(), get()) }
+            factory { (args: StorageListArgs) -> StorageListViewModel(get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: FilePickerArgs) -> FilePickerViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
             viewModel { GroupEditorViewModel(get(), get(), get(), get()) }
             viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }

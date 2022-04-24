@@ -50,6 +50,7 @@ import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
+import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.cells.model.DatabaseCellModel
@@ -386,7 +387,7 @@ class UnlockViewModel(
                 onDatabaseFilePicked(file)
             }
         }
-        router.navigateTo(StorageListScreen(Action.PICK_FILE))
+        router.navigateTo(StorageListScreen(StorageListArgs(Action.PICK_FILE)))
     }
 
     private fun navigateToFilePickerToSelectKey() {
@@ -395,7 +396,7 @@ class UnlockViewModel(
                 checkAndSetSelectedKeyFile(keyFile)
             }
         }
-        router.navigateTo(StorageListScreen(Action.PICK_FILE))
+        router.navigateTo(StorageListScreen(StorageListArgs(Action.PICK_FILE)))
     }
 
     private fun onDatabaseFilePicked(file: FileDescriptor) {

@@ -55,7 +55,7 @@ class FileSystemResolver(
     private fun instantiateProvider(fsAuthority: FSAuthority): FileSystemProvider {
         return when (fsAuthority.type) {
             FSType.REGULAR_FS -> {
-                RegularFileSystemProvider()
+                RegularFileSystemProvider(context)
             }
             FSType.DROPBOX -> {
                 val authenticator = DropboxAuthenticator(settings)

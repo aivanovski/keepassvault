@@ -9,26 +9,24 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.view.isVisible
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.databinding.ViewScreenStateBinding
 
 class ScreenStateView(context: Context, attrs: AttributeSet?) : FrameLayout(context, attrs) {
 
     constructor(context: Context) : this(context, null)
 
-    private val progressBar: ProgressBar
-    private val emptyTextView: TextView
-    private val errorTextView: TextView
-    private val errorLayout: View
+    private val binding: ViewScreenStateBinding
 
     var emptyText: String?
-        get() = emptyTextView.text.toString()
+        get() = binding.emptyTextView.text.toString()
         set(value) {
-            emptyTextView.text = value
+            binding.emptyTextView.text = value
         }
 
     var errorText: String?
-        get() = errorTextView.text.toString()
+        get() = binding.errorText.text.toString()
         set(value) {
-            errorTextView.text = value
+            binding.errorText.text = value
         }
 
     var state: State = State.LOADING
@@ -38,12 +36,8 @@ class ScreenStateView(context: Context, attrs: AttributeSet?) : FrameLayout(cont
         }
 
     init {
-        LayoutInflater.from(context).inflate(R.layout.view_screen_state, this)
-
-        progressBar = findViewById(R.id.progressBar)
-        emptyTextView = findViewById(R.id.emptyTextView)
-        errorTextView = findViewById(R.id.errorTextView)
-        errorLayout = findViewById(R.id.errorLayout)
+        val view = LayoutInflater.from(context).inflate(R.layout.view_screen_state, this, true)
+        binding = ViewScreenStateBinding.bind(view)
 
         applyState(state)
     }
@@ -51,19 +45,19 @@ class ScreenStateView(context: Context, attrs: AttributeSet?) : FrameLayout(cont
     private fun applyState(state: State) {
         when (state) {
             State.LOADING -> {
-                progressBar.isVisible = true
-                emptyTextView.isVisible = false
-                errorLayout.isVisible = false
+                binding.progressBar.isVisible = true
+                binding.emptyTextView.isVisible = false
+                binding.errorLayout.isVisible = false
             }
             State.EMPTY -> {
-                progressBar.isVisible = false
-                emptyTextView.isVisible = true
-                errorLayout.isVisible = false
+                binding.progressBar.isVisible = false
+                binding.emptyTextView.isVisible = true
+                binding.errorLayout.isVisible = false
             }
             State.ERROR -> {
-                progressBar.isVisible = false
-                emptyTextView.isVisible = false
-                errorLayout.isVisible = true
+                binding.progressBar.isVisible = false
+                binding.emptyTextView.isVisible = false
+                binding.errorLayout.isVisible = true
             }
         }
     }

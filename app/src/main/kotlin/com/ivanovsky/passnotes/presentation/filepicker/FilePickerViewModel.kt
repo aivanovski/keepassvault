@@ -1,16 +1,22 @@
 package com.ivanovsky.passnotes.presentation.filepicker
 
+import android.os.Build
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DateFormatProvider
-import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.PermissionHelper
+import com.ivanovsky.passnotes.domain.PermissionHelper.Companion.SDCARD_PERMISSION
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
+import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.Screens.FilePickerScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
@@ -20,17 +26,23 @@ import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.FileCellModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.FileCellViewModel
-import com.ivanovsky.passnotes.presentation.filepicker.converter.toCellModels
+import com.ivanovsky.passnotes.presentation.filepicker.factory.FilePickerCellModelFactory
+import com.ivanovsky.passnotes.presentation.filepicker.factory.FilePickerCellViewModelFactory
+import com.ivanovsky.passnotes.util.FileUtils
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import org.koin.core.parameter.parametersOf
 
 class FilePickerViewModel(
     private val interactor: FilePickerInteractor,
     private val errorInteractor: ErrorInteractor,
-    private val resources: ResourceProvider,
+    private val modelFactory: FilePickerCellModelFactory,
+    private val viewModelFactory: FilePickerCellViewModelFactory,
+    private val resourceProvider: ResourceProvider,
     private val dateFormatProvider: DateFormatProvider,
-    private val dispatchers: DispatcherProvider,
-    private val router: Router
+    private val permissionHelper: PermissionHelper,
+    private val router: Router,
+    private val args: FilePickerArgs
 ) : BaseScreenViewModel() {
 
     val viewTypes = ViewModelTypes()
@@ -38,21 +50,16 @@ class FilePickerViewModel(
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
-    val doneButtonVisibility = MutableLiveData<Boolean>()
-    // TODO: (clean up or refactor) is not used right now, but but may be used in a future
-    //  (when application will support direct access to external storage)
-    val requestPermissionEvent = SingleLiveEvent<String>()
+    val isDoneButtonVisible = MutableLiveData<Boolean>()
+    val requestPermissionEvent = SingleLiveEvent<PermissionType>()
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
+    val currentPath = MutableLiveData(EMPTY)
 
-    private lateinit var action: Action
-    private lateinit var rootFile: FileDescriptor
-    private var isBrowsingEnabled = false
     private var isPermissionRejected = false
     private var filePathToFileMap: Map<String, FileDescriptor> = emptyMap()
     private var selectedFile: FileDescriptor? = null
     private var currentDir: FileDescriptor? = null
     private var currentModels: List<BaseCellModel>? = null
-    private val factory = FilePickerCellFactory()
 
     init {
         eventProvider.subscribe(this) { event ->
@@ -65,63 +72,93 @@ class FilePickerViewModel(
         }
     }
 
-    fun start(
-        action: Action,
-        rootFile: FileDescriptor,
-        isBrowsingEnabled: Boolean
-    ) {
-        this.action = action
-        this.rootFile = rootFile
-        this.isBrowsingEnabled = isBrowsingEnabled
-        this.currentDir = rootFile
+    fun start() {
+        if (currentDir == null) {
+            currentDir = args.rootFile
+        }
 
-        loadData()
+        if (isUsingDeviceFileSystem()) {
+            if (isPermissionWasRejectedAndGrantedFromBackground()) {
+                isPermissionRejected = false
+                loadData()
+                return
+            } else if (isPermissionRejectedFromBackground() || isPermissionRejected) {
+                return
+            }
+
+            if (!hasFileAccessPermission()) {
+                setScreenState(
+                    ScreenState.error(
+                        resourceProvider.getString(R.string.permission_denied_message)
+                    )
+                )
+
+                getNecessaryPermissionType()?.let {
+                    requestPermissionEvent.call(it)
+                }
+            } else if (shouldReloadData()) {
+                loadData()
+            }
+        } else if (shouldReloadData()) {
+            loadData()
+        }
     }
 
     fun onDoneButtonClicked() {
-        if (action == Action.PICK_DIRECTORY) {
+        if (args.action == Action.PICK_DIRECTORY) {
             val currentDir = currentDir ?: return
 
             router.sendResult(FilePickerScreen.RESULT_KEY, currentDir)
             router.exit()
-        } else if (action == Action.PICK_FILE) {
+        } else if (args.action == Action.PICK_FILE) {
             if (isAnyFileSelected()) {
                 val selectedFile = selectedFile ?: return
 
                 router.sendResult(FilePickerScreen.RESULT_KEY, selectedFile)
                 router.exit()
             } else {
-                showSnackbarMessageEvent.call(resources.getString(R.string.please_select_any_file))
+                showSnackbarMessageEvent.call(resourceProvider.getString(R.string.please_select_any_file))
             }
         }
     }
 
-    fun onPermissionResult(granted: Boolean) {
-        if (granted) {
+    fun onPermissionResult(isGranted: Boolean) {
+        isPermissionRejected = !isGranted
+
+        if (isGranted) {
             loadData()
         } else {
-            //TODO: somehow user should see retry button
-            isPermissionRejected = true
-            screenState.value = ScreenState.error(
-                resources.getString(R.string.permission_denied_message)
+            setScreenState(
+                ScreenState.error(
+                    resourceProvider.getString(R.string.permission_denied_message)
+                )
             )
-            doneButtonVisibility.value = false
         }
     }
 
-    fun navigateBack() = router.exit()
+    fun onBackClicked() {
+        val currentDir = currentDir ?: return
+
+        if (currentDir.isRoot || !args.isBrowsingEnabled) {
+            navigateToPreviousScreen()
+        } else {
+            val parentPath = FileUtils.getParentPath(currentDir.path)
+            if (parentPath != null && filePathToFileMap.containsKey(parentPath)) {
+                onItemClicked(parentPath)
+            } else {
+                navigateToPreviousScreen()
+            }
+        }
+    }
+
+    fun navigateToPreviousScreen() = router.exit()
 
     private fun loadData() {
-        screenState.value = ScreenState.loading()
-        doneButtonVisibility.value = false
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val dir = currentDir ?: rootFile
-
-            val files = withContext(dispatchers.IO) {
-                interactor.getFileList(dir)
-            }
-
+            val dir = currentDir ?: args.rootFile
+            val files = interactor.getFileList(dir)
             onFilesLoaded(dir, files)
         }
     }
@@ -130,51 +167,59 @@ class FilePickerViewModel(
         dir: FileDescriptor,
         result: OperationResult<List<FileDescriptor>>
     ) {
-        val currentDir = currentDir ?: rootFile
+        val currentDir = currentDir ?: args.rootFile
 
         if (result.isSucceededOrDeferred) {
             val unsortedFiles = result.obj
 
-            if (!dir.isRoot && isBrowsingEnabled) {
-                viewModelScope.launch {
-                    val parent = withContext(dispatchers.IO) {
-                        interactor.getParent(currentDir)
-                    }
+            currentPath.value = currentDir.path
 
+            if (!dir.isRoot && args.isBrowsingEnabled) {
+                viewModelScope.launch {
+                    val parent = interactor.getParent(currentDir)
                     onParentLoaded(unsortedFiles, parent)
                 }
-
             } else {
                 val sortedFiles = sortFiles(unsortedFiles)
 
-                val displayedFiles = if (isBrowsingEnabled) {
+                val displayedFiles = if (args.isBrowsingEnabled) {
                     sortedFiles
                 } else {
                     // hide all directories
                     sortedFiles.filter { file -> !file.isDirectory }
                 }
 
-                val cellModels = displayedFiles.toCellModels(
-                    dir,
-                    dateFormatProvider.getShortDateFormat()
+                val cellModels = modelFactory.createCellModels(
+                    files = displayedFiles,
+                    parentDir = dir,
+                    dateFormat = dateFormatProvider.getShortDateFormat()
                 )
 
                 filePathToFileMap = createFileMap(displayedFiles)
 
                 if (displayedFiles.isNotEmpty()) {
-                    setCellElements(factory.createCellViewModels(cellModels, eventProvider))
+                    setCellElements(
+                        viewModelFactory.createCellViewModels(
+                            cellModels,
+                            eventProvider
+                        )
+                    )
                     currentModels = cellModels
-                    screenState.value = ScreenState.data()
-                    doneButtonVisibility.value = true
+                    setScreenState(ScreenState.data())
                 } else {
-                    screenState.value = ScreenState.empty(
-                        resources.getString(R.string.no_items)
+                    setScreenState(
+                        ScreenState.empty(
+                            resourceProvider.getString(R.string.no_items)
+                        )
                     )
                 }
             }
         } else {
-            val message = errorInteractor.processAndGetMessage(result.error)
-            screenState.value = ScreenState.error(message)
+            setScreenState(
+                ScreenState.error(
+                    errorText = errorInteractor.processAndGetMessage(result.error)
+                )
+            )
         }
     }
 
@@ -188,21 +233,23 @@ class FilePickerViewModel(
             val sortedFiles = sortFiles(unsortedFiles).toMutableList()
             sortedFiles.add(0, parent)
 
-            val cellModels = sortedFiles.toCellModels(
-                parent,
-                dateFormatProvider.getShortDateFormat()
+            val cellModels = modelFactory.createCellModels(
+                files = sortedFiles,
+                parentDir = parent,
+                dateFormat = dateFormatProvider.getShortDateFormat()
             )
 
             filePathToFileMap = createFileMap(sortedFiles)
 
-            setCellElements(factory.createCellViewModels(cellModels, eventProvider))
+            setCellElements(viewModelFactory.createCellViewModels(cellModels, eventProvider))
             currentModels = cellModels
-            screenState.value = ScreenState.data()
-            doneButtonVisibility.value = true
+            setScreenState(ScreenState.data())
         } else {
-            val message = errorInteractor.processAndGetMessage(result.error)
-            screenState.value = ScreenState.error(message)
-            doneButtonVisibility.value = false
+            setScreenState(
+                ScreenState.error(
+                    errorText = errorInteractor.processAndGetMessage(result.error)
+                )
+            )
         }
     }
 
@@ -213,7 +260,7 @@ class FilePickerViewModel(
             currentDir = selectedFile
 
             loadData()
-        } else if (action == Action.PICK_FILE) {
+        } else if (args.action == Action.PICK_FILE) {
             val models = currentModels ?: return
 
             val selectedModel = (models.find { model -> model.id == filePath } as? FileCellModel)
@@ -221,11 +268,12 @@ class FilePickerViewModel(
 
             val newModels = if (selectedModel.isSelected) {
                 val modelIdx = models.indexOf(selectedModel)
-                val newModels = models.toMutableList()
-                newModels[modelIdx] = selectedModel.copy(isSelected = false)
-                newModels
+                models.toMutableList()
+                    .apply {
+                        this[modelIdx] = selectedModel.copy(isSelected = false)
+                    }
             } else {
-                val newModels = models.map { model ->
+                models.map { model ->
                     if (selectedModel == model) {
                         selectedModel.copy(isSelected = true)
                     } else if (model is FileCellModel && model.isSelected) {
@@ -234,29 +282,93 @@ class FilePickerViewModel(
                         model
                     }
                 }
-
-                newModels
             }
-            setCellElements(factory.createCellViewModels(newModels, eventProvider))
+            setCellElements(viewModelFactory.createCellViewModels(newModels, eventProvider))
             currentModels = newModels
             this.selectedFile = selectedFile
         }
     }
 
     private fun sortFiles(files: List<FileDescriptor>): List<FileDescriptor> {
-        return files.sortedWith(Comparator { lhs, rhs ->
+        return files.sortedWith { lhs, rhs ->
             if ((lhs.isDirectory && !rhs.isDirectory) || (!lhs.isDirectory && rhs.isDirectory)) {
                 if (lhs.isDirectory) -1 else 1
             } else {//if files have same type
                 lhs.name.compareTo(rhs.name)
             }
-        })
+        }
+    }
+
+    private fun setScreenState(state: ScreenState) {
+        screenState.value = state
+        isDoneButtonVisible.value = getDoneButtonVisibility()
+    }
+
+    private fun getDoneButtonVisibility(): Boolean {
+        val screenState = this.screenState.value ?: return false
+
+        return screenState.isDisplayingData
     }
 
     private fun createFileMap(files: List<FileDescriptor>): Map<String, FileDescriptor> {
-        return files.map { file -> Pair(file.path, file) }
-            .toMap()
+        return files.associateBy { file -> file.path }
     }
 
     private fun isAnyFileSelected(): Boolean = (selectedFile != null)
+
+    private fun hasFileAccessPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= 30) {
+            permissionHelper.isAllFilesPermissionGranted()
+        } else {
+            permissionHelper.isPermissionGranted(SDCARD_PERMISSION)
+        }
+    }
+
+    private fun isUsingDeviceFileSystem(): Boolean {
+        return args.rootFile.fsAuthority.type == FSType.REGULAR_FS
+    }
+
+    private fun getNecessaryPermissionType(): PermissionType? {
+        return when {
+            hasFileAccessPermission() -> null
+            Build.VERSION.SDK_INT >= 30 -> PermissionType.ALL_FILES_ACCESS
+            else -> PermissionType.SDCARD_PERMISSION
+        }
+    }
+
+    private fun isPermissionWasRejectedAndGrantedFromBackground(): Boolean {
+        val currentScreenState = screenState.value ?: return false
+
+        return isPermissionRejected &&
+            hasFileAccessPermission() &&
+            !currentScreenState.isDisplayingData
+    }
+
+    private fun isPermissionRejectedFromBackground(): Boolean {
+        val currentScreenState = screenState.value ?: return false
+
+        return !hasFileAccessPermission() &&
+            (currentScreenState.isDisplayingData || currentScreenState.isDisplayingEmptyState)
+    }
+
+    private fun shouldReloadData(): Boolean {
+        val currentScreenState = screenState.value ?: return false
+
+        return !currentScreenState.isDisplayingData && !currentScreenState.isDisplayingLoading
+    }
+
+    class Factory(private val args: FilePickerArgs) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return GlobalInjector.get<FilePickerViewModel>(
+                parametersOf(args)
+            ) as T
+        }
+    }
+
+    enum class PermissionType {
+        SDCARD_PERMISSION,
+        ALL_FILES_ACCESS
+    }
 }

@@ -5,7 +5,7 @@ import com.github.terrakok.cicerone.androidx.FragmentScreen
 import com.ivanovsky.passnotes.presentation.about.AboutFragment
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuFragment
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment
-import com.ivanovsky.passnotes.presentation.filepicker.model.FilePickerArgs
+import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorFragment
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
@@ -24,7 +24,7 @@ import com.ivanovsky.passnotes.presentation.server_login.ServerLoginFragment
 import com.ivanovsky.passnotes.presentation.settings.app.AppSettingsFragment
 import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsFragment
 import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsFragment
-import com.ivanovsky.passnotes.presentation.storagelist.Action
+import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListFragment
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockFragment
@@ -45,10 +45,10 @@ object Screens {
     }
 
     // File and Storage
-    class StorageListScreen(private val action: Action) : FragmentScreen {
+    class StorageListScreen(private val args: StorageListArgs) : FragmentScreen {
 
         override fun createFragment(factory: FragmentFactory) =
-            StorageListFragment.newInstance(action)
+            StorageListFragment.newInstance(args)
 
         companion object {
             val RESULT_KEY = StorageListScreen::class.simpleName + "_result"

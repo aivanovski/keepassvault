@@ -37,7 +37,7 @@ public class OperationError {
     public static final String MESSAGE_DUPLICATED_NOTE = "Duplicated note";
     public static final String MESSAGE_FAILED_TO_ADD_ENTRY = "Failed to add entry";
     public static final String MESSAGE_FAILED_TO_REMOVE_ROOT_GROUP = "Failed to remove root group";
-    public static final String MESSAGE_FAILED_TO_GET_PARENT_PATH = "Failed to get paretn path";
+    public static final String MESSAGE_FAILED_TO_GET_PARENT_PATH = "Failed to get parent path";
     public static final String MESSAGE_FAILED_TO_RESOLVE_SYNC_PROCESSOR = "Failed to resolve sync processot";
     public static final String MESSAGE_FILE_IS_NOT_MODIFIED = "File is not modified";
     public static final String MESSAGE_INCORRECT_SYNC_STATUS = "Incorrect sync status";
@@ -180,18 +180,25 @@ public class OperationError {
         return error;
     }
 
+    public static OperationError newPermissionError(String message) {
+        OperationError error = new OperationError(Type.FILE_PERMISSION_ERROR);
+        error.message = message;
+        return error;
+    }
+
     public enum Type {
         GENERIC_ERROR,
         DB_AUTH_ERROR,
         DB_ERROR,
         DB_VERSION_CONFLICT_ERROR,// if user modified db
         FILE_ACCESS_ERROR,
+        FILE_PERMISSION_ERROR,
         FILE_NOT_FOUND_ERROR,
         GENERIC_IO_ERROR,
         AUTH_ERROR,
         NETWORK_IO_ERROR,
         FILE_IS_ALREADY_EXISTS,
-        CACHE_ERROR, // inconsistent cached data
+        CACHE_ERROR, // inconsistent cached data,
         REMOTE_API_ERROR
     }
 

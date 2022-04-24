@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
@@ -15,19 +16,26 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.databinding.StorageListFragmentBinding
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
-import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.util.FileUtils.DEFAULT_DB_NAME
 import com.ivanovsky.passnotes.util.IntentUtils.newCreateFileIntent
 import com.ivanovsky.passnotes.util.IntentUtils.newOpenFileIntent
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class StorageListFragment : BaseFragment() {
 
-    private val viewModel: StorageListViewModel by viewModel()
     private val fileSystemResolver: FileSystemResolver by inject()
-    private var requestedFSAuthority: FSAuthority? = null
+
+    private val viewModel: StorageListViewModel by lazy {
+        ViewModelProvider(
+            this,
+            StorageListViewModel.Factory(
+                args = getMandatoryArgument(ARGUMENTS)
+            )
+        )
+            .get(StorageListViewModel::class.java)
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -49,16 +57,11 @@ class StorageListFragment : BaseFragment() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        viewModel.onScreenStart()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         return StorageListFragmentBinding.inflate(inflater)
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
@@ -77,18 +80,18 @@ class StorageListFragment : BaseFragment() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.onScreenStart()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        subscribeToLiveData()
-
-        val requiredAction = arguments?.getSerializable(ARG_REQUIRED_ACTION) as? Action
-            ?: requireArgument(ARG_REQUIRED_ACTION)
-
-        viewModel.loadData(requiredAction)
+        subscribeToLiveEvents()
     }
 
-    private fun subscribeToLiveData() {
+    private fun subscribeToLiveEvents() {
         viewModel.showAuthActivityEvent.observe(viewLifecycleOwner) { fsAuthority ->
             showAuthActivity(fsAuthority)
         }
@@ -101,9 +104,7 @@ class StorageListFragment : BaseFragment() {
     }
 
     private fun showAuthActivity(fsAuthority: FSAuthority) {
-        requestedFSAuthority = fsAuthority
-
-        val authenticator = fileSystemResolver.resolveProvider(fsAuthority).authenticator ?: return
+        val authenticator = fileSystemResolver.resolveProvider(fsAuthority).authenticator
         if (authenticator.getAuthType() == AuthType.EXTERNAL) {
             authenticator.startAuthActivity(requireContext())
         }
@@ -121,10 +122,11 @@ class StorageListFragment : BaseFragment() {
 
         private const val REQUEST_CODE_PICK_FILE = 1
 
-        private const val ARG_REQUIRED_ACTION = "requiredAction"
+        private const val ARGUMENTS = "arguments"
 
-        fun newInstance(requiredAction: Action) = StorageListFragment().withArguments {
-            putSerializable(ARG_REQUIRED_ACTION, requiredAction)
-        }
+        fun newInstance(args: StorageListArgs) = StorageListFragment()
+            .withArguments {
+                putParcelable(ARGUMENTS, args)
+            }
     }
 }

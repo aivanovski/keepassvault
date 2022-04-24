@@ -7,13 +7,12 @@
 
     <TextView
         android:id="@+id/text"
+        style="@style/Material.ErrorSecondaryText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/element_margin"
         android:gravity="center"
         android:minHeight="96dp"
-        android:textColor="@color/error_text"
-        android:textSize="@dimen/material_primary_text_size"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/retryButton"
         app:layout_constraintStart_toStartOf="parent"

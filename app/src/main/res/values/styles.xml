@@ -127,8 +127,13 @@
     </style>
 
     <style name="Material.ErrorSecondaryText">
-        <item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
-        <item name="android:textColor">@color/material_error_secondary_text</item>
+        <item name="android:textSize">@dimen/material_primary_text_size</item>
+        <item name="android:textColor">@color/error_text</item>
+    </style>
+
+    <style name="Material.ErrorPrimaryText">
+        <item name="android:textSize">@dimen/material_header_text_size</item>
+        <item name="android:textColor">@color/error_text</item>
     </style>
 
     <style name="Material.SecondarySmallText">

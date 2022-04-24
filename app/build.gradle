@@ -6,8 +6,8 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'com.google.gms.google-services'
 
 def versionMajor = 0
-def versionMinor = 12
-def versionPatch = 1
+def versionMinor = 13
+def versionPatch = 0
 
 def PROPERTIES_FILE = file("../project.properties")
 

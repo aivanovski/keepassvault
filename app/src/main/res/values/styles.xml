@@ -171,24 +171,20 @@
         <item name="android:lines">1</item>
     </style>
 
-    <style name="Material.EditText"></style>
-
-    <style name="Material.EditText.PrimaryMultiLine">
+    <style name="Material.EditText">
         <item name="android:textSize">@dimen/material_edit_text_primary_text_size</item>
         <item name="android:textColor">@color/material_edit_text_primary_text</item>
     </style>
 
+    <style name="Material.EditText.PrimaryMultiLine"></style>
+
     <style name="Material.EditText.PrimarySingleLine">
-        <item name="android:textSize">@dimen/material_edit_text_primary_text_size</item>
-        <item name="android:textColor">@color/material_edit_text_primary_text</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
         <item name="android:lines">1</item>
     </style>
 
     <style name="Material.EditText.Password">
-        <item name="android:textSize">@dimen/material_edit_text_primary_text_size</item>
-        <item name="android:textColor">@color/material_edit_text_primary_text</item>
         <item name="android:inputType">textWebPassword</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>

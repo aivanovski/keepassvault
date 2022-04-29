@@ -4,4 +4,5 @@ object StringUtils {
 
     const val EMPTY = ""
     const val DOT = '.'
+    const val SPACE = ' '
 }

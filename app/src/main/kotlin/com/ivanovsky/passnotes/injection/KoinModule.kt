@@ -25,6 +25,7 @@ import com.ivanovsky.passnotes.domain.interactor.main.MainInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
+import com.ivanovsky.passnotes.domain.interactor.password_generator.PasswordGeneratorInteractor
 import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
 import com.ivanovsky.passnotes.domain.interactor.selectdb.SelectDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
@@ -39,6 +40,7 @@ import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
+import com.ivanovsky.passnotes.domain.usecases.GeneratePasswordUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetGroupUseCase
@@ -74,9 +76,11 @@ import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
+import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.password_generator.PasswordGeneratorViewModel
 import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.search.SearchViewModel
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellModelFactory
@@ -155,6 +159,7 @@ object KoinModule {
             single { RemoveUsedFileUseCase(get(), get()) }
             single { SortGroupsAndNotesUseCase(get(), get()) }
             single { GetUsedFileUseCase(get(), get()) }
+            single { GeneratePasswordUseCase() }
 
             // Interactors
             single { FilePickerInteractor(get(), get()) }
@@ -176,6 +181,7 @@ object KoinModule {
             single { AutofillInteractor(get(), get()) }
             single { MainInteractor(get()) }
             single { LockServiceInteractor(get(), get(), get(), get(), get()) }
+            single { PasswordGeneratorInteractor(get()) }
 
             // Autofill
             single { AutofillViewFactory(get(), get()) }
@@ -214,6 +220,8 @@ object KoinModule {
             single { SettingsRouter(get()) }
 
             // ViewModels
+            // TODO: factory {} can be replaced with viewModel {}
+            //  that will exclude necessity of ViewModelProvider.Factory for each VM
             factory { (args: StorageListArgs) -> StorageListViewModel(get(), get(), get(), get(), get(), get(), get(), args) }
             factory { (args: FilePickerArgs) -> FilePickerViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
@@ -221,7 +229,7 @@ object KoinModule {
             viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
             factory { (args: NoteScreenArgs) -> NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
-            viewModel { NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
+            viewModel { (args: NoteEditorArgs) -> NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
             viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), get(), args) }
             factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), args) }
@@ -231,6 +239,7 @@ object KoinModule {
             viewModel { DatabaseSettingsViewModel(get(), get()) }
             viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
             viewModel { SortAndViewDialogViewModel(get()) }
+            viewModel { PasswordGeneratorViewModel(get(), get(), get()) }
             factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             factory { NavigationMenuViewModel(get()) }
             factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }

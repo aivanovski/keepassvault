@@ -170,6 +170,26 @@
     <string name="choose_property_type">Choose property type</string>
     <string name="custom">Custom</string>
 
+    <!-- Password generator screen -->
+    <string name="generate_password">Generate password</string>
+    <string name="generate">Generate</string>
+    <string name="generated_password">Generated password</string>
+    <string name="length">Length</string>
+    <string name="eight">8</string>
+    <string name="twelve">12</string>
+    <string name="sixteen">16</string>
+    <string name="thirty_two">32</string>
+    <string name="sixty_four">64</string>
+    <string name="upper_case">Upper-case</string>
+    <string name="lower_case">Lower-case</string>
+    <string name="digits">Digits</string>
+    <string name="minus">Minus</string>
+    <string name="underscore">Underscore</string>
+    <string name="space">Space</string>
+    <string name="special">Special</string>
+    <string name="brackets">Brackets</string>
+    <string name="no_options_selected_message">At least one option should be selected (not space)</string>
+
     <!-- Storage screen -->
     <string name="select_storage">Select storage</string>
     <string name="private_app_storage">Private app storage</string>

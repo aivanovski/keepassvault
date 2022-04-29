@@ -17,6 +17,7 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
+import com.ivanovsky.passnotes.presentation.Screens.PasswordGeneratorScreen
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
@@ -48,7 +49,8 @@ class NoteEditorViewModel(
     private val dispatchers: DispatcherProvider,
     private val modelFactory: NoteEditorCellModelFactory,
     private val viewModelFactory: NoteEditorCellViewModelFactory,
-    private val router: Router
+    private val router: Router,
+    private val args: NoteEditorArgs
 ) : BaseScreenViewModel() {
 
     val viewTypes = ViewModelTypes()
@@ -66,23 +68,20 @@ class NoteEditorViewModel(
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val showToastEvent = SingleLiveEvent<String>()
 
-    private lateinit var mode: NoteEditorMode
-    private var groupUid: UUID? = null
-    private var noteUid: UUID? = null
     private var note: Note? = null
-    private var template: Template? = null
+    private var template: Template? = args.template
 
     init {
         subscribeToEvents()
     }
 
-    fun start(args: NoteEditorArgs) {
-        mode = args.mode
-        noteUid = args.noteUid
-        groupUid = args.groupUid
-        template = args.template
+    fun start() {
+        val currentScreenState = screenState.value ?: return
+        if (!currentScreenState.isNotInitialized) {
+            return
+        }
 
-        if (mode == NoteEditorMode.NEW) {
+        if (args.mode == NoteEditorMode.NEW) {
             val models = when {
                 args.template != null -> modelFactory.createModelsFromTemplate(args.template)
                 args.properties != null -> modelFactory.createModelsFromProperties(args.properties)
@@ -93,8 +92,7 @@ class NoteEditorViewModel(
 
             isDoneButtonVisible.value = true
             screenState.value = ScreenState.data()
-
-        } else if (mode == NoteEditorMode.EDIT) {
+        } else if (args.mode == NoteEditorMode.EDIT) {
             isDoneButtonVisible.value = false
             screenState.value = ScreenState.loading()
 
@@ -108,8 +106,8 @@ class NoteEditorViewModel(
             return
         }
 
-        if (mode == NoteEditorMode.NEW) {
-            val groupUid = this.groupUid ?: return
+        if (args.mode == NoteEditorMode.NEW) {
+            val groupUid = args.groupUid ?: return
 
             val note = createNewNoteFromCells(groupUid, template)
             isDoneButtonVisible.value = false
@@ -129,7 +127,7 @@ class NoteEditorViewModel(
                     screenState.value = ScreenState.dataWithError(message)
                 }
             }
-        } else if (mode == NoteEditorMode.EDIT) {
+        } else if (args.mode == NoteEditorMode.EDIT) {
             val sourceNote = note ?: return
             val sourceTemplate = template
 
@@ -164,7 +162,7 @@ class NoteEditorViewModel(
     fun onBackClicked() {
         val properties = createPropertiesFromCells()
 
-        when (mode) {
+        when (args.mode) {
             NoteEditorMode.NEW -> {
                 if (properties.isEmpty() || isAllDefaultAndEmpty(properties)) {
                     finishScreen()
@@ -252,15 +250,15 @@ class NoteEditorViewModel(
             GroupsScreen(
                 GroupsScreenArgs(
                     appMode = ApplicationLaunchMode.NORMAL,
-                    groupUid = groupUid,
-                    isCloseDatabaseOnExit = (groupUid == null)
+                    groupUid = args.groupUid,
+                    isCloseDatabaseOnExit = (args.groupUid == null)
                 )
             )
         )
     }
 
     private fun loadData() {
-        val uid = noteUid ?: return
+        val uid = args.noteUid ?: return
 
         screenState.value = ScreenState.loading()
 
@@ -310,22 +308,56 @@ class NoteEditorViewModel(
 
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
-            if (event.containsKey(ExtendedTextPropertyCellViewModel.REMOVE_EVENT)) {
-                val cellId = event.getString(ExtendedTextPropertyCellViewModel.REMOVE_EVENT)
-                if (cellId != null) {
-                    val viewModel = findViewModelByCellId(cellId)
-                    val viewModels = cellViewModels.value
-                        ?.toMutableList()
-                        ?: mutableListOf()
+            when {
+                event.containsKey(ExtendedTextPropertyCellViewModel.REMOVE_EVENT) -> {
+                    val cellId = event.getString(ExtendedTextPropertyCellViewModel.REMOVE_EVENT)
+                    if (cellId != null) {
+                        val viewModel = findViewModelByCellId(cellId)
+                        val viewModels = cellViewModels.value
+                            ?.toMutableList()
+                            ?: mutableListOf()
 
-                    if (viewModel != null) {
-                        viewModels.remove(viewModel)
+                        if (viewModel != null) {
+                            viewModels.remove(viewModel)
+                        }
+
+                        setCellElements(viewModels)
                     }
-
-                    setCellElements(viewModels)
+                }
+                event.containsKey(SecretPropertyCellViewModel.GENERATE_CLICK_EVENT) -> {
+                    val cellId = event.getString(SecretPropertyCellViewModel.GENERATE_CLICK_EVENT)
+                    if (cellId != null) {
+                        router.setResultListener(PasswordGeneratorScreen.RESULT_KEY) { password ->
+                            if (password is String) {
+                                setPasswordToCell(cellId, password)
+                            }
+                        }
+                        router.navigateTo(PasswordGeneratorScreen())
+                    }
                 }
             }
         }
+    }
+
+    private fun setPasswordToCell(cellId: String, password: String) {
+        val viewModel = (findViewModelByCellId(cellId) as? SecretPropertyCellViewModel) ?: return
+
+        val newModel = viewModel.model.copy(value = password)
+
+        updateCellElement(cellId, viewModelFactory.createCellViewModel(newModel, eventProvider))
+    }
+
+    private fun updateCellElement(cellId: String, viewModel: BaseCellViewModel) {
+        val viewModels = cellViewModels.value?.toMutableList() ?: return
+
+        val idx = viewModels.indexOfFirst { it.model.id == cellId }
+        if (idx == -1) {
+            return
+        }
+
+        viewModels[idx] = viewModel
+
+        setCellElements(viewModels)
     }
 
     private fun createPropertiesFromCells(): List<Property> {

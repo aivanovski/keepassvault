@@ -41,8 +41,13 @@
 
     <!-- Buttons -->
     <dimen name="borderless_icon_button_size">48dp</dimen>
+    <dimen name="small_borderless_icon_button_size">32dp</dimen>
 
     <!-- Dialogs -->
     <dimen name="min_dialog_width">300dp</dimen>
+
+    <!-- Password Generator -->
+    <dimen name="password_length_button_width">54dp</dimen>
+    <dimen name="password_length_edit_text_min_width">64dp</dimen>
 
 </resources>

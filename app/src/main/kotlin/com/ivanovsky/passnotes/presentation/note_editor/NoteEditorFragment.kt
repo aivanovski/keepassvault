@@ -14,10 +14,16 @@ import com.ivanovsky.passnotes.presentation.core.extensions.*
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel.AddPropertyDialogItem
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class NoteEditorFragment : FragmentWithDoneButton() {
 
-    private val viewModel: NoteEditorViewModel by viewModel()
+    private val args: NoteEditorArgs by lazy {
+        getMandatoryArgument(ARGUMENTS)
+    }
+    private val viewModel: NoteEditorViewModel by viewModel(
+        parameters = { parametersOf(args) }
+    )
     private var backCallback: OnBackPressedCallback? = null
 
     override fun onCreateView(
@@ -78,7 +84,7 @@ class NoteEditorFragment : FragmentWithDoneButton() {
 
         subscribeToLiveData()
 
-        viewModel.start(args)
+        viewModel.start()
     }
 
     private fun subscribeToLiveData() {

@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation
 
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentFactory
 import com.github.terrakok.cicerone.androidx.FragmentScreen
 import com.ivanovsky.passnotes.presentation.about.AboutFragment
@@ -15,6 +16,7 @@ import com.ivanovsky.passnotes.presentation.note.NoteFragment
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorFragment
+import com.ivanovsky.passnotes.presentation.password_generator.PasswordGeneratorFragment
 import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.search.SearchFragment
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
@@ -111,6 +113,16 @@ object Screens {
     class AboutScreen : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
             AboutFragment.newInstance()
+    }
+
+    class PasswordGeneratorScreen : FragmentScreen {
+
+        override fun createFragment(factory: FragmentFactory): Fragment =
+            PasswordGeneratorFragment.newInstance()
+
+        companion object {
+            val RESULT_KEY = PasswordGeneratorScreen::class.simpleName + "_result"
+        }
     }
 
     // Settings

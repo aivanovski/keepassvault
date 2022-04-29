@@ -15,6 +15,7 @@ import androidx.databinding.InverseBindingListener
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.WidgetSecretInputBinding
 import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType
+import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputLines
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class SecretInputView(
@@ -52,6 +53,12 @@ class SecretInputView(
             field = value
         }
 
+    var inputLines: TextInputLines? = TextInputLines.SINGLE_LINE
+        set(value) {
+            setInputLinesToView(value)
+            field = value
+        }
+
     private val textInputWatcher: InputWatcher
     private val binding: WidgetSecretInputBinding
     private var onTextChanged: ((String) -> Unit)? = null
@@ -70,6 +77,7 @@ class SecretInputView(
 
         setTextVisibilityToView(isTextVisible)
         setInputTypeToView(inputType)
+        setInputLinesToView(inputLines)
     }
 
     private fun setTextVisibilityToView(isVisible: Boolean) {
@@ -114,6 +122,19 @@ class SecretInputView(
     }
 
     private fun getTextFromView(): String = binding.textInput.text.toString()
+
+    private fun setInputLinesToView(inputLines: TextInputLines?) {
+        when (inputLines) {
+            TextInputLines.SINGLE_LINE -> {
+                binding.textInput.minLines = 1
+                binding.textInput.maxLines = 1
+            }
+            TextInputLines.MULTIPLE_LINES -> {
+                binding.textInput.minLines = 1
+                binding.textInput.maxLines = 5
+            }
+        }
+    }
 
     private fun toggleTextVisibility() {
         isTextVisible = !isTextVisible

@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
+import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.SecretPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
@@ -22,15 +23,6 @@ class SecretPropertyCellViewModel(
     val confirmationError = MutableLiveData<String?>(null)
     val secretTransformationMethod = MutableLiveData(TextTransformationMethod.PASSWORD)
     val isConfirmationVisible = MutableLiveData(true)
-
-    fun onVisibilityButtonClicked() {
-        isConfirmationVisible.value = isConfirmationVisibleInternal().not()
-        secretTransformationMethod.value = if (isConfirmationVisibleInternal()) {
-            TextTransformationMethod.PASSWORD
-        } else {
-            TextTransformationMethod.PLANE_TEXT
-        }
-    }
 
     override fun createProperty(): Property {
         return Property(
@@ -52,8 +44,22 @@ class SecretPropertyCellViewModel(
         val isConfirmationVisible = isConfirmationVisible.value ?: false
 
         if (isConfirmationVisible && getSecretText() != getConfirmationText()) {
-            confirmationError.value = resourceProvider.getString(R.string.does_not_match_with_password)
+            confirmationError.value =
+                resourceProvider.getString(R.string.does_not_match_with_password)
         }
+    }
+
+    fun onVisibilityButtonClicked() {
+        isConfirmationVisible.value = isConfirmationVisibleInternal().not()
+        secretTransformationMethod.value = if (isConfirmationVisibleInternal()) {
+            TextTransformationMethod.PASSWORD
+        } else {
+            TextTransformationMethod.PLANE_TEXT
+        }
+    }
+
+    fun onGenerateButtonClicked() {
+        eventProvider.send((GENERATE_CLICK_EVENT to model.id).toEvent())
     }
 
     private fun getSecretText(): String = secretText.value?.trim() ?: EMPTY
@@ -61,4 +67,9 @@ class SecretPropertyCellViewModel(
     private fun getConfirmationText(): String = confirmationText.value?.trim() ?: EMPTY
 
     private fun isConfirmationVisibleInternal() = isConfirmationVisible.value ?: false
+
+    companion object {
+        val GENERATE_CLICK_EVENT =
+            SecretPropertyCellViewModel::class.simpleName + "_generateClickEvent"
+    }
 }

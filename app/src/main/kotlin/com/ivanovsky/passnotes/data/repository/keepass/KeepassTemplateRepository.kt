@@ -77,7 +77,8 @@ class KeepassTemplateRepository(
         }
 
         val templateGroup = GroupEntity(
-            title = TEMPLATE_GROUP_NAME
+            title = TEMPLATE_GROUP_NAME,
+            parentUid = rootGroup.uid
         )
         val insertGroupResult = groupDao.insert(templateGroup, doCommit)
         if (insertGroupResult.isFailed) {

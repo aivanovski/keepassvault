@@ -12,15 +12,16 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.FilePickerFragmentBinding
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.PermissionHelper.Companion.SDCARD_PERMISSION
+import com.ivanovsky.passnotes.domain.entity.StoragePermissionType
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
+import com.ivanovsky.passnotes.presentation.core.dialog.AllFilesPermissionDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.filepicker.Action.PICK_DIRECTORY
 import com.ivanovsky.passnotes.presentation.filepicker.Action.PICK_FILE
-import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel.PermissionType
 
 class FilePickerFragment : FragmentWithDoneButton() {
 
@@ -110,17 +111,20 @@ class FilePickerFragment : FragmentWithDoneButton() {
         viewModel.showSnackbarMessageEvent.observe(viewLifecycleOwner) { message ->
             showSnackbarMessage(message)
         }
+        viewModel.showAllFilePermissionDialogEvent.observe(viewLifecycleOwner) {
+            showAllFilePermissionDialog()
+        }
     }
 
-    private fun requestPermission(type: PermissionType) {
+    private fun requestPermission(type: StoragePermissionType) {
         when (type) {
-            PermissionType.ALL_FILES_ACCESS -> {
+            StoragePermissionType.ALL_FILES_ACCESS -> {
                 permissionHelper.requestManageAllFilesPermission(
                     this,
                     REQUEST_CODE_ALL_FILES_PERMISSION
                 )
             }
-            PermissionType.SDCARD_PERMISSION -> {
+            StoragePermissionType.SDCARD_PERMISSION -> {
                 permissionHelper.requestPermission(this, SDCARD_PERMISSION, REQUEST_CODE_PERMISSION)
             }
         }
@@ -138,6 +142,22 @@ class FilePickerFragment : FragmentWithDoneButton() {
                 isGranted = permissionHelper.isAllGranted(grantResults)
             )
         }
+    }
+
+    private fun showAllFilePermissionDialog() {
+        val dialog = AllFilesPermissionDialog.newInstance()
+            .apply {
+                onPositiveClicked = {
+                    permissionHelper.requestManageAllFilesPermission(
+                        this,
+                        REQUEST_CODE_ALL_FILES_PERMISSION
+                    )
+                }
+                onNegativeClicked = {
+                    viewModel.navigateToPreviousScreen()
+                }
+            }
+        dialog.show(childFragmentManager, AllFilesPermissionDialog.TAG)
     }
 
     companion object {

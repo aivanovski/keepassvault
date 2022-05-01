@@ -223,7 +223,7 @@ object KoinModule {
             // TODO: factory {} can be replaced with viewModel {}
             //  that will exclude necessity of ViewModelProvider.Factory for each VM
             factory { (args: StorageListArgs) -> StorageListViewModel(get(), get(), get(), get(), get(), get(), get(), args) }
-            factory { (args: FilePickerArgs) -> FilePickerViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: FilePickerArgs) -> FilePickerViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
             viewModel { GroupEditorViewModel(get(), get(), get(), get()) }
             viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }

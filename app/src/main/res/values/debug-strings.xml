@@ -17,6 +17,8 @@
     <string name="hooks_with_dots" translatable="false">Hooks:</string>
     <string name="use_external_storage_for_remote_files" translatable="false">Use External storage for remote files</string>
     <string name="device_file_system" translatable="false">Device file system</string>
+    <string name="internal_storage" translatable="false">Internal storage</string>
+    <string name="external_storage" translatable="false">External storage</string>
     <string name="file_read" translatable="false">File read</string>
     <string name="file_wrote" translatable="false">File wrote</string>
     <string name="file_is_not_loaded" translatable="false">File is not loaded</string>

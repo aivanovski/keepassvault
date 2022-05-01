@@ -15,6 +15,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
+import com.ivanovsky.passnotes.extensions.toFileDescriptor
 import com.ivanovsky.passnotes.util.InputOutputUtils
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileOutputStreamOrNull
@@ -152,7 +153,9 @@ class DebugMenuInteractor(
 
         val dbFile = fileHelper.generateDestinationFileForRemoteFile()
         if (dbFile != null) {
-            val dbDescriptor = FileDescriptor.fromRegularFile(dbFile)
+            val dbDescriptor = dbFile.toFileDescriptor(
+                fsAuthority = getFsAuthorityForFile(dbFile)
+            )
             val key = PasswordKeepassKey(password)
 
             val creationResult = dbRepository.createNew(key, dbDescriptor, false)
@@ -231,7 +234,10 @@ class DebugMenuInteractor(
 
         val key = PasswordKeepassKey(password)
 
-        val openResult = dbRepository.open(key, FileDescriptor.fromRegularFile(file), FSOptions.DEFAULT)
+        val descriptor = file.toFileDescriptor(
+            fsAuthority = getFsAuthorityForFile(file)
+        )
+        val openResult = dbRepository.open(key, descriptor, FSOptions.DEFAULT)
         if (openResult.isSucceededOrDeferred) {
             result.obj = true
         } else {
@@ -347,5 +353,13 @@ class DebugMenuInteractor(
         }
 
         return result
+    }
+
+    private fun getFsAuthorityForFile(file: File): FSAuthority {
+        return if (fileHelper.isLocatedInInternalStorage(file)) {
+            FSAuthority.INTERNAL_FS_AUTHORITY
+        } else {
+            FSAuthority.EXTERNAL_FS_AUTHORITY
+        }
     }
 }

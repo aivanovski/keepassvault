@@ -1,5 +1,14 @@
 package com.ivanovsky.passnotes.util
 
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+
 object FileUtils {
 
     const val ROOT_PATH = "/"
@@ -53,5 +62,13 @@ object FileUtils {
         } else {
             ""
         }
+    }
+
+    @JvmStatic
+    @Throws(IOException::class)
+    fun copyFile(source: File, destination: File) {
+        val input: InputStream = BufferedInputStream(FileInputStream(source))
+        val output: OutputStream = BufferedOutputStream(FileOutputStream(destination))
+        InputOutputUtils.copy(input, output, true)
     }
 }

@@ -55,7 +55,7 @@ class DebugMenuViewModel(
 
     private var lastReadDescriptor: FileDescriptor? = null
     private var lastReadFile: File? = null
-    private var selectedFsType = FSType.REGULAR_FS
+    private var selectedFsType = FSType.INTERNAL_STORAGE
     private var uriFileDescriptor: FileDescriptor? = null
 
     fun onReadButtonClicked() {
@@ -348,13 +348,15 @@ class DebugMenuViewModel(
 
     private fun getSelectedFsAuthority(): FSAuthority {
         return when (selectedFsType) {
-            FSType.REGULAR_FS -> FSAuthority.REGULAR_FS_AUTHORITY
+            FSType.INTERNAL_STORAGE -> FSAuthority.INTERNAL_FS_AUTHORITY
+            FSType.EXTERNAL_STORAGE -> FSAuthority.EXTERNAL_FS_AUTHORITY
             FSType.SAF -> FSAuthority.SAF_FS_AUTHORITY
             FSType.DROPBOX -> FSAuthority.DROPBOX_FS_AUTHORITY
             FSType.WEBDAV -> {
                 val creds = interactor.getDebugWebDavCredentials()
                 FSAuthority(creds, selectedFsType)
             }
+            FSType.UNDEFINED -> throw IllegalArgumentException()
         }
     }
 

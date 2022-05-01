@@ -24,6 +24,7 @@ import com.ivanovsky.passnotes.data.repository.file.SyncStrategy;
 import com.ivanovsky.passnotes.domain.FileHelper;
 import com.ivanovsky.passnotes.domain.SyncStrategyResolver;
 import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
+import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
 import com.ivanovsky.passnotes.util.LongExtKt;
 
@@ -353,7 +354,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
         File buffer = fileHelper.generateDestinationFileForRemoteFile();
         if (buffer != null) {
             try {
-                fileHelper.duplicateFile(file, buffer);
+                FileUtils.copyFile(file, buffer);
 
                 InputStream in = newFileInputStreamOrNull(buffer);
                 if (in != null) {

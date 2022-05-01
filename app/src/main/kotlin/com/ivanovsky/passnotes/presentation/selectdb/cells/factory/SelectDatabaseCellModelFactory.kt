@@ -50,7 +50,9 @@ class SelectDatabaseCellModelFactory(
         syncState: SyncState?
     ): BaseCellModel {
         val fsType = file.fsAuthority.type
-        val isStatusVisible = (fsType != FSType.REGULAR_FS && fsType != FSType.SAF)
+        val isStatusVisible = (fsType != FSType.INTERNAL_STORAGE &&
+            fsType != FSType.EXTERNAL_STORAGE &&
+            fsType != FSType.SAF)
 
         return DatabaseFileCellModel(
             id = cellUid,

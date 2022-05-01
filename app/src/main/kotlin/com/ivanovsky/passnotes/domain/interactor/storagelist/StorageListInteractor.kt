@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.domain.interactor.storagelist
 
 import android.content.Context
-import android.os.Environment
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
@@ -26,44 +25,54 @@ class StorageListInteractor(
     private val dispatchers: DispatcherProvider
 ) {
 
-    fun getStorageOptions(action: Action): List<StorageOption> {
-        return when (action) {
-            Action.PICK_FILE -> {
-                listOf(
-                    createPrivateStorageOption(),
-                    createSafStorageOption(),
-                    createExternalStorageOption(),
-                    // createDropboxOption(),
-                    createWebDavOption()
-                )
+    suspend fun getStorageOptions(action: Action): OperationResult<List<StorageOption>> =
+        withContext(dispatchers.IO) {
+            val getInternalRootResult = fileSystemResolver
+                .resolveProvider(FSAuthority.INTERNAL_FS_AUTHORITY)
+                .rootFile
+            if (getInternalRootResult.isFailed) {
+                return@withContext getInternalRootResult.takeError()
             }
-            Action.PICK_STORAGE -> {
-                listOf(
-                    createPrivateStorageOption(),
-                    createSafStorageOption(),
-                    createExternalStorageOption(),
-                    // createDropboxOption(),
-                    createWebDavOption()
-                )
-            }
-        }
-    }
 
-    private fun createPrivateStorageOption(): StorageOption {
+            val getExternalRootResult = fileSystemResolver
+                .resolveProvider(FSAuthority.EXTERNAL_FS_AUTHORITY)
+                .rootFile
+
+            val internalRoot = getInternalRootResult.obj
+            val externalRoot = if (getExternalRootResult.isSucceeded) {
+                getExternalRootResult.obj
+            } else {
+                null
+            }
+
+            val options = mutableListOf(
+                createPrivateStorageOption(internalRoot),
+                createSafStorageOption()
+            )
+
+            if (externalRoot != null) {
+                options.add(createExternalStorageOption(externalRoot))
+            }
+
+            // options.add(createDropboxOption())
+            options.add(createWebDavOption())
+
+            OperationResult.success(options)
+        }
+
+    private fun createPrivateStorageOption(root: FileDescriptor): StorageOption {
         return StorageOption(
             PRIVATE_STORAGE,
             context.getString(R.string.private_app_storage),
-            createPrivateStorageDir()
+            root
         )
     }
 
-    @Suppress("DEPRECATION")
-    private fun createExternalStorageOption(): StorageOption {
+    private fun createExternalStorageOption(root: FileDescriptor): StorageOption {
         return StorageOption(
             EXTERNAL_STORAGE,
             context.getString(R.string.external_storage_app_picker),
-            FileDescriptor.fromRegularFile(Environment.getExternalStorageDirectory())
-                .copy(isRoot = true)
+            root
         )
     }
 
@@ -71,7 +80,7 @@ class StorageListInteractor(
         return StorageOption(
             SAF_STORAGE,
             context.getString(R.string.external_storage_system_picker),
-            createExternalStorageDir()
+            createSafStorageDir()
         )
     }
 
@@ -91,11 +100,7 @@ class StorageListInteractor(
         )
     }
 
-    private fun createPrivateStorageDir(): FileDescriptor {
-        return FileDescriptor.fromRegularFile(context.filesDir)
-    }
-
-    private fun createExternalStorageDir(): FileDescriptor {
+    private fun createSafStorageDir(): FileDescriptor {
         return FileDescriptor(
             fsAuthority = FSAuthority.SAF_FS_AUTHORITY,
             path = ROOT_PATH,

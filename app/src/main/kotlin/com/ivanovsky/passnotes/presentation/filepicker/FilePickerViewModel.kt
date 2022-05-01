@@ -1,19 +1,19 @@
 package com.ivanovsky.passnotes.presentation.filepicker
 
-import android.os.Build
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.data.repository.file.AuthType
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.PermissionHelper
-import com.ivanovsky.passnotes.domain.PermissionHelper.Companion.SDCARD_PERMISSION
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.StoragePermissionType
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
@@ -36,6 +36,7 @@ import org.koin.core.parameter.parametersOf
 class FilePickerViewModel(
     private val interactor: FilePickerInteractor,
     private val errorInteractor: ErrorInteractor,
+    private val fileSystemResolver: FileSystemResolver,
     private val modelFactory: FilePickerCellModelFactory,
     private val viewModelFactory: FilePickerCellViewModelFactory,
     private val resourceProvider: ResourceProvider,
@@ -51,7 +52,8 @@ class FilePickerViewModel(
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
     val isDoneButtonVisible = MutableLiveData<Boolean>()
-    val requestPermissionEvent = SingleLiveEvent<PermissionType>()
+    val requestPermissionEvent = SingleLiveEvent<StoragePermissionType>()
+    val showAllFilePermissionDialogEvent = SingleLiveEvent<Unit>()
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
     val currentPath = MutableLiveData(EMPTY)
 
@@ -77,29 +79,45 @@ class FilePickerViewModel(
             currentDir = args.rootFile
         }
 
-        if (isUsingDeviceFileSystem()) {
-            if (isPermissionWasRejectedAndGrantedFromBackground()) {
-                isPermissionRejected = false
-                loadData()
-                return
-            } else if (isPermissionRejectedFromBackground() || isPermissionRejected) {
-                return
-            }
+        val authenticator = fileSystemResolver
+            .resolveProvider(args.rootFile.fsAuthority)
+            .authenticator
+        val authType = authenticator.getAuthType()
 
-            if (!hasFileAccessPermission()) {
-                setScreenState(
-                    ScreenState.error(
-                        resourceProvider.getString(R.string.permission_denied_message)
-                    )
+        if (authenticator.isAuthenticationRequired() &&
+            authType != AuthType.SDCARD_PERMISSION &&
+            authType != AuthType.ALL_FILES_PERMISSION) {
+            setScreenState(
+                ScreenState.error(
+                    errorText = resourceProvider.getString(R.string.unable_to_authenticate)
                 )
+            )
+            return
+        }
 
-                getNecessaryPermissionType()?.let {
-                    requestPermissionEvent.call(it)
+        if (isPermissionWasRejectedAndGrantedFromBackground()) {
+            isPermissionRejected = false
+            loadData()
+            return
+        } else if (isPermissionRejectedFromBackground() || isPermissionRejected) {
+            return
+        }
+
+        if (authenticator.isAuthenticationRequired()) {
+            setScreenState(
+                ScreenState.error(
+                    resourceProvider.getString(R.string.permission_is_required)
+                )
+            )
+
+            permissionHelper.getRequiredFilePermissionType()?.let { permission ->
+                if (permission == StoragePermissionType.ALL_FILES_ACCESS) {
+                    showAllFilePermissionDialogEvent.call()
+                } else {
+                    requestPermissionEvent.call(permission)
                 }
-            } else if (shouldReloadData()) {
-                loadData()
             }
-        } else if (shouldReloadData()) {
+        } else {
             loadData()
         }
     }
@@ -130,7 +148,7 @@ class FilePickerViewModel(
         } else {
             setScreenState(
                 ScreenState.error(
-                    resourceProvider.getString(R.string.permission_denied_message)
+                    resourceProvider.getString(R.string.permission_is_required)
                 )
             )
         }
@@ -316,38 +334,18 @@ class FilePickerViewModel(
 
     private fun isAnyFileSelected(): Boolean = (selectedFile != null)
 
-    private fun hasFileAccessPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= 30) {
-            permissionHelper.isAllFilesPermissionGranted()
-        } else {
-            permissionHelper.isPermissionGranted(SDCARD_PERMISSION)
-        }
-    }
-
-    private fun isUsingDeviceFileSystem(): Boolean {
-        return args.rootFile.fsAuthority.type == FSType.REGULAR_FS
-    }
-
-    private fun getNecessaryPermissionType(): PermissionType? {
-        return when {
-            hasFileAccessPermission() -> null
-            Build.VERSION.SDK_INT >= 30 -> PermissionType.ALL_FILES_ACCESS
-            else -> PermissionType.SDCARD_PERMISSION
-        }
-    }
-
     private fun isPermissionWasRejectedAndGrantedFromBackground(): Boolean {
         val currentScreenState = screenState.value ?: return false
 
         return isPermissionRejected &&
-            hasFileAccessPermission() &&
+            permissionHelper.hasFileAccessPermission() &&
             !currentScreenState.isDisplayingData
     }
 
     private fun isPermissionRejectedFromBackground(): Boolean {
         val currentScreenState = screenState.value ?: return false
 
-        return !hasFileAccessPermission() &&
+        return !permissionHelper.hasFileAccessPermission() &&
             (currentScreenState.isDisplayingData || currentScreenState.isDisplayingEmptyState)
     }
 
@@ -365,10 +363,5 @@ class FilePickerViewModel(
                 parametersOf(args)
             ) as T
         }
-    }
-
-    enum class PermissionType {
-        SDCARD_PERMISSION,
-        ALL_FILES_ACCESS
     }
 }

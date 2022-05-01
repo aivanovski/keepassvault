@@ -124,13 +124,20 @@ class StorageListViewModel(
         screenState.value = ScreenState.loading()
 
         viewModelScope.launch {
-            val options = interactor.getStorageOptions(args.action)
+            val getOptionsResult = interactor.getStorageOptions(args.action)
+            if (getOptionsResult.isSucceededOrDeferred) {
+                val options = getOptionsResult.obj
+                storageOptions = options
 
-            val cellModels = modelFactory.createCellModel(options)
-            setCellElements(viewModelFactory.createCellViewModels(cellModels, eventProvider))
+                val cellModels = modelFactory.createCellModel(options)
+                setCellElements(viewModelFactory.createCellViewModels(cellModels, eventProvider))
 
-            storageOptions = options
-            screenState.value = ScreenState.data()
+                screenState.value = ScreenState.data()
+            } else {
+                screenState.value = ScreenState.error(
+                    errorText = errorInteractor.processAndGetMessage(getOptionsResult.error)
+                )
+            }
         }
     }
 

@@ -14,18 +14,29 @@ class StorageListCellModelFactory(
 
     fun createCellModel(options: List<StorageOption>): List<BaseCellModel> {
         return options.map { option ->
-            if (option.type == StorageOptionType.SAF_STORAGE) {
-                TwoTextWithIconCellModel(
-                    id = option.type.name,
-                    title = option.title,
-                    description = resourceProvider.getString(R.string.saf_warning_message),
-                    iconResId = R.drawable.ic_info_grey_600_24dp
-                )
-            } else {
-                SingleTextCellModel(
-                    id = option.type.name,
-                    text = option.title
-                )
+            when (option.type) {
+                StorageOptionType.SAF_STORAGE -> {
+                    TwoTextWithIconCellModel(
+                        id = option.type.name,
+                        title = option.title,
+                        description = resourceProvider.getString(R.string.saf_warning_message),
+                        iconResId = R.drawable.ic_info_grey_600_24dp
+                    )
+                }
+                StorageOptionType.EXTERNAL_STORAGE -> {
+                    TwoTextWithIconCellModel(
+                        id = option.type.name,
+                        title = option.title,
+                        description = resourceProvider.getString(R.string.requires_permission),
+                        iconResId = R.drawable.ic_info_grey_600_24dp
+                    )
+                }
+                else -> {
+                    SingleTextCellModel(
+                        id = option.type.name,
+                        text = option.title
+                    )
+                }
             }
         }
     }

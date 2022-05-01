@@ -36,6 +36,7 @@
     <string name="sort_and_view">Sort &amp; View</string>
     <string name="login">Login</string>
     <string name="refresh">Refresh</string>
+    <string name="grant">Grant</string>
 
     <!-- Lock notification -->
     <string name="lock_notification_channel">Quick Lock</string>
@@ -197,12 +198,16 @@
     <string name="external_storage_app_picker">External storage (Built-in file picker)</string>
     <string name="authentication_failed">Authentication failed</string>
     <string name="saf_warning_message">Not recommended, access granted by System File Picker can be temporal</string>
+    <string name="requires_permission">Requires permission</string>
 
     <!-- File picker screen -->
     <string name="select_directory">Select directory</string>
     <string name="select_file">Select file</string>
-    <string name="permission_denied_message">Permission is required</string>
+    <string name="permission_is_required">Permission is required</string>
     <string name="please_select_any_file">Please select any file</string>
+    <string name="all_files_permission_dialog_title">Grant permission</string>
+    <string name="all_files_permission_dialog_message">To complete this action application needs the permission to manage all files. After pressing "Grant" button, please select <b>Allow access to manage all files</b> option on the next screen</string>
+    <string name="unable_to_authenticate">Unable to authenticate</string>
 
     <!-- Server screen -->
     <string name="enter_server_credentials">Enter server credentials</string>

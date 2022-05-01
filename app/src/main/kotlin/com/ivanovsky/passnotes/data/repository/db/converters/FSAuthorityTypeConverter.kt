@@ -33,7 +33,7 @@ class FSAuthorityTypeConverter(
 
             return FSAuthority(
                 credentials = credentials,
-                type = FSType.findByValue(obj.optString(FS_TYPE)) ?: FSType.REGULAR_FS
+                type = FSType.findByValue(obj.optString(FS_TYPE)) ?: FSType.UNDEFINED
             )
         } catch (e: JSONException) {
             Timber.e("Failed to parse ${FSAuthority::class.simpleName} object: exception=%s", e)

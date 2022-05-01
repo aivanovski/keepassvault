@@ -1,7 +1,9 @@
 package com.ivanovsky.passnotes.data.entity
 
 enum class FSType(val value: String) {
-    REGULAR_FS("REGULAR_FS"),
+    UNDEFINED("UNDEFINED"),
+    INTERNAL_STORAGE("INTERNAL_STORAGE"),
+    EXTERNAL_STORAGE("EXTERNAL_STORAGE"),
     DROPBOX("DROPBOX"),
     WEBDAV("WEBDAV"),
     SAF("STORAGE_ACCESS_FRAMEWORK");

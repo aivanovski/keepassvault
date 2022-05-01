@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Environment
 import com.ivanovsky.passnotes.data.entity.FSAuthority
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
@@ -34,14 +35,14 @@ import java.io.OutputStream
 import java.util.concurrent.locks.ReentrantLock
 
 class RegularFileSystemProvider(
-    private val context: Context
+    private val context: Context,
+    private val fsAuthority: FSAuthority
 ) : FileSystemProvider {
 
-    private val fsAuthority = FSAuthority.REGULAR_FS_AUTHORITY
     private val lock = ReentrantLock()
-    private val authenticator = RegularFileSystemAuthenticator()
     private val syncProcessor = RegularFileSystemSyncProcessor()
     private val permissionHelper = PermissionHelper(context)
+    private val authenticator = createAuthenticator(fsAuthority.type)
 
     override fun getAuthenticator(): FileSystemAuthenticator {
         return authenticator
@@ -100,13 +101,17 @@ class RegularFileSystemProvider(
     }
 
     override fun getRootFile(): OperationResult<FileDescriptor> {
-        val path = getExternalRoots().firstOrNull()
-            ?: return OperationResult.error(newFileNotFoundError())
-
-        val check = checkPermissionForPath(path)
-        if (check.isFailed) {
-            return check.takeError()
-        }
+        val path = when (fsAuthority.type) {
+            FSType.INTERNAL_STORAGE -> {
+                getInternalRoot()
+            }
+            FSType.EXTERNAL_STORAGE -> {
+                getExternalRoots().firstOrNull()
+            }
+            else -> {
+                throw IllegalStateException()
+            }
+        } ?: return OperationResult.error(newFileNotFoundError())
 
         val root = File(path)
         return if (root.exists()) {
@@ -256,7 +261,7 @@ class RegularFileSystemProvider(
     private fun getExternalRoots(): List<String> {
         val roots = mutableListOf<String>()
 
-        val external = Environment.getExternalStorageDirectory();
+        val external = Environment.getExternalStorageDirectory()
         if (external.exists() && !roots.contains(external.path)) {
             roots.add(external.path)
         }
@@ -281,6 +286,14 @@ class RegularFileSystemProvider(
     private fun isPathInsideExternalStorage(path: String): Boolean {
         return getExternalRoots()
             .any { root -> path == root || path.startsWith(root) }
+    }
+
+    private fun createAuthenticator(fsType: FSType): FileSystemAuthenticator {
+        return when (fsType) {
+            FSType.INTERNAL_STORAGE -> InternalStorageAuthenticator()
+            FSType.EXTERNAL_STORAGE -> ExternalStorageAuthenticator(permissionHelper)
+            else -> throw IllegalArgumentException()
+        }
     }
 
     companion object {

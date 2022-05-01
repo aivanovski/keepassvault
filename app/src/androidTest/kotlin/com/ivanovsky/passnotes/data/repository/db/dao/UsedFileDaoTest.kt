@@ -112,7 +112,7 @@ class UsedFileDaoTest {
                     username = "firstUsername",
                     password = "firstPassword"
                 ),
-                type = FSType.REGULAR_FS
+                type = FSType.INTERNAL_STORAGE
             ),
             filePath = "/firsFilePath",
             fileUid = "firstFileUir",
@@ -125,7 +125,7 @@ class UsedFileDaoTest {
                     username = "keyFilUsername",
                     password = "keyFilePassword"
                 ),
-                type = FSType.REGULAR_FS
+                type = FSType.INTERNAL_STORAGE
             ),
             keyFilePath = "firstKeyFilePath",
             keyFileUid = "firstKeyFileUid",

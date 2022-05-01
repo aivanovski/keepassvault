@@ -131,7 +131,8 @@ class DebugMenuFragment : BaseFragment() {
         private const val REQUEST_CODE_PICK_FILE = 1
 
         private val FILE_SYSTEM_ITEMS = listOf(
-            FSType.REGULAR_FS to R.string.device_file_system,
+            FSType.INTERNAL_STORAGE to R.string.internal_storage,
+            FSType.EXTERNAL_STORAGE to R.string.external_storage,
             FSType.SAF to R.string.storage_access_framework,
             FSType.DROPBOX to R.string.dropbox,
             FSType.WEBDAV to R.string.webdav

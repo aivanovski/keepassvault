@@ -24,7 +24,10 @@ fun FileDescriptor.toUsedFile(
 
 fun FileDescriptor.formatReadablePath(resourceProvider: ResourceProvider): String {
     return when (fsAuthority.type) {
-        FSType.REGULAR_FS -> {
+        FSType.UNDEFINED -> {
+            path
+        }
+        FSType.INTERNAL_STORAGE, FSType.EXTERNAL_STORAGE -> {
             path
         }
         FSType.DROPBOX -> {

@@ -54,8 +54,11 @@ class FileSystemResolver(
 
     private fun instantiateProvider(fsAuthority: FSAuthority): FileSystemProvider {
         return when (fsAuthority.type) {
-            FSType.REGULAR_FS -> {
-                RegularFileSystemProvider(context)
+            FSType.INTERNAL_STORAGE -> {
+                RegularFileSystemProvider(context, FSAuthority.INTERNAL_FS_AUTHORITY)
+            }
+            FSType.EXTERNAL_STORAGE -> {
+                RegularFileSystemProvider(context, FSAuthority.EXTERNAL_FS_AUTHORITY)
             }
             FSType.DROPBOX -> {
                 val authenticator = DropboxAuthenticator(settings)
@@ -83,6 +86,7 @@ class FileSystemResolver(
             FSType.SAF -> {
                 SAFFileSystemProvider(context)
             }
+            FSType.UNDEFINED -> throw IllegalStateException()
         }
     }
 }

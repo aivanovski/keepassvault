@@ -179,10 +179,10 @@ class NewDatabaseViewModel(
 
     private fun onStorageSelected(selectedFile: FileDescriptor) {
         when (selectedFile.fsAuthority.type) {
-            FSType.REGULAR_FS -> {
+            FSType.INTERNAL_STORAGE, FSType.EXTERNAL_STORAGE -> {
                 selectedStorage = SelectedStorage.ParentDir(selectedFile)
 
-                if (fileHelper.isLocatedInPrivateStorage(File(selectedFile.path))) {
+                if (fileHelper.isLocatedInInternalStorage(File(selectedFile.path))) {
                     storageType.value = resourceProvider.getString(R.string.private_storage)
                 } else {
                     storageType.value = resourceProvider.getString(R.string.public_storage)
@@ -200,6 +200,9 @@ class NewDatabaseViewModel(
                 selectedStorage = SelectedStorage.File(selectedFile)
                 storageType.value = resourceProvider.getString(R.string.public_storage)
                 filename.value = removeFileExtensionsIfNeed(selectedFile.name)
+            }
+            FSType.UNDEFINED -> {
+
             }
         }
 

@@ -22,8 +22,10 @@ class UnlockCellModelFactory(
         onFileClicked: (file: FileDescriptor) -> Unit
     ): DatabaseCellModel {
         val fsType = file.fsAuthority.type
-        val isStatusVisible =
-            (fsType != FSType.SAF && fsType != FSType.REGULAR_FS && syncState?.status != SyncStatus.CONFLICT)
+        val isStatusVisible = (fsType != FSType.SAF &&
+            fsType != FSType.INTERNAL_STORAGE &&
+            fsType != FSType.EXTERNAL_STORAGE &&
+            syncState?.status != SyncStatus.CONFLICT)
 
         return DatabaseCellModel(
             id = file.uid,

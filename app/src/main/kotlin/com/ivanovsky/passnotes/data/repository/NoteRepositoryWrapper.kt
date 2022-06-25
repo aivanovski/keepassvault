@@ -4,7 +4,9 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import java.util.UUID
 
-class NoteRepositoryWrapper : RepositoryWrapperWithDatabase(), NoteRepository {
+class NoteRepositoryWrapper(
+    dbRepo: EncryptedDatabaseRepository
+) : RepositoryWrapperWithDatabase(dbRepo), NoteRepository {
 
     override fun getNotesByGroupUid(groupUid: UUID): OperationResult<MutableList<Note>> {
         val db = getDatabase() ?: return noDatabaseError()

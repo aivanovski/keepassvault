@@ -5,7 +5,9 @@ import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import java.util.UUID
 
-class GroupRepositoryWrapper : RepositoryWrapperWithDatabase(), GroupRepository {
+class GroupRepositoryWrapper(
+    dbRepo: EncryptedDatabaseRepository
+) : RepositoryWrapperWithDatabase(dbRepo), GroupRepository {
 
     override fun getGroupByUid(groupUid: UUID): OperationResult<Group> {
         val db = getDatabase() ?: return noDatabaseError()

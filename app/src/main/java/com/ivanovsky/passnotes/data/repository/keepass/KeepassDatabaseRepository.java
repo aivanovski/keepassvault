@@ -14,7 +14,6 @@ import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.GroupRepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepositoryWrapper;
-import com.ivanovsky.passnotes.data.repository.RepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.TemplateRepository;
 import com.ivanovsky.passnotes.data.repository.TemplateRepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
@@ -30,8 +29,6 @@ import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.List;
 
 import timber.log.Timber;
 
@@ -51,8 +48,6 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     private final DatabaseLockInteractor lockInteractor;
     private final ObserverBus observerBus;
     private final Object lock;
-    @NonNull
-    private final List<RepositoryWrapper> repositoryWrappers;
 
     public KeepassDatabaseRepository(Context context,
                                      FileSystemResolver fileSystemResolver,
@@ -63,15 +58,9 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
         this.lockInteractor = lockInteractor;
         this.observerBus = observerBus;
         this.lock = new Object();
-        templateRepositoryWrapper = new TemplateRepositoryWrapper();
-        groupRepositoryWrapper = new GroupRepositoryWrapper();
-        noteRepositoryWrapper = new NoteRepositoryWrapper();
-
-        repositoryWrappers = Arrays.asList(
-                templateRepositoryWrapper,
-                groupRepositoryWrapper,
-                noteRepositoryWrapper
-        );
+        templateRepositoryWrapper = new TemplateRepositoryWrapper(this);
+        groupRepositoryWrapper = new GroupRepositoryWrapper(this);
+        noteRepositoryWrapper = new NoteRepositoryWrapper(this);
     }
 
     @Override
@@ -210,19 +199,11 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     }
 
     private void onDatabaseOpened(FSOptions fsOptions, DatabaseStatus status) {
-        for (RepositoryWrapper wrapper : repositoryWrappers) {
-            wrapper.onDatabaseOpened(db);
-        }
-
         lockInteractor.onDatabaseOpened(fsOptions, status);
         observerBus.notifyDatabaseOpened(fsOptions, status);
     }
 
     private void onDatabaseClosed() {
-        for (RepositoryWrapper wrapper : repositoryWrappers) {
-            wrapper.onDatabaseClosed();
-        }
-
         lockInteractor.onDatabaseClosed();
         observerBus.notifyDatabaseClosed();
     }

@@ -4,7 +4,9 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import java.util.UUID
 
-class TemplateRepositoryWrapper : RepositoryWrapperWithDatabase(), TemplateRepository {
+class TemplateRepositoryWrapper(
+    dbRepo: EncryptedDatabaseRepository
+) : RepositoryWrapperWithDatabase(dbRepo), TemplateRepository {
 
     override fun getTemplateGroupUid(): OperationResult<UUID?> {
         val db = getDatabase() ?: return noDatabaseError()

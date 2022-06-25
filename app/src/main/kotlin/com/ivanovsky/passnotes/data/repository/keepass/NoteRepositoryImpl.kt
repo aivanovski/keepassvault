@@ -7,7 +7,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Property
 import java.util.UUID
 
-class KeepassNoteRepository(private val dao: NoteDao) : NoteRepository {
+class NoteRepositoryImpl(private val dao: NoteDao) : NoteRepository {
 
     override fun getNotesByGroupUid(groupUid: UUID): OperationResult<List<Note>> {
         return dao.getNotesByGroupUid(groupUid)

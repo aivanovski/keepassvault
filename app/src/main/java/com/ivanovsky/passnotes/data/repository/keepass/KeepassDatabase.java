@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.linguafranca.pwdb.Credentials;
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
@@ -51,9 +50,9 @@ public class KeepassDatabase implements EncryptedDatabase {
     @NonNull
     private final FileDescriptor file;
     @NonNull
-    private final KeepassGroupRepository groupRepository;
+    private final GroupRepositoryImpl groupRepository;
     @NonNull
-    private final KeepassNoteRepository noteRepository;
+    private final NoteRepositoryImpl noteRepository;
     @NonNull
     private final KeepassTemplateRepository templateRepository;
     @NonNull
@@ -163,8 +162,8 @@ public class KeepassDatabase implements EncryptedDatabase {
         KeepassNoteDao noteDao = new KeepassNoteDao(this);
         KeepassGroupDao groupDao = new KeepassGroupDao(this);
 
-        groupRepository = new KeepassGroupRepository(groupDao);
-        noteRepository = new KeepassNoteRepository(noteDao);
+        groupRepository = new GroupRepositoryImpl(groupDao);
+        noteRepository = new NoteRepositoryImpl(noteDao);
         templateRepository = new KeepassTemplateRepository(groupDao, noteDao);
 
         templateRepository.findTemplateNotes();

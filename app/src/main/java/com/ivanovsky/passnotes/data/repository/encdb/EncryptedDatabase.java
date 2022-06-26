@@ -9,10 +9,12 @@ import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.TemplateRepository;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 public interface EncryptedDatabase {
 
     @NonNull
-    Object getLock();
+    ReentrantLock getLock();
 
     @NonNull
     FileDescriptor getFile();

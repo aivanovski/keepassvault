@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
@@ -60,7 +61,7 @@ public class KeepassDatabase implements EncryptedDatabase {
     @NonNull
     private final SimpleDatabase db;
     @NonNull
-    private final Object lock;
+    private final ReentrantLock lock;
     @NonNull
     private final AtomicReference<DatabaseStatus> status;
     @NonNull
@@ -157,7 +158,7 @@ public class KeepassDatabase implements EncryptedDatabase {
         this.status = new AtomicReference<>(status);
         this.statusListener = statusListener;
 
-        lock = new Object();
+        lock = new ReentrantLock();
 
         KeepassNoteDao noteDao = new KeepassNoteDao(this);
         KeepassGroupDao groupDao = new KeepassGroupDao(this);
@@ -171,7 +172,7 @@ public class KeepassDatabase implements EncryptedDatabase {
 
     @NonNull
     @Override
-    public Object getLock() {
+    public ReentrantLock getLock() {
         return lock;
     }
 
@@ -191,8 +192,12 @@ public class KeepassDatabase implements EncryptedDatabase {
     @Override
     public OperationResult<EncryptedDatabaseConfig> getConfig() {
         KeepassDatabaseConfig config;
-        synchronized (lock) {
+
+        lock.lock();
+        try {
             config = new KeepassDatabaseConfig(db.isRecycleBinEnabled());
+        } finally {
+            lock.unlock();
         }
 
         return OperationResult.success(config);
@@ -206,12 +211,16 @@ public class KeepassDatabase implements EncryptedDatabase {
         }
 
         OperationResult<Boolean> result;
-        synchronized (lock) {
+
+        lock.lock();
+        try {
             if (db.isRecycleBinEnabled() != config.isRecycleBinEnabled()) {
                 db.enableRecycleBin(config.isRecycleBinEnabled());
             }
 
             result = commit();
+        } finally {
+            lock.unlock();
         }
 
         return result;
@@ -240,7 +249,8 @@ public class KeepassDatabase implements EncryptedDatabase {
     public OperationResult<Boolean> commit() {
         OperationResult<Boolean> result = new OperationResult<>();
 
-        synchronized (lock) {
+        lock.lock();
+        try {
             OperationResult<byte[]> getKeyResult = key.getKey();
             if (getKeyResult.isFailed()) {
                 return getKeyResult.takeError();
@@ -288,6 +298,8 @@ public class KeepassDatabase implements EncryptedDatabase {
 
                 result.setError(newGenericIOError(e));
             }
+        } finally {
+            lock.unlock();
         }
 
         return result;
@@ -342,13 +354,16 @@ public class KeepassDatabase implements EncryptedDatabase {
     public OperationResult<Boolean> changeKey(@NonNull EncryptedDatabaseKey oldKey,
                                               @NonNull EncryptedDatabaseKey newKey) {
         OperationResult<Boolean> result;
-        synchronized (lock) {
+        lock.lock();
+        try {
             if (oldKey.equals(key) || (oldKey instanceof DefaultDatabaseKey)) {
                 key = newKey;
                 result = commit();
             } else {
                 result = OperationResult.error(newAuthError());
             }
+        } finally {
+            lock.unlock();
         }
 
         return result;

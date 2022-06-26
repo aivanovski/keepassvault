@@ -54,11 +54,14 @@ public class KeepassGroupDao implements GroupDao {
         SimpleDatabase keepassDb = db.getKeepassDatabase();
 
         SimpleGroup rootGroup;
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             rootGroup = keepassDb.getRootGroup();
             if (rootGroup == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_ROOT_GROUP));
             }
+        } finally {
+                db.getLock().unlock();
         }
 
         return OperationResult.success(createGroupFromKeepassGroup(rootGroup));
@@ -69,7 +72,8 @@ public class KeepassGroupDao implements GroupDao {
     public OperationResult<List<Group>> getChildGroups(UUID parentGroupUid) {
         List<Group> groups = new ArrayList<>();
 
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             SimpleGroup parentGroup = db.findGroupByUid(parentGroupUid);
 
             if (parentGroup == null) {
@@ -80,6 +84,8 @@ public class KeepassGroupDao implements GroupDao {
             if (childGroups != null) {
                 groups.addAll(createGroupsFromKeepassGroups(childGroups));
             }
+        } finally {
+            db.getLock().unlock();
         }
 
         return OperationResult.success(groups);
@@ -90,10 +96,13 @@ public class KeepassGroupDao implements GroupDao {
     public OperationResult<List<Group>> getAll() {
         List<Group> groups = new ArrayList<>();
 
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             SimpleDatabase keepassDb = db.getKeepassDatabase();
 
             putAllGroupsIntoListRecursively(groups, keepassDb.getRootGroup());
+        } finally {
+            db.getLock().unlock();
         }
 
         return OperationResult.success(groups);
@@ -146,7 +155,8 @@ public class KeepassGroupDao implements GroupDao {
         SimpleDatabase keepassDb = db.getKeepassDatabase();
 
         SimpleGroup newGroup;
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             if (group.getParentUid() == null) {
                 return OperationResult.error(newDbError(MESSAGE_PARENT_UID_IS_NULL));
             }
@@ -170,6 +180,8 @@ public class KeepassGroupDao implements GroupDao {
                     return commitResult.takeError();
                 }
             }
+        } finally {
+            db.getLock().unlock();
         }
 
         return OperationResult.success(newGroup.getUuid());
@@ -183,7 +195,8 @@ public class KeepassGroupDao implements GroupDao {
 
     @NonNull
     private OperationResult<Boolean> remove(UUID groupUid, boolean doCommit) {
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             boolean deleted = db.getKeepassDatabase().deleteGroup(groupUid);
             if (!deleted) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_COMPLETE_OPERATION));
@@ -195,6 +208,8 @@ public class KeepassGroupDao implements GroupDao {
                     return commitResult.takeError();
                 }
             }
+        } finally {
+            db.getLock().unlock();
         }
 
         notifyOnGroupRemoved(groupUid);
@@ -207,11 +222,14 @@ public class KeepassGroupDao implements GroupDao {
     public OperationResult<Group> getGroupByUid(@NonNull UUID groupUid) {
         SimpleGroup group;
 
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             group = db.findGroupByUid(groupUid);
             if (group == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
             }
+        } finally {
+            db.getLock().unlock();
         }
 
         return OperationResult.success(createGroupFromKeepassGroup(group));
@@ -222,7 +240,8 @@ public class KeepassGroupDao implements GroupDao {
     public OperationResult<Boolean> update(@NonNull GroupEntity group) {
         UUID groupUid = group.getUid();
 
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             if (group.getParentUid() == null) {
                 if (group.getUid() == null) {
                     return OperationResult.error(newDbError(MESSAGE_UID_IS_NULL));
@@ -308,6 +327,8 @@ public class KeepassGroupDao implements GroupDao {
             if (commitResult.isFailed()) {
                 return commitResult.takeError();
             }
+        } finally {
+            db.getLock().unlock();
         }
 
         return OperationResult.success(true);

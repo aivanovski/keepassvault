@@ -81,7 +81,8 @@ public class KeepassNoteDao implements NoteDao {
     public OperationResult<List<Note>> getAll() {
         List<Note> allNotes = new ArrayList<>();
 
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             OperationResult<List<Group>> allGroupsResult = db.getGroupRepository().getAllGroup();
             if (allGroupsResult.isFailed()) {
                 return allGroupsResult.takeError();
@@ -109,6 +110,8 @@ public class KeepassNoteDao implements NoteDao {
 
                 allNotes.addAll(notesResult.getObj());
             }
+        } finally {
+            db.getLock().unlock();
         }
 
         return OperationResult.success(allNotes);
@@ -119,7 +122,8 @@ public class KeepassNoteDao implements NoteDao {
     public OperationResult<List<Note>> getNotesByGroupUid(UUID groupUid) {
         List<Note> notes = new ArrayList<>();
 
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             SimpleGroup group = db.findGroupByUid(groupUid);
             if (group == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
@@ -129,6 +133,8 @@ public class KeepassNoteDao implements NoteDao {
             if (entries != null) {
                 notes.addAll(createNotesFromEntries(group.getEntries()));
             }
+        } finally {
+            db.getLock().unlock();
         }
 
         return OperationResult.success(notes);
@@ -215,7 +221,8 @@ public class KeepassNoteDao implements NoteDao {
     private OperationResult<UUID> insert(Note note, boolean notifyListener, boolean doCommit) {
         SimpleEntry newEntry;
 
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             SimpleGroup group = db.findGroupByUid(note.getGroupUid());
             if (group == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
@@ -233,6 +240,8 @@ public class KeepassNoteDao implements NoteDao {
                     return commitResult.takeError();
                 }
             }
+        } finally {
+            db.getLock().unlock();
         }
 
         UUID newEntryUid = newEntry.getUuid();
@@ -314,7 +323,8 @@ public class KeepassNoteDao implements NoteDao {
     @Override
     public OperationResult<Note> getNoteByUid(UUID noteUid) {
         Note note;
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             SimpleGroup rootGroup = db.getKeepassDatabase().getRootGroup();
             if (rootGroup == null) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_ROOT_GROUP));
@@ -326,6 +336,8 @@ public class KeepassNoteDao implements NoteDao {
             }
 
             note = createNoteFromEntry(entry);
+        } finally {
+            db.getLock().unlock();
         }
 
         return OperationResult.success(note);
@@ -342,7 +354,8 @@ public class KeepassNoteDao implements NoteDao {
 
         boolean isInTheSameGroup;
         Note currentNote;
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             OperationResult<Note> getNoteResult = getNoteByUid(newNote.getUid());
             if (getNoteResult.isFailed()) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
@@ -388,6 +401,8 @@ public class KeepassNoteDao implements NoteDao {
             if (commitResult.isFailed()) {
                 return commitResult.takeError();
             }
+        } finally {
+            db.getLock().unlock();
         }
 
         if (isInTheSameGroup) {
@@ -438,7 +453,8 @@ public class KeepassNoteDao implements NoteDao {
         boolean deleted;
         Note note;
 
-        synchronized (db.getLock()) {
+        db.getLock().lock();
+        try {
             OperationResult<Note> getNote = getNoteByUid(noteUid);
             if (getNote.isFailed()) {
                 return getNote.takeError();
@@ -457,6 +473,8 @@ public class KeepassNoteDao implements NoteDao {
                     return commitResult.takeError();
                 }
             }
+        } finally {
+            db.getLock().unlock();
         }
 
         if (notifyListeners) {

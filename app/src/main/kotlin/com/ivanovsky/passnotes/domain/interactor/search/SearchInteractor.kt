@@ -30,7 +30,7 @@ class SearchInteractor(
             }
 
             val db = dbResult.obj
-            val notesResult = db.noteRepository.find(query)
+            val notesResult = db.noteDao.find(query)
             if (notesResult.isFailed) {
                 return@withContext notesResult.takeError()
             }

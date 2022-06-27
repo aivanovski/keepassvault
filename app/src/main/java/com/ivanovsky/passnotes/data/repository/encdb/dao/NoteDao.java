@@ -30,4 +30,7 @@ public interface NoteDao {
 
     @NonNull
     OperationResult<Boolean> remove(UUID noteUid);
+
+    @NonNull
+    OperationResult<List<Note>> find(@NonNull String query);
 }

@@ -20,7 +20,7 @@ class UpdateNoteUseCase(
             }
 
             val db = getDbResult.obj
-            val updateResult = db.noteRepository.update(note)
+            val updateResult = db.noteDao.update(note)
             if (updateResult.isFailed) {
                 return@withContext updateResult.takeError()
             }

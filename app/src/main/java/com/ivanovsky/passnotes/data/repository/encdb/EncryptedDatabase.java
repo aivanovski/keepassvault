@@ -4,9 +4,9 @@ import androidx.annotation.NonNull;
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
-import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.TemplateDao;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
+import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 
 import java.util.concurrent.locks.ReentrantLock;
@@ -32,7 +32,7 @@ public interface EncryptedDatabase {
     GroupDao getGroupDao();
 
     @NonNull
-    NoteRepository getNoteRepository();
+    NoteDao getNoteDao();
 
     @NonNull
     TemplateDao getTemplateDao();

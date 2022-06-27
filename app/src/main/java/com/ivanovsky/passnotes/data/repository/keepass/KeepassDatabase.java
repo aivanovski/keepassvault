@@ -5,17 +5,17 @@ import androidx.annotation.Nullable;
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
-import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.TemplateDao;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseConfig;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
+import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.KeepassJavaGroupDao;
-import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao;
+import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.KeepassJavaNoteDao;
 import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.KeepassJavaTemplateDao;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 import com.ivanovsky.passnotes.util.FileUtils;
@@ -54,7 +54,7 @@ public class KeepassDatabase implements EncryptedDatabase {
     @NonNull
     private final KeepassJavaGroupDao groupDao;
     @NonNull
-    private final NoteRepositoryImpl noteRepository;
+    private final KeepassJavaNoteDao noteDao;
     @NonNull
     private final KeepassJavaTemplateDao templateDao;
     @NonNull
@@ -161,10 +161,8 @@ public class KeepassDatabase implements EncryptedDatabase {
 
         lock = new ReentrantLock();
 
-        KeepassNoteDao noteDao = new KeepassNoteDao(this);
+        noteDao = new KeepassJavaNoteDao(this);
         groupDao = new KeepassJavaGroupDao(this);
-
-        noteRepository = new NoteRepositoryImpl(noteDao);
         templateDao = new KeepassJavaTemplateDao(groupDao, noteDao);
 
         templateDao.findTemplateNotes();
@@ -234,8 +232,8 @@ public class KeepassDatabase implements EncryptedDatabase {
 
     @NonNull
     @Override
-    public NoteRepository getNoteRepository() {
-        return noteRepository;
+    public NoteDao getNoteDao() {
+        return noteDao;
     }
 
     @NonNull

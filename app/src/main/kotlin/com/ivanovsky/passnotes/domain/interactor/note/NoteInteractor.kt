@@ -30,7 +30,7 @@ class NoteInteractor(
         }
 
         val db = getDbResult.obj
-        return db.noteRepository.getNoteByUid(noteUid)
+        return db.noteDao.getNoteByUid(noteUid)
     }
 
     fun copyToClipboardWithTimeout(text: String) {

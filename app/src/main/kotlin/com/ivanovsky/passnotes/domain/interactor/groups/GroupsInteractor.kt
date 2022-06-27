@@ -88,7 +88,7 @@ class GroupsInteractor(
             return groupsResult.takeError()
         }
 
-        val notesResult = db.noteRepository.getNotesByGroupUid(groupUid)
+        val notesResult = db.noteDao.getNotesByGroupUid(groupUid)
         if (notesResult.isFailed) {
             return groupsResult.takeError()
         }
@@ -125,7 +125,7 @@ class GroupsInteractor(
         }
 
         val db = getDbResult.obj
-        val removeResult = db.noteRepository.remove(noteUid)
+        val removeResult = db.noteDao.remove(noteUid)
 
         observerBus.notifyNoteDataSetChanged(groupUid)
 

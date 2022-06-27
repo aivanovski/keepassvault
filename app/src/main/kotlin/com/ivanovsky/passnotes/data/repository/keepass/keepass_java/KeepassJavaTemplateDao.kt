@@ -11,13 +11,12 @@ import com.ivanovsky.passnotes.data.repository.TemplateDao
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst.TEMPLATE_GROUP_NAME
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateNoteFactory
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateParser
-import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 
 class KeepassJavaTemplateDao(
     private val groupDao: KeepassJavaGroupDao,
-    private val noteDao: KeepassNoteDao
+    private val noteDao: KeepassJavaNoteDao
 ) : TemplateDao {
 
     private val templateGroupUidRef = AtomicReference<UUID>()

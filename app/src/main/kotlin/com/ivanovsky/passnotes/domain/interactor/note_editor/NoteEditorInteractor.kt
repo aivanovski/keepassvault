@@ -24,7 +24,7 @@ class NoteEditorInteractor(
         }
 
         val db = getDbResult.obj
-        val insertResult = db.noteRepository.insert(note)
+        val insertResult = db.noteDao.insert(note)
         if (insertResult.isFailed) {
             return insertResult.takeError()
         }
@@ -41,7 +41,7 @@ class NoteEditorInteractor(
         }
 
         val db = getDbResult.obj
-        return db.noteRepository.getNoteByUid(uid)
+        return db.noteDao.getNoteByUid(uid)
     }
 
     suspend fun updateNote(note: Note): OperationResult<Unit> =

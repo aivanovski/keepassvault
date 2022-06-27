@@ -29,9 +29,9 @@ class FindNoteForAutofillUseCase(
             val applicationId = structure.applicationId
 
             // TODO(autofill): to improve search, autofill-properties should be also checked after
-            //  noteRepository.find()
+            //  noteDao.find()
             if (applicationId != null) {
-                val findResult = db.noteRepository.find(applicationId)
+                val findResult = db.noteDao.find(applicationId)
                 if (findResult.isFailed) {
                     return@withContext findResult.takeError()
                 }
@@ -43,7 +43,7 @@ class FindNoteForAutofillUseCase(
             }
 
             if (domain != null) {
-                val findResult = db.noteRepository.find(domain)
+                val findResult = db.noteDao.find(domain)
                 if (findResult.isFailed) {
                     return@withContext findResult.takeError()
                 }

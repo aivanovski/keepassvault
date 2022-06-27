@@ -19,7 +19,7 @@ class GetNoteUseCase(
             }
 
             val db = getDbResult.obj
-            db.noteRepository.getNoteByUid(noteUid)
+            db.noteDao.getNoteByUid(noteUid)
         }
     }
 }

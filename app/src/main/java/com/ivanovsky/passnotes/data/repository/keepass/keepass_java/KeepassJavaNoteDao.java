@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.data.repository.keepass.dao;
+package com.ivanovsky.passnotes.data.repository.keepass.keepass_java;
 
 import android.util.Pair;
 import androidx.annotation.NonNull;
@@ -32,7 +32,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.linguafranca.pwdb.kdbx.simple.SimpleEntry;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
 
-public class KeepassNoteDao implements NoteDao {
+import kotlin.text.StringsKt;
+
+public class KeepassJavaNoteDao implements NoteDao {
 
     private static final String PROPERTY_TITLE = "Title";
     private static final String PROPERTY_PASSWORD = "Password";
@@ -57,7 +59,7 @@ public class KeepassNoteDao implements NoteDao {
         void onNoteRemove(UUID groupUid, UUID noteUid);
     }
 
-    public KeepassNoteDao(KeepassDatabase db) {
+    public KeepassJavaNoteDao(KeepassDatabase db) {
         this.db = db;
         this.updateListeners = new CopyOnWriteArrayList<>();
         this.insertListeners = new CopyOnWriteArrayList<>();
@@ -484,6 +486,26 @@ public class KeepassNoteDao implements NoteDao {
         return OperationResult.success(true);
     }
 
+    @NonNull
+    @Override
+    public OperationResult<List<Note>> find(@NonNull String query) {
+        OperationResult<List<Note>> allNotesResult = getAll();
+        if (allNotesResult.isFailed()) {
+            return allNotesResult.takeError();
+        }
+
+        List<Note> allNotes = allNotesResult.getObj();
+        List<Note> matchedNotes = new ArrayList<>(allNotes.size());
+
+        for (Note note : allNotes) {
+            if (isNoteMatches(note, query)) {
+                matchedNotes.add(note);
+            }
+        }
+
+        return OperationResult.success(matchedNotes);
+    }
+
     private void notifyNoteUpdated(UUID groupUid, UUID oldNoteUid, UUID newNoteUid) {
         for (OnNoteUpdateListener listener : updateListeners) {
             listener.onNoteChanged(groupUid, oldNoteUid, newNoteUid);
@@ -508,5 +530,39 @@ public class KeepassNoteDao implements NoteDao {
 
     private boolean isInTheSameGroup(Note first, Note second) {
         return first.getGroupUid().equals(second.getGroupUid());
+    }
+
+    private boolean isNoteMatches(@NonNull Note note,
+                                  @NonNull String query) {
+        boolean titleMatches = StringsKt.contains(note.getTitle(), query, true);
+
+        boolean propertyMatches = false;
+        for (Property property : note.getProperties()) {
+            if (isPropertyMatches(property, query)) {
+                propertyMatches = true;
+                break;
+            }
+        }
+
+        return titleMatches || propertyMatches;
+    }
+
+    private boolean isPropertyMatches(@NonNull Property property,
+                                      @NonNull String query) {
+        boolean nameMatches;
+        if (property.getName() != null) {
+            nameMatches = StringsKt.contains(property.getName(), query, true);
+        } else {
+            nameMatches = false;
+        }
+
+        boolean valueMatches;
+        if (property.getValue() != null) {
+            valueMatches = StringsKt.contains(property.getValue(), query, true);
+        } else {
+            valueMatches = false;
+        }
+
+        return nameMatches || valueMatches;
     }
 }

@@ -55,7 +55,7 @@ class NoteEditorInteractor(
             }
 
             val db = getDbResult.obj
-            val getTemplatesResult = db.templateRepository.getTemplates()
+            val getTemplatesResult = db.templateDao.getTemplates()
             if (getTemplatesResult.isFailed) {
                 return@withContext getTemplatesResult.takeError()
             }

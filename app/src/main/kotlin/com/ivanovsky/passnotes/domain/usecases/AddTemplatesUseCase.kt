@@ -21,12 +21,12 @@ class AddTemplatesUseCase(
             }
 
             val db = getDbResult.obj
-            val addTemplatesResult = db.templateRepository.addTemplates(createDefaultTemplates())
+            val addTemplatesResult = db.templateDao.addTemplates(createDefaultTemplates())
 
             if (addTemplatesResult.isSucceededOrDeferred) {
                 observerBus.notifyGroupDataSetChanged()
 
-                val getTemplateGroupUidResult = db.templateRepository.getTemplateGroupUid()
+                val getTemplateGroupUidResult = db.templateDao.getTemplateGroupUid()
                 if (getTemplateGroupUidResult.isSucceededOrDeferred) {
                     val templateGroupUid = getTemplateGroupUidResult.obj
                     observerBus.notifyNoteDataSetChanged(templateGroupUid)

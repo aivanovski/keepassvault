@@ -40,7 +40,7 @@ class GroupsInteractor(
             }
 
             val db = getDbResult.obj
-            db.templateRepository.getTemplates()
+            db.templateDao.getTemplates()
         }
 
     fun getRootUid(): UUID? {

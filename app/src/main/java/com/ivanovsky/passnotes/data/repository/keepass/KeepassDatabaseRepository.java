@@ -145,7 +145,7 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
             KeepassDatabase db = openResult.getObj();
             if (addTemplates) {
-                OperationResult<Boolean> addTemplateResult = db.getTemplateRepository()
+                OperationResult<Boolean> addTemplateResult = db.getTemplateDao()
                         .addTemplates(TemplateFactory.createDefaultTemplates(), false);
                 if (addTemplateResult.isFailed()) {
                     return addTemplateResult.takeError();

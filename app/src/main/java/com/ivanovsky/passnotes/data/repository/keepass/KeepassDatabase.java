@@ -7,7 +7,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
-import com.ivanovsky.passnotes.data.repository.TemplateRepository;
+import com.ivanovsky.passnotes.data.repository.TemplateDao;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseConfig;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
@@ -16,6 +16,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassGroupDao;
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao;
+import com.ivanovsky.passnotes.data.repository.keepass.keepass_java_2.KeepassJava2TemplateDao;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
@@ -55,7 +56,7 @@ public class KeepassDatabase implements EncryptedDatabase {
     @NonNull
     private final NoteRepositoryImpl noteRepository;
     @NonNull
-    private final KeepassTemplateRepository templateRepository;
+    private final KeepassJava2TemplateDao templateDao;
     @NonNull
     private final FSOptions fsOptions;
     @NonNull
@@ -165,9 +166,9 @@ public class KeepassDatabase implements EncryptedDatabase {
 
         groupRepository = new GroupRepositoryImpl(groupDao);
         noteRepository = new NoteRepositoryImpl(noteDao);
-        templateRepository = new KeepassTemplateRepository(groupDao, noteDao);
+        templateDao = new KeepassJava2TemplateDao(groupDao, noteDao);
 
-        templateRepository.findTemplateNotes();
+        templateDao.findTemplateNotes();
     }
 
     @NonNull
@@ -240,8 +241,8 @@ public class KeepassDatabase implements EncryptedDatabase {
 
     @NonNull
     @Override
-    public TemplateRepository getTemplateRepository() {
-        return templateRepository;
+    public TemplateDao getTemplateDao() {
+        return templateDao;
     }
 
     @NonNull

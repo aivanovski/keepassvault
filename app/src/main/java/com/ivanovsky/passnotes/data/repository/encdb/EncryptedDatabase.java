@@ -6,7 +6,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
-import com.ivanovsky.passnotes.data.repository.TemplateRepository;
+import com.ivanovsky.passnotes.data.repository.TemplateDao;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 
 import java.util.concurrent.locks.ReentrantLock;
@@ -35,7 +35,7 @@ public interface EncryptedDatabase {
     NoteRepository getNoteRepository();
 
     @NonNull
-    TemplateRepository getTemplateRepository();
+    TemplateDao getTemplateDao();
 
     @NonNull
     OperationResult<Boolean> changeKey(@NonNull EncryptedDatabaseKey oldKey,

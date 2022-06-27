@@ -12,8 +12,6 @@ import androidx.annotation.NonNull;
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
-import com.ivanovsky.passnotes.data.repository.NoteRepository;
-import com.ivanovsky.passnotes.data.repository.NoteRepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
@@ -35,8 +33,6 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     private static final String EMPTY_DB_PATH = "base.kdbx.xml";
 
     private volatile KeepassDatabase db;
-    @NonNull
-    private final NoteRepositoryWrapper noteRepositoryWrapper;
     private final Context context;
     private final FileSystemResolver fileSystemResolver;
     private final DatabaseLockInteractor lockInteractor;
@@ -52,7 +48,6 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
         this.lockInteractor = lockInteractor;
         this.observerBus = observerBus;
         this.lock = new Object();
-        noteRepositoryWrapper = new NoteRepositoryWrapper(this);
     }
 
     @Override
@@ -72,11 +67,6 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
         } else {
             return OperationResult.error(newDbError(MESSAGE_FAILED_TO_GET_DATABASE));
         }
-    }
-
-    @Override
-    public NoteRepository getNoteRepository() {
-        return noteRepositoryWrapper;
     }
 
     @NonNull

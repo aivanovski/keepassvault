@@ -4,21 +4,27 @@ import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
-import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
 class NoteEditorInteractor(
-    private val dbRepo: EncryptedDatabaseRepository,
     private val updateNoteUseCase: UpdateNoteUseCase,
+    private val getDbUseCase: GetDatabaseUseCase,
     private val dispatchers: DispatcherProvider,
     private val observerBus: ObserverBus,
 ) {
 
     fun createNewNote(note: Note): OperationResult<Unit> {
-        val insertResult = dbRepo.noteRepository.insert(note)
+        val getDbResult = getDbUseCase.getDatabaseSynchronously()
+        if (getDbResult.isFailed) {
+            return getDbResult.takeError()
+        }
+
+        val db = getDbResult.obj
+        val insertResult = db.noteRepository.insert(note)
         if (insertResult.isFailed) {
             return insertResult.takeError()
         }
@@ -29,7 +35,13 @@ class NoteEditorInteractor(
     }
 
     fun loadNote(uid: UUID): OperationResult<Note> {
-        return dbRepo.noteRepository.getNoteByUid(uid)
+        val getDbResult = getDbUseCase.getDatabaseSynchronously()
+        if (getDbResult.isFailed) {
+            return getDbResult.takeError()
+        }
+
+        val db = getDbResult.obj
+        return db.noteRepository.getNoteByUid(uid)
     }
 
     suspend fun updateNote(note: Note): OperationResult<Unit> =
@@ -37,12 +49,13 @@ class NoteEditorInteractor(
 
     suspend fun loadTemplate(templateUid: UUID): OperationResult<Template?> =
         withContext(dispatchers.IO) {
-            val getDbResult = dbRepo.encryptedDatabase
+            val getDbResult = getDbUseCase.getDatabase()
             if (getDbResult.isFailed) {
                 return@withContext getDbResult.takeError()
             }
 
-            val getTemplatesResult = getDbResult.obj.templateRepository.getTemplates()
+            val db = getDbResult.obj
+            val getTemplatesResult = db.templateRepository.getTemplates()
             if (getTemplatesResult.isFailed) {
                 return@withContext getTemplatesResult.takeError()
             }

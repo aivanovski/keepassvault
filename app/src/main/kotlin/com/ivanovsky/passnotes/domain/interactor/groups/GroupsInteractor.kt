@@ -34,7 +34,12 @@ class GroupsInteractor(
 
     suspend fun getTemplates(): OperationResult<List<Template>> =
         withContext(dispatchers.IO) {
-            dbRepo.templateRepository.getTemplates()
+            val getDbResult = dbRepo.encryptedDatabase
+            if (getDbResult.isFailed) {
+                return@withContext getDbResult.takeError()
+            }
+
+            getDbResult.obj.templateRepository.getTemplates()
         }
 
     fun getRootUid(): UUID? {
@@ -58,6 +63,8 @@ class GroupsInteractor(
     }
 
     fun getGroupData(groupUid: UUID): OperationResult<List<EncryptedDatabaseEntry>> {
+        dbRepo.database
+
         val groupsResult = dbRepo.groupRepository.getChildGroups(groupUid)
         if (groupsResult.isFailed) {
             return groupsResult.takeError()

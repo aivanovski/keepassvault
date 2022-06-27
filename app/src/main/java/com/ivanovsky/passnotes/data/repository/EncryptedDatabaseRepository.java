@@ -14,12 +14,11 @@ public interface EncryptedDatabaseRepository {
 
     EncryptedDatabase getDatabase();
 
+    OperationResult<EncryptedDatabase> getEncryptedDatabase();
+
     NoteRepository getNoteRepository();
 
     GroupRepository getGroupRepository();
-
-    @NonNull
-    TemplateRepository getTemplateRepository();
 
     @NonNull
     OperationResult<EncryptedDatabase> open(@NonNull EncryptedDatabaseKey key,

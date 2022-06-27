@@ -1,6 +1,8 @@
 package com.ivanovsky.passnotes.data.repository.keepass;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_GET_DATABASE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_OPEN_DEFAULT_DB_FILE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericError;
 
 import android.content.Context;
@@ -14,7 +16,6 @@ import com.ivanovsky.passnotes.data.repository.GroupRepository;
 import com.ivanovsky.passnotes.data.repository.GroupRepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepositoryWrapper;
-import com.ivanovsky.passnotes.data.repository.TemplateRepository;
 import com.ivanovsky.passnotes.data.repository.TemplateRepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
@@ -74,6 +75,15 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     }
 
     @Override
+    public OperationResult<EncryptedDatabase> getEncryptedDatabase() {
+        if (isOpened()) {
+            return OperationResult.success(db);
+        } else {
+            return OperationResult.error(newDbError(MESSAGE_FAILED_TO_GET_DATABASE));
+        }
+    }
+
+    @Override
     public NoteRepository getNoteRepository() {
         return noteRepositoryWrapper;
     }
@@ -81,12 +91,6 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     @Override
     public GroupRepository getGroupRepository() {
         return groupRepositoryWrapper;
-    }
-
-    @NonNull
-    @Override
-    public TemplateRepository getTemplateRepository() {
-        return templateRepositoryWrapper;
     }
 
     @NonNull

@@ -37,7 +37,12 @@ class NoteEditorInteractor(
 
     suspend fun loadTemplate(templateUid: UUID): OperationResult<Template?> =
         withContext(dispatchers.IO) {
-            val getTemplatesResult = dbRepo.templateRepository.getTemplates()
+            val getDbResult = dbRepo.encryptedDatabase
+            if (getDbResult.isFailed) {
+                return@withContext getDbResult.takeError()
+            }
+
+            val getTemplatesResult = getDbResult.obj.templateRepository.getTemplates()
             if (getTemplatesResult.isFailed) {
                 return@withContext getTemplatesResult.takeError()
             }

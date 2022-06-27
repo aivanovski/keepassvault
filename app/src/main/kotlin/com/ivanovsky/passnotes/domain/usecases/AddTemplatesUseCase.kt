@@ -15,12 +15,18 @@ class AddTemplatesUseCase(
 
     suspend fun addTemplates(): OperationResult<Boolean> =
         withContext(dispatchers.IO) {
-            val addTemplatesResult = dbRepo.templateRepository.addTemplates(createDefaultTemplates())
+            val getDbResult = dbRepo.encryptedDatabase
+            if (getDbResult.isFailed) {
+                return@withContext getDbResult.takeError()
+            }
+
+            val db = getDbResult.obj
+            val addTemplatesResult = db.templateRepository.addTemplates(createDefaultTemplates())
 
             if (addTemplatesResult.isSucceededOrDeferred) {
                 observerBus.notifyGroupDataSetChanged()
 
-                val getTemplateGroupUidResult = dbRepo.templateRepository.getTemplateGroupUid()
+                val getTemplateGroupUidResult = db.templateRepository.getTemplateGroupUid()
                 if (getTemplateGroupUidResult.isSucceededOrDeferred) {
                     val templateGroupUid = getTemplateGroupUidResult.obj
                     observerBus.notifyNoteDataSetChanged(templateGroupUid)

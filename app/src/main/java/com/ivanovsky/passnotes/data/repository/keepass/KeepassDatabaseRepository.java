@@ -12,11 +12,8 @@ import androidx.annotation.NonNull;
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
-import com.ivanovsky.passnotes.data.repository.GroupRepository;
-import com.ivanovsky.passnotes.data.repository.GroupRepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.NoteRepository;
 import com.ivanovsky.passnotes.data.repository.NoteRepositoryWrapper;
-import com.ivanovsky.passnotes.data.repository.TemplateRepositoryWrapper;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository;
@@ -39,10 +36,6 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
 
     private volatile KeepassDatabase db;
     @NonNull
-    private final TemplateRepositoryWrapper templateRepositoryWrapper;
-    @NonNull
-    private final GroupRepositoryWrapper groupRepositoryWrapper;
-    @NonNull
     private final NoteRepositoryWrapper noteRepositoryWrapper;
     private final Context context;
     private final FileSystemResolver fileSystemResolver;
@@ -59,8 +52,6 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
         this.lockInteractor = lockInteractor;
         this.observerBus = observerBus;
         this.lock = new Object();
-        templateRepositoryWrapper = new TemplateRepositoryWrapper(this);
-        groupRepositoryWrapper = new GroupRepositoryWrapper(this);
         noteRepositoryWrapper = new NoteRepositoryWrapper(this);
     }
 
@@ -86,11 +77,6 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     @Override
     public NoteRepository getNoteRepository() {
         return noteRepositoryWrapper;
-    }
-
-    @Override
-    public GroupRepository getGroupRepository() {
-        return groupRepositoryWrapper;
     }
 
     @NonNull

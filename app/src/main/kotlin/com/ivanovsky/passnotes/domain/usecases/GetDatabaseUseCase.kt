@@ -15,12 +15,16 @@ class GetDatabaseUseCase(
 
     suspend fun getDatabase(): OperationResult<EncryptedDatabase> {
         return withContext(dispatchers.IO) {
-            val db = dbRepo.database
-            if (db != null) {
-                OperationResult.success(db)
-            } else {
-                OperationResult.error(newDbError(MESSAGE_FAILED_TO_GET_DATABASE))
-            }
+            getDatabaseSynchronously()
+        }
+    }
+
+    fun getDatabaseSynchronously(): OperationResult<EncryptedDatabase> {
+        val db = dbRepo.database
+        return if (db != null) {
+            OperationResult.success(db)
+        } else {
+            OperationResult.error(newDbError(MESSAGE_FAILED_TO_GET_DATABASE))
         }
     }
 }

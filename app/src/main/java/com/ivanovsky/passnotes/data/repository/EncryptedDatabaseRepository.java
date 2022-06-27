@@ -18,8 +18,6 @@ public interface EncryptedDatabaseRepository {
 
     NoteRepository getNoteRepository();
 
-    GroupRepository getGroupRepository();
-
     @NonNull
     OperationResult<EncryptedDatabase> open(@NonNull EncryptedDatabaseKey key,
                                             @NonNull FileDescriptor file,

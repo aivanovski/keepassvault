@@ -6,7 +6,6 @@ import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
@@ -15,7 +14,6 @@ import kotlinx.coroutines.withContext
 import java.util.UUID
 
 class GroupEditorInteractor(
-    private val dbRepo: EncryptedDatabaseRepository,
     private val getDbUseCase: GetDatabaseUseCase,
     private val getGroupUseCase: GetGroupUseCase,
     private val resourceProvider: ResourceProvider,
@@ -28,7 +26,13 @@ class GroupEditorInteractor(
 
     suspend fun createNewGroup(title: String, parentUid: UUID): OperationResult<Group> {
         return withContext(dispatchers.IO) {
-            if (!isTitleFree(title)) {
+            val getDbResult = getDbUseCase.getDatabase()
+            if (getDbResult.isFailed) {
+                return@withContext getDbResult.takeError()
+            }
+            val db = getDbResult.obj
+
+            if (!isTitleAvailable(title)) {
                 return@withContext OperationResult.error(
                     newGenericError(resourceProvider.getString(R.string.group_with_this_name_is_already_exist))
                 )
@@ -39,7 +43,7 @@ class GroupEditorInteractor(
                 title = title
             )
 
-            val insertResult = dbRepo.groupRepository.insert(group)
+            val insertResult = db.groupRepository.insert(group)
             if (insertResult.isFailed) {
                 return@withContext insertResult.takeError()
             }
@@ -72,9 +76,15 @@ class GroupEditorInteractor(
         }
     }
 
-    private fun isTitleFree(title: String): Boolean {
-        val groups = dbRepo.groupRepository.allGroup
-        return groups.isSucceededOrDeferred
-                && groups.obj.none { group -> group.title == title }
+    private fun isTitleAvailable(title: String): Boolean {
+        val getDbResult = getDbUseCase.getDatabaseSynchronously()
+        if (getDbResult.isFailed) {
+            return false
+        }
+
+        val db = getDbResult.obj
+        val groups = db.groupRepository.allGroup
+        return groups.isSucceededOrDeferred &&
+            groups.obj.none { group -> group.title == title }
     }
 }

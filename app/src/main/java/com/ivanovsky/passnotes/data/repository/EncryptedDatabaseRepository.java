@@ -14,8 +14,6 @@ public interface EncryptedDatabaseRepository {
 
     EncryptedDatabase getDatabase();
 
-    OperationResult<EncryptedDatabase> getEncryptedDatabase();
-
     @NonNull
     OperationResult<EncryptedDatabase> open(@NonNull EncryptedDatabaseKey key,
                                             @NonNull FileDescriptor file,

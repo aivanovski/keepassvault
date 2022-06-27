@@ -1,8 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.keepass;
 
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_GET_DATABASE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_OPEN_DEFAULT_DB_FILE;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericError;
 
 import android.content.Context;
@@ -58,15 +56,6 @@ public class KeepassDatabaseRepository implements EncryptedDatabaseRepository {
     @Override
     public EncryptedDatabase getDatabase() {
         return db;
-    }
-
-    @Override
-    public OperationResult<EncryptedDatabase> getEncryptedDatabase() {
-        if (isOpened()) {
-            return OperationResult.success(db);
-        } else {
-            return OperationResult.error(newDbError(MESSAGE_FAILED_TO_GET_DATABASE));
-        }
     }
 
     @NonNull

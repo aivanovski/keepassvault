@@ -7,7 +7,7 @@ import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.OperationError.*
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
-import com.ivanovsky.passnotes.data.repository.GroupRepository
+import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
@@ -268,12 +268,12 @@ class DebugMenuInteractor(
             return OperationResult.error(newDbError(MESSAGE_FAILED_TO_GET_DATABASE))
         }
 
-        val newGroupTitle = generateNewGroupTitle(db.groupRepository)
+        val newGroupTitle = generateNewGroupTitle(db.groupDao)
         if (newGroupTitle == null) {
             return OperationResult.error(newDbError(MESSAGE_UNKNOWN_ERROR))
         }
 
-        val rootGroupResult = db.groupRepository.rootGroup
+        val rootGroupResult = db.groupDao.rootGroup
         if (rootGroupResult.isFailed) {
             return rootGroupResult.takeError()
         }
@@ -284,7 +284,7 @@ class DebugMenuInteractor(
             title = newGroupTitle
         )
 
-        val insertResult = db.groupRepository.insert(newGroup)
+        val insertResult = db.groupDao.insert(newGroup)
         if (insertResult.isFailed) {
             return insertResult.takeError()
         }
@@ -307,10 +307,10 @@ class DebugMenuInteractor(
                 .getFile(path, FSOptions.DEFAULT)
         }
 
-    private fun generateNewGroupTitle(groupRepository: GroupRepository): String? {
+    private fun generateNewGroupTitle(groupDao: GroupDao): String? {
         var title: String? = null
 
-        val groupsResult = groupRepository.allGroup
+        val groupsResult = groupDao.all
         if (groupsResult.isSucceededOrDeferred) {
             val indexesInGroups = extractIndexesFromGroups(groupsResult.obj)
             val nextGroupIndex = findNextAvailableIndex(indexesInGroups)

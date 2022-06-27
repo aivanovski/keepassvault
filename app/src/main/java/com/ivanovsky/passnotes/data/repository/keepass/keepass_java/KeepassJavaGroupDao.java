@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.data.repository.keepass.dao;
+package com.ivanovsky.passnotes.data.repository.keepass.keepass_java;
 
 import androidx.annotation.NonNull;
 
@@ -30,7 +30,9 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNKNOWN_ERROR;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 
-public class KeepassGroupDao implements GroupDao {
+import kotlin.text.StringsKt;
+
+public class KeepassJavaGroupDao implements GroupDao {
 
     private final KeepassDatabase db;
     private final List<OnGroupRemoveLister> removeListeners;
@@ -39,7 +41,7 @@ public class KeepassGroupDao implements GroupDao {
         void onGroupRemoved(UUID groupUid);
     }
 
-    public KeepassGroupDao(KeepassDatabase db) {
+    public KeepassJavaGroupDao(KeepassDatabase db) {
         this.db = db;
         this.removeListeners = new CopyOnWriteArrayList<>();
     }
@@ -332,6 +334,27 @@ public class KeepassGroupDao implements GroupDao {
         }
 
         return OperationResult.success(true);
+    }
+
+    @NonNull
+    @Override
+    public OperationResult<List<Group>> find(@NonNull String query) {
+        OperationResult<List<Group>> allGroupsResult = getAll();
+        if (allGroupsResult.isFailed()) {
+            return allGroupsResult.takeError();
+        }
+
+        List<Group> allGroups = allGroupsResult.getObj();
+
+        List<Group> matchedGroups = new ArrayList<>();
+        for (Group group : allGroups) {
+            boolean contains = StringsKt.contains(group.getTitle(), query, true);
+            if (contains) {
+                matchedGroups.add(group);
+            }
+        }
+
+        return OperationResult.success(matchedGroups);
     }
 
     private boolean containsGroupWithUid(List<SimpleGroup> groups, UUID groupUid) {

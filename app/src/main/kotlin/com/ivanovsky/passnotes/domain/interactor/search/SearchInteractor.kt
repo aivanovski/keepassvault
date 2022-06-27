@@ -35,7 +35,7 @@ class SearchInteractor(
                 return@withContext notesResult.takeError()
             }
 
-            val groupsResult = db.groupRepository.find(query)
+            val groupsResult = db.groupDao.find(query)
             if (groupsResult.isFailed) {
                 return@withContext groupsResult.takeError()
             }

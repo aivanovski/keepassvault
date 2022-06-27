@@ -31,4 +31,7 @@ public interface GroupDao {
 
     @NonNull
     OperationResult<Boolean> update(@NonNull GroupEntity group);
+
+    @NonNull
+    OperationResult<List<Group>> find(@NonNull String query);
 }

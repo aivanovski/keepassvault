@@ -43,7 +43,7 @@ class GroupEditorInteractor(
                 title = title
             )
 
-            val insertResult = db.groupRepository.insert(group)
+            val insertResult = db.groupDao.insert(group)
             if (insertResult.isFailed) {
                 return@withContext insertResult.takeError()
             }
@@ -72,7 +72,7 @@ class GroupEditorInteractor(
             }
 
             val db = getDbResult.obj
-            db.groupRepository.update(group)
+            db.groupDao.update(group)
         }
     }
 
@@ -83,7 +83,7 @@ class GroupEditorInteractor(
         }
 
         val db = getDbResult.obj
-        val groups = db.groupRepository.allGroup
+        val groups = db.groupDao.all
         return groups.isSucceededOrDeferred &&
             groups.obj.none { group -> group.title == title }
     }

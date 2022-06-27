@@ -83,12 +83,12 @@ public class KeepassNoteDao implements NoteDao {
 
         db.getLock().lock();
         try {
-            OperationResult<List<Group>> allGroupsResult = db.getGroupRepository().getAllGroup();
+            OperationResult<List<Group>> allGroupsResult = db.getGroupDao().getAll();
             if (allGroupsResult.isFailed()) {
                 return allGroupsResult.takeError();
             }
 
-            OperationResult<Group> rootGroupResult = db.getGroupRepository().getRootGroup();
+            OperationResult<Group> rootGroupResult = db.getGroupDao().getRootGroup();
             if (rootGroupResult.isFailed()) {
                 return rootGroupResult.takeError();
             }

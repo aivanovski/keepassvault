@@ -1,6 +1,6 @@
 @file:Suppress("FoldInitializerAndIfToElvis")
 
-package com.ivanovsky.passnotes.data.repository.keepass.keepass_java_2
+package com.ivanovsky.passnotes.data.repository.keepass.keepass_java
 
 import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST
@@ -11,13 +11,12 @@ import com.ivanovsky.passnotes.data.repository.TemplateDao
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst.TEMPLATE_GROUP_NAME
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateNoteFactory
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateParser
-import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassGroupDao
 import com.ivanovsky.passnotes.data.repository.keepass.dao.KeepassNoteDao
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 
-class KeepassJava2TemplateDao(
-    private val groupDao: KeepassGroupDao,
+class KeepassJavaTemplateDao(
+    private val groupDao: KeepassJavaGroupDao,
     private val noteDao: KeepassNoteDao
 ) : TemplateDao {
 

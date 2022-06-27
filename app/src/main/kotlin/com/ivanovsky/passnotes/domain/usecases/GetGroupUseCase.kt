@@ -19,7 +19,7 @@ class GetGroupUseCase(
             }
 
             val db = getDbResult.obj
-            db.groupRepository.getGroupByUid(groupUid)
+            db.groupDao.getGroupByUid(groupUid)
         }
     }
 }

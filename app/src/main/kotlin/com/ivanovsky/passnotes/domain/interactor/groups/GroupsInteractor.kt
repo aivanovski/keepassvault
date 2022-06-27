@@ -50,7 +50,7 @@ class GroupsInteractor(
         }
 
         val db = getDbResult.obj
-        val rootResult = db.groupRepository.rootGroup
+        val rootResult = db.groupDao.rootGroup
         if (rootResult.isFailed) {
             return null
         }
@@ -66,7 +66,7 @@ class GroupsInteractor(
 
         val db = getDbResult.obj
 
-        val rootGroupResult = db.groupRepository.rootGroup
+        val rootGroupResult = db.groupDao.rootGroup
         if (rootGroupResult.isFailed) {
             return rootGroupResult.takeError()
         }
@@ -83,7 +83,7 @@ class GroupsInteractor(
         }
 
         val db = getDbResult.obj
-        val groupsResult = db.groupRepository.getChildGroups(groupUid)
+        val groupsResult = db.groupDao.getChildGroups(groupUid)
         if (groupsResult.isFailed) {
             return groupsResult.takeError()
         }
@@ -111,7 +111,7 @@ class GroupsInteractor(
         }
 
         val db = getDbResult.obj
-        val removeResult = db.groupRepository.remove(groupUid)
+        val removeResult = db.groupDao.remove(groupUid)
 
         observerBus.notifyGroupDataSetChanged()
 
@@ -140,7 +140,7 @@ class GroupsInteractor(
             }
 
             val db = getDbResult.obj
-            db.groupRepository.getGroupByUid(groupUid)
+            db.groupDao.getGroupByUid(groupUid)
         }
     }
 

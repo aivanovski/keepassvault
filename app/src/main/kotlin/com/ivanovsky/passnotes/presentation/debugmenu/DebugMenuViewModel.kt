@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
+import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.settings.Settings
@@ -42,7 +43,8 @@ class DebugMenuViewModel(
     val debugServerUrlText = MutableLiveData(EMPTY)
     val debugCredentialsText = MutableLiveData(EMPTY)
     val isSAFButtonsVisible = MutableLiveData(false)
-    val isDebugCredentialsVisible = MutableLiveData(false)
+    val isServerUrlVisible = MutableLiveData(false)
+    val isCredentialsVisible = MutableLiveData(false)
     val isWriteButtonEnabled = MutableLiveData(false)
     val isOpenDbButtonEnabled = MutableLiveData(false)
     val isEditDbButtonEnabled = MutableLiveData(false)
@@ -57,6 +59,10 @@ class DebugMenuViewModel(
     private var lastReadFile: File? = null
     private var selectedFsType = FSType.INTERNAL_STORAGE
     private var uriFileDescriptor: FileDescriptor? = null
+
+    fun onScreenStart() {
+        loadDebugCredentials()
+    }
 
     fun onReadButtonClicked() {
         val inFile = getSelectedFile() ?: return
@@ -116,7 +122,8 @@ class DebugMenuViewModel(
                 }
             }
         } else {
-            screenState.value = ScreenState.dataWithError(resourceProvider.getString(R.string.file_is_not_loaded))
+            screenState.value =
+                ScreenState.dataWithError(resourceProvider.getString(R.string.file_is_not_loaded))
         }
     }
 
@@ -188,7 +195,8 @@ class DebugMenuViewModel(
                 }
             }
         } else {
-            screenState.value = ScreenState.dataWithError(resourceProvider.getString(R.string.file_is_not_loaded))
+            screenState.value =
+                ScreenState.dataWithError(resourceProvider.getString(R.string.file_is_not_loaded))
         }
     }
 
@@ -263,32 +271,11 @@ class DebugMenuViewModel(
     fun onFileSystemSelected(fsType: FSType) {
         selectedFsType = fsType
 
-        when (fsType) {
-            FSType.WEBDAV -> {
-                val creds = interactor.getDebugWebDavCredentials()
-
-                val (urlText, credsText) = if (creds != null) {
-                    Pair(
-                        creds.serverUrl,
-                        creds.username + " / " + creds.password
-                    )
-                } else {
-                    Pair(EMPTY, EMPTY)
-                }
-
-                debugServerUrlText.value = resourceProvider.getString(
-                    R.string.server_url_with_str,
-                    urlText
-                )
-                debugCredentialsText.value = resourceProvider.getString(
-                    R.string.credentials_with_str,
-                    credsText
-                )
-            }
-        }
-
-        isDebugCredentialsVisible.value = (fsType == FSType.WEBDAV)
+        isServerUrlVisible.value = (fsType == FSType.WEBDAV || fsType == FSType.GIT)
+        isCredentialsVisible.value = (fsType == FSType.WEBDAV)
         isSAFButtonsVisible.value = (fsType == FSType.SAF)
+
+        loadDebugCredentials()
     }
 
     fun onExternalStorageCheckBoxChanged(isChecked: Boolean) {
@@ -325,6 +312,21 @@ class DebugMenuViewModel(
         }
     }
 
+    fun onGetRootButtonClicked() {
+        viewModelScope.launch {
+            val getRootResult = interactor.getRootFile(getSelectedFsAuthority())
+
+            if (getRootResult.isSucceededOrDeferred) {
+                showSnackbarEvent.call(
+                    resourceProvider.getString(R.string.successfully)
+                )
+            } else {
+                val message = errorInteractor.processAndGetMessage(getRootResult.error)
+                screenState.value = ScreenState.dataWithError(message)
+            }
+        }
+    }
+
     private fun getSelectedFile(): FileDescriptor? {
         val filePath = this.filePath.value ?: return null
         if (filePath.isBlank()) {
@@ -353,11 +355,46 @@ class DebugMenuViewModel(
             FSType.SAF -> FSAuthority.SAF_FS_AUTHORITY
             FSType.DROPBOX -> FSAuthority.DROPBOX_FS_AUTHORITY
             FSType.WEBDAV -> {
-                val creds = interactor.getDebugWebDavCredentials()
-                FSAuthority(creds, selectedFsType)
+                FSAuthority(
+                    credentials = interactor.getDebugWebDavCredentials(),
+                    type = selectedFsType
+                )
+            }
+            FSType.GIT -> {
+                FSAuthority(
+                    credentials = interactor.getDebugGitCredentials(),
+                    type = selectedFsType
+                )
             }
             FSType.UNDEFINED -> throw IllegalArgumentException()
         }
+    }
+
+    private fun loadDebugCredentials() {
+        val creds = when (selectedFsType) {
+            FSType.WEBDAV -> interactor.getDebugWebDavCredentials()
+            FSType.GIT -> interactor.getDebugGitCredentials()
+            else -> null
+        }
+
+        val (urlText, credsText) = when {
+            creds != null && creds is FSCredentials.BasicCredentials -> {
+                Pair(creds.url, creds.username + " / " + creds.password)
+            }
+            creds != null && creds is FSCredentials.GitCredentials -> {
+                Pair(creds.url, EMPTY)
+            }
+            else -> Pair(EMPTY, EMPTY)
+        }
+
+        debugServerUrlText.value = resourceProvider.getString(
+            R.string.server_url_with_str,
+            urlText
+        )
+        debugCredentialsText.value = resourceProvider.getString(
+            R.string.credentials_with_str,
+            credsText
+        )
     }
 
     fun navigateBack() = router.exit()

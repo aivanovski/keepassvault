@@ -135,9 +135,10 @@ object KoinModule {
             single { AppDatabase.buildDatabase(get(), get()) }
             single { provideRemoteFileRepository(get()) }
             single { provideUsedFileRepository(get(), get()) }
+            single { providerGitRootDao(get()) }
 
             // Files, Keepass
-            single { FileSystemResolver(get(), get(), get(), get(), get(), get()) }
+            single { FileSystemResolver(get(), get(), get(), get(), get(), get(), get()) }
             single<EncryptedDatabaseRepository> { KeepassDatabaseRepository(get(), get(), get(), get()) }
 
             // Use Cases
@@ -264,6 +265,9 @@ object KoinModule {
 
     private fun provideUsedFileRepository(database: AppDatabase, observerBus: ObserverBus) =
         UsedFileRepository(database.usedFileDao, observerBus)
+
+    private fun providerGitRootDao(database: AppDatabase) =
+        database.gitRootDao
 
     private fun provideCiceroneRouter(cicerone: Cicerone<Router>) =
         cicerone.router

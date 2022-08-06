@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.data.repository.file.webdav
+package com.ivanovsky.passnotes.data.repository.file.git
 
 import android.content.Context
 import com.ivanovsky.passnotes.data.entity.FSAuthority
@@ -8,15 +8,19 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator
 import com.ivanovsky.passnotes.data.repository.file.exception.IncorrectUseException
 import java.util.concurrent.atomic.AtomicReference
 
-class WebdavAuthenticator(
+class GitFileSystemAuthenticator(
     private val initialAuthority: FSAuthority
 ) : FileSystemAuthenticator {
 
     private val fsAuthority = AtomicReference(initialAuthority)
 
-    override fun getAuthType() = AuthType.CREDENTIALS
+    override fun getAuthType(): AuthType {
+        return AuthType.CREDENTIALS
+    }
 
-    override fun getFsAuthority(): FSAuthority = fsAuthority.get()
+    override fun getFsAuthority(): FSAuthority {
+        return fsAuthority.get()
+    }
 
     override fun isAuthenticationRequired(): Boolean {
         return initialAuthority.isRequireCredentials

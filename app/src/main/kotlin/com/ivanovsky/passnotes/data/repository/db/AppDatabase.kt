@@ -9,16 +9,21 @@ import androidx.room.TypeConverters
 import com.ivanovsky.passnotes.data.repository.db.converters.FSAuthorityTypeConverter
 import androidx.room.RoomDatabase
 import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
+import com.ivanovsky.passnotes.data.entity.GitRoot
+import com.ivanovsky.passnotes.data.repository.db.dao.GitRootDao
 import com.ivanovsky.passnotes.data.repository.db.dao.UsedFileDao
 import com.ivanovsky.passnotes.data.repository.db.dao.RemoteFileDao
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom1To2
 
+// TODO(improvement): Unused data from should be removed from database
+
 @Database(
     entities = [
         UsedFile::class,
-        RemoteFile::class
+        RemoteFile::class,
+        GitRoot::class
     ],
-    version = 2
+    version = 3
 )
 @TypeConverters(
     FSAuthorityTypeConverter::class,
@@ -27,6 +32,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract val usedFileDao: UsedFileDao
     abstract val remoteFileDao: RemoteFileDao
+    abstract val gitRootDao: GitRootDao
 
     companion object {
 

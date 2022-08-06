@@ -1,7 +1,31 @@
 package com.ivanovsky.passnotes.util
 
+import java.lang.NumberFormatException
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.UUID
+
+fun String.toIntSafely(): Int? {
+    return try {
+        Integer.parseInt(this)
+    } catch (e: NumberFormatException) {
+        null
+    }
+}
+
+fun String.substituteAt(start: Int, end: Int, substitution: Char): String {
+    val chars = toCharArray()
+        .mapIndexed { index, char ->
+            if (index in start until end) {
+                substitution
+            } else {
+                char
+            }
+        }
+    return String(chars.toCharArray())
+}
 
 fun String.isDigitsOnly(): Boolean {
     return this.all { ch -> ch.isDigit() }

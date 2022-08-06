@@ -575,6 +575,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
                         cachedFile.setFsAuthority(fsAuthority);
                         cachedFile.setRemotePath(remotePath);
+                        cachedFile.setUid(uid);
                         cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
                         cachedFile.setLastModificationTimestamp(localModified.getTime());
                         cachedFile.setLastRemoteModificationTimestamp(serverModified.getTime());

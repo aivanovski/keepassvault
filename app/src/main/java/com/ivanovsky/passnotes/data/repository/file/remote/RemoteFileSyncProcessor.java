@@ -309,7 +309,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         InputStream in = openBufferResult.getObj();
         try {
-            InputOutputUtils.copy(in, out, true);
+            InputOutputUtils.copyOrThrow(in, out, true);
         } catch (IOException e) {
             Timber.d("Failed to copy file, uid=%s, error=%s", cachedFile.getUid(), e.toString());
             Timber.d(e);
@@ -351,7 +351,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
     private OperationResult<InputStream> copyFileAndOpen(File file) {
         OperationResult<InputStream> result = new OperationResult<>();
 
-        File buffer = fileHelper.generateDestinationFileForRemoteFile();
+        File buffer = fileHelper.generateDestinationFileOrNull();
         if (buffer != null) {
             try {
                 FileUtils.copyFile(file, buffer);

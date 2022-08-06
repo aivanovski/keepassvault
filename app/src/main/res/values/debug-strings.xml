@@ -31,5 +31,6 @@
     <string name="check_exists" translatable="false">Check exists</string>
     <string name="file_exits_with_str" translatable="false">File exists: %s</string>
     <string name="create_file" translatable="false">Create file</string>
+    <string name="get_root" translatable="false">Get root</string>
 
 </resources>

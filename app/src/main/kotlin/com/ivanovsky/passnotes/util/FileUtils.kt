@@ -32,7 +32,7 @@ object FileUtils {
         } else if (idx == 0 && filePath.length == 1) {
             filePath
         } else {
-            ""
+            filePath
         }
     }
 
@@ -69,6 +69,6 @@ object FileUtils {
     fun copyFile(source: File, destination: File) {
         val input: InputStream = BufferedInputStream(FileInputStream(source))
         val output: OutputStream = BufferedOutputStream(FileOutputStream(destination))
-        InputOutputUtils.copy(input, output, true)
+        InputOutputUtils.copyOrThrow(input, output, true)
     }
 }

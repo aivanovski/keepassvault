@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.util
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import timber.log.Timber
+import java.io.Closeable
 import kotlin.Throws
 import java.io.File
 import java.io.FileInputStream
@@ -51,15 +52,14 @@ object InputOutputUtils {
         }
 
         val destination = try {
-            FileOutputStream(destinationFile)
+            FileOutputStream(destinationFile, false)
         } catch (exception: FileNotFoundException) {
             Timber.d(exception)
             return OperationResult.error(newGenericIOError(exception))
         }
 
-
         return try {
-            copy(
+            copyOrThrow(
                 source,
                 destination,
                 isCloneOnFinish = true,
@@ -74,17 +74,17 @@ object InputOutputUtils {
 
     @JvmStatic
     @Throws(IOException::class)
-    fun copy(
+    fun copyOrThrow(
         source: InputStream,
         destination: OutputStream,
         isCloneOnFinish: Boolean
     ) {
-        copy(source, destination, isCloneOnFinish, cancellation = UNCANCELABLE)
+        copyOrThrow(source, destination, isCloneOnFinish, cancellation = UNCANCELABLE)
     }
 
     @JvmStatic
     @Throws(IOException::class)
-    fun copy(
+    fun copyOrThrow(
         source: InputStream,
         destination: OutputStream,
         isCloneOnFinish: Boolean,
@@ -99,33 +99,30 @@ object InputOutputUtils {
             destination.flush()
         } finally {
             if (isCloneOnFinish) {
-                close(source)
-                close(destination)
+                closeOrThrow(source)
+                closeOrThrow(destination)
             }
         }
     }
 
     @JvmStatic
-    fun close(stream: OutputStream?) {
-        if (stream == null) {
+    @Throws(IOException::class)
+    fun closeOrThrow(closeable: Closeable?) {
+        if (closeable == null) {
             return
         }
 
-        try {
-            stream.close()
-        } catch (e: IOException) {
-            Timber.d(e)
-        }
+        closeable.close()
     }
 
     @JvmStatic
-    fun close(stream: InputStream?) {
-        if (stream == null) {
+    fun close(closeable: Closeable?) {
+        if (closeable == null) {
             return
         }
 
         try {
-            stream.close()
+            closeable.close()
         } catch (e: IOException) {
             Timber.d(e)
         }

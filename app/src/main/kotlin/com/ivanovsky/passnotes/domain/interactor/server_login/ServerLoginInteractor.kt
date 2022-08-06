@@ -1,10 +1,12 @@
 package com.ivanovsky.passnotes.domain.interactor.server_login
 
 import com.ivanovsky.passnotes.data.entity.FSAuthority
+import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.entity.ServerCredentials
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.extensions.mapError
+import com.ivanovsky.passnotes.extensions.mapWithObject
 import kotlinx.coroutines.withContext
 
 class ServerLoginInteractor(
@@ -15,29 +17,30 @@ class ServerLoginInteractor(
 
     fun getDebugWebDavCredentials() = getDebugCredentialsUseCase.getDebugWebDavCredentials()
 
+    fun getDebugGitCredentials() = getDebugCredentialsUseCase.getDebugGitCredentials()
+
     suspend fun authenticate(
-        credentials: ServerCredentials,
+        credentials: FSCredentials,
         fsAuthority: FSAuthority
-    ): OperationResult<Boolean> =
+    ): OperationResult<Unit> =
         withContext(dispatchers.IO) {
             val fileSystemProvider = fileSystemResolver.resolveProvider(fsAuthority)
             val authenticator = fileSystemProvider.authenticator
             authenticator.setCredentials(credentials)
 
-            val root = fileSystemProvider.rootFile
-
-            if (root.isSucceeded) {
-                OperationResult.success(true)
-            } else {
+            val getRootResult = fileSystemProvider.rootFile
+            if (getRootResult.isFailed) {
                 authenticator.setCredentials(null)
-                root.takeError()
+                return@withContext getRootResult.mapError()
             }
+
+            getRootResult.mapWithObject(Unit)
         }
 
     suspend fun saveCredentials(
-        credentials: ServerCredentials,
+        credentials: FSCredentials,
         fsAuthority: FSAuthority
-    ): OperationResult<Boolean> =
+    ): OperationResult<Unit> =
         withContext(dispatchers.IO) {
             val fileSystemProvider = fileSystemResolver.resolveProvider(fsAuthority)
 
@@ -45,6 +48,6 @@ class ServerLoginInteractor(
                 setCredentials(credentials)
             }
 
-            OperationResult.success(true)
+            OperationResult.success(Unit)
         }
 }

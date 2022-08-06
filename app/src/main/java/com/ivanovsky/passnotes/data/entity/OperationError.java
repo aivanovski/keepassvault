@@ -26,6 +26,7 @@ public class OperationError {
     public static final String MESSAGE_FAILED_TO_FIND_FILE = "Failed to find file";
     public static final String MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE = "Failed to access to private storage";
     public static final String MESSAGE_FAILED_TO_ACCESS_TO_FILE = "Failed to access to file";
+    public static final String MESSAGE_FAILED_TO_ACCESS_TO_FILE_SYSTEM = "Failed to access to file system";
     public static final String MESSAGE_FAILED_TO_GET_DATABASE = "Failed to get database";
     public static final String MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED = "Deferred operations are not supported";
     public static final String MESSAGE_FAILED_TO_FIND_CACHED_FILE = "Failed to find cached file";
@@ -56,6 +57,11 @@ public class OperationError {
     public static final String GENERIC_MESSAGE_FAILED_TO_GET_ACCESS_RIGHT_TO_URI = "Failed to get access to: %s";
     public static final String GENERIC_MESSAGE_FAILED_TO_FIND_FILE = "Failed to find file: %s";
     public static final String GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID = "Failed to find '%s' in db: uid=%s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY = "Failed fo find entity by: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_ACCESS_TO_FILE = "Failed to access to file: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_GET_REFERENCE_TO = "Failed to get reference to: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_GET_PARENT_FOR = "Failed to get parent for: %s";
+    public static final String GENERIC_MESSAGE_FILE_IS_NOT_A_DIRECTORY = "File is not a directory: %s";
 
     private Type type;
     private String message;

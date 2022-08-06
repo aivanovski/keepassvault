@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.data.entity.FSType
+import com.ivanovsky.passnotes.data.repository.db.dao.GitRootDao
 import com.ivanovsky.passnotes.data.repository.file.dropbox.DropboxAuthenticator
 import com.ivanovsky.passnotes.data.repository.file.dropbox.DropboxClient
 import com.ivanovsky.passnotes.data.repository.file.regular.RegularFileSystemProvider
@@ -14,6 +15,8 @@ import com.ivanovsky.passnotes.data.repository.file.remote.RemoteFileSystemProvi
 import com.ivanovsky.passnotes.data.repository.file.saf.SAFFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.webdav.WebDavClientV2
 import com.ivanovsky.passnotes.data.repository.file.webdav.WebdavAuthenticator
+import com.ivanovsky.passnotes.data.repository.file.git.GitClient
+import com.ivanovsky.passnotes.data.repository.file.git.GitFileSystemAuthenticator
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -23,6 +26,7 @@ class FileSystemResolver(
     private val context: Context,
     private val settings: Settings,
     private val remoteFileRepository: RemoteFileRepository,
+    private val gitRootDao: GitRootDao,
     private val fileHelper: FileHelper,
     private val observerBus: ObserverBus,
     private val httpClient: OkHttpClient
@@ -85,6 +89,19 @@ class FileSystemResolver(
             }
             FSType.SAF -> {
                 SAFFileSystemProvider(context)
+            }
+            FSType.GIT -> {
+                val authenticator = GitFileSystemAuthenticator(fsAuthority)
+                val client = RemoteApiClientAdapter(GitClient(authenticator, fileHelper, gitRootDao))
+
+                RemoteFileSystemProvider(
+                    authenticator,
+                    client,
+                    remoteFileRepository,
+                    fileHelper,
+                    observerBus,
+                    fsAuthority
+                )
             }
             FSType.UNDEFINED -> throw IllegalStateException()
         }

@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.presentation.storagelist.factory
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.SingleTextCellModel
 import com.ivanovsky.passnotes.presentation.core.model.TwoTextWithIconCellModel

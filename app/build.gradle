@@ -50,6 +50,7 @@ android {
         buildConfigField "String", "DEBUG_WEB_DAV_URL", "\"\""
         buildConfigField "String", "DEBUG_WEB_DAV_USERNAME", "\"\""
         buildConfigField "String", "DEBUG_WEB_DAV_PASSWORD", "\"\""
+        buildConfigField "String", "DEBUG_GIT_URL", "\"\""
 
         def dropboxAppKey = getCustomProperty(PROPERTY_DROPBOX_APP_KEY)
         def dropboxAppSecret = getCustomProperty(PROPERTY_DROPBOX_APP_SECRET)

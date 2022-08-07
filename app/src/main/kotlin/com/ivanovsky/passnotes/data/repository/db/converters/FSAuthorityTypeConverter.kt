@@ -51,7 +51,7 @@ class FSAuthorityTypeConverter(
         val obj = JSONObject()
 
         if (fsAuthority.credentials != null) {
-            obj.put(CREDENTIALS, toEncodedString(fsAuthority.credentials))
+            obj.put(CREDENTIALS, encodeCredentialsToString(fsAuthority.credentials))
         }
 
         obj.put(FS_TYPE, fsAuthority.type.value)
@@ -66,7 +66,7 @@ class FSAuthorityTypeConverter(
             val credsObj = JSONObject(decodedText ?: encodedText)
 
             return when (credsObj.optString(TYPE)) {
-                TYPE_LOGIN_CREDENTIALS -> {
+                TYPE_BASIC_CREDENTIALS -> {
                     FSCredentials.BasicCredentials(
                         url = credsObj.optString(URL),
                         username = credsObj.optString(USERNAME),
@@ -93,20 +93,20 @@ class FSAuthorityTypeConverter(
         return null
     }
 
-    private fun toEncodedString(credentials: FSCredentials): String {
+    private fun encodeCredentialsToString(credentials: FSCredentials): String {
         val creds = JSONObject()
 
         when (credentials) {
             is FSCredentials.BasicCredentials -> {
+                creds.put(TYPE, TYPE_BASIC_CREDENTIALS)
                 creds.put(URL, credentials.url)
                 creds.put(USERNAME, credentials.username)
                 creds.put(PASSWORD, credentials.password)
-                creds.put(TYPE, TYPE_LOGIN_CREDENTIALS)
             }
             is FSCredentials.GitCredentials -> {
+                creds.put(TYPE, TYPE_GIT_CREDENTIALS)
                 creds.put(URL, credentials.url)
                 creds.put(IS_SECRET_URL, credentials.isSecretUrl)
-                creds.put(TYPE, TYPE_GIT_CREDENTIALS)
                 creds.put(SALT, credentials.salt)
             }
         }
@@ -129,7 +129,7 @@ class FSAuthorityTypeConverter(
         private const val IS_SECRET_URL = "isSecretUrl"
         private const val SALT = "salt"
 
-        private const val TYPE_LOGIN_CREDENTIALS = "LoginCredentials"
+        private const val TYPE_BASIC_CREDENTIALS = "BasicCredentials"
         private const val TYPE_GIT_CREDENTIALS = "GitCredentials"
     }
 }

@@ -5,11 +5,10 @@ import androidx.room.migration.AutoMigrationSpec
 import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
-import com.ivanovsky.passnotes.data.crypto.DataCipher
-import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
 import com.ivanovsky.passnotes.data.repository.db.converters.FSAuthorityTypeConverter
-import com.ivanovsky.passnotes.utils.TestDataCipher
+import com.ivanovsky.passnotes.utils.ClearTextDataCipher
+import com.ivanovsky.passnotes.utils.DataCipherProviderImpl
 import java.util.Calendar
 
 fun dateInMillis(year: Int, month: Int, day: Int): Long {
@@ -22,17 +21,11 @@ fun dateInMillis(year: Int, month: Int, day: Int): Long {
 }
 
 fun initInMemoryDatabase(): AppDatabase {
-    val cipherProvider = object : DataCipherProvider {
-        override fun getCipher(): DataCipher {
-            return TestDataCipher()
-        }
-    }
-
     return Room.inMemoryDatabaseBuilder(
         InstrumentationRegistry.getInstrumentation().context,
         AppDatabase::class.java
     )
-        .addTypeConverter(FSAuthorityTypeConverter(cipherProvider))
+        .addTypeConverter(FSAuthorityTypeConverter(DataCipherProviderImpl(ClearTextDataCipher())))
         .build()
 }
 

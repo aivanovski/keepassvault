@@ -18,10 +18,10 @@ ext {
     android = [
             minSdk    : 21,
             targetSdk : 31,
-            compileSdk: 31
+            compileSdk: 32
     ]
 
-    kotlinVersion = '1.5.0'
+    kotlinVersion = '1.6.10'
 
     // KeePassJava 2 dependencies
     jetbrainsAnnotationsVersion = '15.0'

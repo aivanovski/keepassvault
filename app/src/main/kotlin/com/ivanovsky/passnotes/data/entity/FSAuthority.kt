@@ -5,7 +5,7 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class FSAuthority(
-    val credentials: ServerCredentials?,
+    val credentials: FSCredentials?,
     val type: FSType
 ) : Parcelable {
 

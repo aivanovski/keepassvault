@@ -7,9 +7,9 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PasswordResource
 import com.ivanovsky.passnotes.domain.interactor.password_generator.PasswordGeneratorInteractor
-import com.ivanovsky.passnotes.extensions.toIntSafely
 import com.ivanovsky.passnotes.presentation.Screens.PasswordGeneratorScreen
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
+import com.ivanovsky.passnotes.util.toIntSafely
 import kotlin.math.absoluteValue
 
 class PasswordGeneratorViewModel(

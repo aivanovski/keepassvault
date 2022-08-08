@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FSAuthority
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
@@ -49,6 +50,7 @@ import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingAction
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
+import com.ivanovsky.passnotes.presentation.server_login.model.LoginType
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
@@ -688,7 +690,12 @@ class UnlockViewModel(
         router.navigateTo(
             Screens.ServerLoginScreen(
                 ServerLoginArgs(
-                    fsAuthority = oldFsAuthority
+                    fsAuthority = oldFsAuthority,
+                    loginType = when (selectedFile.fsAuthority.type) {
+                        FSType.WEBDAV -> LoginType.USERNAME_PASSWORD
+                        FSType.GIT -> LoginType.GIT
+                        else -> throw IllegalStateException()
+                    }
                 )
             )
         )

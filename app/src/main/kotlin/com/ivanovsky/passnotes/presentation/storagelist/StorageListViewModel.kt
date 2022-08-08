@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.storagelist
 
 import android.net.Uri
+import android.os.Build.VERSION_CODES.S
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -8,17 +9,18 @@ import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.AuthType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType.DROPBOX
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType.EXTERNAL_STORAGE
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType.SAF_STORAGE
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType.PRIVATE_STORAGE
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType.WEBDAV
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.DROPBOX
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.EXTERNAL_STORAGE
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.SAF_STORAGE
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.PRIVATE_STORAGE
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.WEBDAV
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
@@ -34,8 +36,10 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.SingleTextCellViewMod
 import com.ivanovsky.passnotes.presentation.core.viewmodel.TwoTextWithIconCellViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
+import com.ivanovsky.passnotes.presentation.server_login.model.LoginType
 import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellModelFactory
 import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.GIT
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
@@ -161,18 +165,34 @@ class StorageListViewModel(
         router.navigateTo(FilePickerScreen(args))
     }
 
-    private fun navigateToServerLogin(args: ServerLoginArgs) {
+    private fun navigateToServerLogin(fsAuthority: FSAuthority) {
+        val screenArgs = when (fsAuthority.type) {
+            FSType.WEBDAV -> {
+                ServerLoginArgs(
+                    loginType = LoginType.USERNAME_PASSWORD,
+                    fsAuthority = fsAuthority
+                )
+            }
+            FSType.GIT -> {
+                ServerLoginArgs(
+                    loginType = LoginType.GIT,
+                    fsAuthority = fsAuthority
+                )
+            }
+            else -> throw IllegalArgumentException()
+        }
+
         screenState.value = ScreenState.loading()
         isReloadOnStart = true
-        router.setResultListener(ServerLoginScreen.RESULT_KEY) { fsAuthority ->
-            if (fsAuthority is FSAuthority) {
+        router.setResultListener(ServerLoginScreen.RESULT_KEY) { fsAuthorityWithCreds ->
+            if (fsAuthorityWithCreds is FSAuthority) {
                 isReloadOnStart = false
-                onInternalAuthSuccess(fsAuthority)
+                onInternalAuthSuccess(fsAuthorityWithCreds)
             } else {
                 onInternalAuthFailed()
             }
         }
-        router.navigateTo(ServerLoginScreen(args))
+        router.navigateTo(ServerLoginScreen(screenArgs))
     }
 
     private fun onFilePickedByPicker(file: FileDescriptor) {
@@ -204,7 +224,7 @@ class StorageListViewModel(
                 onDeviceStorageSelected(selectedOption.root, selectedOption.type)
             }
             SAF_STORAGE -> onSafStorageSelected()
-            DROPBOX, WEBDAV -> onRemoteFileStorageSelected(selectedOption.root)
+            DROPBOX, WEBDAV, GIT -> onRemoteFileStorageSelected(selectedOption.root)
         }
     }
 
@@ -253,7 +273,7 @@ class StorageListViewModel(
         if (authenticator.isAuthenticationRequired()) {
             val authType = authenticator.getAuthType()
             if (authType == AuthType.CREDENTIALS) {
-                navigateToServerLogin(ServerLoginArgs(root.fsAuthority))
+                navigateToServerLogin(root.fsAuthority)
             } else if (authType == AuthType.EXTERNAL) {
                 isExternalAuthActivityLaunched = true
                 showAuthActivityEvent.call(root.fsAuthority)

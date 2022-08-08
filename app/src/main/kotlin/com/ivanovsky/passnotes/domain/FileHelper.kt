@@ -1,6 +1,9 @@
 package com.ivanovsky.passnotes.domain
 
 import android.content.Context
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE
+import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
+import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import java.io.File
 import java.util.UUID
@@ -22,9 +25,22 @@ class FileHelper(
             }
         }
 
-    fun generateDestinationFileForRemoteFile(): File? {
+    fun generateDestinationFileOrNull(): File? {
         return generateDestinationForRemoteFile()?.let {
             File(it)
+        }
+    }
+
+    fun generateDestinationFile(): OperationResult<File> {
+        val file = generateDestinationFileOrNull()
+        return if (file != null) {
+            OperationResult.success(file)
+        } else {
+            OperationResult.error(
+                newGenericIOError(
+                    MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE
+                )
+            )
         }
     }
 

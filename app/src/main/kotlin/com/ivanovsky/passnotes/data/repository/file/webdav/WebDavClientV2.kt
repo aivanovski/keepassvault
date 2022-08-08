@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.file.webdav
 
+import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_GET_PARENT_PATH
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_IS_NOT_A_DIRECTORY
@@ -12,6 +13,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientV2
+import com.ivanovsky.passnotes.extensions.getUrl
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
 import com.ivanovsky.passnotes.util.InputOutputUtils
@@ -32,7 +34,7 @@ class WebDavClientV2(
     private val webDavClient = WebDavNetworkLayer(httpClient).apply {
         val creds = authenticator.getFsAuthority().credentials
         if (creds != null) {
-            setCredentials(creds)
+            setCredentials(creds as FSCredentials.BasicCredentials)
         }
     }
     private var fsAuthority = authenticator.getFsAuthority()
@@ -120,7 +122,7 @@ class WebDavClientV2(
         val cancellation = AtomicBoolean(false)
         try {
             val out = FileOutputStream(File(destinationPath))
-            InputOutputUtils.copy(input.obj, out, true, cancellation)
+            InputOutputUtils.copyOrThrow(input.obj, out, true, cancellation)
         } catch (e: IOException) {
             Timber.d(e)
             cancellation.set(true)
@@ -150,7 +152,7 @@ class WebDavClientV2(
 
         if (currentCreds != authenticatorCreds && authenticatorCreds != null) {
             fsAuthority = authenticator.getFsAuthority()
-            webDavClient.setCredentials(authenticatorCreds)
+            webDavClient.setCredentials(authenticatorCreds as FSCredentials.BasicCredentials)
         }
 
         if (fsAuthority.credentials == null) {
@@ -217,7 +219,7 @@ class WebDavClientV2(
     }
 
     private fun getServerUrl(): String {
-        return fsAuthority.credentials?.serverUrl ?: throw IllegalStateException()
+        return fsAuthority.credentials?.getUrl() ?: throw IllegalStateException()
     }
 
     private fun List<DavResource>.toFileDescriptors(): List<FileDescriptor> {

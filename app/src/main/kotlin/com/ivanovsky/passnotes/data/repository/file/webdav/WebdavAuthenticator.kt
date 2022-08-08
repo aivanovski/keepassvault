@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.data.repository.file.webdav
 
 import android.content.Context
 import com.ivanovsky.passnotes.data.entity.FSAuthority
-import com.ivanovsky.passnotes.data.entity.ServerCredentials
+import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.repository.file.AuthType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator
 import com.ivanovsky.passnotes.data.repository.file.exception.IncorrectUseException
@@ -26,7 +26,7 @@ class WebdavAuthenticator(
         throw IncorrectUseException()
     }
 
-    override fun setCredentials(credentials: ServerCredentials?) {
+    override fun setCredentials(credentials: FSCredentials?) {
         fsAuthority.set(
             fsAuthority.get().copy(
                 credentials = credentials

@@ -6,7 +6,8 @@ enum class FSType(val value: String) {
     EXTERNAL_STORAGE("EXTERNAL_STORAGE"),
     DROPBOX("DROPBOX"),
     WEBDAV("WEBDAV"),
-    SAF("STORAGE_ACCESS_FRAMEWORK");
+    SAF("STORAGE_ACCESS_FRAMEWORK"),
+    GIT("GIT");
 
     companion object {
 

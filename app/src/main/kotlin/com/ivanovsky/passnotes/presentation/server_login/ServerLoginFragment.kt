@@ -13,6 +13,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.server_login.model.LoginType
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -29,7 +30,10 @@ class ServerLoginFragment : FragmentWithDoneButton() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         setupActionBar {
-            title = getString(R.string.enter_server_credentials)
+            title = when (args.loginType) {
+                LoginType.USERNAME_PASSWORD -> getString(R.string.login_to_server)
+                LoginType.GIT -> getString(R.string.login_to_git)
+            }
             setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
         }
@@ -62,7 +66,7 @@ class ServerLoginFragment : FragmentWithDoneButton() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.doneButtonVisibility.observe(viewLifecycleOwner) { isVisible ->
+        viewModel.isDoneButtonVisible.observe(viewLifecycleOwner) { isVisible ->
             setDoneButtonVisibility(isVisible)
         }
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {

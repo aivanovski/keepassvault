@@ -5,6 +5,7 @@
     <!-- Common for all screens -->
     <string name="dropbox">Dropbox</string>
     <string name="webdav">WebDAV</string>
+    <string name="git">Git</string>
     <string name="device">Device</string>
     <string name="no_items">No items</string>
     <string name="yes">Yes</string>
@@ -209,12 +210,16 @@
     <string name="all_files_permission_dialog_message">To complete this action application needs the permission to manage all files. After pressing "Grant" button, please select <b>Allow access to manage all files</b> option on the next screen</string>
     <string name="unable_to_authenticate">Unable to authenticate</string>
 
-    <!-- Server screen -->
-    <string name="enter_server_credentials">Enter server credentials</string>
+    <!-- Server login screen -->
+    <string name="login_to_server">Login to server</string>
+    <string name="login_to_git">Login to Git repository</string>
     <string name="server_url">Server url</string>
+    <string name="git_repository_url">Git repositroy url</string>
+    <string name="url_contains_secret_message">Url contains secret key, hide it if need</string>
 
     <!-- Debug menu screen -->
     <string name="debug_menu">Debug menu</string>
+    <string name="clone_repository">Clone repository</string>
 
     <!-- Select database screen -->
     <string name="select_database">Select Database</string>

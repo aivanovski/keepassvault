@@ -23,6 +23,11 @@ class MigrationFrom2To3(
             """.trimIndent()
         )
 
+        migrateDataInUsedFileTable(database)
+        migrateDataInRemoteFileTable(database)
+    }
+
+    private fun migrateDataInUsedFileTable(database: SupportSQLiteDatabase) {
         val cursor = database.query("SELECT * FROM $TABLE_USED_FILE")
 
         val columnId = cursor.getColumnIndex(COLUMN_ID)
@@ -31,36 +36,90 @@ class MigrationFrom2To3(
         while (cursor.moveToNext()) {
             val id: Int = cursor.getInt(columnId)
             val oldFsAuthority: String? = cursor.getString(columnFsAuthority)
-            if (oldFsAuthority.isNullOrEmpty()) {
-                continue
-            }
+            val oldKeyFileFsAuthority: String? = cursor.getString(columnFsAuthority)
 
-            when (val action = migrateFsAuthorityData(oldFsAuthority)) {
-                is Action.Update -> {
-                    val values = ContentValues()
-                        .apply {
-                            put(COLUMN_FS_AUTHORITY, action.updatedRow)
-                        }
-                    database.update(
-                        TABLE_USED_FILE,
-                        SQLiteDatabase.CONFLICT_REPLACE,
-                        values,
-                        "$COLUMN_ID = $id",
-                        emptyArray()
-                    )
+            if (oldFsAuthority != null) {
+                val action = migrateFsAuthorityData(oldFsAuthority)
+
+                runActionOnColumn(
+                    database = database,
+                    action = action,
+                    tableName = TABLE_USED_FILE,
+                    columnName = COLUMN_FS_AUTHORITY,
+                    rowId = id
+                )
+
+                if (action == Action.Remove) {
+                    continue
                 }
-                is Action.Remove -> {
-                    database.delete(
-                        TABLE_USED_FILE,
-                        "$COLUMN_ID = $id",
-                        emptyArray()
-                    )
-                }
-                is Action.Skip -> continue
+            }
+            if (oldKeyFileFsAuthority != null) {
+                runActionOnColumn(
+                    database = database,
+                    action = migrateFsAuthorityData(oldKeyFileFsAuthority),
+                    tableName = TABLE_USED_FILE,
+                    columnName = COLUMN_KEY_FILE_FS_AUTHORITY,
+                    rowId = id
+                )
             }
         }
 
         cursor.close()
+    }
+
+    private fun migrateDataInRemoteFileTable(database: SupportSQLiteDatabase) {
+        val cursor = database.query("SELECT * FROM $TABLE_REMOTE_FILE")
+
+        val columnId = cursor.getColumnIndex(COLUMN_ID)
+        val columnFsAuthority = cursor.getColumnIndex(COLUMN_FS_AUTHORITY)
+
+        while (cursor.moveToNext()) {
+            val id: Int = cursor.getInt(columnId)
+            val oldFsAuthority = cursor.getString(columnFsAuthority)
+                ?: continue
+
+            runActionOnColumn(
+                database = database,
+                action = migrateFsAuthorityData(oldFsAuthority),
+                tableName = TABLE_REMOTE_FILE,
+                columnName = COLUMN_FS_AUTHORITY,
+                rowId = id
+            )
+        }
+
+        cursor.close()
+    }
+
+    private fun runActionOnColumn(
+        database: SupportSQLiteDatabase,
+        action: Action,
+        tableName: String,
+        columnName: String,
+        rowId: Int
+    ) {
+        when (action) {
+            is Action.Update -> {
+                val values = ContentValues()
+                    .apply {
+                        put(columnName, action.updatedRow)
+                    }
+                database.update(
+                    tableName,
+                    SQLiteDatabase.CONFLICT_REPLACE,
+                    values,
+                    "$COLUMN_ID = $rowId",
+                    emptyArray()
+                )
+            }
+            is Action.Remove -> {
+                database.delete(
+                    tableName,
+                    "$COLUMN_ID = $rowId",
+                    emptyArray()
+                )
+            }
+            is Action.Skip -> {}
+        }
     }
 
     private fun migrateFsAuthorityData(oldFsAuthority: String): Action {
@@ -117,9 +176,11 @@ class MigrationFrom2To3(
 
     companion object {
         private const val TABLE_USED_FILE = "used_file"
+        private const val TABLE_REMOTE_FILE = "remote_file"
 
         private const val COLUMN_ID = "id"
         private const val COLUMN_FS_AUTHORITY = "fs_authority"
+        private const val COLUMN_KEY_FILE_FS_AUTHORITY = "key_file_fs_authority"
 
         private const val CREDENTIALS = "credentials"
         private const val FS_TYPE = "fsType"

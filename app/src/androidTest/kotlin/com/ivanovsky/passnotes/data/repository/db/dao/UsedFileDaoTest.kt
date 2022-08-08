@@ -2,14 +2,14 @@ package com.ivanovsky.passnotes.data.repository.db.dao
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.ivanovsky.passnotes.TestData.dateInMillis
+import com.ivanovsky.passnotes.TestDatabase.initInMemoryDatabase
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.KeyType
-import com.ivanovsky.passnotes.dateInMillis
-import com.ivanovsky.passnotes.initInMemoryDatabase
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

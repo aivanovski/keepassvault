@@ -30,6 +30,6 @@ ext {
     simpleXmlVersion = '2.7.1'
     aaltoXmlVersion = '1.0.0'
     repackedCodecsVersion = '1.0.2'
-    crashlyticsVersion = '18.2.5'
 
+    crashlyticsVersion = '18.2.5'
 }

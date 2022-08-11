@@ -8,13 +8,10 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
-class App : MultiDexApplication() {
+open class App : MultiDexApplication() {
 
     override fun onCreate() {
         super.onCreate()
-
-        FirebaseCrashlytics.getInstance()
-            .setCrashlyticsCollectionEnabled(BuildConfig.IS_CRASHLYTICS_ENABLED)
 
         val loggerInteractor = LoggerInteractor(this)
             .apply {

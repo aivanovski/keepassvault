@@ -85,7 +85,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
     signingConfigs {
@@ -97,6 +97,16 @@ android {
             storePassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD) ?: ""
             keyAlias getCustomProperty(PROPERTY_KEYSTORE_ALIAS) ?: ""
             keyPassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD) ?: ""
+        }
+    }
+
+    flavorDimensions "default"
+    productFlavors {
+        gplay {
+            dimension "default"
+        }
+        libre {
+            dimension "default"
         }
     }
 
@@ -271,7 +281,7 @@ dependencies {
     implementation "com.github.terrakok:cicerone:$ciceroneVersion"
 
     // Firebase Crashlytics
-    implementation "com.google.firebase:firebase-crashlytics:$crashlyticsVersion"
+    gplayImplementation "com.google.firebase:firebase-crashlytics:$crashlyticsVersion"
 
     // Timber
     implementation "com.jakewharton.timber:timber:$timberVersion"

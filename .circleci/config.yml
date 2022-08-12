@@ -38,9 +38,9 @@ jobs:
           name: Assemble release build
           command: ./gradlew app:assembleGplayRelease
       - store_artifacts:
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/gplay/debug/app-gplay-debug.apk
       - store_artifacts:
-          path: app/build/outputs/apk/release/app-release.apk
+          path: app/build/outputs/apk/gplay/release/app-gplay-release.apk
 
 workflows:
   build:

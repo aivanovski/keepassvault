@@ -8,7 +8,7 @@ Another Android client app for KeePass databases.
 **This app is orientated for my personal use. It may have some bugs, so please make a backups before use it.**
 
 # Features
-- Synchronization with WebDav server (by default synchronization is work in background that means no need wait after until server synchronization will be finished after each modification)
+- Synchronization with WebDav server or Git repository
 - Create databases, entries and groups
 - Password or key file unlock
 - Support .kdbx files (version 2-3, application uses [KeePassJava2](https://github.com/jorabin/KeePassJava2) to manipulate the KeePass database)

@@ -271,5 +271,5 @@ dependencies {
     implementation "org.eclipse.jgit:org.eclipse.jgit:6.2.0.202206071550-r"
 
     // KeePassJava2
-    implementation 'com.github.aivanovski:KeePassJava2-android:acc4afaf9d'
+    implementation "com.github.aivanovski:KeePassJava2-android:2.1.4"
 }

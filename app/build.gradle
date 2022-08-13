@@ -204,29 +204,6 @@ dependencies {
     androidTestImplementation "com.google.truth:truth:$truthVersion"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
-    implementation fileTree(include: ['*.jar', '*.aar'], exclude: 'KeePassJava2*', dir: 'libs')
-
-    debugImplementation files('libs/KeePassJava2-database-debug.aar')
-    debugImplementation files('libs/KeePassJava2-simple-debug.aar')
-    debugImplementation files('libs/KeePassJava2-kdbx-debug.aar')
-
-    releaseImplementation files('libs/KeePassJava2-database-release.aar')
-    releaseImplementation files('libs/KeePassJava2-simple-release.aar')
-    releaseImplementation files('libs/KeePassJava2-kdbx-release.aar')
-
-    // KeePassJava2
-    // for KeePassJava2-database
-    implementation "org.jetbrains:annotations:$jetbrainsAnnotationsVersion"
-    implementation ("com.google.guava:guava:$guavaVersion") {
-        exclude group: 'com.google.code.findbugs', module: 'jsr305'
-    }
-    implementation "com.madgag.spongycastle:core:$spongyCastleVersion"
-    // for KeePassJava2-kdbx
-    implementation "com.epam.reportportal:commons-codec-repacked:$repackedCodecsVersion"
-    // for KeePassJava2-simple
-    implementation "org.simpleframework:simple-xml:$simpleXmlVersion"
-    implementation "com.fasterxml:aalto-xml:$aaltoXmlVersion"
-
     // MultiDex
     implementation "androidx.multidex:multidex:2.0.1"
 
@@ -293,4 +270,6 @@ dependencies {
     // JGit
     implementation "org.eclipse.jgit:org.eclipse.jgit:6.2.0.202206071550-r"
 
+    // KeePassJava2
+    implementation "com.github.aivanovski:KeePassJava2-android:2.1.4"
 }

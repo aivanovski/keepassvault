@@ -2,8 +2,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
-apply plugin: 'com.google.firebase.crashlytics'
-apply plugin: 'com.google.gms.google-services'
+
+if (shouldEnableGoogleServicesPlugins()) {
+    project.logger.lifecycle("Enable Google Services plugins")
+    apply plugin: 'com.google.firebase.crashlytics'
+    apply plugin: 'com.google.gms.google-services'
+}
 
 def versionMajor = 0
 def versionMinor = 17
@@ -28,6 +32,10 @@ if (PROPERTIES_FILE.exists()) {
 
 String getCustomProperty(String key) {
     return project.ext.customProps[key] ?: System.getenv(key) ?: ""
+}
+
+Boolean shouldEnableGoogleServicesPlugins() {
+    return getGradle().getStartParameter().getTaskRequests().toString().contains("Gplay")
 }
 
 android {

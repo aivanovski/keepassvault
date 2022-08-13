@@ -1,4 +1,4 @@
-# KPassnotes
+# KPassNotes
 Another Android client app for KeePass databases.
 
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"

@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.domain.interactor.storagelist
 
-import android.content.Context
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
@@ -9,18 +8,20 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType.DROPBOX
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType.EXTERNAL_STORAGE
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType.SAF_STORAGE
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType.PRIVATE_STORAGE
-import com.ivanovsky.passnotes.domain.entity.StorageOptionType.WEBDAV
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.DROPBOX
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.EXTERNAL_STORAGE
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.GIT
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.SAF_STORAGE
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.PRIVATE_STORAGE
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.WEBDAV
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
 import kotlinx.coroutines.withContext
 
 class StorageListInteractor(
-    private val context: Context,
+    private val resourceProvider: ResourceProvider,
     private val fileSystemResolver: FileSystemResolver,
     private val dispatchers: DispatcherProvider
 ) {
@@ -56,6 +57,7 @@ class StorageListInteractor(
 
             // options.add(createDropboxOption())
             options.add(createWebDavOption())
+            options.add(createGitOption())
 
             OperationResult.success(options)
         }
@@ -63,7 +65,7 @@ class StorageListInteractor(
     private fun createPrivateStorageOption(root: FileDescriptor): StorageOption {
         return StorageOption(
             PRIVATE_STORAGE,
-            context.getString(R.string.private_app_storage),
+            resourceProvider.getString(R.string.private_app_storage),
             root
         )
     }
@@ -71,7 +73,7 @@ class StorageListInteractor(
     private fun createExternalStorageOption(root: FileDescriptor): StorageOption {
         return StorageOption(
             EXTERNAL_STORAGE,
-            context.getString(R.string.external_storage_app_picker),
+            resourceProvider.getString(R.string.external_storage_app_picker),
             root
         )
     }
@@ -79,7 +81,7 @@ class StorageListInteractor(
     private fun createSafStorageOption(): StorageOption {
         return StorageOption(
             SAF_STORAGE,
-            context.getString(R.string.external_storage_system_picker),
+            resourceProvider.getString(R.string.external_storage_system_picker),
             createSafStorageDir()
         )
     }
@@ -87,7 +89,7 @@ class StorageListInteractor(
     private fun createDropboxOption(): StorageOption {
         return StorageOption(
             DROPBOX,
-            context.getString(R.string.dropbox),
+            resourceProvider.getString(R.string.dropbox),
             createDropboxStorageDir()
         )
     }
@@ -95,8 +97,16 @@ class StorageListInteractor(
     private fun createWebDavOption(): StorageOption {
         return StorageOption(
             WEBDAV,
-            context.getString(R.string.webdav),
+            resourceProvider.getString(R.string.webdav),
             createWebdavStorageDir()
+        )
+    }
+
+    private fun createGitOption(): StorageOption {
+        return StorageOption(
+            GIT,
+            resourceProvider.getString(R.string.git),
+            createGitStorageDir()
         )
     }
 
@@ -126,6 +136,19 @@ class StorageListInteractor(
             fsAuthority = FSAuthority(
                 credentials = null,
                 type = FSType.WEBDAV
+            ),
+            path = ROOT_PATH,
+            uid = ROOT_PATH,
+            name = ROOT_PATH,
+            isDirectory = true,
+            isRoot = true
+        )
+
+    private fun createGitStorageDir(): FileDescriptor =
+        FileDescriptor(
+            fsAuthority = FSAuthority(
+                credentials = null,
+                type = FSType.GIT
             ),
             path = ROOT_PATH,
             uid = ROOT_PATH,

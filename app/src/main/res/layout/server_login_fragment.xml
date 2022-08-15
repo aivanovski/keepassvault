@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -18,7 +19,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/rootLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
                 android:id="@+id/errorPanelView"
@@ -75,10 +76,11 @@
                             style="@style/Material.EditText.PrimaryMultiLine"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/server_url"
+                            android:hint="@{viewModel.urlHint}"
                             android:imeOptions="actionNext"
                             android:inputType="text"
-                            android:text="@={viewModel.url}" />
+                            android:text="@={viewModel.url}"
+                            tools:hint="Server url" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -89,7 +91,9 @@
                         android:layout_marginTop="@dimen/element_margin"
                         app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
                         app:layout_constraintStart_toEndOf="@id/guidelineStart"
-                        app:layout_constraintTop_toBottomOf="@id/urlLayout">
+                        app:layout_constraintTop_toBottomOf="@id/urlLayout"
+                        app:visible="@{viewModel.isUsernameVisible}"
+                        tools:visibility="visible">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/username"
@@ -110,7 +114,9 @@
                         android:layout_marginTop="@dimen/element_margin"
                         app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
                         app:layout_constraintStart_toEndOf="@id/guidelineStart"
-                        app:layout_constraintTop_toBottomOf="@id/usernameLayout">
+                        app:layout_constraintTop_toBottomOf="@id/usernameLayout"
+                        app:visible="@{viewModel.isPasswordVisible}"
+                        tools:visibility="visible">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/password"
@@ -122,6 +128,21 @@
                             android:text="@={viewModel.password}" />
 
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <CheckBox
+                        android:id="@+id/secretUrlCheckbox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/element_margin"
+                        android:checked="@={viewModel.isSecretUrlChecked}"
+                        android:text="@string/url_contains_secret_message"
+                        android:textColor="@color/primary_text"
+                        android:textSize="@dimen/material_primary_text_size"
+                        app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+                        app:layout_constraintStart_toEndOf="@id/guidelineStart"
+                        app:layout_constraintTop_toBottomOf="@id/passwordLayout"
+                        app:visible="@{viewModel.isSecretUrlCheckboxVisible}"
+                        tools:visibility="visible" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

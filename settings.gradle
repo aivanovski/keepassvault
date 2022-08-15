@@ -1,1 +1,1 @@
-include ':app', ':libs:KeePassJava2-database', ':libs:KeePassJava2-kdbx', ':libs:KeePassJava2-simple'
+include ':app'

@@ -17,9 +17,7 @@ import com.ivanovsky.passnotes.databinding.DebugMenuFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
-import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.FileUtils.DEFAULT_DB_NAME
-import com.ivanovsky.passnotes.util.IntentUtils
 import com.ivanovsky.passnotes.util.IntentUtils.newCreateFileIntent
 import com.ivanovsky.passnotes.util.IntentUtils.newOpenFileIntent
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -92,6 +90,8 @@ class DebugMenuFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         subscribeToLiveData()
+
+        viewModel.onScreenStart()
     }
 
     private fun subscribeToLiveData() {
@@ -135,7 +135,8 @@ class DebugMenuFragment : BaseFragment() {
             FSType.EXTERNAL_STORAGE to R.string.external_storage,
             FSType.SAF to R.string.storage_access_framework,
             FSType.DROPBOX to R.string.dropbox,
-            FSType.WEBDAV to R.string.webdav
+            FSType.WEBDAV to R.string.webdav,
+            FSType.GIT to R.string.git
         )
 
         fun newInstance() = DebugMenuFragment()

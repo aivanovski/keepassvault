@@ -5,17 +5,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
-import com.ivanovsky.passnotes.data.entity.ServerCredentials
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
+import com.ivanovsky.passnotes.extensions.getUrl
 import com.ivanovsky.passnotes.presentation.Screens.ServerLoginScreen
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.server_login.model.LoginType
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class ServerLoginViewModel(
     private val interactor: ServerLoginInteractor,
@@ -29,10 +32,15 @@ class ServerLoginViewModel(
     val screenState = MutableLiveData(ScreenState.data())
 
     val url = MutableLiveData(EMPTY)
+    val urlHint = MutableLiveData(getUrlHint(args.loginType))
     val username = MutableLiveData(EMPTY)
     val password = MutableLiveData(EMPTY)
     val urlError = MutableLiveData<String?>()
-    val doneButtonVisibility = MutableLiveData(true)
+    val isSecretUrlChecked = MutableLiveData(true)
+    val isDoneButtonVisible = MutableLiveData(true)
+    val isUsernameVisible = MutableLiveData(args.loginType == LoginType.USERNAME_PASSWORD)
+    val isPasswordVisible = MutableLiveData(args.loginType == LoginType.USERNAME_PASSWORD)
+    val isSecretUrlCheckboxVisible = MutableLiveData(args.loginType == LoginType.GIT)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
 
     init {
@@ -48,18 +56,29 @@ class ServerLoginViewModel(
             return
         }
 
-        val credentials = ServerCredentials(url, username, password)
+        val credentials = when (args.loginType) {
+            LoginType.USERNAME_PASSWORD -> FSCredentials.BasicCredentials(
+                url = url,
+                username = username,
+                password = password
+            )
+            LoginType.GIT -> FSCredentials.GitCredentials(
+                url = url,
+                isSecretUrl = isSecretUrlChecked.value ?: false,
+                salt = UUID.randomUUID().toString()
+            )
+        }
 
         screenState.value = ScreenState.loading()
         hideKeyboardEvent.call()
-        doneButtonVisibility.value = false
+        isDoneButtonVisible.value = false
 
         viewModelScope.launch {
             val authentication = interactor.authenticate(credentials, args.fsAuthority)
             if (authentication.isFailed) {
                 val message = errorInteractor.processAndGetMessage(authentication.error)
                 screenState.value = ScreenState.dataWithError(message)
-                doneButtonVisibility.value = true
+                isDoneButtonVisible.value = true
                 return@launch
             }
 
@@ -67,7 +86,7 @@ class ServerLoginViewModel(
             if (save.isFailed) {
                 val message = errorInteractor.processAndGetMessage(save.error)
                 screenState.value = ScreenState.dataWithError(message)
-                doneButtonVisibility.value = true
+                isDoneButtonVisible.value = true
                 return@launch
             }
 
@@ -95,13 +114,27 @@ class ServerLoginViewModel(
     private fun loadDebugData() {
         val credentials = when (args.fsAuthority.type) {
             FSType.WEBDAV -> interactor.getDebugWebDavCredentials()
+            FSType.GIT -> interactor.getDebugGitCredentials()
             else -> null
         }
 
-        credentials?.let {
-            url.value = it.serverUrl
-            username.value = it.username
-            password.value = it.password
+        when (credentials) {
+            is FSCredentials.BasicCredentials -> {
+                url.value = credentials.getUrl()
+                username.value = credentials.username
+                password.value = credentials.password
+            }
+            is FSCredentials.GitCredentials -> {
+                url.value = credentials.url
+                isSecretUrlChecked.value = credentials.isSecretUrl
+            }
+        }
+    }
+
+    private fun getUrlHint(loginType: LoginType): String {
+        return when (loginType) {
+            LoginType.USERNAME_PASSWORD -> resourceProvider.getString(R.string.server_url)
+            LoginType.GIT -> resourceProvider.getString(R.string.git_repository_url)
         }
     }
 }

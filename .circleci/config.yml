@@ -30,17 +30,17 @@ jobs:
             echo "4c259d0e1b031108e3fa682353f7ca450827644422c736334f1b3f24cb10bc62 *app/google-services.json" | sha256sum --check
       - run:
           name: Run tests
-          command: ./gradlew app:testDebugUnitTest
+          command: ./gradlew app:testGplayDebugUnitTest
       - run:
           name: Assemble debug build
-          command: ./gradlew app:assembleDebug
+          command: ./gradlew app:assembleGplayDebug
       - run:
           name: Assemble release build
-          command: ./gradlew app:assembleRelease
+          command: ./gradlew app:assembleGplayRelease
       - store_artifacts:
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/gplay/debug/app-gplay-debug.apk
       - store_artifacts:
-          path: app/build/outputs/apk/release/app-release.apk
+          path: app/build/outputs/apk/gplay/release/app-gplay-release.apk
 
 workflows:
   build:

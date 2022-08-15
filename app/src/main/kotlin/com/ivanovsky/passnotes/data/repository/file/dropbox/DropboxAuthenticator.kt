@@ -4,7 +4,7 @@ import android.content.Context
 import com.dropbox.core.android.Auth
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.entity.FSAuthority
-import com.ivanovsky.passnotes.data.entity.ServerCredentials
+import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.repository.file.AuthType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator
 import com.ivanovsky.passnotes.data.repository.file.exception.IncorrectUseException
@@ -36,7 +36,7 @@ class DropboxAuthenticator(
         Auth.startOAuth2Authentication(context, BuildConfig.DROPBOX_APP_KEY)
     }
 
-    override fun setCredentials(credentials: ServerCredentials?) {
+    override fun setCredentials(credentials: FSCredentials?) {
         throw IncorrectUseException()
     }
 }

@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 fun FileDescriptor.toUsedFile(
     addedTime: Long,
@@ -34,11 +35,15 @@ fun FileDescriptor.formatReadablePath(resourceProvider: ResourceProvider): Strin
             resourceProvider.getString(R.string.dropbox) + ":/" + path
         }
         FSType.WEBDAV -> {
-            val url = fsAuthority.credentials?.serverUrl ?: ""
+            val url = fsAuthority.credentials?.formatReadableUrl() ?: EMPTY
             url + path
         }
         FSType.SAF -> {
             path
+        }
+        FSType.GIT -> {
+            val url = fsAuthority.credentials?.formatReadableUrl() ?: EMPTY
+            url + path
         }
     }
 }

@@ -2,11 +2,15 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
-apply plugin: 'com.google.firebase.crashlytics'
-apply plugin: 'com.google.gms.google-services'
+
+if (shouldEnableGoogleServicesPlugins()) {
+    project.logger.lifecycle("Enable Google Services plugins")
+    apply plugin: 'com.google.firebase.crashlytics'
+    apply plugin: 'com.google.gms.google-services'
+}
 
 def versionMajor = 0
-def versionMinor = 15
+def versionMinor = 17
 def versionPatch = 0
 
 def PROPERTIES_FILE = file("../project.properties")
@@ -18,6 +22,7 @@ def PROPERTY_KEYSTORE_ALIAS = 'KEYSTORE_ALIAS'
 def PROPERTY_DEBUG_WEBDAV_URL = 'DEBUG_WEBDAV_URL'
 def PROPERTY_DEBUG_WEBDAV_USERNAME = 'DEBUG_WEBDAV_USERNAME'
 def PROPERTY_DEBUG_WEBDAV_PASSWORD = 'DEBUG_WEBDAV_PASSWORD'
+def PROPERTY_DEBUG_GIT_URL = 'DEBUG_GIT_URL'
 def PROPERTY_IS_CRASHLYTICS_ENABLED = 'IS_CRASHLYTICS_ENABLED'
 
 project.ext.customProps = new Properties()
@@ -27,6 +32,10 @@ if (PROPERTIES_FILE.exists()) {
 
 String getCustomProperty(String key) {
     return project.ext.customProps[key] ?: System.getenv(key) ?: ""
+}
+
+Boolean shouldEnableGoogleServicesPlugins() {
+    return getGradle().getStartParameter().getTaskRequests().toString().contains("Gplay")
 }
 
 android {
@@ -49,6 +58,7 @@ android {
         buildConfigField "String", "DEBUG_WEB_DAV_URL", "\"\""
         buildConfigField "String", "DEBUG_WEB_DAV_USERNAME", "\"\""
         buildConfigField "String", "DEBUG_WEB_DAV_PASSWORD", "\"\""
+        buildConfigField "String", "DEBUG_GIT_URL", "\"\""
 
         def dropboxAppKey = getCustomProperty(PROPERTY_DROPBOX_APP_KEY)
         def dropboxAppSecret = getCustomProperty(PROPERTY_DROPBOX_APP_SECRET)
@@ -57,6 +67,9 @@ android {
 
         def isCrashlyticsEnabled = getCustomProperty(PROPERTY_IS_CRASHLYTICS_ENABLED) ?: "true"
         buildConfigField "boolean", "IS_CRASHLYTICS_ENABLED", "$isCrashlyticsEnabled"
+
+        project.logger.lifecycle("VersionName: $versionName")
+        project.logger.lifecycle("VersionCode: $versionCode")
     }
 
     buildFeatures {
@@ -78,12 +91,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
     signingConfigs {
@@ -95,6 +108,16 @@ android {
             storePassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD) ?: ""
             keyAlias getCustomProperty(PROPERTY_KEYSTORE_ALIAS) ?: ""
             keyPassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD) ?: ""
+        }
+    }
+
+    flavorDimensions "default"
+    productFlavors {
+        gplay {
+            dimension "default"
+        }
+        libre {
+            dimension "default"
         }
     }
 
@@ -119,9 +142,11 @@ android {
             def debugWebDavUrl = getCustomProperty(PROPERTY_DEBUG_WEBDAV_URL) ?: ""
             def debugWebDavUsername = getCustomProperty(PROPERTY_DEBUG_WEBDAV_USERNAME) ?: ""
             def debugWebDavPassword = getCustomProperty(PROPERTY_DEBUG_WEBDAV_PASSWORD) ?: ""
+            def debugGitUrl = getCustomProperty(PROPERTY_DEBUG_GIT_URL) ?: ""
             buildConfigField "String", "DEBUG_WEB_DAV_URL", "\"$debugWebDavUrl\""
             buildConfigField "String", "DEBUG_WEB_DAV_USERNAME", "\"$debugWebDavUsername\""
             buildConfigField "String", "DEBUG_WEB_DAV_PASSWORD", "\"$debugWebDavPassword\""
+            buildConfigField "String", "DEBUG_GIT_URL", "\"$debugGitUrl\""
         }
         release {
             minifyEnabled false
@@ -187,29 +212,6 @@ dependencies {
     androidTestImplementation "com.google.truth:truth:$truthVersion"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
-    implementation fileTree(include: ['*.jar', '*.aar'], exclude: 'KeePassJava2*', dir: 'libs')
-
-    debugImplementation files('libs/KeePassJava2-database-debug.aar')
-    debugImplementation files('libs/KeePassJava2-simple-debug.aar')
-    debugImplementation files('libs/KeePassJava2-kdbx-debug.aar')
-
-    releaseImplementation files('libs/KeePassJava2-database-release.aar')
-    releaseImplementation files('libs/KeePassJava2-simple-release.aar')
-    releaseImplementation files('libs/KeePassJava2-kdbx-release.aar')
-
-    // KeePassJava2
-    // for KeePassJava2-database
-    implementation "org.jetbrains:annotations:$jetbrainsAnnotationsVersion"
-    implementation ("com.google.guava:guava:$guavaVersion") {
-        exclude group: 'com.google.code.findbugs', module: 'jsr305'
-    }
-    implementation "com.madgag.spongycastle:core:$spongyCastleVersion"
-    // for KeePassJava2-kdbx
-    implementation "com.epam.reportportal:commons-codec-repacked:$repackedCodecsVersion"
-    // for KeePassJava2-simple
-    implementation "org.simpleframework:simple-xml:$simpleXmlVersion"
-    implementation "com.fasterxml:aalto-xml:$aaltoXmlVersion"
-
     // MultiDex
     implementation "androidx.multidex:multidex:2.0.1"
 
@@ -267,9 +269,15 @@ dependencies {
     implementation "com.github.terrakok:cicerone:$ciceroneVersion"
 
     // Firebase Crashlytics
-    implementation "com.google.firebase:firebase-crashlytics:$crashlyticsVersion"
+    gplayImplementation "com.google.firebase:firebase-crashlytics:$crashlyticsVersion"
 
     // Timber
     implementation "com.jakewharton.timber:timber:$timberVersion"
     implementation "com.github.bastienpaulfr:Treessence:$treessenceVersion"
+
+    // JGit
+    implementation "org.eclipse.jgit:org.eclipse.jgit:6.2.0.202206071550-r"
+
+    // KeePassJava2
+    implementation "com.github.aivanovski:KeePassJava2-android:2.1.4"
 }

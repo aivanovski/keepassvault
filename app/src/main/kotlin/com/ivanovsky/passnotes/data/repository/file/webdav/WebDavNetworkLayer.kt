@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.data.repository.file.webdav
 
+import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.entity.ServerCredentials
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import com.thegrizzlylabs.sardineandroid.impl.SardineException
 import java.io.IOException
@@ -15,7 +15,7 @@ class WebDavNetworkLayer(
 
     private val webDavClient = OkHttpSardine(httpClient)
 
-    fun setCredentials(credentials: ServerCredentials) {
+    fun setCredentials(credentials: FSCredentials.BasicCredentials) {
         webDavClient.setCredentials(credentials.username, credentials.password)
     }
 

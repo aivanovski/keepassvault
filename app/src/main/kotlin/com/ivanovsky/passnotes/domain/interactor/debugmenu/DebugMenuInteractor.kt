@@ -35,6 +35,8 @@ class DebugMenuInteractor(
 
     fun getDebugWebDavCredentials() = getDebugCredentialsUseCase.getDebugWebDavCredentials()
 
+    fun getDebugGitCredentials() = getDebugCredentialsUseCase.getDebugGitCredentials()
+
     fun getFileContent(file: FileDescriptor): OperationResult<Pair<FileDescriptor, File>> {
         val result = OperationResult<Pair<FileDescriptor, File>>()
 
@@ -55,7 +57,7 @@ class DebugMenuInteractor(
                     val destinationStream = destinationResult.obj.second
 
                     try {
-                        InputOutputUtils.copy(content, destinationStream, true)
+                        InputOutputUtils.copyOrThrow(content, destinationStream, true)
                         result.obj = Pair(descriptor, destinationFile)
                     } catch (e: Exception) {
                         Timber.d(e)
@@ -77,7 +79,7 @@ class DebugMenuInteractor(
     private fun createNewLocalDestinationStream(): OperationResult<Pair<File, OutputStream>> {
         val result = OperationResult<Pair<File, OutputStream>>()
 
-        val outFile = fileHelper.generateDestinationFileForRemoteFile()
+        val outFile = fileHelper.generateDestinationFileOrNull()
         if (outFile != null) {
             val outStream = newFileOutputStreamOrNull(outFile)
             if (outStream != null) {
@@ -151,7 +153,7 @@ class DebugMenuInteractor(
     private fun createNewDatabaseInPrivateStorage(password: String): OperationResult<Pair<File, InputStream>> {
         val result = OperationResult<Pair<File, InputStream>>()
 
-        val dbFile = fileHelper.generateDestinationFileForRemoteFile()
+        val dbFile = fileHelper.generateDestinationFileOrNull()
         if (dbFile != null) {
             val dbDescriptor = dbFile.toFileDescriptor(
                 fsAuthority = getFsAuthorityForFile(dbFile)
@@ -183,7 +185,7 @@ class DebugMenuInteractor(
         val result = OperationResult<Boolean>()
 
         try {
-            InputOutputUtils.copy(inStream, outStream, true)
+            InputOutputUtils.copyOrThrow(inStream, outStream, true)
             result.obj = true
         } catch (e: Exception) {
             Timber.d(e)
@@ -213,7 +215,7 @@ class DebugMenuInteractor(
 
             if (inStream != null) {
                 try {
-                    InputOutputUtils.copy(inStream, outStream, true)
+                    InputOutputUtils.copyOrThrow(inStream, outStream, true)
                     result.obj = Pair(outFile, inFile)
                 } catch (e: Exception) {
                     Timber.d(e)
@@ -305,6 +307,13 @@ class DebugMenuInteractor(
             fileSystemResolver
                 .resolveProvider(fsAuthority)
                 .getFile(path, FSOptions.DEFAULT)
+        }
+
+    suspend fun getRootFile(fsAuthority: FSAuthority): OperationResult<FileDescriptor> =
+        withContext(dispatchers.IO) {
+            fileSystemResolver
+                .resolveProvider(fsAuthority)
+                .rootFile
         }
 
     private fun generateNewGroupTitle(groupDao: GroupDao): String? {

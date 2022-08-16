@@ -1,13 +1,14 @@
-@file:Suppress("FoldInitializerAndIfToElvis")
-
 package com.ivanovsky.passnotes.data.repository.keepass.keepass_java
 
+import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.TemplateDao
+import com.ivanovsky.passnotes.data.repository.keepass.ContentWatcher
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst.TEMPLATE_GROUP_NAME
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateNoteFactory
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateParser
@@ -23,24 +24,29 @@ class KeepassJavaTemplateDao(
     private val templatesRef = AtomicReference<List<Template>>(emptyList())
 
     init {
-        noteDao.addOnNoteChangeListener { groupUid, _, _ ->
-            checkGroupUid(groupUid)
-        }
-        noteDao.addOnNoteInsertListener { groupAndNoteUids ->
-            val groupUids = groupAndNoteUids
-                .map { it.first }
-                .toSet()
-
-            groupUids.forEach { groupUid ->
-                checkGroupUid(groupUid)
+        noteDao.contentWatcher.subscribe(object : ContentWatcher.OnEntryChangeListener<Note> {
+            override fun onEntryChanged(oldEntry: Note, newEntry: Note) {
+                checkGroupUid(newEntry.groupUid)
             }
-        }
-        noteDao.addOnNoteRemoveListener { groupUid, _ ->
-            checkGroupUid(groupUid)
-        }
-        groupDao.addOnGroupRemoveLister { groupUid ->
-            checkGroupUid(groupUid)
-        }
+        })
+
+        noteDao.contentWatcher.subscribe(object : ContentWatcher.OnEntryCreateListener<Note> {
+            override fun onEntryCreated(entry: Note) {
+                checkGroupUid(entry.groupUid)
+            }
+        })
+
+        noteDao.contentWatcher.subscribe(object : ContentWatcher.OnEntryRemoveListener<Note> {
+            override fun onEntryRemoved(entry: Note) {
+                checkGroupUid(entry.groupUid)
+            }
+        })
+
+        groupDao.contentWatcher.subscribe(object : ContentWatcher.OnEntryRemoveListener<Group> {
+            override fun onEntryRemoved(entry: Group) {
+                checkGroupUid(entry.uid)
+            }
+        })
     }
 
     override fun getTemplateGroupUid(): OperationResult<UUID?> {
@@ -55,7 +61,10 @@ class KeepassJavaTemplateDao(
         return addTemplates(templates, true)
     }
 
-    override fun addTemplates(templates: List<Template>, doCommit: Boolean): OperationResult<Boolean> {
+    override fun addTemplates(
+        templates: List<Template>,
+        doCommit: Boolean
+    ): OperationResult<Boolean> {
         val rootGroupResult = groupDao.rootGroup
         if (rootGroupResult.isFailed) {
             return rootGroupResult.takeError()
@@ -103,6 +112,8 @@ class KeepassJavaTemplateDao(
 
         val groups = groupsResult.obj
         val templateGroup = groups.firstOrNull { group -> group.title == TEMPLATE_GROUP_NAME }
+        // TODO: At some cases 'templateGroup' can be located inside 'Recycle Bin'
+        //  in this case it should be ignored
         if (templateGroup == null) {
             templatesRef.set(null)
             templateGroupUidRef.set(null)

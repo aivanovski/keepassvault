@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.data.entity.GroupEntity;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.repository.keepass.ContentWatcher;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
 import com.ivanovsky.passnotes.data.entity.Group;
@@ -17,7 +18,6 @@ import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_COMPLETE_OPERATION;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP;
@@ -35,19 +35,15 @@ import kotlin.text.StringsKt;
 public class KeepassJavaGroupDao implements GroupDao {
 
     private final KeepassDatabase db;
-    private final List<OnGroupRemoveLister> removeListeners;
-
-    public interface OnGroupRemoveLister {
-        void onGroupRemoved(UUID groupUid);
-    }
+    private final ContentWatcher<Group> contentWatcher;
 
     public KeepassJavaGroupDao(KeepassDatabase db) {
         this.db = db;
-        this.removeListeners = new CopyOnWriteArrayList<>();
+        this.contentWatcher = new ContentWatcher<>();
     }
 
-    public void addOnGroupRemoveLister(OnGroupRemoveLister removeLister) {
-        removeListeners.add(removeLister);
+    public ContentWatcher<Group> getContentWatcher() {
+        return contentWatcher;
     }
 
     @NonNull
@@ -186,6 +182,8 @@ public class KeepassJavaGroupDao implements GroupDao {
             db.getLock().unlock();
         }
 
+        contentWatcher.notifyEntryInserted(createGroupFromKeepassGroup(newGroup));
+
         return OperationResult.success(newGroup.getUuid());
     }
 
@@ -198,7 +196,13 @@ public class KeepassJavaGroupDao implements GroupDao {
     @NonNull
     private OperationResult<Boolean> remove(UUID groupUid, boolean doCommit) {
         db.getLock().lock();
+        SimpleGroup group;
         try {
+            group = db.findGroupByUid(groupUid);
+            if (group == null) {
+                return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
+            }
+
             boolean deleted = db.getKeepassDatabase().deleteGroup(groupUid);
             if (!deleted) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_COMPLETE_OPERATION));
@@ -214,7 +218,7 @@ public class KeepassJavaGroupDao implements GroupDao {
             db.getLock().unlock();
         }
 
-        notifyOnGroupRemoved(groupUid);
+        contentWatcher.notifyEntryRemoved(createGroupFromKeepassGroup(group));
 
         return OperationResult.success(true);
     }
@@ -241,6 +245,8 @@ public class KeepassJavaGroupDao implements GroupDao {
     @Override
     public OperationResult<Boolean> update(@NonNull GroupEntity group) {
         UUID groupUid = group.getUid();
+        Group oldGroup;
+        Group newGroup;
 
         db.getLock().lock();
         try {
@@ -254,7 +260,9 @@ public class KeepassJavaGroupDao implements GroupDao {
                     return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP));
                 }
 
+                oldGroup = createGroupFromKeepassGroup(dbGroup);
                 dbGroup.setName(group.getTitle());
+                newGroup = createGroupFromKeepassGroup(dbGroup);
             } else {
                 OperationResult<Boolean> isInsideItselfResult = isGroupInsideGroupTree(group.getParentUid(), groupUid);
                 if (isInsideItselfResult.isFailed()) {
@@ -271,7 +279,6 @@ public class KeepassJavaGroupDao implements GroupDao {
 
                 SimpleGroup oldParentGroup = null;
                 SimpleGroup newParentGroup = null;
-                SimpleGroup dbGroup = null;
 
                 LinkedList<SimpleGroup> nextGroups = new LinkedList<>();
                 nextGroups.add(rootGroup);
@@ -284,6 +291,7 @@ public class KeepassJavaGroupDao implements GroupDao {
                 }
 
                 SimpleGroup currentGroup;
+                SimpleGroup dbGroup = null;
                 while ((currentGroup = nextGroups.pollFirst()) != null) {
                     List<SimpleGroup> innerGroups = currentGroup.getGroups();
 
@@ -319,10 +327,12 @@ public class KeepassJavaGroupDao implements GroupDao {
                     return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NEW_PARENT_GROUP));
                 }
 
+                oldGroup = createGroupFromKeepassGroup(dbGroup);
                 dbGroup.setName(group.getTitle());
 
                 oldParentGroup.getGroups().remove(oldParentGroup);
                 newParentGroup.addGroup(dbGroup);
+                newGroup = createGroupFromKeepassGroup(dbGroup);
             }
 
             OperationResult<Boolean> commitResult = db.commit();
@@ -332,6 +342,8 @@ public class KeepassJavaGroupDao implements GroupDao {
         } finally {
             db.getLock().unlock();
         }
+
+        contentWatcher.notifyEntryChanged(oldGroup, newGroup);
 
         return OperationResult.success(true);
     }
@@ -365,12 +377,6 @@ public class KeepassJavaGroupDao implements GroupDao {
         }
 
         return false;
-    }
-
-    private void notifyOnGroupRemoved(UUID groupUid) {
-        for (OnGroupRemoveLister lister : removeListeners) {
-            lister.onGroupRemoved(groupUid);
-        }
     }
 
     private OperationResult<Boolean> isGroupInsideGroupTree(UUID groupUid, UUID groupTreeRootUid) {

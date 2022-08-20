@@ -96,6 +96,7 @@ class DebugMenuInteractor(
     }
 
     fun newDbFile(
+        type: KeepassImplementation,
         password: String,
         file: FileDescriptor
     ): OperationResult<Pair<FileDescriptor, File>> {
@@ -108,7 +109,7 @@ class DebugMenuInteractor(
             val exists = existsResult.obj
 
             if (!exists) {
-                val creationResult = createNewDatabaseInPrivateStorage(password)
+                val creationResult = createNewDatabaseInPrivateStorage(type, password)
 
                 if (creationResult.isSucceededOrDeferred) {
                     val openResult = anyFsProvider.openFileForWrite(
@@ -151,7 +152,10 @@ class DebugMenuInteractor(
         return result
     }
 
-    private fun createNewDatabaseInPrivateStorage(password: String): OperationResult<Pair<File, InputStream>> {
+    private fun createNewDatabaseInPrivateStorage(
+        type: KeepassImplementation,
+        password: String
+    ): OperationResult<Pair<File, InputStream>> {
         val result = OperationResult<Pair<File, InputStream>>()
 
         val dbFile = fileHelper.generateDestinationFileOrNull()
@@ -161,7 +165,12 @@ class DebugMenuInteractor(
             )
             val key = PasswordKeepassKey(password)
 
-            val creationResult = dbRepository.createNew(KeepassImplementation.KEEPASS_JAVA_2, key, dbDescriptor, false)
+            val creationResult = dbRepository.createNew(
+                type,
+                key,
+                dbDescriptor,
+                false
+            )
             if (creationResult.isSucceededOrDeferred) {
                 val dbStream = newFileInputStreamOrNull(dbFile)
                 if (dbStream != null) {
@@ -232,7 +241,11 @@ class DebugMenuInteractor(
         return result
     }
 
-    fun openDbFile(password: String, file: File): OperationResult<Boolean> {
+    fun openDbFile(
+        type: KeepassImplementation,
+        password: String,
+        file: File
+    ): OperationResult<Boolean> {
         val result = OperationResult<Boolean>()
 
         val key = PasswordKeepassKey(password)
@@ -241,7 +254,7 @@ class DebugMenuInteractor(
             fsAuthority = getFsAuthorityForFile(file)
         )
         val openResult = dbRepository.open(
-            KeepassImplementation.KEEPASS_JAVA_2,
+            type,
             key,
             descriptor,
             FSOptions.DEFAULT
@@ -308,7 +321,10 @@ class DebugMenuInteractor(
         }
     }
 
-    suspend fun getFileByPath(path: String, fsAuthority: FSAuthority): OperationResult<FileDescriptor> =
+    suspend fun getFileByPath(
+        path: String,
+        fsAuthority: FSAuthority
+    ): OperationResult<FileDescriptor> =
         withContext(dispatchers.IO) {
             fileSystemResolver
                 .resolveProvider(fsAuthority)

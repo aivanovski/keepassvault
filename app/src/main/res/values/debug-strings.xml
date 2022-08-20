@@ -32,5 +32,7 @@
     <string name="file_exits_with_str" translatable="false">File exists: %s</string>
     <string name="create_file" translatable="false">Create file</string>
     <string name="get_root" translatable="false">Get root</string>
+    <string name="kotpass" translatable="false">KotPass</string>
+    <string name="keepass_java_2" translatable="false">KeePassJava2</string>
 
 </resources>

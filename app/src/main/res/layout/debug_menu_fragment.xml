@@ -72,10 +72,12 @@
                     android:layout_marginStart="@dimen/group_margin"
                     android:layout_marginTop="@dimen/element_margin"
                     android:layout_marginEnd="@dimen/group_margin"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="16dp"
+                    android:paddingTop="@dimen/element_margin"
+                    android:paddingBottom="@dimen/element_margin"
                     android:textSize="@dimen/material_primary_text_size"
-                    app:layout_constraintTop_toBottomOf="@id/fileSystemDivider" />
+                    app:items="@{viewModel.fileSystemNames}"
+                    app:layout_constraintTop_toBottomOf="@id/fileSystemDivider"
+                    app:onItemSelected="@{(item, idx) -> viewModel.onFileSystemSelected(idx)}" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/pickFileButton"
@@ -259,12 +261,27 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <Spinner
+                    android:id="@+id/keepassImplementationSpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/element_margin"
+                    android:layout_marginEnd="@dimen/group_margin"
+                    android:paddingTop="@dimen/element_margin"
+                    android:paddingBottom="@dimen/element_margin"
+                    android:textSize="@dimen/material_primary_text_size"
+                    app:items="@{viewModel.keepassImplementationNames}"
+                    app:onItemSelected="@{(item, idx) -> viewModel.onKeepassImplementationSelected(idx)}"
+                    app:layout_constraintTop_toBottomOf="@id/passwordLayout" />
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/openButton"
                     style="@style/Material.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/element_margin"
                     android:layout_marginEnd="@dimen/element_margin"
                     android:enabled="@{viewModel.isOpenDbButtonEnabled}"
                     android:onClick="@{() -> viewModel.onOpenDbButtonClicked()}"
@@ -272,13 +289,14 @@
                     app:layout_constraintEnd_toStartOf="@id/editButton"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/passwordLayout" />
+                    app:layout_constraintTop_toBottomOf="@id/keepassImplementationSpinner" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/editButton"
                     style="@style/Material.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/element_margin"
                     android:layout_marginEnd="@dimen/group_margin"
                     android:enabled="@{viewModel.isEditDbButtonEnabled}"
                     android:onClick="@{() -> viewModel.onEditDbButtonClicked()}"
@@ -286,7 +304,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_weight="1"
                     app:layout_constraintStart_toEndOf="@id/openButton"
-                    app:layout_constraintTop_toBottomOf="@id/passwordLayout" />
+                    app:layout_constraintTop_toBottomOf="@id/keepassImplementationSpinner" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/closeButton"

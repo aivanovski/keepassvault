@@ -80,10 +80,6 @@ class MaterialSpinner(
         binding.textInputLayout.hint = hint
     }
 
-    fun interface OnItemSelectListener {
-        fun onItemSelected(selectedItem: String)
-    }
-
     private inner class CustomTextWatcher : TextWatcher {
 
         var isEnabled: Boolean = true
@@ -96,7 +92,8 @@ class MaterialSpinner(
 
             if (lastSelectedItem != text) {
                 lastSelectedItem = text
-                onItemSelectListener?.onItemSelected(text)
+                val itemIndex = items.indexOf(lastSelectedItem)
+                onItemSelectListener?.onItemSelected(text, itemIndex)
             }
         }
 
@@ -122,8 +119,8 @@ class MaterialSpinner(
             if (itemAttrChanged == null) {
                 view.onItemSelectListener = onItemSelected
             } else {
-                view.onItemSelectListener = OnItemSelectListener { item ->
-                    onItemSelected?.onItemSelected(item)
+                view.onItemSelectListener = OnItemSelectListener { item, itemIndex ->
+                    onItemSelected?.onItemSelected(item, itemIndex)
                     itemAttrChanged.onChange()
                 }
             }

@@ -56,7 +56,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/databaseFileContainer"
-            app:onItemSelected="@{(item) -> viewModel.onKeyTypeSelected(item)}"
+            app:onItemSelected="@{(item, idx) -> viewModel.onKeyTypeSelected(item)}"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 

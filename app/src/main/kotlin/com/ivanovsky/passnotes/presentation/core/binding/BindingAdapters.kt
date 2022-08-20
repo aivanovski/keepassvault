@@ -7,8 +7,10 @@ import android.text.method.HideReturnsTransformationMethod
 import android.text.method.LinkMovementMethod
 import android.text.method.PasswordTransformationMethod
 import android.view.View
+import android.widget.AdapterView
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
@@ -23,11 +25,13 @@ import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
+import com.ivanovsky.passnotes.presentation.core.adapter.StringArraySpinnerAdapter
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.widget.CellLinearLayout
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
+import com.ivanovsky.passnotes.presentation.core.widget.OnItemSelectListener
 import com.ivanovsky.passnotes.presentation.core.widget.TextMovementMethod
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PASSWORD
@@ -238,4 +242,46 @@ fun setFabClickListener(
     onItemClickListener: OnItemClickListener?
 ) {
     fab.onItemClickListener = onItemClickListener
+}
+
+@BindingAdapter("onItemSelected")
+fun setSpinnerItemSelectedListener(
+    spinner: Spinner,
+    onItemSelectedListener: OnItemSelectListener?
+) {
+    if (onItemSelectedListener != null) {
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                val adapter = parent?.adapter as? StringArraySpinnerAdapter ?: return
+                onItemSelectedListener.onItemSelected(adapter.getItem(position), position)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+        }
+    } else {
+        spinner.onItemSelectedListener = null
+    }
+}
+
+@BindingAdapter("items")
+fun setSpinnerItems(
+    spinner: Spinner,
+    items: List<String>?
+) {
+    val nonEmptyItems = items ?: emptyList()
+
+    spinner.adapter = if (spinner.adapter == null) {
+        StringArraySpinnerAdapter(spinner.context, nonEmptyItems)
+    } else {
+        (spinner.adapter as? StringArraySpinnerAdapter)
+            ?.apply {
+                updateItems(nonEmptyItems)
+            }
+    }
 }

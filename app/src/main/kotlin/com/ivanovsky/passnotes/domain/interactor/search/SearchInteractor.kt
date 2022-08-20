@@ -30,12 +30,12 @@ class SearchInteractor(
             }
 
             val db = dbResult.obj
-            val notesResult = db.noteRepository.find(query)
+            val notesResult = db.noteDao.find(query)
             if (notesResult.isFailed) {
                 return@withContext notesResult.takeError()
             }
 
-            val groupsResult = db.groupRepository.find(query)
+            val groupsResult = db.groupDao.find(query)
             if (groupsResult.isFailed) {
                 return@withContext groupsResult.takeError()
             }

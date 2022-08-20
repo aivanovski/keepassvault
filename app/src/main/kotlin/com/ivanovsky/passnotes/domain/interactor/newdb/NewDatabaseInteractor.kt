@@ -7,9 +7,9 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
-import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import kotlinx.coroutines.withContext
 
@@ -17,7 +17,6 @@ class NewDatabaseInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
     private val usedFileRepository: UsedFileRepository,
     private val fileSystemResolver: FileSystemResolver,
-    private val addTemplatesUseCase: AddTemplatesUseCase,
     private val dispatchers: DispatcherProvider
 ) {
 
@@ -39,7 +38,7 @@ class NewDatabaseInteractor(
                 return@withContext OperationResult.error(newFileIsAlreadyExistsError())
             }
 
-            val creationResult = dbRepo.createNew(key, file, isAddTemplates)
+            val creationResult = dbRepo.createNew(KeepassImplementation.KOTPASS, key, file, isAddTemplates)
             if (creationResult.isFailed) {
                 return@withContext creationResult.takeError()
             } else if (creationResult.isDeferred) {
@@ -48,7 +47,12 @@ class NewDatabaseInteractor(
                 )
             }
 
-            val openResult = dbRepo.open(key, file, FSOptions.DEFAULT)
+            val openResult = dbRepo.open(
+                KeepassImplementation.KOTPASS,
+                key,
+                file,
+                FSOptions.DEFAULT
+            )
             if (openResult.isFailed) {
                 return@withContext openResult.takeError()
             }

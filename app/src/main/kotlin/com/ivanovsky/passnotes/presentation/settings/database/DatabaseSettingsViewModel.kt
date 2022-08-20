@@ -4,11 +4,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseConfig
-import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseConfig
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class DatabaseSettingsViewModel(
@@ -40,13 +38,13 @@ class DatabaseSettingsViewModel(
     }
 
     fun onRecycleBinEnabledChanged(isEnabled: Boolean) {
-        if (config == null) return
+        val config = config ?: return
 
         isLoading.value = true
 
         viewModelScope.launch {
             val applyConfig = interactor.applyDbConfig(
-                KeepassDatabaseConfig(
+                config = config.toMutableConfig().copy(
                     isRecycleBinEnabled = isEnabled
                 )
             )

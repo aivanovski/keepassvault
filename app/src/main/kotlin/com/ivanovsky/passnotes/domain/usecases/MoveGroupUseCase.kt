@@ -21,7 +21,7 @@ class MoveGroupUseCase(
            }
 
            val db = getDbResult.obj
-           val getGroupResult = db.groupRepository.getGroupByUid(groupUid)
+           val getGroupResult = db.groupDao.getGroupByUid(groupUid)
            if (getGroupResult.isFailed) {
                return@withContext getGroupResult.takeError()
            }
@@ -32,9 +32,9 @@ class MoveGroupUseCase(
                parentUid = newParentGroupUid,
                title = group.title
            )
-           val moveResult = db.groupRepository.update(newGroup)
+           val moveResult = db.groupDao.update(newGroup)
            if (moveResult.isFailed) {
-               return@withContext moveResult.takeError();
+               return@withContext moveResult.takeError()
            }
 
            observerBus.notifyGroupDataSetChanged()

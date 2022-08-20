@@ -8,7 +8,6 @@ import androidx.annotation.NonNull;
 import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
-import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus;
 import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;

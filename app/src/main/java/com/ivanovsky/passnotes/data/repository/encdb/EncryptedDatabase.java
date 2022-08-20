@@ -4,15 +4,17 @@ import androidx.annotation.NonNull;
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
-import com.ivanovsky.passnotes.data.repository.GroupRepository;
-import com.ivanovsky.passnotes.data.repository.NoteRepository;
-import com.ivanovsky.passnotes.data.repository.TemplateRepository;
+import com.ivanovsky.passnotes.data.repository.TemplateDao;
+import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
+import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
+
+import java.util.concurrent.locks.ReentrantLock;
 
 public interface EncryptedDatabase {
 
     @NonNull
-    Object getLock();
+    ReentrantLock getLock();
 
     @NonNull
     FileDescriptor getFile();
@@ -27,14 +29,15 @@ public interface EncryptedDatabase {
     OperationResult<Boolean> applyConfig(@NonNull EncryptedDatabaseConfig config);
 
     @NonNull
-    GroupRepository getGroupRepository();
+    GroupDao getGroupDao();
 
     @NonNull
-    NoteRepository getNoteRepository();
+    NoteDao getNoteDao();
 
     @NonNull
-    TemplateRepository getTemplateRepository();
+    TemplateDao getTemplateDao();
 
+    // TODO: refactor, change key should not invoke commit
     @NonNull
     OperationResult<Boolean> changeKey(@NonNull EncryptedDatabaseKey oldKey,
                                        @NonNull EncryptedDatabaseKey newKey);

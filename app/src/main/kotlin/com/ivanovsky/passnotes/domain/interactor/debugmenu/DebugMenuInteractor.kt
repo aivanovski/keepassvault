@@ -7,10 +7,11 @@ import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.OperationError.*
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
-import com.ivanovsky.passnotes.data.repository.GroupRepository
+import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
@@ -95,6 +96,7 @@ class DebugMenuInteractor(
     }
 
     fun newDbFile(
+        type: KeepassImplementation,
         password: String,
         file: FileDescriptor
     ): OperationResult<Pair<FileDescriptor, File>> {
@@ -107,7 +109,7 @@ class DebugMenuInteractor(
             val exists = existsResult.obj
 
             if (!exists) {
-                val creationResult = createNewDatabaseInPrivateStorage(password)
+                val creationResult = createNewDatabaseInPrivateStorage(type, password)
 
                 if (creationResult.isSucceededOrDeferred) {
                     val openResult = anyFsProvider.openFileForWrite(
@@ -150,7 +152,10 @@ class DebugMenuInteractor(
         return result
     }
 
-    private fun createNewDatabaseInPrivateStorage(password: String): OperationResult<Pair<File, InputStream>> {
+    private fun createNewDatabaseInPrivateStorage(
+        type: KeepassImplementation,
+        password: String
+    ): OperationResult<Pair<File, InputStream>> {
         val result = OperationResult<Pair<File, InputStream>>()
 
         val dbFile = fileHelper.generateDestinationFileOrNull()
@@ -160,7 +165,12 @@ class DebugMenuInteractor(
             )
             val key = PasswordKeepassKey(password)
 
-            val creationResult = dbRepository.createNew(key, dbDescriptor, false)
+            val creationResult = dbRepository.createNew(
+                type,
+                key,
+                dbDescriptor,
+                false
+            )
             if (creationResult.isSucceededOrDeferred) {
                 val dbStream = newFileInputStreamOrNull(dbFile)
                 if (dbStream != null) {
@@ -231,7 +241,11 @@ class DebugMenuInteractor(
         return result
     }
 
-    fun openDbFile(password: String, file: File): OperationResult<Boolean> {
+    fun openDbFile(
+        type: KeepassImplementation,
+        password: String,
+        file: File
+    ): OperationResult<Boolean> {
         val result = OperationResult<Boolean>()
 
         val key = PasswordKeepassKey(password)
@@ -239,7 +253,12 @@ class DebugMenuInteractor(
         val descriptor = file.toFileDescriptor(
             fsAuthority = getFsAuthorityForFile(file)
         )
-        val openResult = dbRepository.open(key, descriptor, FSOptions.DEFAULT)
+        val openResult = dbRepository.open(
+            type,
+            key,
+            descriptor,
+            FSOptions.DEFAULT
+        )
         if (openResult.isSucceededOrDeferred) {
             result.obj = true
         } else {
@@ -270,12 +289,12 @@ class DebugMenuInteractor(
             return OperationResult.error(newDbError(MESSAGE_FAILED_TO_GET_DATABASE))
         }
 
-        val newGroupTitle = generateNewGroupTitle(db.groupRepository)
+        val newGroupTitle = generateNewGroupTitle(db.groupDao)
         if (newGroupTitle == null) {
             return OperationResult.error(newDbError(MESSAGE_UNKNOWN_ERROR))
         }
 
-        val rootGroupResult = db.groupRepository.rootGroup
+        val rootGroupResult = db.groupDao.rootGroup
         if (rootGroupResult.isFailed) {
             return rootGroupResult.takeError()
         }
@@ -286,7 +305,7 @@ class DebugMenuInteractor(
             title = newGroupTitle
         )
 
-        val insertResult = db.groupRepository.insert(newGroup)
+        val insertResult = db.groupDao.insert(newGroup)
         if (insertResult.isFailed) {
             return insertResult.takeError()
         }
@@ -302,7 +321,10 @@ class DebugMenuInteractor(
         }
     }
 
-    suspend fun getFileByPath(path: String, fsAuthority: FSAuthority): OperationResult<FileDescriptor> =
+    suspend fun getFileByPath(
+        path: String,
+        fsAuthority: FSAuthority
+    ): OperationResult<FileDescriptor> =
         withContext(dispatchers.IO) {
             fileSystemResolver
                 .resolveProvider(fsAuthority)
@@ -316,10 +338,10 @@ class DebugMenuInteractor(
                 .rootFile
         }
 
-    private fun generateNewGroupTitle(groupRepository: GroupRepository): String? {
+    private fun generateNewGroupTitle(groupDao: GroupDao): String? {
         var title: String? = null
 
-        val groupsResult = groupRepository.allGroup
+        val groupsResult = groupDao.all
         if (groupsResult.isSucceededOrDeferred) {
             val indexesInGroups = extractIndexesFromGroups(groupsResult.obj)
             val nextGroupIndex = findNextAvailableIndex(indexesInGroups)

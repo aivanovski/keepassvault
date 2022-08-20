@@ -20,6 +20,7 @@ import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
@@ -92,12 +93,17 @@ class UnlockInteractor(
             val fsOptions = FSOptions.DEFAULT.copy(
                 isPostponedSyncEnabled = settings.isPostponedSyncEnabled
             )
-            val open = dbRepo.open(key, file, fsOptions)
+            val open = dbRepo.open(KeepassImplementation.KOTPASS, key, file, fsOptions)
 
             val result = if (open.isFailed &&
                 (open.error.type == OperationError.Type.DB_VERSION_CONFLICT_ERROR ||
                     open.error.type == OperationError.Type.AUTH_ERROR)) {
-                val cachedDb = dbRepo.open(key, file, FSOptions.CACHE_ONLY)
+                val cachedDb = dbRepo.open(
+                    KeepassImplementation.KOTPASS,
+                    key,
+                    file,
+                    FSOptions.CACHE_ONLY
+                )
                 if (cachedDb.isSucceededOrDeferred) {
                     cachedDb
                 } else {

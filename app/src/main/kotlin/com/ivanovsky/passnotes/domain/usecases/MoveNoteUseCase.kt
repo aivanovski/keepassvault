@@ -20,13 +20,13 @@ class MoveNoteUseCase(
             }
 
             val db = getDbResult.obj
-            val getNoteResult = db.noteRepository.getNoteByUid(noteUid)
+            val getNoteResult = db.noteDao.getNoteByUid(noteUid)
             if (getNoteResult.isFailed) {
                 return@withContext getNoteResult.takeError()
             }
 
             val note = getNoteResult.obj
-            val updateNoteResult = db.noteRepository.update(
+            val updateNoteResult = db.noteDao.update(
                 note.copy(
                     groupUid = newGroupUid
                 )

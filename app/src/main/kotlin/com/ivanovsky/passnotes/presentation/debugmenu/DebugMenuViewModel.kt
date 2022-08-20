@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -54,10 +55,13 @@ class DebugMenuViewModel(
     val showSnackbarEvent = SingleLiveEvent<String>()
     val showSystemFilePickerEvent = SingleLiveEvent<Unit>()
     val showSystemFileCreatorEvent = SingleLiveEvent<Unit>()
+    val fileSystemNames = FILE_SYSTEM_TYPES.map { it.getTitle() }
+    val keepassImplementationNames = KEEPASS_IMPLEMENTATION_TYPE.map { it.getTitle() }
 
     private var lastReadDescriptor: FileDescriptor? = null
     private var lastReadFile: File? = null
     private var selectedFsType = FSType.INTERNAL_STORAGE
+    private var selectedImplementationType = KeepassImplementation.KOTPASS
     private var uriFileDescriptor: FileDescriptor? = null
 
     fun onScreenStart() {
@@ -135,7 +139,11 @@ class DebugMenuViewModel(
 
         viewModelScope.launch {
             val result = withContext(Dispatchers.Default) {
-                interactor.newDbFile(defaultPasswordIfEmpty(password), outFile)
+                interactor.newDbFile(
+                    selectedImplementationType,
+                    defaultPasswordIfEmpty(password),
+                    outFile
+                )
             }
 
             if (result.isSucceededOrDeferred) {
@@ -182,7 +190,11 @@ class DebugMenuViewModel(
         if (isFileSelected()) {
             viewModelScope.launch {
                 val result = withContext(Dispatchers.Default) {
-                    interactor.openDbFile(defaultPasswordIfEmpty(password), lastReadFile!!)
+                    interactor.openDbFile(
+                        selectedImplementationType,
+                        defaultPasswordIfEmpty(password),
+                        lastReadFile!!
+                    )
                 }
 
                 if (result.isSucceededOrDeferred) {
@@ -268,7 +280,8 @@ class DebugMenuViewModel(
         }
     }
 
-    fun onFileSystemSelected(fsType: FSType) {
+    fun onFileSystemSelected(index: Int) {
+        val fsType = FILE_SYSTEM_TYPES[index]
         selectedFsType = fsType
 
         isServerUrlVisible.value = (fsType == FSType.WEBDAV || fsType == FSType.GIT)
@@ -325,6 +338,10 @@ class DebugMenuViewModel(
                 screenState.value = ScreenState.dataWithError(message)
             }
         }
+    }
+
+    fun onKeepassImplementationSelected(index: Int) {
+        selectedImplementationType = KEEPASS_IMPLEMENTATION_TYPE[index]
     }
 
     private fun getSelectedFile(): FileDescriptor? {
@@ -399,8 +416,40 @@ class DebugMenuViewModel(
 
     fun navigateBack() = router.exit()
 
-    companion object {
+    private fun FSType.getTitle(): String {
+        return when (this) {
+            FSType.INTERNAL_STORAGE -> resourceProvider.getString(R.string.internal_storage)
+            FSType.EXTERNAL_STORAGE -> resourceProvider.getString(R.string.external_storage)
+            FSType.SAF -> resourceProvider.getString(R.string.storage_access_framework)
+            FSType.DROPBOX -> resourceProvider.getString(R.string.dropbox)
+            FSType.WEBDAV -> resourceProvider.getString(R.string.webdav)
+            FSType.GIT -> resourceProvider.getString(R.string.git)
+            FSType.UNDEFINED -> FSType.UNDEFINED.name
+        }
+    }
 
+    private fun KeepassImplementation.getTitle(): String {
+        return when (this) {
+            KeepassImplementation.KOTPASS -> resourceProvider.getString(R.string.kotpass)
+            KeepassImplementation.KEEPASS_JAVA_2 -> resourceProvider.getString(R.string.keepass_java_2)
+        }
+    }
+
+    companion object {
         const val DEFAULT_PASSWORD = "abc123"
+
+        private val FILE_SYSTEM_TYPES = listOf(
+            FSType.INTERNAL_STORAGE,
+            FSType.EXTERNAL_STORAGE,
+            FSType.SAF,
+            FSType.DROPBOX,
+            FSType.WEBDAV,
+            FSType.GIT
+        )
+
+        private val KEEPASS_IMPLEMENTATION_TYPE = listOf(
+            KeepassImplementation.KOTPASS,
+            KeepassImplementation.KEEPASS_JAVA_2
+        )
     }
 }

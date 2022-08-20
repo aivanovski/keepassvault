@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.data.repository.keepass;
+package com.ivanovsky.passnotes.data.repository.keepass.keepass_java;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -9,14 +9,14 @@ import com.ivanovsky.passnotes.data.repository.TemplateDao;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseConfig;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
+import com.ivanovsky.passnotes.data.repository.encdb.MutableEncryptedDatabaseConfig;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy;
-import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.KeepassJavaGroupDao;
-import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.KeepassJavaNoteDao;
-import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.KeepassJavaTemplateDao;
+import com.ivanovsky.passnotes.data.repository.keepass.DefaultDatabaseKey;
+import com.ivanovsky.passnotes.data.repository.keepass.TemplateDaoImpl;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
@@ -36,7 +36,6 @@ import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
 
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_OPEN_DB_FILE;
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_CONFIG_TYPE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newAuthError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
@@ -45,7 +44,7 @@ import android.text.TextUtils;
 
 import timber.log.Timber;
 
-public class KeepassDatabase implements EncryptedDatabase {
+public class KeepassJavaDatabase implements EncryptedDatabase {
 
     @NonNull
     private EncryptedDatabaseKey key;
@@ -56,7 +55,7 @@ public class KeepassDatabase implements EncryptedDatabase {
     @NonNull
     private final KeepassJavaNoteDao noteDao;
     @NonNull
-    private final KeepassJavaTemplateDao templateDao;
+    private final TemplateDaoImpl templateDao;
     @NonNull
     private final FSOptions fsOptions;
     @NonNull
@@ -74,12 +73,12 @@ public class KeepassDatabase implements EncryptedDatabase {
         void onDatabaseStatusChanged(DatabaseStatus status);
     }
 
-    public static OperationResult<KeepassDatabase> open(@NonNull FileSystemProvider fsProvider,
-                                                        @NonNull FSOptions fsOptions,
-                                                        @NonNull FileDescriptor file,
-                                                        @NonNull OperationResult<InputStream> input,
-                                                        @NonNull EncryptedDatabaseKey key,
-                                                        @Nullable OnStatusChangeListener statusListener) {
+    public static OperationResult<KeepassJavaDatabase> open(@NonNull FileSystemProvider fsProvider,
+                                                            @NonNull FSOptions fsOptions,
+                                                            @NonNull FileDescriptor file,
+                                                            @NonNull OperationResult<InputStream> input,
+                                                            @NonNull EncryptedDatabaseKey key,
+                                                            @Nullable OnStatusChangeListener statusListener) {
         if (input.isFailed()) {
             return input.takeError();
         }
@@ -119,7 +118,7 @@ public class KeepassDatabase implements EncryptedDatabase {
             InputOutputUtils.close(stream);
         }
 
-        KeepassDatabase keepassDb = new KeepassDatabase(fsProvider,
+        KeepassJavaDatabase keepassDb = new KeepassJavaDatabase(fsProvider,
                 fsOptions,
                 file,
                 key,
@@ -144,13 +143,13 @@ public class KeepassDatabase implements EncryptedDatabase {
         }
     }
 
-    private KeepassDatabase(@NonNull FileSystemProvider fsProvider,
-                            @NonNull FSOptions fsOptions,
-                            @NonNull FileDescriptor file,
-                            @NonNull EncryptedDatabaseKey key,
-                            @NonNull SimpleDatabase db,
-                            @NonNull DatabaseStatus status,
-                            @Nullable OnStatusChangeListener statusListener) {
+    private KeepassJavaDatabase(@NonNull FileSystemProvider fsProvider,
+                                @NonNull FSOptions fsOptions,
+                                @NonNull FileDescriptor file,
+                                @NonNull EncryptedDatabaseKey key,
+                                @NonNull SimpleDatabase db,
+                                @NonNull DatabaseStatus status,
+                                @Nullable OnStatusChangeListener statusListener) {
         this.fsProvider = fsProvider;
         this.fsOptions = fsOptions;
         this.file = file;
@@ -163,9 +162,7 @@ public class KeepassDatabase implements EncryptedDatabase {
 
         noteDao = new KeepassJavaNoteDao(this);
         groupDao = new KeepassJavaGroupDao(this);
-        templateDao = new KeepassJavaTemplateDao(groupDao, noteDao);
-
-        templateDao.findTemplateNotes();
+        templateDao = new TemplateDaoImpl(groupDao, noteDao);
     }
 
     @NonNull
@@ -189,11 +186,11 @@ public class KeepassDatabase implements EncryptedDatabase {
     @NonNull
     @Override
     public OperationResult<EncryptedDatabaseConfig> getConfig() {
-        KeepassDatabaseConfig config;
+        EncryptedDatabaseConfig config;
 
         lock.lock();
         try {
-            config = new KeepassDatabaseConfig(db.isRecycleBinEnabled());
+            config = new MutableEncryptedDatabaseConfig(db.isRecycleBinEnabled());
         } finally {
             lock.unlock();
         }
@@ -204,10 +201,6 @@ public class KeepassDatabase implements EncryptedDatabase {
     @NonNull
     @Override
     public OperationResult<Boolean> applyConfig(@NonNull EncryptedDatabaseConfig config) {
-        if (!(config instanceof KeepassDatabaseConfig)) {
-            return OperationResult.error(newDbError(MESSAGE_UNSUPPORTED_CONFIG_TYPE));
-        }
-
         OperationResult<Boolean> result;
 
         lock.lock();

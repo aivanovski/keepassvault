@@ -32,3 +32,10 @@ fun Note.addOrUpdateProperty(property: Property): Note {
         this
     }
 }
+
+fun Note.matches(query: String): Boolean {
+    val isTitleMatches = title.contains(query, ignoreCase = true)
+    val isPropertyMatches = properties.any { it.matches(query) }
+
+    return isTitleMatches || isPropertyMatches
+}

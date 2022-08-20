@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.data.repository.keepass.keepass_java
+package com.ivanovsky.passnotes.data.repository.keepass
 
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
@@ -8,16 +8,16 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.TemplateDao
-import com.ivanovsky.passnotes.data.repository.keepass.ContentWatcher
+import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
+import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao
+import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst.TEMPLATE_GROUP_NAME
-import com.ivanovsky.passnotes.data.repository.keepass.TemplateNoteFactory
-import com.ivanovsky.passnotes.data.repository.keepass.TemplateParser
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 
-class KeepassJavaTemplateDao(
-    private val groupDao: KeepassJavaGroupDao,
-    private val noteDao: KeepassJavaNoteDao
+class TemplateDaoImpl(
+    private val groupDao: GroupDao,
+    private val noteDao: NoteDao
 ) : TemplateDao {
 
     private val templateGroupUidRef = AtomicReference<UUID>()
@@ -47,6 +47,8 @@ class KeepassJavaTemplateDao(
                 checkGroupUid(entry.uid)
             }
         })
+
+        findTemplateNotes()
     }
 
     override fun getTemplateGroupUid(): OperationResult<UUID?> {

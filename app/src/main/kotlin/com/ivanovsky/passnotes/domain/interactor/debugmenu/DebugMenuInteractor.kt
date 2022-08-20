@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
@@ -160,7 +161,7 @@ class DebugMenuInteractor(
             )
             val key = PasswordKeepassKey(password)
 
-            val creationResult = dbRepository.createNew(key, dbDescriptor, false)
+            val creationResult = dbRepository.createNew(KeepassImplementation.KEEPASS_JAVA_2, key, dbDescriptor, false)
             if (creationResult.isSucceededOrDeferred) {
                 val dbStream = newFileInputStreamOrNull(dbFile)
                 if (dbStream != null) {
@@ -239,7 +240,12 @@ class DebugMenuInteractor(
         val descriptor = file.toFileDescriptor(
             fsAuthority = getFsAuthorityForFile(file)
         )
-        val openResult = dbRepository.open(key, descriptor, FSOptions.DEFAULT)
+        val openResult = dbRepository.open(
+            KeepassImplementation.KEEPASS_JAVA_2,
+            key,
+            descriptor,
+            FSOptions.DEFAULT
+        )
         if (openResult.isSucceededOrDeferred) {
             result.obj = true
         } else {

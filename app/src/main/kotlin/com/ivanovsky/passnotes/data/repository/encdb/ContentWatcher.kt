@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.data.repository.keepass
+package com.ivanovsky.passnotes.data.repository.encdb
 
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import java.util.concurrent.CopyOnWriteArrayList

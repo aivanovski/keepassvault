@@ -5,8 +5,7 @@ import androidx.annotation.NonNull;
 import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.data.entity.GroupEntity;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
-import com.ivanovsky.passnotes.data.repository.keepass.ContentWatcher;
-import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
+import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
 import com.ivanovsky.passnotes.data.entity.Group;
 
@@ -34,14 +33,16 @@ import kotlin.text.StringsKt;
 
 public class KeepassJavaGroupDao implements GroupDao {
 
-    private final KeepassDatabase db;
+    private final KeepassJavaDatabase db;
     private final ContentWatcher<Group> contentWatcher;
 
-    public KeepassJavaGroupDao(KeepassDatabase db) {
+    public KeepassJavaGroupDao(KeepassJavaDatabase db) {
         this.db = db;
         this.contentWatcher = new ContentWatcher<>();
     }
 
+    @NonNull
+    @Override
     public ContentWatcher<Group> getContentWatcher() {
         return contentWatcher;
     }
@@ -149,7 +150,8 @@ public class KeepassJavaGroupDao implements GroupDao {
     }
 
     @NonNull
-    public OperationResult<UUID> insert(GroupEntity group, boolean doCommit) {
+    @Override
+    public OperationResult<UUID> insert(@NonNull GroupEntity group, boolean doCommit) {
         SimpleDatabase keepassDb = db.getKeepassDatabase();
 
         SimpleGroup newGroup;

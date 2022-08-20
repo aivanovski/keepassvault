@@ -20,8 +20,8 @@ import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.Property;
 import com.ivanovsky.passnotes.data.entity.PropertyType;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
-import com.ivanovsky.passnotes.data.repository.keepass.ContentWatcher;
-import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabase;
+import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher;
+import com.ivanovsky.passnotes.extensions.NoteExtKt;
 import com.ivanovsky.passnotes.extensions.SimpleDatabaseExtensionsKt;
 
 import java.util.ArrayList;
@@ -31,8 +31,6 @@ import java.util.UUID;
 import org.linguafranca.pwdb.kdbx.simple.SimpleEntry;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
 
-import kotlin.text.StringsKt;
-
 public class KeepassJavaNoteDao implements NoteDao {
 
     private static final String PROPERTY_TITLE = "Title";
@@ -41,14 +39,16 @@ public class KeepassJavaNoteDao implements NoteDao {
     private static final String PROPERTY_USER_NAME = "UserName";
     private static final String PROPERTY_NOTES = "Notes";
 
-    private final KeepassDatabase db;
+    private final KeepassJavaDatabase db;
     private final ContentWatcher<Note> contentWatcher;
 
-    public KeepassJavaNoteDao(KeepassDatabase db) {
+    public KeepassJavaNoteDao(KeepassJavaDatabase db) {
         this.db = db;
         this.contentWatcher = new ContentWatcher<>();
     }
 
+    @NonNull
+    @Override
     public ContentWatcher<Note> getContentWatcher() {
         return contentWatcher;
     }
@@ -244,7 +244,8 @@ public class KeepassJavaNoteDao implements NoteDao {
     }
 
     @NonNull
-    public OperationResult<Boolean> insert(List<Note> notes, boolean doCommit) {
+    @Override
+    public OperationResult<Boolean> insert(@NonNull List<Note> notes, boolean doCommit) {
         List<Pair<Note, OperationResult<UUID>>> results = Stream.of(notes)
                 .map(note -> new Pair<>(note, insert(note, false, false)))
                 .collect(Collectors.toList());
@@ -468,7 +469,7 @@ public class KeepassJavaNoteDao implements NoteDao {
         List<Note> matchedNotes = new ArrayList<>(allNotes.size());
 
         for (Note note : allNotes) {
-            if (isNoteMatches(note, query)) {
+            if (NoteExtKt.matches(note, query)) {
                 matchedNotes.add(note);
             }
         }
@@ -478,39 +479,5 @@ public class KeepassJavaNoteDao implements NoteDao {
 
     private boolean isInTheSameGroup(Note first, Note second) {
         return first.getGroupUid().equals(second.getGroupUid());
-    }
-
-    private boolean isNoteMatches(@NonNull Note note,
-                                  @NonNull String query) {
-        boolean titleMatches = StringsKt.contains(note.getTitle(), query, true);
-
-        boolean propertyMatches = false;
-        for (Property property : note.getProperties()) {
-            if (isPropertyMatches(property, query)) {
-                propertyMatches = true;
-                break;
-            }
-        }
-
-        return titleMatches || propertyMatches;
-    }
-
-    private boolean isPropertyMatches(@NonNull Property property,
-                                      @NonNull String query) {
-        boolean nameMatches;
-        if (property.getName() != null) {
-            nameMatches = StringsKt.contains(property.getName(), query, true);
-        } else {
-            nameMatches = false;
-        }
-
-        boolean valueMatches;
-        if (property.getValue() != null) {
-            valueMatches = StringsKt.contains(property.getValue(), query, true);
-        } else {
-            valueMatches = false;
-        }
-
-        return nameMatches || valueMatches;
     }
 }

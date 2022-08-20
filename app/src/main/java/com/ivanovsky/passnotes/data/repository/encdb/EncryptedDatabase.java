@@ -37,6 +37,7 @@ public interface EncryptedDatabase {
     @NonNull
     TemplateDao getTemplateDao();
 
+    // TODO: refactor, change key should not invoke commit
     @NonNull
     OperationResult<Boolean> changeKey(@NonNull EncryptedDatabaseKey oldKey,
                                        @NonNull EncryptedDatabaseKey newKey);

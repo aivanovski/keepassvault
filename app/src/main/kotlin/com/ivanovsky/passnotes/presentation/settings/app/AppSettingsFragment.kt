@@ -2,15 +2,19 @@ package com.ivanovsky.passnotes.presentation.settings.app
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.FileProvider
+import androidx.core.view.isVisible
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIOMETRIC_UNLOCK_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
@@ -21,6 +25,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.showErrorDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.throwPreferenceNotFound
 import com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
+import com.ivanovsky.passnotes.util.getChildViews
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
 
@@ -31,12 +36,14 @@ class AppSettingsFragment : BasePreferenceFragment() {
 
     private lateinit var isFileLogEnabledPref: SwitchPreferenceCompat
     private lateinit var isPostponedSyncEnabledPref: SwitchPreferenceCompat
+    private lateinit var isBiometricUnlockEnabledPref: SwitchPreferenceCompat
     private lateinit var sendLogFilePref: Preference
     private lateinit var removeLogFilesPref: Preference
     private lateinit var categoryGeneral: Preference
+    private lateinit var categoryBiometric: Preference
     private lateinit var categoryNotifications: Preference
     private lateinit var categoryLogging: Preference
-    private lateinit var progressPref: Preference
+    private lateinit var contentView: ViewGroup
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -53,17 +60,18 @@ class AppSettingsFragment : BasePreferenceFragment() {
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        // Init default values to make is visible for UI components
-        settings.initDefaultIfNeed(IS_LOCK_NOTIFICATION_VISIBLE)
-        settings.initDefaultIfNeed(AUTO_LOCK_DELAY_IN_MS)
-        settings.initDefaultIfNeed(AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS)
-        settings.initDefaultIfNeed(IS_FILE_LOG_ENABLED)
-        settings.initDefaultIfNeed(IS_POSTPONED_SYNC_ENABLED)
+        // Init default values to make it visible for UI components
+        listOf(
+            IS_LOCK_NOTIFICATION_VISIBLE,
+            AUTO_LOCK_DELAY_IN_MS,
+            AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS,
+            IS_FILE_LOG_ENABLED,
+            IS_POSTPONED_SYNC_ENABLED,
+            IS_BIOMETRIC_UNLOCK_ENABLED
+        )
+            .forEach { settings.initDefaultIfNeed(it) }
 
         setPreferencesFromResource(R.xml.application_settings, rootKey)
-
-        progressPref = findPreference(getString(R.string.pref_progress))
-            ?: throwPreferenceNotFound(R.string.pref_progress)
 
         sendLogFilePref = findPreference(getString(R.string.pref_send_log_file))
             ?: throwPreferenceNotFound(R.string.pref_send_log_file)
@@ -77,8 +85,14 @@ class AppSettingsFragment : BasePreferenceFragment() {
         isPostponedSyncEnabledPref = findPreference(getString(R.string.pref_is_postponed_sync_enabled))
             ?: throwPreferenceNotFound(R.string.pref_is_postponed_sync_enabled)
 
+        isBiometricUnlockEnabledPref = findPreference(getString(R.string.pref_is_biometric_unlock_enabled))
+            ?: throwPreferenceNotFound(R.string.pref_is_biometric_unlock_enabled)
+
         categoryGeneral = findPreference(getString(R.string.pref_category_general))
             ?: throwPreferenceNotFound(R.string.pref_category_general)
+
+        categoryBiometric = findPreference(getString(R.string.pref_category_biometrics))
+            ?: throwPreferenceNotFound(R.string.pref_category_biometrics)
 
         categoryNotifications = findPreference(getString(R.string.pref_category_notifications))
             ?: throwPreferenceNotFound(R.string.pref_category_notifications)
@@ -87,16 +101,36 @@ class AppSettingsFragment : BasePreferenceFragment() {
             ?: throwPreferenceNotFound(R.string.pref_category_logging)
 
         isFileLogEnabledPref.setOnPreferenceChangeListener { _, newValue ->
-            val isEnabled = (newValue as? Boolean) ?: false
-            viewModel.onFileLogEnabledChanged(isEnabled)
+            viewModel.onFileLogEnabledChanged(newValue as Boolean)
             true
         }
 
         isPostponedSyncEnabledPref.setOnPreferenceChangeListener { _, newValue ->
-            val isEnabled = (newValue as? Boolean) ?: false
-            viewModel.onPostponedSyncEnabledChanged(isEnabled)
+            viewModel.onPostponedSyncEnabledChanged(newValue as Boolean)
             true
         }
+
+        isBiometricUnlockEnabledPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.onBiometricUnlockEnabledChanged(newValue as Boolean)
+            true
+        }
+
+        categoryBiometric.isVisible = viewModel.isBiometricUnlockAvailable()
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val view = super.onCreateView(inflater, container, savedInstanceState)
+
+        contentView = view?.findViewById(android.R.id.list_container)
+            ?: throw IllegalStateException()
+
+        inflater.inflate(R.layout.core_progress_bar, contentView, true)
+
+        return view
     }
 
     override fun onDisplayPreferenceDialog(preference: Preference?) {
@@ -162,10 +196,13 @@ class AppSettingsFragment : BasePreferenceFragment() {
     }
 
     private fun setProgressVisibility(isProgressVisible: Boolean) {
-        progressPref.isVisible = isProgressVisible
-        categoryGeneral.isVisible = !isProgressVisible
-        categoryNotifications.isVisible = !isProgressVisible
-        categoryLogging.isVisible = !isProgressVisible
+        for (childView in contentView.getChildViews()) {
+            childView.isVisible = if (childView.id == R.id.progressBarLayout) {
+                isProgressVisible
+            } else {
+                !isProgressVisible
+            }
+        }
     }
 
     private fun shareFile(file: File) {

@@ -4,10 +4,12 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
+import com.ivanovsky.passnotes.data.crypto.entity.BiometricData
+import com.ivanovsky.passnotes.data.repository.db.converters.BiometricDataTypeConverter
 import com.ivanovsky.passnotes.data.repository.db.converters.KeyTypeConverter
 
 @Entity(tableName = "used_file")
-@TypeConverters(KeyTypeConverter::class)
+@TypeConverters(KeyTypeConverter::class, BiometricDataTypeConverter::class)
 data class UsedFile(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
@@ -44,5 +46,8 @@ data class UsedFile(
     val keyFileUid: String? = null,
 
     @ColumnInfo(name = "key_file_name")
-    val keyFileName: String? = null
+    val keyFileName: String? = null,
+
+    @ColumnInfo(name = "biometric_data")
+    val biometricData: BiometricData? = null
 )

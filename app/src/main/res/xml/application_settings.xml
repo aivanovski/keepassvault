@@ -2,10 +2,6 @@
 <PreferenceScreen
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.ivanovsky.passnotes.presentation.core.widget.ProgressPreference
-        app:isPreferenceVisible="false"
-        app:key="@string/pref_progress" />
-
     <PreferenceCategory
         app:key="@string/pref_category_general"
         app:title="@string/general">
@@ -28,6 +24,17 @@
             app:key="@string/pref_auto_clear_clipboard_delay_in_ms"
             app:summary="@string/pref_auto_clear_clipboard_delay_in_ms_summary"
             app:title="@string/pref_auto_clear_clipboard_delay_in_ms_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="@string/pref_category_biometrics"
+        app:title="@string/biometrics">
+
+        <SwitchPreferenceCompat
+            app:key="@string/pref_is_biometric_unlock_enabled"
+            app:title="@string/pref_is_biometric_unlock_enabled_title"
+            app:summary="@string/pref_is_biometric_unlock_enabled_summary" />
 
     </PreferenceCategory>
 

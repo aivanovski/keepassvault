@@ -25,7 +25,7 @@ import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom2To3
         RemoteFile::class,
         GitRoot::class
     ],
-    version = 3
+    version = 4
 )
 @TypeConverters(
     FSAuthorityTypeConverter::class,

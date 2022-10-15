@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoderImpl
+import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoderImpl
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
@@ -17,6 +19,7 @@ import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.presentation.core.BiometricPromptHelper
 import com.ivanovsky.passnotes.presentation.core.dialog.ThreeButtonDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
@@ -140,6 +143,28 @@ class UnlockFragment : BaseFragment() {
         viewModel.sendAutofillResponseEvent.observe(viewLifecycleOwner) { (note, structure) ->
             sendAutofillResult(note, structure)
             finishActivity()
+        }
+        viewModel.showBiometricSetupDialog.observe(viewLifecycleOwner) { cipher ->
+            BiometricPromptHelper.authenticateForSetup(
+                activity = requireActivity(),
+                cipher = cipher,
+                onSuccess = { result ->
+                    result.cryptoObject?.cipher?.let {
+                        viewModel.onBiometricSetupSuccess(BiometricEncoderImpl(it))
+                    }
+                }
+            )
+        }
+        viewModel.showBiometricUnlockDialog.observe(viewLifecycleOwner) { cipher ->
+            BiometricPromptHelper.authenticateForUnlock(
+                activity = requireActivity(),
+                cipher = cipher,
+                onSuccess = { result ->
+                    result.cryptoObject?.cipher?.let {
+                        viewModel.onBiometricUnlockSuccess(BiometricDecoderImpl(it))
+                    }
+                }
+            )
         }
     }
 

@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.core.binding
 
+import android.content.res.ColorStateList
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -283,5 +284,15 @@ fun setSpinnerItems(
             ?.apply {
                 updateItems(nonEmptyItems)
             }
+    }
+}
+
+@BindingAdapter("imageTint")
+fun setImageViewTint(
+    view: ImageView,
+    color: Int?
+) {
+    if (color != null) {
+        view.imageTintList = ColorStateList.valueOf(color)
     }
 }

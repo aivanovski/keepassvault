@@ -14,9 +14,13 @@ class UsedFileRepository(
         return dao.all
     }
 
+    fun findById(id: Int): UsedFile? {
+        return dao.getById(id)
+    }
+
     fun findByUid(fileUid: String, fsAuthority: FSAuthority): UsedFile? {
         return dao.all
-            .firstOrNull { file: UsedFile? -> fileUid == file!!.fileUid && fsAuthority == file.fsAuthority }
+            .firstOrNull { file: UsedFile -> fileUid == file.fileUid && fsAuthority == file.fsAuthority }
     }
 
     fun insert(file: UsedFile): UsedFile {

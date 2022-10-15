@@ -9,10 +9,11 @@
     <string name="pref_is_lock_notification_visible" translatable="false">isLockNotificationVisible</string>
     <string name="pref_is_external_storage_cache_enabled" translatable="false">isExternalStorageCacheEnabled</string>
     <string name="pref_is_file_log_enabled" translatable="false">isLogToFileEnabled</string>
-    <string name="pref_is_postponed_sync_enabled">isPostponedSyncEnabled</string>
-    <string name="pref_sort_type">sortType</string>
-    <string name="pref_sort_direction">sortDirection</string>
-    <string name="pref_is_groups_at_start_enabled">isGroupsAtStartEnabled</string>
+    <string name="pref_is_postponed_sync_enabled" translatable="false">isPostponedSyncEnabled</string>
+    <string name="pref_sort_type" translatable="false">sortType</string>
+    <string name="pref_sort_direction" translatable="false">sortDirection</string>
+    <string name="pref_is_groups_at_start_enabled" translatable="false">isGroupsAtStartEnabled</string>
+    <string name="pref_is_biometric_unlock_enabled" translatable="false">isBiometricUnlockEnabled</string>
 
     <string name="pref_database_settings_fragment" translatable="false">databaseSettingsFragment</string>
     <string name="pref_is_recycle_bin_enabled" translatable="false">isRecycleBinEnabled</string>
@@ -21,6 +22,7 @@
     <string name="pref_send_log_file" translatable="false">sendLogFile</string>
     <string name="pref_remove_log_files" translatable="false">removeLogFiles</string>
     <string name="pref_category_general" translatable="false">categoryGeneral</string>
+    <string name="pref_category_biometrics" translatable="false">categoryBiometrics</string>
     <string name="pref_category_notifications" translatable="false">categoryNotifications</string>
     <string name="pref_category_logging" translatable="false">categoryLogging</string>
 

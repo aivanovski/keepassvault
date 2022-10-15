@@ -9,12 +9,15 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
+import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
@@ -23,9 +26,11 @@ import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
+import com.ivanovsky.passnotes.domain.interactor.unlock.BiometricUnlockInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.extensions.getKeyFileDescriptor
 import com.ivanovsky.passnotes.extensions.getFileDescriptor
@@ -68,6 +73,7 @@ import java.util.regex.Pattern
 
 class UnlockViewModel(
     private val interactor: UnlockInteractor,
+    private val biometricInteractor: BiometricUnlockInteractor,
     private val errorInteractor: ErrorInteractor,
     private val fileSystemResolver: FileSystemResolver,
     private val observerBus: ObserverBus,
@@ -75,6 +81,7 @@ class UnlockViewModel(
     private val dispatchers: DispatcherProvider,
     private val modelFactory: UnlockCellModelFactory,
     private val viewModelFactory: UnlockCellViewModelFactory,
+    private val settings: Settings,
     private val router: Router,
     private val args: UnlockScreenArgs
 ) : ViewModel(),
@@ -97,6 +104,10 @@ class UnlockViewModel(
     val visibleMenuItems = MutableLiveData<List<UnlockMenuItem>>(emptyList())
     val allKeyTypes = getKeyTypeNames()
     val showResolveConflictDialog = SingleLiveEvent<SyncConflictInfo>()
+    val biometricIconTint = MutableLiveData(getBiometricIconTint())
+    val isBiometricAvailable = MutableLiveData(false)
+    val showBiometricSetupDialog = SingleLiveEvent<BiometricEncoder>()
+    val showBiometricUnlockDialog = SingleLiveEvent<BiometricDecoder>()
 
     val fileCellTypes = ViewModelTypes()
         .add(DatabaseCellViewModel::class, R.layout.cell_database)
@@ -174,8 +185,7 @@ class UnlockViewModel(
                     setScreenState(ScreenState.empty(emptyText))
                 }
             } else {
-                val message = errorInteractor.processAndGetMessage(result.error)
-                setScreenState(ScreenState.error(message))
+                setErrorState(result.error)
             }
         }
     }
@@ -207,11 +217,7 @@ class UnlockViewModel(
             if (resolvedConflict.isSucceeded) {
                 loadData(resetSelection = false)
             } else {
-                setScreenState(
-                    ScreenState.dataWithError(
-                        errorText = errorInteractor.processAndGetMessage(resolvedConflict.error)
-                    )
-                )
+                setErrorPanelState(resolvedConflict.error)
             }
         }
     }
@@ -246,11 +252,7 @@ class UnlockViewModel(
             if (open.isSucceededOrDeferred) {
                 onDatabaseUnlocked()
             } else {
-                setScreenState(
-                    ScreenState.dataWithError(
-                        errorText = errorInteractor.processAndGetMessage(open.error)
-                    )
-                )
+                setErrorPanelState(open.error)
             }
         }
     }
@@ -276,6 +278,74 @@ class UnlockViewModel(
         navigateToFilePickerToSelectKey()
     }
 
+    fun onBiometricLoginButtonClicked() {
+        val selectedUsedFile = selectedUsedFile ?: return
+
+        if (selectedUsedFile.biometricData != null) {
+            showBiometricUnlockDialog.call(
+                biometricInteractor.getCipherForDecryption(
+                    selectedUsedFile.biometricData
+                )
+            )
+        } else {
+            showBiometricSetupDialog.call(biometricInteractor.getCipherForEncryption())
+        }
+    }
+
+    fun onBiometricSetupSuccess(encoder: BiometricEncoder) {
+        val selectedUsedFile = selectedUsedFile ?: return
+        val selectedFile = selectedUsedFile.getFileDescriptor()
+        val password = password.value ?: EMPTY
+        val key = PasswordKeepassKey(password)
+
+        setScreenState(ScreenState.loading())
+
+        viewModelScope.launch {
+            val openResult = interactor.openDatabase(key, selectedFile)
+            if (openResult.isFailed) {
+                setErrorPanelState(openResult.error)
+                return@launch
+            }
+
+            val encryptPasswordResult = biometricInteractor.encodeAndStorePasswordForFile(
+                encoder,
+                password,
+                selectedUsedFile
+            )
+            if (encryptPasswordResult.isFailed) {
+                setErrorPanelState(encryptPasswordResult.error)
+                return@launch
+            }
+
+            onDatabaseUnlocked()
+        }
+    }
+
+    fun onBiometricUnlockSuccess(decoder: BiometricDecoder) {
+        val selectedUsedFile = selectedUsedFile ?: return
+        val selectedFile = selectedUsedFile.getFileDescriptor()
+
+        setScreenState(ScreenState.loading())
+
+        viewModelScope.launch {
+            val passwordResult =
+                biometricInteractor.decodePassword(decoder, selectedUsedFile)
+            if (passwordResult.isFailed) {
+                setErrorPanelState(passwordResult.error)
+                return@launch
+            }
+
+            val key = PasswordKeepassKey(passwordResult.obj)
+            val openResult = interactor.openDatabase(key, selectedFile)
+            if (openResult.isFailed) {
+                setErrorPanelState(openResult.error)
+                return@launch
+            }
+
+            onDatabaseUnlocked()
+        }
+    }
+
     private fun checkAndSetSelectedKeyFile(file: FileDescriptor) {
         selectedKeyFileTitle.value = resourceProvider.getString(
             R.string.text_with_dots,
@@ -294,11 +364,7 @@ class UnlockViewModel(
             } else {
                 selectedKeyFileTitle.value = resourceProvider.getString(R.string.not_selected)
                 selectedKeyFileTitleColor.value = resourceProvider.getColor(R.color.primary_text)
-                setScreenState(
-                    ScreenState.dataWithError(
-                        errorText = errorInteractor.processAndGetMessage(getFileResult.error)
-                    )
-                )
+                setErrorPanelState(getFileResult.error)
             }
         }
     }
@@ -306,6 +372,9 @@ class UnlockViewModel(
     private fun setSelectedKeyType(keyType: KeyType) {
         selectedKeyTypeTitle.value = keyType.getTitle()
         selectedKeyType.value = keyType
+
+        isBiometricAvailable.value = getIsBiometricAvailable()
+        biometricIconTint.value = getBiometricIconTint()
 
         clearKeyInputIfNeed()
     }
@@ -357,11 +426,7 @@ class UnlockViewModel(
 
                     sendAutofillResponseEvent.call(Pair(note, structure))
                 } else {
-                    setScreenState(
-                        ScreenState.dataWithError(
-                            errorText = errorInteractor.processAndGetMessage(autofillNoteResult.error)
-                        )
-                    )
+                    setErrorPanelState(autofillNoteResult.error)
                 }
             }
             else -> {
@@ -494,8 +559,7 @@ class UnlockViewModel(
                 }
 
                 if (closeResult.isFailed) {
-                    val message = errorInteractor.processAndGetMessage(closeResult.error)
-                    setScreenState(ScreenState.error(message))
+                    setErrorPanelState(closeResult.error)
                 }
             }
         }
@@ -548,6 +612,8 @@ class UnlockViewModel(
                 onFileClicked = { navigateToSelectDatabaseScreen() }
             )
         )
+        isBiometricAvailable.value = getIsBiometricAvailable()
+        biometricIconTint.value = getBiometricIconTint()
 
         viewModelScope.launch {
             val syncState = interactor.getSyncState(file)
@@ -648,11 +714,7 @@ class UnlockViewModel(
                 showResolveConflictDialog.call(conflict.obj)
                 setScreenState(lastState)
             } else {
-                setScreenState(
-                    ScreenState.dataWithError(
-                        errorText = errorInteractor.processAndGetMessage(conflict.error)
-                    )
-                )
+                setErrorPanelState(conflict.error)
             }
         }
     }
@@ -716,8 +778,7 @@ class UnlockViewModel(
             )
 
             if (updateResult.isFailed) {
-                val message = errorInteractor.processAndGetMessage(updateResult.error)
-                setScreenState(ScreenState.dataWithError(message))
+                setErrorState(updateResult.error)
                 return@launch
             }
 
@@ -739,10 +800,41 @@ class UnlockViewModel(
         password.value = EMPTY
     }
 
+    private fun setErrorState(error: OperationError) {
+        setScreenState(
+            ScreenState.error(
+                errorText = errorInteractor.processAndGetMessage(error)
+            )
+        )
+    }
+
+    private fun setErrorPanelState(error: OperationError) {
+        setScreenState(
+            ScreenState.dataWithError(
+                errorText = errorInteractor.processAndGetMessage(error)
+            )
+        )
+    }
+
     private fun setScreenState(state: ScreenState) {
         screenState.value = state
         isFabButtonVisible.value = getFabButtonVisibility()
         visibleMenuItems.value = getVisibleMenuItems()
+    }
+
+    private fun getIsBiometricAvailable(): Boolean {
+        return selectedKeyType.value == KeyType.PASSWORD &&
+            biometricInteractor.isBiometricUnlockAvailable() &&
+            settings.isBiometricUnlockEnabled
+    }
+
+    private fun getBiometricIconTint(): Int {
+        val biometricData = selectedUsedFile?.biometricData
+        return if (biometricData != null) {
+            resourceProvider.getColor(R.color.icon_gray)
+        } else {
+            resourceProvider.getColor(R.color.icon_gray_inactive)
+        }
     }
 
     private fun getFabButtonVisibility(): Boolean {

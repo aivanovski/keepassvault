@@ -35,6 +35,7 @@ import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInterac
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.main.MainSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
+import com.ivanovsky.passnotes.domain.interactor.unlock.BiometricUnlockInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
@@ -164,6 +165,7 @@ object KoinModule {
 
             // Interactors
             single { FilePickerInteractor(get(), get()) }
+            single { BiometricUnlockInteractor(get(), get(), get()) }
             single { UnlockInteractor(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
             single { StorageListInteractor(get(), get(), get()) }
             single { NewDatabaseInteractor(get(), get(), get(), get()) }
@@ -236,12 +238,12 @@ object KoinModule {
             factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), args) }
             viewModel { AboutViewModel(get(), get()) }
             viewModel { MainSettingsViewModel(get(), get()) }
-            viewModel { AppSettingsViewModel(get(), get(), get(), get(), get()) }
+            viewModel { AppSettingsViewModel(get(), get(), get(), get(), get(), get()) }
             viewModel { DatabaseSettingsViewModel(get(), get()) }
             viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
             viewModel { SortAndViewDialogViewModel(get()) }
             viewModel { PasswordGeneratorViewModel(get(), get(), get()) }
-            factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             factory { NavigationMenuViewModel(get()) }
             factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }
         }

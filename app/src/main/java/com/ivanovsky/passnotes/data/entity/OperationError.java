@@ -50,6 +50,9 @@ public class OperationError {
     public static final String MESSAGE_FAILED_TO_REMOVE_FILE = "Failed to remove file";
     public static final String MESSAGE_FAILED_TO_READ_KEY_FILE = "Failed to read key file";
     public static final String MESSAGE_UNSUPPORTED_OPERATION = "Unsupported operation";
+    public static final String MESSAGE_FAILED_TO_ENCODE_DATA = "Failed to encode data";
+    public static final String MESSAGE_NO_DATA_TO_DECODE = "No data to decode";
+    public static final String MESSAGE_FAILED_TO_DECODE_DATA = "Failed to decode data";
 
     public static final String GENERIC_MESSAGE_NOT_FOUND = "%s not found";
     public static final String GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST = "Group '%s' already exists";
@@ -58,6 +61,7 @@ public class OperationError {
     public static final String GENERIC_MESSAGE_FAILED_TO_GET_ACCESS_RIGHT_TO_URI = "Failed to get access to: %s";
     public static final String GENERIC_MESSAGE_FAILED_TO_FIND_FILE = "Failed to find file: %s";
     public static final String GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID = "Failed to find '%s' in db: uid=%s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_ID = "Failed to find '%s' in db: id=%s";
     public static final String GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY = "Failed fo find entity by: %s";
     public static final String GENERIC_MESSAGE_FAILED_TO_ACCESS_TO_FILE = "Failed to access to file: %s";
     public static final String GENERIC_MESSAGE_FAILED_TO_GET_REFERENCE_TO = "Failed to get reference to: %s";

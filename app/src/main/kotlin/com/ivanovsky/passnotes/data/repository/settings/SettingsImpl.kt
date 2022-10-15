@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.DROPBOX_AUTH_TOKEN
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIOMETRIC_UNLOCK_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXTERNAL_STORAGE_CACHE_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED
@@ -65,6 +66,12 @@ class SettingsImpl(
         get() = getBoolean(IS_FILE_LOG_ENABLED)
         set(value) {
             putBoolean(IS_FILE_LOG_ENABLED, value)
+        }
+
+    override var isBiometricUnlockEnabled: Boolean
+        get() = getBoolean(IS_BIOMETRIC_UNLOCK_ENABLED)
+        set(value) {
+            putBoolean(IS_BIOMETRIC_UNLOCK_ENABLED, value)
         }
 
     override var autoLockDelayInMs: Int
@@ -228,6 +235,11 @@ class SettingsImpl(
         ),
         IS_GROUPS_AT_START_ENABLED(
             keyId = R.string.pref_is_groups_at_start_enabled,
+            type = BOOLEAN,
+            defaultValue = true
+        ),
+        IS_BIOMETRIC_UNLOCK_ENABLED(
+            keyId = R.string.pref_is_biometric_unlock_enabled,
             type = BOOLEAN,
             defaultValue = true
         ),

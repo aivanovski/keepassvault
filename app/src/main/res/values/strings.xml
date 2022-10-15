@@ -90,6 +90,9 @@
     <string name="unlock_type">Unlock type</string>
     <string name="key_file">Key file</string>
     <string name="key_file_is_not_selected">Key file is not selected</string>
+    <string name="unlock_with_fingerprint">Unlock with fingerprint</string>
+    <string name="setup_fingerprint_unlock">Setup fingerprint unlock</string>
+    <string name="setup_fingerprint_unlock_message">Please authenticate to continue</string>
 
     <!-- New database screen -->
     <string name="new_database">New database</string>
@@ -258,9 +261,13 @@
     <string name="pref_remove_log_files_title">Clear logs</string>
     <string name="pref_is_postponed_sync_enabled_title">Postponed synchronization</string>
     <string name="pref_is_postponed_sync_enabled_summary">Synchronization via network will be postponed until database will be locked</string>
+    <string name="pref_is_biometric_unlock_enabled_title">Enable biometric unlock</string>
+    <string name="pref_is_biometric_unlock_enabled_summary">Allows to unlock database with fingerprint</string>
     <string name="general">General</string>
     <string name="notifications">Notifications</string>
     <string name="logging">Logging</string>
+    <string name="biometrics">Biometrics</string>
+    <string name="master_key">Master key</string>
 
     <!-- DatabaseSettings screen -->
     <string name="pref_is_recycle_bin_enabled_title">Use Recycle bin</string>

@@ -1,10 +1,12 @@
 package com.ivanovsky.passnotes.data.crypto
 
 import android.os.Build
-import android.util.Base64
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.ANDROID_KEY_STORE
 import com.ivanovsky.passnotes.data.crypto.entity.CipherTransformation
+import com.ivanovsky.passnotes.data.crypto.entity.Base64SecretData
 import com.ivanovsky.passnotes.data.crypto.entity.SecretData
+import com.ivanovsky.passnotes.data.crypto.entity.toBase64SecretData
+import com.ivanovsky.passnotes.data.crypto.entity.toSecretData
 import com.ivanovsky.passnotes.data.crypto.keyprovider.SecretKeyProvider
 import timber.log.Timber
 import java.security.GeneralSecurityException
@@ -30,27 +32,27 @@ class DataCipherImpl(
 
             try {
                 val encodedBytes = cipher.doFinal(data.toByteArray())
-                result = SecretData(toBase64String(initVector), toBase64String(encodedBytes))
+                result = SecretData(initVector, encodedBytes)
             } catch (e: GeneralSecurityException) {
                 Timber.d(e)
             }
         }
 
-        return result?.toString()
+        return result?.toBase64SecretData()?.toString()
     }
 
     override fun decode(data: String): String? {
-        val secreteData = SecretData.parse(data) ?: return null
-        return decode(secreteData)
+        val secreteData = Base64SecretData.parse(data) ?: return null
+        return decode(secreteData.toSecretData())
     }
 
     private fun decode(data: SecretData): String? {
         var result: String? = null
 
-        val cipher = initCipherForDecode(fromBase64String(data.initVector))
+        val cipher = initCipherForDecode(data.initVector)
         if (cipher != null) {
             try {
-                val decodedBytes = cipher.doFinal(fromBase64String(data.encryptedText))
+                val decodedBytes = cipher.doFinal(data.encryptedData)
                 if (decodedBytes != null) {
                     result = String(decodedBytes, Charsets.UTF_8)
                 }
@@ -122,14 +124,6 @@ class DataCipherImpl(
         }
 
         return result
-    }
-
-    private fun toBase64String(data: ByteArray): String {
-        return Base64.encodeToString(data, Base64.NO_WRAP)
-    }
-
-    private fun fromBase64String(base64Data: String): ByteArray {
-        return Base64.decode(base64Data, Base64.NO_WRAP)
     }
 
     companion object {

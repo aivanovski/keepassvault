@@ -13,7 +13,8 @@ def versionMajor = 0
 def versionMinor = 17
 def versionPatch = 0
 
-def PROPERTIES_FILE = file("../project.properties")
+def DEV_PROPERTIES_FILE = file("../project.properties")
+def CI_PROPERTIES_FILE = file("../ci.properties")
 
 def PROPERTY_DROPBOX_APP_KEY = 'DROPBOX_APP_KEY'
 def PROPERTY_DROPBOX_APP_SECRET = 'DROPBOX_APP_SECRET'
@@ -26,8 +27,11 @@ def PROPERTY_DEBUG_GIT_URL = 'DEBUG_GIT_URL'
 def PROPERTY_IS_CRASHLYTICS_ENABLED = 'IS_CRASHLYTICS_ENABLED'
 
 project.ext.customProps = new Properties()
-if (PROPERTIES_FILE.exists()) {
-    project.ext.customProps.load(new FileInputStream(PROPERTIES_FILE))
+if (DEV_PROPERTIES_FILE.exists()) {
+    project.ext.customProps.load(new FileInputStream(DEV_PROPERTIES_FILE))
+}
+if (CI_PROPERTIES_FILE.exists()) {
+    project.ext.customProps.load(new FileInputStream(CI_PROPERTIES_FILE))
 }
 
 String getCustomProperty(String key) {

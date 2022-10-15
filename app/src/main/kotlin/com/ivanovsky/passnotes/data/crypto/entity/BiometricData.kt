@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.data.crypto.entity
 
-class SecretData(
+class BiometricData(
     val initVector: ByteArray,
     val encryptedData: ByteArray
 )

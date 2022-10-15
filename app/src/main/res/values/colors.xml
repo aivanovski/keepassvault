@@ -15,6 +15,7 @@
 
     <!-- Color for icons -->
     <color name="icon_gray">#757575</color>
+    <color name="icon_gray_inactive">#aaaaaa</color>
 
     <color name="material_icon_background">#9d9d9d</color>
 

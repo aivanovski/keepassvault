@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -92,19 +93,41 @@
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/unlockButton"
-            style="@style/Material.ContainedButton"
+        <LinearLayout
+            android:id="@+id/buttonLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/element_margin"
             android:layout_marginTop="@dimen/element_margin"
-            android:layout_marginEnd="@dimen/element_margin"
-            android:onClick="@{() -> viewModel.onUnlockButtonClicked()}"
-            android:text="@string/unlock"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
             app:layout_constraintTop_toBottomOf="@id/keyInputLayout"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenStateHandler="@{viewModel.screenStateHandler}">
+
+            <Button
+                android:id="@+id/unlockButton"
+                style="@style/Material.ContainedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/element_margin"
+                android:layout_marginEnd="@dimen/element_margin"
+                android:layout_weight="1"
+                android:onClick="@{() -> viewModel.onUnlockButtonClicked()}"
+                android:text="@string/unlock" />
+
+            <ImageView
+                android:id="@+id/biometricUnlockButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/element_margin"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:onClick="@{v -> viewModel.onBiometricLoginButtonClicked()}"
+                android:src="@drawable/ic_fingerprint_48dp"
+                app:imageTint="@{viewModel.biometricIconTint}"
+                app:visible="@{viewModel.isBiometricAvailable}"
+                tools:visibility="visible" />
+
+        </LinearLayout>
 
         <com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
             android:id="@+id/fab"

@@ -9,12 +9,14 @@ import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
+import com.ivanovsky.passnotes.domain.interactor.unlock.BiometricUnlockInteractor
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import kotlinx.coroutines.launch
 import java.io.File
 
 class AppSettingsViewModel(
     private val interactor: AppSettingsInteractor,
+    private val biometricInteractor: BiometricUnlockInteractor,
     private val errorInteractor: ErrorInteractor,
     private val resourceProvider: ResourceProvider,
     private val settings: Settings,
@@ -29,6 +31,10 @@ class AppSettingsViewModel(
     val shareFileEvent = SingleLiveEvent<File>()
 
     fun navigateBack() = router.exit()
+
+    fun isBiometricUnlockAvailable(): Boolean {
+        return biometricInteractor.isBiometricUnlockAvailable()
+    }
 
     fun start() {
         isSendLogFileEnabled.value = settings.isFileLogEnabled
@@ -47,6 +53,15 @@ class AppSettingsViewModel(
 
     fun onPostponedSyncEnabledChanged(isEnabled: Boolean) {
         interactor.lockDatabase()
+    }
+
+    fun onBiometricUnlockEnabledChanged(isEnabled: Boolean) {
+        isLoading.value = true
+
+        viewModelScope.launch {
+            biometricInteractor.removeAllBiometricData()
+            isLoading.value = false
+        }
     }
 
     fun onSendLongFileClicked() {

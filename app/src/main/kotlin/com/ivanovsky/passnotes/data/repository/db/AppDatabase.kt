@@ -16,6 +16,7 @@ import com.ivanovsky.passnotes.data.repository.db.dao.UsedFileDao
 import com.ivanovsky.passnotes.data.repository.db.dao.RemoteFileDao
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom1To2
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom2To3
+import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom3To4
 
 // TODO(improvement): Unused data from should be removed from database
 
@@ -57,7 +58,8 @@ abstract class AppDatabase : RoomDatabase() {
         private fun createMigrations(cipherProvider: DataCipherProvider): Array<Migration> {
             return arrayOf(
                 MigrationFrom1To2(),
-                MigrationFrom2To3(cipherProvider)
+                MigrationFrom2To3(cipherProvider),
+                MigrationFrom3To4()
             )
         }
     }

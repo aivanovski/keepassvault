@@ -10,7 +10,7 @@ if (shouldEnableGoogleServicesPlugins()) {
 }
 
 def versionMajor = 0
-def versionMinor = 17
+def versionMinor = 18
 def versionPatch = 0
 
 def DEV_PROPERTIES_FILE = file("../project.properties")

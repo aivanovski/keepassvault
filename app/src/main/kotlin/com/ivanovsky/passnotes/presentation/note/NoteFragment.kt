@@ -10,9 +10,12 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
+import com.ivanovsky.passnotes.presentation.autofill.AutofillDialogFactory
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
+import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
@@ -146,6 +149,17 @@ class NoteFragment : BaseFragment() {
             sendAutofillResult(note, structure)
             finishActivity()
         }
+        viewModel.showAddAutofillDataDialog.observe(viewLifecycleOwner) {
+            showAddAutofillDataDialog(it)
+        }
+    }
+
+    private fun showAddAutofillDataDialog(note: Note) {
+        val dialog = AutofillDialogFactory(requireContext()).createAddAutofillDataToNoteDialog(
+            onConfirmed = { viewModel.onAddAutofillDataConfirmed(note) },
+            onDenied = { viewModel.onAddAutofillDataDenied(note) }
+        )
+        dialog.show(childFragmentManager, ConfirmationDialog.TAG)
     }
 
     companion object {

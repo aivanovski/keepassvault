@@ -8,7 +8,8 @@ import androidx.fragment.app.DialogFragment
 
 class ConfirmationDialog : DialogFragment(), DialogInterface.OnClickListener {
 
-    lateinit var onConfirmationLister: () -> Unit
+    var onConfirmed: (() -> Unit)? = null
+    var onDenied: (() -> Unit)? = null
     private lateinit var message: String
     private lateinit var positiveButtonText: String
     private lateinit var negativeButtonText: String
@@ -29,8 +30,13 @@ class ConfirmationDialog : DialogFragment(), DialogInterface.OnClickListener {
     }
 
     override fun onClick(dialog: DialogInterface?, which: Int) {
-        if (which == DialogInterface.BUTTON_POSITIVE) {
-            onConfirmationLister.invoke()
+        when (which) {
+            DialogInterface.BUTTON_POSITIVE -> {
+                onConfirmed?.invoke()
+            }
+            DialogInterface.BUTTON_NEGATIVE -> {
+                onDenied?.invoke()
+            }
         }
     }
 

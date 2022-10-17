@@ -1,10 +1,39 @@
 package com.ivanovsky.passnotes.util
 
 import android.net.Uri
+import com.ivanovsky.passnotes.util.StringUtils.DOT
 import com.ivanovsky.passnotes.util.StringUtils.STAR
 import java.lang.StringBuilder
 
 object UrlUtils {
+
+    private val UNNECESSARY_URL_PREFIXES = listOf("https", "http", "://", "www", ".")
+
+    fun extractWebDomain(url: String): String? {
+        var cleanedUrl = url.trim()
+        for (prefix in UNNECESSARY_URL_PREFIXES) {
+            if (cleanedUrl.startsWith(prefix, ignoreCase = true)) {
+                val start = prefix.length
+                val end = cleanedUrl.length
+                if (start < end) {
+                    cleanedUrl = cleanedUrl.substring(start, end)
+                } else {
+                    return null
+                }
+            }
+        }
+
+        val lastDotIdx = cleanedUrl.lastIndexOf(DOT)
+        if (lastDotIdx == -1 && cleanedUrl.isNotEmpty()) {
+            return cleanedUrl
+        }
+
+        return if (lastDotIdx > 0) {
+            cleanedUrl.substring(0, lastDotIdx)
+        } else {
+            null
+        }
+    }
 
     fun formatSecretUrl(url: String): String {
         val parsedUrl = parseUrl(url) ?: return url.substituteAt(0, url.length, STAR)

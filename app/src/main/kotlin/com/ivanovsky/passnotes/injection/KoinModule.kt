@@ -39,6 +39,7 @@ import com.ivanovsky.passnotes.domain.interactor.unlock.BiometricUnlockInteracto
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestPasswordUseCase
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
+import com.ivanovsky.passnotes.domain.usecases.CheckNoteAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
@@ -159,6 +160,7 @@ object KoinModule {
             single { GetNoteUseCase(get(), get()) }
             single { FindNoteForAutofillUseCase(get(), get()) }
             single { UpdateNoteWithAutofillDataUseCase(get(), get(), get()) }
+            single { CheckNoteAutofillDataUseCase(get()) }
             single { UpdateNoteUseCase(get(), get(), get()) }
             single { RemoveUsedFileUseCase(get(), get()) }
             single { SortGroupsAndNotesUseCase(get(), get()) }
@@ -173,13 +175,13 @@ object KoinModule {
             single { NewDatabaseInteractor(get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get()) }
             single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
-            single { NoteInteractor(get(), get(), get(), get(), get(), get()) }
+            single { NoteInteractor(get(), get(), get(), get(), get(), get(), get()) }
             single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
             single { NoteEditorInteractor(get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
             single { DatabaseLockInteractor(get(), get(), get()) }
             single { SelectDatabaseInteractor(get(), get(), get(), get()) }
-            single { SearchInteractor(get(), get(), get(), get(), get(), get()) }
+            single { SearchInteractor(get(), get(), get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
             single { DatabaseSettingsInteractor(get(), get()) }
             single { AppSettingsInteractor(get(), get(), get()) }

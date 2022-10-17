@@ -1,19 +1,3 @@
-ext.extractPasswordRules = { Properties props ->
-    def result = [:]
-
-    for (key in (props.keySet() as Set<String>)) {
-        if (key.startsWith('DEBUG_PASSWORD_RULE_')) {
-            def values = (props[key] as String).split("=")
-            def fileNameRegexp = values[0]
-            def password = values[1]
-            project.logger.lifecycle("Use password $password for file with name matched $fileNameRegexp")
-            result.put(fileNameRegexp, password)
-        }
-    }
-
-    return result
-}
-
 ext {
     android = [
             minSdk    : 26,

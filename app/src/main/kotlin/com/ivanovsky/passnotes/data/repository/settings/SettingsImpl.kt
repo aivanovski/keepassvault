@@ -7,6 +7,7 @@ import android.os.Looper
 import androidx.annotation.StringRes
 import androidx.preference.PreferenceManager
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.TestData
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.DROPBOX_AUTH_TOKEN
@@ -18,9 +19,11 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOC
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_DIRECTION
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_TYPE
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.TEST_DATA
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.BOOLEAN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.INT
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.STRING
+import com.ivanovsky.passnotes.data.serialization.TestDataConverter
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.SortDirection
 import com.ivanovsky.passnotes.domain.entity.SortType
@@ -116,6 +119,12 @@ class SettingsImpl(
         get() = getBoolean(IS_GROUPS_AT_START_ENABLED)
         set(value) {
             putBoolean(IS_GROUPS_AT_START_ENABLED, value)
+        }
+
+    override var testData: TestData?
+        get() = getString(TEST_DATA)?.let { TestDataConverter.fromString(it) }
+        set(value) {
+            putString(TEST_DATA, value?.let { TestDataConverter.toString(it) })
         }
 
     init {
@@ -269,6 +278,11 @@ class SettingsImpl(
         ),
         SORT_DIRECTION(
             keyId = R.string.pref_sort_direction,
+            type = STRING,
+            defaultValue = null
+        ),
+        TEST_DATA(
+            keyId = R.string.pref_test_data,
             type = STRING,
             defaultValue = null
         )

@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestCredentialsUseCase
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import kotlinx.coroutines.withContext
@@ -12,12 +13,12 @@ import kotlinx.coroutines.withContext
 class ServerLoginInteractor(
     private val dispatchers: DispatcherProvider,
     private val fileSystemResolver: FileSystemResolver,
-    private val getDebugCredentialsUseCase: GetDebugCredentialsUseCase
+    private val getTestCredentialsUseCase: GetTestCredentialsUseCase
 ) {
 
-    fun getDebugWebDavCredentials() = getDebugCredentialsUseCase.getDebugWebDavCredentials()
+    fun getTestWebDavCredentials() = getTestCredentialsUseCase.getDebugWebDavCredentials()
 
-    fun getDebugGitCredentials() = getDebugCredentialsUseCase.getDebugGitCredentials()
+    fun getTestGitCredentials() = getTestCredentialsUseCase.getDebugGitCredentials()
 
     suspend fun authenticate(
         credentials: FSCredentials,

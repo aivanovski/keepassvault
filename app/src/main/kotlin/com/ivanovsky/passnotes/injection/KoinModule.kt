@@ -28,7 +28,7 @@ import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteracto
 import com.ivanovsky.passnotes.domain.interactor.password_generator.PasswordGeneratorInteractor
 import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
 import com.ivanovsky.passnotes.domain.interactor.selectdb.SelectDatabaseInteractor
-import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
+import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestCredentialsUseCase
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
 import com.ivanovsky.passnotes.domain.interactor.service.LockServiceInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
@@ -37,6 +37,7 @@ import com.ivanovsky.passnotes.domain.interactor.settings.main.MainSettingsInter
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.BiometricUnlockInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
+import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestPasswordUseCase
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
@@ -143,7 +144,8 @@ object KoinModule {
             single<EncryptedDatabaseRepository> { KeepassDatabaseRepository(get(), get(), get(), get()) }
 
             // Use Cases
-            single { GetDebugCredentialsUseCase() }
+            single { GetTestCredentialsUseCase(get()) }
+            single { GetTestPasswordUseCase(get(), get()) }
             single { LockDatabaseUseCase() }
             single { GetRecentlyOpenedFilesUseCase(get(), get()) }
             single { SyncUseCases(get(), get()) }
@@ -166,7 +168,7 @@ object KoinModule {
             // Interactors
             single { FilePickerInteractor(get(), get()) }
             single { BiometricUnlockInteractor(get(), get(), get()) }
-            single { UnlockInteractor(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+            single { UnlockInteractor(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
             single { StorageListInteractor(get(), get(), get()) }
             single { NewDatabaseInteractor(get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get()) }

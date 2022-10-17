@@ -44,7 +44,7 @@ class ServerLoginViewModel(
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
 
     init {
-        loadDebugData()
+        loadTestCredentials()
     }
 
     fun authenticate() {
@@ -111,10 +111,10 @@ class ServerLoginViewModel(
         return url.isNotBlank()
     }
 
-    private fun loadDebugData() {
+    private fun loadTestCredentials() {
         val credentials = when (args.fsAuthority.type) {
-            FSType.WEBDAV -> interactor.getDebugWebDavCredentials()
-            FSType.GIT -> interactor.getDebugGitCredentials()
+            FSType.WEBDAV -> interactor.getTestWebDavCredentials()
+            FSType.GIT -> interactor.getTestGitCredentials()
             else -> null
         }
 

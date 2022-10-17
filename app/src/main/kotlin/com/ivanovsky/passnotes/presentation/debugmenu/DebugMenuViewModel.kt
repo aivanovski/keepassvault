@@ -65,7 +65,7 @@ class DebugMenuViewModel(
     private var uriFileDescriptor: FileDescriptor? = null
 
     fun onScreenStart() {
-        loadDebugCredentials()
+        loadTestCredentials()
     }
 
     fun onReadButtonClicked() {
@@ -288,7 +288,7 @@ class DebugMenuViewModel(
         isCredentialsVisible.value = (fsType == FSType.WEBDAV)
         isSAFButtonsVisible.value = (fsType == FSType.SAF)
 
-        loadDebugCredentials()
+        loadTestCredentials()
     }
 
     fun onExternalStorageCheckBoxChanged(isChecked: Boolean) {
@@ -373,13 +373,13 @@ class DebugMenuViewModel(
             FSType.DROPBOX -> FSAuthority.DROPBOX_FS_AUTHORITY
             FSType.WEBDAV -> {
                 FSAuthority(
-                    credentials = interactor.getDebugWebDavCredentials(),
+                    credentials = interactor.getTestWebDavCredentials(),
                     type = selectedFsType
                 )
             }
             FSType.GIT -> {
                 FSAuthority(
-                    credentials = interactor.getDebugGitCredentials(),
+                    credentials = interactor.getTestGitCredentials(),
                     type = selectedFsType
                 )
             }
@@ -387,10 +387,10 @@ class DebugMenuViewModel(
         }
     }
 
-    private fun loadDebugCredentials() {
+    private fun loadTestCredentials() {
         val creds = when (selectedFsType) {
-            FSType.WEBDAV -> interactor.getDebugWebDavCredentials()
-            FSType.GIT -> interactor.getDebugGitCredentials()
+            FSType.WEBDAV -> interactor.getTestWebDavCredentials()
+            FSType.GIT -> interactor.getTestGitCredentials()
             else -> null
         }
 

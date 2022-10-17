@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
-import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
@@ -62,14 +61,10 @@ import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.cells.model.DatabaseCellModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.viewmodel.DatabaseCellViewModel
-import com.ivanovsky.passnotes.presentation.unlock.model.PasswordRule
-import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.parameter.parametersOf
-import java.util.ArrayList
-import java.util.regex.Pattern
 
 class UnlockViewModel(
     private val interactor: UnlockInteractor,
@@ -125,17 +120,10 @@ class UnlockViewModel(
     private var selectedKeyFile: FileDescriptor? = null
     private var userSelectedKeyType: KeyType? = null
     private var recentlyUsedFiles: List<FileDescriptor>? = null
-    private val debugPasswordRules: List<PasswordRule>
     private var errorPanelButtonAction: ErrorPanelButtonAction? = null
 
     init {
         observerBus.register(this)
-
-        debugPasswordRules = if (BuildConfig.DEBUG) {
-            createDebugPasswordRulesForAutoFill()
-        } else {
-            emptyList()
-        }
     }
 
     override fun onCleared() {
@@ -392,8 +380,11 @@ class UnlockViewModel(
 
         when (selectedKeyType) {
             KeyType.PASSWORD -> {
-                getDebugPassword()?.let {
-                    password.value = it
+                password.value = EMPTY
+                viewModelScope.launch {
+                    val filename = selectedUsedFile ?.getFileDescriptor()?.name ?: return@launch
+                    val testPassword = interactor.getTestPasswordForFile(filename) ?: return@launch
+                    password.value = testPassword
                 }
             }
             KeyType.KEY_FILE -> {
@@ -529,28 +520,6 @@ class UnlockViewModel(
         }
     }
 
-    private fun createDebugPasswordRulesForAutoFill(): List<PasswordRule> {
-        val rules = ArrayList<PasswordRule>()
-
-        if (BuildConfig.DEBUG_FILE_NAME_PATTERNS != null && BuildConfig.DEBUG_PASSWORDS != null) {
-            for (idx in BuildConfig.DEBUG_FILE_NAME_PATTERNS.indices) {
-                val fileNamePattern = BuildConfig.DEBUG_FILE_NAME_PATTERNS[idx]
-
-                val password = BuildConfig.DEBUG_PASSWORDS[idx]
-                val pattern = Pattern.compile(fileNamePattern)
-
-                rules.add(
-                    PasswordRule(
-                        pattern,
-                        password
-                    )
-                )
-            }
-        }
-
-        return rules
-    }
-
     private fun closeActiveDatabaseIfNeed() {
         if (interactor.hasActiveDatabase()) {
             viewModelScope.launch {
@@ -620,23 +589,6 @@ class UnlockViewModel(
 
             onSyncStateReceived(file, syncState)
         }
-    }
-
-    private fun getDebugPassword(): String? {
-        if (!BuildConfig.DEBUG) {
-            return null
-        }
-
-        val file = selectedUsedFile?.getFileDescriptor() ?: return null
-        val fileNameWithoutExtension = FileUtils.removeFileExtensionsIfNeed(file.name)
-
-        for (passwordRule in debugPasswordRules) {
-            if (passwordRule.pattern.matcher(fileNameWithoutExtension).matches()) {
-                return passwordRule.password
-            }
-        }
-
-        return null
     }
 
     override fun onSyncProgressStatusChanged(

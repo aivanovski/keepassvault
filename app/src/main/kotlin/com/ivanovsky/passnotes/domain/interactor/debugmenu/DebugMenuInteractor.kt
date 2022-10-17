@@ -15,7 +15,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
-import com.ivanovsky.passnotes.domain.interactor.server_login.GetDebugCredentialsUseCase
+import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestCredentialsUseCase
 import com.ivanovsky.passnotes.extensions.toFileDescriptor
 import com.ivanovsky.passnotes.util.InputOutputUtils
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull
@@ -30,13 +30,13 @@ class DebugMenuInteractor(
     private val fileSystemResolver: FileSystemResolver,
     private val dbRepository: EncryptedDatabaseRepository,
     private val fileHelper: FileHelper,
-    private val getDebugCredentialsUseCase: GetDebugCredentialsUseCase,
+    private val getTestCredentialsUseCase: GetTestCredentialsUseCase,
     private val dispatchers: DispatcherProvider
 ) {
 
-    fun getDebugWebDavCredentials() = getDebugCredentialsUseCase.getDebugWebDavCredentials()
+    fun getTestWebDavCredentials() = getTestCredentialsUseCase.getDebugWebDavCredentials()
 
-    fun getDebugGitCredentials() = getDebugCredentialsUseCase.getDebugGitCredentials()
+    fun getTestGitCredentials() = getTestCredentialsUseCase.getDebugGitCredentials()
 
     fun getFileContent(file: FileDescriptor): OperationResult<Pair<FileDescriptor, File>> {
         val result = OperationResult<Pair<FileDescriptor, File>>()

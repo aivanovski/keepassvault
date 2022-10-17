@@ -24,6 +24,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestPasswordUseCase
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetUsedFileUseCase
@@ -39,6 +40,7 @@ class UnlockInteractor(
     private val getFilesUseCase: GetRecentlyOpenedFilesUseCase,
     private val removeFileUseCase: RemoveUsedFileUseCase,
     private val autofillUseCase: FindNoteForAutofillUseCase,
+    private val getTestPasswordUseCase: GetTestPasswordUseCase,
     private val syncUseCases: SyncUseCases,
     private val getUsedFileUseCase: GetUsedFileUseCase,
     private val dispatchers: DispatcherProvider,
@@ -217,4 +219,9 @@ class UnlockInteractor(
                 .resolveProvider(fsAuthority)
                 .getFile(path, FSOptions.READ_ONLY)
         }
+
+    suspend fun getTestPasswordForFile(
+        filename: String
+    ): String? =
+        getTestPasswordUseCase.getTestPasswordForFile(filename)
 }

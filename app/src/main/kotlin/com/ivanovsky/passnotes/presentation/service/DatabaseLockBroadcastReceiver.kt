@@ -6,18 +6,18 @@ import android.content.Intent
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
-import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.injection.GlobalInjector.get
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class DatabaseLockBroadcastReceiver : BroadcastReceiver() {
 
-    private val dispatchers: DispatcherProvider by inject()
-    private val errorInteractor: ErrorInteractor by inject()
-    private val lockDatabaseUseCase: LockDatabaseUseCase by inject()
-
     override fun onReceive(context: Context?, intent: Intent?) {
+        val dispatchers: DispatcherProvider = get()
+        val errorInteractor: ErrorInteractor = get()
+        val lockDatabaseUseCase: LockDatabaseUseCase = get()
+
         CoroutineScope(dispatchers.IO).launch {
             Timber.d("Closing database")
 
@@ -27,9 +27,5 @@ class DatabaseLockBroadcastReceiver : BroadcastReceiver() {
                 Timber.d("Unable to close database: %s", message)
             }
         }
-    }
-
-    companion object {
-        private val TAG = DatabaseLockBroadcastReceiver::class.simpleName
     }
 }

@@ -127,7 +127,7 @@ class SelectDatabaseFragment : BaseFragment() {
             positiveButtonText = getString(R.string.yes),
             negativeButtonText = getString(R.string.no)
         ).apply {
-            onConfirmationLister = {
+            onConfirmed = {
                 viewModel.onRemoveConfirmed(uid)
             }
         }

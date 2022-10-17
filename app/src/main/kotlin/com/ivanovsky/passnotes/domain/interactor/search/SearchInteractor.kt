@@ -4,6 +4,7 @@ import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.usecases.CheckNoteAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetNoteUseCase
@@ -18,6 +19,7 @@ class SearchInteractor(
     private val getDbUseCase: GetDatabaseUseCase,
     private val getNoteUseCase: GetNoteUseCase,
     private val autofillUseCase: UpdateNoteWithAutofillDataUseCase,
+    private val checkNoteAutofillDataUseCase: CheckNoteAutofillDataUseCase,
     private val lockUseCase: LockDatabaseUseCase,
     private val sortUseCase: SortGroupsAndNotesUseCase
 ) {
@@ -60,6 +62,12 @@ class SearchInteractor(
         structure: AutofillStructure
     ): OperationResult<Boolean> =
         autofillUseCase.updateNoteWithAutofillData(note, structure)
+
+    suspend fun shouldUpdateNoteAutofillData(
+        note: Note,
+        structure: AutofillStructure
+    ): Boolean =
+        checkNoteAutofillDataUseCase.shouldUpdateNoteAutofillData(note, structure)
 
     fun lockDatabase() {
         lockUseCase.lockIfNeed()

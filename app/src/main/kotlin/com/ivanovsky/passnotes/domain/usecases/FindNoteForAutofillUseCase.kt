@@ -4,8 +4,7 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
-import com.ivanovsky.passnotes.util.StringUtils.DOT
-import com.ivanovsky.passnotes.util.StringUtils.EMPTY
+import com.ivanovsky.passnotes.util.UrlUtils
 import kotlinx.coroutines.withContext
 
 class FindNoteForAutofillUseCase(
@@ -25,7 +24,7 @@ class FindNoteForAutofillUseCase(
             }
 
             val db = getDbResult.obj
-            val domain = structure.webDomain?.let { getCleanWebDomain(it) }
+            val domain = structure.webDomain?.let { UrlUtils.extractWebDomain(it) }
             val applicationId = structure.applicationId
 
             // TODO(autofill): to improve search, autofill-properties should be also checked after
@@ -42,7 +41,7 @@ class FindNoteForAutofillUseCase(
                 }
             }
 
-            if (domain != null) {
+            if (domain != null && domain.isNotEmpty()) {
                 val findResult = db.noteDao.find(domain)
                 if (findResult.isFailed) {
                     return@withContext findResult.takeError()
@@ -56,18 +55,4 @@ class FindNoteForAutofillUseCase(
 
             OperationResult.success(null)
         }
-
-    private fun getCleanWebDomain(webDomain: String): String {
-        val lastDotIdx = webDomain.lastIndexOf(DOT)
-        if (lastDotIdx == -1) {
-            return EMPTY
-        }
-
-        return when {
-            lastDotIdx > 0 && lastDotIdx <= webDomain.length - 1 -> {
-                webDomain.substring(0, lastDotIdx)
-            }
-            else -> webDomain
-        }
-    }
 }

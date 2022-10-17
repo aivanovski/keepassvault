@@ -75,6 +75,7 @@ class NoteViewModel(
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
+    val showAddAutofillDataDialog = SingleLiveEvent<Note>()
 
     val statusViewModel = MutableLiveData(
         cellViewModelFactory.createCellViewModel(
@@ -157,7 +158,7 @@ class NoteViewModel(
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
 
     fun onSelectButtonClicked() {
-        val autofillStructure = args.autofillStructure ?: return
+        val structure = args.autofillStructure ?: return
 
         if (args.appMode != ApplicationLaunchMode.AUTOFILL_SELECTION) {
             return
@@ -165,21 +166,40 @@ class NoteViewModel(
 
         val note = this.note
         if (note == null) {
-            sendAutofillResponseEvent.call(Pair(null, autofillStructure))
+            sendAutofillResponseEvent.call(Pair(null, structure))
             return
         }
+
+        viewModelScope.launch {
+            if (interactor.shouldUpdateNoteAutofillData(note, structure)) {
+                showAddAutofillDataDialog.call(note)
+            } else {
+                sendAutofillResponseEvent.call(Pair(note, structure))
+            }
+        }
+    }
+
+    fun onAddAutofillDataConfirmed(note: Note) {
+        val structure = args.autofillStructure ?: return
 
         screenState.value = ScreenState.loading()
 
         viewModelScope.launch {
-            val updateResult = interactor.updateNoteWithAutofillData(note, autofillStructure)
-            if (updateResult.isSucceededOrDeferred) {
-                sendAutofillResponseEvent.call(Pair(note, autofillStructure))
-            } else {
-               val message = errorInteractor.processAndGetMessage(updateResult.error)
-               screenState.value = ScreenState.dataWithError(message)
+            val updateNoteResult = interactor.updateNoteWithAutofillData(note, structure)
+            if (updateNoteResult.isFailed) {
+                val message = errorInteractor.processAndGetMessage(updateNoteResult.error)
+                screenState.value = ScreenState.dataWithError(message)
+                return@launch
             }
+
+            sendAutofillResponseEvent.call(Pair(note, structure))
         }
+    }
+
+    fun onAddAutofillDataDenied(note: Note) {
+        val structure = args.autofillStructure ?: return
+
+        sendAutofillResponseEvent.call(Pair(note, structure))
     }
 
     fun loadData() {

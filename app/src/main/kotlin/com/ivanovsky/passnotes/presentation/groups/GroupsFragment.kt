@@ -244,7 +244,7 @@ class GroupsFragment : BaseFragment() {
             getString(R.string.yes),
             getString(R.string.no)
         )
-        dialog.onConfirmationLister = {
+        dialog.onConfirmed = {
             viewModel.onRemoveConfirmed(group, note)
         }
         dialog.show(childFragmentManager, ConfirmationDialog.TAG)
@@ -256,7 +256,7 @@ class GroupsFragment : BaseFragment() {
             getString(R.string.yes),
             getString(R.string.no)
         ).apply {
-            onConfirmationLister = {
+            onConfirmed = {
                 viewModel.onAddTemplatesConfirmed()
             }
         }

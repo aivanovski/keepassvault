@@ -358,7 +358,7 @@ class GroupsViewModel(
             interactor.lockDatabase()
         }
 
-        if (args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION) {
+        if (args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION && groupUid == rootGroupUid) {
             finishActivityEvent.call()
         } else {
             router.exit()

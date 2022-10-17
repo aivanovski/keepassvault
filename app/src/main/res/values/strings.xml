@@ -51,6 +51,7 @@
     <string name="select_entry_with_dots">Select entry…</string>
     <string name="autofill_service_name">KPassNotes Autofill</string>
     <string name="autofill_save_note_message">Save previously entered data for autofill suggestions?</string>
+    <string name="add_autofill_data_message">Do you want to associate selected entry with Autofill data for future use?</string>
 
     <!-- Common for error -->
     <string name="error_has_been_occurred">Error has been occurred</string>

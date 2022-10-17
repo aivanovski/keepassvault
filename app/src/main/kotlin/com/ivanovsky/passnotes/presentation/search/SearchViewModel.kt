@@ -64,6 +64,7 @@ class SearchViewModel(
     val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note, AutofillStructure>>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
+    val showAddAutofillDataDialog = SingleLiveEvent<Note>()
 
     val searchTextListener = object : OnTextChangeListener {
         override fun onTextChanged(text: String) {
@@ -106,6 +107,29 @@ class SearchViewModel(
                 router.backTo(UnlockScreen(UnlockScreenArgs(args.appMode)))
             }
         }
+    }
+
+    fun onAddAutofillDataConfirmed(note: Note) {
+        val structure = args.autofillStructure ?: return
+
+        screenState.value = ScreenState.loading()
+
+        viewModelScope.launch {
+            val updateNoteResult = interactor.updateNoteWithAutofillData(note, structure)
+            if (updateNoteResult.isFailed) {
+                val message = errorInteractor.processAndGetMessage(updateNoteResult.error)
+                screenState.value = ScreenState.dataWithError(message)
+                return@launch
+            }
+
+            sendAutofillResponseEvent.call(Pair(note, structure))
+        }
+    }
+
+    fun onAddAutofillDataDenied(note: Note) {
+        val structure = args.autofillStructure ?: return
+
+        sendAutofillResponseEvent.call(Pair(note, structure))
     }
 
     private fun searchData(query: String) {
@@ -194,9 +218,9 @@ class SearchViewModel(
 
         when (args.appMode) {
             AUTOFILL_SELECTION -> {
-                val structure = args.autofillStructure ?: return
-
                 screenState.value = ScreenState.loading()
+
+                val structure = args.autofillStructure ?: return
 
                 viewModelScope.launch {
                     val getNoteResult = interactor.getNoteByUid(noteUid)
@@ -207,14 +231,13 @@ class SearchViewModel(
                     }
 
                     val note = getNoteResult.obj
-                    val updateResult = interactor.updateNoteWithAutofillData(note, structure)
-                    if (updateResult.isFailed) {
-                        val message = errorInteractor.processAndGetMessage(updateResult.error)
-                        screenState.value = ScreenState.dataWithError(message)
-                        return@launch
+                    if (interactor.shouldUpdateNoteAutofillData(note, structure)) {
+                        showAddAutofillDataDialog.call(note)
+                    } else {
+                        sendAutofillResponseEvent.call(Pair(note, structure))
                     }
 
-                    sendAutofillResponseEvent.call(Pair(note, structure))
+                    screenState.value = ScreenState.data()
                 }
             }
             else -> {

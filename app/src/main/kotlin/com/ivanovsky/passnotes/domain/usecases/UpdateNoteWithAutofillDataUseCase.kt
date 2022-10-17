@@ -9,7 +9,6 @@ import com.ivanovsky.passnotes.domain.PropertyFactory.createAutofillAppIdPropert
 import com.ivanovsky.passnotes.extensions.addOrUpdateProperty
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import kotlinx.coroutines.withContext
-import org.koin.core.context.startKoin
 
 class UpdateNoteWithAutofillDataUseCase(
     private val updateNoteUseCase: UpdateNoteUseCase,

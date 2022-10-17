@@ -112,7 +112,7 @@ class NoteEditorFragment : FragmentWithDoneButton() {
             getString(R.string.cancel)
         )
 
-        dialog.onConfirmationLister = {
+        dialog.onConfirmed = {
             viewModel.onDiscardConfirmed()
         }
 

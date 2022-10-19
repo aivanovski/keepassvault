@@ -34,6 +34,7 @@
                 android:id="@+id/primaryText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingEnd="@dimen/borderless_icon_button_size"
                 android:text="@={viewModel.primaryText}"
                 android:textColor="@color/material_edit_text_primary_text"
                 android:textSize="@dimen/material_edit_text_primary_text_size"
@@ -73,6 +74,7 @@
                 android:id="@+id/secondaryText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingEnd="@dimen/borderless_icon_button_size"
                 android:text="@={viewModel.secondaryText}"
                 android:textColor="@color/material_edit_text_primary_text"
                 android:textSize="@dimen/material_edit_text_primary_text_size"
@@ -104,6 +106,30 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/secondary_text_layout"
             app:srcCompat="@drawable/ic_delete_red_400_24dp" />
+
+        <ImageButton
+            android:id="@+id/primary_visibility_button"
+            style="@style/Material.BorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> viewModel.onVisibilityButtonClicked()}"
+            app:layout_constraintBottom_toBottomOf="@id/primary_text_layout"
+            app:layout_constraintEnd_toEndOf="@id/primary_text_layout"
+            app:layout_constraintTop_toTopOf="@id/primary_text_layout"
+            app:srcCompat="@drawable/ic_eye_grey_600_24dp"
+            app:visible="@{viewModel.isPrimaryVisibilityButtonVisible}" />
+
+        <ImageButton
+            android:id="@+id/secondary_visibility_button"
+            style="@style/Material.BorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> viewModel.onVisibilityButtonClicked()}"
+            app:layout_constraintBottom_toBottomOf="@id/secondary_text_layout"
+            app:layout_constraintEnd_toEndOf="@id/secondary_text_layout"
+            app:layout_constraintTop_toTopOf="@id/secondary_text_layout"
+            app:srcCompat="@drawable/ic_eye_grey_600_24dp"
+            app:visible="@{viewModel.isSecondaryVisibilityButtonVisible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

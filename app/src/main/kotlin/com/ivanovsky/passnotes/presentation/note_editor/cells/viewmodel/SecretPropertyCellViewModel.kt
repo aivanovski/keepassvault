@@ -17,8 +17,7 @@ class SecretPropertyCellViewModel(
     private val resourceProvider: ResourceProvider
 ) : BaseCellViewModel(model), PropertyViewModel {
 
-    // Somehow "MutableLiveData<String>" fixes error in 2-way data-binding
-    val secretText: MutableLiveData<String> = MutableLiveData(model.value)
+    val secretText = MutableLiveData(model.value)
     val confirmationText = MutableLiveData(model.value)
     val confirmationError = MutableLiveData<String?>(null)
     val secretTransformationMethod = MutableLiveData(TextTransformationMethod.PASSWORD)
@@ -34,8 +33,8 @@ class SecretPropertyCellViewModel(
     }
 
     override fun isDataValid(): Boolean {
-        val secret = getSecretText()
-        val confirmation = getConfirmationText()
+        val secret = getSecretTextInternal()
+        val confirmation = getConfirmationTextInternal()
 
         return !isConfirmationVisibleInternal() || secret == confirmation
     }
@@ -43,7 +42,7 @@ class SecretPropertyCellViewModel(
     override fun displayError() {
         val isConfirmationVisible = isConfirmationVisible.value ?: false
 
-        if (isConfirmationVisible && getSecretText() != getConfirmationText()) {
+        if (isConfirmationVisible && getSecretTextInternal() != getConfirmationTextInternal()) {
             confirmationError.value =
                 resourceProvider.getString(R.string.does_not_match_with_password)
         }
@@ -62,9 +61,9 @@ class SecretPropertyCellViewModel(
         eventProvider.send((GENERATE_CLICK_EVENT to model.id).toEvent())
     }
 
-    private fun getSecretText(): String = secretText.value?.trim() ?: EMPTY
+    private fun getSecretTextInternal(): String = secretText.value?.trim() ?: EMPTY
 
-    private fun getConfirmationText(): String = confirmationText.value?.trim() ?: EMPTY
+    private fun getConfirmationTextInternal(): String = confirmationText.value?.trim() ?: EMPTY
 
     private fun isConfirmationVisibleInternal() = isConfirmationVisible.value ?: false
 

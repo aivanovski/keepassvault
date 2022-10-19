@@ -15,8 +15,7 @@ class TextPropertyCellViewModel(
     private val resourceProvider: ResourceProvider
 ) : BaseCellViewModel(model), PropertyViewModel {
 
-    // Somehow "MutableLiveData<String>" fixes error in 2-way data-binding
-    val text: MutableLiveData<String> = MutableLiveData(model.value)
+    val text = MutableLiveData(model.value)
     val error = MutableLiveData<String?>(null)
 
     override fun createProperty(): Property {
@@ -29,14 +28,14 @@ class TextPropertyCellViewModel(
     }
 
     override fun isDataValid(): Boolean {
-        return model.isAllowEmpty || getText().isNotEmpty()
+        return model.isAllowEmpty || getTextInternal().isNotEmpty()
     }
 
     override fun displayError() {
-        if (!model.isAllowEmpty && getText().isEmpty()) {
+        if (!model.isAllowEmpty && getTextInternal().isEmpty()) {
             error.value = resourceProvider.getString(R.string.should_not_be_empty)
         }
     }
 
-    private fun getText(): String = text.value?.trim() ?: EMPTY
+    private fun getTextInternal(): String = text.value?.trim() ?: EMPTY
 }

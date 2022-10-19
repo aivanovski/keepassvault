@@ -20,8 +20,7 @@ class ExtendedTextPropertyCellViewModel(
     private val resourceProvider: ResourceProvider
 ) : BaseCellViewModel(model), PropertyViewModel {
 
-    // Somehow "MutableLiveData<String>" fixes error in 2-way data-binding
-    val primaryText: MutableLiveData<String> = MutableLiveData(
+    val primaryText = MutableLiveData(
         if (model.isCollapsed) {
             model.value
         } else {
@@ -33,14 +32,14 @@ class ExtendedTextPropertyCellViewModel(
     val isCollapsed = MutableLiveData(model.isCollapsed)
     val isProtected = MutableLiveData(model.isProtected)
     val primaryError = MutableLiveData<String?>(null)
-    val primaryHint = MutableLiveData<String>(
+    val primaryHint = MutableLiveData(
         if (model.isCollapsed) {
             model.name
         } else {
             resourceProvider.getString(R.string.field_name)
         }
     )
-    val secondaryHint = MutableLiveData<String>(resourceProvider.getString(R.string.field_value))
+    val secondaryHint = MutableLiveData(resourceProvider.getString(R.string.field_value))
 
     val primaryTextListener = object : OnTextChangeListener {
         override fun onTextChanged(text: String) {
@@ -115,15 +114,15 @@ class ExtendedTextPropertyCellViewModel(
 
     @VisibleForTesting
     fun isAbleToCollapse(): Boolean {
-        return isCollapsedInternal() || getPrimaryText().isNotEmpty()
+        return isCollapsedInternal() || getPrimaryTextInternal().isNotEmpty()
     }
 
     @VisibleForTesting
     fun getNameAndValue(): Pair<String, String> {
         return if (isCollapsedInternal()) {
-            Pair(getPrimaryHint(), getPrimaryText())
+            Pair(getPrimaryHintInternal(), getPrimaryTextInternal())
         } else {
-            Pair(getPrimaryText(), getSecondaryText())
+            Pair(getPrimaryTextInternal(), getSecondaryTextInternal())
         }
     }
 
@@ -131,11 +130,11 @@ class ExtendedTextPropertyCellViewModel(
 
     private fun isProtectedInternal() = isProtected.value ?: false
 
-    private fun getPrimaryText() = primaryText.value?.trim() ?: EMPTY
+    private fun getPrimaryTextInternal() = primaryText.value?.trim() ?: EMPTY
 
-    private fun getSecondaryText() = secondaryText.value?.trim() ?: EMPTY
+    private fun getSecondaryTextInternal() = secondaryText.value?.trim() ?: EMPTY
 
-    private fun getPrimaryHint() = primaryHint.value ?: EMPTY
+    private fun getPrimaryHintInternal() = primaryHint.value ?: EMPTY
 
     private fun obtainTextTransformationMethod(isProtected: Boolean): TextTransformationMethod {
         return if (isProtected) {

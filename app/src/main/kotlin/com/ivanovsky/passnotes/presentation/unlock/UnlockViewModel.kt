@@ -99,7 +99,7 @@ class UnlockViewModel(
     val visibleMenuItems = MutableLiveData<List<UnlockMenuItem>>(emptyList())
     val allKeyTypes = getKeyTypeNames()
     val showResolveConflictDialog = SingleLiveEvent<SyncConflictInfo>()
-    val biometricIconTint = MutableLiveData(getBiometricIconTint())
+    val biometricIconTint = MutableLiveData(getBiometricIconTintInternal())
     val isBiometricAvailable = MutableLiveData(false)
     val showBiometricSetupDialog = SingleLiveEvent<BiometricEncoder>()
     val showBiometricUnlockDialog = SingleLiveEvent<BiometricDecoder>()
@@ -362,7 +362,7 @@ class UnlockViewModel(
         selectedKeyType.value = keyType
 
         isBiometricAvailable.value = getIsBiometricAvailable()
-        biometricIconTint.value = getBiometricIconTint()
+        biometricIconTint.value = getBiometricIconTintInternal()
 
         clearKeyInputIfNeed()
     }
@@ -582,7 +582,7 @@ class UnlockViewModel(
             )
         )
         isBiometricAvailable.value = getIsBiometricAvailable()
-        biometricIconTint.value = getBiometricIconTint()
+        biometricIconTint.value = getBiometricIconTintInternal()
 
         viewModelScope.launch {
             val syncState = interactor.getSyncState(file)
@@ -780,7 +780,7 @@ class UnlockViewModel(
             settings.isBiometricUnlockEnabled
     }
 
-    private fun getBiometricIconTint(): Int {
+    private fun getBiometricIconTintInternal(): Int {
         val biometricData = selectedUsedFile?.biometricData
         return if (biometricData != null) {
             resourceProvider.getColor(R.color.icon_gray)

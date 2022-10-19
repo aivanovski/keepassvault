@@ -170,7 +170,7 @@ class NoteEditorViewModel(
 
         when (args.mode) {
             NoteEditorMode.NEW -> {
-                if (properties.isEmpty() || isAllDefaultAndEmpty(properties)) {
+                if (properties.isEmpty() || isAllEmpty(properties)) {
                     finishScreen()
                 } else {
                     showDiscardDialogEvent.call(resources.getString(R.string.discard_changes))
@@ -536,10 +536,8 @@ class NoteEditorViewModel(
         )
     }
 
-    private fun isAllDefaultAndEmpty(properties: List<Property>): Boolean {
-        return properties.all { property ->
-            property.isDefault && property.value.isNullOrEmpty()
-        }
+    private fun isAllEmpty(properties: List<Property>): Boolean {
+        return properties.all { property -> property.value.isNullOrEmpty() }
     }
 
     private fun determineCellTypesToAdd(): List<PropertyType> {

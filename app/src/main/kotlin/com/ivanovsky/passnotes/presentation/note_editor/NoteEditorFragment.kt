@@ -5,14 +5,19 @@ import android.view.*
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.lifecycle.observe
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.NoteEditorFragmentBinding
+import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.*
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel.AddPropertyDialogItem
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -24,6 +29,7 @@ class NoteEditorFragment : FragmentWithDoneButton() {
     private val viewModel: NoteEditorViewModel by viewModel(
         parameters = { parametersOf(args) }
     )
+    private val router: Router by inject()
     private var backCallback: OnBackPressedCallback? = null
 
     override fun onCreateView(
@@ -83,6 +89,7 @@ class NoteEditorFragment : FragmentWithDoneButton() {
         }
 
         subscribeToLiveData()
+        subscribeToEvents()
 
         viewModel.start()
     }
@@ -91,6 +98,9 @@ class NoteEditorFragment : FragmentWithDoneButton() {
         viewModel.isDoneButtonVisible.observe(viewLifecycleOwner) { isVisible ->
             setDoneButtonVisibility(isVisible)
         }
+    }
+
+    private fun subscribeToEvents() {
         viewModel.showDiscardDialogEvent.observe(viewLifecycleOwner) { message ->
             showDiscardDialog(message)
         }
@@ -102,6 +112,13 @@ class NoteEditorFragment : FragmentWithDoneButton() {
         }
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
             hideKeyboard()
+        }
+        viewModel.lockScreenEvent.observe(viewLifecycleOwner) {
+            router.backTo(
+                Screens.UnlockScreen(
+                    args = UnlockScreenArgs(ApplicationLaunchMode.NORMAL)
+                )
+            )
         }
     }
 

@@ -168,6 +168,7 @@ object KoinModule {
             single { GeneratePasswordUseCase() }
 
             // Interactors
+            single { DatabaseLockInteractor(get(), get(), get()) }
             single { FilePickerInteractor(get(), get()) }
             single { BiometricUnlockInteractor(get(), get(), get()) }
             single { UnlockInteractor(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
@@ -179,7 +180,6 @@ object KoinModule {
             single { GroupsInteractor(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
             single { NoteEditorInteractor(get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
-            single { DatabaseLockInteractor(get(), get(), get()) }
             single { SelectDatabaseInteractor(get(), get(), get(), get()) }
             single { SearchInteractor(get(), get(), get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
@@ -232,21 +232,21 @@ object KoinModule {
             factory { (args: StorageListArgs) -> StorageListViewModel(get(), get(), get(), get(), get(), get(), get(), args) }
             factory { (args: FilePickerArgs) -> FilePickerViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
-            viewModel { GroupEditorViewModel(get(), get(), get(), get()) }
+            viewModel { GroupEditorViewModel(get(), get(), get(), get(), get(), get()) }
             viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
-            factory { (args: NoteScreenArgs) -> NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
-            factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
-            viewModel { (args: NoteEditorArgs) -> NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: NoteScreenArgs) -> NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            viewModel { (args: NoteEditorArgs) -> NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
             viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), get(), args) }
-            factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { AboutViewModel(get(), get()) }
             viewModel { MainSettingsViewModel(get(), get()) }
             viewModel { AppSettingsViewModel(get(), get(), get(), get(), get(), get()) }
-            viewModel { DatabaseSettingsViewModel(get(), get()) }
+            viewModel { DatabaseSettingsViewModel(get(), get(), get(), get()) }
             viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
             viewModel { SortAndViewDialogViewModel(get()) }
-            viewModel { PasswordGeneratorViewModel(get(), get(), get()) }
+            viewModel { PasswordGeneratorViewModel(get(), get(), get(), get(), get()) }
             factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             factory { NavigationMenuViewModel(get()) }
             factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }

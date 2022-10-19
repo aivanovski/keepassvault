@@ -3,11 +3,14 @@ package com.ivanovsky.passnotes.presentation.settings.database
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import androidx.lifecycle.observe
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.core.BasePreferenceFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
@@ -15,6 +18,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.showErrorDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.throwPreferenceNotFound
 import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordDialog
 import com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class DatabaseSettingsFragment : BasePreferenceFragment() {
@@ -83,6 +87,7 @@ class DatabaseSettingsFragment : BasePreferenceFragment() {
         viewLifecycleOwner.lifecycle.addObserver(DatabaseInteractionWatcher(this))
 
         subscribeToLiveData()
+        subscribeToEvents()
 
         viewModel.start()
     }
@@ -91,11 +96,21 @@ class DatabaseSettingsFragment : BasePreferenceFragment() {
         viewModel.isLoading.observe(viewLifecycleOwner) {
             setProgressVisible(it)
         }
+        viewModel.isRecycleBinEnabled.observe(viewLifecycleOwner) {
+            isRecycleBinEnabledPref.isChecked = it
+        }
+    }
+
+    private fun subscribeToEvents() {
         viewModel.showErrorDialogEvent.observe(viewLifecycleOwner) {
             showErrorDialog(it)
         }
-        viewModel.isRecycleBinEnabled.observe(viewLifecycleOwner) {
-            isRecycleBinEnabledPref.isChecked = it
+        viewModel.lockScreenEvent.observe(viewLifecycleOwner) {
+            router.backTo(
+                Screens.UnlockScreen(
+                    args = UnlockScreenArgs(ApplicationLaunchMode.NORMAL)
+                )
+            )
         }
     }
 

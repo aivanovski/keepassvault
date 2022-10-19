@@ -9,9 +9,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
+import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.autofill.AutofillDialogFactory
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
@@ -24,6 +28,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel.NoteMenuItem
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils
 
 class NoteFragment : BaseFragment() {
@@ -37,6 +42,7 @@ class NoteFragment : BaseFragment() {
         )
             .get(NoteViewModel::class.java)
     }
+    private val router: Router by inject()
     private var menu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -151,6 +157,13 @@ class NoteFragment : BaseFragment() {
         }
         viewModel.showAddAutofillDataDialog.observe(viewLifecycleOwner) {
             showAddAutofillDataDialog(it)
+        }
+        viewModel.lockScreenEvent.observe(viewLifecycleOwner) {
+            router.backTo(
+                Screens.UnlockScreen(
+                    args = UnlockScreenArgs(ApplicationLaunchMode.NORMAL)
+                )
+            )
         }
     }
 

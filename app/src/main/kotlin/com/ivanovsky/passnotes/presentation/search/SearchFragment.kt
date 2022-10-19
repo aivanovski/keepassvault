@@ -9,10 +9,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.databinding.SearchFragmentBinding
 import com.ivanovsky.passnotes.extensions.setItemVisibility
+import com.ivanovsky.passnotes.injection.GlobalInjector
+import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.autofill.AutofillDialogFactory
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
@@ -23,6 +28,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 
 class SearchFragment : BaseFragment() {
 
@@ -37,6 +43,7 @@ class SearchFragment : BaseFragment() {
         )
             .get(SearchViewModel::class.java)
     }
+    private val router: Router by inject()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -126,6 +133,13 @@ class SearchFragment : BaseFragment() {
         }
         viewModel.showAddAutofillDataDialog.observe(viewLifecycleOwner) {
             showAddAutofillDataDialog(it)
+        }
+        viewModel.lockScreenEvent.observe(viewLifecycleOwner) {
+            router.backTo(
+                Screens.UnlockScreen(
+                    args = UnlockScreenArgs(ApplicationLaunchMode.NORMAL)
+                )
+            )
         }
     }
 

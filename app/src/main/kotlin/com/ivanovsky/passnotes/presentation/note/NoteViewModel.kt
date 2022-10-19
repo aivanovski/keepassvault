@@ -9,6 +9,7 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.LocaleProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
@@ -26,6 +27,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
+import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
@@ -49,6 +51,7 @@ import java.util.*
 class NoteViewModel(
     private val interactor: NoteInteractor,
     private val errorInteractor: ErrorInteractor,
+    lockInteractor: DatabaseLockInteractor,
     private val resourceProvider: ResourceProvider,
     private val localeProvider: LocaleProvider,
     private val observerBus: ObserverBus,
@@ -76,6 +79,7 @@ class NoteViewModel(
     val finishActivityEvent = SingleLiveEvent<Unit>()
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
     val showAddAutofillDataDialog = SingleLiveEvent<Note>()
+    val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
 
     val statusViewModel = MutableLiveData(
         cellViewModelFactory.createCellViewModel(

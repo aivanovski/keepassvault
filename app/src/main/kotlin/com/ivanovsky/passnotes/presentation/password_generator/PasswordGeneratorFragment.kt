@@ -5,15 +5,22 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.observe
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.PasswordGeneratorFragmentBinding
+import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PasswordGeneratorFragment : FragmentWithDoneButton() {
 
     private val viewModel: PasswordGeneratorViewModel by viewModel()
+    private val router: Router by inject()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -54,7 +61,19 @@ class PasswordGeneratorFragment : FragmentWithDoneButton() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        subscribeToEvents()
+
         viewModel.start()
+    }
+
+    private fun subscribeToEvents() {
+        viewModel.lockScreenEvent.observe(viewLifecycleOwner) {
+            router.backTo(
+                Screens.UnlockScreen(
+                    args = UnlockScreenArgs(ApplicationLaunchMode.NORMAL)
+                )
+            )
+        }
     }
 
     companion object {

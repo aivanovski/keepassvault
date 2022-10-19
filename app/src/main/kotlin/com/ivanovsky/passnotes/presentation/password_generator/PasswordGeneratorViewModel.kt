@@ -4,17 +4,22 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PasswordResource
 import com.ivanovsky.passnotes.domain.interactor.password_generator.PasswordGeneratorInteractor
 import com.ivanovsky.passnotes.presentation.Screens.PasswordGeneratorScreen
+import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toIntSafely
 import kotlin.math.absoluteValue
 
 class PasswordGeneratorViewModel(
     private val interactor: PasswordGeneratorInteractor,
+    lockInteractor: DatabaseLockInteractor,
     private val resourceProvider: ResourceProvider,
+    observerBus: ObserverBus,
     private val router: Router
 ) : ViewModel() {
 
@@ -29,6 +34,7 @@ class PasswordGeneratorViewModel(
     val isSpaceChecked = MutableLiveData(false)
     val isSpecialChecked = MutableLiveData(false)
     val isBracketsChecked = MutableLiveData(false)
+    val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
     private var lastSelectedResources: List<PasswordResource>? = null
 
     fun start() {

@@ -5,13 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
+import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.group_editor.GroupEditorInteractor
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
@@ -20,7 +23,9 @@ import java.util.UUID
 class GroupEditorViewModel(
     private val interactor: GroupEditorInteractor,
     private val errorInteractor: ErrorInteractor,
+    lockInteractor: DatabaseLockInteractor,
     private val resourceProvider: ResourceProvider,
+    observerBus: ObserverBus,
     private val router: Router
 ) : ViewModel() {
 
@@ -30,6 +35,7 @@ class GroupEditorViewModel(
     val errorText = MutableLiveData<String?>()
     val doneButtonVisibility = MutableLiveData(true)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
+    val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
 
     private lateinit var mode: Mode
     private var groupUid: UUID? = null

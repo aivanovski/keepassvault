@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
@@ -24,6 +26,7 @@ import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.binding.OnTextChangeListener
+import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
@@ -42,9 +45,11 @@ import java.util.UUID
 class SearchViewModel(
     private val interactor: SearchInteractor,
     private val errorInteractor: ErrorInteractor,
+    lockInteractor: DatabaseLockInteractor,
     private val resourceProvider: ResourceProvider,
     private val cellModelFactory: SearchCellModelFactory,
     private val cellViewModelFactory: SearchCellViewModelFactory,
+    observerBus: ObserverBus,
     private val router: Router,
     private val args: SearchScreenArgs
 ) : BaseScreenViewModel() {
@@ -65,6 +70,7 @@ class SearchViewModel(
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note, AutofillStructure>>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
     val showAddAutofillDataDialog = SingleLiveEvent<Note>()
+    val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
 
     val searchTextListener = object : OnTextChangeListener {
         override fun onTextChanged(text: String) {

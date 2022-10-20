@@ -20,8 +20,7 @@ class ExtendedTextPropertyCellViewModel(
     private val resourceProvider: ResourceProvider
 ) : BaseCellViewModel(model), PropertyViewModel {
 
-    // Somehow "MutableLiveData<String>" fixes error in 2-way data-binding
-    val primaryText: MutableLiveData<String> = MutableLiveData(
+    val primaryText = MutableLiveData(
         if (model.isCollapsed) {
             model.value
         } else {
@@ -32,15 +31,17 @@ class ExtendedTextPropertyCellViewModel(
     val secondaryText = MutableLiveData(model.value)
     val isCollapsed = MutableLiveData(model.isCollapsed)
     val isProtected = MutableLiveData(model.isProtected)
+    val isPrimaryVisibilityButtonVisible = MutableLiveData(model.isCollapsed && model.isProtected)
+    val isSecondaryVisibilityButtonVisible = MutableLiveData(!model.isCollapsed && model.isProtected)
     val primaryError = MutableLiveData<String?>(null)
-    val primaryHint = MutableLiveData<String>(
+    val primaryHint = MutableLiveData(
         if (model.isCollapsed) {
             model.name
         } else {
             resourceProvider.getString(R.string.field_name)
         }
     )
-    val secondaryHint = MutableLiveData<String>(resourceProvider.getString(R.string.field_value))
+    val secondaryHint = MutableLiveData(resourceProvider.getString(R.string.field_value))
 
     val primaryTextListener = object : OnTextChangeListener {
         override fun onTextChanged(text: String) {
@@ -48,6 +49,7 @@ class ExtendedTextPropertyCellViewModel(
         }
     }
 
+    private val isTextHidden = MutableLiveData(true)
     val primaryTransformationMethod = MutableLiveData(
         obtainTextTransformationMethod(model.isProtected && model.isCollapsed)
     )
@@ -58,8 +60,15 @@ class ExtendedTextPropertyCellViewModel(
 
     init {
         isProtected.observeForever { isProtected ->
+            isTextHidden.value = true
             secondaryTransformationMethod.value = obtainTextTransformationMethod(isProtected)
             primaryTransformationMethod.value = obtainTextTransformationMethod(isProtected && isCollapsedInternal())
+            isPrimaryVisibilityButtonVisible.value = isCollapsedInternal() && isProtected
+            isSecondaryVisibilityButtonVisible.value = !isCollapsedInternal() && isProtected
+        }
+        isCollapsed.observeForever { isCollapsed ->
+            isPrimaryVisibilityButtonVisible.value = isCollapsed && isProtectedInternal()
+            isSecondaryVisibilityButtonVisible.value = !isCollapsed && isProtectedInternal()
         }
     }
 
@@ -113,32 +122,40 @@ class ExtendedTextPropertyCellViewModel(
         eventProvider.send((REMOVE_EVENT to model.id).toEvent())
     }
 
+    fun onVisibilityButtonClicked() {
+        isTextHidden.value = isTextHidden.value?.not()
+        primaryTransformationMethod.value = obtainTextTransformationMethod(isProtectedInternal() && isCollapsedInternal())
+        secondaryTransformationMethod.value = obtainTextTransformationMethod(isProtectedInternal())
+    }
+
     @VisibleForTesting
     fun isAbleToCollapse(): Boolean {
-        return isCollapsedInternal() || getPrimaryText().isNotEmpty()
+        return isCollapsedInternal() || getPrimaryTextInternal().isNotEmpty()
     }
 
     @VisibleForTesting
     fun getNameAndValue(): Pair<String, String> {
         return if (isCollapsedInternal()) {
-            Pair(getPrimaryHint(), getPrimaryText())
+            Pair(getPrimaryHintInternal(), getPrimaryTextInternal())
         } else {
-            Pair(getPrimaryText(), getSecondaryText())
+            Pair(getPrimaryTextInternal(), getSecondaryTextInternal())
         }
     }
 
-    private fun isCollapsedInternal() = isCollapsed.value ?: false
+    private fun isCollapsedInternal(): Boolean = isCollapsed.value ?: false
 
-    private fun isProtectedInternal() = isProtected.value ?: false
+    private fun isProtectedInternal(): Boolean = isProtected.value ?: false
 
-    private fun getPrimaryText() = primaryText.value?.trim() ?: EMPTY
+    private fun isTextHiddenInternal(): Boolean = isTextHidden.value ?: false
 
-    private fun getSecondaryText() = secondaryText.value?.trim() ?: EMPTY
+    private fun getPrimaryTextInternal(): String = primaryText.value?.trim() ?: EMPTY
 
-    private fun getPrimaryHint() = primaryHint.value ?: EMPTY
+    private fun getSecondaryTextInternal(): String = secondaryText.value?.trim() ?: EMPTY
+
+    private fun getPrimaryHintInternal(): String = primaryHint.value ?: EMPTY
 
     private fun obtainTextTransformationMethod(isProtected: Boolean): TextTransformationMethod {
-        return if (isProtected) {
+        return if (isProtected && isTextHiddenInternal()) {
             TextTransformationMethod.PASSWORD
         } else {
             TextTransformationMethod.PLANE_TEXT

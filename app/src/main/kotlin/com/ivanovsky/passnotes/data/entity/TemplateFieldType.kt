@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.data.entity
 
-enum class TemplateFieldType(private val textName: String) {
+enum class TemplateFieldType(val textName: String) {
 
     INLINE("Inline"),
     PROTECTED_INLINE("Protected Inline"),

@@ -36,6 +36,8 @@ class DatabaseLockInteractor(
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.IO + job)
 
+    fun isDatabaseOpened(): Boolean = isDatabaseOpened.get()
+
     fun onDatabaseOpened(fsOptions: FSOptions, status: DatabaseStatus) {
         startServiceIfNeed()
         isDatabaseOpened.set(true)

@@ -16,6 +16,8 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
@@ -29,6 +31,7 @@ import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.GroupsMenuIte
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.groups.dialog.SortAndViewDialog
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 
 class GroupsFragment : BaseFragment() {
 
@@ -176,8 +179,12 @@ class GroupsFragment : BaseFragment() {
         viewModel.finishActivityEvent.observe(viewLifecycleOwner) {
             finishActivity()
         }
-        viewModel.showUnlockScreenEvent.observe(viewLifecycleOwner) {
-            router.backTo(it)
+        viewModel.lockScreenEvent.observe(viewLifecycleOwner) {
+            router.backTo(
+                Screens.UnlockScreen(
+                    args = UnlockScreenArgs(ApplicationLaunchMode.NORMAL)
+                )
+            )
         }
         viewModel.showSortAndViewDialogEvent.observe(viewLifecycleOwner) {
             showSortAndViewDialog()

@@ -4,10 +4,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.data.entity.Template
+import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.NoteDiffer
 import com.ivanovsky.passnotes.domain.ResourceProvider
@@ -23,6 +25,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
+import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
@@ -44,11 +47,13 @@ import java.util.UUID
 class NoteEditorViewModel(
     private val interactor: NoteEditorInteractor,
     private val resources: ResourceProvider,
+    lockInteractor: DatabaseLockInteractor,
     private val errorInteractor: ErrorInteractor,
     private val noteDiffer: NoteDiffer,
     private val dispatchers: DispatcherProvider,
     private val modelFactory: NoteEditorCellModelFactory,
     private val viewModelFactory: NoteEditorCellViewModelFactory,
+    observerBus: ObserverBus,
     private val router: Router,
     private val args: NoteEditorArgs
 ) : BaseScreenViewModel() {
@@ -67,6 +72,7 @@ class NoteEditorViewModel(
     val showAddPropertyDialogEvent = SingleLiveEvent<List<Pair<AddPropertyDialogItem, String>>>()
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val showToastEvent = SingleLiveEvent<String>()
+    val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
 
     private var note: Note? = null
     private var template: Template? = args.template
@@ -164,7 +170,7 @@ class NoteEditorViewModel(
 
         when (args.mode) {
             NoteEditorMode.NEW -> {
-                if (properties.isEmpty() || isAllDefaultAndEmpty(properties)) {
+                if (properties.isEmpty() || isAllEmpty(properties)) {
                     finishScreen()
                 } else {
                     showDiscardDialogEvent.call(resources.getString(R.string.discard_changes))
@@ -530,10 +536,8 @@ class NoteEditorViewModel(
         )
     }
 
-    private fun isAllDefaultAndEmpty(properties: List<Property>): Boolean {
-        return properties.all { property ->
-            property.isDefault && property.value.isNullOrEmpty()
-        }
+    private fun isAllEmpty(properties: List<Property>): Boolean {
+        return properties.all { property -> property.value.isNullOrEmpty() }
     }
 
     private fun determineCellTypesToAdd(): List<PropertyType> {

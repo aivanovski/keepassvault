@@ -15,6 +15,7 @@ import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
+import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
@@ -33,6 +34,7 @@ import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
 import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
+import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingType
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -63,6 +65,7 @@ import java.util.UUID
 class GroupsViewModel(
     private val interactor: GroupsInteractor,
     private val errorInteractor: ErrorInteractor,
+    lockInteractor: DatabaseLockInteractor,
     private val observerBus: ObserverBus,
     private val settings: Settings,
     private val resourceProvider: ResourceProvider,
@@ -76,7 +79,6 @@ class GroupsViewModel(
     ObserverBus.GroupDataSetObserver,
     ObserverBus.NoteDataSetChanged,
     ObserverBus.NoteContentObserver,
-    ObserverBus.DatabaseCloseObserver,
     ObserverBus.DatabaseStatusObserver,
     OnSettingsChangeListener {
 
@@ -107,8 +109,8 @@ class GroupsViewModel(
     val showRemoveConfirmationDialogEvent = SingleLiveEvent<Pair<Group?, Note?>>()
     val showAddTemplatesDialogEvent = SingleLiveEvent<Unit>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
-    val showUnlockScreenEvent = SingleLiveEvent<UnlockScreen>()
     val showSortAndViewDialogEvent = SingleLiveEvent<Unit>()
+    val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
 
     private var currentDataItems: List<EncryptedDatabaseEntry>? = null
     private var rootGroupUid: UUID? = null
@@ -142,17 +144,6 @@ class GroupsViewModel(
         if (groupUid == getCurrentGroupUid()) {
             loadData()
         }
-    }
-
-    override fun onDatabaseClosed() {
-        showUnlockScreenEvent.call(
-            UnlockScreen(
-                UnlockScreenArgs(
-                    appMode = args.appMode,
-                    autofillStructure = args.autofillStructure
-                )
-            )
-        )
     }
 
     override fun onDatabaseStatusChanged(status: DatabaseStatus) {

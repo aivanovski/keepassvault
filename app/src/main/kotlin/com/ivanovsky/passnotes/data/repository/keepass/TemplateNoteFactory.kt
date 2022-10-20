@@ -44,7 +44,7 @@ object TemplateNoteFactory {
                     add(
                         Property(
                             name = PROPERTY_PREFIX_TYPE + field.title,
-                            value = field.type?.name
+                            value = field.type?.textName
                         )
                     )
                 }

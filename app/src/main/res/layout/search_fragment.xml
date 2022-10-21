@@ -32,11 +32,25 @@
                 android:id="@+id/searchText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingEnd="@dimen/borderless_icon_button_size"
+                android:text="@={viewModel.query}"
                 android:textColor="@color/material_edit_text_primary_text"
-                android:textSize="@dimen/material_edit_text_primary_text_size"
-                app:onTextChanged="@{viewModel.searchTextListener}" />
+                android:textSize="@dimen/material_edit_text_primary_text_size" />
 
         </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageButton
+            android:id="@+id/clearButton"
+            style="@style/Material.BorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> viewModel.onClearButtonClicked()}"
+            android:src="@drawable/ic_close_white_24dp"
+            android:tint="@color/icon_gray"
+            app:layout_constraintBottom_toBottomOf="@id/searchTextLayout"
+            app:layout_constraintEnd_toEndOf="@id/searchTextLayout"
+            app:layout_constraintTop_toTopOf="@id/searchTextLayout"
+            app:visible="@{viewModel.isClearButtonVisible}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
             android:id="@+id/errorPanelView"

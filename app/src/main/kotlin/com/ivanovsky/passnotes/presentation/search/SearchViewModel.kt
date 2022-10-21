@@ -1,13 +1,19 @@
 package com.ivanovsky.passnotes.presentation.search
 
+import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.recyclerview.widget.RecyclerView
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
+import com.ivanovsky.passnotes.data.repository.settings.Settings
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -25,9 +31,9 @@ import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
-import com.ivanovsky.passnotes.presentation.core.binding.OnTextChangeListener
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
@@ -35,6 +41,7 @@ import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellModelFactory
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toUUID
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -49,47 +56,79 @@ class SearchViewModel(
     private val resourceProvider: ResourceProvider,
     private val cellModelFactory: SearchCellModelFactory,
     private val cellViewModelFactory: SearchCellViewModelFactory,
-    observerBus: ObserverBus,
+    private val observerBus: ObserverBus,
+    private val settings: Settings,
     private val router: Router,
     private val args: SearchScreenArgs
-) : BaseScreenViewModel() {
+) : BaseScreenViewModel(),
+    ObserverBus.NoteDataSetChanged,
+    ObserverBus.GroupDataSetObserver,
+    OnSettingsChangeListener {
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(
-        ScreenState.empty(
-            resourceProvider.getString(R.string.input_text_to_start_search)
-        )
-    )
+    val screenState = MutableLiveData(ScreenState.loading())
 
     val cellViewTypes = ViewModelTypes()
         .add(NoteCellViewModel::class, R.layout.cell_note)
         .add(GroupCellViewModel::class, R.layout.cell_group)
 
-    val isMoreMenuVisible = MutableLiveData(args.appMode == NORMAL)
+    val query = MutableLiveData(EMPTY)
+    val visibleMenuItems = MutableLiveData(getVisibleMenuItems())
+    val isClearButtonVisible = MutableLiveData(false)
     val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note, AutofillStructure>>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
     val showAddAutofillDataDialog = SingleLiveEvent<Note>()
     val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
+    val showSortAndViewDialogEvent = SingleLiveEvent<Unit>()
+    val savedScrollPosition = MutableLiveData(RecyclerView.NO_POSITION)
 
-    val searchTextListener = object : OnTextChangeListener {
-        override fun onTextChanged(text: String) {
-            searchData(text)
+    private var data: List<EncryptedDatabaseEntry>? = null
+    private var filteredData: List<EncryptedDatabaseEntry>? = null
+    private var currentSearchJob: Job? = null
+    private var currentQuery: String? = null
+
+    init {
+        observerBus.register(this)
+        settings.register(this)
+        subscribeToEvents()
+        if (args.appMode == AUTOFILL_AUTHORIZATION) {
+            throwIncorrectLaunchMode(args.appMode)
+        }
+        query.observeForever { query ->
+            searchData(query)
+            isClearButtonVisible.value = query.isNotEmpty()
         }
     }
 
-    private var currentSearchJob: Job? = null
+    override fun onCleared() {
+        super.onCleared()
+        observerBus.unregister(this)
+        settings.unregister(this)
+    }
 
-    init {
-        subscribeToEvents()
+    override fun onNoteDataSetChanged(groupUid: UUID) {
+        loadData()
+    }
 
-        if (args.appMode == AUTOFILL_AUTHORIZATION) {
-            throwIncorrectLaunchMode(args.appMode)
+    override fun onGroupDataSetChanged() {
+        loadData()
+    }
+
+    override fun onSettingsChanged(pref: SettingsImpl.Pref) {
+        if (pref == SettingsImpl.Pref.SEARCH_TYPE ||
+            pref == SettingsImpl.Pref.SORT_TYPE ||
+            pref == SettingsImpl.Pref.SORT_DIRECTION ||
+            pref == SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED) {
+            filteredData = null
+            loadData()
         }
     }
 
     fun onScreenCreated() {
         isKeyboardVisibleEvent.value = true
+
+        loadData()
     }
 
     fun onBackClicked() {
@@ -115,16 +154,23 @@ class SearchViewModel(
         }
     }
 
+    fun onSortAndViewButtonClicked() {
+        showSortAndViewDialogEvent.call()
+    }
+
     fun onAddAutofillDataConfirmed(note: Note) {
         val structure = args.autofillStructure ?: return
 
-        screenState.value = ScreenState.loading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val updateNoteResult = interactor.updateNoteWithAutofillData(note, structure)
             if (updateNoteResult.isFailed) {
-                val message = errorInteractor.processAndGetMessage(updateNoteResult.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = errorInteractor.processAndGetMessage(updateNoteResult.error)
+                    )
+                )
                 return@launch
             }
 
@@ -138,20 +184,54 @@ class SearchViewModel(
         sendAutofillResponseEvent.call(Pair(note, structure))
     }
 
-    private fun searchData(query: String) {
-        if (query.isEmpty()) {
-            currentSearchJob?.apply {
-                cancel()
-                currentSearchJob = null
+    fun onClearButtonClicked() {
+        if (!query.value.isNullOrEmpty()) {
+            query.value = EMPTY
+        }
+    }
+
+    private fun loadData() {
+        setScreenState(ScreenState.loading())
+
+        viewModelScope.launch {
+            val getAllDataResult = interactor.loadAllData()
+            if (getAllDataResult.isFailed) {
+                setScreenState(
+                    ScreenState.error(
+                        errorText = errorInteractor.processAndGetMessage(getAllDataResult.error)
+                    )
+                )
+                return@launch
             }
 
-            screenState.value = ScreenState.empty(
-                resourceProvider.getString(R.string.input_text_to_start_search)
-            )
+            val allData = getAllDataResult.obj
+            val currentQuery = currentQuery
+
+            data = allData
+
+            if (currentQuery != null) {
+                searchData(currentQuery)
+            } else {
+                filteredData = allData
+                showItems(allData)
+            }
+        }
+    }
+
+    private fun searchData(query: String) {
+        val data = data
+
+        if (data == null || (currentQuery == query && filteredData != null)) {
+            filteredData?.let {
+                showItems(it)
+            }
             return
         }
 
-        screenState.value = ScreenState.loading()
+        savedScrollPosition.value = RecyclerView.NO_POSITION
+        currentQuery = query
+
+        setScreenState(ScreenState.loading())
 
         currentSearchJob = viewModelScope.launch {
             currentSearchJob?.apply {
@@ -161,29 +241,29 @@ class SearchViewModel(
 
             delay(SEARCH_DELAY)
 
-            val findResult = interactor.find(query)
-            if (findResult.isSucceededOrDeferred) {
-                val items = interactor.sort(findResult.obj)
-
-                if (items.isNotEmpty()) {
-                    val cellModels = cellModelFactory.createCellModels(items)
-                    val cellViewModels = cellViewModelFactory.createCellViewModels(
-                        models = cellModels,
-                        eventProvider = eventProvider
-                    )
-                    setCellElements(cellViewModels)
-                    screenState.value = ScreenState.data()
-                } else {
-                    screenState.value = ScreenState.empty(
-                        resourceProvider.getString(R.string.no_results)
-                    )
-                }
-            } else {
-                val message = errorInteractor.processAndGetMessage(findResult.error)
-                screenState.value = ScreenState.error(message)
-            }
+            val items = interactor.filter(data, query)
+            filteredData = items
+            showItems(items)
 
             currentSearchJob = null
+        }
+    }
+
+    private fun showItems(items: List<EncryptedDatabaseEntry>) {
+        if (items.isNotEmpty()) {
+            val cellModels = cellModelFactory.createCellModels(items)
+            val cellViewModels = cellViewModelFactory.createCellViewModels(
+                models = cellModels,
+                eventProvider = eventProvider
+            )
+            setCellElements(cellViewModels)
+            setScreenState(ScreenState.data())
+        } else {
+            setScreenState(
+                ScreenState.empty(
+                    emptyText = resourceProvider.getString(R.string.no_results)
+                )
+            )
         }
     }
 
@@ -224,15 +304,18 @@ class SearchViewModel(
 
         when (args.appMode) {
             AUTOFILL_SELECTION -> {
-                screenState.value = ScreenState.loading()
+                setScreenState(ScreenState.loading())
 
                 val structure = args.autofillStructure ?: return
 
                 viewModelScope.launch {
                     val getNoteResult = interactor.getNoteByUid(noteUid)
                     if (getNoteResult.isFailed) {
-                        val message = errorInteractor.processAndGetMessage(getNoteResult.error)
-                        screenState.value = ScreenState.dataWithError(message)
+                        setScreenState(
+                            ScreenState.dataWithError(
+                                errorText = errorInteractor.processAndGetMessage(getNoteResult.error)
+                            )
+                        )
                         return@launch
                     }
 
@@ -243,7 +326,7 @@ class SearchViewModel(
                         sendAutofillResponseEvent.call(Pair(note, structure))
                     }
 
-                    screenState.value = ScreenState.data()
+                    setScreenState(ScreenState.data())
                 }
             }
             else -> {
@@ -260,9 +343,27 @@ class SearchViewModel(
         }
     }
 
+    private fun setScreenState(state: ScreenState) {
+        screenState.value = state
+    }
+
+    private fun getVisibleMenuItems(): List<SearchMenuItem> {
+        return if (args.appMode == NORMAL) {
+            SearchMenuItem.values().toList()
+        } else {
+            emptyList()
+        }
+    }
+
+    enum class SearchMenuItem(@IdRes override val menuId: Int) : ScreenMenuItem {
+        LOCK(R.id.menu_lock),
+        VIEW_MODE(R.id.menu_sort_and_view),
+        SETTINGS(R.id.menu_settings)
+    }
+
     class Factory(private val args: SearchScreenArgs) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return GlobalInjector.get<SearchViewModel>(
                 parametersOf(args)
             ) as T

@@ -257,4 +257,7 @@ dependencies {
 
     // Kotpass
     implementation 'com.github.anvell:kotpass:0.4.0'
+
+    // Fuzzy search
+    implementation "me.xdrop:fuzzywuzzy:1.4.0"
 }

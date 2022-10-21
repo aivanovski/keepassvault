@@ -29,7 +29,9 @@ import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibi
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.GroupsMenuItem
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
-import com.ivanovsky.passnotes.presentation.groups.dialog.SortAndViewDialog
+import com.ivanovsky.passnotes.presentation.dialogs.sort_and_view.SortAndViewDialog
+import com.ivanovsky.passnotes.presentation.dialogs.sort_and_view.SortAndViewDialogArgs
+import com.ivanovsky.passnotes.presentation.dialogs.sort_and_view.ScreenType
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 
@@ -271,7 +273,7 @@ class GroupsFragment : BaseFragment() {
     }
 
     private fun showSortAndViewDialog() {
-        val dialog = SortAndViewDialog.newInstance()
+        val dialog = SortAndViewDialog.newInstance(args = SortAndViewDialogArgs(ScreenType.GROUPS_SCREEN))
         dialog.show(childFragmentManager, SortAndViewDialog.TAG)
     }
 

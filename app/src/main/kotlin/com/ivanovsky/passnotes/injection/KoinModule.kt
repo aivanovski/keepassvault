@@ -61,6 +61,7 @@ import com.ivanovsky.passnotes.presentation.about.AboutViewModel
 import com.ivanovsky.passnotes.presentation.autofill.AutofillViewFactory
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
+import com.ivanovsky.passnotes.presentation.dialogs.sort_and_view.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.factory.FilePickerCellModelFactory
 import com.ivanovsky.passnotes.presentation.filepicker.factory.FilePickerCellViewModelFactory
@@ -68,7 +69,7 @@ import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel
-import com.ivanovsky.passnotes.presentation.groups.dialog.SortAndViewDialogViewModel
+import com.ivanovsky.passnotes.presentation.dialogs.sort_and_view.SortAndViewDialogViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.main.MainScreenArgs
@@ -181,7 +182,7 @@ object KoinModule {
             single { NoteEditorInteractor(get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
             single { SelectDatabaseInteractor(get(), get(), get(), get()) }
-            single { SearchInteractor(get(), get(), get(), get(), get(), get(), get()) }
+            single { SearchInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
             single { DatabaseSettingsInteractor(get(), get()) }
             single { AppSettingsInteractor(get(), get(), get()) }
@@ -239,13 +240,13 @@ object KoinModule {
             viewModel { (args: NoteEditorArgs) -> NoteEditorViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { (args: ServerLoginArgs) -> ServerLoginViewModel(get(), get(), get(), get(), args) }
             viewModel { (args: SelectDatabaseArgs) -> SelectDatabaseViewModel(get(), get(), get(), get(), get(), get(), get(), args) }
-            factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), get(), get(), args) }
+            factory { (args: SearchScreenArgs) -> SearchViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { AboutViewModel(get(), get()) }
             viewModel { MainSettingsViewModel(get(), get()) }
             viewModel { AppSettingsViewModel(get(), get(), get(), get(), get(), get()) }
             viewModel { DatabaseSettingsViewModel(get(), get(), get(), get()) }
             viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
-            viewModel { SortAndViewDialogViewModel(get()) }
+            factory { (args: SortAndViewDialogArgs) -> SortAndViewDialogViewModel(get(), args) }
             viewModel { PasswordGeneratorViewModel(get(), get(), get(), get(), get()) }
             factory { (args: UnlockScreenArgs) -> UnlockViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             factory { NavigationMenuViewModel(get()) }

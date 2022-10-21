@@ -8,6 +8,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
 import com.ivanovsky.passnotes.data.entity.Group;
+import com.ivanovsky.passnotes.extensions.GroupExtKt;
 
 import java.util.LinkedList;
 
@@ -362,8 +363,7 @@ public class KeepassJavaGroupDao implements GroupDao {
 
         List<Group> matchedGroups = new ArrayList<>();
         for (Group group : allGroups) {
-            boolean contains = StringsKt.contains(group.getTitle(), query, true);
-            if (contains) {
+            if (GroupExtKt.matches(group, query)) {
                 matchedGroups.add(group);
             }
         }

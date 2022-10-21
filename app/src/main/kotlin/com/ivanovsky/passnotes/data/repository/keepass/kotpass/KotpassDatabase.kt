@@ -184,11 +184,9 @@ class KotpassDatabase(
         val allGroups = mutableListOf<RawGroup>()
 
         while (nextGroups.size > 0) {
-            val currentGroup = nextGroups.pop()
+            val currentGroup = nextGroups.removeFirst()
 
             nextGroups.addAll(currentGroup.groups)
-
-            allGroups.add(currentGroup)
             allGroups.addAll(currentGroup.groups)
         }
 

@@ -7,20 +7,17 @@
         android:id="@+id/menu_lock"
         android:icon="@drawable/ic_lock_white_24dp"
         android:title="@string/lock"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
     <item
-        android:id="@+id/menu_more"
-        android:icon="@drawable/ic_more_vert_white_24dp"
-        android:title="@string/more_options"
-        app:showAsAction="ifRoom">
+        android:id="@+id/menu_sort_and_view"
+        android:icon="@drawable/ic_sort_white_24dp"
+        android:title="@string/sort_and_view"
+        app:showAsAction="never" />
 
-        <menu>
-            <item
-                android:id="@+id/menu_settings"
-                android:title="@string/settings" />
-        </menu>
-
-    </item>
+    <item
+        android:id="@+id/menu_settings"
+        android:title="@string/settings"
+        app:showAsAction="never" />
 
 </menu>

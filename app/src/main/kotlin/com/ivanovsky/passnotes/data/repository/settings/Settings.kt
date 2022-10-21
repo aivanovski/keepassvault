@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository.settings
 
 import com.ivanovsky.passnotes.data.entity.TestData
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref
+import com.ivanovsky.passnotes.domain.entity.SearchType
 import com.ivanovsky.passnotes.domain.entity.SortDirection
 import com.ivanovsky.passnotes.domain.entity.SortType
 
@@ -13,6 +14,7 @@ interface Settings {
     var isLockNotificationVisible: Boolean
     var dropboxAuthToken: String?
     var isFileLogEnabled: Boolean
+    var searchType: SearchType
     var sortType: SortType
     var sortDirection: SortDirection
     var isGroupsAtStartEnabled: Boolean

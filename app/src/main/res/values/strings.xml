@@ -135,6 +135,9 @@
         <item>Remove</item>
         <item>Cut</item>
     </string-array>
+    <string name="search_type">Search type</string>
+    <string name="fuzzy">Fuzzy</string>
+    <string name="strict">Strict</string>
     <string name="sort_by">Sort by</string>
     <string name="sort_order">Sort order</string>
     <string name="modification">Modification</string>

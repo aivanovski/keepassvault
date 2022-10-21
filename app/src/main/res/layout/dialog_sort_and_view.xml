@@ -10,54 +10,71 @@
 
         <import type="com.ivanovsky.passnotes.domain.entity.SortDirection" />
 
+        <import type="com.ivanovsky.passnotes.domain.entity.SearchType" />
+
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.groups.dialog.SortAndViewDialogViewModel" />
+            type="com.ivanovsky.passnotes.presentation.dialogs.sort_and_view.SortAndViewDialogViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minWidth="@dimen/min_dialog_width"
+        android:padding="@dimen/group_margin"
         tools:layout_width="300dp">
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guidelineStart"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/searchTypeTitle"
+            style="@style/Material.PrimaryText.SingleLine"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_begin="@dimen/group_margin" />
+            android:text="@{String.format(@string/text_with_colon, @string/search_type)}"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.isSearchTypeGroupVisible}"
+            tools:text="Search type:"
+            tools:visibility="visible" />
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guidelineEnd"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_end="@dimen/group_margin" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guidelineTop"
+        <RadioGroup
+            android:id="@+id/searchTypeGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintGuide_begin="@dimen/group_margin" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/searchTypeTitle"
+            app:visible="@{viewModel.isSearchTypeGroupVisible}"
+            tools:visibility="visible">
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guidelineBottom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintGuide_end="@dimen/group_margin" />
+            <RadioButton
+                android:id="@+id/searchTypeFuzzy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="@{viewModel.isSearchTypeChecked(SearchType.FUZZY)}"
+                android:onCheckedChanged="@{(v, checked) -> viewModel.onSearchTypeChanged(checked, SearchType.FUZZY)}"
+                android:text="@string/fuzzy"
+                android:textSize="@dimen/material_small_text_size" />
+
+            <RadioButton
+                android:id="@+id/searchTypeStrict"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/element_margin"
+                android:checked="@{viewModel.isSearchTypeChecked(SearchType.STRICT)}"
+                android:onCheckedChanged="@{(v, checked) -> viewModel.onSearchTypeChanged(checked, SearchType.STRICT)}"
+                android:text="@string/strict"
+                android:textSize="@dimen/material_small_text_size" />
+
+        </RadioGroup>
 
         <TextView
             android:id="@+id/sortTypeTitle"
             style="@style/Material.PrimaryText.SingleLine"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@{String.format(@string/text_with_colon, @string/sort_by)}"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@id/guidelineStart"
-            app:layout_constraintTop_toTopOf="@id/guidelineTop"
+            app:layout_constraintTop_toBottomOf="@id/searchTypeGroup"
             tools:text="Sort by:" />
 
         <RadioGroup
@@ -65,7 +82,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintStart_toStartOf="@id/guidelineStart"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/sortTypeTitle">
 
             <RadioButton
@@ -73,6 +90,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="@{viewModel.isSortTypeChecked(SortType.DEFAULT)}"
+                android:enabled="@{viewModel.isSortGroupsEnabled}"
                 android:onCheckedChanged="@{(v, checked) -> viewModel.onSortTypeChanged(checked, SortType.DEFAULT)}"
                 android:text="@string/default_"
                 android:textSize="@dimen/material_small_text_size" />
@@ -82,6 +100,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="@{viewModel.isSortTypeChecked(SortType.TITLE)}"
+                android:enabled="@{viewModel.isSortGroupsEnabled}"
                 android:onCheckedChanged="@{(v, checked) -> viewModel.onSortTypeChanged(checked, SortType.TITLE)}"
                 android:text="@string/title"
                 android:textSize="@dimen/material_small_text_size" />
@@ -91,6 +110,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="@{viewModel.isSortTypeChecked(SortType.MODIFICATION_DATE)}"
+                android:enabled="@{viewModel.isSortGroupsEnabled}"
                 android:onCheckedChanged="@{(v, checked) -> viewModel.onSortTypeChanged(checked, SortType.MODIFICATION_DATE)}"
                 android:text="@string/modification"
                 android:textSize="@dimen/material_small_text_size" />
@@ -100,6 +120,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="@{viewModel.isSortTypeChecked(SortType.CREATION_DATE)}"
+                android:enabled="@{viewModel.isSortGroupsEnabled}"
                 android:onCheckedChanged="@{(v, checked) -> viewModel.onSortTypeChanged(checked, SortType.CREATION_DATE)}"
                 android:text="@string/creation"
                 android:textSize="@dimen/material_small_text_size" />
@@ -109,12 +130,11 @@
         <TextView
             android:id="@+id/sortDirectionTitle"
             style="@style/Material.PrimaryText.SingleLine"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/quarter_margin"
             android:text="@{String.format(@string/text_with_colon, @string/sort_order)}"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="@id/guidelineStart"
             app:layout_constraintTop_toBottomOf="@id/sortTypeGroup"
             tools:text="Sort order:" />
 
@@ -123,7 +143,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="@id/guidelineStart"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/sortDirectionTitle">
 
             <RadioButton
@@ -131,6 +151,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="@{viewModel.isSortDirectionChecked(SortDirection.ASCENDING)}"
+                android:enabled="@{viewModel.isSortGroupsEnabled}"
                 android:onCheckedChanged="@{(v, checked) -> viewModel.onSortDirectionChanged(checked, SortDirection.ASCENDING)}"
                 android:text="@string/ascending"
                 android:textSize="@dimen/material_small_text_size" />
@@ -141,6 +162,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/element_margin"
                 android:checked="@{viewModel.isSortDirectionChecked(SortDirection.DESCENDING)}"
+                android:enabled="@{viewModel.isSortGroupsEnabled}"
                 android:onCheckedChanged="@{(v, checked) -> viewModel.onSortDirectionChanged(checked, SortDirection.DESCENDING)}"
                 android:text="@string/descending"
                 android:textSize="@dimen/material_small_text_size" />
@@ -152,12 +174,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/quarter_margin"
-            android:checked="@={viewModel.isGroupsAtStartEnabled}"
+            android:checked="@={viewModel.isGroupsAtStartChecked}"
+            android:enabled="@{viewModel.isSortGroupsEnabled}"
             android:onCheckedChanged="@{(v, checked) -> viewModel.onGroupsAtStartChanged(checked)}"
             android:text="@string/list_groups_first"
             android:textSize="@dimen/material_small_text_size"
-            app:layout_constraintBottom_toBottomOf="@id/guidelineBottom"
-            app:layout_constraintStart_toStartOf="@id/guidelineStart"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/sortDirectionGroup" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

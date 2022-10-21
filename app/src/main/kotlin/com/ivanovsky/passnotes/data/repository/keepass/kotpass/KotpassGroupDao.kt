@@ -12,6 +12,7 @@ import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
 import com.ivanovsky.passnotes.extensions.map
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
+import com.ivanovsky.passnotes.extensions.matches
 import io.github.anvell.kotpass.database.modifiers.modifyGroup
 import io.github.anvell.kotpass.database.modifiers.moveGroup
 import io.github.anvell.kotpass.database.modifiers.removeGroup
@@ -245,15 +246,23 @@ class KotpassGroupDao(
 
     override fun find(query: String): OperationResult<List<Group>> {
         return db.lock.withLock {
+            val getRootResult = rootGroup
+            if (getRootResult.isFailed) {
+                return@withLock getRootResult.mapError()
+            }
+
             val allGroupsResult = all
             if (allGroupsResult.isFailed) {
                 return@withLock allGroupsResult.mapError()
             }
 
             val allGroups = allGroupsResult.obj
+            val root = getRootResult.obj
 
             val matchedGroups = allGroups
-                .filter { group -> group.title.contains(query, ignoreCase = true) }
+                .filter { group ->
+                    group.uid != root.uid && group.matches(query)
+                }
 
             OperationResult.success(matchedGroups)
         }

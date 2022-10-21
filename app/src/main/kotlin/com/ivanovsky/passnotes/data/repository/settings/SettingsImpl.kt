@@ -17,6 +17,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FIL
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SEARCH_TYPE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_DIRECTION
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_TYPE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.TEST_DATA
@@ -25,6 +26,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.IN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.STRING
 import com.ivanovsky.passnotes.data.serialization.TestDataConverter
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.SearchType
 import com.ivanovsky.passnotes.domain.entity.SortDirection
 import com.ivanovsky.passnotes.domain.entity.SortType
 import java.util.concurrent.CopyOnWriteArrayList
@@ -95,6 +97,15 @@ class SettingsImpl(
         get() = getString(DROPBOX_AUTH_TOKEN)
         set(value) {
             putString(DROPBOX_AUTH_TOKEN, value)
+        }
+
+    override var searchType: SearchType
+        get() {
+            return getString(SEARCH_TYPE)?.let { SearchType.getByName(it) }
+                ?: SearchType.default()
+        }
+        set(value) {
+            putString(SEARCH_TYPE, value.name)
         }
 
     override var sortType: SortType
@@ -268,6 +279,11 @@ class SettingsImpl(
         // String prefs
         DROPBOX_AUTH_TOKEN(
             keyId = R.string.pref_dropbox_auth_token,
+            type = STRING,
+            defaultValue = null
+        ),
+        SEARCH_TYPE(
+            keyId = R.string.pref_search_type,
             type = STRING,
             defaultValue = null
         ),

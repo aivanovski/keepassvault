@@ -10,6 +10,7 @@
     <string name="pref_is_external_storage_cache_enabled" translatable="false">isExternalStorageCacheEnabled</string>
     <string name="pref_is_file_log_enabled" translatable="false">isLogToFileEnabled</string>
     <string name="pref_is_postponed_sync_enabled" translatable="false">isPostponedSyncEnabled</string>
+    <string name="pref_search_type" translatable="false">searchType</string>
     <string name="pref_sort_type" translatable="false">sortType</string>
     <string name="pref_sort_direction" translatable="false">sortDirection</string>
     <string name="pref_is_groups_at_start_enabled" translatable="false">isGroupsAtStartEnabled</string>

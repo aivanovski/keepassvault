@@ -13,13 +13,13 @@
         android:id="@+id/menu_lock"
         android:icon="@drawable/ic_lock_white_24dp"
         android:title="@string/lock"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/menu_sort_and_view"
         android:icon="@drawable/ic_sort_white_24dp"
         android:title="@string/sort_and_view"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/menu_add_templates"

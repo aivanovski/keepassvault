@@ -87,8 +87,8 @@ class SearchFragment : BaseFragment() {
 
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                viewModel.savedScrollPosition.value = (recyclerView.layoutManager as LinearLayoutManager)
-                    .findFirstVisibleItemPosition()
+                viewModel.savedScrollPosition.value =
+                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             }
         })
         return binding.root
@@ -197,7 +197,9 @@ class SearchFragment : BaseFragment() {
     }
 
     private fun showSortAndViewDialog() {
-        val dialog = SortAndViewDialog.newInstance(args = SortAndViewDialogArgs(ScreenType.SEARCH_SCREEN))
+        val dialog = SortAndViewDialog.newInstance(
+            args = SortAndViewDialogArgs(ScreenType.SEARCH)
+        )
         dialog.show(childFragmentManager, SortAndViewDialog.TAG)
     }
 

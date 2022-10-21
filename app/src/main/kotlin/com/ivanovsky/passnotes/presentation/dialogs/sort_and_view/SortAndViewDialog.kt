@@ -37,7 +37,7 @@ class SortAndViewDialog : DialogFragment() {
 
     companion object {
 
-        val TAG = SortAndViewDialog::class.java.simpleName
+        val TAG: String = SortAndViewDialog::class.java.simpleName
         private const val ARGUMENTS = "arguments"
 
         fun newInstance(args: SortAndViewDialogArgs): SortAndViewDialog {

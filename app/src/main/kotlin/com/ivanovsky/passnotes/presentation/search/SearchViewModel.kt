@@ -127,7 +127,6 @@ class SearchViewModel(
 
     fun onScreenCreated() {
         isKeyboardVisibleEvent.value = true
-
         loadData()
     }
 

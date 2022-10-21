@@ -9,7 +9,7 @@ enum class SearchType {
         fun default(): SearchType = FUZZY
 
         fun getByName(name: String): SearchType? {
-            return SearchType.values().firstOrNull { it.name == name }
+            return values().firstOrNull { it.name == name }
         }
     }
 }

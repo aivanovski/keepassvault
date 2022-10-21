@@ -273,7 +273,9 @@ class GroupsFragment : BaseFragment() {
     }
 
     private fun showSortAndViewDialog() {
-        val dialog = SortAndViewDialog.newInstance(args = SortAndViewDialogArgs(ScreenType.GROUPS_SCREEN))
+        val dialog = SortAndViewDialog.newInstance(
+            args = SortAndViewDialogArgs(ScreenType.GROUPS)
+        )
         dialog.show(childFragmentManager, SortAndViewDialog.TAG)
     }
 

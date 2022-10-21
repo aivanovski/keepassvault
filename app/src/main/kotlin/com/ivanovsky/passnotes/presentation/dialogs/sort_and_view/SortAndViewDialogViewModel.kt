@@ -20,7 +20,7 @@ class SortAndViewDialogViewModel(
     private var selectedSortDirection = settings.sortDirection
 
     val isGroupsAtStartChecked = MutableLiveData(settings.isGroupsAtStartEnabled)
-    val isSearchTypeGroupVisible = (args.type == ScreenType.SEARCH_SCREEN)
+    val isSearchTypeGroupVisible = (args.type == ScreenType.SEARCH)
     val isSortGroupsEnabled = MutableLiveData(isSortGroupsEnabledInternal())
 
     fun isSearchTypeChecked(searchType: SearchType): Boolean {
@@ -36,7 +36,7 @@ class SortAndViewDialogViewModel(
     }
 
     fun onSearchTypeChanged(isChecked: Boolean, searchType: SearchType) {
-        if (args.type != ScreenType.SEARCH_SCREEN) {
+        if (args.type != ScreenType.SEARCH) {
             return
         }
 
@@ -66,7 +66,7 @@ class SortAndViewDialogViewModel(
     }
 
     private fun isSortGroupsEnabledInternal(): Boolean {
-        return args.type == ScreenType.GROUPS_SCREEN || selectedSearchType == SearchType.STRICT
+        return args.type == ScreenType.GROUPS || selectedSearchType == SearchType.STRICT
     }
 
     class Factory(private val args: SortAndViewDialogArgs) : ViewModelProvider.Factory {

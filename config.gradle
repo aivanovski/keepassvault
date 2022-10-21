@@ -6,6 +6,4 @@ ext {
     ]
 
     kotlinVersion = '1.6.10'
-
-    crashlyticsVersion = '18.2.5'
 }

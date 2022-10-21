@@ -223,7 +223,8 @@ class AutofillStructureParser(
             when {
                 name.equals("tel", ignoreCase = true)
                     || name.equals("email", ignoreCase = true)
-                    || name.equals("text", ignoreCase = true) -> {
+                    || name.equals("text", ignoreCase = true)
+                    || name.contains("user", ignoreCase = true)-> {
                     return AutofillNode(
                         AutofillFieldType.USERNAME,
                         AutofillSourceType.HTML_ATTRIBUTE,

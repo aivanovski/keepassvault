@@ -90,16 +90,6 @@ android {
         }
     }
 
-    flavorDimensions "default"
-    productFlavors {
-        gplay {
-            dimension "default"
-        }
-        libre {
-            dimension "default"
-        }
-    }
-
     buildTypes {
         debug {
             debuggable true

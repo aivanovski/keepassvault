@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.extensions
 
-import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
@@ -30,9 +29,6 @@ fun FileDescriptor.formatReadablePath(resourceProvider: ResourceProvider): Strin
         }
         FSType.INTERNAL_STORAGE, FSType.EXTERNAL_STORAGE -> {
             path
-        }
-        FSType.DROPBOX -> {
-            resourceProvider.getString(R.string.dropbox) + ":/" + path
         }
         FSType.WEBDAV -> {
             val url = fsAuthority.credentials?.formatReadableUrl() ?: EMPTY

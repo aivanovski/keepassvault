@@ -10,7 +10,6 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.TestData
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
-import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.DROPBOX_AUTH_TOKEN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIOMETRIC_UNLOCK_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXTERNAL_STORAGE_CACHE_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
@@ -91,12 +90,6 @@ class SettingsImpl(
             ?: (AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS.defaultValue as String).toInt()
         set(value) {
             putString(AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS, value.toString())
-        }
-
-    override var dropboxAuthToken: String?
-        get() = getString(DROPBOX_AUTH_TOKEN)
-        set(value) {
-            putString(DROPBOX_AUTH_TOKEN, value)
         }
 
     override var searchType: SearchType
@@ -277,11 +270,6 @@ class SettingsImpl(
         ),
 
         // String prefs
-        DROPBOX_AUTH_TOKEN(
-            keyId = R.string.pref_dropbox_auth_token,
-            type = STRING,
-            defaultValue = null
-        ),
         SEARCH_TYPE(
             keyId = R.string.pref_search_type,
             type = STRING,

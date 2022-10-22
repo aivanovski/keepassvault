@@ -7,8 +7,6 @@ import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.repository.db.dao.GitRootDao
-import com.ivanovsky.passnotes.data.repository.file.dropbox.DropboxAuthenticator
-import com.ivanovsky.passnotes.data.repository.file.dropbox.DropboxClient
 import com.ivanovsky.passnotes.data.repository.file.regular.RegularFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientAdapter
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteFileSystemProvider
@@ -63,17 +61,6 @@ class FileSystemResolver(
             }
             FSType.EXTERNAL_STORAGE -> {
                 RegularFileSystemProvider(context, FSAuthority.EXTERNAL_FS_AUTHORITY)
-            }
-            FSType.DROPBOX -> {
-                val authenticator = DropboxAuthenticator(settings)
-                RemoteFileSystemProvider(
-                    authenticator,
-                    DropboxClient(authenticator),
-                    remoteFileRepository,
-                    fileHelper,
-                    observerBus,
-                    fsAuthority
-                )
             }
             FSType.WEBDAV -> {
                 val authenticator = WebdavAuthenticator(fsAuthority)

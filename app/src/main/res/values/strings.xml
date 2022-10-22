@@ -3,7 +3,6 @@
     <string name="app_name">KPassNotes</string>
 
     <!-- Common for all screens -->
-    <string name="dropbox">Dropbox</string>
     <string name="webdav">WebDAV</string>
     <string name="git">Git</string>
     <string name="device">Device</string>

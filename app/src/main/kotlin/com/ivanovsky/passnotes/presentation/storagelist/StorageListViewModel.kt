@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.presentation.storagelist
 
 import android.net.Uri
-import android.os.Build.VERSION_CODES.S
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -16,7 +15,6 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.DROPBOX
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.EXTERNAL_STORAGE
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.SAF_STORAGE
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.PRIVATE_STORAGE
@@ -224,7 +222,7 @@ class StorageListViewModel(
                 onDeviceStorageSelected(selectedOption.root, selectedOption.type)
             }
             SAF_STORAGE -> onSafStorageSelected()
-            DROPBOX, WEBDAV, GIT -> onRemoteFileStorageSelected(selectedOption.root)
+            WEBDAV, GIT -> onRemoteFileStorageSelected(selectedOption.root)
         }
     }
 

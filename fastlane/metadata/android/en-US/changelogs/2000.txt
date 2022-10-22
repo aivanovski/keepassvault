@@ -1,0 +1,4 @@
+- Fixed several bugs
+- Improved autofill for web pages
+- Add Fuzzy search
+

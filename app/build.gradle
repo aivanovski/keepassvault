@@ -7,6 +7,9 @@ def versionMajor = 0
 def versionMinor = 20
 def versionPatch = 0
 
+def formattedVersionCode = (versionMajor * 10000 + versionMinor * 100 + versionPatch).toString()
+def formattedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}"
+
 def DEV_PROPERTIES_FILE = file("../project.properties")
 def CI_PROPERTIES_FILE = file("../ci.properties")
 
@@ -25,6 +28,29 @@ String getCustomProperty(String key) {
     return project.ext.customProps[key] ?: System.getenv(key) ?: ""
 }
 
+task generateVersionPropertiesFile {
+    // This task is need only for F-Droid
+    def PROPERTY_VERSION_CODE = "versionCode"
+    def PROPERTY_VERSION_NAME = "versionName"
+    def VERSION_PROPERTIES_FILE = file("../version.properties")
+
+    def versions = new Properties()
+    if (VERSION_PROPERTIES_FILE.exists()) {
+        versions.load(new FileInputStream(VERSION_PROPERTIES_FILE))
+    }
+
+    if (versions[PROPERTY_VERSION_CODE] != formattedVersionCode
+            || versions[PROPERTY_VERSION_NAME] != formattedVersionName) {
+        project.logger.lifecycle("Updating file: version.properties")
+
+        versions.setProperty(PROPERTY_VERSION_CODE, formattedVersionCode)
+        versions.setProperty(PROPERTY_VERSION_NAME, formattedVersionName)
+
+        versions.store(new BufferedWriter(new FileWriter(VERSION_PROPERTIES_FILE)),
+                "The content of this file is generated automatically for F-Droid")
+    }
+}
+
 android {
     def ext = rootProject.extensions.ext
 
@@ -34,8 +60,8 @@ android {
         applicationId 'com.ivanovsky.passnotes'
         minSdkVersion ext.android.minSdk
         targetSdkVersion ext.android.targetSdk
-        versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
-        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+        versionCode formattedVersionCode.toInteger()
+        versionName formattedVersionName
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
@@ -108,6 +134,8 @@ android {
         checkReleaseBuilds true
         abortOnError false
     }
+
+    preBuild.dependsOn(generateVersionPropertiesFile)
 }
 
 def koinVersion = '2.0.1'

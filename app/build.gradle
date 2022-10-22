@@ -5,7 +5,7 @@ apply plugin: 'kotlin-parcelize'
 
 def versionMajor = 0
 def versionMinor = 20
-def versionPatch = 0
+def versionPatch = 1
 
 def formattedVersionCode = (versionMajor * 10000 + versionMinor * 100 + versionPatch).toString()
 def formattedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}"

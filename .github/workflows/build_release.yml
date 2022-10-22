@@ -1,4 +1,4 @@
-name: Build Libre Release
+name: Build Gplay Release
 
 on:
   push:
@@ -21,23 +21,21 @@ jobs:
         run: |
           gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/debug.keystore -d ./keys/debug.keystore.gpg
           gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/release.keystore -d ./keys/release.keystore.gpg
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./app/google-services.json -d ./app/google-services.json.gpg
           gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./ci.properties -d ./ci.properties.gpg
 
       - name: Validate decrypted data
         run: |
           echo "3a15a7065ed4a62a747af2e3477b0a3e1940a7bc2946df638b902bcb186998e7 *keys/debug.keystore" | sha256sum --check
           echo "36a3bb8b7bda141b414c2df7fac7dcd09a2775769c561e562d2b43f7b246bfa5 *keys/release.keystore" | sha256sum --check
-          echo "4c259d0e1b031108e3fa682353f7ca450827644422c736334f1b3f24cb10bc62 *app/google-services.json" | sha256sum --check
           echo "b009011968e80d5b99eaa181141e6c94178a538c3dac0e413c43d5f95f50f557 *ci.properties" | sha256sum --check
 
       - name: Build
         run: |
-          ./gradlew app:assembleLibreRelease
+          ./gradlew app:assembleRelease
 
       - name: Store APK file
         uses: actions/upload-artifact@v2
         with:
-          name: app-libre-release.apk
+          name: app-release.apk
           path: |
-            ./app/build/outputs/apk/libre/release/app-libre-release.apk
+            ./app/build/outputs/apk/release/app-release.apk

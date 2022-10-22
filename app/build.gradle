@@ -3,12 +3,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 
-if (shouldEnableGoogleServicesPlugins()) {
-    project.logger.lifecycle("Enable Google Services plugins")
-    apply plugin: 'com.google.firebase.crashlytics'
-    apply plugin: 'com.google.gms.google-services'
-}
-
 def versionMajor = 0
 def versionMinor = 19
 def versionPatch = 0
@@ -20,7 +14,6 @@ def PROPERTY_DROPBOX_APP_KEY = 'DROPBOX_APP_KEY'
 def PROPERTY_DROPBOX_APP_SECRET = 'DROPBOX_APP_SECRET'
 def PROPERTY_KEYSTORE_PASSWORD = 'KEYSTORE_PASSWORD'
 def PROPERTY_KEYSTORE_ALIAS = 'KEYSTORE_ALIAS'
-def PROPERTY_IS_CRASHLYTICS_ENABLED = 'IS_CRASHLYTICS_ENABLED'
 
 project.ext.customProps = new Properties()
 if (DEV_PROPERTIES_FILE.exists()) {
@@ -32,10 +25,6 @@ if (CI_PROPERTIES_FILE.exists()) {
 
 String getCustomProperty(String key) {
     return project.ext.customProps[key] ?: System.getenv(key) ?: ""
-}
-
-Boolean shouldEnableGoogleServicesPlugins() {
-    return getGradle().getStartParameter().getTaskRequests().toString().contains("Gplay")
 }
 
 android {
@@ -57,9 +46,6 @@ android {
         def dropboxAppSecret = getCustomProperty(PROPERTY_DROPBOX_APP_SECRET)
         buildConfigField "String", "DROPBOX_APP_KEY", "\"$dropboxAppKey\""
         buildConfigField "String", "DROPBOX_APP_SECRET", "\"$dropboxAppSecret\""
-
-        def isCrashlyticsEnabled = getCustomProperty(PROPERTY_IS_CRASHLYTICS_ENABLED) ?: "true"
-        buildConfigField "boolean", "IS_CRASHLYTICS_ENABLED", "$isCrashlyticsEnabled"
 
         project.logger.lifecycle("VersionName: $versionName")
         project.logger.lifecycle("VersionCode: $versionCode")
@@ -104,16 +90,6 @@ android {
         }
     }
 
-    flavorDimensions "default"
-    productFlavors {
-        gplay {
-            dimension "default"
-        }
-        libre {
-            dimension "default"
-        }
-    }
-
     buildTypes {
         debug {
             debuggable true
@@ -126,8 +102,6 @@ android {
             debuggable false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-
-            buildConfigField "boolean", "IS_CRASHLYTICS_ENABLED", "true"
         }
     }
 
@@ -241,9 +215,6 @@ dependencies {
 
     //Cicerone
     implementation "com.github.terrakok:cicerone:$ciceroneVersion"
-
-    // Firebase Crashlytics
-    gplayImplementation "com.google.firebase:firebase-crashlytics:$crashlyticsVersion"
 
     // Timber
     implementation "com.jakewharton.timber:timber:$timberVersion"

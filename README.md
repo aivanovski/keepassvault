@@ -13,6 +13,7 @@ Another Android client app for KeePass databases.
 - Password or key file unlock
 - Supports .kdbx files up to version 4.1 (application uses [Kotpass](https://github.com/keemobile/kotpass) library to manipulate the KeePass database)
 - Dynamic templates (compatible with other android applications: [KeePassDX](https://github.com/Kunzisoft/KeePassDX), [keepass2android](https://github.com/PhilippC/keepass2android))
+- Biometric unlock
 - Autofill for Android >= 8.0
 - Fuzzy search
 

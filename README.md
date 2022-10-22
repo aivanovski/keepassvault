@@ -11,9 +11,10 @@ Another Android client app for KeePass databases.
 - Synchronization with WebDav server or Git repository
 - Create databases, entries and groups
 - Password or key file unlock
-- Support .kdb and .kdbx files (version 2-3, application uses [KeePassJava2](https://github.com/jorabin/KeePassJava2) to manipulate the KeePass database)
+- Supports .kdbx files up to version 4.1 (application uses [Kotpass](https://github.com/keemobile/kotpass) library to manipulate the KeePass database)
 - Dynamic templates (compatible with other android applications: [KeePassDX](https://github.com/Kunzisoft/KeePassDX), [keepass2android](https://github.com/PhilippC/keepass2android))
 - Autofill for Android >= 8.0
+- Fuzzy search
 
 # License
 ```

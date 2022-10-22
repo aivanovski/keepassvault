@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 
-DEBUG_APK_PATH = 'app/build/outputs/apk/gplay/debug/app-gplay-debug.apk'.freeze
-RELEASE_APK_PATH = 'app/build/outputs/apk/gplay/release/app-gplay-release.apk'.freeze
-RELEASE_AAB_PATH = 'app/build/outputs/bundle/gplayRelease/app-gplay-release.aab'.freeze
+DEBUG_APK_PATH = 'app/build/outputs/apk/debug/app-debug.apk'.freeze
+RELEASE_APK_PATH = 'app/build/outputs/apk/release/app-release.apk'.freeze
+RELEASE_AAB_PATH = 'app/build/outputs/bundle/release/app-release.aab'.freeze
 
 def project_directory?
   `pwd | awk -F'/' '{print $NF}'`.strip == 'kpassnotes'
@@ -53,13 +53,13 @@ end
 
 def assemble
   puts 'Assembling Gplay Debug...'
-  `./gradlew app:assembleGplayDebug`
+  `./gradlew app:assembleDebug`
 
   puts 'Assembling Gplay Release...'
-  `./gradlew app:assembleGplayRelease`
+  `./gradlew app:assembleRelease`
 
   puts 'Assembling Bundle Gplay Release...'
-  `./gradlew app:bundleGplayRelease`
+  `./gradlew app:bundleRelease`
 end
 
 def main
@@ -79,9 +79,9 @@ def main
     output_dir = ARGV[0].strip.gsub('~', '$HOME')
     version = get_app_version
     destinations = [
-      "#{output_dir}/app-gplay-debug-#{version}.apk",
-      "#{output_dir}/app-gplay-release-#{version}.apk",
-      "#{output_dir}/app-gplay-release-#{version}.aab"
+      "#{output_dir}/app-debug-#{version}.apk",
+      "#{output_dir}/app-release-#{version}.apk",
+      "#{output_dir}/app-release-#{version}.aab"
     ]
     copy_files(files, destinations)
   else

@@ -10,7 +10,6 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.DROPBOX
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.EXTERNAL_STORAGE
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.GIT
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.SAF_STORAGE
@@ -55,7 +54,6 @@ class StorageListInteractor(
                 options.add(createExternalStorageOption(externalRoot))
             }
 
-            // options.add(createDropboxOption())
             options.add(createWebDavOption())
             options.add(createGitOption())
 
@@ -86,14 +84,6 @@ class StorageListInteractor(
         )
     }
 
-    private fun createDropboxOption(): StorageOption {
-        return StorageOption(
-            DROPBOX,
-            resourceProvider.getString(R.string.dropbox),
-            createDropboxStorageDir()
-        )
-    }
-
     private fun createWebDavOption(): StorageOption {
         return StorageOption(
             WEBDAV,
@@ -120,16 +110,6 @@ class StorageListInteractor(
             isRoot = true
         )
     }
-
-    private fun createDropboxStorageDir(): FileDescriptor =
-        FileDescriptor(
-            fsAuthority = FSAuthority.DROPBOX_FS_AUTHORITY,
-            path = ROOT_PATH,
-            uid = ROOT_PATH,
-            name = ROOT_PATH,
-            isDirectory = true,
-            isRoot = true
-        )
 
     private fun createWebdavStorageDir(): FileDescriptor =
         FileDescriptor(

@@ -3,7 +3,6 @@
     <string name="homepage_url" translatable="false"><a href="https://github.com/aivanovski/passnotes">https://github.com/aivanovski/passnotes</a></string>
     <string name="feedback_url" translatable="false"><a href="https://github.com/aivanovski/passnotes/issues">https://github.com/aivanovski/passnotes/issues</a></string>
 
-    <string name="pref_dropbox_auth_token" translatable="false">dropboxAuthToken</string>
     <string name="pref_auto_lock_delay_in_ms" translatable="false">autoLockDelayInMs</string>
     <string name="pref_auto_clear_clipboard_delay_in_ms" translatable="false">autoClearClipboardDelayInMs</string>
     <string name="pref_is_lock_notification_visible" translatable="false">isLockNotificationVisible</string>

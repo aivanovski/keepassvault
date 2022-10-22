@@ -140,7 +140,7 @@ class UsedFileDaoTest {
                     isSecretUrl = false,
                     salt = "salt"
                 ),
-                type = FSType.DROPBOX
+                type = FSType.GIT
             ),
             filePath = "/secondFilePath",
             fileUid = "secondFileUId",

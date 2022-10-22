@@ -10,8 +10,6 @@ def versionPatch = 0
 def DEV_PROPERTIES_FILE = file("../project.properties")
 def CI_PROPERTIES_FILE = file("../ci.properties")
 
-def PROPERTY_DROPBOX_APP_KEY = 'DROPBOX_APP_KEY'
-def PROPERTY_DROPBOX_APP_SECRET = 'DROPBOX_APP_SECRET'
 def PROPERTY_KEYSTORE_PASSWORD = 'KEYSTORE_PASSWORD'
 def PROPERTY_KEYSTORE_ALIAS = 'KEYSTORE_ALIAS'
 
@@ -41,11 +39,6 @@ android {
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables.useSupportLibrary true
         multiDexEnabled true
-
-        def dropboxAppKey = getCustomProperty(PROPERTY_DROPBOX_APP_KEY)
-        def dropboxAppSecret = getCustomProperty(PROPERTY_DROPBOX_APP_SECRET)
-        buildConfigField "String", "DROPBOX_APP_KEY", "\"$dropboxAppKey\""
-        buildConfigField "String", "DROPBOX_APP_SECRET", "\"$dropboxAppSecret\""
 
         project.logger.lifecycle("VersionName: $versionName")
         project.logger.lifecycle("VersionCode: $versionCode")
@@ -123,7 +116,6 @@ def lifecycleVersion = '2.2.0'
 def androidXVersion = '1.2.0'
 
 def annimonStreamApiVersion = '1.1.4'
-def dropboxVersion = '5.1.1'
 def okHttpVersion = '4.9.1'
 def apacheCommonsLangVersion = '3.0'
 def sardineAndroidVersion = 'v0.8'
@@ -202,9 +194,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
-
-    // Dropbox
-    implementation "com.dropbox.core:dropbox-core-sdk:$dropboxVersion"
 
     // OkHttp
     implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"

@@ -188,10 +188,6 @@ class NewDatabaseViewModel(
                     storageType.value = resourceProvider.getString(R.string.public_storage)
                 }
             }
-            FSType.DROPBOX -> {
-                selectedStorage = SelectedStorage.ParentDir(selectedFile)
-                storageType.value = resourceProvider.getString(R.string.dropbox)
-            }
             FSType.WEBDAV -> {
                 selectedStorage = SelectedStorage.ParentDir(selectedFile)
                 storageType.value = resourceProvider.getString(R.string.webdav)

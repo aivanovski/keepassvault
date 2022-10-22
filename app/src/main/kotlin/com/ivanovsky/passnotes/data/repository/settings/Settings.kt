@@ -12,7 +12,6 @@ interface Settings {
     var autoLockDelayInMs: Int
     var autoClearClipboardDelayInMs: Int
     var isLockNotificationVisible: Boolean
-    var dropboxAuthToken: String?
     var isFileLogEnabled: Boolean
     var searchType: SearchType
     var sortType: SortType

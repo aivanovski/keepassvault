@@ -370,7 +370,6 @@ class DebugMenuViewModel(
             FSType.INTERNAL_STORAGE -> FSAuthority.INTERNAL_FS_AUTHORITY
             FSType.EXTERNAL_STORAGE -> FSAuthority.EXTERNAL_FS_AUTHORITY
             FSType.SAF -> FSAuthority.SAF_FS_AUTHORITY
-            FSType.DROPBOX -> FSAuthority.DROPBOX_FS_AUTHORITY
             FSType.WEBDAV -> {
                 FSAuthority(
                     credentials = interactor.getTestWebDavCredentials(),
@@ -421,7 +420,6 @@ class DebugMenuViewModel(
             FSType.INTERNAL_STORAGE -> resourceProvider.getString(R.string.internal_storage)
             FSType.EXTERNAL_STORAGE -> resourceProvider.getString(R.string.external_storage)
             FSType.SAF -> resourceProvider.getString(R.string.storage_access_framework)
-            FSType.DROPBOX -> resourceProvider.getString(R.string.dropbox)
             FSType.WEBDAV -> resourceProvider.getString(R.string.webdav)
             FSType.GIT -> resourceProvider.getString(R.string.git)
             FSType.UNDEFINED -> FSType.UNDEFINED.name
@@ -442,7 +440,6 @@ class DebugMenuViewModel(
             FSType.INTERNAL_STORAGE,
             FSType.EXTERNAL_STORAGE,
             FSType.SAF,
-            FSType.DROPBOX,
             FSType.WEBDAV,
             FSType.GIT
         )

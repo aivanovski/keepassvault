@@ -66,7 +66,7 @@ class TemplateDaoImpl(
 
     override fun addTemplates(
         templates: List<Template>,
-        doCommit: Boolean
+        doInterstitialCommits: Boolean
     ): OperationResult<Boolean> {
         val rootGroupResult = groupDao.rootGroup
         if (rootGroupResult.isFailed) {
@@ -96,14 +96,14 @@ class TemplateDaoImpl(
                 isInheritValue = false
             )
         )
-        val insertGroupResult = groupDao.insert(templateGroup, doCommit)
+        val insertGroupResult = groupDao.insert(templateGroup, doInterstitialCommits)
         if (insertGroupResult.isFailed) {
             return insertGroupResult.takeError()
         }
 
         val templateGroupUid = insertGroupResult.obj
         val notes = templates.map { TemplateNoteFactory.createTemplateNote(it, templateGroupUid) }
-        val insertNotesResult = noteDao.insert(notes, doCommit)
+        val insertNotesResult = noteDao.insert(notes, doInterstitialCommits)
         if (insertNotesResult.isFailed) {
             return insertNotesResult.takeError()
         }

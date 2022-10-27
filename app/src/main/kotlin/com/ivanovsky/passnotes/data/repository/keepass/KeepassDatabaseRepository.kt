@@ -18,6 +18,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.KeepassJavaD
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
+import com.ivanovsky.passnotes.extensions.mapError
 import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.IOException
@@ -114,7 +115,8 @@ class KeepassDatabaseRepository(
                 )
             }
 
-            // KotPass implementation doesn't allow to change
+            // Create a new file with KeePassJava2, because KotPass doesn't allow
+            // to open file in xml format
             val openResult = openDatabase(
                 KeepassImplementation.KEEPASS_JAVA_2,
                 fsProvider,
@@ -129,20 +131,54 @@ class KeepassDatabaseRepository(
             }
 
             val db = openResult.obj
-            if (addTemplates) {
-                val addTemplateResult = db.templateDao.addTemplates(createDefaultTemplates(), false)
-                if (addTemplateResult.isFailed) {
-                    return@withLock addTemplateResult.takeError()
-                }
-            }
 
-            // 'changeKey' will invoke commit
+            // 'changeKey' will invoke commit and write db content to 'file'
             val changeKeyResult = db.changeKey(unencryptedKey, key)
             if (changeKeyResult.isFailed) {
                 return@withLock changeKeyResult.takeError()
             }
 
-            changeKeyResult
+            val result = if (addTemplates) {
+                // Reopen db with Kotpass implementation and write templates into it.
+                // We need Kotpass implementation as group options 'EnableAutoType' and 'EnableSearching'
+                // can't be specified with KeePassJava2
+                val openFileResult = fsProvider.openFileForRead(
+                    file,
+                    OnConflictStrategy.CANCEL,
+                    defaultOptions()
+                )
+                if (openFileResult.isFailed) {
+                    return@withLock openFileResult.takeError()
+                }
+
+                val reopenResult = openDatabase(
+                    KeepassImplementation.KOTPASS,
+                    fsProvider,
+                    defaultOptions(),
+                    file,
+                    openFileResult,
+                    key,
+                    statusListener = null
+                )
+                if (reopenResult.isFailed) {
+                    return@withLock reopenResult.mapError()
+                }
+
+                val reopenedDb = reopenResult.obj
+                val addTemplateResult = reopenedDb.templateDao.addTemplates(
+                    createDefaultTemplates(),
+                    doInterstitialCommits = false
+                )
+                if (addTemplateResult.isFailed) {
+                    return@withLock addTemplateResult.takeError()
+                }
+
+                reopenedDb.commit()
+            } else {
+                changeKeyResult
+            }
+
+            result
         }
     }
 

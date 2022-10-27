@@ -30,7 +30,9 @@ class MoveGroupUseCase(
            val newGroup = GroupEntity(
                uid = groupUid,
                parentUid = newParentGroupUid,
-               title = group.title
+               title = group.title,
+               autotypeEnabled = group.autotypeEnabled,
+               searchEnabled = group.searchEnabled
            )
            val moveResult = db.groupDao.update(newGroup)
            if (moveResult.isFailed) {

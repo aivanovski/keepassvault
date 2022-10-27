@@ -2,23 +2,26 @@ package com.ivanovsky.passnotes.presentation.group_editor
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
+import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.group_editor.GroupEditorInteractor
+import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
-import java.util.UUID
+import org.koin.core.parameter.parametersOf
 
 class GroupEditorViewModel(
     private val interactor: GroupEditorInteractor,
@@ -26,74 +29,98 @@ class GroupEditorViewModel(
     lockInteractor: DatabaseLockInteractor,
     private val resourceProvider: ResourceProvider,
     observerBus: ObserverBus,
-    private val router: Router
+    private val router: Router,
+    private val args: GroupEditorArgs
 ) : ViewModel() {
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.notInitialized())
-    val groupTitle = MutableLiveData(EMPTY)
+    val screenState = MutableLiveData(ScreenState.loading())
+    val screenTitle = determineScreenTitle()
+    val autotypeValues = MutableLiveData(emptyList<String>())
+    val selectedAutotypeValue = MutableLiveData(EMPTY)
+    val searchValues = MutableLiveData(emptyList<String>())
+    val selectedSearchValue = MutableLiveData(EMPTY)
+    val title = MutableLiveData(EMPTY)
     val errorText = MutableLiveData<String?>()
     val doneButtonVisibility = MutableLiveData(true)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
 
-    private lateinit var mode: Mode
-    private var groupUid: UUID? = null
-    private var parentGroupUid: UUID? = null
     private var group: Group? = null
+    private var parentGroup: Group? = null
+    private var autotypeOptions = DEFAULT_OPTIONS
+    private var searchOptions = DEFAULT_OPTIONS
 
-    fun start(args: GroupEditorArgs) {
-        when (args) {
-            is GroupEditorArgs.NewGroup -> {
-                parentGroupUid = args.parentGroupUid
-                mode = Mode.NEW
-            }
-            is GroupEditorArgs.EditGroup ->{
-                groupUid = args.groupUid
-                mode = Mode.EDIT
-            }
-        }
-
-        if (mode == Mode.EDIT) {
-            loadData()
-        } else {
-            screenState.value = ScreenState.data()
-        }
+    fun onScreenCreated() {
+        loadData()
     }
 
-    fun loadData() {
-        val groupUid = groupUid ?: return
-
-        screenState.value = ScreenState.loading()
+    private fun loadData() {
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val getGroupResult = interactor.getGroup(groupUid)
-
-            if (getGroupResult.isSucceededOrDeferred) {
-                group = getGroupResult.obj
-                groupTitle.value = getGroupResult.obj.title
-                screenState.value = ScreenState.data()
-            } else {
-                val message = errorInteractor.processAndGetMessage(getGroupResult.error)
-                screenState.value = ScreenState.error(message)
+            val loadDataResult = interactor.loadData(
+                groupUid = args.groupUid,
+                parentGroupUid = args.parentGroupUid
+            )
+            if (loadDataResult.isFailed) {
+                setScreenState(
+                    ScreenState.error(
+                        errorText = errorInteractor.processAndGetMessage(loadDataResult.error)
+                    )
+                )
+                return@launch
             }
+
+            val (group, parentGroup) = loadDataResult.obj
+
+            onDataLoaded(group, parentGroup)
+            setScreenState(ScreenState.data())
         }
     }
 
     fun onDoneButtonClicked() {
-        when (mode) {
-            Mode.NEW -> createNewGroup()
-            Mode.EDIT -> updateGroup()
+        when (args.mode) {
+            GroupEditorMode.NEW -> createNewGroup()
+            GroupEditorMode.EDIT -> updateGroup()
         }
     }
 
     fun navigateBack() = router.exit()
 
-    private fun createNewGroup() {
-        val parentGroupUid = parentGroupUid ?: return
-        val title = groupTitle.value?.trim() ?: return
+    private fun onDataLoaded(group: Group?, parentGroup: Group) {
+        this.parentGroup = parentGroup
+        this.group = group
 
-        if (title.isEmpty()) {
+        autotypeOptions = createInheritableOptions(
+            parentValue = parentGroup.autotypeEnabled.isEnabled
+        )
+        searchOptions = createInheritableOptions(
+            parentValue = parentGroup.searchEnabled.isEnabled
+        )
+
+        autotypeValues.value = autotypeOptions.map { formatInheritableOption(it) }
+        searchValues.value = searchOptions.map { formatInheritableOption(it) }
+
+        when (args.mode) {
+            GroupEditorMode.NEW -> {
+                selectedAutotypeValue.value = autotypeValues.value?.firstOrNull() ?: EMPTY
+                selectedSearchValue.value = searchValues.value?.firstOrNull() ?: EMPTY
+            }
+            GroupEditorMode.EDIT -> {
+                group?.let {
+                    title.value = it.title
+                    selectedAutotypeValue.value = formatInheritableOption(it.autotypeEnabled)
+                    selectedSearchValue.value = formatInheritableOption(it.searchEnabled)
+                }
+            }
+        }
+    }
+
+    private fun createNewGroup() {
+        val entity = createGroupEntity()
+
+        if (entity.title.isEmpty()) {
             errorText.value = resourceProvider.getString(R.string.empty_field)
             return
         }
@@ -101,44 +128,44 @@ class GroupEditorViewModel(
         hideKeyboardEvent.call()
         doneButtonVisibility.value = false
         errorText.value = null
-        screenState.value = ScreenState.loading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val createResult = interactor.createNewGroup(title, parentGroupUid)
+            val createResult = interactor.createNewGroup(entity)
 
             if (createResult.isSucceededOrDeferred) {
                 router.exit()
             } else {
                 doneButtonVisibility.value = true
 
-                val message = errorInteractor.processAndGetMessage(createResult.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = errorInteractor.processAndGetMessage(createResult.error)
+                    )
+                )
             }
         }
     }
 
     private fun updateGroup() {
         val group = group ?: return
-        val newTitle = groupTitle.value?.trim() ?: return
+        val newGroup = createGroupEntity()
 
-        if (newTitle.isEmpty()) {
+        if (newGroup.title.isEmpty()) {
             errorText.value = resourceProvider.getString(R.string.empty_field)
             return
         }
 
-        if (newTitle == group.title) {
+        if (newGroup.title == group.title &&
+            newGroup.autotypeEnabled == group.autotypeEnabled &&
+            newGroup.searchEnabled == group.searchEnabled) {
             router.exit()
             return
         }
 
         hideKeyboardEvent.call()
         doneButtonVisibility.value = false
-        screenState.value = ScreenState.loading()
-
-        val newGroup = GroupEntity(
-            uid = group.uid,
-            title = newTitle
-        )
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val updateResult = interactor.updateGroup(newGroup)
@@ -148,14 +175,119 @@ class GroupEditorViewModel(
             } else {
                 doneButtonVisibility.value = true
 
-                val message = errorInteractor.processAndGetMessage(updateResult.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = errorInteractor.processAndGetMessage(updateResult.error)
+                    )
+                )
             }
         }
     }
 
-    enum class Mode {
-        NEW,
-        EDIT
+    private fun determineScreenTitle(): String {
+        return when (args.mode) {
+            GroupEditorMode.NEW -> resourceProvider.getString(R.string.new_group)
+            GroupEditorMode.EDIT -> resourceProvider.getString(R.string.edit_group)
+        }
+    }
+
+    private fun formatInheritableOption(option: InheritableBooleanOption): String {
+        return when {
+            option.isInheritValue -> {
+                val value = if (option.isEnabled) {
+                    resourceProvider.getString(R.string.enable)
+                } else {
+                    resourceProvider.getString(R.string.disable)
+                }
+
+                resourceProvider.getString(
+                    R.string.inherit_from_parent_with_value,
+                    value
+                )
+            }
+            option.isEnabled -> resourceProvider.getString(R.string.enable)
+            else -> resourceProvider.getString(R.string.disable)
+        }
+    }
+
+    private fun createGroupEntity(): GroupEntity {
+        val uid = group?.uid
+        val parentUid = if (args.mode == GroupEditorMode.NEW) {
+            parentGroup?.uid
+        } else {
+            null
+        }
+
+        return GroupEntity(
+            uid = uid,
+            parentUid = parentUid,
+            title = title.value?.trim() ?: EMPTY,
+            autotypeEnabled = getAutotypeEnabledOption(),
+            searchEnabled = getSearchEnabledOption()
+        )
+    }
+
+    private fun getAutotypeEnabledOption(): InheritableBooleanOption {
+        val allValues = autotypeValues.value ?: return DEFAULT_INHERITABLE_OPTION
+        val selectedValue = selectedAutotypeValue.value ?: return DEFAULT_INHERITABLE_OPTION
+
+        val selectedIdx = allValues.indexOf(selectedValue)
+        if (selectedIdx == -1) {
+            return DEFAULT_INHERITABLE_OPTION
+        }
+
+        return autotypeOptions[selectedIdx]
+    }
+
+    private fun getSearchEnabledOption(): InheritableBooleanOption {
+        val allValues = searchValues.value ?: return DEFAULT_INHERITABLE_OPTION
+        val selectedValue = selectedSearchValue.value ?: return DEFAULT_INHERITABLE_OPTION
+
+        val selectedIdx = allValues.indexOf(selectedValue)
+        if (selectedIdx == -1) {
+            return DEFAULT_INHERITABLE_OPTION
+        }
+
+        return searchOptions[selectedIdx]
+    }
+
+    private fun createInheritableOptions(parentValue: Boolean): List<InheritableBooleanOption> {
+        return listOf(
+            InheritableBooleanOption(
+                isEnabled = parentValue,
+                isInheritValue = true,
+            ),
+            InheritableBooleanOption.ENABLED,
+            InheritableBooleanOption.DISABLED
+        )
+    }
+
+    private fun setScreenState(state: ScreenState) {
+        screenState.value = state
+    }
+
+    class Factory(private val args: GroupEditorArgs) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return GlobalInjector.get<GroupEditorViewModel>(
+                parametersOf(args)
+            ) as T
+        }
+    }
+
+    companion object {
+        private val DEFAULT_INHERITABLE_OPTION = InheritableBooleanOption(
+            isEnabled = true,
+            isInheritValue = true
+        )
+
+        private val DEFAULT_OPTIONS = listOf(
+            InheritableBooleanOption(
+                isEnabled = true,
+                isInheritValue = true,
+            ),
+            InheritableBooleanOption.ENABLED,
+            InheritableBooleanOption.DISABLED
+        )
     }
 }

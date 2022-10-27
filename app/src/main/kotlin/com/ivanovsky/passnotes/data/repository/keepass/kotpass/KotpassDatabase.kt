@@ -21,6 +21,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.KeepassJavaDatabase
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateDaoImpl
+import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.util.InputOutputUtils
@@ -53,6 +54,8 @@ class KotpassDatabase(
 
     private val lock = ReentrantLock()
     private val database = AtomicReference(db)
+    private val autotypeOptionMap = AtomicReference(createInheritableOptionsMap())
+    private val groupUidToParentMap = AtomicReference(createGroupUidToParentMap())
     private val status = AtomicReference(status)
     private val groupDao = KotpassGroupDao(this)
     private val noteDao = KotpassNoteDao(this)
@@ -146,6 +149,8 @@ class KotpassDatabase(
     fun swapDatabase(db: KeePassDatabase) {
         lock.withLock {
             database.set(db)
+            autotypeOptionMap.set(createInheritableOptionsMap())
+            groupUidToParentMap.set(createGroupUidToParentMap())
         }
     }
 
@@ -153,12 +158,21 @@ class KotpassDatabase(
 
     fun getRawRootGroup(): RawGroup = database.get().content.group
 
-    fun getRawParentGroup(childUid: UUID): OperationResult<RawGroup> {
-        val rootGroup = database.get().content.group
+    fun getRawRootGroupOptions(): InheritableOptions {
+        val root = getRawRootGroup()
 
-        val (_, parentGroup) = rootGroup.findChildGroup { parentGroup ->
-            parentGroup.groups.any { it.uuid == childUid }
-        }
+        return InheritableOptions(
+            autotypeEnabled = root.enableAutoType.convertToInheritableOption(
+                parentValue = DEFAULT_ROOT_INHERITABLE_VALUE
+            ),
+            searchEnabled = root.enableSearching.convertToInheritableOption(
+                parentValue = DEFAULT_ROOT_INHERITABLE_VALUE
+            )
+        )
+    }
+
+    fun getRawParentGroup(childUid: UUID): OperationResult<RawGroup> {
+        val parentGroup = groupUidToParentMap.get()[childUid]
             ?: return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP))
 
         return OperationResult.success(parentGroup)
@@ -176,7 +190,7 @@ class KotpassDatabase(
         return OperationResult.success(parentGroup)
     }
 
-    fun getRawChildGroups(root: RawGroup): OperationResult<List<RawGroup>> {
+    fun getRawChildGroups(root: RawGroup): List<RawGroup> {
         val nextGroups = LinkedList<RawGroup>()
             .apply {
                 add(root)
@@ -191,8 +205,10 @@ class KotpassDatabase(
             allGroups.addAll(currentGroup.groups)
         }
 
-        return OperationResult.success(allGroups)
+        return allGroups
     }
+
+    fun getAllRawGroups(): List<RawGroup> = database.get().getAllGroups()
 
     fun getRawChildEntries(root: RawGroup): List<Entry> {
         val nextGroups = LinkedList<RawGroup>()
@@ -231,7 +247,68 @@ class KotpassDatabase(
         return result
     }
 
+    fun getInheritableOptions(groupUid: UUID): OperationResult<InheritableOptions> {
+        val options = autotypeOptionMap.get()[groupUid]
+        return options?.let { OperationResult.success(it) }
+            ?: OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP))
+    }
+
+    private fun createInheritableOptionsMap(): Map<UUID, InheritableOptions> {
+        val result = hashMapOf<UUID, InheritableOptions>()
+
+        val root = getRawRootGroup()
+        val rootOptions = getRawRootGroupOptions()
+        result[root.uuid] = rootOptions
+
+        val nextGroups = LinkedList<Pair<RawGroup, InheritableOptions>>()
+            .apply {
+                add(Pair(root, rootOptions))
+            }
+
+        while (nextGroups.size > 0) {
+            val (group, parentOptions) = nextGroups.removeFirst()
+
+            val options = InheritableOptions(
+                autotypeEnabled = group.enableAutoType.convertToInheritableOption(
+                    parentValue = parentOptions.autotypeEnabled.isEnabled
+                ),
+                searchEnabled = group.enableSearching.convertToInheritableOption(
+                    parentValue = parentOptions.searchEnabled.isEnabled
+                )
+            )
+            result[group.uuid] = options
+
+            for (child in group.groups) {
+                nextGroups.add(Pair(child, options))
+            }
+        }
+
+        return result
+    }
+
+    private fun createGroupUidToParentMap(): Map<UUID, RawGroup> {
+        val result = hashMapOf<UUID, RawGroup>()
+
+        val nextGroups = LinkedList<RawGroup>()
+            .apply {
+                add(getRawRootGroup())
+            }
+
+        while (nextGroups.size > 0) {
+            val group = nextGroups.removeFirst()
+
+            for (child in group.groups) {
+                result[child.uuid] = group
+                nextGroups.add(child)
+            }
+        }
+
+        return result
+    }
+
     companion object {
+
+        const val DEFAULT_ROOT_INHERITABLE_VALUE = true
 
         fun open(
             fsProvider: FileSystemProvider,

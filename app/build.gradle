@@ -142,6 +142,17 @@ def koinVersion = '2.0.1'
 def roomVersion = '2.4.2'
 def lifecycleVersion = '2.2.0'
 def androidXVersion = '1.2.0'
+def legacySupportV4Version = '1.0.0'
+def androidAnnotationVersion = '1.1.0'
+def multidexVersion = '2.0.1'
+def coroutinesVersion = '1.5.0'
+def recyclerViewVersion = '1.1.0'
+def constrainLayoutVersion = '1.1.3'
+def cardViewVersion = '1.0.0'
+def coreKtxVersion = '1.3.1'
+def activityKtxVersion = '1.1.0'
+def preferenceKtxVersion = '1.1.1'
+def biometricVersion = '1.2.0-alpha05'
 
 def annimonStreamApiVersion = '1.1.4'
 def okHttpVersion = '4.9.1'
@@ -149,7 +160,11 @@ def apacheCommonsLangVersion = '3.0'
 def sardineAndroidVersion = 'v0.8'
 def ciceroneVersion = '7.0'
 def timberVersion = '5.0.1'
-def treessenceVersion = "1.0.5"
+def treessenceVersion = '1.0.5'
+def keepassJavaVersion = '2.1.4'
+def kotpassVersion = '0.4.10'
+def fuzzywuzzyVersion = '1.4.0'
+def jgitVersion = '6.2.0.202206071550-r'
 
 // Test
 def jUnitVersion = '4.13'
@@ -180,7 +195,7 @@ dependencies {
     androidTestImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
     // MultiDex
-    implementation "androidx.multidex:multidex:2.0.1"
+    implementation "androidx.multidex:multidex:$multidexVersion"
 
     // DI
     implementation "io.insert-koin:koin-android:$koinVersion"
@@ -197,20 +212,20 @@ dependencies {
 
     // AndroidX libraries
     implementation "androidx.appcompat:appcompat:$androidXVersion"
+    implementation "androidx.legacy:legacy-support-v4:$legacySupportV4Version"
     implementation "com.google.android.material:material:$androidXVersion"
-    implementation "androidx.legacy:legacy-support-v4:1.0.0"
-    implementation "androidx.recyclerview:recyclerview:1.1.0"
-    implementation "androidx.cardview:cardview:1.0.0"
-    implementation "androidx.annotation:annotation:1.1.0"
-    implementation "androidx.constraintlayout:constraintlayout:1.1.3"
-    implementation "androidx.preference:preference-ktx:1.1.1"
-    implementation "androidx.biometric:biometric-ktx:1.2.0-alpha05"
+    implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
+    implementation "androidx.cardview:cardview:$cardViewVersion"
+    implementation "androidx.annotation:annotation:$androidAnnotationVersion"
+    implementation "androidx.constraintlayout:constraintlayout:$constrainLayoutVersion"
+    implementation "androidx.biometric:biometric:$biometricVersion"
 
     // Android KTX
-    implementation "androidx.core:core-ktx:1.3.1"
+    implementation "androidx.core:core-ktx:$coreKtxVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion"
-    implementation "androidx.activity:activity-ktx:1.1.0"
+    implementation "androidx.activity:activity-ktx:$activityKtxVersion"
+    implementation "androidx.preference:preference-ktx:$preferenceKtxVersion"
 
     // Java stream API
     implementation "com.annimon:stream:$annimonStreamApiVersion"
@@ -221,7 +236,7 @@ dependencies {
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
 
     // OkHttp
     implementation "com.squareup.okhttp3:okhttp:$okHttpVersion"
@@ -238,14 +253,12 @@ dependencies {
     implementation "com.github.bastienpaulfr:Treessence:$treessenceVersion"
 
     // JGit
-    implementation "org.eclipse.jgit:org.eclipse.jgit:6.2.0.202206071550-r"
+    implementation "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"
 
-    // KeePassJava2
-    implementation "com.github.aivanovski:KeePassJava2-android:2.1.4"
-
-    // Kotpass
-    implementation "com.github.anvell:kotpass:0.4.10"
+    // KeePass
+    implementation "com.github.aivanovski:KeePassJava2-android:$keepassJavaVersion"
+    implementation "com.github.anvell:kotpass:$kotpassVersion"
 
     // Fuzzy search
-    implementation "me.xdrop:fuzzywuzzy:1.4.0"
+    implementation "me.xdrop:fuzzywuzzy:$fuzzywuzzyVersion"
 }

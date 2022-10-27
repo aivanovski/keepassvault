@@ -24,6 +24,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.TemplateDaoImpl
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.util.InputOutputUtils
+import io.github.anvell.kotpass.cryptography.EncryptedValue
 import io.github.anvell.kotpass.database.Credentials
 import io.github.anvell.kotpass.database.KeePassDatabase
 import io.github.anvell.kotpass.database.decode
@@ -245,9 +246,15 @@ class KotpassDatabase(
             }
 
             val contentStream = content.obj
+            val getCredentialsResult = getCredentials(key)
+            if (getCredentialsResult.isFailed) {
+                return getCredentialsResult.mapError()
+            }
+
+            val credentials = getCredentialsResult.obj
 
             try {
-                val db = KeePassDatabase.decode(contentStream, key.toCredentials())
+                val db = KeePassDatabase.decode(contentStream, credentials)
 
                 return OperationResult.success(
                     KotpassDatabase(
@@ -294,13 +301,26 @@ class KotpassDatabase(
             }
         }
 
-        private fun EncryptedDatabaseKey.toCredentials(): Credentials {
-            return when (this) {
+        private fun getCredentials(
+            key: EncryptedDatabaseKey
+        ): OperationResult<Credentials> {
+            return when (key) {
                 is PasswordKeepassKey -> {
-                    Credentials.from(this.getKey().obj)
+                    val credentials = Credentials.from(key.getKey().obj)
+                    OperationResult.success(credentials)
                 }
                 is FileKeepassKey -> {
-                    throw NotImplementedError()
+                    val getBytesResult = key.getKey()
+                    if (getBytesResult.isFailed) {
+                        return getBytesResult.mapError()
+                    }
+
+                    val bytes = getBytesResult.obj
+                    val credentials = Credentials.from(
+                        EncryptedValue.fromBinary(bytes)
+                    )
+
+                    OperationResult.success(credentials)
                 }
                 else -> throw IllegalArgumentException()
             }

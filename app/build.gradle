@@ -244,7 +244,7 @@ dependencies {
     implementation "com.github.aivanovski:KeePassJava2-android:2.1.4"
 
     // Kotpass
-    implementation 'com.github.anvell:kotpass:0.4.0'
+    implementation "com.github.anvell:kotpass:0.4.10"
 
     // Fuzzy search
     implementation "me.xdrop:fuzzywuzzy:1.4.0"

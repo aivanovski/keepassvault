@@ -24,13 +24,13 @@ import com.ivanovsky.passnotes.data.repository.keepass.TemplateDaoImpl
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.util.InputOutputUtils
-import io.github.anvell.kotpass.cryptography.EncryptedValue
-import io.github.anvell.kotpass.database.Credentials
-import io.github.anvell.kotpass.database.KeePassDatabase
-import io.github.anvell.kotpass.database.decode
-import io.github.anvell.kotpass.database.encode
-import io.github.anvell.kotpass.database.modifiers.modifyMeta
-import io.github.anvell.kotpass.models.Entry
+import app.keemobile.kotpass.cryptography.EncryptedValue
+import app.keemobile.kotpass.database.Credentials
+import app.keemobile.kotpass.database.KeePassDatabase
+import app.keemobile.kotpass.database.decode
+import app.keemobile.kotpass.database.encode
+import app.keemobile.kotpass.database.modifiers.modifyMeta
+import app.keemobile.kotpass.models.Entry
 import timber.log.Timber
 import java.io.IOException
 import java.io.InputStream
@@ -39,7 +39,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-import io.github.anvell.kotpass.models.Group as RawGroup
+import app.keemobile.kotpass.models.Group as RawGroup
 
 class KotpassDatabase(
     private val fsProvider: FileSystemProvider,

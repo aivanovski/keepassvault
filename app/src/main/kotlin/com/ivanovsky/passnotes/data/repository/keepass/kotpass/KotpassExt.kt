@@ -6,14 +6,14 @@ import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
-import io.github.anvell.kotpass.cryptography.EncryptedValue
-import io.github.anvell.kotpass.models.EntryValue
-import io.github.anvell.kotpass.models.TimeData
+import app.keemobile.kotpass.cryptography.EncryptedValue
+import app.keemobile.kotpass.models.EntryValue
+import app.keemobile.kotpass.models.TimeData
 import java.time.Instant
 import java.util.Date
 import java.util.UUID
-import io.github.anvell.kotpass.models.Entry as RawEntry
-import io.github.anvell.kotpass.models.Group as RawGroup
+import app.keemobile.kotpass.models.Entry as RawEntry
+import app.keemobile.kotpass.models.Group as RawGroup
 
 fun RawGroup.convertToGroup(): Group {
     return Group(

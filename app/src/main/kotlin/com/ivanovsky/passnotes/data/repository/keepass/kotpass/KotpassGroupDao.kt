@@ -13,12 +13,12 @@ import com.ivanovsky.passnotes.extensions.map
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.extensions.matches
-import io.github.anvell.kotpass.database.modifiers.modifyGroup
-import io.github.anvell.kotpass.database.modifiers.moveGroup
-import io.github.anvell.kotpass.database.modifiers.removeGroup
+import app.keemobile.kotpass.database.modifiers.modifyGroup
+import app.keemobile.kotpass.database.modifiers.moveGroup
+import app.keemobile.kotpass.database.modifiers.removeGroup
 import java.util.UUID
 import kotlin.concurrent.withLock
-import io.github.anvell.kotpass.models.Group as RawGroup
+import app.keemobile.kotpass.models.Group as RawGroup
 
 class KotpassGroupDao(
     private val db: KotpassDatabase

@@ -12,9 +12,9 @@ import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.extensions.matches
-import io.github.anvell.kotpass.database.findEntry
-import io.github.anvell.kotpass.database.modifiers.modifyGroup
-import io.github.anvell.kotpass.database.modifiers.removeEntry
+import app.keemobile.kotpass.database.findEntry
+import app.keemobile.kotpass.database.modifiers.modifyGroup
+import app.keemobile.kotpass.database.modifiers.removeEntry
 import java.util.UUID
 import kotlin.concurrent.withLock
 

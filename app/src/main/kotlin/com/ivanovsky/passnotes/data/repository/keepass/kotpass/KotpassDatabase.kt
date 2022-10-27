@@ -24,12 +24,13 @@ import com.ivanovsky.passnotes.data.repository.keepass.TemplateDaoImpl
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.util.InputOutputUtils
-import io.github.anvell.kotpass.database.Credentials
-import io.github.anvell.kotpass.database.KeePassDatabase
-import io.github.anvell.kotpass.database.decode
-import io.github.anvell.kotpass.database.encode
-import io.github.anvell.kotpass.database.modifiers.modifyMeta
-import io.github.anvell.kotpass.models.Entry
+import app.keemobile.kotpass.cryptography.EncryptedValue
+import app.keemobile.kotpass.database.Credentials
+import app.keemobile.kotpass.database.KeePassDatabase
+import app.keemobile.kotpass.database.decode
+import app.keemobile.kotpass.database.encode
+import app.keemobile.kotpass.database.modifiers.modifyMeta
+import app.keemobile.kotpass.models.Entry
 import timber.log.Timber
 import java.io.IOException
 import java.io.InputStream
@@ -38,7 +39,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-import io.github.anvell.kotpass.models.Group as RawGroup
+import app.keemobile.kotpass.models.Group as RawGroup
 
 class KotpassDatabase(
     private val fsProvider: FileSystemProvider,
@@ -245,9 +246,15 @@ class KotpassDatabase(
             }
 
             val contentStream = content.obj
+            val getCredentialsResult = getCredentials(key)
+            if (getCredentialsResult.isFailed) {
+                return getCredentialsResult.mapError()
+            }
+
+            val credentials = getCredentialsResult.obj
 
             try {
-                val db = KeePassDatabase.decode(contentStream, key.toCredentials())
+                val db = KeePassDatabase.decode(contentStream, credentials)
 
                 return OperationResult.success(
                     KotpassDatabase(
@@ -294,13 +301,26 @@ class KotpassDatabase(
             }
         }
 
-        private fun EncryptedDatabaseKey.toCredentials(): Credentials {
-            return when (this) {
+        private fun getCredentials(
+            key: EncryptedDatabaseKey
+        ): OperationResult<Credentials> {
+            return when (key) {
                 is PasswordKeepassKey -> {
-                    Credentials.from(this.getKey().obj)
+                    val credentials = Credentials.from(key.getKey().obj)
+                    OperationResult.success(credentials)
                 }
                 is FileKeepassKey -> {
-                    throw NotImplementedError()
+                    val getBytesResult = key.getKey()
+                    if (getBytesResult.isFailed) {
+                        return getBytesResult.mapError()
+                    }
+
+                    val bytes = getBytesResult.obj
+                    val credentials = Credentials.from(
+                        EncryptedValue.fromBinary(bytes)
+                    )
+
+                    OperationResult.success(credentials)
                 }
                 else -> throw IllegalArgumentException()
             }

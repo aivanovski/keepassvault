@@ -15,4 +15,27 @@ data class InheritableBooleanOption(
 ) : InheritableOption(
     type = InheritableOptionType.BOOLEAN,
     isInheritValue = isInheritValue
-)
+) {
+
+    fun inherit(): InheritableBooleanOption {
+        return InheritableBooleanOption(
+            isEnabled = isEnabled,
+            isInheritValue = true
+        )
+    }
+
+    companion object {
+
+        @JvmStatic
+        val ENABLED = InheritableBooleanOption(
+            isEnabled = true,
+            isInheritValue = false
+        )
+
+        @JvmStatic
+        val DISABLED = InheritableBooleanOption(
+            isEnabled = false,
+            isInheritValue = false
+        )
+    }
+}

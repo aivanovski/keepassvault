@@ -60,20 +60,27 @@ class SearchInteractor(
             val allNotes = getAllNotesResult.obj
             val allGroups = getAllGroupsResult.obj
 
+            val searchableGroupMap = allGroups
+                .filter { it.searchEnabled.isEnabled }
+                .associateBy { it.uid }
+
+            val searchableNotes = allNotes
+                .filter { searchableGroupMap.containsKey(it.groupUid) }
+
             val items = if (isRespectAutotypeProperty) {
-                val visibleGroups = allGroups
+                val autotypeableGroups = searchableGroupMap.values
                     .filter { it.uid != root.uid && it.autotypeEnabled.isEnabled }
 
-                val visibleGroupsMap = allGroups
+                val autotypeableGroupMap = searchableGroupMap.values
                     .filter { it.autotypeEnabled.isEnabled }
                     .associateBy { it.uid }
 
-                val visibleNotes = allNotes
-                    .filter { visibleGroupsMap.containsKey(it.groupUid) }
+                val autotypeableNotes = searchableNotes
+                    .filter { autotypeableGroupMap.containsKey(it.groupUid) }
 
-                visibleNotes + visibleGroups
+                autotypeableNotes + autotypeableGroups
             } else {
-                allNotes + allGroups.filter { it.uid != root.uid }
+                searchableNotes + searchableGroupMap.values.filter { it.uid != root.uid }
             }
 
             val result = sortUseCase.sortGroupsAndNotesAccordingToSettings(items)

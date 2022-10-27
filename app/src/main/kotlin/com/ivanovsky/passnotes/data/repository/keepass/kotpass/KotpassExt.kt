@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
+import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import app.keemobile.kotpass.cryptography.EncryptedValue
@@ -57,7 +58,7 @@ fun KeePassDatabase.getAllGroups(): List<RawGroup> {
 
 fun RawGroup.convertToGroup(
     parentGroupUid: UUID?,
-    autotypeEnabled: InheritableBooleanOption
+    options: InheritableOptions
 ): Group {
     return Group(
         uid = uuid,
@@ -65,7 +66,8 @@ fun RawGroup.convertToGroup(
         title = name,
         groupCount = groups.size,
         noteCount = entries.size,
-        autotypeEnabled = autotypeEnabled
+        autotypeEnabled = options.autotypeEnabled,
+        searchEnabled = options.searchEnabled
     )
 }
 

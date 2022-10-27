@@ -61,6 +61,22 @@
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
+        <com.ivanovsky.passnotes.presentation.core.widget.MaterialSpinner
+            android:id="@+id/searchSpinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:layout_marginTop="@dimen/element_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            app:hint="@{@string/search}"
+            app:item="@={viewModel.selectedSearchValue}"
+            app:items="@{viewModel.searchValues}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/autotypeSpinner"
+            app:layout_constraintWidth_percent="0.65"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

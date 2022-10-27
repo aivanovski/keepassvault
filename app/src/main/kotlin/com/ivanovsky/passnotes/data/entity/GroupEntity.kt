@@ -6,5 +6,6 @@ data class GroupEntity(
     val uid: UUID? = null,
     val parentUid: UUID? = null,
     val title: String,
-    val autotypeEnabled: InheritableBooleanOption
+    val autotypeEnabled: InheritableBooleanOption,
+    val searchEnabled: InheritableBooleanOption
 )

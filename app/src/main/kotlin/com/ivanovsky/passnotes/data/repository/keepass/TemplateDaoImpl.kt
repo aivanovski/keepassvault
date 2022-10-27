@@ -91,10 +91,8 @@ class TemplateDaoImpl(
         val templateGroup = GroupEntity(
             title = TEMPLATE_GROUP_NAME,
             parentUid = rootGroup.uid,
-            autotypeEnabled = InheritableBooleanOption(
-                isEnabled = false,
-                isInheritValue = false
-            )
+            autotypeEnabled = InheritableBooleanOption.DISABLED,
+            searchEnabled = InheritableBooleanOption.DISABLED
         )
         val insertGroupResult = groupDao.insert(templateGroup, doInterstitialCommits)
         if (insertGroupResult.isFailed) {

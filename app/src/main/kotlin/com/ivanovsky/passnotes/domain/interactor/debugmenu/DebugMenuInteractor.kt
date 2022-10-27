@@ -305,10 +305,8 @@ class DebugMenuInteractor(
         val newGroup = GroupEntity(
             parentUid = rootGroupUid,
             title = newGroupTitle,
-            autotypeEnabled = InheritableBooleanOption(
-                isEnabled = rootGroup.autotypeEnabled.isEnabled,
-                isInheritValue = true
-            )
+            autotypeEnabled = rootGroup.autotypeEnabled.inherit(),
+            searchEnabled = rootGroup.searchEnabled.inherit()
         )
 
         val insertResult = db.groupDao.insert(newGroup)

@@ -145,8 +145,10 @@ public class KeepassJavaGroupDao implements GroupDao {
                 keepassGroup.getName(),
                 keepassGroup.getGroupsCount(),
                 keepassGroup.getEntriesCount(),
-                // Property 'enableAutotype' is not accessible, let it be always true
-                new InheritableBooleanOption(true, false)
+                // Property 'enableAutotype' and 'enableSearching' is not accessible,
+                // let them always be true
+                InheritableBooleanOption.getENABLED(),
+                InheritableBooleanOption.getENABLED()
         );
     }
 

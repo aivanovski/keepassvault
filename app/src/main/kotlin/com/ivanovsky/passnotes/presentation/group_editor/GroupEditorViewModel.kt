@@ -36,8 +36,10 @@ class GroupEditorViewModel(
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.loading())
     val screenTitle = determineScreenTitle()
-    val autotypeValues = MutableLiveData(formatAllAuotypeValues(isParentAutotypeEnabled = null))
+    val autotypeValues = MutableLiveData(emptyList<String>())
     val selectedAutotypeValue = MutableLiveData(EMPTY)
+    val searchValues = MutableLiveData(emptyList<String>())
+    val selectedSearchValue = MutableLiveData(EMPTY)
     val title = MutableLiveData(EMPTY)
     val errorText = MutableLiveData<String?>()
     val doneButtonVisibility = MutableLiveData(true)
@@ -46,6 +48,8 @@ class GroupEditorViewModel(
 
     private var group: Group? = null
     private var parentGroup: Group? = null
+    private var autotypeOptions = DEFAULT_OPTIONS
+    private var searchOptions = DEFAULT_OPTIONS
 
     fun onScreenCreated() {
         loadData()
@@ -88,18 +92,26 @@ class GroupEditorViewModel(
         this.parentGroup = parentGroup
         this.group = group
 
-        autotypeValues.value = formatAllAuotypeValues(
-            isParentAutotypeEnabled = parentGroup.autotypeEnabled.isEnabled
+        autotypeOptions = createInheritableOptions(
+            parentValue = parentGroup.autotypeEnabled.isEnabled
         )
+        searchOptions = createInheritableOptions(
+            parentValue = parentGroup.searchEnabled.isEnabled
+        )
+
+        autotypeValues.value = autotypeOptions.map { formatInheritableOption(it) }
+        searchValues.value = searchOptions.map { formatInheritableOption(it) }
 
         when (args.mode) {
             GroupEditorMode.NEW -> {
                 selectedAutotypeValue.value = autotypeValues.value?.firstOrNull() ?: EMPTY
+                selectedSearchValue.value = searchValues.value?.firstOrNull() ?: EMPTY
             }
             GroupEditorMode.EDIT -> {
                 group?.let {
                     title.value = it.title
-                    selectedAutotypeValue.value = formatAutotypeValue(it.autotypeEnabled)
+                    selectedAutotypeValue.value = formatInheritableOption(it.autotypeEnabled)
+                    selectedSearchValue.value = formatInheritableOption(it.searchEnabled)
                 }
             }
         }
@@ -144,7 +156,9 @@ class GroupEditorViewModel(
             return
         }
 
-        if (newGroup.title == group.title && newGroup.autotypeEnabled == group.autotypeEnabled) {
+        if (newGroup.title == group.title &&
+            newGroup.autotypeEnabled == group.autotypeEnabled &&
+            newGroup.searchEnabled == group.searchEnabled) {
             router.exit()
             return
         }
@@ -177,34 +191,10 @@ class GroupEditorViewModel(
         }
     }
 
-    private fun formatAllAuotypeValues(isParentAutotypeEnabled: Boolean?): List<String> {
-        return mutableListOf<String>()
-            .apply {
-                if (isParentAutotypeEnabled != null) {
-                    val value = if (isParentAutotypeEnabled) {
-                        resourceProvider.getString(R.string.enable)
-                    } else {
-                        resourceProvider.getString(R.string.disable)
-                    }
-
-                    add(
-                        resourceProvider.getString(
-                            R.string.inherit_from_parent_with_value,
-                            value
-                        )
-                    )
-                } else {
-                    add(resourceProvider.getString(R.string.inherit_from_parent))
-                }
-                add(resourceProvider.getString(R.string.enable))
-                add(resourceProvider.getString(R.string.disable))
-            }
-    }
-
-    private fun formatAutotypeValue(autotypeEnabled: InheritableBooleanOption): String {
+    private fun formatInheritableOption(option: InheritableBooleanOption): String {
         return when {
-            autotypeEnabled.isInheritValue -> {
-                val value = if (autotypeEnabled.isEnabled) {
+            option.isInheritValue -> {
+                val value = if (option.isEnabled) {
                     resourceProvider.getString(R.string.enable)
                 } else {
                     resourceProvider.getString(R.string.disable)
@@ -215,7 +205,7 @@ class GroupEditorViewModel(
                     value
                 )
             }
-            autotypeEnabled.isEnabled -> resourceProvider.getString(R.string.enable)
+            option.isEnabled -> resourceProvider.getString(R.string.enable)
             else -> resourceProvider.getString(R.string.disable)
         }
     }
@@ -232,35 +222,44 @@ class GroupEditorViewModel(
             uid = uid,
             parentUid = parentUid,
             title = title.value?.trim() ?: EMPTY,
-            autotypeEnabled = getAutotypeEnabledOption()
+            autotypeEnabled = getAutotypeEnabledOption(),
+            searchEnabled = getSearchEnabledOption()
         )
     }
 
     private fun getAutotypeEnabledOption(): InheritableBooleanOption {
-        val allValues = autotypeValues.value ?: return DEFAULT_AUTOTYPE_ENABLED_OPTION
-        val selectedValue = selectedAutotypeValue.value ?: return DEFAULT_AUTOTYPE_ENABLED_OPTION
-        val parentAutotypeEnabled = parentGroup?.autotypeEnabled
-            ?: return DEFAULT_AUTOTYPE_ENABLED_OPTION
+        val allValues = autotypeValues.value ?: return DEFAULT_INHERITABLE_OPTION
+        val selectedValue = selectedAutotypeValue.value ?: return DEFAULT_INHERITABLE_OPTION
 
-        return if (allValues.contains(selectedValue)) {
-            val position = allValues.indexOf(selectedValue)
-
-            val isInheritValue = (position == 0)
-
-            InheritableBooleanOption(
-                isEnabled = if (isInheritValue) {
-                    parentAutotypeEnabled.isEnabled
-                } else {
-                    (position == 1)
-                },
-                isInheritValue = isInheritValue
-            )
-        } else {
-            InheritableBooleanOption(
-                isEnabled = parentAutotypeEnabled.isEnabled,
-                isInheritValue = true
-            )
+        val selectedIdx = allValues.indexOf(selectedValue)
+        if (selectedIdx == -1) {
+            return DEFAULT_INHERITABLE_OPTION
         }
+
+        return autotypeOptions[selectedIdx]
+    }
+
+    private fun getSearchEnabledOption(): InheritableBooleanOption {
+        val allValues = searchValues.value ?: return DEFAULT_INHERITABLE_OPTION
+        val selectedValue = selectedSearchValue.value ?: return DEFAULT_INHERITABLE_OPTION
+
+        val selectedIdx = allValues.indexOf(selectedValue)
+        if (selectedIdx == -1) {
+            return DEFAULT_INHERITABLE_OPTION
+        }
+
+        return searchOptions[selectedIdx]
+    }
+
+    private fun createInheritableOptions(parentValue: Boolean): List<InheritableBooleanOption> {
+        return listOf(
+            InheritableBooleanOption(
+                isEnabled = parentValue,
+                isInheritValue = true,
+            ),
+            InheritableBooleanOption.ENABLED,
+            InheritableBooleanOption.DISABLED
+        )
     }
 
     private fun setScreenState(state: ScreenState) {
@@ -277,9 +276,18 @@ class GroupEditorViewModel(
     }
 
     companion object {
-        private val DEFAULT_AUTOTYPE_ENABLED_OPTION = InheritableBooleanOption(
+        private val DEFAULT_INHERITABLE_OPTION = InheritableBooleanOption(
             isEnabled = true,
             isInheritValue = true
+        )
+
+        private val DEFAULT_OPTIONS = listOf(
+            InheritableBooleanOption(
+                isEnabled = true,
+                isInheritValue = true,
+            ),
+            InheritableBooleanOption.ENABLED,
+            InheritableBooleanOption.DISABLED
         )
     }
 }

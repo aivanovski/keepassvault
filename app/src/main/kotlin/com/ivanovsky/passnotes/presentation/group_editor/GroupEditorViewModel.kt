@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.group_editor
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
@@ -12,13 +13,14 @@ import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.group_editor.GroupEditorInteractor
+import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
-import java.util.UUID
+import org.koin.core.parameter.parametersOf
 
 class GroupEditorViewModel(
     private val interactor: GroupEditorInteractor,
@@ -26,35 +28,23 @@ class GroupEditorViewModel(
     lockInteractor: DatabaseLockInteractor,
     private val resourceProvider: ResourceProvider,
     observerBus: ObserverBus,
-    private val router: Router
+    private val router: Router,
+    private val args: GroupEditorArgs
 ) : ViewModel() {
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
+    val screenTitle = getScreenTitleInternal()
     val groupTitle = MutableLiveData(EMPTY)
     val errorText = MutableLiveData<String?>()
     val doneButtonVisibility = MutableLiveData(true)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
 
-    private lateinit var mode: Mode
-    private var groupUid: UUID? = null
-    private var parentGroupUid: UUID? = null
     private var group: Group? = null
 
-    fun start(args: GroupEditorArgs) {
-        when (args) {
-            is GroupEditorArgs.NewGroup -> {
-                parentGroupUid = args.parentGroupUid
-                mode = Mode.NEW
-            }
-            is GroupEditorArgs.EditGroup ->{
-                groupUid = args.groupUid
-                mode = Mode.EDIT
-            }
-        }
-
-        if (mode == Mode.EDIT) {
+    fun onScreenCreated() {
+        if (args.mode == GroupEditorMode.EDIT) {
             loadData()
         } else {
             screenState.value = ScreenState.data()
@@ -62,7 +52,7 @@ class GroupEditorViewModel(
     }
 
     fun loadData() {
-        val groupUid = groupUid ?: return
+        val groupUid = args.groupUid ?: return
 
         screenState.value = ScreenState.loading()
 
@@ -81,16 +71,16 @@ class GroupEditorViewModel(
     }
 
     fun onDoneButtonClicked() {
-        when (mode) {
-            Mode.NEW -> createNewGroup()
-            Mode.EDIT -> updateGroup()
+        when (args.mode) {
+            GroupEditorMode.NEW -> createNewGroup()
+            GroupEditorMode.EDIT -> updateGroup()
         }
     }
 
     fun navigateBack() = router.exit()
 
     private fun createNewGroup() {
-        val parentGroupUid = parentGroupUid ?: return
+        val parentGroupUid = args.parentGroupUid ?: return
         val title = groupTitle.value?.trim() ?: return
 
         if (title.isEmpty()) {
@@ -154,8 +144,19 @@ class GroupEditorViewModel(
         }
     }
 
-    enum class Mode {
-        NEW,
-        EDIT
+    private fun getScreenTitleInternal(): String {
+        return when (args.mode) {
+            GroupEditorMode.NEW -> resourceProvider.getString(R.string.new_group)
+            GroupEditorMode.EDIT -> resourceProvider.getString(R.string.edit_group)
+        }
+    }
+
+    class Factory(private val args: GroupEditorArgs) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            return GlobalInjector.get<GroupEditorViewModel>(
+                parametersOf(args)
+            ) as T
+        }
     }
 }

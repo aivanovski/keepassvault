@@ -70,6 +70,7 @@ import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel
 import com.ivanovsky.passnotes.presentation.dialogs.sort_and_view.SortAndViewDialogViewModel
+import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.main.MainScreenArgs
@@ -233,7 +234,7 @@ object KoinModule {
             factory { (args: StorageListArgs) -> StorageListViewModel(get(), get(), get(), get(), get(), get(), get(), args) }
             factory { (args: FilePickerArgs) -> FilePickerViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
-            viewModel { GroupEditorViewModel(get(), get(), get(), get(), get(), get()) }
+            factory { (args: GroupEditorArgs) -> GroupEditorViewModel(get(), get(), get(), get(), get(), get(), args) }
             viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
             factory { (args: NoteScreenArgs) -> NoteViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }
             factory { (args: GroupsScreenArgs) -> GroupsViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), args) }

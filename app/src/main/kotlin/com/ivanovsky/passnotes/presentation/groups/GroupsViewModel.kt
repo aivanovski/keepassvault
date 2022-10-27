@@ -235,7 +235,7 @@ class GroupsViewModel(
 
         router.navigateTo(
             GroupEditorScreen(
-                GroupEditorArgs.NewGroup(
+                GroupEditorArgs.newGroupArgs(
                     parentGroupUid = currentGroupUid
                 )
             )
@@ -275,7 +275,7 @@ class GroupsViewModel(
     fun onEditGroupClicked(group: Group) {
         router.navigateTo(
             GroupEditorScreen(
-                GroupEditorArgs.EditGroup(
+                GroupEditorArgs.editGroupArgs(
                     groupUid = group.uid
                 )
             )

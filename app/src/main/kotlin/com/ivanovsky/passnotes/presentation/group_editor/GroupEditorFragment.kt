@@ -2,9 +2,9 @@ package com.ivanovsky.passnotes.presentation.group_editor
 
 import android.os.Bundle
 import android.view.*
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.github.terrakok.cicerone.Router
-import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.GroupEditorFragmentBinding
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
@@ -16,18 +16,22 @@ import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class GroupEditorFragment : FragmentWithDoneButton() {
 
-    private val viewModel: GroupEditorViewModel by viewModel()
-    private val args: GroupEditorArgs by lazy { getMandatoryArgument(ARGS) }
+    private val viewModel: GroupEditorViewModel by lazy {
+        ViewModelProvider(
+            this,
+            GroupEditorViewModel.Factory(args = getMandatoryArgument(ARGUMENTS))
+        )
+            .get(GroupEditorViewModel::class.java)
+    }
     private val router: Router by inject()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         setupActionBar {
-            title = getScreenTitle()
+            title = viewModel.screenTitle
             setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
         }
@@ -70,7 +74,7 @@ class GroupEditorFragment : FragmentWithDoneButton() {
         subscribeToLiveData()
         subscribeToEvents()
 
-        viewModel.start(args)
+        viewModel.onScreenCreated()
     }
 
     private fun subscribeToLiveData() {
@@ -92,19 +96,12 @@ class GroupEditorFragment : FragmentWithDoneButton() {
         }
     }
 
-    private fun getScreenTitle(): String {
-        return when(args) {
-            is GroupEditorArgs.NewGroup -> getString(R.string.new_group)
-            is GroupEditorArgs.EditGroup -> getString(R.string.edit_group)
-        }
-    }
-
     companion object {
 
-        private const val ARGS = "args"
+        private const val ARGUMENTS = "args"
 
         fun newInstance(args: GroupEditorArgs) = GroupEditorFragment().withArguments {
-            putParcelable(ARGS, args)
+            putParcelable(ARGUMENTS, args)
         }
     }
 }

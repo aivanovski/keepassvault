@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
+import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -33,40 +34,44 @@ class GroupEditorViewModel(
 ) : ViewModel() {
 
     val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.notInitialized())
-    val screenTitle = getScreenTitleInternal()
-    val groupTitle = MutableLiveData(EMPTY)
+    val screenState = MutableLiveData(ScreenState.loading())
+    val screenTitle = determineScreenTitle()
+    val autotypeValues = MutableLiveData(formatAllAuotypeValues(isParentAutotypeEnabled = null))
+    val selectedAutotypeValue = MutableLiveData(EMPTY)
+    val title = MutableLiveData(EMPTY)
     val errorText = MutableLiveData<String?>()
     val doneButtonVisibility = MutableLiveData(true)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
 
     private var group: Group? = null
+    private var parentGroup: Group? = null
 
     fun onScreenCreated() {
-        if (args.mode == GroupEditorMode.EDIT) {
-            loadData()
-        } else {
-            screenState.value = ScreenState.data()
-        }
+        loadData()
     }
 
-    fun loadData() {
-        val groupUid = args.groupUid ?: return
-
-        screenState.value = ScreenState.loading()
+    private fun loadData() {
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val getGroupResult = interactor.getGroup(groupUid)
-
-            if (getGroupResult.isSucceededOrDeferred) {
-                group = getGroupResult.obj
-                groupTitle.value = getGroupResult.obj.title
-                screenState.value = ScreenState.data()
-            } else {
-                val message = errorInteractor.processAndGetMessage(getGroupResult.error)
-                screenState.value = ScreenState.error(message)
+            val loadDataResult = interactor.loadData(
+                groupUid = args.groupUid,
+                parentGroupUid = args.parentGroupUid
+            )
+            if (loadDataResult.isFailed) {
+                setScreenState(
+                    ScreenState.error(
+                        errorText = errorInteractor.processAndGetMessage(loadDataResult.error)
+                    )
+                )
+                return@launch
             }
+
+            val (group, parentGroup) = loadDataResult.obj
+
+            onDataLoaded(group, parentGroup)
+            setScreenState(ScreenState.data())
         }
     }
 
@@ -79,11 +84,31 @@ class GroupEditorViewModel(
 
     fun navigateBack() = router.exit()
 
-    private fun createNewGroup() {
-        val parentGroupUid = args.parentGroupUid ?: return
-        val title = groupTitle.value?.trim() ?: return
+    private fun onDataLoaded(group: Group?, parentGroup: Group) {
+        this.parentGroup = parentGroup
+        this.group = group
 
-        if (title.isEmpty()) {
+        autotypeValues.value = formatAllAuotypeValues(
+            isParentAutotypeEnabled = parentGroup.autotypeEnabled.isEnabled
+        )
+
+        when (args.mode) {
+            GroupEditorMode.NEW -> {
+                selectedAutotypeValue.value = autotypeValues.value?.firstOrNull() ?: EMPTY
+            }
+            GroupEditorMode.EDIT -> {
+                group?.let {
+                    title.value = it.title
+                    selectedAutotypeValue.value = formatAutotypeValue(it.autotypeEnabled)
+                }
+            }
+        }
+    }
+
+    private fun createNewGroup() {
+        val entity = createGroupEntity()
+
+        if (entity.title.isEmpty()) {
             errorText.value = resourceProvider.getString(R.string.empty_field)
             return
         }
@@ -91,44 +116,42 @@ class GroupEditorViewModel(
         hideKeyboardEvent.call()
         doneButtonVisibility.value = false
         errorText.value = null
-        screenState.value = ScreenState.loading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val createResult = interactor.createNewGroup(title, parentGroupUid)
+            val createResult = interactor.createNewGroup(entity)
 
             if (createResult.isSucceededOrDeferred) {
                 router.exit()
             } else {
                 doneButtonVisibility.value = true
 
-                val message = errorInteractor.processAndGetMessage(createResult.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = errorInteractor.processAndGetMessage(createResult.error)
+                    )
+                )
             }
         }
     }
 
     private fun updateGroup() {
         val group = group ?: return
-        val newTitle = groupTitle.value?.trim() ?: return
+        val newGroup = createGroupEntity()
 
-        if (newTitle.isEmpty()) {
+        if (newGroup.title.isEmpty()) {
             errorText.value = resourceProvider.getString(R.string.empty_field)
             return
         }
 
-        if (newTitle == group.title) {
+        if (newGroup.title == group.title && newGroup.autotypeEnabled == group.autotypeEnabled) {
             router.exit()
             return
         }
 
         hideKeyboardEvent.call()
         doneButtonVisibility.value = false
-        screenState.value = ScreenState.loading()
-
-        val newGroup = GroupEntity(
-            uid = group.uid,
-            title = newTitle
-        )
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val updateResult = interactor.updateGroup(newGroup)
@@ -138,17 +161,110 @@ class GroupEditorViewModel(
             } else {
                 doneButtonVisibility.value = true
 
-                val message = errorInteractor.processAndGetMessage(updateResult.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = errorInteractor.processAndGetMessage(updateResult.error)
+                    )
+                )
             }
         }
     }
 
-    private fun getScreenTitleInternal(): String {
+    private fun determineScreenTitle(): String {
         return when (args.mode) {
             GroupEditorMode.NEW -> resourceProvider.getString(R.string.new_group)
             GroupEditorMode.EDIT -> resourceProvider.getString(R.string.edit_group)
         }
+    }
+
+    private fun formatAllAuotypeValues(isParentAutotypeEnabled: Boolean?): List<String> {
+        return mutableListOf<String>()
+            .apply {
+                if (isParentAutotypeEnabled != null) {
+                    val value = if (isParentAutotypeEnabled) {
+                        resourceProvider.getString(R.string.enable)
+                    } else {
+                        resourceProvider.getString(R.string.disable)
+                    }
+
+                    add(
+                        resourceProvider.getString(
+                            R.string.inherit_from_parent_with_value,
+                            value
+                        )
+                    )
+                } else {
+                    add(resourceProvider.getString(R.string.inherit_from_parent))
+                }
+                add(resourceProvider.getString(R.string.enable))
+                add(resourceProvider.getString(R.string.disable))
+            }
+    }
+
+    private fun formatAutotypeValue(autotypeEnabled: InheritableBooleanOption): String {
+        return when {
+            autotypeEnabled.isInheritValue -> {
+                val value = if (autotypeEnabled.isEnabled) {
+                    resourceProvider.getString(R.string.enable)
+                } else {
+                    resourceProvider.getString(R.string.disable)
+                }
+
+                resourceProvider.getString(
+                    R.string.inherit_from_parent_with_value,
+                    value
+                )
+            }
+            autotypeEnabled.isEnabled -> resourceProvider.getString(R.string.enable)
+            else -> resourceProvider.getString(R.string.disable)
+        }
+    }
+
+    private fun createGroupEntity(): GroupEntity {
+        val uid = group?.uid
+        val parentUid = if (args.mode == GroupEditorMode.NEW) {
+            parentGroup?.uid
+        } else {
+            null
+        }
+
+        return GroupEntity(
+            uid = uid,
+            parentUid = parentUid,
+            title = title.value?.trim() ?: EMPTY,
+            autotypeEnabled = getAutotypeEnabledOption()
+        )
+    }
+
+    private fun getAutotypeEnabledOption(): InheritableBooleanOption {
+        val allValues = autotypeValues.value ?: return DEFAULT_AUTOTYPE_ENABLED_OPTION
+        val selectedValue = selectedAutotypeValue.value ?: return DEFAULT_AUTOTYPE_ENABLED_OPTION
+        val parentAutotypeEnabled = parentGroup?.autotypeEnabled
+            ?: return DEFAULT_AUTOTYPE_ENABLED_OPTION
+
+        return if (allValues.contains(selectedValue)) {
+            val position = allValues.indexOf(selectedValue)
+
+            val isInheritValue = (position == 0)
+
+            InheritableBooleanOption(
+                isEnabled = if (isInheritValue) {
+                    parentAutotypeEnabled.isEnabled
+                } else {
+                    (position == 1)
+                },
+                isInheritValue = isInheritValue
+            )
+        } else {
+            InheritableBooleanOption(
+                isEnabled = parentAutotypeEnabled.isEnabled,
+                isInheritValue = true
+            )
+        }
+    }
+
+    private fun setScreenState(state: ScreenState) {
+        screenState.value = state
     }
 
     class Factory(private val args: GroupEditorArgs) : ViewModelProvider.Factory {
@@ -158,5 +274,12 @@ class GroupEditorViewModel(
                 parametersOf(args)
             ) as T
         }
+    }
+
+    companion object {
+        private val DEFAULT_AUTOTYPE_ENABLED_OPTION = InheritableBooleanOption(
+            isEnabled = true,
+            isInheritValue = true
+        )
     }
 }

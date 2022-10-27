@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.keepass.kotpass
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_OPERATION
@@ -53,6 +54,8 @@ class KotpassDatabase(
 
     private val lock = ReentrantLock()
     private val database = AtomicReference(db)
+    private val autotypeOptionMap = AtomicReference(createAutotypeOptionMap())
+    private val groupUidToParentMap = AtomicReference(createGroupUidToParentMap())
     private val status = AtomicReference(status)
     private val groupDao = KotpassGroupDao(this)
     private val noteDao = KotpassNoteDao(this)
@@ -146,6 +149,8 @@ class KotpassDatabase(
     fun swapDatabase(db: KeePassDatabase) {
         lock.withLock {
             database.set(db)
+            autotypeOptionMap.set(createAutotypeOptionMap())
+            groupUidToParentMap.set(createGroupUidToParentMap())
         }
     }
 
@@ -154,11 +159,7 @@ class KotpassDatabase(
     fun getRawRootGroup(): RawGroup = database.get().content.group
 
     fun getRawParentGroup(childUid: UUID): OperationResult<RawGroup> {
-        val rootGroup = database.get().content.group
-
-        val (_, parentGroup) = rootGroup.findChildGroup { parentGroup ->
-            parentGroup.groups.any { it.uuid == childUid }
-        }
+        val parentGroup = groupUidToParentMap.get()[childUid]
             ?: return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP))
 
         return OperationResult.success(parentGroup)
@@ -176,7 +177,7 @@ class KotpassDatabase(
         return OperationResult.success(parentGroup)
     }
 
-    fun getRawChildGroups(root: RawGroup): OperationResult<List<RawGroup>> {
+    fun getRawChildGroups(root: RawGroup): List<RawGroup> {
         val nextGroups = LinkedList<RawGroup>()
             .apply {
                 add(root)
@@ -191,8 +192,10 @@ class KotpassDatabase(
             allGroups.addAll(currentGroup.groups)
         }
 
-        return OperationResult.success(allGroups)
+        return allGroups
     }
+
+    fun getAllRawGroups(): List<RawGroup> = database.get().getAllGroups()
 
     fun getRawChildEntries(root: RawGroup): List<Entry> {
         val nextGroups = LinkedList<RawGroup>()
@@ -231,7 +234,64 @@ class KotpassDatabase(
         return result
     }
 
+    fun getAutotypeEnabled(groupUid: UUID): OperationResult<InheritableBooleanOption> {
+        val value = autotypeOptionMap.get()[groupUid]
+        return value?.let { OperationResult.success(it) }
+            ?: OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP))
+    }
+
+    private fun createAutotypeOptionMap(): Map<UUID, InheritableBooleanOption> {
+        val result = hashMapOf<UUID, InheritableBooleanOption>()
+
+        val root = getRawRootGroup()
+        result[root.uuid] = root.enableAutoType.convertToInheritableOption(
+            parentValue = ROOT_AUTOTYPE_ENABLED_DEFAULT_VALUE
+        )
+
+        val nextGroups = LinkedList<Pair<RawGroup, Boolean>>()
+            .apply {
+                add(Pair(root, true))
+            }
+
+        while (nextGroups.size > 0) {
+            val (group, parentValue) = nextGroups.removeFirst()
+
+            val groupValue = group.enableAutoType.convertToInheritableOption(
+                parentValue = parentValue
+            )
+            result[group.uuid] = groupValue
+
+            for (child in group.groups) {
+                nextGroups.add(Pair(child, groupValue.isEnabled))
+            }
+        }
+
+        return result
+    }
+
+    private fun createGroupUidToParentMap(): Map<UUID, RawGroup> {
+        val result = hashMapOf<UUID, RawGroup>()
+
+        val nextGroups = LinkedList<RawGroup>()
+            .apply {
+                add(getRawRootGroup())
+            }
+
+        while (nextGroups.size > 0) {
+            val group = nextGroups.removeFirst()
+
+            for (child in group.groups) {
+                result[child.uuid] = group
+                nextGroups.add(child)
+            }
+        }
+
+        return result
+    }
+
     companion object {
+
+        const val ROOT_AUTOTYPE_ENABLED_DEFAULT_VALUE = true
 
         fun open(
             fsProvider: FileSystemProvider,

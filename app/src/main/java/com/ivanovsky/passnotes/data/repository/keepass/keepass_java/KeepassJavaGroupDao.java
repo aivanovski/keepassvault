@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.data.entity.GroupEntity;
+import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
@@ -29,8 +30,6 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_PARENT_
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNKNOWN_ERROR;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
-
-import kotlin.text.StringsKt;
 
 public class KeepassJavaGroupDao implements GroupDao {
 
@@ -140,8 +139,15 @@ public class KeepassJavaGroupDao implements GroupDao {
             parentGroupUid = keepassGroup.getParent().getUuid();
         }
 
-        return new Group(keepassGroup.getUuid(), parentGroupUid, keepassGroup.getName(),
-                keepassGroup.getGroupsCount(), keepassGroup.getEntriesCount());
+
+        return new Group(keepassGroup.getUuid(),
+                parentGroupUid,
+                keepassGroup.getName(),
+                keepassGroup.getGroupsCount(),
+                keepassGroup.getEntriesCount(),
+                // Property 'enableAutotype' is not accessible, let it be always true
+                new InheritableBooleanOption(true, false)
+        );
     }
 
     @NonNull

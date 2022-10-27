@@ -1,7 +1,9 @@
 package com.ivanovsky.passnotes.data.repository.keepass.kotpass
 
+import app.keemobile.kotpass.constants.GroupOverride
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
+import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_MOVE_GROUP_INSIDE_ITS_OWN_TREE
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_PARENT_UID_IS_NULL
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL
@@ -30,28 +32,46 @@ class KotpassGroupDao(
 
     override fun getAll(): OperationResult<List<Group>> {
         return db.lock.withLock {
-            val root = db.getRawRootGroup()
-            val getGroupsResult = db.getRawChildGroups(root)
-            if (getGroupsResult.isFailed) {
-                return@withLock getGroupsResult.mapError()
-            }
+            val rootUid = db.getRawRootGroup().uuid
 
-            getGroupsResult.map { rootChildren ->
-                val allGroups = mutableListOf<RawGroup>()
-                    .apply {
-                        add(root)
-                        addAll(rootChildren)
+            val allGroups = db.getAllRawGroups()
+                .map { group ->
+                    val getAutotypeEnabledResult = db.getAutotypeEnabled(group.uuid)
+                    if (getAutotypeEnabledResult.isFailed) {
+                        return@withLock getAutotypeEnabledResult.mapError()
                     }
-                    .map { it.convertToGroup() }
 
-                allGroups
-            }
+                    val parent = if (group.uuid != rootUid) {
+                        val getParentResult = db.getRawParentGroup(group.uuid)
+                        if (getParentResult.isFailed) {
+                            return@withLock getParentResult.mapError()
+                        }
+
+                        getParentResult.obj
+                    } else {
+                        null
+                    }
+
+                    group.convertToGroup(
+                        parentGroupUid = parent?.uuid,
+                        autotypeEnabled = getAutotypeEnabledResult.obj
+                    )
+                }
+
+            OperationResult.success(allGroups)
         }
     }
 
     override fun getRootGroup(): OperationResult<Group> {
-        val rootGroup = db.getRawDatabase().content.group.convertToGroup()
-        return OperationResult.success(rootGroup)
+        val root = db.getRawRootGroup()
+        val autotypeEnabled = root.enableAutoType.convertToInheritableOption(
+            parentValue = KotpassDatabase.ROOT_AUTOTYPE_ENABLED_DEFAULT_VALUE
+        )
+        val result = root.convertToGroup(
+            parentGroupUid = null,
+            autotypeEnabled = autotypeEnabled
+        )
+        return OperationResult.success(result)
     }
 
     override fun getChildGroups(parentGroupUid: UUID): OperationResult<List<Group>> {
@@ -62,8 +82,20 @@ class KotpassGroupDao(
             }
 
             val group = getGroupResult.obj
+            val groups = group.groups
+                .map { child ->
+                    val autotypeEnabledResult = db.getAutotypeEnabled(child.uuid)
+                    if (autotypeEnabledResult.isFailed) {
+                        return@withLock autotypeEnabledResult.mapError()
+                    }
 
-            OperationResult.success(group.groups.convertToGroups())
+                    child.convertToGroup(
+                        parentGroupUid = group.uuid,
+                        autotypeEnabled = autotypeEnabledResult.obj
+                    )
+                }
+
+            OperationResult.success(groups)
         }
     }
 
@@ -71,25 +103,32 @@ class KotpassGroupDao(
         return insert(group, doCommit = true)
     }
 
-    override fun insert(group: GroupEntity, doCommit: Boolean): OperationResult<UUID> {
+    override fun insert(entity: GroupEntity, doCommit: Boolean): OperationResult<UUID> {
         val result = db.lock.withLock {
-            if (group.parentUid == null) {
+            if (entity.parentUid == null) {
                 return@withLock OperationResult.error(newDbError(MESSAGE_PARENT_UID_IS_NULL))
             }
 
-            val getParentGroupResult = db.getRawGroupByUid(group.parentUid)
+            val getParentGroupResult = db.getRawGroupByUid(entity.parentUid)
             if (getParentGroupResult.isFailed) {
                 return@withLock getParentGroupResult.mapError()
             }
 
             val parentRawGroup = getParentGroupResult.obj
+            val getParentAutotypeEnabledResult = db.getAutotypeEnabled(parentRawGroup.uuid)
+            if (getParentAutotypeEnabledResult.isFailed) {
+                return@withLock getParentAutotypeEnabledResult.mapError()
+            }
+
+            val parentAutotypeEnabled = getParentAutotypeEnabledResult.obj
             val newRawGroup = RawGroup(
-                uuid = group.uid ?: UUID.randomUUID(),
-                name = group.title,
-                previousParentGroup = group.parentUid
+                uuid = entity.uid ?: UUID.randomUUID(),
+                name = entity.title,
+                previousParentGroup = entity.parentUid,
+                enableAutoType = entity.autotypeEnabled.toRawOption()
             )
 
-            val newRawDatabase = db.getRawDatabase().modifyGroup(group.parentUid) {
+            val newRawDatabase = db.getRawDatabase().modifyGroup(entity.parentUid) {
                 copy(
                     groups = parentRawGroup.groups.toMutableList()
                         .apply {
@@ -101,9 +140,13 @@ class KotpassGroupDao(
             val newGroup = Group(
                 uid = newRawGroup.uuid,
                 parentUid = parentRawGroup.uuid,
-                title = group.title,
+                title = entity.title,
                 groupCount = 0,
-                noteCount = 0
+                noteCount = 0,
+                autotypeEnabled = InheritableBooleanOption(
+                    isEnabled = parentAutotypeEnabled.isEnabled,
+                    isInheritValue = true
+                )
             )
 
             db.swapDatabase(newRawDatabase)
@@ -151,32 +194,59 @@ class KotpassGroupDao(
                 return@withLock getGroupResult.mapError()
             }
 
+            val getAutotypeEnabledResult = db.getAutotypeEnabled(groupUid)
+            if (getAutotypeEnabledResult.isFailed) {
+                return@withLock getAutotypeEnabledResult.mapError()
+            }
+
             val group = getGroupResult.obj
-            OperationResult.success(group.convertToGroup())
+            val autotypeEnabled = getAutotypeEnabledResult.obj
+
+            val rootUid = db.getRawRootGroup().uuid
+
+            val parent = if (group.uuid != rootUid) {
+                val getParentResult = db.getRawParentGroup(group.uuid)
+                if (getParentResult.isFailed) {
+                    return@withLock getParentResult.mapError()
+                }
+
+                getParentResult.obj
+            } else {
+                null
+            }
+
+            OperationResult.success(
+                group.convertToGroup(
+                    parentGroupUid = parent?.uuid,
+                    autotypeEnabled = autotypeEnabled
+                )
+            )
         }
     }
 
-    override fun update(group: GroupEntity): OperationResult<Boolean> {
-        if (group.uid == null) {
+    override fun update(entity: GroupEntity): OperationResult<Boolean> {
+        if (entity.uid == null) {
             return OperationResult.error(newDbError(MESSAGE_UID_IS_NULL))
         }
 
-        val getGroupResult = db.lock.withLock { getGroupByUid(group.uid) }
+        val getGroupResult = db.lock.withLock { getGroupByUid(entity.uid) }
         if (getGroupResult.isFailed) {
             return getGroupResult.mapError()
         }
 
         val oldGroup = getGroupResult.obj
         val newGroup = oldGroup.copy(
-            title = group.title,
-            parentUid = group.parentUid
+            title = entity.title,
+            parentUid = entity.parentUid,
+            autotypeEnabled = entity.autotypeEnabled
         )
 
         val result = db.lock.withLock {
-            if (group.parentUid == null) {
-                val newDb = db.getRawDatabase().modifyGroup(group.uid) {
+            if (entity.parentUid == null) {
+                val newDb = db.getRawDatabase().modifyGroup(entity.uid) {
                     copy(
-                        name = group.title
+                        name = entity.title,
+                        enableAutoType = entity.autotypeEnabled.toRawOption()
                     )
                 }
 
@@ -185,7 +255,7 @@ class KotpassGroupDao(
                 return@withLock db.commit().mapWithObject(newGroup)
             }
 
-            val isInsideItself = isGroupInsideGroupTree(group.parentUid, group.uid)
+            val isInsideItself = isGroupInsideGroupTree(entity.parentUid, entity.uid)
             if (isInsideItself.isFailed) {
                 return@withLock isInsideItself.mapError()
             }
@@ -197,17 +267,17 @@ class KotpassGroupDao(
                 )
             }
 
-            val getOldGroupResult = db.getRawGroupByUid(group.uid)
+            val getOldGroupResult = db.getRawGroupByUid(entity.uid)
             if (getOldGroupResult.isFailed) {
                 return@withLock getOldGroupResult.mapError()
             }
 
-            val getOldParentResult = db.getRawParentGroup(group.uid)
+            val getOldParentResult = db.getRawParentGroup(entity.uid)
             if (getOldParentResult.isFailed) {
                 return@withLock getOldParentResult.mapError()
             }
 
-            val getNewParentResult = db.getRawGroupByUid(group.parentUid)
+            val getNewParentResult = db.getRawGroupByUid(entity.parentUid)
             if (getNewParentResult.isFailed) {
                 return@withLock getNewParentResult.mapError()
             }
@@ -217,17 +287,19 @@ class KotpassGroupDao(
 
             val newDb = if (oldRawParent.uuid != newRawParent.uuid) {
                 db.getRawDatabase()
-                    .moveGroup(group.uid, group.parentUid)
-                    .modifyGroup(group.uid) {
+                    .moveGroup(entity.uid, entity.parentUid)
+                    .modifyGroup(entity.uid) {
                         copy(
-                            name = group.title
+                            name = entity.title,
+                            enableAutoType = entity.autotypeEnabled.toRawOption()
                         )
                     }
             } else {
                 db.getRawDatabase()
-                    .modifyGroup(group.uid) {
+                    .modifyGroup(entity.uid) {
                         copy(
-                            name = group.title
+                            name = entity.title,
+                            enableAutoType = entity.autotypeEnabled.toRawOption()
                         )
                     }
             }
@@ -278,14 +350,18 @@ class KotpassGroupDao(
         }
 
         val rawTreeRoot = getTreeRootResult.obj
-        val getTreeResult = db.getRawChildGroups(rawTreeRoot)
-        if (getTreeResult.isFailed) {
-            return getTreeResult.mapError()
-        }
+        val tree = db.getRawChildGroups(rawTreeRoot)
 
-        val tree = getTreeResult.obj
         val isGroupInsideTree = tree.any { it.uuid == groupUid }
 
         return OperationResult.success(isGroupInsideTree)
+    }
+
+    private fun InheritableBooleanOption.toRawOption(): GroupOverride {
+        return when {
+            isInheritValue -> GroupOverride.Inherit
+            isEnabled -> GroupOverride.Enabled
+            else -> GroupOverride.Disabled
+        }
     }
 }

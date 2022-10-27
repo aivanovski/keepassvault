@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -29,26 +30,36 @@
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
-        <com.google.android.material.textfield.TextInputLayout
+        <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
+            android:id="@+id/title"
+            error="@{viewModel.errorText}"
+            eyeButtonVisible="@{false}"
+            hint="@{@string/title}"
+            text="@={viewModel.title}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/element_margin"
             android:layout_marginTop="@dimen/group_margin"
             android:layout_marginRight="@dimen/element_margin"
-            app:errorText="@{viewModel.errorText}"
             app:layout_constraintTop_toBottomOf="@id/errorPanelView"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}">
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/groupTitle"
-                style="@style/Material.EditText.PrimarySingleLine"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/group_title"
-                android:text="@={viewModel.groupTitle}" />
-
-        </com.google.android.material.textfield.TextInputLayout>
+        <com.ivanovsky.passnotes.presentation.core.widget.MaterialSpinner
+            android:id="@+id/autotypeSpinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:layout_marginTop="@dimen/element_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            app:hint="@{@string/auto_dash_type}"
+            app:item="@={viewModel.selectedAutotypeValue}"
+            app:items="@{viewModel.autotypeValues}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title"
+            app:layout_constraintWidth_percent="0.65"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -31,7 +31,9 @@ class SearchInteractor(
     private val settings: Settings
 ) {
 
-    suspend fun loadAllData(): OperationResult<List<EncryptedDatabaseEntry>> {
+    suspend fun loadAllData(
+        isRespectAutotypeProperty: Boolean
+    ): OperationResult<List<EncryptedDatabaseEntry>> {
         return withContext(dispatchers.IO) {
             val dbResult = getDbUseCase.getDatabase()
             if (dbResult.isFailed) {
@@ -56,11 +58,25 @@ class SearchInteractor(
 
             val root = getRootResult.obj
             val allNotes = getAllNotesResult.obj
-            val allGroups = getAllGroupsResult.obj.filter { it.uid != root.uid }
+            val allGroups = getAllGroupsResult.obj
 
-            val result = sortUseCase.sortGroupsAndNotesAccordingToSettings(
-                items = allNotes + allGroups
-            )
+            val items = if (isRespectAutotypeProperty) {
+                val visibleGroups = allGroups
+                    .filter { it.uid != root.uid && it.autotypeEnabled.isEnabled }
+
+                val visibleGroupsMap = allGroups
+                    .filter { it.autotypeEnabled.isEnabled }
+                    .associateBy { it.uid }
+
+                val visibleNotes = allNotes
+                    .filter { visibleGroupsMap.containsKey(it.groupUid) }
+
+                visibleNotes + visibleGroups
+            } else {
+                allNotes + allGroups.filter { it.uid != root.uid }
+            }
+
+            val result = sortUseCase.sortGroupsAndNotesAccordingToSettings(items)
 
             OperationResult.success(result)
         }

@@ -1,32 +1,72 @@
 package com.ivanovsky.passnotes.data.repository.keepass.kotpass
 
+import app.keemobile.kotpass.constants.GroupOverride
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import app.keemobile.kotpass.cryptography.EncryptedValue
+import app.keemobile.kotpass.database.KeePassDatabase
 import app.keemobile.kotpass.models.EntryValue
 import app.keemobile.kotpass.models.TimeData
 import java.time.Instant
 import java.util.Date
+import java.util.LinkedList
 import java.util.UUID
 import app.keemobile.kotpass.models.Entry as RawEntry
 import app.keemobile.kotpass.models.Group as RawGroup
 
-fun RawGroup.convertToGroup(): Group {
-    return Group(
-        uid = uuid,
-        parentUid = previousParentGroup,
-        title = name,
-        groupCount = groups.size,
-        noteCount = entries.size
-    )
+fun GroupOverride.convertToInheritableOption(parentValue: Boolean): InheritableBooleanOption {
+    return when (this) {
+        GroupOverride.Enabled -> InheritableBooleanOption(
+            isEnabled = true,
+            isInheritValue = false
+        )
+        GroupOverride.Disabled -> InheritableBooleanOption(
+            isEnabled = false,
+            isInheritValue = false
+        )
+        GroupOverride.Inherit -> InheritableBooleanOption(
+            isEnabled = parentValue,
+            isInheritValue = true
+        )
+    }
 }
 
-fun List<RawGroup>.convertToGroups(): List<Group> {
-    return map { it.convertToGroup() }
+fun KeePassDatabase.getAllGroups(): List<RawGroup> {
+    val root = content.group
+    val nextGroups = LinkedList<RawGroup>()
+        .apply {
+            add(root)
+        }
+
+    val allGroups = mutableListOf(root)
+
+    while (nextGroups.size > 0) {
+        val currentGroup = nextGroups.removeFirst()
+
+        nextGroups.addAll(currentGroup.groups)
+        allGroups.addAll(currentGroup.groups)
+    }
+
+    return allGroups
+}
+
+fun RawGroup.convertToGroup(
+    parentGroupUid: UUID?,
+    autotypeEnabled: InheritableBooleanOption
+): Group {
+    return Group(
+        uid = uuid,
+        parentUid = parentGroupUid,
+        title = name,
+        groupCount = groups.size,
+        noteCount = entries.size,
+        autotypeEnabled = autotypeEnabled
+    )
 }
 
 fun RawEntry.convertToNote(groupUid: UUID): Note {

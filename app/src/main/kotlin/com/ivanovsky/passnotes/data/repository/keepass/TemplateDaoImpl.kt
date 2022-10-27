@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository.keepass
 
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
+import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
@@ -89,7 +90,11 @@ class TemplateDaoImpl(
 
         val templateGroup = GroupEntity(
             title = TEMPLATE_GROUP_NAME,
-            parentUid = rootGroup.uid
+            parentUid = rootGroup.uid,
+            autotypeEnabled = InheritableBooleanOption(
+                isEnabled = false,
+                isInheritValue = false
+            )
         )
         val insertGroupResult = groupDao.insert(templateGroup, doCommit)
         if (insertGroupResult.isFailed) {
@@ -106,7 +111,7 @@ class TemplateDaoImpl(
         return OperationResult.success(true)
     }
 
-    fun findTemplateNotes(): OperationResult<Boolean> {
+    private fun findTemplateNotes(): OperationResult<Boolean> {
         val groupsResult = groupDao.all
         if (groupsResult.isFailed) {
             return groupsResult.takeError()

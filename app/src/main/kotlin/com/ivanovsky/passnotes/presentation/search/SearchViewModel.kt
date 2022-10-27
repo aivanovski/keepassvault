@@ -193,7 +193,9 @@ class SearchViewModel(
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val getAllDataResult = interactor.loadAllData()
+            val getAllDataResult = interactor.loadAllData(
+                isRespectAutotypeProperty = (args.appMode == AUTOFILL_SELECTION)
+            )
             if (getAllDataResult.isFailed) {
                 setScreenState(
                     ScreenState.error(
@@ -347,10 +349,10 @@ class SearchViewModel(
     }
 
     private fun getVisibleMenuItems(): List<SearchMenuItem> {
-        return if (args.appMode == NORMAL) {
-            SearchMenuItem.values().toList()
-        } else {
-            emptyList()
+        return when (args.appMode) {
+            NORMAL -> SearchMenuItem.values().toList()
+            AUTOFILL_SELECTION -> listOf(SearchMenuItem.VIEW_MODE)
+            else -> emptyList()
         }
     }
 

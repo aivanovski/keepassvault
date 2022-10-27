@@ -4,6 +4,7 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
+import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.data.entity.OperationError.*
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
@@ -299,10 +300,15 @@ class DebugMenuInteractor(
             return rootGroupResult.takeError()
         }
 
-        val rootGroupUid = rootGroupResult.obj.uid
+        val rootGroup = rootGroupResult.obj
+        val rootGroupUid = rootGroup.uid
         val newGroup = GroupEntity(
             parentUid = rootGroupUid,
-            title = newGroupTitle
+            title = newGroupTitle,
+            autotypeEnabled = InheritableBooleanOption(
+                isEnabled = rootGroup.autotypeEnabled.isEnabled,
+                isInheritValue = true
+            )
         )
 
         val insertResult = db.groupDao.insert(newGroup)

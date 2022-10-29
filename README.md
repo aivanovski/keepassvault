@@ -11,7 +11,7 @@ Another Android client app for KeePass databases.
 **This app is orientated for my personal use. It may have some bugs, so please make a backups before use it.**
 
 # Features
-- Synchronization with WebDav server or Git repository
+- Synchronization with WebDav server or Git (HTTPS only, SSH protocol is not available) repository
 - Create databases, entries and groups
 - Password or key file unlock
 - Supports .kdbx files up to version 4.1 (application uses [Kotpass](https://github.com/keemobile/kotpass) library to manipulate the KeePass database)

@@ -111,6 +111,7 @@
                         app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
                         app:layout_constraintStart_toEndOf="@id/guidelineStart"
                         app:layout_constraintTop_toBottomOf="@id/username"
+                        app:onDoneAction="@{() -> viewModel.authenticate()}"
                         app:visible="@{viewModel.isPasswordVisible}"
                         tools:visibility="visible" />
 

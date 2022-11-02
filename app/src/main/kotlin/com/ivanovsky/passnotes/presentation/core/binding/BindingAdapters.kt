@@ -312,3 +312,11 @@ fun setMaterialBackgroundColor(
 
     imageButton.background = drawable
 }
+
+@BindingAdapter("isEnabled")
+fun setEnabled(
+    view: View,
+    isEnabled: Boolean?
+) {
+    view.isEnabled = isEnabled ?: false
+}

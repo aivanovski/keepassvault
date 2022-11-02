@@ -4,6 +4,7 @@
         <attr name="isShowDividers" format="boolean" />
     </declare-styleable>
     <declare-styleable name="MaterialEditText">
+        <attr name="text" format="string" />
         <attr name="hint" format="string" />
         <attr name="isEyeButtonEnabled" format="boolean" />
         <attr name="isClearButtonEnabled" format="boolean" />

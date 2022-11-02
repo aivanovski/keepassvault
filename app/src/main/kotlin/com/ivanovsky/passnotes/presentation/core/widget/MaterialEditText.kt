@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.core.widget
 
 import android.content.Context
+import android.os.Parcelable
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -87,6 +88,7 @@ class MaterialEditText(
     private val binding: WidgetMaterialEditTextBinding
     private var twoWayBindingTextChangedListener: ((String) -> Unit)? = null
     private var onEditorAction: OnEditorActionListener? = null
+    private var onDoneAction: (() -> Unit)? = null
 
     init {
         val view = LayoutInflater.from(context)
@@ -98,7 +100,7 @@ class MaterialEditText(
         if (minWidth != -1) {
             binding.textInput.minWidth = minWidth
         }
-
+        binding.textInput.isEnabled = isEnabled
 
         binding.actionButton.setOnClickListener {
             handleActionButtonClicked()
@@ -120,6 +122,11 @@ class MaterialEditText(
 
     private fun readAttributes(attrs: AttributeSet) {
         val params = context.obtainStyledAttributes(attrs, R.styleable.MaterialEditText)
+
+        val text = params.getString(R.styleable.MaterialEditText_text)
+        if (text != null) {
+            this.text = text
+        }
 
         val hint = params.getString(R.styleable.MaterialEditText_hint)
         if (hint != null) {
@@ -152,11 +159,25 @@ class MaterialEditText(
         params.recycle()
     }
 
+    override fun setEnabled(isEnabled: Boolean) {
+        super.setEnabled(isEnabled)
+        binding.textInput.isEnabled = isEnabled
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        // State will be restored from ViewModel
+        super.onRestoreInstanceState(null)
+    }
+
     fun getEditText(): EditText = binding.textInput
 
     private fun handleEditorAction(actionId: Int): Boolean {
-        return if (onEditorAction != null) {
-            onEditorAction?.onEditorAction(actionId)
+        return if (onEditorAction != null || onDoneAction != null) {
+            if (actionId == EditorInfo.IME_ACTION_DONE && onDoneAction != null) {
+                onDoneAction?.invoke()
+            } else {
+                onEditorAction?.onEditorAction(actionId)
+            }
             true
         } else {
             false
@@ -388,6 +409,15 @@ class MaterialEditText(
             listener: OnEditorActionListener?
         ) {
             view.onEditorAction = listener
+        }
+
+        @JvmStatic
+        @BindingAdapter("onDoneAction")
+        fun setOnDoneActionListener(
+            view: MaterialEditText,
+            listener: (() -> Unit)?
+        ) {
+            view.onDoneAction = listener
         }
     }
 }

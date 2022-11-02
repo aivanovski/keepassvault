@@ -8,34 +8,47 @@
 
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.selectdb.cells.viewmodel.DatabaseFileCellViewModel" />
+            type="com.ivanovsky.passnotes.presentation.unlock.cells.viewmodel.DatabaseFileCellViewModel" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        style="@style/Material.Layout.Selectable"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
         android:onClick="@{() -> viewModel.onClicked()}"
-        android:paddingBottom="@dimen/half_margin">
+        app:onLongClick="@{() -> viewModel.onLongClicked()}">
+
+        <View
+            android:id="@+id/selectedBackground"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/material_list_item_selected"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.model.selected}"
+            tools:visibility="gone" />
 
         <TextView
             android:id="@+id/filename"
-            style="@style/Material.ListItem.PrimaryText.SingleLine"
+            style="@style/Material.PrimaryText.SingleLine"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/element_margin"
             android:layout_marginTop="@dimen/half_margin"
             android:layout_marginEnd="@dimen/element_margin"
-            android:text="@{viewModel.model.name}"
+            android:text="@{viewModel.model.filename}"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="file.kdbx" />
+            tools:text="filename.kdbx" />
 
         <TextView
             android:id="@+id/path"
-            style="@style/Material.SecondaryText"
+            style="@style/Material.SecondaryText.SingleLine"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/element_margin"
@@ -47,50 +60,20 @@
 
         <TextView
             android:id="@+id/status"
-            style="@style/Material.ListItem.SecondaryText"
+            style="@style/Material.SecondaryText.SingleLine"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/half_margin"
             android:layout_marginEnd="@dimen/element_margin"
+            android:layout_marginBottom="@dimen/half_margin"
             android:text="@{viewModel.model.status}"
             android:textColor="@{viewModel.model.statusColor}"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@id/filename"
             app:layout_constraintTop_toBottomOf="@id/path"
-            app:visible="@{viewModel.model.isStatusVisible}"
-            tools:text="Checking...."
+            tools:text="Checking status..."
             tools:visibility="visible" />
-
-        <Button
-            android:id="@+id/resolveButton"
-            style="@style/Material.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/element_margin"
-            android:onClick="@{() -> viewModel.onResolveButtonClicked()}"
-            android:text="@string/resolve"
-            android:textColor="@color/error_text"
-            android:textSize="@dimen/material_secondary_text_size"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/status"
-            app:layout_goneMarginTop="@dimen/half_margin"
-            app:visible="@{viewModel.model.isResolveButtonVisible}"
-            tools:visibility="visible" />
-
-        <Button
-            android:id="@+id/removeButton"
-            style="@style/Material.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/element_margin"
-            android:onClick="@{() -> viewModel.onRemoveButtonClicked()}"
-            android:text="@string/remove"
-            android:textColor="@color/primary_text"
-            android:textSize="@dimen/material_secondary_text_size"
-            app:layout_constraintEnd_toStartOf="@id/resolveButton"
-            app:layout_constraintTop_toBottomOf="@id/status"
-            app:layout_goneMarginTop="@dimen/half_margin"
-            app:visible="@{viewModel.model.isRemoveButtonVisible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

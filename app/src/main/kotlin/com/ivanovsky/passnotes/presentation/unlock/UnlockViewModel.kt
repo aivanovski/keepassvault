@@ -97,7 +97,7 @@ class UnlockViewModel(
     val showFileActionsDialog = SingleLiveEvent<UsedFile>()
 
     val fileCellTypes = ViewModelTypes()
-        .add(DatabaseFileCellViewModel::class, R.layout.cell_database_file_2)
+        .add(DatabaseFileCellViewModel::class, R.layout.cell_database_file)
 
     val fabItems = FAB_ITEMS
         .map { (_, resId) -> resourceProvider.getString(resId) }

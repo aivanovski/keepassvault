@@ -14,7 +14,6 @@ import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
 import com.ivanovsky.passnotes.domain.interactor.password_generator.PasswordGeneratorInteractor
 import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
-import com.ivanovsky.passnotes.domain.interactor.selectdb.SelectDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
 import com.ivanovsky.passnotes.domain.interactor.service.LockServiceInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
@@ -55,10 +54,6 @@ import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.search.SearchViewModel
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellModelFactory
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
-import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseViewModel
-import com.ivanovsky.passnotes.presentation.selectdb.cells.factory.SelectDatabaseCellModelFactory
-import com.ivanovsky.passnotes.presentation.selectdb.cells.factory.SelectDatabaseCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginViewModel
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
@@ -124,7 +119,6 @@ object UiModule {
             }
             single { NoteEditorInteractor(get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
-            single { SelectDatabaseInteractor(get(), get(), get(), get()) }
             single { SearchInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
             single { DatabaseSettingsInteractor(get(), get()) }
@@ -145,9 +139,6 @@ object UiModule {
 
             single { NoteEditorCellModelFactory(get()) }
             single { NoteEditorCellViewModelFactory(get()) }
-
-            single { SelectDatabaseCellModelFactory(get()) }
-            single { SelectDatabaseCellViewModelFactory() }
 
             single { UnlockCellModelFactory(get()) }
             single { UnlockCellViewModelFactory() }
@@ -257,18 +248,6 @@ object UiModule {
             }
             viewModel { (args: ServerLoginArgs) ->
                 ServerLoginViewModel(
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    args
-                )
-            }
-            viewModel { (args: SelectDatabaseArgs) ->
-                SelectDatabaseViewModel(
-                    get(),
-                    get(),
-                    get(),
                     get(),
                     get(),
                     get(),

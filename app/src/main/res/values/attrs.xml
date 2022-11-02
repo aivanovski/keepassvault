@@ -3,4 +3,8 @@
     <declare-styleable name="DecoratedRecyclerView">
         <attr name="isShowDividers" format="boolean" />
     </declare-styleable>
+    <declare-styleable name="MaterialEditText">
+        <attr name="hint" format="string" />
+        <attr name="isEyeButtonVisible" format="boolean" />
+    </declare-styleable>
 </resources>

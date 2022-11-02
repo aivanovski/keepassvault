@@ -52,7 +52,7 @@ class MaterialEditText(
 
     var isEyeButtonVisible: Boolean = false
         set(value) {
-            setEyeButtonVisibility(value)
+            setEyeButtonVisibleInternal(value)
             field = value
         }
 
@@ -78,6 +78,8 @@ class MaterialEditText(
             .inflate(R.layout.widget_material_edit_text, this, true)
         binding = WidgetMaterialEditTextBinding.bind(view)
 
+        readAttributes(attrs)
+
         binding.eyeButton.setOnClickListener {
             toggleTextVisibility()
         }
@@ -89,9 +91,25 @@ class MaterialEditText(
         textWatcher = CustomTextWatcher()
         binding.textInput.addTextChangedListener(textWatcher)
 
-        setEyeButtonVisibility(isEyeButtonVisible)
-        setTextVisibleInternal(isTextVisible)
         setInputLinesInternal(inputLines)
+        setEyeButtonVisibleInternal(isEyeButtonVisible)
+        setTextVisibleInternal(isTextVisible)
+    }
+
+    private fun readAttributes(attrs: AttributeSet) {
+        val params = context.obtainStyledAttributes(attrs, R.styleable.MaterialEditText)
+
+        val hint = params.getString(R.styleable.MaterialEditText_hint)
+        if (hint != null) {
+            this.hint = hint
+        }
+
+        isEyeButtonVisible = params.getBoolean(
+            R.styleable.MaterialEditText_isEyeButtonVisible,
+            false
+        )
+
+        params.recycle()
     }
 
     fun getEditText(): EditText = binding.textInput
@@ -154,7 +172,7 @@ class MaterialEditText(
         databindingTextChangedListener?.invoke(text)
     }
 
-    private fun setEyeButtonVisibility(isVisible: Boolean) {
+    private fun setEyeButtonVisibleInternal(isVisible: Boolean) {
         if (isVisible && isTextVisible) {
             isTextVisible = false
         }
@@ -184,17 +202,23 @@ class MaterialEditText(
                 binding.textInput.isSingleLine = true
             }
             TextInputLines.MULTIPLE_LINES -> {
+                binding.textInput.isSingleLine = false
                 binding.textInput.minLines = 1
                 binding.textInput.maxLines = 5
             }
             else -> {}
         }
+        setTextVisibleInternal(isTextVisible)
+        setImeOptionsInternal(imeOptions)
     }
 
     private fun setImeOptionsInternal(imeOptions: ImeOptions?) {
         when (imeOptions) {
             ImeOptions.ACTION_DONE -> {
                 binding.textInput.imeOptions = EditorInfo.IME_ACTION_DONE
+            }
+            ImeOptions.ACTION_NEXT -> {
+                binding.textInput.imeOptions = EditorInfo.IME_ACTION_NEXT
             }
             else -> {}
         }

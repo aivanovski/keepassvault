@@ -232,8 +232,8 @@
     <!-- Server login screen -->
     <string name="login_to_server">Login to server</string>
     <string name="login_to_git">Login to Git repository</string>
-    <string name="server_url">Server url</string>
-    <string name="git_repository_url">Git repositroy url</string>
+    <string name="server_url_hint">WebDAV server url (e.g. https://webdav.example.com)</string>
+    <string name="git_repository_url_hint">Git repository url (e.g. https://git.example.com)</string>
     <string name="url_contains_secret_message">Url contains secret key, hide it if need</string>
 
     <!-- Debug menu screen -->

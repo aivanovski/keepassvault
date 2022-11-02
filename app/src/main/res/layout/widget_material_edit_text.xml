@@ -19,8 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/primary_text"
-            android:textSize="@dimen/material_edit_text_primary_text_size"
-            tools:text="Text" />
+            android:textSize="@dimen/material_edit_text_primary_text_size" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

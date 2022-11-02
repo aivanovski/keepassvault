@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.core.widget
 
 import android.content.Context
 import android.text.Editable
+import android.text.InputType
 import android.text.TextWatcher
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
@@ -20,6 +21,7 @@ import com.ivanovsky.passnotes.databinding.WidgetMaterialEditTextBinding
 import com.ivanovsky.passnotes.presentation.core.widget.entity.ImeOptions
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnEditorActionListener
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class MaterialEditText(
@@ -75,6 +77,12 @@ class MaterialEditText(
             field = value
         }
 
+    var inputType: TextInputType = TextInputType.TEXT
+        set(value) {
+            setInputTypeInternal(value)
+            field = value
+        }
+
     private val textWatcher: CustomTextWatcher
     private val binding: WidgetMaterialEditTextBinding
     private var twoWayBindingTextChangedListener: ((String) -> Unit)? = null
@@ -86,6 +94,11 @@ class MaterialEditText(
         binding = WidgetMaterialEditTextBinding.bind(view)
 
         readAttributes(attrs)
+
+        if (minWidth != -1) {
+            binding.textInput.minWidth = minWidth
+        }
+
 
         binding.actionButton.setOnClickListener {
             handleActionButtonClicked()
@@ -102,6 +115,7 @@ class MaterialEditText(
         setInputLinesInternal(inputLines)
         setActionButtonVisibleInternal(determineIsActionButtonVisibleInternal())
         setTextVisibleInternal(isTextVisible)
+        setInputTypeInternal(inputType)
     }
 
     private fun readAttributes(attrs: AttributeSet) {
@@ -207,6 +221,36 @@ class MaterialEditText(
     private fun onTextChanged(text: String) {
         twoWayBindingTextChangedListener?.invoke(text)
         setActionButtonVisibleInternal(determineIsActionButtonVisibleInternal())
+    }
+
+    private fun setInputTypeInternal(inputType: TextInputType) {
+        val flags = when (inputType) {
+            TextInputType.TEXT -> {
+                if (isTextVisible) {
+                    InputType.TYPE_CLASS_TEXT
+                } else {
+                    InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_PASSWORD
+                }
+            }
+            TextInputType.DIGITS -> {
+                if (isTextVisible) {
+                    InputType.TYPE_CLASS_NUMBER
+                } else {
+                    InputType.TYPE_CLASS_NUMBER + InputType.TYPE_NUMBER_VARIATION_PASSWORD
+                }
+            }
+            TextInputType.TEXT_CAP_SENTENCES -> {
+                InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            }
+            TextInputType.URL -> {
+                InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_URI
+            }
+            TextInputType.EMAIl -> {
+                InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+            }
+        }
+
+        binding.textInput.setRawInputType(flags)
     }
 
     private fun setInputLinesInternal(inputLines: TextInputLines?) {

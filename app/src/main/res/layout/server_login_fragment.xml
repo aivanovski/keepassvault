@@ -8,6 +8,8 @@
 
         <import type="com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines" />
 
+        <import type="com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType" />
+
         <import type="com.ivanovsky.passnotes.presentation.core.widget.entity.ImeOptions" />
 
         <variable
@@ -71,6 +73,7 @@
                         hint="@{viewModel.urlHint}"
                         imeOptions="@{ImeOptions.ACTION_NEXT}"
                         inputLines="@{TextInputLines.MULTIPLE_LINES}"
+                        inputType="@{TextInputType.URL}"
                         text="@={viewModel.url}"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"

@@ -47,7 +47,7 @@ import timber.log.Timber;
 public class KeepassJavaDatabase implements EncryptedDatabase {
 
     @NonNull
-    private EncryptedDatabaseKey key;
+    private volatile EncryptedDatabaseKey key;
     @NonNull
     private final FileDescriptor file;
     @NonNull
@@ -175,6 +175,12 @@ public class KeepassJavaDatabase implements EncryptedDatabase {
     @Override
     public FileDescriptor getFile() {
         return file;
+    }
+
+    @NonNull
+    @Override
+    public EncryptedDatabaseKey getKey() {
+        return key;
     }
 
     @NonNull

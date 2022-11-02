@@ -26,14 +26,16 @@
 
     <ImageButton
         android:id="@+id/eyeButton"
-        style="@style/Material.BorderlessButton"
+        style="@style/Material.BorderlessButton.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/small_margin"
+        android:src="@drawable/ic_visibility_off_24dp"
+        android:tint="@color/icon_gray"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/textInputLayout"
         app:layout_constraintEnd_toEndOf="@id/textInputLayout"
         app:layout_constraintTop_toTopOf="@id/textInputLayout"
-        app:srcCompat="@drawable/ic_eye_grey_600_24dp"
         tools:visibility="visible" />
 
 </merge>

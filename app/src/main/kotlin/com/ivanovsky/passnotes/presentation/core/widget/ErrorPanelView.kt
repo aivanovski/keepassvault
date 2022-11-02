@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView.State.HIDDEN
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView.State.MESSAGE
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView.State.MESSAGE_WITH_RETRY
+import com.ivanovsky.passnotes.presentation.core.widget.entity.OnButtonClickListener
 
 class ErrorPanelView(
     context: Context,
@@ -73,9 +74,5 @@ class ErrorPanelView(
         HIDDEN,
         MESSAGE,
         MESSAGE_WITH_RETRY
-    }
-
-    interface OnButtonClickListener {
-        fun onButtonClicked()
     }
 }

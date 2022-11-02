@@ -8,15 +8,21 @@ import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.Template
+import com.ivanovsky.passnotes.data.entity.UsedFile
+import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
@@ -64,6 +70,7 @@ import java.util.UUID
 
 class GroupsViewModel(
     private val interactor: GroupsInteractor,
+    private val biometricInteractor: BiometricInteractor,
     private val errorInteractor: ErrorInteractor,
     lockInteractor: DatabaseLockInteractor,
     private val observerBus: ObserverBus,
@@ -110,11 +117,13 @@ class GroupsViewModel(
     val showAddTemplatesDialogEvent = SingleLiveEvent<Unit>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
     val showSortAndViewDialogEvent = SingleLiveEvent<Unit>()
+    val showBiometricSetupDialog = SingleLiveEvent<BiometricEncoder>()
     val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
 
     private var currentDataItems: List<EncryptedDatabaseEntry>? = null
     private var rootGroupUid: UUID? = null
     private var groupUid: UUID? = args.groupUid
+    private var dbUsedFile: UsedFile? = null
     private var templates: List<Template>? = null
     private var isAutofillSavingCancelled = false
 
@@ -196,6 +205,13 @@ class GroupsViewModel(
             }
 
             val status = interactor.getDatabaseStatus()
+            val getUsedFileResult = interactor.getDatabaseUsedFile()
+            if (getUsedFileResult.isFailed) {
+                setErrorState(getUsedFileResult.error)
+                return@launch
+            }
+
+            dbUsedFile = getUsedFileResult.obj
 
             if (data.isSucceededOrDeferred) {
                 val dataItems = interactor.sortData(data.obj)
@@ -218,8 +234,7 @@ class GroupsViewModel(
 
                 visibleMenuItems.value = getVisibleMenuItems()
             } else {
-                val message = errorInteractor.processAndGetMessage(data.error)
-                setScreenState(ScreenState.error(message))
+                setErrorState(data.error)
             }
 
             updateOptionPanelState()
@@ -413,6 +428,56 @@ class GroupsViewModel(
     }
 
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
+
+    fun onEnableBiometricUnlockButtonClicked() {
+        if (isBiometricUnlockAllowedForDatabase()) {
+            showBiometricSetupDialog.call(biometricInteractor.getCipherForEncryption())
+        }
+    }
+
+    fun onBiometricSetupSuccess(encoder: BiometricEncoder) {
+        val usedFileId = dbUsedFile?.id ?: return
+
+        setScreenState(ScreenState.loading())
+
+        viewModelScope.launch {
+            val getKeyResult = interactor.getDatabaseKey()
+            if (getKeyResult.isFailed) {
+                setErrorPanelState(getKeyResult.error)
+                return@launch
+            }
+
+            val password = (getKeyResult.obj as PasswordKeepassKey).password
+
+            val encryptPasswordResult = interactor.encodePasswordAndStoreData(
+                encoder,
+                password,
+                usedFileId
+            )
+            if (encryptPasswordResult.isFailed) {
+                setErrorPanelState(encryptPasswordResult.error)
+                return@launch
+            }
+
+            loadData()
+        }
+    }
+
+    fun onDisableBiometricUnlockButtonClicked() {
+        val usedFileId = dbUsedFile?.id ?: return
+
+        setScreenState(ScreenState.loading())
+
+        viewModelScope.launch {
+            val removeResult = interactor.removeBiometricData(usedFileId)
+            if (removeResult.isFailed) {
+                setErrorPanelState(removeResult.error)
+                return@launch
+            }
+
+            loadData()
+        }
+    }
 
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
@@ -648,6 +713,22 @@ class GroupsViewModel(
         updateOptionPanelState()
     }
 
+    private fun setErrorState(error: OperationError) {
+        setScreenState(
+            ScreenState.error(
+                errorText = errorInteractor.processAndGetMessage(error)
+            )
+        )
+    }
+
+    private fun setErrorPanelState(error: OperationError) {
+        setScreenState(
+            ScreenState.dataWithError(
+                errorText = errorInteractor.processAndGetMessage(error)
+            )
+        )
+    }
+
     private fun setScreenState(state: ScreenState) {
         screenState.value = state
         isFabButtonVisible.value = getFabButtonVisibility()
@@ -670,6 +751,7 @@ class GroupsViewModel(
 
     private fun getVisibleMenuItems(): List<GroupsMenuItem> {
         val screenState = this.screenState.value ?: return emptyList()
+        val usedFile = this.dbUsedFile ?: return emptyList()
 
         val isShowMenu = (screenState.isDisplayingData || screenState.isDisplayingEmptyState)
 
@@ -686,6 +768,14 @@ class GroupsViewModel(
                     items.add(GroupsMenuItem.ADD_TEMPLATES)
                 }
 
+                if (isBiometricUnlockAllowedForDatabase()) {
+                    if (usedFile.biometricData == null) {
+                        items.add(GroupsMenuItem.ENABLE_BIOMETRIC_UNLOCK)
+                    } else {
+                        items.add(GroupsMenuItem.DISABLE_BIOMETRIC_UNLOCK)
+                    }
+                }
+
                 items
             }
             isShowMenu && args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
@@ -698,6 +788,12 @@ class GroupsViewModel(
             }
             else -> emptyList()
         }
+    }
+
+    private fun isBiometricUnlockAllowedForDatabase(): Boolean {
+        return biometricInteractor.isBiometricUnlockAvailable() &&
+            settings.isBiometricUnlockEnabled &&
+            dbUsedFile?.keyType == KeyType.PASSWORD
     }
 
     enum class OptionPanelState {
@@ -721,6 +817,8 @@ class GroupsViewModel(
         LOCK(R.id.menu_lock),
         VIEW_MODE(R.id.menu_sort_and_view),
         ADD_TEMPLATES(R.id.menu_add_templates),
-        SETTINGS(R.id.menu_settings)
+        SETTINGS(R.id.menu_settings),
+        ENABLE_BIOMETRIC_UNLOCK(R.id.menu_enable_biometric_unlock),
+        DISABLE_BIOMETRIC_UNLOCK(R.id.menu_disable_biometric_unlock)
     }
 }

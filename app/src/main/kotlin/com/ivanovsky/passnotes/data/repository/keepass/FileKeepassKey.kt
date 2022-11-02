@@ -14,6 +14,7 @@ import java.lang.Exception
 
 class FileKeepassKey(
     val file: FileDescriptor,
+    val password: String? = null,
     private val fileSystemProvider: FileSystemProvider
 ) : EncryptedDatabaseKey {
 

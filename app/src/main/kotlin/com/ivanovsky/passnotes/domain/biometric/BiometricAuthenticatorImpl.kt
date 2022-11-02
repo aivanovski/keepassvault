@@ -1,38 +1,52 @@
-package com.ivanovsky.passnotes.presentation.core
+package com.ivanovsky.passnotes.domain.biometric
 
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDataCipher
+import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
+import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoderImpl
+import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
+import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoderImpl
 import timber.log.Timber
 import javax.crypto.Cipher
 
-object BiometricPromptHelper {
+class BiometricAuthenticatorImpl : BiometricAuthenticator {
 
-    fun authenticateForUnlock(
+    override fun authenticateForUnlock(
         activity: FragmentActivity,
         cipher: BiometricDataCipher,
-        onSuccess: (result: BiometricPrompt.AuthenticationResult) -> Unit,
+        onSuccess: (decoder: BiometricDecoder) -> Unit
     ) {
         val promptInfo = createPromptInfo(
             title = activity.getString(R.string.unlock_with_fingerprint),
             negativeButtonText = activity.getString(R.string.cancel)
         )
-        authenticate(activity, cipher.getCipher(), promptInfo, onSuccess)
+        authenticate(activity, cipher.getCipher(), promptInfo) { result ->
+            val decoderCipher = result.cryptoObject?.cipher
+            if (decoderCipher != null) {
+                onSuccess.invoke(BiometricDecoderImpl(decoderCipher))
+            }
+        }
     }
 
-    fun authenticateForSetup(
+    override fun authenticateForSetup(
         activity: FragmentActivity,
         cipher: BiometricDataCipher,
-        onSuccess: (result: BiometricPrompt.AuthenticationResult) -> Unit,
+        onSuccess: (encoder: BiometricEncoder) -> Unit
     ) {
         val promptInfo = createPromptInfo(
             title = activity.getString(R.string.setup_fingerprint_unlock),
             message = activity.getString(R.string.setup_fingerprint_unlock_message),
             negativeButtonText = activity.getString(R.string.cancel)
         )
-        authenticate(activity, cipher.getCipher(), promptInfo, onSuccess)
+        authenticate(activity, cipher.getCipher(), promptInfo) { result ->
+            val encoderCipher = result.cryptoObject?.cipher
+            if (encoderCipher != null) {
+                onSuccess.invoke(BiometricEncoderImpl(encoderCipher))
+            }
+        }
     }
 
     private fun authenticate(

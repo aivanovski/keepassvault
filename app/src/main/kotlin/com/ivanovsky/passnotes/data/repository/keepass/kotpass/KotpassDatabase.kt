@@ -65,6 +65,8 @@ class KotpassDatabase(
 
     override fun getFile(): FileDescriptor = file
 
+    override fun getKey(): EncryptedDatabaseKey = key
+
     override fun getStatus(): DatabaseStatus = status.get()
 
     override fun getGroupDao(): GroupDao = groupDao
@@ -393,9 +395,16 @@ class KotpassDatabase(
                     }
 
                     val bytes = getBytesResult.obj
-                    val credentials = Credentials.from(
-                        EncryptedValue.fromBinary(bytes)
-                    )
+                    val credentials = if (key.password == null) {
+                        Credentials.from(
+                            EncryptedValue.fromBinary(bytes)
+                        )
+                    } else {
+                        Credentials.from(
+                            passphrase = EncryptedValue.fromString(key.password),
+                            keyData = bytes
+                        )
+                    }
 
                     OperationResult.success(credentials)
                 }

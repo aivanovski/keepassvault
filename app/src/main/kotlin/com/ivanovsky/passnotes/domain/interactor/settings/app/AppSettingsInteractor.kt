@@ -7,13 +7,15 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.LoggerInteractor
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
+import com.ivanovsky.passnotes.domain.usecases.RemoveBiometricDataUseCase
 import kotlinx.coroutines.withContext
 import java.io.File
 
 class AppSettingsInteractor(
     private val loggerInteractor: LoggerInteractor,
     private val dispatchers: DispatcherProvider,
-    private val lockUseCase: LockDatabaseUseCase
+    private val lockUseCase: LockDatabaseUseCase,
+    private val removeBiometricDataUseCase: RemoveBiometricDataUseCase
 ) {
 
     fun reInitializeLogging() {
@@ -45,4 +47,7 @@ class AppSettingsInteractor(
                 OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_REMOVE_FILE))
             }
         }
+
+    suspend fun removeAllBiometricData() =
+        removeBiometricDataUseCase.removeAllBiometricData()
 }

@@ -20,6 +20,9 @@ public interface EncryptedDatabase {
     FileDescriptor getFile();
 
     @NonNull
+    EncryptedDatabaseKey getKey();
+
+    @NonNull
     DatabaseStatus getStatus();
 
     @NonNull

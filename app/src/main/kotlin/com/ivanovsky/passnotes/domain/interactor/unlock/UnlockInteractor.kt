@@ -1,8 +1,11 @@
 package com.ivanovsky.passnotes.domain.interactor.unlock
 
+import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
+import com.ivanovsky.passnotes.data.crypto.entity.BiometricData
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
@@ -24,6 +27,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.usecases.DecodePasswordWithBiometricUseCase
 import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestPasswordUseCase
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
@@ -43,6 +47,7 @@ class UnlockInteractor(
     private val getTestPasswordUseCase: GetTestPasswordUseCase,
     private val syncUseCases: SyncUseCases,
     private val getUsedFileUseCase: GetUsedFileUseCase,
+    private val decodePasswordUseCase: DecodePasswordWithBiometricUseCase,
     private val dispatchers: DispatcherProvider,
     private val settings: Settings
 ) {
@@ -179,6 +184,32 @@ class UnlockInteractor(
             OperationResult.success(updatedFile)
         }
 
+    suspend fun removeKeyFile(file: UsedFile): OperationResult<Unit> =
+        withContext(dispatchers.IO) {
+            val existingFile = fileRepository.findByUid(file.fileUid, file.fsAuthority)
+                ?: return@withContext OperationResult.error(
+                    newDbError(
+                        String.format(
+                            GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
+                            UsedFile::class.simpleName,
+                            file.fileUid
+                        )
+                    )
+                )
+
+            val updatedFile = existingFile.copy(
+                keyType = KeyType.PASSWORD,
+                keyFileFsAuthority = null,
+                keyFilePath = null,
+                keyFileUid = null,
+                keyFileName = null
+            )
+
+            fileRepository.update(updatedFile)
+
+            OperationResult.success(Unit)
+        }
+
     suspend fun saveUsedFileWithoutAccessTime(file: UsedFile): OperationResult<UsedFile> =
         withContext(dispatchers.IO) {
             val existingFile = fileRepository.findByUid(file.fileUid, file.fsAuthority)
@@ -204,11 +235,11 @@ class UnlockInteractor(
             OperationResult.success(insertedFile)
         }
 
-    suspend fun getUsedFile(
-        fileUid: String,
-        fsAuthority: FSAuthority
-    ): OperationResult<UsedFile> =
-        getUsedFileUseCase.getUsedFile(fileUid, fsAuthority)
+    suspend fun decodePassword(
+        decoder: BiometricDecoder,
+        biometricData: BiometricData
+    ): OperationResult<String> =
+        decodePasswordUseCase.decodePassword(decoder, biometricData)
 
     suspend fun getFile(
         path: String,

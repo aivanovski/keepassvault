@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.unlock
 
-import androidx.annotation.IdRes
+import android.view.inputmethod.EditorInfo
+import androidx.annotation.DrawableRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -9,7 +10,6 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
-import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
@@ -28,8 +28,8 @@ import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
-import com.ivanovsky.passnotes.domain.interactor.unlock.BiometricUnlockInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.extensions.getKeyFileDescriptor
 import com.ivanovsky.passnotes.extensions.getFileDescriptor
@@ -40,7 +40,6 @@ import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_AUTHO
 import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NewDatabaseScreen
-import com.ivanovsky.passnotes.presentation.Screens.SelectDatabaseScreen
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
@@ -49,18 +48,15 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
-import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.server_login.model.LoginType
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.unlock.cells.model.DatabaseCellModel
-import com.ivanovsky.passnotes.presentation.unlock.cells.viewmodel.DatabaseCellViewModel
+import com.ivanovsky.passnotes.presentation.unlock.cells.viewmodel.DatabaseFileCellViewModel
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -68,7 +64,7 @@ import org.koin.core.parameter.parametersOf
 
 class UnlockViewModel(
     private val interactor: UnlockInteractor,
-    private val biometricInteractor: BiometricUnlockInteractor,
+    private val biometricInteractor: BiometricInteractor,
     private val errorInteractor: ErrorInteractor,
     private val fileSystemResolver: FileSystemResolver,
     private val observerBus: ObserverBus,
@@ -86,26 +82,22 @@ class UnlockViewModel(
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.loading())
-    val selectedKeyType = MutableLiveData(KeyType.PASSWORD)
-    val selectedKeyTypeTitle = MutableLiveData<String>()
+    val filename = MutableLiveData(EMPTY)
+    val keyFilename = MutableLiveData(EMPTY)
     val password = MutableLiveData(EMPTY)
-    val selectedKeyFileTitle = MutableLiveData(resourceProvider.getString(R.string.not_selected))
-    val selectedKeyFileTitleColor = MutableLiveData(resourceProvider.getColor(R.color.primary_text))
-    val hideKeyboardEvent = SingleLiveEvent<Unit>()
+    val unlockIconResId = MutableLiveData(getUnlockIconResIdInternal())
+    val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
     val showSnackbarMessage = SingleLiveEvent<String>()
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
     val fileCellViewModels = MutableLiveData<List<BaseCellViewModel>>()
     val isFabButtonVisible = MutableLiveData(false)
-    val visibleMenuItems = MutableLiveData<List<UnlockMenuItem>>(emptyList())
-    val allKeyTypes = getKeyTypeNames()
     val showResolveConflictDialog = SingleLiveEvent<SyncConflictInfo>()
-    val biometricIconTint = MutableLiveData(getBiometricIconTintInternal())
-    val isBiometricAvailable = MutableLiveData(false)
-    val showBiometricSetupDialog = SingleLiveEvent<BiometricEncoder>()
+    val isAddKeyButtonVisible = MutableLiveData(false)
     val showBiometricUnlockDialog = SingleLiveEvent<BiometricDecoder>()
+    val showFileActionsDialog = SingleLiveEvent<UsedFile>()
 
     val fileCellTypes = ViewModelTypes()
-        .add(DatabaseCellViewModel::class, R.layout.cell_database)
+        .add(DatabaseFileCellViewModel::class, R.layout.cell_database_file_2)
 
     val fabItems = FAB_ITEMS
         .map { (_, resId) -> resourceProvider.getString(resId) }
@@ -116,34 +108,47 @@ class UnlockViewModel(
         }
     }
 
+    private val eventProvider = EventProviderImpl()
     private var selectedUsedFile: UsedFile? = null
     private var selectedKeyFile: FileDescriptor? = null
-    private var userSelectedKeyType: KeyType? = null
-    private var recentlyUsedFiles: List<FileDescriptor>? = null
+    private var recentlyUsedDescriptors: List<FileDescriptor>? = null
+    private var recentlyUsedFiles: List<UsedFile>? = null
     private var errorPanelButtonAction: ErrorPanelButtonAction? = null
+    private var usedFileIdToSyncStateMap: MutableMap<Int?, SyncState?> = HashMap()
 
     init {
         observerBus.register(this)
+        subscribeToEvents()
     }
 
     override fun onCleared() {
         super.onCleared()
         observerBus.unregister(this)
+        unsubscribeFromEvents()
     }
 
     override fun onUsedFileDataSetChanged() {
-        loadData(resetSelection = false)
+        loadData(
+            isResetSelection = false,
+            isShowKeyboard = false
+        )
     }
 
     override fun onUsedFileContentChanged(usedFileId: Int) {
-        loadData(resetSelection = false)
+        loadData(
+            isResetSelection = false,
+            isShowKeyboard = false
+        )
     }
 
     fun onScreenStart() {
         closeActiveDatabaseIfNeed()
     }
 
-    fun loadData(resetSelection: Boolean) {
+    fun loadData(
+        isResetSelection: Boolean,
+        isShowKeyboard: Boolean
+    ) {
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
@@ -152,22 +157,19 @@ class UnlockViewModel(
             if (result.isSucceededOrDeferred) {
                 val files = result.obj
                 if (files.isNotEmpty()) {
-                    val descriptors = files.map { it.getFileDescriptor() }
-                    recentlyUsedFiles = descriptors
+                    recentlyUsedDescriptors = files.map { it.getFileDescriptor() }
+                    recentlyUsedFiles = files
 
-                    if (resetSelection) {
+                    if (isResetSelection) {
                         selectedUsedFile = null
-                        userSelectedKeyType = null
                     }
 
-                    val selectedFile = takeAlreadySelectedOrFirst(files)
-                    if (selectedFile != null) {
-                        setSelectedFile(selectedFile)
-                    } else {
-                        removeSelectedFileCell()
-                    }
-
+                    setSelectedFile(takeAlreadySelectedOrFirst(files))
                     setScreenState(ScreenState.data())
+
+                    if (isShowKeyboard) {
+                        isKeyboardVisibleEvent.call(true)
+                    }
                 } else {
                     val emptyText = resourceProvider.getString(R.string.no_databases)
                     setScreenState(ScreenState.empty(emptyText))
@@ -186,7 +188,7 @@ class UnlockViewModel(
                 onResolveConflictButtonClicked()
             }
             ErrorPanelButtonAction.REMOVE_FILE -> {
-                onRemoveFileButtonClicked()
+                onRemoveSelectedFileButtonClicked()
             }
             ErrorPanelButtonAction.AUTHORISATION -> {
                 onLoginButtonClicked()
@@ -203,7 +205,10 @@ class UnlockViewModel(
             val resolvedConflict = interactor.resolveConflict(selectFile, resolutionStrategy)
 
             if (resolvedConflict.isSucceeded) {
-                loadData(resetSelection = false)
+                loadData(
+                    isResetSelection = false,
+                    isShowKeyboard = false
+                )
             } else {
                 setErrorPanelState(resolvedConflict.error)
             }
@@ -211,27 +216,31 @@ class UnlockViewModel(
     }
 
     fun onUnlockButtonClicked() {
-        val selectedKeyType = selectedKeyType.value ?: return
         val selectedFile = selectedUsedFile?.getFileDescriptor() ?: return
+        val biometricData = selectedUsedFile?.biometricData
         val selectedKeyFile = selectedKeyFile
         val password = password.value ?: EMPTY
 
-        val key = when (selectedKeyType) {
-            KeyType.PASSWORD -> PasswordKeepassKey(password)
-            KeyType.KEY_FILE -> {
-                if (selectedKeyFile == null) {
-                    showSnackbarMessage.call(resourceProvider.getString(R.string.key_file_is_not_selected))
-                    return
-                }
-
-                FileKeepassKey(
-                    selectedKeyFile,
-                    fileSystemResolver.resolveProvider(selectedFile.fsAuthority)
-                )
-            }
+        if (isBiometricAuthenticationAvailable() &&
+            biometricData != null &&
+            selectedKeyFile == null) {
+            val decoder = biometricInteractor.getCipherForDecryption(biometricData)
+            showBiometricUnlockDialog.call(decoder)
+            return
         }
 
-        hideKeyboardEvent.call()
+        val key = when {
+            selectedKeyFile != null -> {
+                FileKeepassKey(
+                    file = selectedKeyFile,
+                    password = password.ifEmpty { null },
+                    fileSystemProvider = fileSystemResolver.resolveProvider(selectedFile.fsAuthority)
+                )
+            }
+            else -> PasswordKeepassKey(password)
+        }
+
+        isKeyboardVisibleEvent.call(false)
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
@@ -246,78 +255,66 @@ class UnlockViewModel(
     }
 
     fun onRefreshButtonClicked() {
-        loadData(resetSelection = false)
+        loadData(
+            isResetSelection = false,
+            isShowKeyboard = false
+        )
     }
 
-    fun onKeyTypeSelected(type: String) {
-        val currentKeyType = selectedKeyType.value ?: return
-        val newKeyType = getKeyTypeByTitle(type) ?: return
-
-        if (newKeyType == currentKeyType) {
-            return
-        }
-
-        userSelectedKeyType = newKeyType
-        setSelectedKeyType(newKeyType)
-        fillKeyInputIfNeed()
-    }
-
-    fun onChangeKeyFileButtonClicked() {
+    fun onAddKeyFileButtonClicked() {
         navigateToFilePickerToSelectKey()
     }
 
-    fun onBiometricLoginButtonClicked() {
-        val selectedUsedFile = selectedUsedFile ?: return
+    fun onRemoveKeyFileButtonClicked() {
+        val selectedFile = selectedUsedFile ?: return
+        if (selectedKeyFile == null) {
+            return
+        }
 
-        if (selectedUsedFile.biometricData != null) {
-            showBiometricUnlockDialog.call(
-                biometricInteractor.getCipherForDecryption(
-                    selectedUsedFile.biometricData
-                )
+        viewModelScope.launch {
+            val removeKeyResult = interactor.removeKeyFile(selectedFile)
+            if (removeKeyResult.isFailed) {
+                setErrorPanelState(removeKeyResult.error)
+                return@launch
+            }
+
+            selectedKeyFile = null
+
+            loadData(
+                isResetSelection = false,
+                isShowKeyboard = false
             )
-        } else {
-            showBiometricSetupDialog.call(biometricInteractor.getCipherForEncryption())
         }
     }
 
-    fun onBiometricSetupSuccess(encoder: BiometricEncoder) {
-        val selectedUsedFile = selectedUsedFile ?: return
-        val selectedFile = selectedUsedFile.getFileDescriptor()
-        val password = password.value ?: EMPTY
-        val key = PasswordKeepassKey(password)
+    fun onRemoveFileClicked(file: UsedFile) {
+        val descriptor = file.getFileDescriptor()
 
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val openResult = interactor.openDatabase(key, selectedFile)
-            if (openResult.isFailed) {
-                setErrorPanelState(openResult.error)
+            val removeResult = interactor.removeFromUsedFiles(descriptor)
+            if (removeResult.isFailed) {
+                setErrorPanelState(removeResult.error)
                 return@launch
             }
 
-            val encryptPasswordResult = biometricInteractor.encodeAndStorePasswordForFile(
-                encoder,
-                password,
-                selectedUsedFile
+            loadData(
+                isResetSelection = true,
+                isShowKeyboard = false
             )
-            if (encryptPasswordResult.isFailed) {
-                setErrorPanelState(encryptPasswordResult.error)
-                return@launch
-            }
-
-            onDatabaseUnlocked()
         }
     }
 
     fun onBiometricUnlockSuccess(decoder: BiometricDecoder) {
         val selectedUsedFile = selectedUsedFile ?: return
+        val biometricData = selectedUsedFile.biometricData ?: return
         val selectedFile = selectedUsedFile.getFileDescriptor()
 
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val passwordResult =
-                biometricInteractor.decodePassword(decoder, selectedUsedFile)
+            val passwordResult = interactor.decodePassword(decoder, biometricData)
             if (passwordResult.isFailed) {
                 setErrorPanelState(passwordResult.error)
                 return@launch
@@ -334,74 +331,77 @@ class UnlockViewModel(
         }
     }
 
-    private fun checkAndSetSelectedKeyFile(file: FileDescriptor) {
-        selectedKeyFileTitle.value = resourceProvider.getString(
-            R.string.text_with_dots,
-            resourceProvider.getString(R.string.checking)
-        )
-        selectedKeyFileTitleColor.value = resourceProvider.getColor(R.color.secondary_text)
+    fun handleEditorAction(actionId: Int) {
+        if (actionId == EditorInfo.IME_ACTION_DONE) {
+            onUnlockButtonClicked()
+        }
+    }
 
-        viewModelScope.launch {
-            val getFileResult = interactor.getFile(file.path, file.fsAuthority)
-            if (getFileResult.isSucceeded) {
-                val checkedFile = getFileResult.obj
-
-                selectedKeyFile = checkedFile
-                selectedKeyFileTitle.value = checkedFile.name
-                selectedKeyFileTitleColor.value = resourceProvider.getColor(R.color.primary_text)
-            } else {
-                selectedKeyFileTitle.value = resourceProvider.getString(R.string.not_selected)
-                selectedKeyFileTitleColor.value = resourceProvider.getColor(R.color.primary_text)
-                setErrorPanelState(getFileResult.error)
+    private fun subscribeToEvents() {
+        eventProvider.subscribe(this) { event ->
+            event.getInt(DatabaseFileCellViewModel.CLICK_EVENT)?.let { id ->
+                onDatabaseFileClicked(id)
+            }
+            event.getInt(DatabaseFileCellViewModel.LONG_CLICK_EVENT)?.let { id ->
+                onDatabaseFileLongClicked(id)
             }
         }
     }
 
-    private fun setSelectedKeyType(keyType: KeyType) {
-        selectedKeyTypeTitle.value = keyType.getTitle()
-        selectedKeyType.value = keyType
+    private fun unsubscribeFromEvents() {
+        eventProvider.unSubscribe(this)
+    }
 
-        isBiometricAvailable.value = getIsBiometricAvailable()
-        biometricIconTint.value = getBiometricIconTintInternal()
+    private fun onDatabaseFileClicked(usedFileId: Int) {
+        val selectedFile = recentlyUsedFiles?.firstOrNull { it.id == usedFileId } ?: return
 
-        clearKeyInputIfNeed()
+        setSelectedFile(selectedFile)
+    }
+
+    private fun onDatabaseFileLongClicked(usedFileId: Int) {
+        val selectedFile = recentlyUsedFiles?.firstOrNull { it.id == usedFileId } ?: return
+
+        showFileActionsDialog.call(selectedFile)
+    }
+
+    private fun checkAndSetSelectedKeyFile(keyFile: FileDescriptor) {
+        viewModelScope.launch {
+            val getFileResult = interactor.getFile(keyFile.path, keyFile.fsAuthority)
+            if (getFileResult.isSucceeded) {
+                val checkedFile = getFileResult.obj
+
+                selectedKeyFile = checkedFile
+                keyFilename.value = checkedFile.name
+            } else {
+                keyFilename.value = EMPTY
+                setErrorPanelState(getFileResult.error)
+            }
+
+            isAddKeyButtonVisible.value = isAddKeyFileButtonVisibleInternal()
+        }
     }
 
     private fun clearKeyInputIfNeed() {
         password.value = EMPTY
         selectedKeyFile = null
-        selectedKeyFileTitle.value = EMPTY
+        isAddKeyButtonVisible.value = true
+        keyFilename.value = EMPTY
     }
 
     private fun fillKeyInputIfNeed() {
-        val selectedKeyType = selectedKeyType.value ?: return
         val selectedKeyFile = selectedKeyFile
-        val selectedFile = selectedUsedFile
 
-        when (selectedKeyType) {
-            KeyType.PASSWORD -> {
+        when {
+            selectedKeyFile == null -> {
                 password.value = EMPTY
                 viewModelScope.launch {
-                    val filename = selectedUsedFile ?.getFileDescriptor()?.name ?: return@launch
+                    val filename = selectedUsedFile?.getFileDescriptor()?.name ?: return@launch
                     val testPassword = interactor.getTestPasswordForFile(filename) ?: return@launch
                     password.value = testPassword
                 }
             }
-            KeyType.KEY_FILE -> {
-                if (selectedKeyFile != null) {
-                    checkAndSetSelectedKeyFile(selectedKeyFile)
-                } else if (selectedFile != null &&
-                    selectedFile.keyType == KeyType.KEY_FILE &&
-                    selectedFile.getKeyFileDescriptor() != null
-                ) {
-                    selectedFile.getKeyFileDescriptor()?.let {
-                        checkAndSetSelectedKeyFile(it)
-                    }
-                } else {
-                    selectedKeyFileTitle.value = resourceProvider.getString(R.string.not_selected)
-                    selectedKeyFileTitleColor.value =
-                        resourceProvider.getColor(R.color.primary_text)
-                }
+            else -> {
+                checkAndSetSelectedKeyFile(selectedKeyFile)
             }
         }
     }
@@ -458,7 +458,7 @@ class UnlockViewModel(
     }
 
     private fun onDatabaseFilePicked(file: FileDescriptor) {
-        userSelectedKeyType = null
+        // userSelectedKeyType = null
 
         setScreenState(ScreenState.loading())
 
@@ -472,7 +472,10 @@ class UnlockViewModel(
             if (saveResult.isSucceededOrDeferred) {
                 selectedUsedFile = saveResult.obj
 
-                loadData(resetSelection = false)
+                loadData(
+                    isResetSelection = false,
+                    isShowKeyboard = false
+                )
             } else {
                 setScreenState(ScreenState.data())
 
@@ -482,41 +485,16 @@ class UnlockViewModel(
         }
     }
 
-    private fun navigateToSelectDatabaseScreen() {
-        val currentlySelectedFile = selectedUsedFile?.getFileDescriptor() ?: return
-
-        router.setResultListener(SelectDatabaseScreen.RESULT_KEY) { newDbFile ->
-            if (newDbFile is FileDescriptor) {
-                onDatabaseSelected(newDbFile)
-            }
-        }
-        router.navigateTo(
-            SelectDatabaseScreen(
-                SelectDatabaseArgs(
-                    selectedFile = currentlySelectedFile
-                )
-            )
-        )
-    }
-
-    private fun onDatabaseSelected(dbFile: FileDescriptor) {
-        userSelectedKeyType = null
-
-        viewModelScope.launch {
-            val getUsedFileResult = interactor.getUsedFile(dbFile.uid, dbFile.fsAuthority)
-            if (getUsedFileResult.isSucceeded) {
-                setSelectedFile(getUsedFileResult.obj)
-            } else {
-                val message = errorInteractor.processAndGetMessage(getUsedFileResult.error)
-                showSnackbarMessage.call(message)
-            }
-        }
-    }
-
     private fun onFabItemClicked(position: Int) {
         when (position) {
-            FAB_ITEM_NEW_FILE -> router.navigateTo(NewDatabaseScreen())
-            FAB_ITEM_OPEN_FILE -> navigateToFilePickerToSelectDatabase()
+            FAB_ITEM_NEW_FILE -> {
+                isKeyboardVisibleEvent.call(false)
+                router.navigateTo(NewDatabaseScreen())
+            }
+            FAB_ITEM_OPEN_FILE -> {
+                isKeyboardVisibleEvent.call(false)
+                navigateToFilePickerToSelectDatabase()
+            }
         }
     }
 
@@ -557,37 +535,38 @@ class UnlockViewModel(
         }
     }
 
-    private fun setSelectedFile(usedFile: UsedFile) {
+    private fun setSelectedFile(usedFile: UsedFile?) {
+        clearKeyInputIfNeed()
+
         this.selectedUsedFile = usedFile
-
-        val files = recentlyUsedFiles ?: return
-
-        if (userSelectedKeyType == null) {
-            if (usedFile.keyType != selectedKeyType.value) {
-                setSelectedKeyType(usedFile.keyType)
-            }
-
-            clearKeyInputIfNeed()
-            fillKeyInputIfNeed()
+        this.selectedKeyFile = if (usedFile?.keyType == KeyType.KEY_FILE) {
+            usedFile.getKeyFileDescriptor()
+        } else {
+            null
         }
 
-        val file = usedFile.getFileDescriptor()
+        val selectedKeyFile = selectedKeyFile
+        val files = recentlyUsedFiles ?: return
 
-        setSelectedFileCell(
-            modelFactory.createFileCellModel(
-                file = file,
-                syncState = null,
-                isNextButtonVisible = files.size > 1,
-                onFileClicked = { navigateToSelectDatabaseScreen() }
-            )
-        )
-        isBiometricAvailable.value = getIsBiometricAvailable()
-        biometricIconTint.value = getBiometricIconTintInternal()
+        fillKeyInputIfNeed()
+
+        if (usedFile != null) {
+            usedFileIdToSyncStateMap[usedFile.id] = null
+        }
+
+        val models = modelFactory.createFileModels(files, usedFile, usedFileIdToSyncStateMap)
+        fileCellViewModels.value = viewModelFactory.createCellViewModels(models, eventProvider)
+
+        unlockIconResId.value = getUnlockIconResIdInternal()
+        isAddKeyButtonVisible.value = isAddKeyFileButtonVisibleInternal()
+        filename.value = usedFile?.fileName ?: EMPTY
+        keyFilename.value = selectedKeyFile?.name ?: EMPTY
 
         viewModelScope.launch {
-            val syncState = interactor.getSyncState(file)
+            val descriptor = usedFile?.getFileDescriptor() ?: return@launch
+            val syncState = interactor.getSyncState(descriptor)
 
-            onSyncStateReceived(file, syncState)
+            onSyncStateReceived(usedFile, descriptor, syncState)
         }
     }
 
@@ -596,31 +575,43 @@ class UnlockViewModel(
         uid: String,
         status: SyncProgressStatus
     ) {
-        val selectedFile = selectedUsedFile?.getFileDescriptor() ?: return
+        val file = selectedUsedFile ?: return
+        val descriptor = file.getFileDescriptor()
 
-        if (selectedFile.uid == uid && selectedFile.fsAuthority == fsAuthority) {
+        if (descriptor.uid == uid && descriptor.fsAuthority == fsAuthority) {
             viewModelScope.launch {
-                val syncState = interactor.getSyncState(selectedFile)
-                onSyncStateReceived(selectedFile, syncState)
+                val syncState = interactor.getSyncState(descriptor)
+                onSyncStateReceived(file, descriptor, syncState)
             }
         }
     }
 
-    private fun onSyncStateReceived(file: FileDescriptor, syncState: SyncState) {
-        if (file.uid != selectedUsedFile?.fileUid) return
-
+    private fun onSyncStateReceived(
+        file: UsedFile,
+        descriptor: FileDescriptor,
+        syncState: SyncState
+    ) {
         val files = recentlyUsedFiles ?: return
+        val selectedFile = selectedUsedFile ?: return
 
-        setSelectedFileCell(
-            modelFactory.createFileCellModel(
-                file = file,
-                syncState = syncState,
-                isNextButtonVisible = files.size > 1,
-                onFileClicked = { navigateToSelectDatabaseScreen() }
-            )
-        )
+        usedFileIdToSyncStateMap[file.id] = syncState
+
+        if (descriptor.uid != selectedFile.fileUid ||
+            descriptor.fsAuthority != selectedFile.fsAuthority) return
+
+        val models = modelFactory.createFileModels(files, selectedFile, usedFileIdToSyncStateMap)
+        fileCellViewModels.value = viewModelFactory.createCellViewModels(models, eventProvider)
 
         when (syncState.status) {
+            SyncStatus.FILE_NOT_FOUND -> {
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = resourceProvider.getString(R.string.sync_file_not_found_message),
+                        errorButtonText = resourceProvider.getString(R.string.remove)
+                    )
+                )
+                errorPanelButtonAction = ErrorPanelButtonAction.REMOVE_FILE
+            }
             SyncStatus.CONFLICT -> {
                 setScreenState(
                     ScreenState.dataWithError(
@@ -671,7 +662,7 @@ class UnlockViewModel(
         }
     }
 
-    private fun onRemoveFileButtonClicked() {
+    private fun onRemoveSelectedFileButtonClicked() {
         val selectedFile = selectedUsedFile?.getFileDescriptor() ?: return
         val lastState = screenState.value ?: return
 
@@ -684,7 +675,10 @@ class UnlockViewModel(
                 return@launch
             }
 
-            loadData(resetSelection = true)
+            loadData(
+                isResetSelection = true,
+                isShowKeyboard = false
+            )
         }
     }
 
@@ -734,18 +728,11 @@ class UnlockViewModel(
                 return@launch
             }
 
-            loadData(resetSelection = false)
+            loadData(
+                isResetSelection = false,
+                isShowKeyboard = false
+            )
         }
-    }
-
-    private fun setSelectedFileCell(model: DatabaseCellModel) {
-        fileCellViewModels.value = listOf(
-            viewModelFactory.createCellViewModel(model, EventProviderImpl())
-        )
-    }
-
-    private fun removeSelectedFileCell() {
-        fileCellViewModels.value = listOf()
     }
 
     private fun clearEnteredPassword() {
@@ -771,22 +758,10 @@ class UnlockViewModel(
     private fun setScreenState(state: ScreenState) {
         screenState.value = state
         isFabButtonVisible.value = getFabButtonVisibility()
-        visibleMenuItems.value = getVisibleMenuItems()
     }
 
-    private fun getIsBiometricAvailable(): Boolean {
-        return selectedKeyType.value == KeyType.PASSWORD &&
-            biometricInteractor.isBiometricUnlockAvailable() &&
-            settings.isBiometricUnlockEnabled
-    }
-
-    private fun getBiometricIconTintInternal(): Int {
-        val biometricData = selectedUsedFile?.biometricData
-        return if (biometricData != null) {
-            resourceProvider.getColor(R.color.icon_gray)
-        } else {
-            resourceProvider.getColor(R.color.icon_gray_inactive)
-        }
+    private fun isAddKeyFileButtonVisibleInternal(): Boolean {
+        return selectedKeyFile == null
     }
 
     private fun getFabButtonVisibility(): Boolean {
@@ -796,34 +771,19 @@ class UnlockViewModel(
             args.appMode == ApplicationLaunchMode.NORMAL
     }
 
-    private fun getVisibleMenuItems(): List<UnlockMenuItem> {
-        val screenState = this.screenState.value ?: return emptyList()
-
-        return if (screenState.isDisplayingData) {
-            listOf(UnlockMenuItem.REFRESH)
+    @DrawableRes
+    private fun getUnlockIconResIdInternal(): Int {
+        return if (isBiometricAuthenticationAvailable() &&
+            selectedUsedFile?.biometricData != null &&
+            selectedKeyFile == null) {
+            R.drawable.ic_fingerprint_white_24dp
         } else {
-            emptyList()
+            R.drawable.ic_lock_open_white_24dp
         }
     }
 
-    private fun getKeyTypeByTitle(title: String): KeyType? {
-        return when (title) {
-            resourceProvider.getString(R.string.key_file) -> KeyType.KEY_FILE
-            resourceProvider.getString(R.string.password) -> KeyType.PASSWORD
-            else -> null
-        }
-    }
-
-    private fun getKeyTypeNames(): List<String> {
-        return listOf(KeyType.PASSWORD, KeyType.KEY_FILE)
-            .map { it.getTitle() }
-    }
-
-    private fun KeyType.getTitle(): String {
-        return when (this) {
-            KeyType.PASSWORD -> resourceProvider.getString(R.string.password)
-            KeyType.KEY_FILE -> resourceProvider.getString(R.string.key_file)
-        }
+    private fun isBiometricAuthenticationAvailable(): Boolean {
+        return biometricInteractor.isBiometricUnlockAvailable() && settings.isBiometricUnlockEnabled
     }
 
     private enum class ErrorPanelButtonAction {
@@ -837,15 +797,11 @@ class UnlockViewModel(
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return GlobalInjector.get<UnlockViewModel>(
                 parametersOf(args)
             ) as T
         }
-    }
-
-    enum class UnlockMenuItem(@IdRes override val menuId: Int) : ScreenMenuItem {
-        REFRESH(R.id.menu_refresh)
     }
 
     companion object {

@@ -7,16 +7,16 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
-import com.ivanovsky.passnotes.domain.interactor.unlock.BiometricUnlockInteractor
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import kotlinx.coroutines.launch
 import java.io.File
 
 class AppSettingsViewModel(
     private val interactor: AppSettingsInteractor,
-    private val biometricInteractor: BiometricUnlockInteractor,
+    private val biometricInteractor: BiometricInteractor,
     private val errorInteractor: ErrorInteractor,
     private val resourceProvider: ResourceProvider,
     private val settings: Settings,
@@ -59,7 +59,7 @@ class AppSettingsViewModel(
         isLoading.value = true
 
         viewModelScope.launch {
-            biometricInteractor.removeAllBiometricData()
+            interactor.removeAllBiometricData()
             isLoading.value = false
         }
     }

@@ -15,7 +15,7 @@ import androidx.databinding.InverseBindingListener
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.WidgetSecretInputBinding
 import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputLines
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class SecretInputView(

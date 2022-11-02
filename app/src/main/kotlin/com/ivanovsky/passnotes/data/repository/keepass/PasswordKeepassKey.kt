@@ -5,7 +5,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 
 data class PasswordKeepassKey(
-    private val password: String
+    val password: String
 ) : EncryptedDatabaseKey {
 
     override val type: KeyType

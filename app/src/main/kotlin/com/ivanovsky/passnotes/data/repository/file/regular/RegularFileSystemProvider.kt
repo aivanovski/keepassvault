@@ -40,7 +40,7 @@ class RegularFileSystemProvider(
 ) : FileSystemProvider {
 
     private val lock = ReentrantLock()
-    private val syncProcessor = RegularFileSystemSyncProcessor()
+    private val syncProcessor = RegularFileSystemSyncProcessor(this)
     private val permissionHelper = PermissionHelper(context)
     private val authenticator = createAuthenticator(fsAuthority.type)
 

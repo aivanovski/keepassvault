@@ -16,8 +16,8 @@ import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedText
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.SecretPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.TextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputLines.MULTIPLE_LINES
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputLines.SINGLE_LINE
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines.MULTIPLE_LINES
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines.SINGLE_LINE
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType.TEXT
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType.TEXT_CAP_SENTENCES
 import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType.URL

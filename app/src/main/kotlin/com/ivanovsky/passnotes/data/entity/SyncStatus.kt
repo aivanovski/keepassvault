@@ -8,5 +8,6 @@ enum class SyncStatus {
     NO_NETWORK,
     ERROR,
     CONFLICT,
-    AUTH_ERROR
+    AUTH_ERROR,
+    FILE_NOT_FOUND
 }

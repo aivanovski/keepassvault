@@ -15,6 +15,7 @@
 
     <!-- Color for icons -->
     <color name="icon_gray">#757575</color>
+    <color name="icon_white">#ffffff</color>
     <color name="icon_gray_inactive">#aaaaaa</color>
 
     <color name="material_icon_background">#9d9d9d</color>
@@ -25,7 +26,7 @@
     <!-- list item colors -->
     <color name="material_list_item_primary_text">@color/primary_text</color>
     <color name="material_list_item_secondary_text">#757575</color>
-    <color name="material_list_item_selected">#99999999</color>
+    <color name="material_list_item_selected">#283F51B5</color>
 
     <!-- error panel -->
     <color name="material_error_panel_background">#e7e7e7</color>

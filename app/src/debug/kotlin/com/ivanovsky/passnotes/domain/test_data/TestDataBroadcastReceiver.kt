@@ -19,6 +19,7 @@ class TestDataBroadcastReceiver : BroadcastReceiver() {
 
         if (extras.containsKey(KEY_IS_RESET_STORED_TEST_DATA)) {
             settings.testData = null
+            settings.testToggles = null
             Timber.d("Test data removed")
 
             showToast(

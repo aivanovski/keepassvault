@@ -6,7 +6,9 @@
 
     <data>
 
-        <import type="com.ivanovsky.passnotes.data.entity.KeyType" />
+        <import type="com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines" />
+
+        <import type="com.ivanovsky.passnotes.presentation.core.widget.entity.ImeOptions" />
 
         <variable
             name="viewModel"
@@ -33,101 +35,138 @@
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
-        <com.ivanovsky.passnotes.presentation.core.widget.CellLinearLayout
-            android:id="@+id/databaseFileContainer"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/filenameText"
+            style="@style/Material.PrimaryText.SingleLine"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:layout_marginHorizontal="@dimen/element_margin"
+            android:layout_marginTop="@dimen/element_margin"
+            android:text="@{viewModel.filename}"
+            android:textSize="@dimen/material_header_text_size"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/errorPanelView"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}"
-            app:viewModels="@{viewModel.fileCellViewModels}"
-            app:viewTypes="@{viewModel.fileCellTypes}" />
+            tools:text="Filename.kdbx" />
 
-        <com.ivanovsky.passnotes.presentation.core.widget.MaterialSpinner
-            android:id="@+id/keyTypeSpinner"
-            android:layout_width="match_parent"
+        <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
+            android:id="@+id/password"
+            eyeButtonVisible="@{true}"
+            hint="@{@string/password}"
+            imeOptions="@{ImeOptions.ACTION_DONE}"
+            inputLines="@{TextInputLines.MULTIPLE_LINES}"
+            text="@={viewModel.password}"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/element_margin"
-            android:layout_marginTop="@dimen/element_margin"
-            android:layout_marginEnd="@dimen/element_margin"
-            app:hint="@{@string/unlock_type}"
-            app:item="@{viewModel.selectedKeyTypeTitle}"
-            app:items="@{viewModel.allKeyTypes}"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="@dimen/half_margin"
+            android:layout_marginEnd="@dimen/half_margin"
+            app:layout_constraintEnd_toStartOf="@id/unlockButton"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/databaseFileContainer"
-            app:onItemSelected="@{(item, idx) -> viewModel.onKeyTypeSelected(item)}"
+            app:layout_constraintTop_toBottomOf="@id/filenameText"
+            app:onEditorAction="@{(actionId) -> viewModel.handleEditorAction(actionId)}"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <ImageButton
+            android:id="@+id/unlockButton"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/small_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:foreground="?attr/selectableItemBackground"
+            android:minWidth="@dimen/unlock_button_size"
+            android:onClick="@{() -> viewModel.onUnlockButtonClicked()}"
+            app:imageResourceId="@{viewModel.unlockIconResId}"
+            app:layout_constraintBottom_toBottomOf="@id/password"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/password"
+            app:materialBackgroundColor="@{@color/primary}"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <LinearLayout
-            android:id="@+id/keyInputLayout"
-            android:layout_width="match_parent"
+            android:id="@+id/buttonsLayout"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/element_margin"
-            android:layout_marginTop="@dimen/element_margin"
+            android:layout_marginTop="@dimen/quarter_margin"
             android:layout_marginEnd="@dimen/element_margin"
+            android:gravity="end"
             android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@id/keyTypeSpinner"
-            app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}">
-
-            <com.ivanovsky.passnotes.presentation.core.widget.SecretInputView
-                android:id="@+id/password"
-                hint="@{@string/password}"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:text="@={viewModel.password}"
-                app:visible="@{viewModel.selectedKeyType == KeyType.PASSWORD}" />
-
-            <com.ivanovsky.passnotes.presentation.core.widget.SelectorView
-                android:id="@+id/keyFileSelector"
-                hint="@{@string/key_file}"
-                onChangeClicked="@{() -> viewModel.onChangeKeyFileButtonClicked()}"
-                text="@{viewModel.selectedKeyFileTitle}"
-                textColor="@{viewModel.selectedKeyFileTitleColor}"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:visible="@{viewModel.selectedKeyType == KeyType.KEY_FILE}" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/buttonLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/element_margin"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/keyInputLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/password"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}">
 
             <Button
-                android:id="@+id/unlockButton"
-                style="@style/Material.ContainedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/element_margin"
-                android:layout_marginEnd="@dimen/element_margin"
-                android:layout_weight="1"
-                android:onClick="@{() -> viewModel.onUnlockButtonClicked()}"
-                android:text="@string/unlock" />
-
-            <ImageView
-                android:id="@+id/biometricUnlockButton"
+                android:id="@+id/addKeyButton"
+                style="@style/Material.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/element_margin"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:onClick="@{v -> viewModel.onBiometricLoginButtonClicked()}"
-                android:src="@drawable/ic_fingerprint_48dp"
-                app:imageTint="@{viewModel.biometricIconTint}"
-                app:visible="@{viewModel.isBiometricAvailable}"
-                tools:visibility="visible" />
+                android:onClick="@{() -> viewModel.onAddKeyFileButtonClicked()}"
+                android:text="@string/add_key"
+                app:visible="@{viewModel.isAddKeyButtonVisible}" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:visible="@{!viewModel.isAddKeyButtonVisible}">
+
+                <Button
+                    style="@style/Material.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:enabled="false"
+                    android:maxWidth="200dp"
+                    android:text="@{viewModel.keyFilename}"
+                    android:textColor="@color/primary"
+                    tools:text="key-file-name" />
+
+                <ImageButton
+                    android:id="@+id/removeKeyButton"
+                    style="@style/Material.BorderlessButton.Borderless"
+                    android:layout_width="@dimen/small_borderless_icon_button_size"
+                    android:layout_height="@dimen/small_borderless_icon_button_size"
+                    android:onClick="@{() -> viewModel.onRemoveKeyFileButtonClicked()}"
+                    android:src="@drawable/ic_close_white_24dp"
+                    android:tint="@color/primary" />
+
+            </LinearLayout>
 
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/recentFilesText"
+            style="@style/Material.SecondaryText.SingleLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:layout_marginTop="@dimen/half_margin"
+            android:text="@string/recent_files"
+            app:layout_constraintBottom_toBottomOf="@id/buttonsLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/quarter_margin"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recentFilesText"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            app:viewModels="@{viewModel.fileCellViewModels}"
+            app:viewTypes="@{viewModel.fileCellTypes}"
+            tools:itemCount="5"
+            tools:listitem="@layout/cell_database_file_2" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
             android:id="@+id/fab"

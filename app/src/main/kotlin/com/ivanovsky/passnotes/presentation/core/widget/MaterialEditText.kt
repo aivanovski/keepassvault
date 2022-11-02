@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
@@ -19,7 +20,7 @@ import com.ivanovsky.passnotes.databinding.WidgetMaterialEditTextBinding
 import com.ivanovsky.passnotes.presentation.core.widget.entity.ImeOptions
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnEditorActionListener
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines
-import com.ivanovsky.passnotes.util.StringUtils
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class MaterialEditText(
     context: Context,
@@ -40,7 +41,7 @@ class MaterialEditText(
 
     var hint: String? = null
         set(value) {
-            setHintInternal(value ?: StringUtils.EMPTY)
+            setHintInternal(value ?: EMPTY)
             field = value
         }
 
@@ -50,10 +51,10 @@ class MaterialEditText(
             field = value
         }
 
-    var isEyeButtonVisible: Boolean = false
+    var isActionButtonVisible: Boolean = false
         set(value) {
-            setEyeButtonVisibleInternal(value)
             field = value
+            setActionButtonVisibleInternal(determineIsActionButtonVisibleInternal())
         }
 
     var inputLines: TextInputLines? = TextInputLines.SINGLE_LINE
@@ -68,9 +69,15 @@ class MaterialEditText(
             field = value
         }
 
+    var actionButton: ActionButton = ActionButton.EYE
+        set(value) {
+            setActionButtonInternal(value, isResetTextVisibility = true)
+            field = value
+        }
+
     private val textWatcher: CustomTextWatcher
     private val binding: WidgetMaterialEditTextBinding
-    private var databindingTextChangedListener: ((String) -> Unit)? = null
+    private var twoWayBindingTextChangedListener: ((String) -> Unit)? = null
     private var onEditorAction: OnEditorActionListener? = null
 
     init {
@@ -80,8 +87,8 @@ class MaterialEditText(
 
         readAttributes(attrs)
 
-        binding.eyeButton.setOnClickListener {
-            toggleTextVisibility()
+        binding.actionButton.setOnClickListener {
+            handleActionButtonClicked()
         }
 
         binding.textInput.setOnEditorActionListener { _, actionId, _ ->
@@ -91,8 +98,9 @@ class MaterialEditText(
         textWatcher = CustomTextWatcher()
         binding.textInput.addTextChangedListener(textWatcher)
 
+        setActionButtonInternal(actionButton, isResetTextVisibility = false)
         setInputLinesInternal(inputLines)
-        setEyeButtonVisibleInternal(isEyeButtonVisible)
+        setActionButtonVisibleInternal(determineIsActionButtonVisibleInternal())
         setTextVisibleInternal(isTextVisible)
     }
 
@@ -104,10 +112,28 @@ class MaterialEditText(
             this.hint = hint
         }
 
-        isEyeButtonVisible = params.getBoolean(
-            R.styleable.MaterialEditText_isEyeButtonVisible,
+        val isEyeButtonEnabled = params.getBoolean(
+            R.styleable.MaterialEditText_isEyeButtonEnabled,
             false
         )
+        val isClearButtonEnabled = params.getBoolean(
+            R.styleable.MaterialEditText_isClearButtonEnabled,
+            false
+        )
+
+        isActionButtonVisible = (isEyeButtonEnabled || isClearButtonEnabled)
+        when {
+            isEyeButtonEnabled && isClearButtonEnabled -> {
+                throw IllegalStateException()
+            }
+            isEyeButtonEnabled -> {
+                actionButton = ActionButton.EYE
+                isTextVisible = false
+            }
+            isClearButtonEnabled -> {
+                actionButton = ActionButton.CLEAR
+            }
+        }
 
         params.recycle()
     }
@@ -123,6 +149,13 @@ class MaterialEditText(
         }
     }
 
+    private fun handleActionButtonClicked() {
+        when (actionButton) {
+            ActionButton.EYE -> toggleTextVisibility()
+            ActionButton.CLEAR -> clearText()
+        }
+    }
+
     private fun setHintInternal(hint: String) {
         binding.textInputLayout.hint = hint
     }
@@ -135,19 +168,22 @@ class MaterialEditText(
         isTextVisible = !isTextVisible
     }
 
+    private fun clearText() {
+        if (text.isNotEmpty()) {
+            text = EMPTY
+        }
+    }
+
     private fun setTextVisibleInternal(isVisible: Boolean) {
         binding.textInput.transformationMethod = if (isVisible) {
             HideReturnsTransformationMethod.getInstance()
         } else {
             PasswordTransformationMethod.getInstance()
         }
-        binding.eyeButton.setImageResource(
-            if (isVisible) {
-                R.drawable.ic_visibility_on_24dp
-            } else {
-                R.drawable.ic_visibility_off_24dp
-            }
-        )
+
+        if (actionButton == ActionButton.EYE) {
+            binding.actionButton.setImageResource(getEyeIcon(isVisible))
+        }
     }
 
     private fun getTextInternal(): String = binding.textInput.text.toString()
@@ -169,29 +205,8 @@ class MaterialEditText(
     }
 
     private fun onTextChanged(text: String) {
-        databindingTextChangedListener?.invoke(text)
-    }
-
-    private fun setEyeButtonVisibleInternal(isVisible: Boolean) {
-        if (isVisible && isTextVisible) {
-            isTextVisible = false
-        }
-        binding.eyeButton.isVisible = isVisible
-
-        val textInput = binding.textInput
-
-        val paddingEnd = if (isVisible) {
-            context.resources.getDimension(R.dimen.borderless_icon_button_size).toInt()
-        } else {
-            context.resources.getDimension(R.dimen.half_margin).toInt()
-        }
-
-        textInput.setPadding(
-            textInput.paddingStart,
-            textInput.paddingTop,
-            paddingEnd,
-            textInput.paddingBottom
-        )
+        twoWayBindingTextChangedListener?.invoke(text)
+        setActionButtonVisibleInternal(determineIsActionButtonVisibleInternal())
     }
 
     private fun setInputLinesInternal(inputLines: TextInputLines?) {
@@ -224,6 +239,57 @@ class MaterialEditText(
         }
     }
 
+    private fun setActionButtonVisibleInternal(isVisible: Boolean) {
+        binding.actionButton.isVisible = isVisible
+
+        val textInput = binding.textInput
+
+        val paddingEnd = if (isVisible) {
+            context.resources.getDimension(R.dimen.borderless_icon_button_size).toInt()
+        } else {
+            context.resources.getDimension(R.dimen.half_margin).toInt()
+        }
+
+        textInput.setPadding(
+            textInput.paddingStart,
+            textInput.paddingTop,
+            paddingEnd,
+            textInput.paddingBottom
+        )
+    }
+
+    private fun setActionButtonInternal(
+        actionButton: ActionButton,
+        isResetTextVisibility: Boolean
+    ) {
+        when (actionButton) {
+            ActionButton.EYE -> {
+                if (isResetTextVisibility && isTextVisible) {
+                    isTextVisible = false
+                }
+                binding.actionButton.setImageResource(getEyeIcon(isTextVisible))
+            }
+            ActionButton.CLEAR -> {
+                binding.actionButton.setImageResource(R.drawable.ic_close_white_24dp)
+            }
+        }
+    }
+
+    private fun determineIsActionButtonVisibleInternal(): Boolean {
+        return isActionButtonVisible &&
+            (actionButton == ActionButton.EYE ||
+                (actionButton == ActionButton.CLEAR && getTextInternal().isNotEmpty()))
+    }
+
+    @DrawableRes
+    private fun getEyeIcon(isTextVisible: Boolean): Int {
+        return if (isTextVisible) {
+            R.drawable.ic_visibility_on_24dp
+        } else {
+            R.drawable.ic_visibility_off_24dp
+        }
+    }
+
     private inner class CustomTextWatcher : TextWatcher {
 
         var isEnabled = true
@@ -239,6 +305,11 @@ class MaterialEditText(
                 onTextChanged(s.toString())
             }
         }
+    }
+
+    enum class ActionButton {
+        EYE,
+        CLEAR
     }
 
     companion object {
@@ -259,11 +330,11 @@ class MaterialEditText(
         @BindingAdapter("textAttrChanged")
         fun setListener(view: MaterialEditText, textAttrChanged: InverseBindingListener?) {
             if (textAttrChanged == null) {
-                view.databindingTextChangedListener = null
+                view.twoWayBindingTextChangedListener = null
                 return
             }
 
-            view.databindingTextChangedListener = { textAttrChanged.onChange() }
+            view.twoWayBindingTextChangedListener = { textAttrChanged.onChange() }
         }
 
         @JvmStatic

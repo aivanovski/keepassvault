@@ -5,6 +5,7 @@
     </declare-styleable>
     <declare-styleable name="MaterialEditText">
         <attr name="hint" format="string" />
-        <attr name="isEyeButtonVisible" format="boolean" />
+        <attr name="isEyeButtonEnabled" format="boolean" />
+        <attr name="isClearButtonEnabled" format="boolean" />
     </declare-styleable>
 </resources>

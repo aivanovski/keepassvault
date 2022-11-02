@@ -74,7 +74,6 @@ class SearchViewModel(
 
     val query = MutableLiveData(EMPTY)
     val visibleMenuItems = MutableLiveData(getVisibleMenuItems())
-    val isClearButtonVisible = MutableLiveData(false)
     val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note, AutofillStructure>>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
@@ -97,7 +96,6 @@ class SearchViewModel(
         }
         query.observeForever { query ->
             searchData(query)
-            isClearButtonVisible.value = query.isNotEmpty()
         }
     }
 
@@ -181,12 +179,6 @@ class SearchViewModel(
         val structure = args.autofillStructure ?: return
 
         sendAutofillResponseEvent.call(Pair(note, structure))
-    }
-
-    fun onClearButtonClicked() {
-        if (!query.value.isNullOrEmpty()) {
-            query.value = EMPTY
-        }
     }
 
     private fun loadData() {

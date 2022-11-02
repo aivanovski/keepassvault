@@ -18,45 +18,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/searchTextLayout"
+        <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
+            android:id="@+id/searchText"
+            text="@={viewModel.query}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/element_margin"
             android:layout_marginTop="@dimen/group_margin"
             android:layout_marginEnd="@dimen/element_margin"
-            android:hint="@string/query"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/searchText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingEnd="@dimen/borderless_icon_button_size"
-                android:text="@={viewModel.query}"
-                android:textColor="@color/material_edit_text_primary_text"
-                android:textSize="@dimen/material_edit_text_primary_text_size" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <ImageButton
-            android:id="@+id/clearButton"
-            style="@style/Material.BorderlessButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="@{() -> viewModel.onClearButtonClicked()}"
-            android:src="@drawable/ic_close_white_24dp"
-            android:tint="@color/icon_gray"
-            app:layout_constraintBottom_toBottomOf="@id/searchTextLayout"
-            app:layout_constraintEnd_toEndOf="@id/searchTextLayout"
-            app:layout_constraintTop_toTopOf="@id/searchTextLayout"
-            app:visible="@{viewModel.isClearButtonVisible}" />
+            app:hint="@string/query"
+            app:isClearButtonEnabled="true"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
             android:id="@+id/errorPanelView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/searchTextLayout"
+            app:layout_constraintTop_toBottomOf="@id/searchText"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
@@ -64,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/searchTextLayout"
+            app:layout_constraintTop_toBottomOf="@id/searchText"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 

@@ -104,7 +104,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/element_margin"
                         app:hint="@string/password"
-                        app:isEyeButtonVisible="true"
+                        app:isEyeButtonEnabled="true"
                         app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
                         app:layout_constraintStart_toEndOf="@id/guidelineStart"
                         app:layout_constraintTop_toBottomOf="@id/username"

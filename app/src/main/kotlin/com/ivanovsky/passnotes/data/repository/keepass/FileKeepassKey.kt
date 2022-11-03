@@ -39,4 +39,22 @@ class FileKeepassKey(
             OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_READ_KEY_FILE, e))
         }
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as FileKeepassKey
+
+        if (file != other.file) return false
+        if (password != other.password) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = file.hashCode()
+        result = 31 * result + (password?.hashCode() ?: 0)
+        return result
+    }
 }

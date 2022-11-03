@@ -53,6 +53,8 @@ public class OperationError {
     public static final String MESSAGE_FAILED_TO_ENCODE_DATA = "Failed to encode data";
     public static final String MESSAGE_NO_DATA_TO_DECODE = "No data to decode";
     public static final String MESSAGE_FAILED_TO_DECODE_DATA = "Failed to decode data";
+    public static final String MESSAGE_INVALID_PASSWORD = "Invalid password";
+    public static final String MESSAGE_INVALID_KEY_FILE = "Invalid key file";
 
     public static final String GENERIC_MESSAGE_NOT_FOUND = "%s not found";
     public static final String GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST = "Group '%s' already exists";

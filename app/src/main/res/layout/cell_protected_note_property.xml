@@ -46,15 +46,17 @@
 
         <ImageButton
             android:id="@+id/visibilityButton"
-            style="@style/Material.BorderlessButton"
+            style="@style/Material.BorderlessButton.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/half_margin"
             android:onClick="@{() -> viewModel.onVisibilityButtonClicked()}"
+            android:tint="@color/icon_gray"
+            app:imageResourceId="@{viewModel.visibilityIconResId}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/copyButton"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_eye_grey_600_24dp" />
+            tools:src="@drawable/ic_visibility_off_24dp" />
 
         <ImageButton
             android:id="@+id/copyButton"

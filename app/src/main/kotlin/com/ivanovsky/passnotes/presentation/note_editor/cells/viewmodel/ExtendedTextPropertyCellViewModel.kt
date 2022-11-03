@@ -34,7 +34,6 @@ class ExtendedTextPropertyCellViewModel(
     val isProtected = MutableLiveData(model.isProtected)
     val isPrimaryVisibilityButtonVisible = MutableLiveData(model.isCollapsed && model.isProtected)
     val isSecondaryVisibilityButtonVisible = MutableLiveData(!model.isCollapsed && model.isProtected)
-    val visibilityIconResId = MutableLiveData(getVisibilityIconResIdInternal(model.isProtected))
     val primaryError = MutableLiveData<String?>(null)
     val primaryHint = MutableLiveData(
         if (model.isCollapsed) {
@@ -52,6 +51,7 @@ class ExtendedTextPropertyCellViewModel(
     }
 
     private val isTextHidden = MutableLiveData(true)
+    val visibilityIconResId = MutableLiveData(getVisibilityIconResIdInternal(model.isProtected))
     val primaryTransformationMethod = MutableLiveData(
         obtainTextTransformationMethod(model.isProtected && model.isCollapsed)
     )

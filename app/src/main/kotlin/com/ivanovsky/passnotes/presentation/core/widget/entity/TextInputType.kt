@@ -5,5 +5,5 @@ enum class TextInputType {
     DIGITS,
     TEXT_CAP_SENTENCES,
     URL,
-    EMAIl
+    EMAIL
 }

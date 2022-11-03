@@ -15,12 +15,10 @@ import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel.Cell
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedTextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.SecretPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.TextPropertyCellModel
-import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType
+import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines.MULTIPLE_LINES
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines.SINGLE_LINE
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType.TEXT
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType.TEXT_CAP_SENTENCES
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType.URL
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toCleanString
 import java.util.UUID
@@ -54,7 +52,7 @@ class NoteEditorCellModelFactory(
                     value = EMPTY,
                     isProtected = isProtected,
                     isCollapsed = true,
-                    inputType = TEXT
+                    inputType = TextInputType.TEXT
                 )
             )
         }
@@ -99,7 +97,7 @@ class NoteEditorCellModelFactory(
                 value = EMPTY,
                 isProtected = false,
                 isCollapsed = false,
-                inputType = TEXT
+                inputType = TextInputType.TEXT
             )
         }
         return listOf(cellModel, createSpaceCell())
@@ -131,7 +129,7 @@ class NoteEditorCellModelFactory(
                     value = property.value ?: EMPTY,
                     isProtected = property.isProtected,
                     isCollapsed = true,
-                    inputType = TEXT
+                    inputType = TextInputType.TEXT
                 )
             )
         }
@@ -174,7 +172,7 @@ class NoteEditorCellModelFactory(
                             value = property?.value ?: EMPTY,
                             isProtected = isProtected,
                             isCollapsed = true,
-                            inputType = TEXT
+                            inputType = TextInputType.TEXT
                         )
                     )
                 }
@@ -208,7 +206,7 @@ class NoteEditorCellModelFactory(
                             value = property.value ?: EMPTY,
                             isProtected = property.isProtected,
                             isCollapsed = true,
-                            inputType = TEXT
+                            inputType = TextInputType.TEXT
                         )
                     )
                 }
@@ -262,7 +260,7 @@ class NoteEditorCellModelFactory(
                     value = property.value ?: EMPTY,
                     isProtected = property.isProtected,
                     isCollapsed = true,
-                    inputType = TEXT
+                    inputType = TextInputType.TEXT
                 )
             )
         }
@@ -295,7 +293,7 @@ class NoteEditorCellModelFactory(
             id = CellId.TITLE,
             name = resourceProvider.getString(R.string.title),
             value = title,
-            textInputType = TEXT_CAP_SENTENCES,
+            textInputType = TextInputType.TEXT_CAP_SENTENCES,
             inputLines = SINGLE_LINE,
             isAllowEmpty = false,
             propertyType = PropertyType.TITLE,
@@ -308,7 +306,7 @@ class NoteEditorCellModelFactory(
             id = CellId.USER_NAME,
             name = resourceProvider.getString(R.string.username),
             value = userName,
-            textInputType = TEXT,
+            textInputType = TextInputType.TEXT,
             inputLines = SINGLE_LINE,
             isAllowEmpty = true,
             propertyType = PropertyType.USER_NAME,
@@ -321,7 +319,7 @@ class NoteEditorCellModelFactory(
             id = CellId.URL,
             name = resourceProvider.getString(R.string.url_cap),
             value = url,
-            textInputType = URL,
+            textInputType = TextInputType.URL,
             inputLines = MULTIPLE_LINES,
             isAllowEmpty = true,
             propertyType = PropertyType.URL,
@@ -334,7 +332,7 @@ class NoteEditorCellModelFactory(
             id = CellId.NOTES,
             name = resourceProvider.getString(R.string.notes),
             value = notes,
-            textInputType = TEXT_CAP_SENTENCES,
+            textInputType = TextInputType.TEXT_CAP_SENTENCES,
             inputLines = MULTIPLE_LINES,
             isAllowEmpty = true,
             propertyType = PropertyType.NOTES,

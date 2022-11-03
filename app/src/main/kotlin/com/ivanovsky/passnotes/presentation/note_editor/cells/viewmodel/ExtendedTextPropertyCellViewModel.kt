@@ -11,7 +11,7 @@ import com.ivanovsky.passnotes.presentation.core.binding.OnTextChangeListener
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedTextPropertyCellModel
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.reset
 

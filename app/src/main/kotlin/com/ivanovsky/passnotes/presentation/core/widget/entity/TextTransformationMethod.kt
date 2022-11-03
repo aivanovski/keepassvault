@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.presentation.note_editor.view
+package com.ivanovsky.passnotes.presentation.core.widget.entity
 
 enum class TextTransformationMethod {
     PASSWORD,

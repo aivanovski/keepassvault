@@ -266,7 +266,7 @@ class MaterialEditText(
             TextInputType.URL -> {
                 InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_URI
             }
-            TextInputType.EMAIl -> {
+            TextInputType.EMAIL -> {
                 InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
             }
         }

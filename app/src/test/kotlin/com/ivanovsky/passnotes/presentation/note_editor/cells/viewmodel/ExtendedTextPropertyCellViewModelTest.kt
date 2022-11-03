@@ -6,9 +6,9 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedTextPropertyCellModel
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

@@ -38,14 +38,14 @@ import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingAction
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnButtonClickListener
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnItemSelectListener
 import com.ivanovsky.passnotes.presentation.core.widget.TextMovementMethod
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PASSWORD
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PLANE_TEXT
-import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType
-import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType.DIGITS
-import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType.TEXT
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PASSWORD
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PLANE_TEXT
+import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType
+import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType.DIGITS
+import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType.TEXT
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
 import com.ivanovsky.passnotes.util.getLifecycleOwner
 
 @BindingAdapter("screenState", "screenStateHandler")
@@ -174,6 +174,7 @@ fun setInputType(editText: EditText, textInputType: TextInputType?) {
     }
 
     val inputType = when (textInputType) {
+        TextInputType.DIGITS -> InputType.TYPE_CLASS_NUMBER
         TextInputType.URL -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_URI
         TextInputType.TEXT -> InputType.TYPE_CLASS_TEXT
         TextInputType.EMAIL -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS

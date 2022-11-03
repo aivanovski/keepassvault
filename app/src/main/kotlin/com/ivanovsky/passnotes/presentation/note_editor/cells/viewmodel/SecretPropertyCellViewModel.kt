@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel
 
+import androidx.annotation.DrawableRes
 import androidx.lifecycle.MutableLiveData
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Property
@@ -8,7 +9,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.SecretPropertyCellModel
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class SecretPropertyCellViewModel(
@@ -22,6 +23,7 @@ class SecretPropertyCellViewModel(
     val confirmationError = MutableLiveData<String?>(null)
     val secretTransformationMethod = MutableLiveData(TextTransformationMethod.PASSWORD)
     val isConfirmationVisible = MutableLiveData(true)
+    val visibilityIconResId = MutableLiveData(getVisibilityIconResIdInternal())
 
     override fun createProperty(): Property {
         return Property(
@@ -55,6 +57,7 @@ class SecretPropertyCellViewModel(
         } else {
             TextTransformationMethod.PLANE_TEXT
         }
+        visibilityIconResId.value = getVisibilityIconResIdInternal()
     }
 
     fun onGenerateButtonClicked() {
@@ -66,6 +69,17 @@ class SecretPropertyCellViewModel(
     private fun getConfirmationTextInternal(): String = confirmationText.value?.trim() ?: EMPTY
 
     private fun isConfirmationVisibleInternal() = isConfirmationVisible.value ?: false
+
+    @DrawableRes
+    private fun getVisibilityIconResIdInternal(): Int {
+        val textTransformationMethod = secretTransformationMethod.value
+            ?: TextTransformationMethod.PLANE_TEXT
+
+        return when (textTransformationMethod) {
+            TextTransformationMethod.PLANE_TEXT -> R.drawable.ic_visibility_on_24dp
+            else -> R.drawable.ic_visibility_off_24dp
+        }
+    }
 
     companion object {
         val GENERATE_CLICK_EVENT =

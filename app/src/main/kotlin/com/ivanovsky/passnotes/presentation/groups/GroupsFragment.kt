@@ -15,6 +15,7 @@ import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
+import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens
@@ -47,6 +48,7 @@ class GroupsFragment : BaseFragment() {
             .get(GroupsViewModel::class.java)
     }
     private val router: Router by inject()
+    private val biometricAuthenticator: BiometricAuthenticator by inject()
 
     private lateinit var binding: GroupsFragmentBinding
     private var menu: Menu? = null
@@ -90,33 +92,9 @@ class GroupsFragment : BaseFragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                viewModel.onBackClicked()
-                true
-            }
-            R.id.menu_lock -> {
-                viewModel.onLockButtonClicked()
-                true
-            }
-            R.id.menu_add_templates -> {
-                viewModel.onAddTemplatesClicked()
-                true
-            }
-            R.id.menu_search -> {
-                viewModel.onSearchButtonClicked()
-                true
-            }
-            R.id.menu_settings -> {
-                viewModel.onSettingsButtonClicked()
-                true
-            }
-            R.id.menu_sort_and_view -> {
-                viewModel.onSortAndViewButtonClicked()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
+        val action = MENU_ACTIONS[item.itemId] ?: throw IllegalArgumentException()
+        action.invoke(viewModel)
+        return true
     }
 
     override fun onStart() {
@@ -190,6 +168,13 @@ class GroupsFragment : BaseFragment() {
         }
         viewModel.showSortAndViewDialogEvent.observe(viewLifecycleOwner) {
             showSortAndViewDialog()
+        }
+        viewModel.showBiometricSetupDialog.observe(viewLifecycleOwner) { cipher ->
+            biometricAuthenticator.authenticateForSetup(
+                activity = requireActivity(),
+                cipher = cipher,
+                onSuccess = { encoder -> viewModel.onBiometricSetupSuccess(encoder) }
+            )
         }
     }
 
@@ -282,6 +267,17 @@ class GroupsFragment : BaseFragment() {
     companion object {
 
         private const val ARGUMENTS = "arguments"
+
+        private val MENU_ACTIONS = mapOf<Int, (vm: GroupsViewModel) -> Unit>(
+            android.R.id.home to { vm -> vm.onBackClicked() },
+            R.id.menu_lock to { vm -> vm.onLockButtonClicked() },
+            R.id.menu_add_templates to { vm -> vm.onAddTemplatesClicked() },
+            R.id.menu_search to { vm -> vm.onSearchButtonClicked() },
+            R.id.menu_settings to { vm -> vm.onSettingsButtonClicked() },
+            R.id.menu_sort_and_view to { vm -> vm.onSortAndViewButtonClicked() },
+            R.id.menu_enable_biometric_unlock to { vm -> vm.onEnableBiometricUnlockButtonClicked() },
+            R.id.menu_disable_biometric_unlock to { vm -> vm.onDisableBiometricUnlockButtonClicked() },
+        )
 
         fun newInstance(args: GroupsScreenArgs) = GroupsFragment()
             .withArguments {

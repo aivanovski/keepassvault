@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.ResourceProvider
@@ -52,6 +53,7 @@ class DebugMenuViewModel(
     val isCloseDbButtonEnabled = MutableLiveData(false)
     val isAddEntryButtonEnabled = MutableLiveData(false)
     val isExternalStorageEnabled = MutableLiveData(settings.isExternalStorageCacheEnabled)
+    val isFakeBiometricEnabled = MutableLiveData(settings.testToggles?.isFakeBiometricEnabled ?: false)
     val showSnackbarEvent = SingleLiveEvent<String>()
     val showSystemFilePickerEvent = SingleLiveEvent<Unit>()
     val showSystemFileCreatorEvent = SingleLiveEvent<Unit>()
@@ -293,6 +295,14 @@ class DebugMenuViewModel(
 
     fun onExternalStorageCheckBoxChanged(isChecked: Boolean) {
         settings.isExternalStorageCacheEnabled = isChecked
+    }
+
+    fun onFakeBiometricCheckBoxChanged(isChecked: Boolean) {
+        val toggles = settings.testToggles ?: TestToggles()
+
+        settings.testToggles = toggles.copy(
+            isFakeBiometricEnabled = isChecked
+        )
     }
 
     fun onPickFileButtonClicked() {

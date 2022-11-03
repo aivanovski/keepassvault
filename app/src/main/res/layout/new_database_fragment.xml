@@ -6,6 +6,8 @@
 
     <data>
 
+        <import type="com.ivanovsky.passnotes.presentation.core.widget.entity.ImeOptions" />
+
         <variable
             name="viewModel"
             type="com.ivanovsky.passnotes.presentation.newdb.NewDatabaseViewModel" />
@@ -129,88 +131,59 @@
                     app:layout_constraintTop_toTopOf="@id/addTemplatesCheckBox"
                     app:srcCompat="@drawable/ic_info_grey_600_24dp" />
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/fileExtensionLayout"
+                <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
+                    android:id="@+id/fileExtension"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/element_margin"
+                    app:hint="@null"
+                    app:isEnabled="@{false}"
                     app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
-                    app:layout_constraintTop_toBottomOf="@id/addTemplatesCheckBox">
+                    app:layout_constraintTop_toBottomOf="@id/addTemplatesCheckBox"
+                    app:text="@string/dot_kdbx" />
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        style="@style/Material.EditText.PrimarySingleLine"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:enabled="false"
-                        android:hint=""
-                        android:text="@string/dot_kdbx" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/filenameLayout"
+                <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
+                    android:id="@+id/filename"
+                    error="@{viewModel.filenameError}"
+                    imeOptions="@{ImeOptions.ACTION_NEXT}"
+                    text="@={viewModel.filename}"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/element_margin"
-                    app:errorText="@{viewModel.filenameError}"
-                    app:layout_constraintEnd_toStartOf="@id/fileExtensionLayout"
+                    app:hint="@string/file_name"
+                    app:isEnabled="@{viewModel.isFilenameEnabled}"
+                    app:layout_constraintEnd_toStartOf="@id/fileExtension"
                     app:layout_constraintStart_toEndOf="@id/guidelineStart"
-                    app:layout_constraintTop_toBottomOf="@id/addTemplatesCheckBox">
+                    app:layout_constraintTop_toBottomOf="@id/addTemplatesCheckBox" />
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/filename"
-                        style="@style/Material.EditText.PrimarySingleLine"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/file_name"
-                        android:imeOptions="actionNext"
-                        android:inputType="text"
-                        android:nextFocusForward="@id/password"
-                        android:text="@={viewModel.filename}"
-                        android:enabled="@{viewModel.isFilenameEnabled}"/>
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/passwordLayout"
+                <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
+                    android:id="@+id/password"
+                    error="@{viewModel.passwordError}"
+                    imeOptions="@{ImeOptions.ACTION_NEXT}"
+                    text="@={viewModel.password}"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/element_margin"
-                    app:errorText="@{viewModel.passwordError}"
+                    app:hint="@string/password"
+                    app:isEyeButtonEnabled="true"
                     app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
                     app:layout_constraintStart_toEndOf="@id/guidelineStart"
-                    app:layout_constraintTop_toBottomOf="@id/filenameLayout">
+                    app:layout_constraintTop_toBottomOf="@id/filename" />
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/password"
-                        style="@style/Material.EditText.Password"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/password"
-                        android:text="@={viewModel.password}" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
+                <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
                     android:id="@+id/passwordConfirmationLayout"
+                    error="@{viewModel.confirmationError}"
+                    imeOptions="@{ImeOptions.ACTION_DONE}"
+                    text="@={viewModel.confirmation}"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/element_margin"
-                    app:errorText="@{viewModel.confirmationError}"
+                    app:hint="@string/confirm"
+                    app:isEyeButtonEnabled="true"
                     app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
                     app:layout_constraintStart_toEndOf="@id/guidelineStart"
-                    app:layout_constraintTop_toBottomOf="@id/passwordLayout">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/passwordConfirmation"
-                        style="@style/Material.EditText.Password"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="@string/confirm"
-                        android:imeOptions="actionDone"
-                        android:text="@={viewModel.confirmation}" />
-
-                </com.google.android.material.textfield.TextInputLayout>
+                    app:layout_constraintTop_toBottomOf="@id/password"
+                    app:onDoneAction="@{() -> viewModel.createNewDatabaseFile()}" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

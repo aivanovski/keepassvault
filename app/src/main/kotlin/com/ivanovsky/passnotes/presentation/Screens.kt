@@ -19,8 +19,6 @@ import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorFragment
 import com.ivanovsky.passnotes.presentation.password_generator.PasswordGeneratorFragment
 import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.search.SearchFragment
-import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseArgs
-import com.ivanovsky.passnotes.presentation.selectdb.SelectDatabaseFragment
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.server_login.ServerLoginFragment
 import com.ivanovsky.passnotes.presentation.settings.app.AppSettingsFragment
@@ -35,15 +33,6 @@ object Screens {
     class UnlockScreen(private val args: UnlockScreenArgs) : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
             UnlockFragment.newInstance(args)
-    }
-
-    class SelectDatabaseScreen(private val args: SelectDatabaseArgs) : FragmentScreen {
-        override fun createFragment(factory: FragmentFactory) =
-            SelectDatabaseFragment.newInstance(args)
-
-        companion object {
-            val RESULT_KEY = SelectDatabaseScreen::class.simpleName + "_result"
-        }
     }
 
     // File and Storage

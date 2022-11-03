@@ -16,6 +16,8 @@
     <string name="add_entry" translatable="false">Add entry</string>
     <string name="hooks_with_dots" translatable="false">Hooks:</string>
     <string name="use_external_storage_for_remote_files" translatable="false">Use External storage for remote files</string>
+    <string name="test_toggles" translatable="false">Test Toggles</string>
+    <string name="fake_biometric_enabled" translatable="false">Use Fake Biometric (requires restart)</string>
     <string name="device_file_system" translatable="false">Device file system</string>
     <string name="internal_storage" translatable="false">Internal storage</string>
     <string name="external_storage" translatable="false">External storage</string>
@@ -34,5 +36,8 @@
     <string name="get_root" translatable="false">Get root</string>
     <string name="kotpass" translatable="false">KotPass</string>
     <string name="keepass_java_2" translatable="false">KeePassJava2</string>
+    <string name="fake_biometric_setup_message" translatable="false">This is a fake biometric setup dialog. Allow biometric setup?</string>
+    <string name="fake_biometric_auth_message" translatable="false">This is a fake biometric authentication dialog. Allow biometric authentication?</string>
+
 
 </resources>

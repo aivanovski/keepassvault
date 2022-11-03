@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.presentation.Screens.AboutScreen
 import com.ivanovsky.passnotes.presentation.Screens.DebugMenuScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
+import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem
 import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.ABOUT
 import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.DEBUG_MENU
@@ -25,6 +26,7 @@ class NavigationMenuViewModel(
 
     val isNavigationMenuEnabled = MutableLiveData(false)
     val visibleItems = MutableLiveData<List<NavigationItem>>()
+    val hideKeyboardEvent = SingleLiveEvent<Unit>()
 
     fun setNavigationEnabled(isEnabled: Boolean) {
         isNavigationMenuEnabled.value = isEnabled
@@ -54,10 +56,14 @@ class NavigationMenuViewModel(
         }
     }
 
+    fun onMenuDragging() {
+        hideKeyboardEvent.call(Unit)
+    }
+
     companion object {
         @Suppress("UNCHECKED_CAST")
         val FACTORY = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return GlobalInjector.get<NavigationMenuViewModel>() as T
             }
         }

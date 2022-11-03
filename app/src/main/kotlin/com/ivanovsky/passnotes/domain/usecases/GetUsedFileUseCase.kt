@@ -34,4 +34,24 @@ class GetUsedFileUseCase(
                 )
             }
         }
+
+    suspend fun getUsedFile(
+        id: Int
+    ): OperationResult<UsedFile> =
+        withContext(dispatchers.IO) {
+            val file = fileRepository.findById(id)
+            if (file != null) {
+                OperationResult.success(file)
+            } else {
+                OperationResult.error(
+                    newDbError(
+                        String.format(
+                            OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_ID,
+                            UsedFile::class.simpleName,
+                            id
+                        )
+                    )
+                )
+            }
+        }
 }

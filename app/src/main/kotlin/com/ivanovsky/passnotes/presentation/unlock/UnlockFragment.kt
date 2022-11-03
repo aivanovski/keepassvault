@@ -2,43 +2,40 @@ package com.ivanovsky.passnotes.presentation.unlock
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoderImpl
-import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoderImpl
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
+import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding
 import com.ivanovsky.passnotes.domain.DateFormatProvider
+import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
-import com.ivanovsky.passnotes.presentation.core.BiometricPromptHelper
 import com.ivanovsky.passnotes.presentation.core.dialog.ThreeButtonDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.showKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
-import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
-import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel.UnlockMenuItem
 import org.apache.commons.lang3.StringUtils.EMPTY
 import java.util.Date
 
 class UnlockFragment : BaseFragment() {
 
     private lateinit var binding: UnlockFragmentBinding
-    private var menu: Menu? = null
     private val dateFormatProvider: DateFormatProvider by inject()
+    private val biometricAuthenticator: BiometricAuthenticator by inject()
     private val viewModel: UnlockViewModel by lazy {
         ViewModelProvider(
             this,
@@ -55,25 +52,6 @@ class UnlockFragment : BaseFragment() {
             title = getString(R.string.app_name)
             setDisplayHomeAsUpEnabled(true)
             setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
-        }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        this.menu = menu
-
-        inflater.inflate(R.menu.unlock, menu)
-
-        viewModel.visibleMenuItems.value?.let {
-            updateMenuItemVisibility(
-                menu = menu,
-                visibleItems = it,
-                allScreenItems = UnlockMenuItem.values().toList()
-            )
         }
     }
 
@@ -112,27 +90,22 @@ class UnlockFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        subscribeToLiveData()
         subscribeToLiveEvents()
 
-        viewModel.loadData(resetSelection = false)
-    }
-
-    private fun subscribeToLiveData() {
-        viewModel.visibleMenuItems.observe(viewLifecycleOwner) { visibleItems ->
-            menu?.let { menu ->
-                updateMenuItemVisibility(
-                    menu = menu,
-                    visibleItems = visibleItems,
-                    allScreenItems = UnlockMenuItem.values().toList()
-                )
-            }
-        }
+        viewModel.loadData(
+            isResetSelection = false,
+            isShowKeyboard = true
+        )
     }
 
     private fun subscribeToLiveEvents() {
-        viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
-            hideKeyboard()
+        viewModel.isKeyboardVisibleEvent.observe(viewLifecycleOwner) { isVisible ->
+            if (isVisible) {
+                binding.password.getEditText().requestFocus()
+                showKeyboard(binding.password.getEditText())
+            } else {
+                hideKeyboard()
+            }
         }
         viewModel.showSnackbarMessage.observe(viewLifecycleOwner) { message ->
             showSnackbarMessage(message)
@@ -144,27 +117,15 @@ class UnlockFragment : BaseFragment() {
             sendAutofillResult(note, structure)
             finishActivity()
         }
-        viewModel.showBiometricSetupDialog.observe(viewLifecycleOwner) { cipher ->
-            BiometricPromptHelper.authenticateForSetup(
+        viewModel.showBiometricUnlockDialog.observe(viewLifecycleOwner) { cipher ->
+            biometricAuthenticator.authenticateForUnlock(
                 activity = requireActivity(),
                 cipher = cipher,
-                onSuccess = { result ->
-                    result.cryptoObject?.cipher?.let {
-                        viewModel.onBiometricSetupSuccess(BiometricEncoderImpl(it))
-                    }
-                }
+                onSuccess = { decoder -> viewModel.onBiometricUnlockSuccess(decoder) }
             )
         }
-        viewModel.showBiometricUnlockDialog.observe(viewLifecycleOwner) { cipher ->
-            BiometricPromptHelper.authenticateForUnlock(
-                activity = requireActivity(),
-                cipher = cipher,
-                onSuccess = { result ->
-                    result.cryptoObject?.cipher?.let {
-                        viewModel.onBiometricUnlockSuccess(BiometricDecoderImpl(it))
-                    }
-                }
-            )
+        viewModel.showFileActionsDialog.observe(viewLifecycleOwner) { file ->
+            showFileActionsDialog(file)
         }
     }
 
@@ -204,6 +165,18 @@ class UnlockFragment : BaseFragment() {
             }
 
         dialog.show(childFragmentManager, ThreeButtonDialog.TAG)
+    }
+
+    private fun showFileActionsDialog(file: UsedFile) {
+        val entries = listOf(resources.getString(R.string.remove))
+
+        val dialog = ChooseOptionDialog.newInstance(null, entries.toList())
+        dialog.onItemClickListener = { itemIdx ->
+            when (itemIdx) {
+                0 -> viewModel.onRemoveFileClicked(file)
+            }
+        }
+        dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
     }
 
     companion object {

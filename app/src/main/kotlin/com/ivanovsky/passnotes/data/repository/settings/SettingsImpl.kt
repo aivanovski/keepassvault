@@ -8,6 +8,7 @@ import androidx.annotation.StringRes
 import androidx.preference.PreferenceManager
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.TestData
+import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIOMETRIC_UNLOCK_ENABLED
@@ -20,21 +21,19 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SEARCH
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_DIRECTION
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_TYPE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.TEST_DATA
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.TEST_TOGGLES
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.BOOLEAN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.INT
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.STRING
 import com.ivanovsky.passnotes.data.serialization.TestDataConverter
-import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.data.serialization.TestTogglesConverter
 import com.ivanovsky.passnotes.domain.entity.SearchType
 import com.ivanovsky.passnotes.domain.entity.SortDirection
 import com.ivanovsky.passnotes.domain.entity.SortType
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 
-class SettingsImpl(
-    private val resourceProvider: ResourceProvider,
-    context: Context
-) : Settings {
+class SettingsImpl(private val context: Context) : Settings {
 
     private val handler = Handler(Looper.getMainLooper())
     private val listeners = CopyOnWriteArrayList<OnSettingsChangeListener>()
@@ -42,7 +41,7 @@ class SettingsImpl(
 
     private val nameResIdToPreferenceMap: Map<Int, Pref> = Pref.values().associateBy { it.keyId }
     private val keyToPreferenceMap: Map<String, Pref> = Pref.values()
-        .associateBy { resourceProvider.getString(it.keyId) }
+        .associateBy { context.getString(it.keyId) }
 
     private val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         onPreferenceChanged(key)
@@ -131,6 +130,12 @@ class SettingsImpl(
             putString(TEST_DATA, value?.let { TestDataConverter.toString(it) })
         }
 
+    override var testToggles: TestToggles?
+        get() = getString(TEST_TOGGLES)?.let { TestTogglesConverter.fromString(it) }
+        set(value) {
+            putString(TEST_TOGGLES, value?.let { TestTogglesConverter.toString(it) })
+        }
+
     init {
         preferences.registerOnSharedPreferenceChangeListener(listener)
     }
@@ -207,7 +212,7 @@ class SettingsImpl(
         editor.apply()
     }
 
-    private fun keyFor(pref: Pref) = resourceProvider.getString(pref.keyId)
+    private fun keyFor(pref: Pref) = context.getString(pref.keyId)
 
     private inline fun <reified T> getDefaultValue(pref: Pref): T {
         return nameResIdToPreferenceMap[pref.keyId]?.defaultValue as T
@@ -287,6 +292,11 @@ class SettingsImpl(
         ),
         TEST_DATA(
             keyId = R.string.pref_test_data,
+            type = STRING,
+            defaultValue = null
+        ),
+        TEST_TOGGLES(
+            keyId = R.string.pref_test_toggles,
             type = STRING,
             defaultValue = null
         )

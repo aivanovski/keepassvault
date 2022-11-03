@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">KPassNotes</string>
@@ -59,6 +60,7 @@
     <string name="file_is_already_exist">File is already exist</string>
     <string name="empty_field">Empty field</string>
     <string name="sync_conflict_message">There is a conflict between version of local and remote databases. Please resolve this conflict before accessing database</string>
+    <string name="sync_file_not_found_message">Can\'t find database file. Please try to remove this file and add it again</string>
     <string name="sync_auth_error_message">Application is unable to authenticate on remote server</string>
     <string name="sync_error_message">Error has been occurred, file can\'t be synchronized with remote server. Please try to remove this file and add it again</string>
 
@@ -77,12 +79,14 @@
     <string name="not_synchronized_and_offline_mode">Not synchronized, offline mode</string>
     <string name="offline_mode">Offline mode</string>
     <string name="checking">Checking</string>
+    <string name="checking_status">Checking status</string>
     <string name="conflict">Conflict</string>
     <string name="not_synchronized">Not synchronized</string>
     <string name="synchronizing">Synchronizing</string>
     <string name="downloading">Downloading</string>
     <string name="uploading">Uploading</string>
     <string name="error">Error</string>
+    <string name="not_found">Not found</string>
     <string name="error_offline_mode">Error, offline mode</string>
     <string name="auth_error_offline_mode">Unauthorised, offline mode</string>
     <string name="unauthorised">Unauthorised</string>
@@ -93,6 +97,9 @@
     <string name="unlock_with_fingerprint">Unlock with fingerprint</string>
     <string name="setup_fingerprint_unlock">Setup fingerprint unlock</string>
     <string name="setup_fingerprint_unlock_message">Please authenticate to continue</string>
+    <string name="add_key">Add key</string>
+    <string name="add_biometrics">Add biometrics</string>
+    <string name="recent_files">Recent files</string>
 
     <!-- New database screen -->
     <string name="new_database">New database</string>
@@ -145,6 +152,8 @@
     <string name="descending">Descending</string>
     <string name="default_">Natural order</string>
     <string name="list_groups_first">List groups first</string>
+    <string name="enable_biometric_unlock">Enable biometric unlock</string>
+    <string name="disable_biometric_unlock">Disable biometric unlock</string>
 
     <!-- Group editor screen -->
     <string name="new_group">New group</string>
@@ -223,8 +232,8 @@
     <!-- Server login screen -->
     <string name="login_to_server">Login to server</string>
     <string name="login_to_git">Login to Git repository</string>
-    <string name="server_url">Server url</string>
-    <string name="git_repository_url">Git repositroy url</string>
+    <string name="server_url_hint">WebDAV server url (e.g. https://webdav.example.com)</string>
+    <string name="git_repository_url_hint">Git repository url (e.g. https://git.example.com)</string>
     <string name="url_contains_secret_message">Url contains secret key, hide it if need</string>
 
     <!-- Debug menu screen -->
@@ -245,7 +254,7 @@
     <!-- About screen -->
     <string name="version_with_str">Version: %s</string>
     <string name="build_with_str">Build: %s</string>
-    <string name="about_intro"><![CDATA[is another client for KeePass password manager databases.\nIt uses <a href="https://github.com/jorabin/KeePassJava2">KeePassJava2</a> library to access KeePass database files.]]></string>
+    <string name="about_intro"><![CDATA[is another client for KeePass password manager databases.\nIt uses <a href="https://github.com/keemobile/kotpass">Kotpass</a> library to access KeePass database files.]]></string>
     <string name="about_licence_intro">%s is open source software provided under Apache License version 2.0. This application is provided on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND.</string>
     <string name="feedback">Feedback</string>
     <string name="homepage">Homepage</string>

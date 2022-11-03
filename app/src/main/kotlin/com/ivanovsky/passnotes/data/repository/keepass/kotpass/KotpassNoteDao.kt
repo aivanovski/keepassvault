@@ -12,7 +12,7 @@ import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.extensions.matches
-import app.keemobile.kotpass.database.findEntry
+import app.keemobile.kotpass.database.getEntry
 import app.keemobile.kotpass.database.modifiers.modifyGroup
 import app.keemobile.kotpass.database.modifiers.removeEntry
 import java.util.UUID
@@ -56,7 +56,7 @@ class KotpassNoteDao(
 
     override fun getNoteByUid(noteUid: UUID): OperationResult<Note> {
         return db.lock.withLock {
-            val result = db.getRawDatabase().findEntry { rawEntry -> rawEntry.uuid == noteUid }
+            val result = db.getRawDatabase().getEntry { rawEntry -> rawEntry.uuid == noteUid }
                 ?: return@withLock OperationResult.error(
                     newDbError(
                         String.format(

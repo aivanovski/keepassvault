@@ -8,6 +8,10 @@ class Event : LinkedHashMap<String, Any>() {
         return this[key] as? String
     }
 
+    fun getInt(key: String): Int? {
+        return this[key] as? Int
+    }
+
     companion object {
 
         fun Pair<String, Any?>.toEvent(): Event {

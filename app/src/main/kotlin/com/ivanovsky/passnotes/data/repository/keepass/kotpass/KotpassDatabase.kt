@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.data.repository.keepass.kotpass
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_OPERATION
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -30,8 +29,14 @@ import app.keemobile.kotpass.database.Credentials
 import app.keemobile.kotpass.database.KeePassDatabase
 import app.keemobile.kotpass.database.decode
 import app.keemobile.kotpass.database.encode
+import app.keemobile.kotpass.database.modifiers.modifyCredentials
 import app.keemobile.kotpass.database.modifiers.modifyMeta
 import app.keemobile.kotpass.models.Entry
+import com.ivanovsky.passnotes.data.entity.KeyType
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INVALID_KEY_FILE
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INVALID_PASSWORD
+import com.ivanovsky.passnotes.data.entity.OperationError.newAuthError
+import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import timber.log.Timber
 import java.io.IOException
 import java.io.InputStream
@@ -46,7 +51,7 @@ class KotpassDatabase(
     private val fsProvider: FileSystemProvider,
     private val fsOptions: FSOptions,
     private val file: FileDescriptor,
-    private val key: EncryptedDatabaseKey,
+    key: EncryptedDatabaseKey,
     db: KeePassDatabase,
     private val statusListener: KeepassJavaDatabase.OnStatusChangeListener?,
     status: DatabaseStatus
@@ -54,6 +59,7 @@ class KotpassDatabase(
 
     private val lock = ReentrantLock()
     private val database = AtomicReference(db)
+    private val key = AtomicReference(key)
     private val autotypeOptionMap = AtomicReference(createInheritableOptionsMap())
     private val groupUidToParentMap = AtomicReference(createGroupUidToParentMap())
     private val status = AtomicReference(status)
@@ -64,6 +70,8 @@ class KotpassDatabase(
     override fun getLock(): ReentrantLock = lock
 
     override fun getFile(): FileDescriptor = file
+
+    override fun getKey(): EncryptedDatabaseKey = key.get()
 
     override fun getStatus(): DatabaseStatus = status.get()
 
@@ -112,7 +120,34 @@ class KotpassDatabase(
         oldKey: EncryptedDatabaseKey,
         newKey: EncryptedDatabaseKey
     ): OperationResult<Boolean> {
-        return OperationResult.error(newDbError(MESSAGE_UNSUPPORTED_OPERATION))
+        return lock.withLock {
+            val currentKey = key.get()
+            if (oldKey != currentKey) {
+                return@withLock OperationResult.error(
+                    newAuthError(
+                        if (currentKey.type == KeyType.PASSWORD) {
+                            MESSAGE_INVALID_PASSWORD
+                        } else {
+                            MESSAGE_INVALID_KEY_FILE
+                        }
+                    )
+                )
+            }
+
+            val getCredentialsResult = getCredentials(newKey)
+            if (getCredentialsResult.isFailed) {
+                return getCredentialsResult.mapError()
+            }
+
+            val newCredentials = getCredentialsResult.obj
+            val newDb = database.get().modifyCredentials {
+                newCredentials
+            }
+            swapDatabase(newDb)
+            key.set(newKey)
+
+            commit()
+        }
     }
 
     override fun commit(): OperationResult<Boolean> {
@@ -393,9 +428,16 @@ class KotpassDatabase(
                     }
 
                     val bytes = getBytesResult.obj
-                    val credentials = Credentials.from(
-                        EncryptedValue.fromBinary(bytes)
-                    )
+                    val credentials = if (key.password == null) {
+                        Credentials.from(
+                            EncryptedValue.fromBinary(bytes)
+                        )
+                    } else {
+                        Credentials.from(
+                            passphrase = EncryptedValue.fromString(key.password),
+                            keyData = bytes
+                        )
+                    }
 
                     OperationResult.success(credentials)
                 }

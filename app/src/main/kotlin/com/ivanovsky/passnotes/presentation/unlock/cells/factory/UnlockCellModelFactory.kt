@@ -1,41 +1,76 @@
 package com.ivanovsky.passnotes.presentation.unlock.cells.factory
 
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.FSType
-import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
+import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.extensions.formatReadablePath
-import com.ivanovsky.passnotes.presentation.unlock.cells.model.DatabaseCellModel
+import com.ivanovsky.passnotes.extensions.getFileDescriptor
+import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.unlock.cells.model.DatabaseFileCellModel
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class UnlockCellModelFactory(
     private val resourceProvider: ResourceProvider
 ) {
 
-    fun createFileCellModel(
-        file: FileDescriptor,
-        syncState: SyncState?,
-        isNextButtonVisible: Boolean,
-        onFileClicked: (file: FileDescriptor) -> Unit
-    ): DatabaseCellModel {
-        val fsType = file.fsAuthority.type
-        val isStatusVisible = (fsType != FSType.SAF &&
-            fsType != FSType.INTERNAL_STORAGE &&
-            fsType != FSType.EXTERNAL_STORAGE &&
-            syncState?.status != SyncStatus.CONFLICT)
+    fun createFileModels(
+        files: List<UsedFile>,
+        selectedFile: UsedFile?,
+        usedFileIdToSyncStateMap: Map<Int?, SyncState?>
+    ): List<BaseCellModel> {
+        return files.map { file ->
+            createFileModel(file, selectedFile, usedFileIdToSyncStateMap)
+        }
+    }
 
-        return DatabaseCellModel(
-            id = file.uid,
-            name = file.name,
-            path = file.formatReadablePath(resourceProvider),
-            status = formatSyncState(syncState),
-            isStatusVisible = isStatusVisible,
-            isNextButtonVisible = isNextButtonVisible,
-            onClicked = { onFileClicked.invoke(file) }
+    private fun createFileModel(
+        file: UsedFile,
+        selectedFile: UsedFile?,
+        usedFileIdToSyncStateMap: Map<Int?, SyncState?>
+    ): BaseCellModel {
+        val isSelected = (selectedFile != null && file.id == selectedFile.id)
+
+        val descriptor = file.getFileDescriptor()
+        val syncState = usedFileIdToSyncStateMap[file.id]
+        val isCheckingStatus = (syncState == null && usedFileIdToSyncStateMap.containsKey(file.id))
+
+        return DatabaseFileCellModel(
+            id = file.id ?: -1,
+            filename = file.fileName,
+            path = descriptor.formatReadablePath(resourceProvider),
+            status = when {
+                isCheckingStatus -> {
+                    resourceProvider.getString(
+                        R.string.text_with_dots,
+                        resourceProvider.getString(R.string.checking_status)
+                    )
+                }
+                syncState != null -> {
+                    formatSyncState(syncState)
+                }
+                else -> EMPTY
+            },
+            statusColor = getSyncStatusColor(syncState),
+            isStatusVisible = true,
+            isSelected = isSelected
         )
+    }
+
+    private fun getSyncStatusColor(state: SyncState?): Int {
+        return when (state?.status) {
+            SyncStatus.CONFLICT,
+            SyncStatus.ERROR,
+            SyncStatus.AUTH_ERROR,
+            SyncStatus.FILE_NOT_FOUND -> {
+                resourceProvider.getColor(R.color.error_text)
+            }
+            else -> {
+                resourceProvider.getColor(R.color.secondary_text)
+            }
+        }
     }
 
     private fun formatSyncState(state: SyncState?): String {
@@ -70,14 +105,14 @@ class UnlockCellModelFactory(
             state?.status == SyncStatus.AUTH_ERROR -> {
                 resourceProvider.getString(R.string.auth_error_offline_mode)
             }
+            state?.status == SyncStatus.FILE_NOT_FOUND -> {
+                resourceProvider.getString(R.string.not_found)
+            }
             state?.status == SyncStatus.CONFLICT -> {
-                EMPTY
+                resourceProvider.getString(R.string.conflict)
             }
             else -> {
-                resourceProvider.getString(
-                    R.string.text_with_dots,
-                    resourceProvider.getString(R.string.checking)
-                )
+                EMPTY
             }
         }
     }

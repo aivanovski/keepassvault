@@ -16,6 +16,16 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_enable_biometric_unlock"
+        android:title="@string/enable_biometric_unlock"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_disable_biometric_unlock"
+        android:title="@string/disable_biometric_unlock"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_sort_and_view"
         android:icon="@drawable/ic_sort_white_24dp"
         android:title="@string/sort_and_view"

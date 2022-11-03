@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.presentation.core.binding
 
-import android.content.res.ColorStateList
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -10,14 +9,18 @@ import android.text.method.PasswordTransformationMethod
 import android.view.View
 import android.widget.AdapterView
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.annotation.DrawableRes
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.shape.MaterialShapeDrawable
+import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.ivanovsky.passnotes.R
@@ -32,16 +35,17 @@ import com.ivanovsky.passnotes.presentation.core.widget.CellLinearLayout
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
-import com.ivanovsky.passnotes.presentation.core.widget.OnItemSelectListener
+import com.ivanovsky.passnotes.presentation.core.widget.entity.OnButtonClickListener
+import com.ivanovsky.passnotes.presentation.core.widget.entity.OnItemSelectListener
 import com.ivanovsky.passnotes.presentation.core.widget.TextMovementMethod
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PASSWORD
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod.PLANE_TEXT
-import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType
-import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType.DIGITS
-import com.ivanovsky.passnotes.presentation.note_editor.view.SecretInputType.TEXT
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputLines
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PASSWORD
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PLANE_TEXT
+import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType
+import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType.DIGITS
+import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType.TEXT
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
 import com.ivanovsky.passnotes.util.getLifecycleOwner
 
 @BindingAdapter("screenState", "screenStateHandler")
@@ -170,6 +174,7 @@ fun setInputType(editText: EditText, textInputType: TextInputType?) {
     }
 
     val inputType = when (textInputType) {
+        TextInputType.DIGITS -> InputType.TYPE_CLASS_NUMBER
         TextInputType.URL -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_URI
         TextInputType.TEXT -> InputType.TYPE_CLASS_TEXT
         TextInputType.EMAIL -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
@@ -224,7 +229,7 @@ fun setSecretInputType(
 @BindingAdapter("onButtonClicked")
 fun setOnButtonClickListener(
     errorPanelView: ErrorPanelView,
-    listener: ErrorPanelView.OnButtonClickListener?
+    listener: OnButtonClickListener?
 ) {
     errorPanelView.buttonClickListener = listener
 }
@@ -287,12 +292,32 @@ fun setSpinnerItems(
     }
 }
 
-@BindingAdapter("imageTint")
-fun setImageViewTint(
-    view: ImageView,
+@BindingAdapter("materialBackgroundColor")
+fun setMaterialBackgroundColor(
+    imageButton: ImageButton,
     color: Int?
 ) {
-    if (color != null) {
-        view.imageTintList = ColorStateList.valueOf(color)
+    if (color == null) {
+        return
     }
+
+    val cornerSize = imageButton.context.resources.getDimension(R.dimen.quarter_margin)
+
+    val drawable = MaterialShapeDrawable()
+        .apply {
+            shapeAppearanceModel = ShapeAppearanceModel.Builder()
+                .setAllCornerSizes(cornerSize)
+                .build()
+        }
+    DrawableCompat.setTint(drawable, color)
+
+    imageButton.background = drawable
+}
+
+@BindingAdapter("isEnabled")
+fun setEnabled(
+    view: View,
+    isEnabled: Boolean?
+) {
+    view.isEnabled = isEnabled ?: false
 }

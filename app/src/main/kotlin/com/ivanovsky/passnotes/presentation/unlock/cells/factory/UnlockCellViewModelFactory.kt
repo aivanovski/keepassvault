@@ -4,8 +4,8 @@ import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
-import com.ivanovsky.passnotes.presentation.unlock.cells.model.DatabaseCellModel
-import com.ivanovsky.passnotes.presentation.unlock.cells.viewmodel.DatabaseCellViewModel
+import com.ivanovsky.passnotes.presentation.unlock.cells.model.DatabaseFileCellModel
+import com.ivanovsky.passnotes.presentation.unlock.cells.viewmodel.DatabaseFileCellViewModel
 
 class UnlockCellViewModelFactory : CellViewModelFactory {
 
@@ -14,7 +14,7 @@ class UnlockCellViewModelFactory : CellViewModelFactory {
         eventProvider: EventProvider
     ): BaseCellViewModel {
         return when (model) {
-            is DatabaseCellModel -> DatabaseCellViewModel(model)
+            is DatabaseFileCellModel -> DatabaseFileCellViewModel(model, eventProvider)
             else -> throwUnsupportedModelException(model)
         }
     }

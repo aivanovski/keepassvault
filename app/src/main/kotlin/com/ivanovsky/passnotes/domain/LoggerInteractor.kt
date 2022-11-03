@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.domain
 import android.content.Context
 import android.util.Log
 import com.ivanovsky.passnotes.BuildConfig
-import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.entity.LoggingType
 import com.ivanovsky.passnotes.util.StringUtils
 import com.ivanovsky.passnotes.util.isDigitsOnly
@@ -12,9 +12,11 @@ import fr.bipi.tressence.file.FileLoggerTree
 import timber.log.Timber
 import java.io.File
 
-class LoggerInteractor(private val context: Context) {
+class LoggerInteractor(
+    private val context: Context,
+    private val settings: Settings
+) {
 
-    private val settings = SettingsImpl(ResourceProvider(context), context)
     private val fileHelper = FileHelper(context, settings)
 
     fun initialize() {

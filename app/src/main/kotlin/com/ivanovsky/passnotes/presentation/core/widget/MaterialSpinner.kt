@@ -12,6 +12,7 @@ import com.ivanovsky.passnotes.databinding.WidgetMaterialSpinnerBinding
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
+import com.ivanovsky.passnotes.presentation.core.widget.entity.OnItemSelectListener
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class MaterialSpinner(

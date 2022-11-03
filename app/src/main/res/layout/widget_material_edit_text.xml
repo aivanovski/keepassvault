@@ -16,24 +16,28 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/textInput"
+            android:saveEnabled="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/primary_text"
-            android:textSize="@dimen/material_edit_text_primary_text_size"
-            tools:text="Text" />
+            android:textSize="@dimen/material_edit_text_primary_text_size" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <ImageButton
-        android:id="@+id/eyeButton"
-        style="@style/Material.BorderlessButton"
+        android:id="@+id/actionButton"
+        style="@style/Material.BorderlessButton.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/small_margin"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:tint="@color/icon_gray"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@id/textInputLayout"
         app:layout_constraintEnd_toEndOf="@id/textInputLayout"
         app:layout_constraintTop_toTopOf="@id/textInputLayout"
-        app:srcCompat="@drawable/ic_eye_grey_600_24dp"
+        tools:src="@drawable/ic_visibility_off_24dp"
         tools:visibility="visible" />
 
 </merge>

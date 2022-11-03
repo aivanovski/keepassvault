@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
 import com.ivanovsky.passnotes.R
@@ -10,7 +11,7 @@ import com.ivanovsky.passnotes.presentation.core.binding.OnTextChangeListener
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedTextPropertyCellModel
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextTransformationMethod
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.reset
 
@@ -50,6 +51,7 @@ class ExtendedTextPropertyCellViewModel(
     }
 
     private val isTextHidden = MutableLiveData(true)
+    val visibilityIconResId = MutableLiveData(getVisibilityIconResIdInternal(model.isProtected))
     val primaryTransformationMethod = MutableLiveData(
         obtainTextTransformationMethod(model.isProtected && model.isCollapsed)
     )
@@ -65,6 +67,7 @@ class ExtendedTextPropertyCellViewModel(
             primaryTransformationMethod.value = obtainTextTransformationMethod(isProtected && isCollapsedInternal())
             isPrimaryVisibilityButtonVisible.value = isCollapsedInternal() && isProtected
             isSecondaryVisibilityButtonVisible.value = !isCollapsedInternal() && isProtected
+            visibilityIconResId.value = getVisibilityIconResIdInternal(isProtected)
         }
         isCollapsed.observeForever { isCollapsed ->
             isPrimaryVisibilityButtonVisible.value = isCollapsed && isProtectedInternal()
@@ -116,6 +119,7 @@ class ExtendedTextPropertyCellViewModel(
 
         secondaryTransformationMethod.value = obtainTextTransformationMethod(isProtectedInternal())
         primaryTransformationMethod.value = obtainTextTransformationMethod(isProtectedInternal() && isCollapsedInternal())
+        visibilityIconResId.value = getVisibilityIconResIdInternal(isProtectedInternal())
     }
 
     fun onRemoveButtonClicked() {
@@ -126,6 +130,7 @@ class ExtendedTextPropertyCellViewModel(
         isTextHidden.value = isTextHidden.value?.not()
         primaryTransformationMethod.value = obtainTextTransformationMethod(isProtectedInternal() && isCollapsedInternal())
         secondaryTransformationMethod.value = obtainTextTransformationMethod(isProtectedInternal())
+        visibilityIconResId.value = getVisibilityIconResIdInternal(isProtectedInternal())
     }
 
     @VisibleForTesting
@@ -159,6 +164,14 @@ class ExtendedTextPropertyCellViewModel(
             TextTransformationMethod.PASSWORD
         } else {
             TextTransformationMethod.PLANE_TEXT
+        }
+    }
+
+    @DrawableRes
+    private fun getVisibilityIconResIdInternal(isProtected: Boolean): Int {
+        return when (obtainTextTransformationMethod(isProtected)) {
+            TextTransformationMethod.PLANE_TEXT -> R.drawable.ic_visibility_on_24dp
+            else -> R.drawable.ic_visibility_off_24dp
         }
     }
 

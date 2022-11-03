@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -25,6 +26,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
+import com.ivanovsky.passnotes.util.InputMethodUtils
 import com.ivanovsky.passnotes.util.IntentUtils.immutablePendingIntentFlags
 
 class MainActivity :
@@ -60,6 +62,22 @@ class MainActivity :
         initActionBar(R.id.tool_bar)
 
         drawer = findViewById(R.id.drawer_layout)
+        drawer.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
+            }
+
+            override fun onDrawerOpened(drawerView: View) {
+            }
+
+            override fun onDrawerClosed(drawerView: View) {
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {
+                if (newState == DrawerLayout.STATE_DRAGGING || newState == DrawerLayout.STATE_SETTLING) {
+                    navigationViewModel.onMenuDragging()
+                }
+            }
+        })
         navigationView = findViewById(R.id.navigation_view)
 
         viewModel.navigateToRootScreen()
@@ -67,6 +85,7 @@ class MainActivity :
         navigationView.setNavigationItemSelectedListener { item -> onNavigationItemSelected(item) }
 
         subscribeToLiveData()
+        subscribeToEvents()
     }
 
     override fun onBackPressed() {
@@ -110,6 +129,12 @@ class MainActivity :
         }
         navigationViewModel.visibleItems.observe(this) {
             setVisibleNavigationItems(it)
+        }
+    }
+
+    private fun subscribeToEvents() {
+        navigationViewModel.hideKeyboardEvent.observe(this) {
+            InputMethodUtils.hideSoftInput(this)
         }
     }
 

@@ -133,8 +133,8 @@ class ServerLoginViewModel(
 
     private fun getUrlHint(loginType: LoginType): String {
         return when (loginType) {
-            LoginType.USERNAME_PASSWORD -> resourceProvider.getString(R.string.server_url)
-            LoginType.GIT -> resourceProvider.getString(R.string.git_repository_url)
+            LoginType.USERNAME_PASSWORD -> resourceProvider.getString(R.string.server_url_hint)
+            LoginType.GIT -> resourceProvider.getString(R.string.git_repository_url_hint)
         }
     }
 }

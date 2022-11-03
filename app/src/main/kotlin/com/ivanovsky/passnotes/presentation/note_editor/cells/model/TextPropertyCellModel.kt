@@ -2,8 +2,8 @@ package com.ivanovsky.passnotes.presentation.note_editor.cells.model
 
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputLines
-import com.ivanovsky.passnotes.presentation.note_editor.view.TextInputType
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
 
 data class TextPropertyCellModel(
     override val id: String,

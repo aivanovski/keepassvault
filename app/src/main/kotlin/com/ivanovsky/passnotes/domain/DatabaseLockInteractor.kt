@@ -43,6 +43,9 @@ class DatabaseLockInteractor(
         isDatabaseOpened.set(true)
         databaseFsOptions.set(fsOptions)
         databaseStatus.set(status)
+        if (settings.autoLockDelayInMs != -1) {
+            startLockTimer()
+        }
     }
 
     fun onDatabaseClosed() {
@@ -55,6 +58,7 @@ class DatabaseLockInteractor(
 
     @UiThread
     fun onScreenInteractionStarted(screenKey: String) {
+        Timber.d("onScreenInteractionStarted: screenKey=%s", screenKey)
         activeScreens.add(screenKey)
         cancelLockTimer()
     }
@@ -62,6 +66,12 @@ class DatabaseLockInteractor(
     @UiThread
     fun onScreenInteractionStopped(screenKey: String) {
         activeScreens.remove(screenKey)
+
+        Timber.d(
+            "onScreenInteractionStopped: screenKey=%s, activeScreens=%s",
+            screenKey,
+            activeScreens.size
+        )
 
         if (isDatabaseOpened.get() &&
             activeScreens.size == 0 &&

@@ -6,25 +6,35 @@
 
     <data>
 
+        <import type="com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape" />
+
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.core.viewmodel.NotePropertyCellViewModel" />
+            type="com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="@dimen/material_list_item_height_two_line_with_icon">
+        android:layout_marginHorizontal="@dimen/element_margin"
+        android:foreground="?attr/selectableItemBackground"
+        android:onClick="@{() -> viewModel.onClicked()}"
+        app:backgroundShape="@{viewModel.model.backgroundShape}"
+        app:backgroundShapeColor="@{@color/light_grey}"
+        app:onLongClick="@{() -> viewModel.onLongClicked()}">
 
         <TextView
             android:id="@+id/name"
-            style="@style/Material.SecondaryText.SingleLine"
+            style="@style/Material.SecondaryText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@{viewModel.model.name}"
+            android:layout_marginStart="@dimen/element_margin"
+            android:layout_marginTop="@dimen/element_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:text="@{viewModel.name}"
             app:layout_constraintBottom_toTopOf="@id/value"
-            app:layout_constraintEnd_toEndOf="@id/value"
-            app:layout_constraintStart_toStartOf="@id/value"
+            app:layout_constraintEnd_toStartOf="@id/visibilityButton"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
             tools:text="User Name" />
@@ -36,25 +46,31 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/element_margin"
             android:layout_marginEnd="@dimen/element_margin"
-            android:text="@{viewModel.model.value}"
+            android:layout_marginBottom="@dimen/element_margin"
+            android:text="@{viewModel.value}"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/copyButton"
+            app:layout_constraintEnd_toStartOf="@id/visibilityButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/name"
+            app:textTransformationMethod="@{viewModel.valueTransformationMethod}"
             tools:text="default@gmail.com" />
 
         <ImageButton
-            android:id="@+id/copyButton"
-            style="@style/Material.BorderlessButton"
+            android:id="@+id/visibilityButton"
+            style="@style/Material.BorderlessButton.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{() -> viewModel.onCopyButtonClicked()}"
+            android:layout_marginEnd="@dimen/half_margin"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:onClick="@{() -> viewModel.onVisibilityButtonClicked()}"
+            android:tint="@color/icon_gray"
+            app:imageResourceId="@{viewModel.visibilityIconResId}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_copy_grey_600_24dp"
-            app:visible="@{viewModel.model.copyButtonVisible}"
-            tools:visibility="visible" />
+            app:visible="@{viewModel.isVisibilityButtonVisible}"
+            tools:src="@drawable/ic_visibility_off_24dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

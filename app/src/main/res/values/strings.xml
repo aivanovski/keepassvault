@@ -38,6 +38,7 @@
     <string name="login">Login</string>
     <string name="refresh">Refresh</string>
     <string name="grant">Grant</string>
+    <string name="toggle_hidden">Toggle hidden</string>
 
     <!-- Lock notification -->
     <string name="lock_notification_channel">Quick Lock</string>
@@ -168,6 +169,10 @@
     <!-- Note screen -->
     <string name="copied_clipboard_will_be_cleared_in_seconds">Copied! Clipboard will be cleared in %d seconds</string>
     <string name="edited_at">Edited %s</string>
+    <string name="copy_with_str">Copy %s</string>
+    <string name="open_with_str">Open %s</string>
+    <string name="copied">Copied!</string>
+    <string name="hidden">Hidden</string>
 
     <!-- Note editor screen -->
     <string name="new_note">New note</string>

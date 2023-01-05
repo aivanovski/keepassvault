@@ -15,6 +15,14 @@ fun String.toIntSafely(): Int? {
     }
 }
 
+fun String.substituteAll(substitution: Char): String {
+    return if (isEmpty()) {
+        this
+    } else {
+        substituteAt(0, length, substitution)
+    }
+}
+
 fun String.substituteAt(start: Int, end: Int, substitution: Char): String {
     val chars = toCharArray()
         .mapIndexed { index, char ->

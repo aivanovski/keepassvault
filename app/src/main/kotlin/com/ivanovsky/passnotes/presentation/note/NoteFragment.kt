@@ -22,12 +22,15 @@ import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.openUrl
 import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel.NoteMenuItem
+import com.ivanovsky.passnotes.presentation.note.NoteViewModel.PropertyAction
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils
 
@@ -93,6 +96,10 @@ class NoteFragment : BaseFragment() {
             }
             R.id.menu_select -> {
                 viewModel.onSelectButtonClicked()
+                true
+            }
+            R.id.menu_toggle_hidden -> {
+                viewModel.onToggleHiddenClicked()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -165,6 +172,12 @@ class NoteFragment : BaseFragment() {
                 )
             )
         }
+        viewModel.showPropertyActionDialog.observe(viewLifecycleOwner) { actions ->
+            showPropertyActionDialog(actions)
+        }
+        viewModel.openUrlEvent.observe(viewLifecycleOwner) { url ->
+            openUrl(url)
+        }
     }
 
     private fun showAddAutofillDataDialog(note: Note) {
@@ -173,6 +186,28 @@ class NoteFragment : BaseFragment() {
             onDenied = { viewModel.onAddAutofillDataDenied(note) }
         )
         dialog.show(childFragmentManager, ConfirmationDialog.TAG)
+    }
+
+    private fun showPropertyActionDialog(actions: List<PropertyAction>) {
+        val entries = actions.map { action ->
+            when (action) {
+                is PropertyAction.CopyText -> {
+                    getString(R.string.copy_with_str, "'${action.title}'")
+                }
+                is PropertyAction.OpenUrl -> {
+                    getString(R.string.open_with_str, action.url)
+                }
+            }
+        }
+
+        val dialog = ChooseOptionDialog.newInstance(
+            title = null,
+            entries = entries
+        ).apply {
+            onItemClickListener = { idx -> viewModel.onPropertyActionClicked(actions[idx]) }
+        }
+
+        dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
     }
 
     companion object {

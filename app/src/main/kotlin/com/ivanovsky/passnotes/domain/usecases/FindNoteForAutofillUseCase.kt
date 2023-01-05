@@ -24,7 +24,7 @@ class FindNoteForAutofillUseCase(
             }
 
             val db = getDbResult.obj
-            val domain = structure.webDomain?.let { UrlUtils.extractWebDomain(it) }
+            val domain = structure.webDomain?.let { UrlUtils.extractCleanWebDomain(it) }
             val applicationId = structure.applicationId
 
             // TODO(autofill): to improve search, autofill-properties should be also checked after

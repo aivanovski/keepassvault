@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel" />
+    </data>
+
+    <TextView
+        style="@style/Material.ListItem.PrimaryText.SingleLine"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingVertical="@dimen/half_margin"
+        android:paddingStart="@{viewModel.paddingHorizontal}"
+        android:paddingEnd="@{viewModel.paddingHorizontal}"
+        android:text="@{viewModel.model.title}"
+        android:textColor="@{viewModel.model.color}"
+        tools:text="Header" />
+
+</layout>

@@ -285,7 +285,7 @@ class NoteEditorCellModelFactory(
     }
 
     private fun createSpaceCell(): BaseCellModel {
-        return SpaceCellModel()
+        return SpaceCellModel(R.dimen.huge_margin)
     }
 
     private fun createTitleCell(title: String): TextPropertyCellModel {

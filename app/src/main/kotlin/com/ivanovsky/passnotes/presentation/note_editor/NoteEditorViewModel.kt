@@ -62,7 +62,7 @@ class NoteEditorViewModel(
         .add(TextPropertyCellViewModel::class, R.layout.cell_text_property)
         .add(SecretPropertyCellViewModel::class, R.layout.cell_secret_property)
         .add(ExtendedTextPropertyCellViewModel::class, R.layout.cell_extended_text_property)
-        .add(SpaceCellViewModel::class, R.layout.cell_space_two_line)
+        .add(SpaceCellViewModel::class, R.layout.cell_space)
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())

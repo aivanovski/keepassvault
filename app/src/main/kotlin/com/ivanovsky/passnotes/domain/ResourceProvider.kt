@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.domain
 
 import android.content.Context
 import androidx.annotation.ColorRes
+import androidx.annotation.DimenRes
 import androidx.annotation.StringRes
 import androidx.core.content.res.ResourcesCompat
 
@@ -17,5 +18,9 @@ class ResourceProvider(private val context: Context) {
 
     fun getColor(@ColorRes resId: Int): Int {
         return ResourcesCompat.getColor(context.resources, resId, null)
+    }
+
+    fun getDimension(@DimenRes resId: Int): Int {
+        return context.resources.getDimension(resId).toInt()
     }
 }

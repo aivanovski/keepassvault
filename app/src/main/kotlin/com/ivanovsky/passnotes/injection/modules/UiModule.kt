@@ -99,7 +99,7 @@ object UiModule {
             single { NewDatabaseInteractor(get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get()) }
             single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
-            single { NoteInteractor(get(), get(), get(), get(), get(), get(), get()) }
+            single { NoteInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
             single {
                 GroupsInteractor(
                     get(),
@@ -146,8 +146,8 @@ object UiModule {
             single { SearchCellModelFactory() }
             single { SearchCellViewModelFactory(get(), get()) }
 
-            single { NoteCellModelFactory() }
-            single { NoteCellViewModelFactory() }
+            single { NoteCellModelFactory(get()) }
+            single { NoteCellViewModelFactory(get()) }
 
             single { FilePickerCellModelFactory() }
             single { FilePickerCellViewModelFactory() }
@@ -271,7 +271,7 @@ object UiModule {
             }
             factory { (args: UnlockScreenArgs) ->
                 UnlockViewModel(
-                    get(),
+                   get(),
                     get(),
                     get(),
                     get(),

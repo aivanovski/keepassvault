@@ -1,3 +1,8 @@
 package com.ivanovsky.passnotes.presentation.core.model
 
-class SpaceCellModel : BaseCellModel()
+import androidx.annotation.DimenRes
+
+data class SpaceCellModel(
+    @DimenRes
+    val height: Int
+) : BaseCellModel()

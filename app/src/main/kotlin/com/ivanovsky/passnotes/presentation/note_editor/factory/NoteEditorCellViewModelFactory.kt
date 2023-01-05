@@ -39,7 +39,8 @@ class NoteEditorCellViewModelFactory(
                 resourceProvider
             )
             is SpaceCellModel -> SpaceCellViewModel(
-                model
+                model,
+                resourceProvider
             )
             else -> throwUnsupportedModelException(model)
         }

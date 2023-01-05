@@ -9,8 +9,9 @@
             type="com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel" />
     </data>
 
-    <View
+    <com.ivanovsky.passnotes.presentation.core.widget.SpaceView
+        heightInPixels="@{viewModel.height}"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/material_list_item_height_two_line_with_icon" />
+        android:layout_height="wrap_content" />
 
 </layout>

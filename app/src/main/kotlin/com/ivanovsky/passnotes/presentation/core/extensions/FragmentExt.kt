@@ -22,6 +22,7 @@ import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.dialog.ErrorDialog
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.util.InputMethodUtils
+import com.ivanovsky.passnotes.util.IntentUtils
 
 fun <T : Parcelable> Fragment.getMandatoryArgument(key: String): T {
     return arguments?.getParcelable(key) ?: requireArgument(key)
@@ -118,4 +119,9 @@ fun Fragment.updateMenuItemVisibility(
 
 private fun Fragment.findViewForSnackbar(): View? {
     return view?.findViewById(R.id.rootLayout)
+}
+
+fun Fragment.openUrl(url: String) {
+    val intent = IntentUtils.newOpenUrlIntent(url)
+    startActivity(Intent.createChooser(intent, ""))
 }

@@ -6,7 +6,7 @@ import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
-import com.ivanovsky.passnotes.util.UrlUtils.extractWebDomain
+import com.ivanovsky.passnotes.util.UrlUtils.extractCleanWebDomain
 import kotlinx.coroutines.withContext
 
 class CheckNoteAutofillDataUseCase(
@@ -19,10 +19,10 @@ class CheckNoteAutofillDataUseCase(
     ): Boolean =
         withContext(dispatchers.IO) {
             if (structure.webDomain != null) {
-                val domain = extractWebDomain(structure.webDomain)
+                val domain = extractCleanWebDomain(structure.webDomain)
                 val domains = URL_FILTER
                     .apply(note.properties)
-                    .mapNotNull { property -> property.value?.let { extractWebDomain(it) } }
+                    .mapNotNull { property -> property.value?.let { extractCleanWebDomain(it) } }
 
                 !domains.contains(domain)
             } else if (structure.applicationId != null) {

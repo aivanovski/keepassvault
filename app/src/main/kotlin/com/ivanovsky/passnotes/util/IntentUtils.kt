@@ -2,9 +2,16 @@ package com.ivanovsky.passnotes.util
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 
 object IntentUtils {
+
+    fun newOpenUrlIntent(url: String): Intent {
+        return Intent(Intent.ACTION_VIEW).apply {
+           data = Uri.parse(url)
+        }
+    }
 
     fun newOpenFileIntent(): Intent {
         return Intent(Intent.ACTION_OPEN_DOCUMENT).apply {

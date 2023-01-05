@@ -1,5 +1,8 @@
 package com.ivanovsky.passnotes.presentation.core.binding
 
+import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -19,6 +22,7 @@ import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.textfield.TextInputEditText
@@ -38,6 +42,7 @@ import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingAction
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnButtonClickListener
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnItemSelectListener
 import com.ivanovsky.passnotes.presentation.core.widget.TextMovementMethod
+import com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PASSWORD
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PLANE_TEXT
@@ -102,7 +107,10 @@ fun setVisible(view: View, isVisible: Boolean) {
 }
 
 @BindingAdapter("onTextChanged")
-fun setOnTextChangedListener(editText: TextInputEditText, onTextChangeListener: OnTextChangeListener?) {
+fun setOnTextChangedListener(
+    editText: TextInputEditText,
+    onTextChangeListener: OnTextChangeListener?
+) {
     val existingListener = editText.getTag(R.id.tagTextWatcher) as? TextWatcher
     existingListener?.let {
         editText.removeTextChangedListener(it)
@@ -290,6 +298,57 @@ fun setSpinnerItems(
                 updateItems(nonEmptyItems)
             }
     }
+}
+
+@BindingAdapter("backgroundShapeColor", "backgroundShape")
+fun setMaterialBackground(
+    view: View,
+    shapeColor: Int?,
+    shape: RoundedShape?
+) {
+    val color = shapeColor ?: Color.RED
+    val shapeModel = buildShapeAppearanceModel(view.context, shape ?: RoundedShape.ALL)
+    val drawable = MaterialShapeDrawable(shapeModel)
+    drawable.fillColor = ColorStateList.valueOf(color)
+
+    view.background = drawable
+}
+
+private fun buildShapeAppearanceModel(context: Context, shape: RoundedShape): ShapeAppearanceModel {
+    val builder = ShapeAppearanceModel.Builder()
+
+    when (shape) {
+        RoundedShape.ALL -> {
+            builder.setAllCorners(
+                CornerFamily.ROUNDED,
+                context.resources.getDimension(R.dimen.half_margin)
+            )
+        }
+        RoundedShape.BOTTOM -> {
+            builder.setBottomLeftCorner(
+                CornerFamily.ROUNDED,
+                context.resources.getDimension(R.dimen.half_margin)
+            )
+            builder.setBottomRightCorner(
+                CornerFamily.ROUNDED,
+                context.resources.getDimension(R.dimen.half_margin)
+            )
+        }
+        RoundedShape.TOP -> {
+            builder.setTopLeftCorner(
+                CornerFamily.ROUNDED,
+                context.resources.getDimension(R.dimen.half_margin)
+            )
+            builder.setTopRightCorner(
+                CornerFamily.ROUNDED,
+                context.resources.getDimension(R.dimen.half_margin)
+            )
+        }
+        RoundedShape.NONE -> {
+        }
+    }
+
+    return builder.build()
 }
 
 @BindingAdapter("materialBackgroundColor")

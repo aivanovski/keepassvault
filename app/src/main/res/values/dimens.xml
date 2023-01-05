@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="group_margin">24dp</dimen>
+    <dimen name="tiny_margin">2dp</dimen>
+    <dimen name="quarter_margin">4dp</dimen>
+    <dimen name="small_margin">6dp</dimen>
+    <dimen name="half_margin">8dp</dimen>
     <dimen name="half_group_margin">12dp</dimen>
     <dimen name="element_margin">16dp</dimen>
-    <dimen name="half_margin">8dp</dimen>
-    <dimen name="small_margin">6dp</dimen>
-    <dimen name="quarter_margin">4dp</dimen>
-    <dimen name="tiny_margin">2dp</dimen>
+    <dimen name="group_margin">24dp</dimen>
+    <dimen name="double_element_margin">32dp</dimen>
+    <dimen name="huge_margin">72dp</dimen>
 
     <dimen name="material_primary_text_size">16sp</dimen>
     <dimen name="material_secondary_text_size">14sp</dimen>

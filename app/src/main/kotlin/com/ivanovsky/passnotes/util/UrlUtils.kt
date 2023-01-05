@@ -1,75 +1,86 @@
 package com.ivanovsky.passnotes.util
 
-import android.net.Uri
+import com.ivanovsky.passnotes.domain.entity.ParsedUrl
 import com.ivanovsky.passnotes.util.StringUtils.DOT
 import com.ivanovsky.passnotes.util.StringUtils.STAR
-import java.lang.StringBuilder
+import timber.log.Timber
+import java.net.MalformedURLException
+import java.net.URL
+import kotlin.text.StringBuilder
 
 object UrlUtils {
 
-    private val UNNECESSARY_URL_PREFIXES = listOf("https", "http", "://", "www", ".")
+    const val SECRET_HOST_MASK = "***"
+    private const val SCHEME_HTTP = "http://"
+    private const val SCHEME_HTTPS = "https://"
+    private const val WWW_PREFIX = "www."
 
-    fun extractWebDomain(url: String): String? {
-        var cleanedUrl = url.trim()
-        for (prefix in UNNECESSARY_URL_PREFIXES) {
-            if (cleanedUrl.startsWith(prefix, ignoreCase = true)) {
-                val start = prefix.length
-                val end = cleanedUrl.length
-                if (start < end) {
-                    cleanedUrl = cleanedUrl.substring(start, end)
-                } else {
-                    return null
-                }
+    fun extractCleanWebDomain(url: String): String? {
+        val domain = parseUrl(url)?.domain ?: return null
+
+        return if (domain.startsWith(WWW_PREFIX, ignoreCase = true)) {
+            if (domain.length > WWW_PREFIX.length) {
+                domain.substring(WWW_PREFIX.length)
+            } else {
+                null
             }
-        }
-
-        val lastDotIdx = cleanedUrl.lastIndexOf(DOT)
-        if (lastDotIdx == -1 && cleanedUrl.isNotEmpty()) {
-            return cleanedUrl
-        }
-
-        return if (lastDotIdx > 0) {
-            cleanedUrl.substring(0, lastDotIdx)
         } else {
-            null
+            domain
         }
     }
 
     fun formatSecretUrl(url: String): String {
         val parsedUrl = parseUrl(url) ?: return url.substituteAt(0, url.length, STAR)
 
-        val result = StringBuilder()
-
-        if (parsedUrl.scheme != null) {
-            result.append(parsedUrl.scheme).append("://")
-        }
-        if (parsedUrl.domain != null) {
-            result.append("****")
-        }
-        if (parsedUrl.path != null) {
-            result.append(parsedUrl.path)
-        }
-
-        return result.toString()
+        return parsedUrl.copy(
+            domain = SECRET_HOST_MASK
+        ).formatToString()
     }
 
-    private fun parseUrl(url: String): ParsedUrl? {
-        val uri = Uri.parse(url)
+    fun parseUrl(url: String): ParsedUrl? {
+        if (!url.contains(DOT)) {
+            return null
+        }
 
-        val scheme = uri.scheme
-        val domain = uri.authority
-        val path = uri.path
-
-        return if (!scheme.isNullOrEmpty() && !domain.isNullOrEmpty() && !path.isNullOrEmpty()) {
-            ParsedUrl(scheme, domain, path)
+        val fixedUrl = if (!url.startsWith(SCHEME_HTTP) && !url.startsWith(SCHEME_HTTPS)) {
+            SCHEME_HTTPS + url
         } else {
+            url
+        }
+
+        return try {
+            URL(fixedUrl).toParsedUrl()
+        } catch (exception: MalformedURLException) {
+            Timber.d(exception)
             null
         }
     }
 
-    data class ParsedUrl(
-        val scheme: String?,
-        val domain: String?,
-        val path: String?
-    )
+    private fun URL.toParsedUrl(): ParsedUrl? {
+        if (host.equals(WWW_PREFIX, ignoreCase = true)) {
+            return null
+        }
+
+        val domain = StringBuilder(
+            if (authority != null) {
+                authority
+            } else {
+                host
+            }
+        )
+
+        val path = StringBuilder(path)
+        if (!query.isNullOrBlank()) {
+            path.append("?").append(query)
+        }
+        if (!ref.isNullOrBlank()) {
+            path.append("#").append(ref)
+        }
+
+        return ParsedUrl(
+            scheme = protocol,
+            domain = domain.toString(),
+            path = path.toString()
+        )
+    }
 }

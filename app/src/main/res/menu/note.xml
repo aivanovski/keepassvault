@@ -25,4 +25,9 @@
         android:title="@string/settings"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/menu_toggle_hidden"
+        android:title="@string/toggle_hidden"
+        app:showAsAction="never"/>
+
 </menu>

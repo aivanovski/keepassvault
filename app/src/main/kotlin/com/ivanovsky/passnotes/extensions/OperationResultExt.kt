@@ -25,3 +25,19 @@ fun <T, R> OperationResult<T>.mapError(): OperationResult<R> {
 
     return OperationResult.error(error)
 }
+
+fun <T> OperationResult<T>.getOrNull(): T? {
+    return if (isSucceededOrDeferred) {
+        obj
+    } else {
+        null
+    }
+}
+
+fun <T> OperationResult<T>.getOrThrow(): T {
+    return if (isSucceededOrDeferred) {
+        obj
+    } else {
+        throw IllegalStateException()
+    }
+}

@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.domain
 
 import android.content.Context
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_CREATE_A_DIRECTORY
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.settings.Settings
@@ -13,7 +14,7 @@ class FileHelper(
     private val settings: Settings
 ) {
 
-    val filesDir: File
+    val filesDir: File?
         get() = context.filesDir
 
     val remoteFilesDir: File?
@@ -26,8 +27,8 @@ class FileHelper(
         }
 
     fun generateDestinationFileOrNull(): File? {
-        return generateDestinationForRemoteFile()?.let {
-            File(it)
+        return generateDestinationForRemoteFile()?.let { path ->
+            File(path)
         }
     }
 
@@ -44,6 +45,27 @@ class FileHelper(
         }
     }
 
+    fun generateDestinationDirectoryForSharedFile(): OperationResult<File> {
+        val dir = generateDestinationForSharedFile()?.let { path ->
+            File(path)
+        }
+            ?: return OperationResult.error(
+                newGenericIOError(
+                    MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE
+                )
+            )
+
+        if (!dir.mkdirs()) {
+            return OperationResult.error(
+                newGenericIOError(
+                    MESSAGE_FAILED_TO_CREATE_A_DIRECTORY
+                )
+            )
+        }
+
+        return OperationResult.success(dir)
+    }
+
     fun isLocatedInInternalStorage(file: File): Boolean {
         val dataDirPath = context.filesDir?.parentFile?.path
         return dataDirPath != null && file.path.startsWith(dataDirPath)
@@ -52,6 +74,12 @@ class FileHelper(
     private fun generateDestinationForRemoteFile(): String? {
         return remoteFilesDir?.let {
             it.path + "/" + UUID.randomUUID().toString()
+        }
+    }
+
+    private fun generateDestinationForSharedFile(): String? {
+        return context.cacheDir?.let { dir ->
+            dir.path + "/" + UUID.randomUUID().toString()
         }
     }
 

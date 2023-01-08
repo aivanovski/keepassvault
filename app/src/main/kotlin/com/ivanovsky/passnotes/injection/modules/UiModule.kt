@@ -99,7 +99,7 @@ object UiModule {
             single { NewDatabaseInteractor(get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get()) }
             single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
-            single { NoteInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
+            single { NoteInteractor(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
             single {
                 GroupsInteractor(
                     get(),

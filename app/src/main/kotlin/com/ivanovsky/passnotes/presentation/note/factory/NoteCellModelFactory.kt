@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.note.factory
 
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
@@ -9,6 +10,7 @@ import com.ivanovsky.passnotes.presentation.core.model.HeaderCellModel
 import com.ivanovsky.passnotes.presentation.note.cells.model.NotePropertyCellModel
 import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
 import com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape
+import com.ivanovsky.passnotes.presentation.note.cells.model.AttachmentCellModel
 import com.ivanovsky.passnotes.util.StringUtils
 
 class NoteCellModelFactory(
@@ -17,6 +19,7 @@ class NoteCellModelFactory(
 
     fun createCellModels(
         visibleIdsAndProperties: List<Pair<String, Property>>,
+        idsAndAttachments: List<Pair<String, Attachment>>,
         hiddenIdsAndProperties: List<Pair<String, Property>>
     ): List<BaseCellModel> {
         val models = mutableListOf<BaseCellModel>()
@@ -46,15 +49,49 @@ class NoteCellModelFactory(
                 )
             )
 
-            if (idx == visibleIdsAndProperties.lastIndex) {
-                if (hiddenIdsAndProperties.isEmpty()) {
-                    models.add(SpaceCellModel(R.dimen.huge_margin))
-                } else {
-                    models.add(createHiddenHeaderCell())
-                }
-            } else {
+            if (idx < visibleIdsAndProperties.lastIndex) {
                 models.add(createDividerCell())
             }
+        }
+
+        if (idsAndAttachments.isNotEmpty()) {
+            models.add(
+                createHeaderCell(
+                    title = resourceProvider.getString(R.string.files)
+                )
+            )
+        }
+
+        for ((idx, cellIdAndAttachment) in idsAndAttachments.withIndex()) {
+            val (cellId, attachment) = cellIdAndAttachment
+
+            val shape = when {
+                idsAndAttachments.size == 1 -> RoundedShape.ALL
+                idx == 0 -> RoundedShape.TOP
+                idx == idsAndAttachments.lastIndex -> RoundedShape.BOTTOM
+                else -> RoundedShape.NONE
+            }
+
+            models.add(
+                AttachmentCellModel(
+                    id = cellId,
+                    name = attachment.name,
+                    size = StringUtils.formatFileSize(attachment.data.size.toLong()),
+                    backgroundShape = shape
+                )
+            )
+
+            if (idx < idsAndAttachments.lastIndex) {
+                models.add(createDividerCell())
+            }
+        }
+
+        if (hiddenIdsAndProperties.isNotEmpty()) {
+            models.add(
+                createHeaderCell(
+                    title = resourceProvider.getString(R.string.hidden)
+                )
+            )
         }
 
         for ((idx, cellIdAndProperty) in hiddenIdsAndProperties.withIndex()) {
@@ -78,12 +115,13 @@ class NoteCellModelFactory(
                 )
             )
 
-            if (idx == hiddenIdsAndProperties.lastIndex) {
-                models.add(SpaceCellModel(R.dimen.huge_margin))
-            } else {
+            if (idx < hiddenIdsAndProperties.lastIndex) {
                 models.add(createDividerCell())
             }
         }
+
+
+        models.add(SpaceCellModel(R.dimen.huge_margin))
 
         return models
     }
@@ -95,11 +133,14 @@ class NoteCellModelFactory(
             paddingEnd = R.dimen.element_margin
         )
 
-    private fun createHiddenHeaderCell(): HeaderCellModel =
+    private fun createHeaderCell(
+        title: String
+    ): HeaderCellModel =
         HeaderCellModel(
             id = null,
-            title = resourceProvider.getString(R.string.hidden),
+            title = title,
             color = resourceProvider.getColor(R.color.secondary_text),
+            isBold = true,
             paddingHorizontal = R.dimen.double_element_margin
         )
 }

@@ -13,6 +13,8 @@ import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.extensions.matches
 import app.keemobile.kotpass.database.getEntry
+import app.keemobile.kotpass.database.modifiers.binaries
+import app.keemobile.kotpass.database.modifiers.modifyBinaries
 import app.keemobile.kotpass.database.modifiers.modifyGroup
 import app.keemobile.kotpass.database.modifiers.removeEntry
 import java.util.UUID
@@ -31,7 +33,10 @@ class KotpassNoteDao(
             val root = db.getRawRootGroup()
 
             val allNotes = db.collectEntries(root) { rawGroup, rawGroupEntries ->
-                rawGroupEntries.convertToNotes(rawGroup.uuid)
+                rawGroupEntries.convertToNotes(
+                    groupUid = rawGroup.uuid,
+                    allBinaries = db.getRawDatabase().binaries
+                )
             }
 
             OperationResult.success(allNotes)
@@ -48,7 +53,8 @@ class KotpassNoteDao(
             val rawGroup = getGroupResult.obj
             return@withLock OperationResult.success(
                 rawGroup.entries.convertToNotes(
-                    groupUid = rawGroup.uuid
+                    groupUid = rawGroup.uuid,
+                    allBinaries = db.getRawDatabase().binaries
                 )
             )
         }
@@ -71,7 +77,8 @@ class KotpassNoteDao(
 
             OperationResult.success(
                 rawEntry.convertToNote(
-                    groupUid = rawGroup.uuid
+                    groupUid = rawGroup.uuid,
+                    allBinaries = db.getRawDatabase().binaries
                 )
             )
         }

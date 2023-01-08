@@ -73,6 +73,32 @@ object InputOutputUtils {
     }
 
     @JvmStatic
+    fun copy(
+        source: InputStream,
+        destinationFile: File
+    ): OperationResult<Unit> {
+        val destination = try {
+            FileOutputStream(destinationFile, false)
+        } catch (exception: FileNotFoundException) {
+            Timber.d(exception)
+            return OperationResult.error(newGenericIOError(exception))
+        }
+
+        return try {
+            copyOrThrow(
+                source,
+                destination,
+                isCloneOnFinish = true,
+                cancellation = UNCANCELABLE
+            )
+            OperationResult.success(Unit)
+        } catch (exception: IOException) {
+            Timber.d(exception)
+            OperationResult.error(newGenericIOError(exception))
+        }
+    }
+
+    @JvmStatic
     @Throws(IOException::class)
     fun copyOrThrow(
         source: InputStream,

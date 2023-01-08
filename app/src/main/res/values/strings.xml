@@ -173,6 +173,10 @@
     <string name="open_with_str">Open %s</string>
     <string name="copied">Copied!</string>
     <string name="hidden">Hidden</string>
+    <string name="files">Files</string>
+    <string name="view">View</string>
+    <string name="view_as_text">View as text</string>
+    <string name="share">Share</string>
 
     <!-- Note editor screen -->
     <string name="new_note">New note</string>

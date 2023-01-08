@@ -45,6 +45,7 @@
 
     <!-- Buttons -->
     <dimen name="borderless_icon_button_size">48dp</dimen>
+    <dimen name="medium_borderless_icon_button_size">36dp</dimen>
     <dimen name="small_borderless_icon_button_size">32dp</dimen>
     <dimen name="unlock_button_size">72dp</dimen>
 

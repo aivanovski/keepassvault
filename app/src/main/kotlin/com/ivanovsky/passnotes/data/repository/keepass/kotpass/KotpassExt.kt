@@ -11,8 +11,12 @@ import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import app.keemobile.kotpass.cryptography.EncryptedValue
 import app.keemobile.kotpass.database.KeePassDatabase
+import app.keemobile.kotpass.extensions.sha256
+import app.keemobile.kotpass.models.BinaryData
 import app.keemobile.kotpass.models.EntryValue
 import app.keemobile.kotpass.models.TimeData
+import com.ivanovsky.passnotes.data.entity.Attachment
+import okio.ByteString
 import java.time.Instant
 import java.util.Date
 import java.util.LinkedList
@@ -71,8 +75,12 @@ fun RawGroup.convertToGroup(
     )
 }
 
-fun RawEntry.convertToNote(groupUid: UUID): Note {
+fun RawEntry.convertToNote(
+    groupUid: UUID,
+    allBinaries: Map<ByteString, BinaryData>
+): Note {
     val properties = mutableListOf<Property>()
+    val attachments = mutableListOf<Attachment>()
 
     for (field in fields.entries) {
         val type = PropertyType.getByName(field.key)
@@ -87,6 +95,18 @@ fun RawEntry.convertToNote(groupUid: UUID): Note {
         )
     }
 
+    for (binary in binaries) {
+        val data = allBinaries[binary.hash] ?: continue
+
+        attachments.add(
+            Attachment(
+                hash = binary.hash.base64(),
+                name = binary.name,
+                data = data.getContent()
+            )
+        )
+    }
+
     val title = PropertyFilter.filterTitle(properties)?.value ?: EMPTY
 
     return Note(
@@ -95,7 +115,8 @@ fun RawEntry.convertToNote(groupUid: UUID): Note {
         created = Date(getCreationTime()),
         modified = Date(getModificationTime()),
         title = title,
-        properties = properties
+        properties = properties,
+        attachments = attachments
     )
 }
 
@@ -119,8 +140,11 @@ private fun RawEntry.getModificationTime(): Long {
     }
 }
 
-fun List<RawEntry>.convertToNotes(groupUid: UUID): List<Note> {
-    return map { it.convertToNote(groupUid) }
+fun List<RawEntry>.convertToNotes(
+    groupUid: UUID,
+    allBinaries: Map<ByteString, BinaryData>
+): List<Note> {
+    return map { it.convertToNote(groupUid, allBinaries) }
 }
 
 fun Property.convertToEntryValue(): EntryValue {
@@ -160,6 +184,7 @@ fun Note.convertToEntry(): RawEntry {
             lastAccessTime = null,
             locationChanged = null,
             expiryTime = null
-        )
+        ),
+        binaries = emptyList() // TODO: binary data should be inserted in db before
     )
 }

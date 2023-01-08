@@ -25,6 +25,7 @@ import com.ivanovsky.passnotes.extensions.NoteExtKt;
 import com.ivanovsky.passnotes.extensions.SimpleDatabaseExtensionsKt;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -163,7 +164,7 @@ public class KeepassJavaNoteDao implements NoteDao {
             }
         }
 
-        return new Note(uid, groupUid, created, modified, title, properties);
+        return new Note(uid, groupUid, created, modified, title, properties, Collections.emptyList());
     }
 
     private Property createProperty(String name, String value, boolean isProtected) {
@@ -230,7 +231,8 @@ public class KeepassJavaNoteDao implements NoteDao {
                     note.getCreated(),
                     note.getModified(),
                     note.getTitle(),
-                    note.getProperties());
+                    note.getProperties(),
+                    note.getAttachments());
             contentWatcher.notifyEntryInserted(newNote);
         }
 

@@ -9,5 +9,6 @@ data class Note(
     val created: Date,
     val modified: Date,
     val title: String,
-    val properties: List<Property> = emptyList()
+    val properties: List<Property> = emptyList(),
+    val attachments: List<Attachment> = emptyList()
 ) : EncryptedDatabaseEntry

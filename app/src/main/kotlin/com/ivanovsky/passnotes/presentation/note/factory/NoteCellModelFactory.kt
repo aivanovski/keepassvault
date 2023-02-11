@@ -57,7 +57,7 @@ class NoteCellModelFactory(
         if (idsAndAttachments.isNotEmpty()) {
             models.add(
                 createHeaderCell(
-                    title = resourceProvider.getString(R.string.files)
+                    title = resourceProvider.getString(R.string.attachments)
                 )
             )
         }
@@ -140,7 +140,7 @@ class NoteCellModelFactory(
             id = null,
             title = title,
             color = resourceProvider.getColor(R.color.secondary_text),
-            isBold = true,
+            isBold = false,
             paddingHorizontal = R.dimen.double_element_margin
         )
 }

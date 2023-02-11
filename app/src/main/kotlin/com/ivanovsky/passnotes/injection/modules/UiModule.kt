@@ -117,7 +117,7 @@ object UiModule {
                     get()
                 )
             }
-            single { NoteEditorInteractor(get(), get(), get(), get()) }
+            single { NoteEditorInteractor(get(), get(), get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
             single { SearchInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }

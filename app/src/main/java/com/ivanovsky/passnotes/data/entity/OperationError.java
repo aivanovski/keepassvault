@@ -200,6 +200,12 @@ public class OperationError {
         return error;
     }
 
+    public static OperationError newErrorMessage(String message) {
+        OperationError error = new OperationError(Type.ERROR_MESSAGE);
+        error.message = message;
+        return error;
+    }
+
     public enum Type {
         GENERIC_ERROR,
         DB_AUTH_ERROR,
@@ -213,7 +219,8 @@ public class OperationError {
         NETWORK_IO_ERROR,
         FILE_IS_ALREADY_EXISTS,
         CACHE_ERROR, // inconsistent cached data,
-        REMOTE_API_ERROR
+        REMOTE_API_ERROR,
+        ERROR_MESSAGE // not important error that can be ignored
     }
 
     //TODO: remove unnecessary constructors and refactor

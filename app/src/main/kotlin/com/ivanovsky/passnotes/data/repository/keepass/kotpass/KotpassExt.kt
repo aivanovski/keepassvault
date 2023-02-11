@@ -11,11 +11,14 @@ import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import app.keemobile.kotpass.cryptography.EncryptedValue
 import app.keemobile.kotpass.database.KeePassDatabase
-import app.keemobile.kotpass.extensions.sha256
 import app.keemobile.kotpass.models.BinaryData
+import app.keemobile.kotpass.models.BinaryReference
 import app.keemobile.kotpass.models.EntryValue
 import app.keemobile.kotpass.models.TimeData
 import com.ivanovsky.passnotes.data.entity.Attachment
+import com.ivanovsky.passnotes.data.entity.Hash
+import com.ivanovsky.passnotes.data.entity.HashType
+import com.ivanovsky.passnotes.extensions.toByteString
 import okio.ByteString
 import java.time.Instant
 import java.util.Date
@@ -100,8 +103,9 @@ fun RawEntry.convertToNote(
 
         attachments.add(
             Attachment(
-                hash = binary.hash.base64(),
+                uid = binary.hash.base64(),
                 name = binary.name,
+                hash = Hash(binary.hash.toByteArray(), HashType.SHA_256),
                 data = data.getContent()
             )
         )
@@ -175,6 +179,8 @@ fun Note.convertToEntry(): RawEntry {
         Pair(name, property.convertToEntryValue())
     }
 
+    val binaries = attachments.map { attachment -> attachment.convertToBinaryReference() }
+
     return RawEntry(
         uuid = uid ?: throw IllegalStateException(),
         fields = fields,
@@ -185,6 +191,20 @@ fun Note.convertToEntry(): RawEntry {
             locationChanged = null,
             expiryTime = null
         ),
-        binaries = emptyList() // TODO: binary data should be inserted in db before
+        binaries = binaries
+    )
+}
+
+fun Attachment.convertToBinaryReference(): BinaryReference {
+    return BinaryReference(
+        hash = hash.toByteString(),
+        name = name
+    )
+}
+
+fun Attachment.convertToBinaryData(): BinaryData {
+    return BinaryData.Uncompressed(
+        memoryProtection = false,
+        rawContent = data
     )
 }

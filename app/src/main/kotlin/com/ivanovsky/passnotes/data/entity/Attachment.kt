@@ -1,8 +1,9 @@
 package com.ivanovsky.passnotes.data.entity
 
 data class Attachment(
-    val hash: String,
+    val uid: String,
     val name: String,
+    val hash: Hash,
     val data: ByteArray
 ) {
     override fun equals(other: Any?): Boolean {
@@ -11,16 +12,18 @@ data class Attachment(
 
         other as Attachment
 
-        if (hash != other.hash) return false
+        if (uid != other.uid) return false
         if (name != other.name) return false
+        if (hash != other.hash) return false
         if (!data.contentEquals(other.data)) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = hash.hashCode()
+        var result = uid.hashCode()
         result = 31 * result + name.hashCode()
+        result = 31 * result + hash.hashCode()
         result = 31 * result + data.contentHashCode()
         return result
     }

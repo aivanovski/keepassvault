@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.AttachmentCellViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/name"
+            style="@style/Material.PrimaryText.SingleLine"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/group_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:text="@{viewModel.model.name}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="id-rsa.pub" />
+
+        <TextView
+            android:id="@+id/size"
+            style="@style/Material.SecondaryText.SingleLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:text="@{viewModel.model.size}"
+            app:layout_constraintBottom_toBottomOf="@id/name"
+            app:layout_constraintEnd_toStartOf="@id/removeButton"
+            app:layout_constraintStart_toEndOf="@id/name"
+            app:layout_constraintTop_toTopOf="@id/name"
+            tools:text="1.2 kB" />
+
+        <ImageButton
+            android:id="@+id/removeButton"
+            style="@style/Material.MediumBorderlessButton.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/quarter_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:onClick="@{() -> viewModel.onRemoveClicked()}"
+            android:src="@drawable/ic_delete_red_400_24dp"
+            android:tint="@color/icon_gray"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

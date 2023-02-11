@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:paddingVertical="@dimen/half_margin"
+        android:paddingVertical="@dimen/half_group_margin"
         android:paddingStart="@{viewModel.paddingHorizontal}"
         android:paddingEnd="@{viewModel.paddingHorizontal}"
         android:text="@{viewModel.model.title}"

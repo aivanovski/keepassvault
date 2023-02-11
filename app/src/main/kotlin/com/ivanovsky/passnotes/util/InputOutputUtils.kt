@@ -153,4 +153,23 @@ object InputOutputUtils {
             Timber.d(e)
         }
     }
+
+    @JvmStatic
+    fun readAllBytes(
+        source: InputStream,
+        isCloseOnFinish: Boolean
+    ): OperationResult<ByteArray> {
+        return try {
+            val bytes = source.readBytes()
+
+            if (isCloseOnFinish) {
+                close(source)
+            }
+
+            OperationResult.success(bytes)
+        } catch (e: IOException) {
+            Timber.e(e)
+            OperationResult.error(newGenericIOError(e))
+        }
+    }
 }

@@ -1,0 +1,3 @@
+- Add attachments handling
+- Refactor Note screen
+- Bugfix

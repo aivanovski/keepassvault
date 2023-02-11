@@ -18,6 +18,7 @@ Another Android client app for KeePass databases.
 - Dynamic templates (compatible with other android applications: [KeePassDX](https://github.com/Kunzisoft/KeePassDX), [keepass2android](https://github.com/PhilippC/keepass2android))
 - Biometric unlock
 - Autofill for Android >= 8.0
+- Attachments handling
 - Fuzzy search
 
 # License

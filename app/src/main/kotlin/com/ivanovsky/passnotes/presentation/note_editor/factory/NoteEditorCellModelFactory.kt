@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.note_editor.factory
 
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
@@ -10,6 +11,7 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.entity.PropertyMap
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.core.model.HeaderCellModel
 import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel.CellId
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedTextPropertyCellModel
@@ -19,6 +21,8 @@ import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines.MULTIPLE_LINES
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines.SINGLE_LINE
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
+import com.ivanovsky.passnotes.presentation.note_editor.cells.model.AttachmentCellModel
+import com.ivanovsky.passnotes.util.StringUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toCleanString
 import java.util.UUID
@@ -66,7 +70,8 @@ class NoteEditorCellModelFactory(
         return createModels(
             uid = null,
             title = EMPTY,
-            properties = properties
+            properties = properties,
+            attachments = emptyList()
         )
     }
 
@@ -79,13 +84,13 @@ class NoteEditorCellModelFactory(
                 createModelsForNoteWithTemplate(note, template)
             }
             else -> {
-                createModels(note.uid, note.title, note.properties)
+                createModels(note.uid, note.title, note.properties, note.attachments)
             }
         }
     }
 
-    fun createCustomPropertyModels(type: PropertyType?): List<BaseCellModel> {
-        val cellModel = when (type) {
+    fun createCustomPropertyModels(type: PropertyType?): BaseCellModel {
+        return when (type) {
             PropertyType.TITLE,
             PropertyType.PASSWORD,
             PropertyType.USER_NAME,
@@ -100,7 +105,6 @@ class NoteEditorCellModelFactory(
                 inputType = TextInputType.TEXT
             )
         }
-        return listOf(cellModel, createSpaceCell())
     }
 
     private fun isTemplateNote(note: Note): Boolean {
@@ -218,7 +222,12 @@ class NoteEditorCellModelFactory(
         return models
     }
 
-    private fun createModels(uid: UUID?, title: String, properties: List<Property>): List<BaseCellModel> {
+    private fun createModels(
+        uid: UUID?,
+        title: String,
+        properties: List<Property>,
+        attachments: List<Attachment>
+    ): List<BaseCellModel> {
         val models = mutableListOf<BaseCellModel>()
 
         val visibleProperties = PropertyMap.mapByType(
@@ -265,6 +274,14 @@ class NoteEditorCellModelFactory(
             )
         }
 
+        if (attachments.isNotEmpty()) {
+            models.add(createAttachmentHeaderCell())
+        }
+
+        for (attachment in attachments) {
+            models.add(createAttachmentCell(attachment))
+        }
+
         models.add(createSpaceCell())
 
         return models
@@ -284,8 +301,33 @@ class NoteEditorCellModelFactory(
         }
     }
 
-    private fun createSpaceCell(): BaseCellModel {
+    fun createSpaceCell(): BaseCellModel {
         return SpaceCellModel(R.dimen.huge_margin)
+    }
+
+    fun createAttachmentCell(attachment: Attachment): BaseCellModel {
+        return AttachmentCellModel(
+            id = attachment.uid,
+            name = attachment.name,
+            size = StringUtils.formatFileSize(attachment.data.size.toLong()),
+        )
+    }
+
+    fun createAttachmentHeaderCell(): BaseCellModel {
+        return createHeaderCell(
+            id = CellId.ATTACHMENT_HEADER,
+            title = resourceProvider.getString(R.string.attachments)
+        )
+    }
+
+    private fun createHeaderCell(id: String, title: String): BaseCellModel {
+        return HeaderCellModel(
+            id = id,
+            title = title,
+            color = resourceProvider.getColor(R.color.secondary_text),
+            isBold = false,
+            paddingHorizontal = R.dimen.element_margin
+        )
     }
 
     private fun createTitleCell(title: String): TextPropertyCellModel {

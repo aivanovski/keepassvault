@@ -1,19 +1,12 @@
 package com.ivanovsky.passnotes.domain
 
+import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.*
+import java.util.LinkedList
 
 class NoteDiffer {
-
-    enum class NoteField {
-        UID,
-        GROUP_UID,
-        CREATED,
-        MODIFIED,
-        TITLE,
-        PROPERTIES
-    }
 
     fun isEqualsByFields(lhs: Note, rhs: Note, fields: List<NoteField>): Boolean {
         for (field in fields) {
@@ -24,6 +17,7 @@ class NoteDiffer {
                 MODIFIED -> isModifiedEquals(lhs, rhs)
                 TITLE -> isTitleEquals(lhs, rhs)
                 PROPERTIES -> isPropertiesEquals(lhs, rhs)
+                ATTACHMENTS -> isAttachmentsEqual(lhs, rhs)
             }
 
             if (!isEquals) {
@@ -32,6 +26,53 @@ class NoteDiffer {
         }
 
         return true
+    }
+
+    fun getAttachmentsDiff(lhs: Note, rhs: Note): List<Pair<DiffAction, Attachment>> {
+        val lhsUids = lhs.attachments
+            .map { attachment -> attachment.uid }
+            .let { uids -> LinkedList(uids) }
+
+        val lhsUidToAttachmentMap = lhs.attachments
+            .associateBy { attachment -> attachment.uid }
+
+        val rhsUids = rhs.attachments
+            .map { attachment -> attachment.uid }
+            .toMutableList()
+
+        val rhsUidToAttachmentMap = rhs.attachments
+            .associateBy { attachment -> attachment.uid }
+
+        val diff = mutableListOf<Pair<DiffAction, Attachment>>()
+
+        while (lhsUids.isNotEmpty()) {
+            val lhsUid = lhsUids.removeFirst()
+            val attachment = lhsUidToAttachmentMap[lhsUid] ?: continue
+
+            if (lhsUid !in rhsUids) {
+                diff.add(
+                    Pair(
+                        DiffAction.REMOVE,
+                        attachment
+                    )
+                )
+            } else {
+                rhsUids.remove(lhsUid)
+            }
+        }
+
+        for (rhsUid in rhsUids) {
+            val attachment = rhsUidToAttachmentMap[rhsUid] ?: continue
+
+            diff.add(
+                Pair(
+                    DiffAction.INSERT,
+                    attachment
+                )
+            )
+        }
+
+        return diff
     }
 
     private fun isUidEquals(lhs: Note, rhs: Note): Boolean {
@@ -88,7 +129,34 @@ class NoteDiffer {
         return true
     }
 
+    private fun isAttachmentsEqual(lhs: Note, rhs: Note): Boolean {
+        if (lhs.attachments.size != rhs.attachments.size) {
+            return false
+        }
+
+        val lhsUids = lhs.attachments.map { it.uid }
+        val rhsUids = rhs.attachments.map { it.uid }
+
+        return lhsUids == rhsUids
+    }
+
+    enum class NoteField {
+        UID,
+        GROUP_UID,
+        CREATED,
+        MODIFIED,
+        TITLE,
+        PROPERTIES,
+        ATTACHMENTS
+    }
+
+    enum class DiffAction {
+        INSERT,
+        REMOVE
+    }
+
     companion object {
-        val ALL_FIELDS_WITHOUT_MODIFIED = listOf(UID, GROUP_UID, CREATED, TITLE, PROPERTIES)
+        val ALL_FIELDS_WITHOUT_MODIFIED =
+            listOf(UID, GROUP_UID, CREATED, TITLE, PROPERTIES, ATTACHMENTS)
     }
 }

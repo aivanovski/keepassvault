@@ -173,6 +173,12 @@
     <string name="open_with_str">Open %s</string>
     <string name="copied">Copied!</string>
     <string name="hidden">Hidden</string>
+    <string name="attachments">Attachments</string>
+    <string name="attachment">Attachment</string>
+    <string name="file_lower">file</string>
+    <string name="view">View</string>
+    <string name="view_as_text">View as text</string>
+    <string name="share">Share</string>
 
     <!-- Note editor screen -->
     <string name="new_note">New note</string>
@@ -193,8 +199,9 @@
     <string name="discard_changes">Discard changes?</string>
     <string name="discard">Discard</string>
     <string name="cancel">Cancel</string>
-    <string name="choose_property_type">Choose property type</string>
-    <string name="custom">Custom</string>
+    <string name="select_item_to_add">Select item to add</string>
+    <string name="custom_property">Custom property</string>
+    <string name="file_is_already_added_with_value">File \'%s\' is already added</string>
 
     <!-- Password generator screen -->
     <string name="generate_password">Generate password</string>

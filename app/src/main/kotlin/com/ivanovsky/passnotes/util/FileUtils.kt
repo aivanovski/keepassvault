@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.util
 
+import android.webkit.MimeTypeMap
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
@@ -14,6 +15,7 @@ object FileUtils {
     const val ROOT_PATH = "/"
     const val SEPARATOR = "/"
     const val DEFAULT_DB_NAME = "database.kdbx"
+    const val MIME_TYPE_TEXT = "text/plain"
 
     @JvmStatic
     fun removeSeparatorIfNeed(path: String): String {
@@ -62,6 +64,21 @@ object FileUtils {
         } else {
             ""
         }
+    }
+
+    fun getMimeTypeFromName(name: String): String? {
+        val extension = getExtensionFromName(name) ?: return null
+
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+    }
+
+    private fun getExtensionFromName(name: String): String? {
+        val lastPointIdx = name.lastIndexOf('.')
+        if (lastPointIdx < 0 || lastPointIdx == name.length - 1) {
+            return null
+        }
+
+        return name.substring(lastPointIdx + 1)
     }
 
     @JvmStatic

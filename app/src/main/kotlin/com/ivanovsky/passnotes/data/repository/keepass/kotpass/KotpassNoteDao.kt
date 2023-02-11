@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.keepass.kotpass
 
+import app.keemobile.kotpass.database.KeePassDatabase
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_NOT_FOUND
@@ -13,8 +14,16 @@ import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.extensions.matches
 import app.keemobile.kotpass.database.getEntry
+import app.keemobile.kotpass.database.modifiers.binaries
+import app.keemobile.kotpass.database.modifiers.modifyBinaries
 import app.keemobile.kotpass.database.modifiers.modifyGroup
 import app.keemobile.kotpass.database.modifiers.removeEntry
+import com.ivanovsky.passnotes.data.entity.Attachment
+import com.ivanovsky.passnotes.data.entity.Hash
+import com.ivanovsky.passnotes.data.entity.HashType
+import com.ivanovsky.passnotes.domain.NoteDiffer
+import com.ivanovsky.passnotes.domain.NoteDiffer.DiffAction
+import com.ivanovsky.passnotes.extensions.toByteString
 import java.util.UUID
 import kotlin.concurrent.withLock
 
@@ -23,6 +32,7 @@ class KotpassNoteDao(
 ) : NoteDao {
 
     private val watcher = ContentWatcher<Note>()
+    private val differ = NoteDiffer()
 
     override fun getContentWatcher(): ContentWatcher<Note> = watcher
 
@@ -31,7 +41,10 @@ class KotpassNoteDao(
             val root = db.getRawRootGroup()
 
             val allNotes = db.collectEntries(root) { rawGroup, rawGroupEntries ->
-                rawGroupEntries.convertToNotes(rawGroup.uuid)
+                rawGroupEntries.convertToNotes(
+                    groupUid = rawGroup.uuid,
+                    allBinaries = db.getRawDatabase().binaries
+                )
             }
 
             OperationResult.success(allNotes)
@@ -48,7 +61,8 @@ class KotpassNoteDao(
             val rawGroup = getGroupResult.obj
             return@withLock OperationResult.success(
                 rawGroup.entries.convertToNotes(
-                    groupUid = rawGroup.uuid
+                    groupUid = rawGroup.uuid,
+                    allBinaries = db.getRawDatabase().binaries
                 )
             )
         }
@@ -71,7 +85,8 @@ class KotpassNoteDao(
 
             OperationResult.success(
                 rawEntry.convertToNote(
-                    groupUid = rawGroup.uuid
+                    groupUid = rawGroup.uuid,
+                    allBinaries = db.getRawDatabase().binaries
                 )
             )
         }
@@ -161,8 +176,42 @@ class KotpassNoteDao(
                 return@withLock OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE))
             }
 
-            val newRawDatabase = if (isInTheSameGroup) {
-                db.getRawDatabase().modifyGroup(newNote.groupUid) {
+            var newDb = db.getRawDatabase()
+
+            val getAllNotes = all
+            if (getAllNotes.isFailed) {
+                return@withLock getAllNotes.mapError()
+            }
+
+            val attachmentsDiff = differ.getAttachmentsDiff(oldNote, newNote)
+            if (attachmentsDiff.isNotEmpty()) {
+                val toInsert = attachmentsDiff
+                    .mapNotNull { (action, attachment) ->
+                        if (action == DiffAction.INSERT) {
+                            attachment
+                        } else {
+                            null
+                        }
+                    }
+
+                val toRemove = attachmentsDiff
+                    .mapNotNull { (action, attachment) ->
+                        if (action == DiffAction.REMOVE) {
+                            attachment
+                        } else {
+                            null
+                        }
+                    }
+
+                newDb = modifyBinaries(
+                    noteUid = oldNote.uid,
+                    toInsert = toInsert,
+                    toRemove = toRemove
+                )
+            }
+
+            if (isInTheSameGroup) {
+                newDb = newDb.modifyGroup(newNote.groupUid) {
                     copy(
                         entries = entries.toMutableList()
                             .apply {
@@ -176,7 +225,7 @@ class KotpassNoteDao(
                     return@withLock getNewGroupResult.mapError()
                 }
 
-                val dbWithoutNote = db.getRawDatabase().modifyGroup(oldNote.groupUid) {
+                newDb = newDb.modifyGroup(oldNote.groupUid) {
                     copy(
                         entries = entries.toMutableList()
                             .apply {
@@ -185,7 +234,7 @@ class KotpassNoteDao(
                     )
                 }
 
-                dbWithoutNote.modifyGroup(newNote.groupUid) {
+                newDb = newDb.modifyGroup(newNote.groupUid) {
                     copy(
                         entries = entries.toMutableList()
                             .apply {
@@ -195,7 +244,7 @@ class KotpassNoteDao(
                 }
             }
 
-            db.swapDatabase(newRawDatabase)
+            db.swapDatabase(newDb)
 
             db.commit().mapWithObject(noteUid)
         }
@@ -263,7 +312,17 @@ class KotpassNoteDao(
 
             val newEntries = rawGroup.entries.plus(rawEntry)
 
-            val newDb = db.getRawDatabase().modifyGroup(newNote.groupUid) {
+            var newDb = db.getRawDatabase()
+
+            if (note.attachments.isNotEmpty()) {
+                newDb = modifyBinaries(
+                    noteUid = null,
+                    toInsert = note.attachments,
+                    toRemove = emptyList()
+                )
+            }
+
+            newDb = newDb.modifyGroup(newNote.groupUid) {
                 copy(
                     entries = newEntries
                 )
@@ -283,5 +342,52 @@ class KotpassNoteDao(
         }
 
         return result
+    }
+
+    private fun modifyBinaries(
+        noteUid: UUID?,
+        toInsert: List<Attachment>,
+        toRemove: List<Attachment>
+    ): KeePassDatabase {
+        val root = db.getRawRootGroup()
+        val allEntries = db.collectEntries(root) { _, entries ->
+            entries.filter { entry -> entry.uuid != noteUid }
+        }
+
+        val removeSet = toRemove
+            .map { attachment -> attachment.hash.toByteString() }
+            .toSet()
+
+        val skip = mutableSetOf<Hash>()
+
+        for (entry in allEntries) {
+            for (binary in entry.binaries) {
+                if (binary.hash in removeSet) {
+                    skip.add(Hash(binary.hash.toByteArray(), HashType.SHA_256))
+                }
+            }
+        }
+
+        return db.getRawDatabase().modifyBinaries {
+            val binaryMap = it.toMutableMap()
+
+            for (attachment in toInsert) {
+                val key = attachment.hash.toByteString()
+                if (!binaryMap.containsKey(key)) {
+                    binaryMap[key] = attachment.convertToBinaryData()
+                }
+            }
+
+            for (attachment in toRemove) {
+                if (attachment.hash in skip) {
+                    continue
+                }
+
+                val key = attachment.hash.toByteString()
+                binaryMap.remove(key)
+            }
+
+            binaryMap
+        }
     }
 }

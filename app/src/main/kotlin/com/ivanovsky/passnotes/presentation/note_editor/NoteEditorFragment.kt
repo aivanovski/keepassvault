@@ -16,7 +16,7 @@ import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.*
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel.AddPropertyDialogItem
+import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel.AddDialogItem
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -104,8 +104,8 @@ class NoteEditorFragment : FragmentWithDoneButton() {
         viewModel.showDiscardDialogEvent.observe(viewLifecycleOwner) { message ->
             showDiscardDialog(message)
         }
-        viewModel.showAddPropertyDialogEvent.observe(viewLifecycleOwner) { items ->
-            showAddPropertyDialog(items)
+        viewModel.showAddDialogEvent.observe(viewLifecycleOwner) { items ->
+            showAddItemDialog(items)
         }
         viewModel.showToastEvent.observe(viewLifecycleOwner) { message ->
             showToastMessage(message)
@@ -136,18 +136,18 @@ class NoteEditorFragment : FragmentWithDoneButton() {
         dialog.show(childFragmentManager, ConfirmationDialog.TAG)
     }
 
-    private fun showAddPropertyDialog(items: List<Pair<AddPropertyDialogItem, String>>) {
+    private fun showAddItemDialog(items: List<Pair<AddDialogItem, String>>) {
         val entries = items.map { it.second }
 
         val dialog = ChooseOptionDialog.newInstance(
             getString(
                 R.string.text_with_colon,
-                getString(R.string.choose_property_type)
+                getString(R.string.select_item_to_add)
             ),
             entries
         )
         dialog.onItemClickListener = { itemIdx ->
-            viewModel.onAddPropertyClicked(items[itemIdx].first)
+            viewModel.onAddDialogItemSelected(items[itemIdx].first)
         }
         dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
     }

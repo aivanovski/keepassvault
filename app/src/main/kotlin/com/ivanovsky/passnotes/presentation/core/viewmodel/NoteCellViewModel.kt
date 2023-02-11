@@ -20,6 +20,7 @@ class NoteCellViewModel(
     val description = formatDescription(model.note)
     val date = model.note.modified.formatAccordingLocale(localeProvider.getSystemLocale())
     val isDescriptionVisible = description.isNotEmpty()
+    val isAttachmentIconVisible = model.note.attachments.isNotEmpty()
     val maxTitleLine = if (description.isNotEmpty()) {
         TITLE_MAX_LINES_WITH_DESCRIPTION
     } else {

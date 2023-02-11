@@ -82,12 +82,12 @@ class LoggerInteractor(
     }
 
     private fun getAllLogFiles(): List<File> {
-        val files = fileHelper.filesDir.listFiles()?.toList() ?: emptyList()
+        val files = fileHelper.filesDir?.listFiles()?.toList() ?: emptyList()
         return files.filter { file -> LOG_FILE_PATTERN.matcher(file.name).matches() }
     }
 
     private fun getFilesToDelete(): List<File> {
-        val files = fileHelper.filesDir.listFiles()?.toList() ?: emptyList()
+        val files = fileHelper.filesDir?.listFiles()?.toList() ?: emptyList()
         return files.filter { it.name.startsWith(LOG_FILE_NAME) }
     }
 

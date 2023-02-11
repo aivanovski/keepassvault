@@ -2,19 +2,26 @@ package com.ivanovsky.passnotes.domain.interactor.note
 
 import android.os.Handler
 import android.os.Looper
+import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.ClipboardHelper
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.usecases.CheckNoteAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
+import com.ivanovsky.passnotes.extensions.getOrThrow
+import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
+import com.ivanovsky.passnotes.util.InputOutputUtils
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayInputStream
+import java.io.File
 import java.util.UUID
 
 class NoteInteractor(
@@ -25,14 +32,34 @@ class NoteInteractor(
     private val autofillUseCase: UpdateNoteWithAutofillDataUseCase,
     private val checkNoteAutofillDataUseCase: CheckNoteAutofillDataUseCase,
     private val settings: Settings,
+    private val fileHelper: FileHelper,
     private val dispatchers: DispatcherProvider
 ) {
+
+    suspend fun saveAttachmentToStorage(attachment: Attachment): OperationResult<File> =
+        withContext(dispatchers.IO) {
+            val generateDirResult = fileHelper.generateDestinationDirectoryForSharedFile()
+            if (generateDirResult.isFailed) {
+                return@withContext generateDirResult.mapError()
+            }
+
+            val outDir = generateDirResult.getOrThrow()
+            val outFile = File(outDir, attachment.name)
+
+            val source = ByteArrayInputStream(attachment.data)
+            val copyResult = InputOutputUtils.copy(source, outFile)
+            if (copyResult.isFailed) {
+                return@withContext copyResult.mapError()
+            }
+
+            OperationResult.success(outFile)
+        }
 
     suspend fun getNoteByUid(noteUid: UUID): OperationResult<Note> =
         withContext(dispatchers.IO) {
             val getDbResult = getDbUseCase.getDatabaseSynchronously()
             if (getDbResult.isFailed) {
-                return@withContext getDbResult.takeError()
+                return@withContext getDbResult.mapError()
             }
 
             val db = getDbResult.obj

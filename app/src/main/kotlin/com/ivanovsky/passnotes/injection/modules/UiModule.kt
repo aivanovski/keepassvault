@@ -99,7 +99,7 @@ object UiModule {
             single { NewDatabaseInteractor(get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get()) }
             single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
-            single { NoteInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
+            single { NoteInteractor(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
             single {
                 GroupsInteractor(
                     get(),
@@ -117,7 +117,7 @@ object UiModule {
                     get()
                 )
             }
-            single { NoteEditorInteractor(get(), get(), get(), get()) }
+            single { NoteEditorInteractor(get(), get(), get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
             single { SearchInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }

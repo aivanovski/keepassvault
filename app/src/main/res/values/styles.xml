@@ -66,6 +66,16 @@
         <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
     </style>
 
+    <style name="Material.MediumBorderlessButton">
+        <item name="android:minWidth">@dimen/medium_borderless_icon_button_size</item>
+        <item name="android:minHeight">@dimen/medium_borderless_icon_button_size</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
+
+    <style name="Material.MediumBorderlessButton.Borderless">
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+    </style>
+
     <style name="Material.FloatingActionButton">
         <item name="android:minWidth">@dimen/material_fab_size</item>
         <item name="android:minHeight">@dimen/material_fab_size</item>

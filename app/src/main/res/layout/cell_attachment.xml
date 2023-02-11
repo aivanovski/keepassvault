@@ -6,11 +6,9 @@
 
     <data>
 
-        <import type="com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape" />
-
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel" />
+            type="com.ivanovsky.passnotes.presentation.note.cells.viewmodel.AttachmentCellViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -25,54 +23,48 @@
 
         <TextView
             android:id="@+id/name"
-            style="@style/Material.SecondaryText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/element_margin"
-            android:layout_marginTop="@dimen/element_margin"
-            android:layout_marginEnd="@dimen/element_margin"
-            android:text="@{viewModel.name}"
-            app:layout_constraintBottom_toTopOf="@id/value"
-            app:layout_constraintEnd_toStartOf="@id/visibilityButton"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_chainStyle="packed"
-            tools:text="User Name" />
-
-        <TextView
-            android:id="@+id/value"
             style="@style/Material.PrimaryText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/element_margin"
+            android:layout_marginTop="@dimen/half_margin"
             android:layout_marginEnd="@dimen/element_margin"
-            android:layout_marginBottom="@dimen/element_margin"
-            android:text="@{viewModel.value}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/visibilityButton"
+            android:text="@{viewModel.model.name}"
+            app:layout_constraintBottom_toTopOf="@id/size"
+            app:layout_constraintEnd_toStartOf="@id/shareButton"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="id-rsa.pub" />
+
+        <TextView
+            android:id="@+id/size"
+            style="@style/Material.SecondaryText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/half_margin"
+            android:text="@{viewModel.model.size}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/name"
+            app:layout_constraintStart_toStartOf="@id/name"
             app:layout_constraintTop_toBottomOf="@id/name"
-            app:textTransformationMethod="@{viewModel.valueTransformationMethod}"
-            tools:text="default@gmail.com" />
+            tools:text="1.2 kB" />
 
         <ImageButton
-            android:id="@+id/visibilityButton"
+            android:id="@+id/shareButton"
             style="@style/Material.MediumBorderlessButton.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/half_margin"
             android:focusable="false"
             android:focusableInTouchMode="false"
-            android:onClick="@{() -> viewModel.onVisibilityButtonClicked()}"
+            android:onClick="@{() -> viewModel.onShareButtonClicked()}"
+            android:src="@drawable/ic_share_white_24dp"
             android:tint="@color/icon_gray"
-            app:imageResourceId="@{viewModel.visibilityIconResId}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:visible="@{viewModel.isVisibilityButtonVisible}"
-            tools:src="@drawable/ic_visibility_off_24dp" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>
-

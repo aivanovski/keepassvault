@@ -5,11 +5,17 @@ import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.core.model.DividerCellModel
+import com.ivanovsky.passnotes.presentation.core.model.HeaderCellModel
 import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
+import com.ivanovsky.passnotes.presentation.note_editor.cells.model.AttachmentCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.ExtendedTextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.SecretPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.model.TextPropertyCellModel
+import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.AttachmentCellViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.ExtendedTextPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.SecretPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.TextPropertyCellViewModel
@@ -39,6 +45,18 @@ class NoteEditorCellViewModelFactory(
                 resourceProvider
             )
             is SpaceCellModel -> SpaceCellViewModel(
+                model,
+                resourceProvider
+            )
+            is AttachmentCellModel -> AttachmentCellViewModel(
+                model,
+                eventProvider
+            )
+            is DividerCellModel -> DividerCellViewModel(
+                model,
+                resourceProvider
+            )
+            is HeaderCellModel -> HeaderCellViewModel(
                 model,
                 resourceProvider
             )

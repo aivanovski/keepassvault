@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.presentation.core.binding
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.Typeface
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
@@ -379,4 +380,16 @@ fun setEnabled(
     isEnabled: Boolean?
 ) {
     view.isEnabled = isEnabled ?: false
+}
+
+@BindingAdapter("isBold")
+fun setBoldStyle(
+    textView: TextView,
+    isBold: Boolean?
+) {
+    if (isBold == true) {
+        textView.setTypeface(null, Typeface.BOLD)
+    } else {
+        textView.setTypeface(null, Typeface.NORMAL)
+    }
 }

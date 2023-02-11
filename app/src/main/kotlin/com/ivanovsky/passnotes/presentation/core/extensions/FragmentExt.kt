@@ -123,5 +123,5 @@ private fun Fragment.findViewForSnackbar(): View? {
 
 fun Fragment.openUrl(url: String) {
     val intent = IntentUtils.newOpenUrlIntent(url)
-    startActivity(Intent.createChooser(intent, ""))
+    startActivity(Intent.createChooser(intent, null))
 }

@@ -11,8 +11,15 @@ import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import app.keemobile.kotpass.cryptography.EncryptedValue
 import app.keemobile.kotpass.database.KeePassDatabase
+import app.keemobile.kotpass.models.BinaryData
+import app.keemobile.kotpass.models.BinaryReference
 import app.keemobile.kotpass.models.EntryValue
 import app.keemobile.kotpass.models.TimeData
+import com.ivanovsky.passnotes.data.entity.Attachment
+import com.ivanovsky.passnotes.data.entity.Hash
+import com.ivanovsky.passnotes.data.entity.HashType
+import com.ivanovsky.passnotes.extensions.toByteString
+import okio.ByteString
 import java.time.Instant
 import java.util.Date
 import java.util.LinkedList
@@ -71,8 +78,12 @@ fun RawGroup.convertToGroup(
     )
 }
 
-fun RawEntry.convertToNote(groupUid: UUID): Note {
+fun RawEntry.convertToNote(
+    groupUid: UUID,
+    allBinaries: Map<ByteString, BinaryData>
+): Note {
     val properties = mutableListOf<Property>()
+    val attachments = mutableListOf<Attachment>()
 
     for (field in fields.entries) {
         val type = PropertyType.getByName(field.key)
@@ -87,6 +98,19 @@ fun RawEntry.convertToNote(groupUid: UUID): Note {
         )
     }
 
+    for (binary in binaries) {
+        val data = allBinaries[binary.hash] ?: continue
+
+        attachments.add(
+            Attachment(
+                uid = binary.hash.base64(),
+                name = binary.name,
+                hash = Hash(binary.hash.toByteArray(), HashType.SHA_256),
+                data = data.getContent()
+            )
+        )
+    }
+
     val title = PropertyFilter.filterTitle(properties)?.value ?: EMPTY
 
     return Note(
@@ -95,7 +119,8 @@ fun RawEntry.convertToNote(groupUid: UUID): Note {
         created = Date(getCreationTime()),
         modified = Date(getModificationTime()),
         title = title,
-        properties = properties
+        properties = properties,
+        attachments = attachments
     )
 }
 
@@ -119,8 +144,11 @@ private fun RawEntry.getModificationTime(): Long {
     }
 }
 
-fun List<RawEntry>.convertToNotes(groupUid: UUID): List<Note> {
-    return map { it.convertToNote(groupUid) }
+fun List<RawEntry>.convertToNotes(
+    groupUid: UUID,
+    allBinaries: Map<ByteString, BinaryData>
+): List<Note> {
+    return map { it.convertToNote(groupUid, allBinaries) }
 }
 
 fun Property.convertToEntryValue(): EntryValue {
@@ -151,6 +179,8 @@ fun Note.convertToEntry(): RawEntry {
         Pair(name, property.convertToEntryValue())
     }
 
+    val binaries = attachments.map { attachment -> attachment.convertToBinaryReference() }
+
     return RawEntry(
         uuid = uid ?: throw IllegalStateException(),
         fields = fields,
@@ -160,6 +190,21 @@ fun Note.convertToEntry(): RawEntry {
             lastAccessTime = null,
             locationChanged = null,
             expiryTime = null
-        )
+        ),
+        binaries = binaries
+    )
+}
+
+fun Attachment.convertToBinaryReference(): BinaryReference {
+    return BinaryReference(
+        hash = hash.toByteString(),
+        name = name
+    )
+}
+
+fun Attachment.convertToBinaryData(): BinaryData {
+    return BinaryData.Uncompressed(
+        memoryProtection = false,
+        rawContent = data
     )
 }

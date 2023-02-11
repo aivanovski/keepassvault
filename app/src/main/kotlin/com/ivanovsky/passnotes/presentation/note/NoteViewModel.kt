@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
@@ -40,6 +41,7 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
+import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.AttachmentCellViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
@@ -52,6 +54,7 @@ import com.ivanovsky.passnotes.util.formatAccordingLocale
 import com.ivanovsky.passnotes.util.substituteAll
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
+import java.io.File
 import java.util.*
 
 class NoteViewModel(
@@ -75,6 +78,7 @@ class NoteViewModel(
         .add(DividerCellViewModel::class, R.layout.cell_divider)
         .add(SpaceCellViewModel::class, R.layout.cell_space)
         .add(HeaderCellViewModel::class, R.layout.cell_header)
+        .add(AttachmentCellViewModel::class, R.layout.cell_attachment)
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
@@ -88,8 +92,11 @@ class NoteViewModel(
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
     val showAddAutofillDataDialog = SingleLiveEvent<Note>()
     val showPropertyActionDialog = SingleLiveEvent<List<PropertyAction>>()
+    val showAttachmentActionDialog = SingleLiveEvent<List<AttachmentAction>>()
     val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
     val openUrlEvent = SingleLiveEvent<String>()
+    val shareFileEvent = SingleLiveEvent<File>()
+    val openFileEvent = SingleLiveEvent<File>()
 
     val statusViewModel = MutableLiveData(
         cellViewModelFactory.createCellViewModel(
@@ -99,6 +106,7 @@ class NoteViewModel(
     )
 
     private var cellIdToPropertyMap: Map<String, Property>? = null
+    private var cellIdToAttachmentMap: Map<String, Attachment>? = null
     private var note: Note? = null
     private var noteUid: UUID = args.noteUid
     private var isShowHiddenProperties = false
@@ -209,13 +217,16 @@ class NoteViewModel(
     fun onAddAutofillDataConfirmed(note: Note) {
         val structure = args.autofillStructure ?: return
 
-        screenState.value = ScreenState.loading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val updateNoteResult = interactor.updateNoteWithAutofillData(note, structure)
             if (updateNoteResult.isFailed) {
-                val message = errorInteractor.processAndGetMessage(updateNoteResult.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setScreenState(
+                    ScreenState.dataWithError(
+                        errorText = errorInteractor.processAndGetMessage(updateNoteResult.error)
+                    )
+                )
                 return@launch
             }
 
@@ -230,8 +241,7 @@ class NoteViewModel(
     }
 
     fun loadData() {
-        visibleMenuItems.value = getVisibleMenuItems()
-        isFabButtonVisible.value = getFabButtonVisibility()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val getNoteResult = interactor.getNoteByUid(noteUid)
@@ -240,11 +250,12 @@ class NoteViewModel(
             if (getNoteResult.isSucceededOrDeferred) {
                 onNoteLoaded(getNoteResult.getOrThrow(), getDbStatus.getOrNull())
             } else {
-                val message = errorInteractor.processAndGetMessage(getNoteResult.error)
-                screenState.value = ScreenState.error(message)
+                setScreenState(
+                    ScreenState.error(
+                        errorText = errorInteractor.processAndGetMessage(getNoteResult.error)
+                    )
+                )
             }
-
-            isFabButtonVisible.value = getFabButtonVisibility()
         }
     }
 
@@ -285,13 +296,24 @@ class NoteViewModel(
             emptyList()
         }
 
-        val visibleIdsAndProperties = pairCellIdAndProperties(visibleProperties, "visible")
-        val hiddenIdsAndProperties = pairCellIdAndProperties(hiddenProperties, "hidden")
+        val visibleIdsAndProperties = pairCellIdAndProperties(
+            visibleProperties,
+            VISIBLE_PROPERTY_CELL_ID_PREFIX
+        )
+
+        val hiddenIdsAndProperties = pairCellIdAndProperties(
+            hiddenProperties,
+            HIDDEN_PROPERTY_CELL_ID_PREFIX
+        )
         cellIdToPropertyMap = visibleIdsAndProperties.toMap() + hiddenIdsAndProperties.toMap()
 
+        val idsAndAttachments = pairCellIdAndAttachments(note.attachments)
+        cellIdToAttachmentMap = idsAndAttachments.toMap()
+
         val models = cellModelFactory.createCellModels(
-            visibleIdsAndProperties,
-            hiddenIdsAndProperties
+            visibleIdsAndProperties = visibleIdsAndProperties,
+            idsAndAttachments = idsAndAttachments,
+            hiddenIdsAndProperties = hiddenIdsAndProperties
         )
 
         setCellElements(cellViewModelFactory.createCellViewModels(models, eventProvider))
@@ -300,8 +322,7 @@ class NoteViewModel(
             updateStatusViewModel(dbStatus)
         }
 
-        screenState.value = ScreenState.data()
-        visibleMenuItems.value = getVisibleMenuItems()
+        setScreenState(ScreenState.data())
     }
 
     private fun subscribeToCellEvents() {
@@ -318,6 +339,24 @@ class NoteViewModel(
                         ?: return@subscribe
 
                     onNotePropertyLongClicked(id)
+                }
+                event.containsKey(AttachmentCellViewModel.CLICK_EVENT) -> {
+                    val id = event.getString(AttachmentCellViewModel.CLICK_EVENT)
+                        ?: return@subscribe
+
+                    onOpenAttachmentClicked(id)
+                }
+                event.containsKey(AttachmentCellViewModel.LONG_CLICK_EVENT) -> {
+                    val id = event.getString(AttachmentCellViewModel.LONG_CLICK_EVENT)
+                        ?: return@subscribe
+
+                    onAttachmentLongClicked(id)
+                }
+                event.containsKey(AttachmentCellViewModel.SHARE_ICON_CLICK_EVENT) -> {
+                    val id = event.getString(AttachmentCellViewModel.SHARE_ICON_CLICK_EVENT)
+                        ?: return@subscribe
+
+                    onShareAttachmentClicked(id)
                 }
             }
         }
@@ -405,6 +444,61 @@ class NoteViewModel(
         showPropertyActionDialog.call(options)
     }
 
+    fun onOpenAttachmentClicked(cellId: String) {
+        val attachment = cellIdToAttachmentMap?.get(cellId) ?: return
+
+        viewModelScope.launch {
+            val file = saveAttachmentAndGetFile(attachment) ?: return@launch
+
+            openFileEvent.call(file)
+            setScreenState(ScreenState.data())
+        }
+    }
+
+    fun onShareAttachmentClicked(cellId: String) {
+        val attachment = cellIdToAttachmentMap?.get(cellId) ?: return
+
+        viewModelScope.launch {
+            val file = saveAttachmentAndGetFile(attachment) ?: return@launch
+
+            shareFileEvent.call(file)
+            setScreenState(ScreenState.data())
+        }
+    }
+
+    private fun onAttachmentLongClicked(cellId: String) {
+        val attachment = cellIdToAttachmentMap?.get(cellId) ?: return
+
+        viewModelScope.launch {
+            val file = saveAttachmentAndGetFile(attachment) ?: return@launch
+
+            showAttachmentActionDialog.call(
+                listOf(
+                    AttachmentAction.OpenFile(file),
+                    AttachmentAction.OpenAsText(file),
+                    AttachmentAction.ShareFile(file)
+                )
+            )
+            setScreenState(ScreenState.data())
+        }
+    }
+
+    private suspend fun saveAttachmentAndGetFile(attachment: Attachment): File? {
+        setScreenState(ScreenState.loading())
+
+        val saveResult = interactor.saveAttachmentToStorage(attachment)
+        if (saveResult.isFailed) {
+            setScreenState(
+                ScreenState.dataWithError(
+                    errorText = errorInteractor.processAndGetMessage(saveResult.error)
+                )
+            )
+            return null
+        }
+
+        return saveResult.getOrThrow()
+    }
+
     private fun updateStatusViewModel(status: DatabaseStatus) {
         statusViewModel.value = cellViewModelFactory.createCellViewModel(
             model = statusCellModelFactory.createStatusCellModel(status),
@@ -461,6 +555,20 @@ class NoteViewModel(
         return properties.mapIndexed { idx, property -> Pair("$idPrefix-$idx", property) }
     }
 
+    private fun pairCellIdAndAttachments(
+        attachments: List<Attachment>
+    ): List<Pair<String, Attachment>> {
+        return attachments.mapIndexed { idx, attachment ->
+            Pair("$ATTACHMENT_CELL_ID_PREFIX-$idx", attachment)
+        }
+    }
+
+    private fun setScreenState(state: ScreenState) {
+        screenState.value = state
+        isFabButtonVisible.value = getFabButtonVisibility()
+        visibleMenuItems.value = getVisibleMenuItems()
+    }
+
     class Factory(private val args: NoteScreenArgs) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
@@ -490,5 +598,26 @@ class NoteViewModel(
         data class OpenUrl(
             val url: String
         ) : PropertyAction()
+    }
+
+    sealed class AttachmentAction {
+
+        data class OpenFile(
+            val file: File
+        ) : AttachmentAction()
+
+        data class OpenAsText(
+            val file: File
+        ) : AttachmentAction()
+
+        data class ShareFile(
+            val file: File
+        ) : AttachmentAction()
+    }
+
+    companion object {
+        private const val ATTACHMENT_CELL_ID_PREFIX = "attachment"
+        private const val VISIBLE_PROPERTY_CELL_ID_PREFIX = "visible"
+        private const val HIDDEN_PROPERTY_CELL_ID_PREFIX = "hidden"
     }
 }

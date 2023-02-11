@@ -73,6 +73,32 @@ object InputOutputUtils {
     }
 
     @JvmStatic
+    fun copy(
+        source: InputStream,
+        destinationFile: File
+    ): OperationResult<Unit> {
+        val destination = try {
+            FileOutputStream(destinationFile, false)
+        } catch (exception: FileNotFoundException) {
+            Timber.d(exception)
+            return OperationResult.error(newGenericIOError(exception))
+        }
+
+        return try {
+            copyOrThrow(
+                source,
+                destination,
+                isCloneOnFinish = true,
+                cancellation = UNCANCELABLE
+            )
+            OperationResult.success(Unit)
+        } catch (exception: IOException) {
+            Timber.d(exception)
+            OperationResult.error(newGenericIOError(exception))
+        }
+    }
+
+    @JvmStatic
     @Throws(IOException::class)
     fun copyOrThrow(
         source: InputStream,
@@ -125,6 +151,25 @@ object InputOutputUtils {
             closeable.close()
         } catch (e: IOException) {
             Timber.d(e)
+        }
+    }
+
+    @JvmStatic
+    fun readAllBytes(
+        source: InputStream,
+        isCloseOnFinish: Boolean
+    ): OperationResult<ByteArray> {
+        return try {
+            val bytes = source.readBytes()
+
+            if (isCloseOnFinish) {
+                close(source)
+            }
+
+            OperationResult.success(bytes)
+        } catch (e: IOException) {
+            Timber.e(e)
+            OperationResult.error(newGenericIOError(e))
         }
     }
 }

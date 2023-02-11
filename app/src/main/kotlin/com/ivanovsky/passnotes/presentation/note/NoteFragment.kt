@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.note
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -29,10 +30,14 @@ import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
+import com.ivanovsky.passnotes.presentation.note.NoteViewModel.AttachmentAction
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel.NoteMenuItem
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel.PropertyAction
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
+import com.ivanovsky.passnotes.util.FileUtils
+import com.ivanovsky.passnotes.util.IntentUtils
 import com.ivanovsky.passnotes.util.StringUtils
+import java.io.File
 
 class NoteFragment : BaseFragment() {
 
@@ -178,6 +183,15 @@ class NoteFragment : BaseFragment() {
         viewModel.openUrlEvent.observe(viewLifecycleOwner) { url ->
             openUrl(url)
         }
+        viewModel.shareFileEvent.observe(viewLifecycleOwner) { file ->
+            shareFile(file)
+        }
+        viewModel.openFileEvent.observe(viewLifecycleOwner) { file ->
+            openFile(file)
+        }
+        viewModel.showAttachmentActionDialog.observe(viewLifecycleOwner) { actions ->
+            showAttachmentActionDialog(actions)
+        }
     }
 
     private fun showAddAutofillDataDialog(note: Note) {
@@ -205,6 +219,56 @@ class NoteFragment : BaseFragment() {
             entries = entries
         ).apply {
             onItemClickListener = { idx -> viewModel.onPropertyActionClicked(actions[idx]) }
+        }
+
+        dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
+    }
+
+    private fun shareFile(file: File) {
+        val intent = IntentUtils.newShareFileIntent(requireContext(), file)
+        startActivity(Intent.createChooser(intent, null))
+    }
+
+    private fun openFile(file: File) {
+        val intent = IntentUtils.newViewFileIntent(requireContext(), file)
+        startActivity(Intent.createChooser(intent, null))
+    }
+
+    private fun openAsText(file: File) {
+        val intent = IntentUtils.newViewFileIntent(
+            requireContext(),
+            file,
+            mimeType = FileUtils.MIME_TYPE_TEXT
+        )
+        startActivity(Intent.createChooser(intent, null))
+    }
+
+    private fun showAttachmentActionDialog(actions: List<AttachmentAction>) {
+        val entries = actions.map { action ->
+            when (action) {
+                is AttachmentAction.OpenFile -> getString(R.string.view)
+                is AttachmentAction.OpenAsText -> getString(R.string.view_as_text)
+                is AttachmentAction.ShareFile -> getString(R.string.share)
+            }
+        }
+
+        val dialog = ChooseOptionDialog.newInstance(
+            title = null,
+            entries = entries
+        ).apply {
+            onItemClickListener = { idx ->
+                when (val action = actions[idx]) {
+                    is AttachmentAction.OpenFile -> {
+                        openFile(action.file)
+                    }
+                    is AttachmentAction.OpenAsText -> {
+                        openAsText(action.file)
+                    }
+                    is AttachmentAction.ShareFile -> {
+                        shareFile(action.file)
+                    }
+                }
+            }
         }
 
         dialog.show(childFragmentManager, ChooseOptionDialog.TAG)

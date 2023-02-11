@@ -40,10 +40,22 @@
             android:layout_margin="@dimen/half_margin"
             android:maxLines="@{viewModel.maxTitleLine}"
             android:text="@{viewModel.title}"
-            app:layout_constraintEnd_toEndOf="@id/guidelineEnd"
+            app:layout_constraintEnd_toStartOf="@id/attachmentIcon"
             app:layout_constraintStart_toEndOf="@id/guidelineStart"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Title" />
+
+        <ImageView
+            android:id="@+id/attachmentIcon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_attach_file_white_24dp"
+            app:layout_constraintBottom_toBottomOf="@id/title"
+            app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+            app:layout_constraintTop_toTopOf="@id/title"
+            app:tint="@color/icon_gray"
+            app:visible="@{viewModel.isAttachmentIconVisible}"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/description"
@@ -51,10 +63,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/quarter_margin"
+            android:layout_marginEnd="@dimen/half_margin"
             android:text="@{viewModel.description}"
             app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
             app:layout_constraintStart_toStartOf="@id/title"
-            app:layout_constraintTop_toBottomOf="@+id/title"
+            app:layout_constraintTop_toBottomOf="@id/title"
             app:visible="@{viewModel.isDescriptionVisible}"
             tools:text="username"
             tools:visibility="visible" />
@@ -69,7 +82,7 @@
             android:text="@{viewModel.date}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
-            app:layout_constraintTop_toBottomOf="@+id/description"
+            app:layout_constraintTop_toBottomOf="@id/description"
             tools:text="30 july 18:06" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

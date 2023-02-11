@@ -55,6 +55,7 @@ public class OperationError {
     public static final String MESSAGE_FAILED_TO_DECODE_DATA = "Failed to decode data";
     public static final String MESSAGE_INVALID_PASSWORD = "Invalid password";
     public static final String MESSAGE_INVALID_KEY_FILE = "Invalid key file";
+    public static final String MESSAGE_FAILED_TO_CREATE_A_DIRECTORY = "Failed to create a directory";
 
     public static final String GENERIC_MESSAGE_NOT_FOUND = "%s not found";
     public static final String GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST = "Group '%s' already exists";
@@ -199,6 +200,12 @@ public class OperationError {
         return error;
     }
 
+    public static OperationError newErrorMessage(String message) {
+        OperationError error = new OperationError(Type.ERROR_MESSAGE);
+        error.message = message;
+        return error;
+    }
+
     public enum Type {
         GENERIC_ERROR,
         DB_AUTH_ERROR,
@@ -212,7 +219,8 @@ public class OperationError {
         NETWORK_IO_ERROR,
         FILE_IS_ALREADY_EXISTS,
         CACHE_ERROR, // inconsistent cached data,
-        REMOTE_API_ERROR
+        REMOTE_API_ERROR,
+        ERROR_MESSAGE // not important error that can be ignored
     }
 
     //TODO: remove unnecessary constructors and refactor

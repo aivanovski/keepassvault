@@ -163,7 +163,7 @@ def timberVersion = '5.0.1'
 def treessenceVersion = '1.0.5'
 def keepassJavaVersion = '2.1.4'
 def kotpassVersion = '0.4.10'
-def fuzzywuzzyVersion = '1.4.0'
+def fzf4jVersion = '0.2.1'
 def jgitVersion = '6.2.0.202206071550-r'
 
 // Test
@@ -260,5 +260,5 @@ dependencies {
     implementation "com.github.anvell:kotpass:$kotpassVersion"
 
     // Fuzzy search
-    implementation "me.xdrop:fuzzywuzzy:$fuzzywuzzyVersion"
+    implementation "com.github.aivanovski:fzf4j:$fzf4jVersion"
 }

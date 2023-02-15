@@ -1,12 +1,14 @@
 package com.ivanovsky.passnotes.domain.interactor.search
 
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
-import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.SearchType
+import com.ivanovsky.passnotes.domain.search.EntryMatcher
+import com.ivanovsky.passnotes.domain.search.Fzf4jFuzzyEntryMatcher
+import com.ivanovsky.passnotes.domain.search.StrictEntryMatcher
 import com.ivanovsky.passnotes.domain.usecases.CheckNoteAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
@@ -14,10 +16,8 @@ import com.ivanovsky.passnotes.domain.usecases.GetNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
 import com.ivanovsky.passnotes.extensions.mapError
-import com.ivanovsky.passnotes.extensions.matches
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import kotlinx.coroutines.withContext
-import me.xdrop.fuzzywuzzy.FuzzySearch
 import java.util.UUID
 
 class SearchInteractor(
@@ -30,6 +30,9 @@ class SearchInteractor(
     private val sortUseCase: SortGroupsAndNotesUseCase,
     private val settings: Settings
 ) {
+
+    private val strictMatcher: EntryMatcher = StrictEntryMatcher()
+    private val fuzzyMatcher: EntryMatcher = Fzf4jFuzzyEntryMatcher()
 
     suspend fun loadAllData(
         isRespectAutotypeProperty: Boolean
@@ -100,17 +103,16 @@ class SearchInteractor(
         return withContext(dispatchers.IO) {
             when (settings.searchType) {
                 SearchType.FUZZY -> {
-                    FuzzySearch.extractSorted(query, data) { it.formatForFuzzySearch() }
-                        .map { it.referent }
+                    fuzzyMatcher.match(
+                        query = query,
+                        entries = data
+                    )
                 }
                 SearchType.STRICT -> {
-                    data.filter { item ->
-                        when (item) {
-                            is Note -> item.matches(query)
-                            is Group -> item.matches(query)
-                            else -> false
-                        }
-                    }
+                    strictMatcher.match(
+                        query = query,
+                        entries = data
+                    )
                 }
             }
         }
@@ -133,26 +135,5 @@ class SearchInteractor(
 
     fun lockDatabase() {
         lockUseCase.lockIfNeed()
-    }
-
-    private fun EncryptedDatabaseEntry.formatForFuzzySearch(): String {
-        return when (this) {
-            is Note -> {
-                val words = mutableListOf<String>()
-
-                for (property in properties) {
-                    if (!property.name.isNullOrEmpty()) {
-                        words.add(property.name)
-                    }
-                    if (!property.value.isNullOrEmpty()) {
-                        words.add(property.value)
-                    }
-                }
-
-                words.joinToString(separator = " ")
-            }
-            is Group -> title
-            else -> ""
-        }
     }
 }

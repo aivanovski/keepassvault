@@ -3,7 +3,13 @@ package com.ivanovsky.passnotes.domain
 import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
-import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.*
+import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.ATTACHMENTS
+import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.CREATED
+import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.GROUP_UID
+import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.MODIFIED
+import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.PROPERTIES
+import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.TITLE
+import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.UID
 import java.util.LinkedList
 
 class NoteDiffer {

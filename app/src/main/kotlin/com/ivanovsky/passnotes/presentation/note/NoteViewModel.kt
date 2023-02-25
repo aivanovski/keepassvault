@@ -53,7 +53,7 @@ import com.ivanovsky.passnotes.util.UrlUtils
 import com.ivanovsky.passnotes.util.formatAccordingLocale
 import com.ivanovsky.passnotes.util.substituteAll
 import java.io.File
-import java.util.*
+import java.util.UUID
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
 

@@ -4,7 +4,22 @@ import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.Property.Companion.PROPERTY_NAME_AUTOFILL_APP_ID
 import com.ivanovsky.passnotes.data.entity.Property.Companion.PROPERTY_NAME_TEMPLATE_UID
 import com.ivanovsky.passnotes.data.entity.PropertyType
-import com.ivanovsky.passnotes.domain.entity.filter.*
+import com.ivanovsky.passnotes.domain.entity.filter.ExcludeByNameStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.ExcludeByTypeStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.ExcludeTitleStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.FilterByNameAndValueStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.FilterByNameStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.FilterByTypeStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.FilterCustomTypesStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.FilterDefaultTypesStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.FilterHiddenStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.FilterNotEmptyNameStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.FilterNotEmptyPropertiesStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.FilterNullTypeStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.FilterTitleStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.FilterVisibleStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.PropertyFilterStrategy
+import com.ivanovsky.passnotes.domain.entity.filter.SortedByTypeStrategy
 
 // TODO: In some scenarios strategies with including and excluding logic can't be mixed
 //  in one filter, so there should be a way to avoid it

@@ -1,7 +1,9 @@
 package com.ivanovsky.passnotes.domain.interactor.newdb
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationError.*
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED
+import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
+import com.ivanovsky.passnotes.data.entity.OperationError.newFileIsAlreadyExistsError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository

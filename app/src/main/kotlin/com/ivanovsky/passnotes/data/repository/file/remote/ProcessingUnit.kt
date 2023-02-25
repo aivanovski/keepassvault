@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.file.remote
 
-import java.util.*
+import java.util.UUID
 
 data class ProcessingUnit(
     val processingUid: UUID,

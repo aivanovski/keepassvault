@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.domain.entity.filter
 
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
-import java.util.*
+import java.util.EnumMap
 
 class SortedByTypeStrategy : PropertyFilterStrategy {
 

@@ -4,7 +4,8 @@ import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst
-import java.util.*
+import java.util.EnumMap
+import java.util.EnumSet
 
 @Deprecated("") // TODO: Refactor class
 class PropertySpreader(

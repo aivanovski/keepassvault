@@ -1,7 +1,10 @@
 package com.ivanovsky.passnotes.data.repository.keepass
 
-import com.ivanovsky.passnotes.data.entity.*
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property.Companion.PROPERTY_NAME_TEMPLATE
+import com.ivanovsky.passnotes.data.entity.Template
+import com.ivanovsky.passnotes.data.entity.TemplateField
+import com.ivanovsky.passnotes.data.entity.TemplateFieldType
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst.PROPERTY_PREFIX_POSITION
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst.PROPERTY_PREFIX_TITLE
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst.PROPERTY_PREFIX_TYPE

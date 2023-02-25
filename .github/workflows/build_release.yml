@@ -29,14 +29,9 @@ jobs:
           echo "36a3bb8b7bda141b414c2df7fac7dcd09a2775769c561e562d2b43f7b246bfa5 *keys/release.keystore" | sha256sum --check
           echo "b009011968e80d5b99eaa181141e6c94178a538c3dac0e413c43d5f95f50f557 *ci.properties" | sha256sum --check
 
-      - name: Download ktlint
-        run: |
-          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.48.2/ktlint
-          chmod +x ktlint
-
-      - name: Run ktlint
-        run: |
-          ./ktlint "app/src/**/*.kt" --editorconfig=".editorconfig"
+      - name: Run spotless
+          run: |
+            ./gradlew app:spotlessCheck
 
       - name: Build
         run: |

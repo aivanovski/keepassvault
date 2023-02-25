@@ -30,7 +30,7 @@ jobs:
           echo "b009011968e80d5b99eaa181141e6c94178a538c3dac0e413c43d5f95f50f557 *ci.properties" | sha256sum --check
 
       - name: Run spotless
-          run: |
+        run: |
             ./gradlew app:spotlessCheck
 
       - name: Build

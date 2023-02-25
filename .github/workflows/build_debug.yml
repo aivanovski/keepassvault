@@ -1,4 +1,4 @@
-name: Build Gplay Debug
+name: Build Debug
 
 on:
   push:

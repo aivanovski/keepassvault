@@ -1,15 +1,28 @@
 package com.ivanovsky.passnotes.data.repository.file.remote;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ACCESS_TO_FILE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_CACHED_FILE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_FILE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_IS_NOT_MODIFIED;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_SYNC_STATUS;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newCacheError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newDbVersionConflictError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError;
+import static com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy;
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
-import com.ivanovsky.passnotes.data.entity.OperationError;
-import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
+import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata;
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo;
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus;
@@ -27,7 +40,6 @@ import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
 import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
 import com.ivanovsky.passnotes.util.LongExtKt;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,22 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ACCESS_TO_FILE;
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_CACHED_FILE;
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_FILE;
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_IS_NOT_MODIFIED;
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_SYNC_STATUS;
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newCacheError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newDbVersionConflictError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError;
-import static com.ivanovsky.passnotes.util.DateUtils.anyLastTimestamp;
-import static com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull;
-
 import timber.log.Timber;
 
 public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
@@ -65,11 +61,12 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
     private final Map<String, SyncProgressStatus> progressStatuses;
     private final Map<String, SyncStatus> statuses;
 
-    public RemoteFileSyncProcessor(RemoteFileSystemProvider provider,
-                                   RemoteFileCache cache,
-                                   FileHelper fileHelper,
-                                   ObserverBus observerBus,
-                                   FSAuthority fsAuthority) {
+    public RemoteFileSyncProcessor(
+            RemoteFileSystemProvider provider,
+            RemoteFileCache cache,
+            FileHelper fileHelper,
+            ObserverBus observerBus,
+            FSAuthority fsAuthority) {
         this.provider = provider;
         this.cache = cache;
         this.fileHelper = fileHelper;
@@ -115,9 +112,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
             return SyncStatus.NO_CHANGES;
         }
 
-        OperationResult<FileDescriptor> getFile = provider.getFile(
-                cachedFile.getRemotePath(),
-                FSOptions.noCache());
+        OperationResult<FileDescriptor> getFile =
+                provider.getFile(cachedFile.getRemotePath(), FSOptions.noCache());
         if (getFile.isFailed()) {
             OperationError.Type errorType = getFile.getError().getType();
 
@@ -138,10 +134,12 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
         Long remoteModified = getFile.getObj().getModified();
 
         if (cachedFile.isLocallyModified()) {
-            SyncResolution resolution = syncResolver.resolve(localModified,
-                    cachedFile.getLastRemoteModificationTimestamp(),
-                    remoteModified,
-                    SyncStrategy.LAST_REMOTE_MODIFICATION_WINS);
+            SyncResolution resolution =
+                    syncResolver.resolve(
+                            localModified,
+                            cachedFile.getLastRemoteModificationTimestamp(),
+                            remoteModified,
+                            SyncStrategy.LAST_REMOTE_MODIFICATION_WINS);
 
             switch (resolution) {
                 case LOCAL:
@@ -157,9 +155,9 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
                 default:
                     return SyncStatus.CONFLICT;
             }
-
         }
-        if (LongExtKt.isNewerThan(remoteModified, cachedFile.getLastRemoteModificationTimestamp())) {
+        if (LongExtKt.isNewerThan(
+                remoteModified, cachedFile.getLastRemoteModificationTimestamp())) {
             return SyncStatus.REMOTE_CHANGES;
         } else {
             return SyncStatus.NO_CHANGES;
@@ -174,9 +172,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
             return OperationResult.error(newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE));
         }
 
-        OperationResult<FileDescriptor> getFile = provider.getFile(
-                cachedFile.getRemotePath(),
-                FSOptions.noCache());
+        OperationResult<FileDescriptor> getFile =
+                provider.getFile(cachedFile.getRemotePath(), FSOptions.noCache());
         if (getFile.isFailed()) {
             return getFile.takeError();
         }
@@ -188,31 +185,32 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
             return OperationResult.error(newGenericError(MESSAGE_FILE_IS_NOT_MODIFIED));
         }
 
-        SyncResolution resolution = syncResolver.resolve(localModified,
-                cachedFile.getLastRemoteModificationTimestamp(),
-                remoteModified,
-                SyncStrategy.LAST_REMOTE_MODIFICATION_WINS);
+        SyncResolution resolution =
+                syncResolver.resolve(
+                        localModified,
+                        cachedFile.getLastRemoteModificationTimestamp(),
+                        remoteModified,
+                        SyncStrategy.LAST_REMOTE_MODIFICATION_WINS);
         if (resolution != SyncResolution.ERROR) {
             return OperationResult.error(newGenericError(MESSAGE_INCORRECT_SYNC_STATUS));
         }
 
-        SyncConflictInfo info = new SyncConflictInfo(RemoteFileExtKt.toFileDescriptor(cachedFile),
-                getFile.getObj());
+        SyncConflictInfo info =
+                new SyncConflictInfo(
+                        RemoteFileExtKt.toFileDescriptor(cachedFile), getFile.getObj());
 
         return OperationResult.success(info);
     }
 
     @NonNull
     @Override
-    public OperationResult<FileDescriptor> process(@NonNull FileDescriptor file,
-                                                   @NonNull SyncStrategy syncStrategy,
-                                                   @Nullable ConflictResolutionStrategy resolutionStrategy) {
+    public OperationResult<FileDescriptor> process(
+            @NonNull FileDescriptor file,
+            @NonNull SyncStrategy syncStrategy,
+            @Nullable ConflictResolutionStrategy resolutionStrategy) {
         Timber.d(
                 "process: file=%s, strategy=%s, conflictStrategy=%s",
-                file,
-                syncStrategy,
-                resolutionStrategy
-        );
+                file, syncStrategy, resolutionStrategy);
 
         updateProgressStatusForFile(file.getUid(), SyncProgressStatus.SYNCING);
 
@@ -226,9 +224,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         FileDescriptor localFile = RemoteFileExtKt.toFileDescriptor(cachedFile);
 
-        OperationResult<FileDescriptor> getFile = provider.getFile(
-                localFile.getPath(),
-                FSOptions.noCache());
+        OperationResult<FileDescriptor> getFile =
+                provider.getFile(localFile.getPath(), FSOptions.noCache());
         if (getFile.isFailed()) {
             Timber.d("Unable to process file, failed to get file info");
 
@@ -241,20 +238,18 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
         Long localModified = localFile.getModified();
         Long remoteModified = remoteDescriptor.getModified();
 
-        SyncResolution resolution = syncResolver.resolve(localModified,
-                cachedFile.getLastRemoteModificationTimestamp(),
-                remoteModified,
-                syncStrategy);
+        SyncResolution resolution =
+                syncResolver.resolve(
+                        localModified,
+                        cachedFile.getLastRemoteModificationTimestamp(),
+                        remoteModified,
+                        syncStrategy);
         SyncStatus status = convertResolutionToStatus(resolution);
         updateSyncStatusForFile(file.getUid(), status);
 
         Timber.d(
                 "process: remoteFile=%s, localModified=%s, remoteModified=%s, resolution=%s",
-                remoteDescriptor,
-                localModified,
-                remoteModified,
-                resolution
-        );
+                remoteDescriptor, localModified, remoteModified, resolution);
 
         switch (resolution) {
             case LOCAL:
@@ -268,26 +263,30 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
                 if (resolutionStrategy == ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE) {
                     return uploadLocalFile(cachedFile, localFile, remoteDescriptor);
 
-                } else if (resolutionStrategy == ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE) {
+                } else if (resolutionStrategy
+                        == ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE) {
                     return downloadFile(cachedFile, localFile, remoteDescriptor);
 
                 } else {
-                    return OperationResult.error(newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
+                    return OperationResult.error(
+                            newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
                 }
 
             default:
-                return OperationResult.error(newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
+                return OperationResult.error(
+                        newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
         }
     }
 
-    private OperationResult<FileDescriptor> uploadLocalFile(RemoteFile cachedFile,
-                                                            FileDescriptor localDescriptor,
-                                                            FileDescriptor remoteDescriptor) {
+    private OperationResult<FileDescriptor> uploadLocalFile(
+            RemoteFile cachedFile,
+            FileDescriptor localDescriptor,
+            FileDescriptor remoteDescriptor) {
         updateProgressStatusForFile(cachedFile.getUid(), SyncProgressStatus.UPLOADING);
 
-        OperationResult<OutputStream> outResult = provider.openFileForWrite(localDescriptor,
-                OnConflictStrategy.REWRITE,
-                FSOptions.noCache());
+        OperationResult<OutputStream> outResult =
+                provider.openFileForWrite(
+                        localDescriptor, OnConflictStrategy.REWRITE, FSOptions.noCache());
         if (outResult.isFailed()) {
             Timber.d("Failed to open file for write, error=%s", outResult.getError());
             return outResult.takeError();
@@ -301,7 +300,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         // Create buffer which will contains file data, because 'out' linked to the same file,
         // that 'in'
-        OperationResult<InputStream> openBufferResult = copyFileAndOpen(new File(cachedFile.getLocalPath()));
+        OperationResult<InputStream> openBufferResult =
+                copyFileAndOpen(new File(cachedFile.getLocalPath()));
         if (openBufferResult.isFailed()) {
             Timber.d("Failed to copy file, uid=%s", cachedFile.getUid());
             return openBufferResult.takeError();
@@ -322,7 +322,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
             return OperationResult.error(newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE));
         }
 
-        OperationResult<RemoteFileMetadata> metadataResult = provider.getFileMetadata(remoteDescriptor);
+        OperationResult<RemoteFileMetadata> metadataResult =
+                provider.getFileMetadata(remoteDescriptor);
         if (metadataResult.isFailed()) {
             Timber.d("Failed to get metadata, error=%s", metadataResult.getError());
             return metadataResult.takeError();
@@ -335,7 +336,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
         updatedCachedFile.setRemotePath(metadata.getPath());
         updatedCachedFile.setRevision(metadata.getRevision());
         updatedCachedFile.setLastModificationTimestamp(metadata.getServerModified().getTime());
-        updatedCachedFile.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
+        updatedCachedFile.setLastRemoteModificationTimestamp(
+                metadata.getServerModified().getTime());
         updatedCachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
         updatedCachedFile.setUploaded(true);
         updatedCachedFile.setLocallyModified(false);
@@ -374,16 +376,17 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
         return result;
     }
 
-    private OperationResult<FileDescriptor> downloadFile(RemoteFile cachedFile,
-                                                         FileDescriptor localDescriptor,
-                                                         FileDescriptor remoteDescriptor) {
+    private OperationResult<FileDescriptor> downloadFile(
+            RemoteFile cachedFile,
+            FileDescriptor localDescriptor,
+            FileDescriptor remoteDescriptor) {
         Timber.d("downloadFile: file=%s", localDescriptor);
 
         updateProgressStatusForFile(cachedFile.getUid(), SyncProgressStatus.DOWNLOADING);
 
-        OperationResult<InputStream> inResult = provider.openFileForRead(localDescriptor,
-                OnConflictStrategy.REWRITE,
-                FSOptions.noCache());
+        OperationResult<InputStream> inResult =
+                provider.openFileForRead(
+                        localDescriptor, OnConflictStrategy.REWRITE, FSOptions.noCache());
         if (inResult.isFailed()) {
             Timber.d("Failed to download, error=%s", inResult.getError());
             return inResult.takeError();
@@ -408,7 +411,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
             return OperationResult.error(newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE));
         }
 
-        OperationResult<RemoteFileMetadata> metadataResult = provider.getFileMetadata(remoteDescriptor);
+        OperationResult<RemoteFileMetadata> metadataResult =
+                provider.getFileMetadata(remoteDescriptor);
         if (metadataResult.isFailed()) {
             Timber.d("Failed to get metadata, error=%s", metadataResult.getError());
             return metadataResult.takeError();
@@ -421,7 +425,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
         updatedCachedFile.setRemotePath(metadata.getPath());
         updatedCachedFile.setRevision(metadata.getRevision());
         updatedCachedFile.setLastModificationTimestamp(metadata.getServerModified().getTime());
-        updatedCachedFile.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
+        updatedCachedFile.setLastRemoteModificationTimestamp(
+                metadata.getServerModified().getTime());
         updatedCachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
         updatedCachedFile.setUploaded(true);
         updatedCachedFile.setLocallyModified(false);
@@ -436,8 +441,10 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
     private void updateProgressStatusForFile(String uid, SyncProgressStatus status) {
         Timber.d("updateStatusForFile: status=%s, uid=%s", status, uid);
-        SyncProgressStatus oldStatus = progressStatuses.containsKey(uid) ? progressStatuses.get(uid)
-                : SyncProgressStatus.IDLE;
+        SyncProgressStatus oldStatus =
+                progressStatuses.containsKey(uid)
+                        ? progressStatuses.get(uid)
+                        : SyncProgressStatus.IDLE;
 
         if (status != oldStatus) {
             observerBus.notifySyncProgressStatusChanged(fsAuthority, uid, status);

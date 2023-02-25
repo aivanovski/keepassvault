@@ -1,6 +1,10 @@
 package com.ivanovsky.passnotes.data.repository.keepass.kotpass
 
 import app.keemobile.kotpass.constants.GroupOverride
+import app.keemobile.kotpass.database.modifiers.modifyGroup
+import app.keemobile.kotpass.database.modifiers.moveGroup
+import app.keemobile.kotpass.database.modifiers.removeGroup
+import app.keemobile.kotpass.models.Group as RawGroup
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
@@ -9,18 +13,14 @@ import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_PARENT_UID_IS_
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao
 import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
+import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao
 import com.ivanovsky.passnotes.extensions.map
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.extensions.matches
-import app.keemobile.kotpass.database.modifiers.modifyGroup
-import app.keemobile.kotpass.database.modifiers.moveGroup
-import app.keemobile.kotpass.database.modifiers.removeGroup
 import java.util.UUID
 import kotlin.concurrent.withLock
-import app.keemobile.kotpass.models.Group as RawGroup
 
 class KotpassGroupDao(
     private val db: KotpassDatabase

@@ -8,15 +8,15 @@ import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.DatabaseStatusCellModel
 import com.ivanovsky.passnotes.presentation.core.model.DividerCellModel
 import com.ivanovsky.passnotes.presentation.core.model.HeaderCellModel
-import com.ivanovsky.passnotes.presentation.note.cells.model.NotePropertyCellModel
 import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
-import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.model.AttachmentCellModel
+import com.ivanovsky.passnotes.presentation.note.cells.model.NotePropertyCellModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.AttachmentCellViewModel
+import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel
 
 class NoteCellViewModelFactory(
     private val resourceProvider: ResourceProvider

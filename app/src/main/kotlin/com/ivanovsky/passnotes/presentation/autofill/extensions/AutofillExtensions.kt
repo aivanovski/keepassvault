@@ -2,8 +2,8 @@ package com.ivanovsky.passnotes.presentation.autofill.extensions
 
 import androidx.annotation.RequiresApi
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillField
-import com.ivanovsky.passnotes.presentation.autofill.model.AutofillNode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillFieldType
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillNode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.autofill.model.MutableAutofillStructure
 

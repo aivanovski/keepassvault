@@ -71,7 +71,10 @@ class PassnotesAutofillService : AutofillService() {
 
                 if (note != null) {
                     Timber.d("Show note and selection")
-                    val response = responseFactory.createResponseWithNoteAndSelection(note, structure)
+                    val response = responseFactory.createResponseWithNoteAndSelection(
+                        note,
+                        structure
+                    )
                     callback.onSuccess(response)
                 } else {
                     Timber.d("Show selection")

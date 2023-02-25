@@ -28,7 +28,7 @@ class FilePickerCellModelFactory {
                 iconResId = getIconResId(file),
                 title = title,
                 description = formatModifiedDate(file, dateFormat),
-                isSelected =  false
+                isSelected = false
             )
         }
     }

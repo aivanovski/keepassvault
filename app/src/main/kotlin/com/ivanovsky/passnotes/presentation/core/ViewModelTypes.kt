@@ -35,5 +35,4 @@ class ViewModelTypes {
     private fun throwNoLayoutId(): Nothing {
         throw IllegalArgumentException("Unable to find layout id")
     }
-
 }

@@ -2,19 +2,19 @@ package com.ivanovsky.passnotes.data.crypto
 
 import android.os.Build
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.ANDROID_KEY_STORE
-import com.ivanovsky.passnotes.data.crypto.entity.CipherTransformation
 import com.ivanovsky.passnotes.data.crypto.entity.Base64SecretData
+import com.ivanovsky.passnotes.data.crypto.entity.CipherTransformation
 import com.ivanovsky.passnotes.data.crypto.entity.SecretData
 import com.ivanovsky.passnotes.data.crypto.entity.toBase64SecretData
 import com.ivanovsky.passnotes.data.crypto.entity.toSecretData
 import com.ivanovsky.passnotes.data.crypto.keyprovider.SecretKeyProvider
-import timber.log.Timber
 import java.security.GeneralSecurityException
 import java.security.InvalidKeyException
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
+import timber.log.Timber
 
 class DataCipherImpl(
     private val secretKeyProvider: SecretKeyProvider,

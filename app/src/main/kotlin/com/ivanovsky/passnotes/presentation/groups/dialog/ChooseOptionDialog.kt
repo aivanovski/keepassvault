@@ -22,7 +22,7 @@ class ChooseOptionDialog : DialogFragment(), DialogInterface.OnClickListener {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder =  AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(context)
             .setItems(entries.toTypedArray(), this)
 
         if (title != null) {

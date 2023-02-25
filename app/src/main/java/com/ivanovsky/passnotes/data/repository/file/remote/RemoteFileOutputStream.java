@@ -5,7 +5,6 @@ import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata;
 import com.ivanovsky.passnotes.data.repository.file.BaseRemoteFileOutputStream;
 import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSException;
 import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSNetworkException;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,7 +12,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
-
 import timber.log.Timber;
 
 public class RemoteFileOutputStream extends BaseRemoteFileOutputStream {
@@ -32,10 +30,12 @@ public class RemoteFileOutputStream extends BaseRemoteFileOutputStream {
     // should be lazy initialized, because new FileOutputStream make file content empty
     private OutputStream out;
 
-    public RemoteFileOutputStream(RemoteFileSystemProvider provider,
-                                  RemoteApiClient client,
-                                  RemoteFile file,
-                                  UUID processingUnitUid) throws FileNotFoundException {
+    public RemoteFileOutputStream(
+            RemoteFileSystemProvider provider,
+            RemoteApiClient client,
+            RemoteFile file,
+            UUID processingUnitUid)
+            throws FileNotFoundException {
         this.provider = provider;
         this.client = client;
         this.file = file;

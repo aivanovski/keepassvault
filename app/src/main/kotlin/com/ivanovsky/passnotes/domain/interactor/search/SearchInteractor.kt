@@ -10,15 +10,15 @@ import com.ivanovsky.passnotes.domain.search.EntryMatcher
 import com.ivanovsky.passnotes.domain.search.Fzf4jFuzzyEntryMatcher
 import com.ivanovsky.passnotes.domain.search.StrictEntryMatcher
 import com.ivanovsky.passnotes.domain.usecases.CheckNoteAutofillDataUseCase
-import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
+import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
-import kotlinx.coroutines.withContext
 import java.util.UUID
+import kotlinx.coroutines.withContext
 
 class SearchInteractor(
     private val dispatchers: DispatcherProvider,

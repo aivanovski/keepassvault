@@ -9,8 +9,8 @@ import com.ivanovsky.passnotes.util.StringUtils
 import com.ivanovsky.passnotes.util.isDigitsOnly
 import fr.bipi.tressence.base.PriorityTree
 import fr.bipi.tressence.file.FileLoggerTree
-import timber.log.Timber
 import java.io.File
+import timber.log.Timber
 
 class LoggerInteractor(
     private val context: Context,

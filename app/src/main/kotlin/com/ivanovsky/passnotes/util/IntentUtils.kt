@@ -50,7 +50,7 @@ object IntentUtils {
 
     fun newOpenFileIntent(): Intent {
         return Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            type = "*/*";
+            type = "*/*"
             addCategory(Intent.CATEGORY_OPENABLE)
         }
     }

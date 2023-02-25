@@ -4,7 +4,8 @@ import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst
-import java.util.*
+import java.util.EnumMap
+import java.util.EnumSet
 
 @Deprecated("") // TODO: Refactor class
 class PropertySpreader(
@@ -35,7 +36,7 @@ class PropertySpreader(
     fun getCustomProperties(): List<Property> {
         return getVisibleProperties().filter { property ->
             !property.name.isNullOrEmpty() &&
-                    (property.type == null || !DEFAULT_PROPERTIES.contains(property.type))
+                (property.type == null || !DEFAULT_PROPERTIES.contains(property.type))
         }
     }
 
@@ -46,7 +47,9 @@ class PropertySpreader(
 
     fun getVisibleNotEmptyWithoutTitle(): List<Property> {
         return getVisibleProperties().filter { property ->
-            property.type != PropertyType.TITLE && !property.name.isNullOrEmpty() && !property.value.isNullOrEmpty()
+            property.type != PropertyType.TITLE &&
+                !property.name.isNullOrEmpty() &&
+                !property.value.isNullOrEmpty()
         }
     }
 
@@ -55,9 +58,13 @@ class PropertySpreader(
     }
 
     private fun isTemplateProperty(property: Property): Boolean {
-        return property.name != null &&
-                (property.name == Property.PROPERTY_NAME_TEMPLATE ||
-                        TEMPLATE_PROPERTY_PREFIXES.any { prefix -> property.name.startsWith(prefix) })
+        val name = property.name ?: return false
+
+        if (name == Property.PROPERTY_NAME_TEMPLATE) {
+            return true
+        }
+
+        return TEMPLATE_PROPERTY_PREFIXES.any { prefix -> property.name.startsWith(prefix) }
     }
 
     private fun isPropertyVisible(property: Property): Boolean {

@@ -6,4 +6,6 @@ ext {
     ]
 
     kotlinVersion = '1.6.10'
+    spotlessVersion = '6.15.0'
+    ktlintVersion = '0.48.2'
 }

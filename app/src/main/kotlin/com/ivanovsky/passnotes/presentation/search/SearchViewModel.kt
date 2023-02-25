@@ -43,11 +43,11 @@ import com.ivanovsky.passnotes.presentation.search.factory.SearchCellViewModelFa
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toUUID
+import java.util.UUID
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
-import java.util.UUID
 
 class SearchViewModel(
     private val interactor: SearchInteractor,
@@ -117,7 +117,8 @@ class SearchViewModel(
         if (pref == SettingsImpl.Pref.SEARCH_TYPE ||
             pref == SettingsImpl.Pref.SORT_TYPE ||
             pref == SettingsImpl.Pref.SORT_DIRECTION ||
-            pref == SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED) {
+            pref == SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED
+        ) {
             filteredData = null
             loadData()
         }
@@ -306,7 +307,9 @@ class SearchViewModel(
                     if (getNoteResult.isFailed) {
                         setScreenState(
                             ScreenState.dataWithError(
-                                errorText = errorInteractor.processAndGetMessage(getNoteResult.error)
+                                errorText = errorInteractor.processAndGetMessage(
+                                    getNoteResult.error
+                                )
                             )
                         )
                         return@launch

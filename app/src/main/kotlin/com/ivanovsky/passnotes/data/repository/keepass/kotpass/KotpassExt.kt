@@ -1,31 +1,31 @@
 package com.ivanovsky.passnotes.data.repository.keepass.kotpass
 
 import app.keemobile.kotpass.constants.GroupOverride
+import app.keemobile.kotpass.cryptography.EncryptedValue
+import app.keemobile.kotpass.database.KeePassDatabase
+import app.keemobile.kotpass.models.BinaryData
+import app.keemobile.kotpass.models.BinaryReference
+import app.keemobile.kotpass.models.Entry as RawEntry
+import app.keemobile.kotpass.models.EntryValue
+import app.keemobile.kotpass.models.Group as RawGroup
+import app.keemobile.kotpass.models.TimeData
+import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.Hash
+import com.ivanovsky.passnotes.data.entity.HashType
 import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
-import com.ivanovsky.passnotes.util.StringUtils.EMPTY
-import app.keemobile.kotpass.cryptography.EncryptedValue
-import app.keemobile.kotpass.database.KeePassDatabase
-import app.keemobile.kotpass.models.BinaryData
-import app.keemobile.kotpass.models.BinaryReference
-import app.keemobile.kotpass.models.EntryValue
-import app.keemobile.kotpass.models.TimeData
-import com.ivanovsky.passnotes.data.entity.Attachment
-import com.ivanovsky.passnotes.data.entity.Hash
-import com.ivanovsky.passnotes.data.entity.HashType
 import com.ivanovsky.passnotes.extensions.toByteString
-import okio.ByteString
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import java.time.Instant
 import java.util.Date
 import java.util.LinkedList
 import java.util.UUID
-import app.keemobile.kotpass.models.Entry as RawEntry
-import app.keemobile.kotpass.models.Group as RawGroup
+import okio.ByteString
 
 fun GroupOverride.convertToInheritableOption(parentValue: Boolean): InheritableBooleanOption {
     return when (this) {

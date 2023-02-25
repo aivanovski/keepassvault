@@ -6,15 +6,15 @@ import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.interactor.autofill.AutofillInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
-import com.ivanovsky.passnotes.domain.interactor.group_editor.GroupEditorInteractor
+import com.ivanovsky.passnotes.domain.interactor.groupEditor.GroupEditorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.domain.interactor.main.MainInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
-import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
-import com.ivanovsky.passnotes.domain.interactor.password_generator.PasswordGeneratorInteractor
+import com.ivanovsky.passnotes.domain.interactor.noteEditor.NoteEditorInteractor
+import com.ivanovsky.passnotes.domain.interactor.passwordGenerator.PasswordGeneratorInteractor
 import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
-import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
+import com.ivanovsky.passnotes.domain.interactor.serverLogin.ServerLoginInteractor
 import com.ivanovsky.passnotes.domain.interactor.service.LockServiceInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
@@ -23,16 +23,16 @@ import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteract
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.presentation.about.AboutViewModel
 import com.ivanovsky.passnotes.presentation.autofill.AutofillViewFactory
+import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
+import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogViewModel
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
-import com.ivanovsky.passnotes.presentation.dialogs.sort_and_view.SortAndViewDialogArgs
-import com.ivanovsky.passnotes.presentation.dialogs.sort_and_view.SortAndViewDialogViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.factory.FilePickerCellModelFactory
 import com.ivanovsky.passnotes.presentation.filepicker.factory.FilePickerCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
-import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorViewModel
+import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
+import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
@@ -45,21 +45,21 @@ import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel
-import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellModelFactory
-import com.ivanovsky.passnotes.presentation.note_editor.factory.NoteEditorCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.password_generator.PasswordGeneratorViewModel
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorViewModel
+import com.ivanovsky.passnotes.presentation.noteEditor.factory.NoteEditorCellModelFactory
+import com.ivanovsky.passnotes.presentation.noteEditor.factory.NoteEditorCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.passwordGenerator.PasswordGeneratorViewModel
 import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.search.SearchViewModel
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellModelFactory
 import com.ivanovsky.passnotes.presentation.search.factory.SearchCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
-import com.ivanovsky.passnotes.presentation.server_login.ServerLoginViewModel
+import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
+import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginViewModel
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
 import com.ivanovsky.passnotes.presentation.settings.app.AppSettingsViewModel
 import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsViewModel
-import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordDialogViewModel
+import com.ivanovsky.passnotes.presentation.settings.database.changePassword.ChangePasswordDialogViewModel
 import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
@@ -271,7 +271,7 @@ object UiModule {
             }
             factory { (args: UnlockScreenArgs) ->
                 UnlockViewModel(
-                   get(),
+                    get(),
                     get(),
                     get(),
                     get(),

@@ -6,10 +6,8 @@ object TestData {
 
     const val DB_NAME = "test-db"
 
-    val PLAIN_TEXT = """
-        abcdefghijklmnopqrstuvwxyzABDCEFGHIJKLMNOPQRSTUVWXYZ0123456789
-        ~`!@#$%^&*()_-+={[}]|\\:;\"'<,>.?/\t\b\n\r_
-        """.trimIndent()
+    val PLAIN_TEXT = "abcdefghijklmnopqrstuvwxyzABDCEFGHIJKLMNOPQRSTUVWXYZ0123456789" +
+        "~`!@#$%^&*()_-+={[}]|\\:;\"'<,>.?/\t\b\n\r_"
 
     fun dateInMillis(year: Int, month: Int, day: Int): Long {
         val cal = Calendar.getInstance()

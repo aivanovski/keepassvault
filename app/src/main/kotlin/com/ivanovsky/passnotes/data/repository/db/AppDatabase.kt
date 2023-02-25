@@ -3,17 +3,17 @@ package com.ivanovsky.passnotes.data.repository.db
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
-import com.ivanovsky.passnotes.data.entity.UsedFile
-import com.ivanovsky.passnotes.data.entity.RemoteFile
-import androidx.room.TypeConverters
-import com.ivanovsky.passnotes.data.repository.db.converters.FSAuthorityTypeConverter
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.entity.GitRoot
+import com.ivanovsky.passnotes.data.entity.RemoteFile
+import com.ivanovsky.passnotes.data.entity.UsedFile
+import com.ivanovsky.passnotes.data.repository.db.converters.FSAuthorityTypeConverter
 import com.ivanovsky.passnotes.data.repository.db.dao.GitRootDao
-import com.ivanovsky.passnotes.data.repository.db.dao.UsedFileDao
 import com.ivanovsky.passnotes.data.repository.db.dao.RemoteFileDao
+import com.ivanovsky.passnotes.data.repository.db.dao.UsedFileDao
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom1To2
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom2To3
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom3To4
@@ -29,7 +29,7 @@ import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom3To4
     version = 4
 )
 @TypeConverters(
-    FSAuthorityTypeConverter::class,
+    FSAuthorityTypeConverter::class
 )
 abstract class AppDatabase : RoomDatabase() {
 

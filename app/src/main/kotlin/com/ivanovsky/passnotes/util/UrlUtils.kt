@@ -3,10 +3,10 @@ package com.ivanovsky.passnotes.util
 import com.ivanovsky.passnotes.domain.entity.ParsedUrl
 import com.ivanovsky.passnotes.util.StringUtils.DOT
 import com.ivanovsky.passnotes.util.StringUtils.STAR
-import timber.log.Timber
 import java.net.MalformedURLException
 import java.net.URL
 import kotlin.text.StringBuilder
+import timber.log.Timber
 
 object UrlUtils {
 

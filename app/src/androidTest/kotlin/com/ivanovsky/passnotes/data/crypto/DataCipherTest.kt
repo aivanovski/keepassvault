@@ -73,8 +73,12 @@ class DataCipherTest {
     @Test
     fun keyShouldBeLoaded() {
         // Arrange
-        val storePreEncoded = DataCipherImpl(KeyStoreSecretKeyProvider(), AES_CBC_PKCS7).encode(PLAIN_TEXT)
-        val filePreEncoded = DataCipherImpl(FileSecretKeyProvider(context), AES_CBC_PKCS5).encode(PLAIN_TEXT)
+        val storePreEncoded = DataCipherImpl(KeyStoreSecretKeyProvider(), AES_CBC_PKCS7).encode(
+            PLAIN_TEXT
+        )
+        val filePreEncoded = DataCipherImpl(FileSecretKeyProvider(context), AES_CBC_PKCS5).encode(
+            PLAIN_TEXT
+        )
         assertThat(keyStoreKeyProvider.isKeyExist()).isTrue()
         assertThat(fileKeyProvider.isKeyExist()).isTrue()
 

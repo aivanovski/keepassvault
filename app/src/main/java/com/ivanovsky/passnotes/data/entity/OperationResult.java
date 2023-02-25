@@ -30,8 +30,7 @@ public class OperationResult<T> {
         return result;
     }
 
-    public OperationResult() {
-    }
+    public OperationResult() {}
 
     public void setObj(T obj) {
         this.obj = obj;

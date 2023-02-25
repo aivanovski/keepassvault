@@ -3,8 +3,8 @@ package com.ivanovsky.passnotes.data.repository.db.converters
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
-import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSAuthority
+import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
 import org.json.JSONException
 import org.json.JSONObject

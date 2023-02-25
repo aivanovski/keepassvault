@@ -6,7 +6,7 @@ import com.ivanovsky.passnotes.data.entity.PropertyType
 class FilterByTypeStrategy(
     vararg types: PropertyType
 ) : PropertyFilterStrategy {
-    
+
     private val typeSet = types.toSet()
 
     override fun apply(properties: Sequence<Property>): Sequence<Property> {

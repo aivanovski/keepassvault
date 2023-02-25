@@ -17,6 +17,9 @@ import com.ivanovsky.passnotes.extensions.map
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.util.InputOutputUtils
+import java.io.File
+import java.io.IOException
+import java.util.Date
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.RebaseResult
 import org.eclipse.jgit.api.ResetCommand
@@ -27,9 +30,6 @@ import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.transport.PushResult
 import org.eclipse.jgit.transport.RemoteRefUpdate
 import timber.log.Timber
-import java.io.File
-import java.io.IOException
-import java.util.Date
 
 class GitRepository(
     private val git: Git,
@@ -87,9 +87,11 @@ class GitRepository(
 
         val localHeadId = getLocalHeadId.obj
         val remoteHeadId = getRemoteHeadId.obj
-        val isUpToDate = (localHeadId != null &&
-            remoteHeadId != null &&
-            localHeadId == remoteHeadId)
+        val isUpToDate = (
+            localHeadId != null &&
+                remoteHeadId != null &&
+                localHeadId == remoteHeadId
+            )
 
         return OperationResult.success(isUpToDate)
     }
@@ -112,7 +114,7 @@ class GitRepository(
 
     fun pull(
         file: VersionedFile? = null,
-        changedFile: File? = null,
+        changedFile: File? = null
     ): OperationResult<Unit> {
         for (pullIdx in 0..1) {
             val pullResult = execute {
@@ -128,7 +130,8 @@ class GitRepository(
             val pull = pullResult.obj
             val pullStatus = pull.rebaseResult?.status
             if (pullStatus == RebaseResult.Status.FAST_FORWARD ||
-                pullStatus == RebaseResult.Status.UP_TO_DATE) {
+                pullStatus == RebaseResult.Status.UP_TO_DATE
+            ) {
                 if (pullIdx == 1 && file != null && changedFile != null) {
                     val restoreBackupResult = InputOutputUtils.copy(
                         sourceFile = changedFile,
@@ -163,7 +166,8 @@ class GitRepository(
 
         val status = getStatusResult.obj
         if (!status.uncommittedChanges.contains(file.localPath) &&
-            !status.added.contains(file.localPath)) {
+            !status.added.contains(file.localPath)
+        ) {
             return OperationResult.error(newRemoteApiError(ERROR_NOTHING_TO_COMMIT))
         }
 

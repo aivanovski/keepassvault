@@ -5,29 +5,29 @@ import androidx.fragment.app.FragmentFactory
 import com.github.terrakok.cicerone.androidx.FragmentScreen
 import com.ivanovsky.passnotes.presentation.about.AboutFragment
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuFragment
-import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
-import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
-import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorFragment
-import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
+import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment
+import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
+import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorFragment
 import com.ivanovsky.passnotes.presentation.groups.GroupsFragment
+import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseFragment
 import com.ivanovsky.passnotes.presentation.note.NoteFragment
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorFragment
-import com.ivanovsky.passnotes.presentation.password_generator.PasswordGeneratorFragment
-import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorFragment
+import com.ivanovsky.passnotes.presentation.passwordGenerator.PasswordGeneratorFragment
 import com.ivanovsky.passnotes.presentation.search.SearchFragment
-import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
-import com.ivanovsky.passnotes.presentation.server_login.ServerLoginFragment
+import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
+import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
+import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginFragment
 import com.ivanovsky.passnotes.presentation.settings.app.AppSettingsFragment
 import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsFragment
 import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsFragment
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListFragment
-import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockFragment
+import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 
 object Screens {
     class UnlockScreen(private val args: UnlockScreenArgs) : FragmentScreen {

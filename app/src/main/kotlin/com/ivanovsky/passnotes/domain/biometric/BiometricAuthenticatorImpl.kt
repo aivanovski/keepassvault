@@ -9,8 +9,8 @@ import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoderImpl
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoderImpl
-import timber.log.Timber
 import javax.crypto.Cipher
+import timber.log.Timber
 
 class BiometricAuthenticatorImpl : BiometricAuthenticator {
 
@@ -53,7 +53,7 @@ class BiometricAuthenticatorImpl : BiometricAuthenticator {
         activity: FragmentActivity,
         cipher: Cipher,
         info: BiometricPrompt.PromptInfo,
-        onSuccess: (result: BiometricPrompt.AuthenticationResult) -> Unit,
+        onSuccess: (result: BiometricPrompt.AuthenticationResult) -> Unit
     ) {
         val executor = ContextCompat.getMainExecutor(activity)
 

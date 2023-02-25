@@ -1,9 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.db.migration
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
-import com.ivanovsky.passnotes.TestData
 import com.ivanovsky.passnotes.TestData.DB_NAME
 import com.ivanovsky.passnotes.TestData.dateInMillis
 import com.ivanovsky.passnotes.TestDatabase.initMigrationHelper

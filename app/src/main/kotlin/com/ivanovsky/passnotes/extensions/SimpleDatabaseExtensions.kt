@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.extensions
 
+import java.util.UUID
 import org.linguafranca.pwdb.Entry
 import org.linguafranca.pwdb.kdbx.simple.SimpleEntry
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup
-import java.util.UUID
 
 fun SimpleGroup.findEntries(
     isRecursive: Boolean,

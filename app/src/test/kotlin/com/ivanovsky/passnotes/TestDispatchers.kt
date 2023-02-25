@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes
 
 import com.ivanovsky.passnotes.domain.DispatcherProvider
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineDispatcher
 
 val TEST_DISPATCHER_PROVIDER = DispatcherProvider(
     Main = TestCoroutineDispatcher(),

@@ -9,8 +9,8 @@ import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
-import timber.log.Timber
 import java.lang.Exception
+import timber.log.Timber
 
 class FileKeepassKey(
     val file: FileDescriptor,

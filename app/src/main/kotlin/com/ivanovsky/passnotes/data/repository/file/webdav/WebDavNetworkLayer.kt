@@ -34,7 +34,9 @@ class WebDavNetworkLayer(
             return OperationResult.error(OperationError.newNetworkIOError())
         } catch (exception: Exception) {
             Timber.d(exception)
-            return OperationResult.error(OperationError.newGenericError(OperationError.MESSAGE_UNKNOWN_ERROR))
+            return OperationResult.error(
+                OperationError.newGenericError(OperationError.MESSAGE_UNKNOWN_ERROR)
+            )
         }
     }
 

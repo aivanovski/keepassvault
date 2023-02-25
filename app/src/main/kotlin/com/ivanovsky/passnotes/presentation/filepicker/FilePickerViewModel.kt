@@ -86,7 +86,8 @@ class FilePickerViewModel(
 
         if (authenticator.isAuthenticationRequired() &&
             authType != AuthType.SDCARD_PERMISSION &&
-            authType != AuthType.ALL_FILES_PERMISSION) {
+            authType != AuthType.ALL_FILES_PERMISSION
+        ) {
             setScreenState(
                 ScreenState.error(
                     errorText = resourceProvider.getString(R.string.unable_to_authenticate)
@@ -135,7 +136,9 @@ class FilePickerViewModel(
                 router.sendResult(FilePickerScreen.RESULT_KEY, selectedFile)
                 router.exit()
             } else {
-                showSnackbarMessageEvent.call(resourceProvider.getString(R.string.please_select_any_file))
+                showSnackbarMessageEvent.call(
+                    resourceProvider.getString(R.string.please_select_any_file)
+                )
             }
         }
     }
@@ -311,7 +314,7 @@ class FilePickerViewModel(
         return files.sortedWith { lhs, rhs ->
             if ((lhs.isDirectory && !rhs.isDirectory) || (!lhs.isDirectory && rhs.isDirectory)) {
                 if (lhs.isDirectory) -1 else 1
-            } else {//if files have same type
+            } else { // if files have same type
                 lhs.name.compareTo(rhs.name)
             }
         }

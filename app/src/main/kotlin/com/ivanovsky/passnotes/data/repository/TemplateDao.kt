@@ -8,5 +8,8 @@ interface TemplateDao {
     fun getTemplateGroupUid(): OperationResult<UUID?>
     fun getTemplates(): OperationResult<List<Template>>
     fun addTemplates(templates: List<Template>): OperationResult<Boolean>
-    fun addTemplates(templates: List<Template>, doInterstitialCommits: Boolean): OperationResult<Boolean>
+    fun addTemplates(
+        templates: List<Template>,
+        doInterstitialCommits: Boolean
+    ): OperationResult<Boolean>
 }

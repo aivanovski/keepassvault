@@ -16,8 +16,8 @@ import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showErrorDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.throwPreferenceNotFound
-import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordDialog
 import com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
+import com.ivanovsky.passnotes.presentation.settings.database.changePassword.ChangePasswordDialog
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -59,7 +59,8 @@ class DatabaseSettingsFragment : BasePreferenceFragment() {
 
     override fun onDisplayPreferenceDialog(preference: Preference?) {
         if (preference is CustomDialogPreference &&
-            preference.key == getString(R.string.pref_change_password)) {
+            preference.key == getString(R.string.pref_change_password)
+        ) {
             val dialog = ChangePasswordDialog.newInstance()
             dialog.show(childFragmentManager, ChangePasswordDialog.TAG)
         } else {

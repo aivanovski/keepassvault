@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.data.repository.file.saf
 
-import timber.log.Timber
 import java.io.IOException
 import java.io.OutputStream
 import java.util.concurrent.atomic.AtomicBoolean
+import timber.log.Timber
 
 class SAFOutputStream(
     private val destination: OutputStream

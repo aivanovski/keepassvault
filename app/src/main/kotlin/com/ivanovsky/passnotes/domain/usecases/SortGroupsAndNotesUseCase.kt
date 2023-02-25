@@ -5,9 +5,9 @@ import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.SortDirection
 import com.ivanovsky.passnotes.domain.entity.SortType
-import com.ivanovsky.passnotes.domain.usecases.sort_groups_and_notes.SortByDateStrategy
-import com.ivanovsky.passnotes.domain.usecases.sort_groups_and_notes.SortByDefaultOrderStrategy
-import com.ivanovsky.passnotes.domain.usecases.sort_groups_and_notes.SortByTitleStrategy
+import com.ivanovsky.passnotes.domain.usecases.sorrting.SortByDateStrategy
+import com.ivanovsky.passnotes.domain.usecases.sorrting.SortByDefaultOrderStrategy
+import com.ivanovsky.passnotes.domain.usecases.sorrting.SortByTitleStrategy
 import kotlinx.coroutines.withContext
 
 class SortGroupsAndNotesUseCase(
@@ -17,7 +17,7 @@ class SortGroupsAndNotesUseCase(
 
     suspend fun sortGroupsAndNotesAccordingToSettings(
         items: List<EncryptedDatabaseEntry>
-    ) : List<EncryptedDatabaseEntry> =
+    ): List<EncryptedDatabaseEntry> =
         sortGroupsAndNotes(
             items = items,
             sortType = settings.sortType,
@@ -43,12 +43,15 @@ class SortGroupsAndNotesUseCase(
                     direction,
                     isGroupsAtStart = isGroupsAtStart
                 )
-                SortType.CREATION_DATE -> SortByDateStrategy(SortByDateStrategy.Type.CREATION_DATE).sort(
-                    items,
-                    direction,
-                    isGroupsAtStart = isGroupsAtStart
-                )
-                SortType.MODIFICATION_DATE -> SortByDateStrategy(SortByDateStrategy.Type.MODIFICATION_DATE).sort(
+                SortType.CREATION_DATE -> SortByDateStrategy(SortByDateStrategy.Type.CREATION_DATE)
+                    .sort(
+                        items,
+                        direction,
+                        isGroupsAtStart = isGroupsAtStart
+                    )
+                SortType.MODIFICATION_DATE -> SortByDateStrategy(
+                    SortByDateStrategy.Type.MODIFICATION_DATE
+                ).sort(
                     items,
                     direction,
                     isGroupsAtStart = isGroupsAtStart

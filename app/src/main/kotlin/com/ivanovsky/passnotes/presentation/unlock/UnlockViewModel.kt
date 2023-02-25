@@ -31,8 +31,8 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
-import com.ivanovsky.passnotes.extensions.getKeyFileDescriptor
 import com.ivanovsky.passnotes.extensions.getFileDescriptor
+import com.ivanovsky.passnotes.extensions.getKeyFileDescriptor
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
@@ -50,8 +50,8 @@ import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
-import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
-import com.ivanovsky.passnotes.presentation.server_login.model.LoginType
+import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
+import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
@@ -223,7 +223,8 @@ class UnlockViewModel(
 
         if (isBiometricAuthenticationAvailable() &&
             biometricData != null &&
-            selectedKeyFile == null) {
+            selectedKeyFile == null
+        ) {
             val decoder = biometricInteractor.getCipherForDecryption(biometricData)
             showBiometricUnlockDialog.call(decoder)
             return
@@ -234,7 +235,9 @@ class UnlockViewModel(
                 FileKeepassKey(
                     file = selectedKeyFile,
                     password = password.ifEmpty { null },
-                    fileSystemProvider = fileSystemResolver.resolveProvider(selectedFile.fsAuthority)
+                    fileSystemProvider = fileSystemResolver.resolveProvider(
+                        selectedFile.fsAuthority
+                    )
                 )
             }
             else -> PasswordKeepassKey(password)
@@ -597,7 +600,10 @@ class UnlockViewModel(
         usedFileIdToSyncStateMap[file.id] = syncState
 
         if (descriptor.uid != selectedFile.fileUid ||
-            descriptor.fsAuthority != selectedFile.fsAuthority) return
+            descriptor.fsAuthority != selectedFile.fsAuthority
+        ) {
+            return
+        }
 
         val models = modelFactory.createFileModels(files, selectedFile, usedFileIdToSyncStateMap)
         fileCellViewModels.value = viewModelFactory.createCellViewModels(models, eventProvider)
@@ -606,7 +612,9 @@ class UnlockViewModel(
             SyncStatus.FILE_NOT_FOUND -> {
                 setScreenState(
                     ScreenState.dataWithError(
-                        errorText = resourceProvider.getString(R.string.sync_file_not_found_message),
+                        errorText = resourceProvider.getString(
+                            R.string.sync_file_not_found_message
+                        ),
                         errorButtonText = resourceProvider.getString(R.string.remove)
                     )
                 )
@@ -775,7 +783,8 @@ class UnlockViewModel(
     private fun getUnlockIconResIdInternal(): Int {
         return if (isBiometricAuthenticationAvailable() &&
             selectedUsedFile?.biometricData != null &&
-            selectedKeyFile == null) {
+            selectedKeyFile == null
+        ) {
             R.drawable.ic_fingerprint_white_24dp
         } else {
             R.drawable.ic_lock_open_white_24dp

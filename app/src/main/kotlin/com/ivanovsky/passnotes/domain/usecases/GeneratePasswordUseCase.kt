@@ -7,8 +7,7 @@ import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 class GeneratePasswordUseCase {
 
     fun generate(length: Int, resources: List<PasswordResource>): String {
-        if (resources.isEmpty() ||
-            (resources.size == 1 && resources.contains(PasswordResource.SPACE))) {
+        if (resources.isEmpty() || isSpaceOnly(resources)) {
             return EMPTY
         }
 
@@ -17,5 +16,9 @@ class GeneratePasswordUseCase {
             .generateOneCharFromEachResource()
             .generateOtherChars()
             .build()
+    }
+
+    private fun isSpaceOnly(resources: List<PasswordResource>): Boolean {
+        return resources.size == 1 && resources.first() == PasswordResource.SPACE
     }
 }

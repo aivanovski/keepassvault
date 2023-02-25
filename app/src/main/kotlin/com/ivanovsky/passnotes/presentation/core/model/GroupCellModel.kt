@@ -6,5 +6,5 @@ data class GroupCellModel(
     override val id: String,
     val group: Group,
     val noteCount: Int,
-    val childGroupCount: Int,
+    val childGroupCount: Int
 ) : BaseCellModel()

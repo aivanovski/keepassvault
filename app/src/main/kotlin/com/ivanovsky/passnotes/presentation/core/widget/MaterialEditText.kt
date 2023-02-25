@@ -341,9 +341,10 @@ class MaterialEditText(
     }
 
     private fun determineIsActionButtonVisibleInternal(): Boolean {
-        return isActionButtonVisible &&
-            (actionButton == ActionButton.EYE ||
-                (actionButton == ActionButton.CLEAR && getTextInternal().isNotEmpty()))
+        val shouldBeVisible = actionButton == ActionButton.EYE ||
+            (actionButton == ActionButton.CLEAR && getTextInternal().isNotEmpty())
+
+        return isActionButtonVisible && shouldBeVisible
     }
 
     @DrawableRes

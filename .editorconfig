@@ -1,0 +1,10 @@
+root = true
+
+[*]
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+ktlint_code_style = android
+insert_final_newline = false
+ij_kotlin_imports_layout = *
+max_line_length = 100

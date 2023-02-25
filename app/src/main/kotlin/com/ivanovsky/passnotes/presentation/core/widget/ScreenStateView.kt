@@ -3,10 +3,7 @@ package com.ivanovsky.passnotes.presentation.core.widget
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.FrameLayout
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.core.view.isVisible
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.ViewScreenStateBinding

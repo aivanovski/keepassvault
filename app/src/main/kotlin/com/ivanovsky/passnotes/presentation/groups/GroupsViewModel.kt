@@ -40,11 +40,11 @@ import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
 import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
-import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingType
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
+import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
@@ -52,21 +52,21 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellVie
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewModel
-import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
+import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toUUID
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.parameter.parametersOf
-import java.util.UUID
 
 class GroupsViewModel(
     private val interactor: GroupsInteractor,
@@ -162,7 +162,8 @@ class GroupsViewModel(
     override fun onSettingsChanged(pref: SettingsImpl.Pref) {
         if (pref == SettingsImpl.Pref.SORT_TYPE ||
             pref == SettingsImpl.Pref.SORT_DIRECTION ||
-            pref == SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED) {
+            pref == SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED
+        ) {
             loadData()
         }
     }
@@ -532,13 +533,13 @@ class GroupsViewModel(
     }
 
     private fun findGroupInItems(groupUid: UUID): Group? {
-        return (currentDataItems?.firstOrNull { item ->
+        return currentDataItems?.firstOrNull { item ->
             if (item is Group) {
                 item.uid == groupUid
             } else {
                 false
             }
-        } as? Group)
+        } as? Group
     }
 
     private fun onNoteClicked(noteUid: UUID) {
@@ -560,13 +561,13 @@ class GroupsViewModel(
     }
 
     private fun findNoteInItems(noteUid: UUID): Note? {
-        return (currentDataItems?.firstOrNull { item ->
+        return currentDataItems?.firstOrNull { item ->
             if (item is Note) {
                 item.uid == noteUid
             } else {
                 false
             }
-        } as? Note)
+        } as? Note
     }
 
     private fun getCurrentGroupUid(): UUID? {

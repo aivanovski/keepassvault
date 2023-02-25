@@ -16,8 +16,8 @@ import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem
 import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.ABOUT
 import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.DEBUG_MENU
 import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.LOCK
-import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.SETTINGS
 import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.SELECT_FILE
+import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem.SETTINGS
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 
 class NavigationMenuViewModel(

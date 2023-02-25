@@ -19,8 +19,8 @@ import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
-import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.getOrNull
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
@@ -39,23 +39,23 @@ import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DatabaseStatusCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
-import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.AttachmentCellViewModel
+import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.STAR
 import com.ivanovsky.passnotes.util.UrlUtils
 import com.ivanovsky.passnotes.util.formatAccordingLocale
 import com.ivanovsky.passnotes.util.substituteAll
+import java.io.File
+import java.util.UUID
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
-import java.io.File
-import java.util.*
 
 class NoteViewModel(
     private val interactor: NoteInteractor,
@@ -525,7 +525,8 @@ class NoteViewModel(
                     if (hasHiddenProperties) NoteMenuItem.TOGGLE_HIDDEN else null
                 )
             }
-            screenState.isDisplayingData && args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
+            screenState.isDisplayingData &&
+                args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
                 listOfNotNull(
                     NoteMenuItem.SELECT,
                     NoteMenuItem.LOCK,

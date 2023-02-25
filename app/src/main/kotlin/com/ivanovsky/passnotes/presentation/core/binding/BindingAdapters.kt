@@ -29,7 +29,6 @@ import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.core.widget.SecureTextView
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ScreenStateHandler
@@ -40,18 +39,19 @@ import com.ivanovsky.passnotes.presentation.core.widget.CellLinearLayout
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
+import com.ivanovsky.passnotes.presentation.core.widget.SecureTextView
+import com.ivanovsky.passnotes.presentation.core.widget.TextMovementMethod
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnButtonClickListener
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnItemSelectListener
-import com.ivanovsky.passnotes.presentation.core.widget.TextMovementMethod
 import com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape
-import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
-import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PASSWORD
-import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PLANE_TEXT
 import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType
 import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType.DIGITS
 import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType.TEXT
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PASSWORD
+import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PLANE_TEXT
 import com.ivanovsky.passnotes.util.getLifecycleOwner
 
 @BindingAdapter("screenState", "screenStateHandler")
@@ -186,7 +186,9 @@ fun setInputType(editText: EditText, textInputType: TextInputType?) {
         TextInputType.DIGITS -> InputType.TYPE_CLASS_NUMBER
         TextInputType.URL -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_URI
         TextInputType.TEXT -> InputType.TYPE_CLASS_TEXT
-        TextInputType.EMAIL -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+        TextInputType.EMAIL -> {
+            InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+        }
         TextInputType.TEXT_CAP_SENTENCES -> {
             InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
         }

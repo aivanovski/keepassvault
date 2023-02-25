@@ -16,10 +16,10 @@ import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
-import timber.log.Timber
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.io.OutputStream
+import timber.log.Timber
 
 class SAFFileSystemProvider(
     private val context: Context

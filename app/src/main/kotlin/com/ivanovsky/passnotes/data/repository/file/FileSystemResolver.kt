@@ -3,19 +3,19 @@ package com.ivanovsky.passnotes.data.repository.file
 import android.content.Context
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FSAuthority
-import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
-import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.data.entity.FSType
+import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.data.repository.db.dao.GitRootDao
+import com.ivanovsky.passnotes.data.repository.file.git.GitClient
+import com.ivanovsky.passnotes.data.repository.file.git.GitFileSystemAuthenticator
 import com.ivanovsky.passnotes.data.repository.file.regular.RegularFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientAdapter
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.saf.SAFFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.webdav.WebDavClientV2
 import com.ivanovsky.passnotes.data.repository.file.webdav.WebdavAuthenticator
-import com.ivanovsky.passnotes.data.repository.file.git.GitClient
-import com.ivanovsky.passnotes.data.repository.file.git.GitFileSystemAuthenticator
 import com.ivanovsky.passnotes.data.repository.settings.Settings
+import com.ivanovsky.passnotes.domain.FileHelper
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import okhttp3.OkHttpClient
@@ -79,7 +79,9 @@ class FileSystemResolver(
             }
             FSType.GIT -> {
                 val authenticator = GitFileSystemAuthenticator(fsAuthority)
-                val client = RemoteApiClientAdapter(GitClient(authenticator, fileHelper, gitRootDao))
+                val client = RemoteApiClientAdapter(
+                    GitClient(authenticator, fileHelper, gitRootDao)
+                )
 
                 RemoteFileSystemProvider(
                     authenticator,

@@ -73,7 +73,9 @@ class MainActivity :
             }
 
             override fun onDrawerStateChanged(newState: Int) {
-                if (newState == DrawerLayout.STATE_DRAGGING || newState == DrawerLayout.STATE_SETTLING) {
+                if (newState == DrawerLayout.STATE_DRAGGING ||
+                    newState == DrawerLayout.STATE_SETTLING
+                ) {
                     navigationViewModel.onMenuDragging()
                 }
             }
@@ -108,7 +110,9 @@ class MainActivity :
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val handledByFragment = supportFragmentManager.fragments.any { it.onOptionsItemSelected(item) }
+        val handledByFragment = supportFragmentManager.fragments.any {
+            it.onOptionsItemSelected(item)
+        }
         if (handledByFragment) {
             return true
         }

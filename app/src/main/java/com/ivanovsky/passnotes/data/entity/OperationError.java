@@ -14,39 +14,50 @@ public class OperationError {
     public static final String MESSAGE_FILE_NOT_FOUND = "File not found";
     public static final String MESSAGE_FILE_DOES_NOT_EXIST = "File doesn't exist";
     public static final String MESSAGE_AUTH_FAILED = "Auth failed";
-    public static final String MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS = "Incorrect file system credentials";
+    public static final String MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS =
+            "Incorrect file system credentials";
     public static final String MESSAGE_FAILED_TO_LOAD_FILE = "Failed to load file";
     public static final String MESSAGE_FAILED_TO_LOAD_FILE_LIST = "Failed to load file list";
     public static final String MESSAGE_IO_ERROR = "IO error";
     public static final String MESSAGE_RECORD_IS_ALREADY_EXISTS = "Record is already exists";
     public static final String MESSAGE_FILE_IS_ALREADY_EXISTS = "File is already exists";
     public static final String MESSAGE_FAILED_TO_OPEN_DB_FILE = "Failed to open DB file";
-    public static final String MESSAGE_FAILED_TO_OPEN_DEFAULT_DB_FILE = "Failed to open default DB file";
-    public static final String MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE = "Local version conflicts with remote";
+    public static final String MESSAGE_FAILED_TO_OPEN_DEFAULT_DB_FILE =
+            "Failed to open default DB file";
+    public static final String MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE =
+            "Local version conflicts with remote";
     public static final String MESSAGE_FAILED_TO_FIND_FILE = "Failed to find file";
-    public static final String MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE = "Failed to access to private storage";
+    public static final String MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE =
+            "Failed to access to private storage";
     public static final String MESSAGE_FAILED_TO_ACCESS_TO_FILE = "Failed to access to file";
-    public static final String MESSAGE_FAILED_TO_ACCESS_TO_FILE_SYSTEM = "Failed to access to file system";
+    public static final String MESSAGE_FAILED_TO_ACCESS_TO_FILE_SYSTEM =
+            "Failed to access to file system";
     public static final String MESSAGE_FAILED_TO_GET_DATABASE = "Failed to get database";
-    public static final String MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED = "Deferred operations are not supported";
+    public static final String MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED =
+            "Deferred operations are not supported";
     public static final String MESSAGE_FAILED_TO_FIND_CACHED_FILE = "Failed to find cached file";
     public static final String MESSAGE_FAILED_TO_FIND_ROOT_GROUP = "Failed to find root group";
     public static final String MESSAGE_FAILED_TO_FIND_PARENT_GROUP = "Failed to find parent group";
-    public static final String MESSAGE_FAILED_TO_FIND_NEW_PARENT_GROUP = "Failed to find new parent group";
+    public static final String MESSAGE_FAILED_TO_FIND_NEW_PARENT_GROUP =
+            "Failed to find new parent group";
     public static final String MESSAGE_UID_IS_NULL = "Uid is null";
     public static final String MESSAGE_PARENT_UID_IS_NULL = "Parent uid is null";
     public static final String MESSAGE_DUPLICATED_NOTE = "Duplicated note";
     public static final String MESSAGE_FAILED_TO_ADD_ENTRY = "Failed to add entry";
     public static final String MESSAGE_FAILED_TO_REMOVE_ROOT_GROUP = "Failed to remove root group";
     public static final String MESSAGE_FAILED_TO_GET_PARENT_PATH = "Failed to get parent path";
-    public static final String MESSAGE_FAILED_TO_RESOLVE_SYNC_PROCESSOR = "Failed to resolve sync processot";
+    public static final String MESSAGE_FAILED_TO_RESOLVE_SYNC_PROCESSOR =
+            "Failed to resolve sync processot";
     public static final String MESSAGE_FILE_IS_NOT_MODIFIED = "File is not modified";
     public static final String MESSAGE_INCORRECT_SYNC_STATUS = "Incorrect sync status";
     public static final String MESSAGE_INCORRECT_USE_CASE = "Incorrect use case";
-    public static final String MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED = "Write operation is not supported";
+    public static final String MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED =
+            "Write operation is not supported";
     public static final String MESSAGE_UNSUPPORTED_CONFIG_TYPE = "Unsupported config type";
-    public static final String MESSAGE_FAILED_TO_COMPLETE_OPERATION = "Failed to complete operation";
-    public static final String MESSAGE_FAILED_TO_MOVE_GROUP_INSIDE_ITS_OWN_TREE = "Failed to move group inside its owdn tree";
+    public static final String MESSAGE_FAILED_TO_COMPLETE_OPERATION =
+            "Failed to complete operation";
+    public static final String MESSAGE_FAILED_TO_MOVE_GROUP_INSIDE_ITS_OWN_TREE =
+            "Failed to move group inside its owdn tree";
     public static final String MESSAGE_FAILED_TO_REMOVE_FILE = "Failed to remove file";
     public static final String MESSAGE_FAILED_TO_READ_KEY_FILE = "Failed to read key file";
     public static final String MESSAGE_UNSUPPORTED_OPERATION = "Unsupported operation";
@@ -55,21 +66,31 @@ public class OperationError {
     public static final String MESSAGE_FAILED_TO_DECODE_DATA = "Failed to decode data";
     public static final String MESSAGE_INVALID_PASSWORD = "Invalid password";
     public static final String MESSAGE_INVALID_KEY_FILE = "Invalid key file";
-    public static final String MESSAGE_FAILED_TO_CREATE_A_DIRECTORY = "Failed to create a directory";
+    public static final String MESSAGE_FAILED_TO_CREATE_A_DIRECTORY =
+            "Failed to create a directory";
 
     public static final String GENERIC_MESSAGE_NOT_FOUND = "%s not found";
     public static final String GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST = "Group '%s' already exists";
-    public static final String GENERIC_MESSAGE_FAILED_TO_RETRIEVE_DATA_BY_URI = "Failed to retrive data by uri: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_RETRIEVE_DATA_BY_URI =
+            "Failed to retrive data by uri: %s";
     public static final String GENERIC_MESSAGE_FAILED_TO_FIND_COLUMN = "Failed to find column: %s";
-    public static final String GENERIC_MESSAGE_FAILED_TO_GET_ACCESS_RIGHT_TO_URI = "Failed to get access to: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_GET_ACCESS_RIGHT_TO_URI =
+            "Failed to get access to: %s";
     public static final String GENERIC_MESSAGE_FAILED_TO_FIND_FILE = "Failed to find file: %s";
-    public static final String GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID = "Failed to find '%s' in db: uid=%s";
-    public static final String GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_ID = "Failed to find '%s' in db: id=%s";
-    public static final String GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY = "Failed fo find entity by: %s";
-    public static final String GENERIC_MESSAGE_FAILED_TO_ACCESS_TO_FILE = "Failed to access to file: %s";
-    public static final String GENERIC_MESSAGE_FAILED_TO_GET_REFERENCE_TO = "Failed to get reference to: %s";
-    public static final String GENERIC_MESSAGE_FAILED_TO_GET_PARENT_FOR = "Failed to get parent for: %s";
-    public static final String GENERIC_MESSAGE_FILE_IS_NOT_A_DIRECTORY = "File is not a directory: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID =
+            "Failed to find '%s' in db: uid=%s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_ID =
+            "Failed to find '%s' in db: id=%s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY =
+            "Failed fo find entity by: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_ACCESS_TO_FILE =
+            "Failed to access to file: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_GET_REFERENCE_TO =
+            "Failed to get reference to: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_GET_PARENT_FOR =
+            "Failed to get parent for: %s";
+    public static final String GENERIC_MESSAGE_FILE_IS_NOT_A_DIRECTORY =
+            "File is not a directory: %s";
 
     private Type type;
     private String message;
@@ -210,7 +231,7 @@ public class OperationError {
         GENERIC_ERROR,
         DB_AUTH_ERROR,
         DB_ERROR,
-        DB_VERSION_CONFLICT_ERROR,// if user modified db
+        DB_VERSION_CONFLICT_ERROR, // if user modified db
         FILE_ACCESS_ERROR,
         FILE_PERMISSION_ERROR,
         FILE_NOT_FOUND_ERROR,
@@ -223,7 +244,7 @@ public class OperationError {
         ERROR_MESSAGE // not important error that can be ignored
     }
 
-    //TODO: remove unnecessary constructors and refactor
+    // TODO: remove unnecessary constructors and refactor
 
     public OperationError(Type type) {
         this.type = type;

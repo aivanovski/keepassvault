@@ -11,7 +11,9 @@ import com.ivanovsky.passnotes.presentation.core.model.GroupCellModel
 import com.ivanovsky.passnotes.presentation.core.model.NoteCellModel
 import com.ivanovsky.passnotes.presentation.core.model.OptionPanelCellModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.OptionPanelState
-import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.OptionPanelState.*
+import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.OptionPanelState.HIDDEN
+import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.OptionPanelState.PASTE
+import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.OptionPanelState.SAVE_AUTOFILL_DATA
 import com.ivanovsky.passnotes.util.StringUtils
 
 class GroupsCellModelFactory(

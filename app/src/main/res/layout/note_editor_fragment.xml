@@ -9,7 +9,7 @@
 
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.note_editor.NoteEditorViewModel" />
+            type="com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

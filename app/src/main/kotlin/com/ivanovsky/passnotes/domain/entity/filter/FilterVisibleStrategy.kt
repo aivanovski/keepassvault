@@ -5,7 +5,7 @@ import com.ivanovsky.passnotes.data.entity.Property
 open class FilterVisibleStrategy : PropertyFilterStrategy {
 
     override fun apply(properties: Sequence<Property>): Sequence<Property> {
-        return properties.filter { isPropertyVisible(it)}
+        return properties.filter { isPropertyVisible(it) }
     }
 
     protected fun isPropertyVisible(property: Property): Boolean {

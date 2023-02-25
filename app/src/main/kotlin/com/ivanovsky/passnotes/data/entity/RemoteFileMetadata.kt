@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.data.entity
 
-import java.util.*
+import java.util.Date
 
 data class RemoteFileMetadata(
     val uid: String,

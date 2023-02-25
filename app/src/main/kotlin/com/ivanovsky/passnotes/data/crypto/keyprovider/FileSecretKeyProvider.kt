@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.data.crypto.keyprovider
 import android.content.Context
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.KEY_ALIAS
-import timber.log.Timber
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -12,6 +11,7 @@ import java.security.KeyStore
 import java.security.NoSuchAlgorithmException
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import timber.log.Timber
 
 class FileSecretKeyProvider(
     private val context: Context

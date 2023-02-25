@@ -10,7 +10,9 @@ class DataCipherProviderImpl(
     private val context: Context
 ) : DataCipherProvider {
 
-    private val dataCipher: DataCipher by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { instantiateDataCipher() }
+    private val dataCipher: DataCipher by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        instantiateDataCipher()
+    }
 
     override fun getCipher(): DataCipher {
         return dataCipher

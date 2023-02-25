@@ -1,0 +1,10 @@
+root = true
+
+[*]
+trim_trailing_whitespace = true
+# [*.{java,kt,kts,xml,gradle}]
+# indent_size = 4
+
+[*.{kt,kts}]
+ktlint_code_style = official
+insert_final_newline = false

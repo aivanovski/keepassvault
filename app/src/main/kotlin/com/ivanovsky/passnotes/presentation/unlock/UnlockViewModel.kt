@@ -50,8 +50,8 @@ import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
-import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
-import com.ivanovsky.passnotes.presentation.server_login.model.LoginType
+import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
+import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory

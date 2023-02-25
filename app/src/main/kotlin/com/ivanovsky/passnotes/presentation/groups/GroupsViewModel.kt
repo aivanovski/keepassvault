@@ -56,8 +56,8 @@ import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorMode
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY

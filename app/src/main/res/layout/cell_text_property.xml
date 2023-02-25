@@ -8,7 +8,7 @@
 
         <variable
             name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.note_editor.cells.viewmodel.TextPropertyCellViewModel" />
+            type="com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.TextPropertyCellViewModel" />
     </data>
 
     <com.google.android.material.textfield.TextInputLayout

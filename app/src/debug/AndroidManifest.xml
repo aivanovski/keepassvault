@@ -8,7 +8,7 @@
         tools:replace="name">
 
         <receiver
-            android:name=".domain.test_data.TestDataBroadcastReceiver"
+            android:name=".domain.test.TestDataBroadcastReceiver"
             android:enabled="true"
             android:exported="true" />
 

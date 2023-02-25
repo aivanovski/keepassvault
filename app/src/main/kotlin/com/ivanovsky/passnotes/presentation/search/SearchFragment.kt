@@ -29,9 +29,9 @@ import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
-import com.ivanovsky.passnotes.presentation.dialogs.sort_and_view.SortAndViewDialog
-import com.ivanovsky.passnotes.presentation.dialogs.sort_and_view.SortAndViewDialogArgs
-import com.ivanovsky.passnotes.presentation.dialogs.sort_and_view.ScreenType
+import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
+import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.ScreenType
 import com.ivanovsky.passnotes.presentation.search.SearchViewModel.SearchMenuItem
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 

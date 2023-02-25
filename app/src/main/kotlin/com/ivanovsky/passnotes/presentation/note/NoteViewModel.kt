@@ -44,8 +44,8 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.AttachmentCellViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorMode
-import com.ivanovsky.passnotes.presentation.note_editor.NoteEditorArgs
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorMode
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.STAR

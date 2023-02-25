@@ -33,8 +33,8 @@ import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SingleTextCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.TwoTextWithIconCellViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
-import com.ivanovsky.passnotes.presentation.server_login.ServerLoginArgs
-import com.ivanovsky.passnotes.presentation.server_login.model.LoginType
+import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
+import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellModelFactory
 import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.GIT

@@ -1,8 +1,21 @@
 package com.ivanovsky.passnotes.data.repository.keepass.kotpass
 
+import app.keemobile.kotpass.cryptography.EncryptedValue
+import app.keemobile.kotpass.database.Credentials
+import app.keemobile.kotpass.database.KeePassDatabase
+import app.keemobile.kotpass.database.decode
+import app.keemobile.kotpass.database.encode
+import app.keemobile.kotpass.database.modifiers.modifyCredentials
+import app.keemobile.kotpass.database.modifiers.modifyMeta
+import app.keemobile.kotpass.models.Entry
+import app.keemobile.kotpass.models.Group as RawGroup
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INVALID_KEY_FILE
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INVALID_PASSWORD
+import com.ivanovsky.passnotes.data.entity.OperationError.newAuthError
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -17,27 +30,13 @@ import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
-import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.KeepassJavaDatabase
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateDaoImpl
+import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.KeepassJavaDatabase
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.util.InputOutputUtils
-import app.keemobile.kotpass.cryptography.EncryptedValue
-import app.keemobile.kotpass.database.Credentials
-import app.keemobile.kotpass.database.KeePassDatabase
-import app.keemobile.kotpass.database.decode
-import app.keemobile.kotpass.database.encode
-import app.keemobile.kotpass.database.modifiers.modifyCredentials
-import app.keemobile.kotpass.database.modifiers.modifyMeta
-import app.keemobile.kotpass.models.Entry
-import com.ivanovsky.passnotes.data.entity.KeyType
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INVALID_KEY_FILE
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INVALID_PASSWORD
-import com.ivanovsky.passnotes.data.entity.OperationError.newAuthError
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
-import timber.log.Timber
 import java.io.IOException
 import java.io.InputStream
 import java.util.LinkedList
@@ -45,7 +44,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-import app.keemobile.kotpass.models.Group as RawGroup
+import timber.log.Timber
 
 class KotpassDatabase(
     private val fsProvider: FileSystemProvider,

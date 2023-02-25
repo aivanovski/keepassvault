@@ -16,7 +16,7 @@ class SortByTitleStrategy : SortStrategy {
             val groups = items
                 .filterGroups()
                 .map { item -> Pair(item.title, item) }
-                .sortedByWithDirection (direction) { it.first }
+                .sortedByWithDirection(direction) { it.first }
                 .map { it.second }
 
             val notes = items
@@ -39,7 +39,7 @@ class SortByTitleStrategy : SortStrategy {
                         else -> throw IllegalStateException()
                     }
                 }
-                .sortedByWithDirection (direction) { it.first }
+                .sortedByWithDirection(direction) { it.first }
                 .map { it.second }
         }
     }

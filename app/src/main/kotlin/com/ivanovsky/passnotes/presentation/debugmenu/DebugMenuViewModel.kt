@@ -24,10 +24,10 @@ import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 
 class DebugMenuViewModel(
     private val interactor: DebugMenuInteractor,
@@ -53,7 +53,9 @@ class DebugMenuViewModel(
     val isCloseDbButtonEnabled = MutableLiveData(false)
     val isAddEntryButtonEnabled = MutableLiveData(false)
     val isExternalStorageEnabled = MutableLiveData(settings.isExternalStorageCacheEnabled)
-    val isFakeBiometricEnabled = MutableLiveData(settings.testToggles?.isFakeBiometricEnabled ?: false)
+    val isFakeBiometricEnabled = MutableLiveData(
+        settings.testToggles?.isFakeBiometricEnabled ?: false
+    )
     val showSnackbarEvent = SingleLiveEvent<String>()
     val showSystemFilePickerEvent = SingleLiveEvent<Unit>()
     val showSystemFileCreatorEvent = SingleLiveEvent<Unit>()
@@ -437,10 +439,11 @@ class DebugMenuViewModel(
     }
 
     private fun KeepassImplementation.getTitle(): String {
-        return when (this) {
-            KeepassImplementation.KOTPASS -> resourceProvider.getString(R.string.kotpass)
-            KeepassImplementation.KEEPASS_JAVA_2 -> resourceProvider.getString(R.string.keepass_java_2)
+        val id = when (this) {
+            KeepassImplementation.KOTPASS -> R.string.kotpass
+            KeepassImplementation.KEEPASS_JAVA_2 -> R.string.keepass_java_2
         }
+        return resourceProvider.getString(id)
     }
 
     companion object {

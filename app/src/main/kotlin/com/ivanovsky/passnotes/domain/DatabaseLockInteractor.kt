@@ -7,24 +7,24 @@ import androidx.annotation.UiThread
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
-import com.ivanovsky.passnotes.presentation.service.model.ServiceState
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.presentation.service.LockService
 import com.ivanovsky.passnotes.presentation.service.model.LockServiceCommand
+import com.ivanovsky.passnotes.presentation.service.model.ServiceState
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
 
 class DatabaseLockInteractor(
     private val context: Context,
     private val settings: Settings,
     private val lockUseCase: LockDatabaseUseCase
-)  {
+) {
 
     private val handler = Handler(Looper.getMainLooper())
     private val activeScreens = CopyOnWriteArrayList<String>()
@@ -75,7 +75,8 @@ class DatabaseLockInteractor(
 
         if (isDatabaseOpened.get() &&
             activeScreens.size == 0 &&
-            settings.autoLockDelayInMs != -1) {
+            settings.autoLockDelayInMs != -1
+        ) {
             startLockTimer()
         }
     }
@@ -92,7 +93,8 @@ class DatabaseLockInteractor(
     private fun startServiceIfNeed() {
         val status = databaseStatus.get()
         if (LockService.getCurrentState() == ServiceState.STOPPED &&
-            (settings.isLockNotificationVisible || status == DatabaseStatus.POSTPONED_CHANGES)) {
+            (settings.isLockNotificationVisible || status == DatabaseStatus.POSTPONED_CHANGES)
+        ) {
             scope.launch {
                 LockService.runCommand(context, LockServiceCommand.ShowNotification)
             }
@@ -122,9 +124,5 @@ class DatabaseLockInteractor(
         )
 
         Timber.d("Auto-Lock timer started with delay: %s milliseconds", delay)
-    }
-
-    companion object {
-        private val TAG = DatabaseLockInteractor::class.simpleName
     }
 }

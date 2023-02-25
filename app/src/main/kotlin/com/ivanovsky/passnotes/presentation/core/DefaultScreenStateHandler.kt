@@ -3,9 +3,9 @@ package com.ivanovsky.passnotes.presentation.core
 import android.view.View
 import androidx.core.view.isVisible
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingType.*
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
+import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
 import com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
 
 open class DefaultScreenStateHandler : ScreenStateHandler {

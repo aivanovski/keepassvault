@@ -4,4 +4,3 @@ enum class TextTransformationMethod {
     PASSWORD,
     PLANE_TEXT
 }
-

@@ -8,8 +8,8 @@ import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.LoggerInteractor
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveBiometricDataUseCase
-import kotlinx.coroutines.withContext
 import java.io.File
+import kotlinx.coroutines.withContext
 
 class AppSettingsInteractor(
     private val loggerInteractor: LoggerInteractor,

@@ -26,8 +26,8 @@ import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.throwPreferenceNotFound
 import com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
 import com.ivanovsky.passnotes.util.getChildViews
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class AppSettingsFragment : BasePreferenceFragment() {
 
@@ -82,10 +82,14 @@ class AppSettingsFragment : BasePreferenceFragment() {
         isFileLogEnabledPref = findPreference(getString(R.string.pref_is_file_log_enabled))
             ?: throwPreferenceNotFound(R.string.pref_is_file_log_enabled)
 
-        isPostponedSyncEnabledPref = findPreference(getString(R.string.pref_is_postponed_sync_enabled))
+        isPostponedSyncEnabledPref = findPreference(
+            getString(R.string.pref_is_postponed_sync_enabled)
+        )
             ?: throwPreferenceNotFound(R.string.pref_is_postponed_sync_enabled)
 
-        isBiometricUnlockEnabledPref = findPreference(getString(R.string.pref_is_biometric_unlock_enabled))
+        isBiometricUnlockEnabledPref = findPreference(
+            getString(R.string.pref_is_biometric_unlock_enabled)
+        )
             ?: throwPreferenceNotFound(R.string.pref_is_biometric_unlock_enabled)
 
         categoryGeneral = findPreference(getString(R.string.pref_category_general))

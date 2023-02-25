@@ -17,7 +17,6 @@ fun Note.addOrUpdateProperty(property: Property): Note {
         if (existing.size == 1) {
             val idx = newProperties.indexOf(existing.first())
             newProperties[idx] = property
-
         } else {
             if (existing.isNotEmpty()) {
                 newProperties.removeAll(existing)

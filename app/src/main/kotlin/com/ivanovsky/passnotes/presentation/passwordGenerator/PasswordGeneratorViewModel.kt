@@ -86,7 +86,8 @@ class PasswordGeneratorViewModel(
     fun navigateBack() = router.exit()
 
     private fun isResourcesValid(resources: List<PasswordResource>): Boolean {
-        return resources.size > 1 || (resources.size == 1 && !resources.contains(PasswordResource.SPACE))
+        return resources.size > 1 ||
+            (resources.size == 1 && !resources.contains(PasswordResource.SPACE))
     }
 
     private fun getErrorMessage(resources: List<PasswordResource>): String? {

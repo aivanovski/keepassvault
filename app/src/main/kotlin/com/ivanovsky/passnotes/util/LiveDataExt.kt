@@ -11,4 +11,3 @@ fun <T> MutableLiveData<T?>.setIfNeed(newValue: T?) {
 fun <T> MutableLiveData<T?>.reset() {
     setIfNeed(null)
 }
-

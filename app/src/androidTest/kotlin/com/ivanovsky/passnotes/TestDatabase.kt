@@ -18,7 +18,9 @@ object TestDatabase {
             InstrumentationRegistry.getInstrumentation().context,
             AppDatabase::class.java
         )
-            .addTypeConverter(FSAuthorityTypeConverter(DataCipherProviderImpl(ClearTextDataCipher())))
+            .addTypeConverter(
+                FSAuthorityTypeConverter(DataCipherProviderImpl(ClearTextDataCipher()))
+            )
             .build()
     }
 

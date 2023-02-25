@@ -33,7 +33,9 @@ abstract class BaseScreenViewModel(
     }
 
     protected fun throwIncorrectLaunchMode(mode: ApplicationLaunchMode): Nothing {
-        throw IllegalStateException("Incorrect ${ApplicationLaunchMode::class.simpleName} was specified: $mode")
+        throw IllegalStateException(
+            "Incorrect ${ApplicationLaunchMode::class.simpleName} was specified: $mode"
+        )
     }
 
     override fun onCleared() {

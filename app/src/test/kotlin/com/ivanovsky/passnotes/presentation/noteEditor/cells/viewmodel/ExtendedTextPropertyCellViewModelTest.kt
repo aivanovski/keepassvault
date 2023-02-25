@@ -7,8 +7,8 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
-import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.ExtendedTextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
+import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.ExtendedTextPropertyCellModel
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

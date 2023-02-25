@@ -11,12 +11,12 @@ import com.ivanovsky.passnotes.presentation.autofill.extensions.getNodesByFieldT
 import com.ivanovsky.passnotes.presentation.autofill.extensions.hasFields
 import com.ivanovsky.passnotes.presentation.autofill.extensions.toField
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillFieldType
-import com.ivanovsky.passnotes.presentation.autofill.model.AutofillSourceType
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillNode
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillSourceType
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.autofill.model.MutableAutofillStructure
-import timber.log.Timber
 import java.util.Locale
+import timber.log.Timber
 
 @RequiresApi(api = 26)
 class AutofillStructureParser(
@@ -190,10 +190,10 @@ class AutofillStructureParser(
     }
 
     private fun isAutofillHintMatchUsername(hint: String): Boolean {
-        return hint.contains(View.AUTOFILL_HINT_USERNAME, true)
-            || hint.contains(View.AUTOFILL_HINT_EMAIL_ADDRESS, true)
-            || hint.contains("email", true)
-            || hint.contains(View.AUTOFILL_HINT_PHONE, true)
+        return hint.contains(View.AUTOFILL_HINT_USERNAME, true) ||
+            hint.contains(View.AUTOFILL_HINT_EMAIL_ADDRESS, true) ||
+            hint.contains("email", true) ||
+            hint.contains(View.AUTOFILL_HINT_PHONE, true)
     }
 
     private fun isAutofillHintMatchPassword(hint: String): Boolean {
@@ -221,10 +221,10 @@ class AutofillStructureParser(
 
             val name = attribute.second ?: continue
             when {
-                name.equals("tel", ignoreCase = true)
-                    || name.equals("email", ignoreCase = true)
-                    || name.equals("text", ignoreCase = true)
-                    || name.contains("user", ignoreCase = true)-> {
+                name.equals("tel", ignoreCase = true) ||
+                    name.equals("email", ignoreCase = true) ||
+                    name.equals("text", ignoreCase = true) ||
+                    name.contains("user", ignoreCase = true) -> {
                     return AutofillNode(
                         AutofillFieldType.USERNAME,
                         AutofillSourceType.HTML_ATTRIBUTE,
@@ -244,10 +244,12 @@ class AutofillStructureParser(
         return null
     }
 
-    private fun isInputTypeMatchWith(inputType: Int, vararg types: Int): Boolean {
-        return types.any { type ->
-            inputType and InputType.TYPE_MASK_VARIATION == type
-        }
+    private fun isInputTypeMatchWith(inputType: Int, types: Collection<Int>): Boolean {
+        return types.any { type -> isInputTypeMatchWith(inputType, type) }
+    }
+
+    private fun isInputTypeMatchWith(inputType: Int, type: Int): Boolean {
+        return inputType and InputType.TYPE_MASK_VARIATION == type
     }
 
     private fun getAutofillNodeByInputType(node: ViewNode): AutofillNode? {
@@ -277,28 +279,24 @@ class AutofillStructureParser(
     }
 
     private fun isInputTypeMatchUsername(inputType: Int): Boolean {
-        return (getInputTypeClass(inputType) == InputType.TYPE_CLASS_TEXT &&
-            isInputTypeMatchWith(
-                inputType,
-                InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
-                InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
-                InputType.TYPE_TEXT_VARIATION_NORMAL,
-                InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
-                InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
-            )) ||
-            (getInputTypeClass(inputType) == InputType.TYPE_CLASS_NUMBER &&
-                isInputTypeMatchWith(inputType, InputType.TYPE_NUMBER_VARIATION_NORMAL))
+        val isText = getInputTypeClass(inputType) == InputType.TYPE_CLASS_TEXT
+        if (isText && isInputTypeMatchWith(inputType, USERNAME_INPUT_TYPES)) {
+            return true
+        }
+
+        val isNumber = getInputTypeClass(inputType) == InputType.TYPE_CLASS_NUMBER
+        return isNumber && isInputTypeMatchWith(inputType, InputType.TYPE_NUMBER_VARIATION_NORMAL)
     }
 
     private fun isInputTypeMatchPassword(inputType: Int): Boolean {
-        return (getInputTypeClass(inputType) == InputType.TYPE_CLASS_TEXT &&
-            isInputTypeMatchWith(
-                inputType,
-                InputType.TYPE_TEXT_VARIATION_PASSWORD,
-                InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD
-            )) ||
-            (getInputTypeClass(inputType) == InputType.TYPE_CLASS_NUMBER &&
-                isInputTypeMatchWith(inputType, InputType.TYPE_NUMBER_VARIATION_PASSWORD))
+        val isText = getInputTypeClass(inputType) == InputType.TYPE_CLASS_TEXT
+        if (isText && isInputTypeMatchWith(inputType, PASSWORD_INPUT_TYPES)) {
+            return true
+        }
+
+        val isNumber = getInputTypeClass(inputType) == InputType.TYPE_CLASS_NUMBER
+        return isNumber &&
+            isInputTypeMatchWith(inputType, InputType.TYPE_NUMBER_VARIATION_PASSWORD)
     }
 
     private fun getAutofillNodeByEditTextHint(node: ViewNode): AutofillNode? {
@@ -329,6 +327,19 @@ class AutofillStructureParser(
     }
 
     companion object {
+        private val USERNAME_INPUT_TYPES = setOf(
+            InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+            InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS,
+            InputType.TYPE_TEXT_VARIATION_NORMAL,
+            InputType.TYPE_TEXT_VARIATION_PERSON_NAME,
+            InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT
+        )
+
+        private val PASSWORD_INPUT_TYPES = setOf(
+            InputType.TYPE_TEXT_VARIATION_PASSWORD,
+            InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD
+        )
+
         private val TAG = AutofillStructureParser::class.java.simpleName
     }
 }

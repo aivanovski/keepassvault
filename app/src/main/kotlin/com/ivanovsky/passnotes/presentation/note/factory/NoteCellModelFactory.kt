@@ -7,10 +7,10 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.DividerCellModel
 import com.ivanovsky.passnotes.presentation.core.model.HeaderCellModel
-import com.ivanovsky.passnotes.presentation.note.cells.model.NotePropertyCellModel
 import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
 import com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape
 import com.ivanovsky.passnotes.presentation.note.cells.model.AttachmentCellModel
+import com.ivanovsky.passnotes.presentation.note.cells.model.NotePropertyCellModel
 import com.ivanovsky.passnotes.util.StringUtils
 
 class NoteCellModelFactory(
@@ -119,7 +119,6 @@ class NoteCellModelFactory(
                 models.add(createDividerCell())
             }
         }
-
 
         models.add(SpaceCellModel(R.dimen.huge_margin))
 

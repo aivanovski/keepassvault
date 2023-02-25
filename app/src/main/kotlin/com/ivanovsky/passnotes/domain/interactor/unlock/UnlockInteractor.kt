@@ -6,7 +6,6 @@ import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
-import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID
@@ -15,10 +14,12 @@ import com.ivanovsky.passnotes.data.entity.OperationError.Type.NETWORK_IO_ERROR
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
+import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
+import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
@@ -28,12 +29,12 @@ import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.DecodePasswordWithBiometricUseCase
-import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestPasswordUseCase
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
+import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestPasswordUseCase
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import kotlinx.coroutines.withContext
 
@@ -102,9 +103,7 @@ class UnlockInteractor(
             )
             val open = dbRepo.open(KeepassImplementation.KOTPASS, key, file, fsOptions)
 
-            val result = if (open.isFailed &&
-                (open.error.type == OperationError.Type.DB_VERSION_CONFLICT_ERROR ||
-                    open.error.type == OperationError.Type.AUTH_ERROR)) {
+            val result = if (shouldOpenDbFromCache(open)) {
                 val cachedDb = dbRepo.open(
                     KeepassImplementation.KOTPASS,
                     key,
@@ -126,6 +125,16 @@ class UnlockInteractor(
 
             result.takeStatusWith(true)
         }
+
+    private fun shouldOpenDbFromCache(openResult: OperationResult<EncryptedDatabase>): Boolean {
+        if (openResult.isSucceededOrDeferred) {
+            return false
+        }
+
+        val error = openResult.error
+        return error.type == OperationError.Type.DB_VERSION_CONFLICT_ERROR ||
+            error.type == OperationError.Type.AUTH_ERROR
+    }
 
     suspend fun findNoteForAutofill(
         structure: AutofillStructure

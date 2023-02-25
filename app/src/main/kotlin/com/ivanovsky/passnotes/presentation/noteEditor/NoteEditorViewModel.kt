@@ -45,11 +45,11 @@ import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toCleanString
 import com.ivanovsky.passnotes.util.toUUID
+import java.util.Date
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Date
-import java.util.UUID
 
 class NoteEditorViewModel(
     private val interactor: NoteEditorInteractor,

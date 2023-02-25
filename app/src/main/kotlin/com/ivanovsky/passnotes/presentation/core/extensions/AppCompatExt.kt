@@ -17,5 +17,7 @@ fun <T : Parcelable> AppCompatActivity.getMandatoryExtra(key: String): T {
 }
 
 fun AppCompatActivity.requireExtraArgument(argumentName: String): Nothing {
-    throw IllegalStateException("${this::class.simpleName} requires argument with name: $argumentName")
+    throw IllegalStateException(
+        "${this::class.simpleName} requires argument with name: $argumentName"
+    )
 }

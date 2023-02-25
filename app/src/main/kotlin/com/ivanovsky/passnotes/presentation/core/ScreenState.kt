@@ -8,8 +8,8 @@ data class ScreenState private constructor(
 ) {
 
     val isDisplayingData: Boolean
-        get() = (screenDisplayingType == ScreenDisplayingType.DATA ||
-            screenDisplayingType == ScreenDisplayingType.DATA_WITH_ERROR)
+        get() = screenDisplayingType == ScreenDisplayingType.DATA ||
+            screenDisplayingType == ScreenDisplayingType.DATA_WITH_ERROR
 
     val isDisplayingLoading: Boolean
         get() = screenDisplayingType == ScreenDisplayingType.LOADING

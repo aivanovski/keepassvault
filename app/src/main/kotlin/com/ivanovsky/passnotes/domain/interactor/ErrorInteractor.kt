@@ -2,8 +2,8 @@ package com.ivanovsky.passnotes.domain.interactor
 
 import android.content.Context
 import com.ivanovsky.passnotes.BuildConfig
-import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.OperationError
 import java.lang.StringBuilder
 
 class ErrorInteractor(private val context: Context) {

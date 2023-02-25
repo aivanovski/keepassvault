@@ -10,12 +10,12 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
+import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.EXTERNAL_STORAGE
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.GIT
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.SAF_STORAGE
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.PRIVATE_STORAGE
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.SAF_STORAGE
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.WEBDAV
-import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
 import kotlinx.coroutines.withContext
 

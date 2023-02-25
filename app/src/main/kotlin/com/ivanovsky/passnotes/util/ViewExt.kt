@@ -11,4 +11,3 @@ fun ViewGroup.getChildViews(): List<View> {
     return (0 until childCount)
         .map { getChildAt(it) }
 }
-

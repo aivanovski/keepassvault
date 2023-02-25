@@ -6,9 +6,6 @@ import android.os.Environment
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator
-import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
-import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ACCESS_TO_FILE
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_GET_PARENT_PATH
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_ACCESS_IS_FORBIDDEN
@@ -18,12 +15,14 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
 import com.ivanovsky.passnotes.data.entity.OperationError.newFileNotFoundError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationError.newPermissionError
+import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
+import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
+import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.PermissionHelper.Companion.SDCARD_PERMISSION
-import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
@@ -33,6 +32,7 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.locks.ReentrantLock
+import timber.log.Timber
 
 class RegularFileSystemProvider(
     private val context: Context,
@@ -152,7 +152,9 @@ class RegularFileSystemProvider(
         options: FSOptions
     ): OperationResult<OutputStream> {
         if (!options.isWriteEnabled) {
-            return OperationResult.error(newGenericIOError(MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED))
+            return OperationResult.error(
+                newGenericIOError(MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED)
+            )
         }
 
         val check = checkPermissionForPath(file.path)

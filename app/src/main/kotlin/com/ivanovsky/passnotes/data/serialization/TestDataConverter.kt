@@ -63,8 +63,8 @@ object TestDataConverter {
                 webdavUsername.isNotEmpty() ||
                 webdavPassword.isNotEmpty() ||
                 gitUrl.isNotEmpty() ||
-                (filenamePatterns.isNotEmpty() && passwords.isNotEmpty())) {
-
+                (filenamePatterns.isNotEmpty() && passwords.isNotEmpty())
+            ) {
                 TestData(
                     filenamePatterns = filenamePatterns,
                     passwords = passwords,

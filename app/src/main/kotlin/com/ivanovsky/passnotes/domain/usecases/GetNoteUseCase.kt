@@ -3,8 +3,8 @@ package com.ivanovsky.passnotes.domain.usecases
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
-import kotlinx.coroutines.withContext
 import java.util.UUID
+import kotlinx.coroutines.withContext
 
 class GetNoteUseCase(
     private val getDbUseCase: GetDatabaseUseCase,

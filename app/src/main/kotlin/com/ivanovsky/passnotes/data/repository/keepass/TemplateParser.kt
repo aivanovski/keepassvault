@@ -54,7 +54,6 @@ object TemplateParser {
 
             if (property.name.startsWith(PROPERTY_PREFIX_TYPE)) {
                 templateField.type = TemplateFieldType.fromTextName(property.value)
-
             } else if (property.name.startsWith(PROPERTY_PREFIX_POSITION) &&
                 property.value.isDigitsOnly()
             ) {

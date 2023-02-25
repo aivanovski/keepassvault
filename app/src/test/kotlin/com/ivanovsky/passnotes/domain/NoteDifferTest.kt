@@ -6,8 +6,8 @@ import com.ivanovsky.passnotes.data.entity.Hash
 import com.ivanovsky.passnotes.data.entity.HashType
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.util.asDate
-import org.junit.Test
 import java.util.UUID
+import org.junit.Test
 
 class NoteDifferTest {
 

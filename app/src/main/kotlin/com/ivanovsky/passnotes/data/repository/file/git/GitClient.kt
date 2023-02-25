@@ -10,15 +10,15 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata
 import com.ivanovsky.passnotes.data.repository.db.dao.GitRootDao
-import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientV2
 import com.ivanovsky.passnotes.data.repository.file.git.model.VersionedFile
+import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientV2
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.InputOutputUtils
-import timber.log.Timber
 import java.io.File
+import timber.log.Timber
 
 class GitClient(
     private val authenticator: GitFileSystemAuthenticator,
@@ -106,7 +106,8 @@ class GitClient(
             file.modified,
             metadata.serverModified,
             metadata.clientModified,
-            metadata.revision)
+            metadata.revision
+        )
 
         return getMetadataResult
     }

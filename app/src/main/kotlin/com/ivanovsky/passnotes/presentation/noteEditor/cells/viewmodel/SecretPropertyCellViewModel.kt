@@ -8,8 +8,8 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
-import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.SecretPropertyCellModel
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
+import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.SecretPropertyCellModel
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class SecretPropertyCellViewModel(

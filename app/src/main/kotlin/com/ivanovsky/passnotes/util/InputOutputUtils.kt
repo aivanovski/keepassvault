@@ -2,9 +2,7 @@ package com.ivanovsky.passnotes.util
 
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import timber.log.Timber
 import java.io.Closeable
-import kotlin.Throws
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -13,6 +11,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.Throws
+import timber.log.Timber
 
 object InputOutputUtils {
 

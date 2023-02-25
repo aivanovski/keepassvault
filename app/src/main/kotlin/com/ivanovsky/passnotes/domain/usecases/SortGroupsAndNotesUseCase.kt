@@ -17,7 +17,7 @@ class SortGroupsAndNotesUseCase(
 
     suspend fun sortGroupsAndNotesAccordingToSettings(
         items: List<EncryptedDatabaseEntry>
-    ) : List<EncryptedDatabaseEntry> =
+    ): List<EncryptedDatabaseEntry> =
         sortGroupsAndNotes(
             items = items,
             sortType = settings.sortType,
@@ -48,7 +48,9 @@ class SortGroupsAndNotesUseCase(
                     direction,
                     isGroupsAtStart = isGroupsAtStart
                 )
-                SortType.MODIFICATION_DATE -> SortByDateStrategy(SortByDateStrategy.Type.MODIFICATION_DATE).sort(
+                SortType.MODIFICATION_DATE -> SortByDateStrategy(
+                    SortByDateStrategy.Type.MODIFICATION_DATE
+                ).sort(
                     items,
                     direction,
                     isGroupsAtStart = isGroupsAtStart

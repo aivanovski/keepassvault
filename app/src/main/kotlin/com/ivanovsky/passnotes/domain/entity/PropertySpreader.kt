@@ -35,7 +35,7 @@ class PropertySpreader(
     fun getCustomProperties(): List<Property> {
         return getVisibleProperties().filter { property ->
             !property.name.isNullOrEmpty() &&
-                    (property.type == null || !DEFAULT_PROPERTIES.contains(property.type))
+                (property.type == null || !DEFAULT_PROPERTIES.contains(property.type))
         }
     }
 
@@ -55,9 +55,13 @@ class PropertySpreader(
     }
 
     private fun isTemplateProperty(property: Property): Boolean {
-        return property.name != null &&
-                (property.name == Property.PROPERTY_NAME_TEMPLATE ||
-                        TEMPLATE_PROPERTY_PREFIXES.any { prefix -> property.name.startsWith(prefix) })
+        val name = property.name ?: return false
+
+        if (name == Property.PROPERTY_NAME_TEMPLATE) {
+            return true
+        }
+
+        return TEMPLATE_PROPERTY_PREFIXES.any { prefix -> property.name.startsWith(prefix) }
     }
 
     private fun isPropertyVisible(property: Property): Boolean {

@@ -7,11 +7,11 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.FrameLayout
-import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.databinding.WidgetMaterialSpinnerBinding
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
+import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.databinding.WidgetMaterialSpinnerBinding
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnItemSelectListener
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
@@ -115,7 +115,7 @@ class MaterialSpinner(
         fun setOnSelectedItemChangeListener(
             view: MaterialSpinner,
             onItemSelected: OnItemSelectListener?,
-            itemAttrChanged: InverseBindingListener?,
+            itemAttrChanged: InverseBindingListener?
         ) {
             if (itemAttrChanged == null) {
                 view.onItemSelectListener = onItemSelected

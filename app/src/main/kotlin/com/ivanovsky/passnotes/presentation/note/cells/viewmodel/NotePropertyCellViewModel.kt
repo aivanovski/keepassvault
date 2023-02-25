@@ -6,8 +6,8 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
-import com.ivanovsky.passnotes.presentation.note.cells.model.NotePropertyCellModel
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
+import com.ivanovsky.passnotes.presentation.note.cells.model.NotePropertyCellModel
 
 class NotePropertyCellViewModel(
     initModel: NotePropertyCellModel,

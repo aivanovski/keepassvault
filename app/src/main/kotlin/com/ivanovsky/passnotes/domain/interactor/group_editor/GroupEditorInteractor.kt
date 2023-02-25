@@ -13,8 +13,8 @@ import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetGroupUseCase
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
-import kotlinx.coroutines.withContext
 import java.util.UUID
+import kotlinx.coroutines.withContext
 
 class GroupEditorInteractor(
     private val getDbUseCase: GetDatabaseUseCase,
@@ -70,7 +70,9 @@ class GroupEditorInteractor(
 
             if (!isTitleAvailable(entity.title)) {
                 return@withContext OperationResult.error(
-                    newGenericError(resourceProvider.getString(R.string.group_with_this_name_is_already_exist))
+                    newGenericError(
+                        resourceProvider.getString(R.string.group_with_this_name_is_already_exist)
+                    )
                 )
             }
 

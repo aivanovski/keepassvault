@@ -158,7 +158,8 @@ class GroupEditorViewModel(
 
         if (newGroup.title == group.title &&
             newGroup.autotypeEnabled == group.autotypeEnabled &&
-            newGroup.searchEnabled == group.searchEnabled) {
+            newGroup.searchEnabled == group.searchEnabled
+        ) {
             router.exit()
             return
         }
@@ -255,7 +256,7 @@ class GroupEditorViewModel(
         return listOf(
             InheritableBooleanOption(
                 isEnabled = parentValue,
-                isInheritValue = true,
+                isInheritValue = true
             ),
             InheritableBooleanOption.ENABLED,
             InheritableBooleanOption.DISABLED
@@ -284,7 +285,7 @@ class GroupEditorViewModel(
         private val DEFAULT_OPTIONS = listOf(
             InheritableBooleanOption(
                 isEnabled = true,
-                isInheritValue = true,
+                isInheritValue = true
             ),
             InheritableBooleanOption.ENABLED,
             InheritableBooleanOption.DISABLED

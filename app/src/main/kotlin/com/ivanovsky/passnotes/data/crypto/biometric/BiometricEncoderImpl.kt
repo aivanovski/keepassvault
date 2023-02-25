@@ -4,7 +4,7 @@ import com.ivanovsky.passnotes.data.crypto.entity.SecretData
 import javax.crypto.Cipher
 
 class BiometricEncoderImpl(
-    private val cipher: Cipher,
+    private val cipher: Cipher
 ) : BiometricEncoder {
 
     override fun getCipher(): Cipher = cipher

@@ -16,7 +16,8 @@ class GetTestCredentialsUseCase(
 
         return if (data.webdavUrl.isNotEmpty() ||
             data.webdavUsername.isNotEmpty() ||
-            data.webdavPassword.isNotEmpty()) {
+            data.webdavPassword.isNotEmpty()
+        ) {
             FSCredentials.BasicCredentials(
                 url = data.webdavUrl,
                 username = data.webdavUsername,

@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
 class UpdateNoteUseCase(
     private val getDbUseCase: GetDatabaseUseCase,
     private val observerBus: ObserverBus,
-    private val dispatchers: DispatcherProvider,
+    private val dispatchers: DispatcherProvider
 ) {
 
     suspend fun updateNote(note: Note): OperationResult<Unit> =

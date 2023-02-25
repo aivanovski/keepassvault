@@ -58,7 +58,11 @@ fun String.toUUID(): UUID? {
         return null
     }
 
-    val formattedUid = substring(0, 8) + "-" + substring(8, 12) + "-" + substring(12, 16) + "-" + substring(16, 20) + "-" + substring(20)
+    val formattedUid = substring(0, 8) + "-" +
+        substring(8, 12) + "-" +
+        substring(12, 16) + "-" +
+        substring(16, 20) + "-" +
+        substring(20)
 
     return UUID.fromString(formattedUid)
 }

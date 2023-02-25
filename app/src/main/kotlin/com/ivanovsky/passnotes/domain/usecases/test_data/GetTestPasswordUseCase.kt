@@ -5,8 +5,8 @@ import com.ivanovsky.passnotes.data.entity.TestData
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.util.FileUtils
-import kotlinx.coroutines.withContext
 import java.util.regex.Pattern
+import kotlinx.coroutines.withContext
 
 class GetTestPasswordUseCase(
     private val settings: Settings,

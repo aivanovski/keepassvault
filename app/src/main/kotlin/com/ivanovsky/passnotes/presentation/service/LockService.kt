@@ -15,20 +15,20 @@ import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.interactor.service.LockServiceInteractor
-import com.ivanovsky.passnotes.presentation.service.model.ServiceState
 import com.ivanovsky.passnotes.extensions.getNotificationManager
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.main.MainActivity
 import com.ivanovsky.passnotes.presentation.main.MainScreenArgs
 import com.ivanovsky.passnotes.presentation.service.model.LockServiceCommand
+import com.ivanovsky.passnotes.presentation.service.model.ServiceState
 import com.ivanovsky.passnotes.util.IntentUtils.defaultPendingIntentFlags
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.concurrent.atomic.AtomicReference
 
 class LockService : Service(), ObserverBus.DatabaseStatusObserver {
 

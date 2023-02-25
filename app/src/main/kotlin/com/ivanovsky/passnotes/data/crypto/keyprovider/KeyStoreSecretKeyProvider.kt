@@ -8,13 +8,13 @@ import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.ANDROID_KEY_STORE
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.KEY_ALGORITHM
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.KEY_ALIAS
 import com.ivanovsky.passnotes.data.crypto.DataCipherConstants.KEY_SIZE
-import timber.log.Timber
 import java.lang.Exception
 import java.security.GeneralSecurityException
 import java.security.KeyStore
 import java.security.KeyStore.getInstance
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import timber.log.Timber
 
 @TargetApi(23)
 class KeyStoreSecretKeyProvider : SecretKeyProvider {

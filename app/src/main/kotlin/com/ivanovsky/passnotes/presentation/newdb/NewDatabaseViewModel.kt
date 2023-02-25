@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.FSType
+import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
@@ -24,9 +24,9 @@ import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.FileUtils.removeFileExtensionsIfNeed
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
-import kotlinx.coroutines.launch
 import java.io.File
 import java.util.regex.Pattern
+import kotlinx.coroutines.launch
 
 class NewDatabaseViewModel(
     private val interactor: NewDatabaseInteractor,
@@ -198,7 +198,6 @@ class NewDatabaseViewModel(
                 filename.value = removeFileExtensionsIfNeed(selectedFile.name)
             }
             FSType.UNDEFINED -> {
-
             }
         }
 
@@ -238,6 +237,7 @@ class NewDatabaseViewModel(
     companion object {
 
         private val FILE_NAME_PATTERN = Pattern.compile("[\\w-_]{1,50}")
+
         // TODO: Refactor, create Validator entity which will be able to validate
         //  different text
         val PASSWORD_PATTERN = Pattern.compile("[\\w@#$!%^&+=]{4,20}")

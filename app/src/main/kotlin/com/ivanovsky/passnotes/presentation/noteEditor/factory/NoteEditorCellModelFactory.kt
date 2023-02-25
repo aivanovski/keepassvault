@@ -13,15 +13,15 @@ import com.ivanovsky.passnotes.domain.entity.PropertyMap
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.HeaderCellModel
 import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
-import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorViewModel.CellId
-import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.ExtendedTextPropertyCellModel
-import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.SecretPropertyCellModel
-import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.TextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines.MULTIPLE_LINES
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines.SINGLE_LINE
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorViewModel.CellId
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.AttachmentCellModel
+import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.ExtendedTextPropertyCellModel
+import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.SecretPropertyCellModel
+import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.TextPropertyCellModel
 import com.ivanovsky.passnotes.util.StringUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toCleanString
@@ -309,7 +309,7 @@ class NoteEditorCellModelFactory(
         return AttachmentCellModel(
             id = attachment.uid,
             name = attachment.name,
-            size = StringUtils.formatFileSize(attachment.data.size.toLong()),
+            size = StringUtils.formatFileSize(attachment.data.size.toLong())
         )
     }
 

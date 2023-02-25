@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.presentation.group_editor
 
 import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
 import java.util.UUID
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class GroupEditorArgs(
@@ -12,8 +12,14 @@ data class GroupEditorArgs(
 ) : Parcelable {
 
     init {
-        if ((mode == GroupEditorMode.NEW && parentGroupUid == null) ||
-            ((mode == GroupEditorMode.EDIT && groupUid == null))) {
+        checkArguments()
+    }
+
+    private fun checkArguments() {
+        if (mode == GroupEditorMode.NEW && parentGroupUid == null) {
+            throw IllegalArgumentException()
+        }
+        if (mode == GroupEditorMode.EDIT && groupUid == null) {
             throw IllegalArgumentException()
         }
     }

@@ -24,8 +24,12 @@ class UrlUtilsTest {
         assertThat(extractCleanWebDomain("http://www.domain.com")).isEqualTo("domain.com")
         assertThat(extractCleanWebDomain("www.domain.com")).isEqualTo("domain.com")
         assertThat(extractCleanWebDomain("domain.com")).isEqualTo("domain.com")
-        assertThat(extractCleanWebDomain("https://www.domain.com/some.action")).isEqualTo("domain.com")
-        assertThat(extractCleanWebDomain("https://www.domain.com/some.action?topic")).isEqualTo("domain.com")
+        assertThat(extractCleanWebDomain("https://www.domain.com/some.action")).isEqualTo(
+            "domain.com"
+        )
+        assertThat(extractCleanWebDomain("https://www.domain.com/some.action?topic")).isEqualTo(
+            "domain.com"
+        )
     }
 
     @Test

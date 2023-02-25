@@ -22,6 +22,9 @@ import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.ScreenType
+import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
@@ -30,9 +33,6 @@ import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibi
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.GroupsMenuItem
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
-import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialog
-import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
-import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.ScreenType
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 
@@ -276,7 +276,7 @@ class GroupsFragment : BaseFragment() {
             R.id.menu_settings to { vm -> vm.onSettingsButtonClicked() },
             R.id.menu_sort_and_view to { vm -> vm.onSortAndViewButtonClicked() },
             R.id.menu_enable_biometric_unlock to { vm -> vm.onEnableBiometricUnlockButtonClicked() },
-            R.id.menu_disable_biometric_unlock to { vm -> vm.onDisableBiometricUnlockButtonClicked() },
+            R.id.menu_disable_biometric_unlock to { vm -> vm.onDisableBiometricUnlockButtonClicked() }
         )
 
         fun newInstance(args: GroupsScreenArgs) = GroupsFragment()

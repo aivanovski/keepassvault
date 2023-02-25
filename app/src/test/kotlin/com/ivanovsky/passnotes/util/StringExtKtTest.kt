@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.util
 
 import com.google.common.truth.Truth.assertThat
-import org.junit.Test
 import java.util.UUID
+import org.junit.Test
 
 class StringExtKtTest {
 

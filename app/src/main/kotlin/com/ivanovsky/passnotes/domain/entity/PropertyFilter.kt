@@ -102,7 +102,7 @@ class PropertyFilter private constructor(
             filters.add(FilterDefaultTypesStrategy())
             return this
         }
-        
+
         fun includeNullType(): Builder {
             filters.add(FilterNullTypeStrategy())
             return this

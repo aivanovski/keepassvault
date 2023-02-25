@@ -5,5 +5,5 @@ import java.util.UUID
 data class SelectionItem(
     val uid: UUID,
     val parentUid: UUID,
-    val type: SelectionItemType,
+    val type: SelectionItemType
 )

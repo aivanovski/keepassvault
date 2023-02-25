@@ -19,6 +19,8 @@ interface CellViewModelFactory {
     ): BaseCellViewModel
 
     fun throwUnsupportedModelException(model: BaseCellModel): Nothing {
-        throw IllegalArgumentException("unable to find ViewModel for model: ${model::class.qualifiedName}")
+        throw IllegalArgumentException(
+            "Unable to find ViewModel for model: ${model::class.qualifiedName}"
+        )
     }
 }

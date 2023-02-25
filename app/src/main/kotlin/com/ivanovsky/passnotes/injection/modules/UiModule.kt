@@ -23,10 +23,10 @@ import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteract
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.presentation.about.AboutViewModel
 import com.ivanovsky.passnotes.presentation.autofill.AutofillViewFactory
-import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
-import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogViewModel
+import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
+import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.factory.FilePickerCellModelFactory
@@ -271,7 +271,7 @@ object UiModule {
             }
             factory { (args: UnlockScreenArgs) ->
                 UnlockViewModel(
-                   get(),
+                    get(),
                     get(),
                     get(),
                     get(),

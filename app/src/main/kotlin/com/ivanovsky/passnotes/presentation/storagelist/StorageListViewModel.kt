@@ -14,11 +14,6 @@ import com.ivanovsky.passnotes.data.repository.file.AuthType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.EXTERNAL_STORAGE
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.SAF_STORAGE
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.PRIVATE_STORAGE
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.WEBDAV
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
@@ -37,7 +32,12 @@ import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellModelFactory
 import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.EXTERNAL_STORAGE
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.GIT
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.PRIVATE_STORAGE
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.SAF_STORAGE
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.WEBDAV
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf

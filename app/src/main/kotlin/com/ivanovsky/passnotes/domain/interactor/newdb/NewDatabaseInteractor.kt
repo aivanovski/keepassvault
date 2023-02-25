@@ -38,7 +38,12 @@ class NewDatabaseInteractor(
                 return@withContext OperationResult.error(newFileIsAlreadyExistsError())
             }
 
-            val creationResult = dbRepo.createNew(KeepassImplementation.KOTPASS, key, file, isAddTemplates)
+            val creationResult = dbRepo.createNew(
+                KeepassImplementation.KOTPASS,
+                key,
+                file,
+                isAddTemplates
+            )
             if (creationResult.isFailed) {
                 return@withContext creationResult.takeError()
             } else if (creationResult.isDeferred) {

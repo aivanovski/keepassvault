@@ -108,7 +108,9 @@ class MainActivity :
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val handledByFragment = supportFragmentManager.fragments.any { it.onOptionsItemSelected(item) }
+        val handledByFragment = supportFragmentManager.fragments.any {
+            it.onOptionsItemSelected(item)
+        }
         if (handledByFragment) {
             return true
         }

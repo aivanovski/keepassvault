@@ -3,8 +3,8 @@ package com.ivanovsky.passnotes.presentation.noteEditor
 import android.os.Parcelable
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.Template
-import kotlinx.android.parcel.Parcelize
 import java.util.UUID
+import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class NoteEditorArgs(

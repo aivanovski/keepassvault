@@ -1,11 +1,10 @@
 package com.ivanovsky.passnotes.data.entity;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @Entity(tableName = "remote_file")
 public class RemoteFile {
@@ -59,8 +58,7 @@ public class RemoteFile {
     @ColumnInfo(name = "revision")
     private String revision;
 
-    public RemoteFile() {
-    }
+    public RemoteFile() {}
 
     public FSAuthority getFsAuthority() {
         return fsAuthority;
@@ -242,23 +240,43 @@ public class RemoteFile {
 
     @Override
     public String toString() {
-        return "RemoteFile{" +
-                "fsAuthority=" + fsAuthority +
-                ", locallyModified=" + locallyModified +
-                ", uploaded=" + uploaded +
-                ", uploadFailed=" + uploadFailed +
-                ", uploading=" + uploading +
-                ", downloading=" + downloading +
-                ", id=" + id +
-                ", retryCount=" + retryCount +
-                ", lastRetryTimestamp=" + lastRetryTimestamp +
-                ", lastDownloadTimestamp=" + lastDownloadTimestamp +
-                ", lastModificationTimestamp=" + lastModificationTimestamp +
-                ", lastServerModificationTimestamp=" + lastRemoteModificationTimestamp +
-                ", localPath='" + localPath + '\'' +
-                ", remotePath='" + remotePath + '\'' +
-                ", uid='" + uid + '\'' +
-                ", revision='" + revision + '\'' +
-                '}';
+        return "RemoteFile{"
+                + "fsAuthority="
+                + fsAuthority
+                + ", locallyModified="
+                + locallyModified
+                + ", uploaded="
+                + uploaded
+                + ", uploadFailed="
+                + uploadFailed
+                + ", uploading="
+                + uploading
+                + ", downloading="
+                + downloading
+                + ", id="
+                + id
+                + ", retryCount="
+                + retryCount
+                + ", lastRetryTimestamp="
+                + lastRetryTimestamp
+                + ", lastDownloadTimestamp="
+                + lastDownloadTimestamp
+                + ", lastModificationTimestamp="
+                + lastModificationTimestamp
+                + ", lastServerModificationTimestamp="
+                + lastRemoteModificationTimestamp
+                + ", localPath='"
+                + localPath
+                + '\''
+                + ", remotePath='"
+                + remotePath
+                + '\''
+                + ", uid='"
+                + uid
+                + '\''
+                + ", revision='"
+                + revision
+                + '\''
+                + '}';
     }
 }

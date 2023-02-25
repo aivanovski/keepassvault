@@ -2,9 +2,7 @@ package com.ivanovsky.passnotes.util;
 
 import android.content.Context;
 import android.os.Build;
-
 import androidx.annotation.NonNull;
-
 import java.util.Locale;
 
 public class LocaleUtils {

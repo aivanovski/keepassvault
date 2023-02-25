@@ -1,13 +1,11 @@
 package com.ivanovsky.passnotes.data.entity;
 
 import androidx.annotation.Nullable;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public enum PropertyType {
-
     TITLE("Title"),
     PASSWORD("Password"),
     USER_NAME("UserName"),

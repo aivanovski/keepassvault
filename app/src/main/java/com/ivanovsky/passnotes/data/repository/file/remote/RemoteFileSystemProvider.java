@@ -1,14 +1,23 @@
 package com.ivanovsky.passnotes.data.repository.file.remote;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_FILE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newAuthError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newDbVersionConflictError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError;
+import static com.ivanovsky.passnotes.util.DateUtils.anyLastTimestamp;
+import static com.ivanovsky.passnotes.util.ObjectUtils.isNotEquals;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
-import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationError;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
+import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata;
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository;
 import com.ivanovsky.passnotes.data.repository.file.FSOptions;
@@ -27,7 +36,6 @@ import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
 import com.ivanovsky.passnotes.extensions.RemoteFileMetadataExtKt;
 import com.ivanovsky.passnotes.util.DateUtils;
 import com.ivanovsky.passnotes.util.FileUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -42,27 +50,19 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_FILE;
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE;
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newAuthError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newDbVersionConflictError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError;
-import static com.ivanovsky.passnotes.util.DateUtils.anyLastTimestamp;
-import static com.ivanovsky.passnotes.util.ObjectUtils.isNotEquals;
-
 import timber.log.Timber;
 
 public class RemoteFileSystemProvider implements FileSystemProvider {
 
     private static final String TAG = RemoteFileSystemProvider.class.getSimpleName();
 
-    private static final String ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR = "Failed to find app private dir";
+    private static final String ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR =
+            "Failed to find app private dir";
     private static final String ERROR_FAILED_TO_FIND_FILE = "Failed to find file: %s";
-    private static final String ERROR_FAILED_TO_FIND_FILE_IN_CACHE = "Faile to find file in cache: %s";
-    private static final String ERROR_FAILED_TO_START_PROCESSING_UNIT = "Failed to start processing unit";
+    private static final String ERROR_FAILED_TO_FIND_FILE_IN_CACHE =
+            "Faile to find file in cache: %s";
+    private static final String ERROR_FAILED_TO_START_PROCESSING_UNIT =
+            "Failed to start processing unit";
 
     private static final long MAX_AWAITING_TIMEOUT_IN_SEC = 30;
 
@@ -76,12 +76,13 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     private final RemoteFileSyncProcessor syncProcessor;
     private final FSAuthority fsAuthority;
 
-    public RemoteFileSystemProvider(FileSystemAuthenticator authenticator,
-                                    RemoteApiClient client,
-                                    RemoteFileRepository remoteFileRepository,
-                                    FileHelper fileHelper,
-                                    ObserverBus observerBus,
-                                    FSAuthority fsAuthority) {
+    public RemoteFileSystemProvider(
+            FileSystemAuthenticator authenticator,
+            RemoteApiClient client,
+            RemoteFileRepository remoteFileRepository,
+            FileHelper fileHelper,
+            ObserverBus observerBus,
+            FSAuthority fsAuthority) {
         this.authenticator = authenticator;
         this.client = client;
         this.cache = new RemoteFileCache(remoteFileRepository, fsAuthority);
@@ -89,7 +90,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         this.processingUidToLatch = new HashMap<>();
         this.unitProcessingLock = new ReentrantLock();
         this.fileHelper = fileHelper;
-        this.syncProcessor = new RemoteFileSyncProcessor(this, cache, fileHelper, observerBus, fsAuthority);
+        this.syncProcessor =
+                new RemoteFileSyncProcessor(this, cache, fileHelper, observerBus, fsAuthority);
         this.fsAuthority = fsAuthority;
     }
 
@@ -131,7 +133,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         } else if (exception instanceof RemoteFSApiException) {
             result = newGenericIOError(exception.getMessage());
         } else {
-            throw new IllegalArgumentException("Exception handling is not implemented: exception=" + exception);
+            throw new IllegalArgumentException(
+                    "Exception handling is not implemented: exception=" + exception);
         }
 
         return result;
@@ -178,8 +181,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         return result;
     }
 
-    private OperationResult<FileDescriptor> getDeferredFileFromCache(@NonNull String path,
-                                                                     @Nullable OperationError error) {
+    private OperationResult<FileDescriptor> getDeferredFileFromCache(
+            @NonNull String path, @Nullable OperationError error) {
         RemoteFile cachedFile = cache.getByRemotePath(path);
 
         if (cachedFile != null) {
@@ -191,8 +194,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
     @NonNull
     @Override
-    public OperationResult<FileDescriptor> getFile(@NonNull String path,
-                                                   @NonNull FSOptions options) {
+    public OperationResult<FileDescriptor> getFile(
+            @NonNull String path, @NonNull FSOptions options) {
         if (options.isCacheOnly()) {
             return getDeferredFileFromCache(path, null);
         }
@@ -217,7 +220,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         OperationResult<FileDescriptor> result = new OperationResult<>();
 
         try {
-            RemoteFileMetadata metadata = client.getFileMetadataOrThrow(newDescriptorFromPath(path));
+            RemoteFileMetadata metadata =
+                    client.getFileMetadataOrThrow(newDescriptorFromPath(path));
             result.setObj(newDescriptorFromMetadata(metadata));
         } catch (RemoteFSNetworkException e) {
             if (!options.isCacheEnabled()) {
@@ -234,13 +238,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     }
 
     private FileDescriptor newDescriptorFromPath(String path) {
-        return new FileDescriptor(fsAuthority,
-                path,
-                path,
-                FileUtils.getFileNameFromPath(path),
-                false,
-                false,
-                null);
+        return new FileDescriptor(
+                fsAuthority, path, path, FileUtils.getFileNameFromPath(path), false, false, null);
     }
 
     private FileDescriptor newDescriptorFromMetadata(RemoteFileMetadata metadata) {
@@ -251,29 +250,33 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         return RemoteFileExtKt.toFileDescriptor(file);
     }
 
-    private OperationResult<InputStream> openDeferredFileForReadFromCache(@NonNull FileDescriptor file,
-                                                                          @Nullable OperationError error) {
+    private OperationResult<InputStream> openDeferredFileForReadFromCache(
+            @NonNull FileDescriptor file, @Nullable OperationError error) {
         RemoteFile cachedFile = cache.getByUid(file.getUid());
         if (cachedFile == null) {
             String message = String.format(ERROR_FAILED_TO_FIND_FILE_IN_CACHE, file.getPath());
             return OperationResult.error(newGenericIOError(message));
         }
 
-        OperationResult<FileInputStream> streamResult = openFileInputStream(cachedFile.getLocalPath());
+        OperationResult<FileInputStream> streamResult =
+                openFileInputStream(cachedFile.getLocalPath());
         if (streamResult.isFailed()) {
             return streamResult.takeError();
         }
 
         FileInputStream stream = streamResult.getObj();
-        return OperationResult.deferred(new RemoteFileInputStream(cachedFile.getLocalPath(), stream), error);
+        return OperationResult.deferred(
+                new RemoteFileInputStream(cachedFile.getLocalPath(), stream), error);
     }
 
     @NonNull
     @Override
-    public OperationResult<InputStream> openFileForRead(@NonNull FileDescriptor file,
-                                                        @NonNull OnConflictStrategy onConflictStrategy,
-                                                        @NonNull FSOptions options) {
-        Timber.d("openFileForRead: file=%s, conflictStrategy=%s, fsOptions=%s",
+    public OperationResult<InputStream> openFileForRead(
+            @NonNull FileDescriptor file,
+            @NonNull OnConflictStrategy onConflictStrategy,
+            @NonNull FSOptions options) {
+        Timber.d(
+                "openFileForRead: file=%s, conflictStrategy=%s, fsOptions=%s",
                 file, onConflictStrategy, options);
 
         OperationResult<InputStream> result = new OperationResult<>();
@@ -301,13 +304,14 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                 // download file and add new entry to the cache
                 String destinationPath = generateDestinationFilePath(destinationDir);
 
-                unit = new ProcessingUnit(UUID.randomUUID(),
-                        ProcessingStatus.DOWNLOADING,
-                        uid,
-                        remotePath);
+                unit =
+                        new ProcessingUnit(
+                                UUID.randomUUID(), ProcessingStatus.DOWNLOADING, uid, remotePath);
 
                 if (startProcessingUnit(unit)) {
-                    Timber.d("Downloading new file: remote=%s, local=%s", remotePath, destinationPath);
+                    Timber.d(
+                            "Downloading new file: remote=%s, local=%s",
+                            remotePath, destinationPath);
 
                     metadata = client.downloadFileOrThrow(remotePath, destinationPath);
 
@@ -321,8 +325,11 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         cachedFile.setRevision(metadata.getRevision());
                         cachedFile.setUploaded(true);
                         cachedFile.setLastModificationTimestamp(
-                                anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
-                        cachedFile.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
+                                anyLastTimestamp(
+                                        metadata.getServerModified(),
+                                        metadata.getClientModified()));
+                        cachedFile.setLastRemoteModificationTimestamp(
+                                metadata.getServerModified().getTime());
                         cachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
 
                         cache.put(cachedFile);
@@ -336,15 +343,20 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
             } else if (isNotEquals(remoteRevision, cachedFile.getRevision())) {
                 if (canResolveDownloadConflict(cachedFile, onConflictStrategy)) {
                     // server has new version of db
-                    unit = new ProcessingUnit(UUID.randomUUID(),
-                            ProcessingStatus.DOWNLOADING,
-                            uid,
-                            remotePath);
+                    unit =
+                            new ProcessingUnit(
+                                    UUID.randomUUID(),
+                                    ProcessingStatus.DOWNLOADING,
+                                    uid,
+                                    remotePath);
 
                     if (startProcessingUnit(unit)) {
-                        Timber.d("Updating cached file: remote=%s, local=%s", remotePath, cachedFile.getLocalPath());
+                        Timber.d(
+                                "Updating cached file: remote=%s, local=%s",
+                                remotePath, cachedFile.getLocalPath());
 
-                        metadata = client.downloadFileOrThrow(remotePath, cachedFile.getLocalPath());
+                        metadata =
+                                client.downloadFileOrThrow(remotePath, cachedFile.getLocalPath());
 
                         cachedFile.setRemotePath(metadata.getPath());
                         cachedFile.setRevision(metadata.getRevision());
@@ -352,8 +364,11 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         cachedFile.setUploadFailed(false);
                         cachedFile.setLocallyModified(false);
                         cachedFile.setLastModificationTimestamp(
-                                anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
-                        cachedFile.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
+                                anyLastTimestamp(
+                                        metadata.getServerModified(),
+                                        metadata.getClientModified()));
+                        cachedFile.setLastRemoteModificationTimestamp(
+                                metadata.getServerModified().getTime());
                         cachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
                         cachedFile.setRetryCount(0);
                         cachedFile.setLastRetryTimestamp(null);
@@ -366,17 +381,21 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                     }
                 } else {
                     // user modified db
-                    result.setError(newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
+                    result.setError(
+                            newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
                 }
             } else {
                 // local revision is the same as in the server
-                Timber.d("Local cached file is up to date: remote=%s, local=%s",
+                Timber.d(
+                        "Local cached file is up to date: remote=%s, local=%s",
                         remotePath, cachedFile.getLocalPath());
 
                 cachedFile.setRemotePath(metadata.getPath());
                 cachedFile.setLastModificationTimestamp(
-                        anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified()));
-                cachedFile.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
+                        anyLastTimestamp(
+                                metadata.getServerModified(), metadata.getClientModified()));
+                cachedFile.setLastRemoteModificationTimestamp(
+                        metadata.getServerModified().getTime());
                 cachedFile.setUploaded(true);
                 cachedFile.setUploadFailed(false);
                 cachedFile.setLocallyModified(false);
@@ -391,10 +410,12 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
             // use cached file
             RemoteFile cachedFile = cache.getByUid(file.getUid());
             if (cachedFile != null) {
-                unit = new ProcessingUnit(UUID.randomUUID(),
-                        ProcessingStatus.DOWNLOADING,
-                        cachedFile.getUid(),
-                        cachedFile.getRemotePath());
+                unit =
+                        new ProcessingUnit(
+                                UUID.randomUUID(),
+                                ProcessingStatus.DOWNLOADING,
+                                cachedFile.getUid(),
+                                cachedFile.getRemotePath());
 
                 if (startProcessingUnit(unit)) {
                     result.from(openFile(cachedFile.getLocalPath()));
@@ -422,8 +443,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         return dir.getPath() + "/" + UUID.randomUUID().toString();
     }
 
-    private boolean canResolveDownloadConflict(RemoteFile cachedFile,
-                                               OnConflictStrategy onConflictStrategy) {
+    private boolean canResolveDownloadConflict(
+            RemoteFile cachedFile, OnConflictStrategy onConflictStrategy) {
         boolean result;
 
         if (cachedFile.isLocallyModified() && onConflictStrategy == OnConflictStrategy.CANCEL) {
@@ -435,8 +456,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         return result;
     }
 
-    private OperationResult<OutputStream> openCachedFileForWrite(@NonNull FileDescriptor file,
-                                                                 @Nullable OperationError error) {
+    private OperationResult<OutputStream> openCachedFileForWrite(
+            @NonNull FileDescriptor file, @Nullable OperationError error) {
         RemoteFile cachedFile = cache.getByUid(file.getUid());
         if (cachedFile == null) {
             String message = String.format(ERROR_FAILED_TO_FIND_FILE_IN_CACHE, file.getPath());
@@ -447,14 +468,17 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         cachedFile.setLocallyModified(true);
         cachedFile.setUploaded(false);
 
-        ProcessingUnit unit = new ProcessingUnit(UUID.randomUUID(),
-                ProcessingStatus.UPLOADING,
-                cachedFile.getUid(),
-                cachedFile.getRemotePath());
+        ProcessingUnit unit =
+                new ProcessingUnit(
+                        UUID.randomUUID(),
+                        ProcessingStatus.UPLOADING,
+                        cachedFile.getUid(),
+                        cachedFile.getRemotePath());
 
         if (startProcessingUnit(unit)) {
             try {
-                OutputStream out = new OfflineFileOutputStream(this, cachedFile, unit.getProcessingUid());
+                OutputStream out =
+                        new OfflineFileOutputStream(this, cachedFile, unit.getProcessingUid());
 
                 cache.update(cachedFile);
 
@@ -462,8 +486,10 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
             } catch (FileNotFoundException ee) {
                 onFinishProcessingUnit(unit.getProcessingUid());
 
-                return OperationResult.error(newGenericIOError(String.format(ERROR_FAILED_TO_FIND_FILE,
-                        cachedFile.getLocalPath())));
+                return OperationResult.error(
+                        newGenericIOError(
+                                String.format(
+                                        ERROR_FAILED_TO_FIND_FILE, cachedFile.getLocalPath())));
             }
         } else {
             return OperationResult.error(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
@@ -472,15 +498,18 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
     @NonNull
     @Override
-    public OperationResult<OutputStream> openFileForWrite(@NonNull FileDescriptor file,
-                                                          @NonNull OnConflictStrategy onConflict,
-                                                          @NonNull FSOptions options) {
+    public OperationResult<OutputStream> openFileForWrite(
+            @NonNull FileDescriptor file,
+            @NonNull OnConflictStrategy onConflict,
+            @NonNull FSOptions options) {
 
-        Timber.d("openFileForWrite: file=%s, conflictStrategy=%s, fsOptions=%s",
+        Timber.d(
+                "openFileForWrite: file=%s, conflictStrategy=%s, fsOptions=%s",
                 file, onConflict, options);
 
         if (!options.isWriteEnabled()) {
-            return OperationResult.error(newGenericIOError(MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED));
+            return OperationResult.error(
+                    newGenericIOError(MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED));
         }
 
         OperationResult<OutputStream> result = new OperationResult<>();
@@ -531,12 +560,15 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                 cachedFile.setLastDownloadTimestamp(timestamp);
                 cachedFile.setLocallyModified(true);
 
-                ProcessingUnit unit = new ProcessingUnit(UUID.randomUUID(),
-                        ProcessingStatus.UPLOADING,
-                        cachedFile.getUid(),
-                        cachedFile.getRemotePath());
+                ProcessingUnit unit =
+                        new ProcessingUnit(
+                                UUID.randomUUID(),
+                                ProcessingStatus.UPLOADING,
+                                cachedFile.getUid(),
+                                cachedFile.getRemotePath());
 
-                Timber.d("openFileForWrite: Uploading to new file: remote=%s, local=%s",
+                Timber.d(
+                        "openFileForWrite: Uploading to new file: remote=%s, local=%s",
                         cachedFile.getRemotePath(), cachedFile.getLocalPath());
 
                 if (startProcessingUnit(unit)) {
@@ -569,7 +601,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
                 Timber.d("re-writing existing file: cachedFile=%s", cachedFile);
 
-                if (canResolveMergeConflict(localModified, serverModified, clientModified, onConflict)) {
+                if (canResolveMergeConflict(
+                        localModified, serverModified, clientModified, onConflict)) {
                     if (cachedFile == null) {
                         cachedFile = new RemoteFile();
 
@@ -582,12 +615,15 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         cachedFile.setLastDownloadTimestamp(localModified.getTime());
                         cachedFile.setLocallyModified(true);
 
-                        ProcessingUnit unit = new ProcessingUnit(UUID.randomUUID(),
-                                ProcessingStatus.UPLOADING,
-                                cachedFile.getUid(),
-                                cachedFile.getRemotePath());
+                        ProcessingUnit unit =
+                                new ProcessingUnit(
+                                        UUID.randomUUID(),
+                                        ProcessingStatus.UPLOADING,
+                                        cachedFile.getUid(),
+                                        cachedFile.getRemotePath());
 
-                        Timber.d("Uploading to existing file: remote=%s, local=%s",
+                        Timber.d(
+                                "Uploading to existing file: remote=%s, local=%s",
                                 cachedFile.getRemotePath(), cachedFile.getLocalPath());
 
                         if (startProcessingUnit(unit)) {
@@ -597,7 +633,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                                 onFinishProcessingUnit(unit.getProcessingUid());
                             }
                         } else {
-                            result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
+                            result.setError(
+                                    newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
                         }
 
                     } else {
@@ -608,10 +645,12 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         cachedFile.setLocallyModified(true);
                         cachedFile.setUploaded(false);
 
-                        ProcessingUnit unit = new ProcessingUnit(UUID.randomUUID(),
-                                ProcessingStatus.UPLOADING,
-                                cachedFile.getUid(),
-                                cachedFile.getRemotePath());
+                        ProcessingUnit unit =
+                                new ProcessingUnit(
+                                        UUID.randomUUID(),
+                                        ProcessingStatus.UPLOADING,
+                                        cachedFile.getUid(),
+                                        cachedFile.getRemotePath());
 
                         if (startProcessingUnit(unit)) {
                             result.from(processFileUploading(cachedFile, unit.getProcessingUid()));
@@ -620,11 +659,13 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                                 onFinishProcessingUnit(unit.getProcessingUid());
                             }
                         } else {
-                            result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
+                            result.setError(
+                                    newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
                         }
                     }
                 } else {
-                    result.setError(newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
+                    result.setError(
+                            newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
                 }
             }
         } catch (RemoteFSNetworkException e) {
@@ -654,14 +695,17 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         return entry;
     }
 
-    private void awaitProcessingUnitFinish(String fileUid,
-                                           String remotePath) throws InterruptedException {
+    private void awaitProcessingUnitFinish(String fileUid, String remotePath)
+            throws InterruptedException {
         ProcessingUnit unit = findProcessingUnit(fileUid, remotePath);
 
         CountDownLatch latch;
 
-        Timber.d("Waiting until operation finished: fileUid=" + fileUid +
-                ", remotePath=" + remotePath);
+        Timber.d(
+                "Waiting until operation finished: fileUid="
+                        + fileUid
+                        + ", remotePath="
+                        + remotePath);
 
         unitProcessingLock.lock();
         try {
@@ -682,12 +726,11 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
             latch.await(MAX_AWAITING_TIMEOUT_IN_SEC, TimeUnit.SECONDS);
         }
 
-        Timber.d("Waiting finished: fileUid=" + fileUid +
-                ", remotePath=" + remotePath);
+        Timber.d("Waiting finished: fileUid=" + fileUid + ", remotePath=" + remotePath);
     }
 
-    private OperationResult<OutputStream> processFileUploading(RemoteFile file,
-                                                               UUID processingUnitUid) {
+    private OperationResult<OutputStream> processFileUploading(
+            RemoteFile file, UUID processingUnitUid) {
         OperationResult<OutputStream> result = new OperationResult<>();
 
         try {
@@ -699,8 +742,9 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                 cache.put(file);
             }
         } catch (FileNotFoundException e) {
-            result.setError(newGenericIOError(String.format(ERROR_FAILED_TO_FIND_FILE,
-                    file.getLocalPath())));
+            result.setError(
+                    newGenericIOError(
+                            String.format(ERROR_FAILED_TO_FIND_FILE, file.getLocalPath())));
         }
 
         return result;
@@ -716,11 +760,12 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         onFinishProcessingUnit(processingUnitUid);
     }
 
-    public void onFileUploadFinished(RemoteFile file, RemoteFileMetadata metadata,
-                                     UUID processingUnitUid) {
+    public void onFileUploadFinished(
+            RemoteFile file, RemoteFileMetadata metadata, UUID processingUnitUid) {
         Timber.d("onFileUploadFinished: unitUid=%s, file=%s", processingUnitUid, file);
 
-        Long modifiedTimestamp = anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified());
+        Long modifiedTimestamp =
+                anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified());
 
         file.setUploadFailed(false);
         file.setLocallyModified(false);
@@ -763,7 +808,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         try {
             boolean running = true;
             while (running) {
-                ProcessingUnit runningUnit = findProcessingUnit(unit.getFileUid(), unit.getRemotePath());
+                ProcessingUnit runningUnit =
+                        findProcessingUnit(unit.getFileUid(), unit.getRemotePath());
                 if (runningUnit == null) {
                     processingMap.put(unit);
                     unitStarted = true;
@@ -807,18 +853,21 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         }
     }
 
-    private boolean canResolveMergeConflict(Date localModified,
-                                            Date serverModified,
-                                            Date clientModified,
-                                            OnConflictStrategy onConflictStrategy) {
-        Timber.d("canResolveMergeConflict: localModified=%s, serverModified=%s, clientModified=%s, strategy=%s",
+    private boolean canResolveMergeConflict(
+            Date localModified,
+            Date serverModified,
+            Date clientModified,
+            OnConflictStrategy onConflictStrategy) {
+        Timber.d(
+                "canResolveMergeConflict: localModified=%s, serverModified=%s, clientModified=%s, strategy=%s",
                 localModified, serverModified, clientModified, onConflictStrategy);
 
         boolean result;
 
         Date lastServerModified = DateUtils.anyLast(serverModified, clientModified);
         if (lastServerModified != null && localModified != null) {
-            if (localModified.after(lastServerModified) || localModified.equals(lastServerModified)) {
+            if (localModified.after(lastServerModified)
+                    || localModified.equals(lastServerModified)) {
                 result = true;
             } else {
                 result = (onConflictStrategy == OnConflictStrategy.REWRITE);
@@ -870,7 +919,6 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         }
 
         return result;
-
     }
 
     private OperationResult<FileInputStream> openFileInputStream(String path) {

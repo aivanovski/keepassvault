@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.util;
 
 import androidx.annotation.NonNull;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,6 +22,5 @@ public class CollectionUtils {
         return result;
     }
 
-    private CollectionUtils() {
-    }
+    private CollectionUtils() {}
 }

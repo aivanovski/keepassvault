@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.data.repository.file.remote;
 
 import com.ivanovsky.passnotes.data.entity.RemoteFile;
 import com.ivanovsky.passnotes.data.repository.file.BaseRemoteFileOutputStream;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,7 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
-
 import timber.log.Timber;
 
 public class OfflineFileOutputStream extends BaseRemoteFileOutputStream {
@@ -24,9 +22,9 @@ public class OfflineFileOutputStream extends BaseRemoteFileOutputStream {
     private final OutputStream out;
     private final RemoteFile file;
 
-    public OfflineFileOutputStream(RemoteFileSystemProvider provider,
-                                   RemoteFile file,
-                                   UUID processingUnitUid) throws FileNotFoundException {
+    public OfflineFileOutputStream(
+            RemoteFileSystemProvider provider, RemoteFile file, UUID processingUnitUid)
+            throws FileNotFoundException {
         this.provider = provider;
         this.file = file;
         this.outFile = new File(file.getLocalPath());

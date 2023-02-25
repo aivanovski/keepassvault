@@ -1,8 +1,13 @@
 package com.ivanovsky.passnotes.data.repository.keepass.keepass_java;
 
+import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_OPEN_DB_FILE;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newAuthError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
+import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
+
+import android.text.TextUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.TemplateDao;
@@ -20,7 +25,6 @@ import com.ivanovsky.passnotes.data.repository.keepass.TemplateDaoImpl;
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
 import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,55 +34,36 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.linguafranca.pwdb.kdbx.KdbxCreds;
 import org.linguafranca.pwdb.kdbx.simple.SimpleDatabase;
 import org.linguafranca.pwdb.kdbx.simple.SimpleGroup;
-
-import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_OPEN_DB_FILE;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newAuthError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
-import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError;
-
-import android.text.TextUtils;
-
 import timber.log.Timber;
 
 public class KeepassJavaDatabase implements EncryptedDatabase {
 
-    @NonNull
-    private volatile EncryptedDatabaseKey key;
-    @NonNull
-    private final FileDescriptor file;
-    @NonNull
-    private final KeepassJavaGroupDao groupDao;
-    @NonNull
-    private final KeepassJavaNoteDao noteDao;
-    @NonNull
-    private final TemplateDaoImpl templateDao;
-    @NonNull
-    private final FSOptions fsOptions;
-    @NonNull
-    private final SimpleDatabase db;
-    @NonNull
-    private final ReentrantLock lock;
-    @NonNull
-    private final AtomicReference<DatabaseStatus> status;
-    @NonNull
-    private final FileSystemProvider fsProvider;
-    @Nullable
-    private final OnStatusChangeListener statusListener;
+    @NonNull private volatile EncryptedDatabaseKey key;
+    @NonNull private final FileDescriptor file;
+    @NonNull private final KeepassJavaGroupDao groupDao;
+    @NonNull private final KeepassJavaNoteDao noteDao;
+    @NonNull private final TemplateDaoImpl templateDao;
+    @NonNull private final FSOptions fsOptions;
+    @NonNull private final SimpleDatabase db;
+    @NonNull private final ReentrantLock lock;
+    @NonNull private final AtomicReference<DatabaseStatus> status;
+    @NonNull private final FileSystemProvider fsProvider;
+    @Nullable private final OnStatusChangeListener statusListener;
 
     public interface OnStatusChangeListener {
         void onDatabaseStatusChanged(DatabaseStatus status);
     }
 
-    public static OperationResult<KeepassJavaDatabase> open(@NonNull FileSystemProvider fsProvider,
-                                                            @NonNull FSOptions fsOptions,
-                                                            @NonNull FileDescriptor file,
-                                                            @NonNull OperationResult<InputStream> input,
-                                                            @NonNull EncryptedDatabaseKey key,
-                                                            @Nullable OnStatusChangeListener statusListener) {
+    public static OperationResult<KeepassJavaDatabase> open(
+            @NonNull FileSystemProvider fsProvider,
+            @NonNull FSOptions fsOptions,
+            @NonNull FileDescriptor file,
+            @NonNull OperationResult<InputStream> input,
+            @NonNull EncryptedDatabaseKey key,
+            @Nullable OnStatusChangeListener statusListener) {
         if (input.isFailed()) {
             return input.takeError();
         }
@@ -118,20 +103,22 @@ public class KeepassJavaDatabase implements EncryptedDatabase {
             InputOutputUtils.close(stream);
         }
 
-        KeepassJavaDatabase keepassDb = new KeepassJavaDatabase(fsProvider,
-                fsOptions,
-                file,
-                key,
-                db,
-                determineDatabaseStatus(fsOptions, input),
-                statusListener);
+        KeepassJavaDatabase keepassDb =
+                new KeepassJavaDatabase(
+                        fsProvider,
+                        fsOptions,
+                        file,
+                        key,
+                        db,
+                        determineDatabaseStatus(fsOptions, input),
+                        statusListener);
 
         return input.takeStatusWith(keepassDb);
     }
 
     @NonNull
-    private static DatabaseStatus determineDatabaseStatus(@NonNull FSOptions fsOptions,
-                                                          @NonNull OperationResult<?> lastOperation) {
+    private static DatabaseStatus determineDatabaseStatus(
+            @NonNull FSOptions fsOptions, @NonNull OperationResult<?> lastOperation) {
         if (!fsOptions.isWriteEnabled()) {
             return DatabaseStatus.READ_ONLY;
         } else if (lastOperation.isDeferred() && !fsOptions.isPostponedSyncEnabled()) {
@@ -143,13 +130,14 @@ public class KeepassJavaDatabase implements EncryptedDatabase {
         }
     }
 
-    private KeepassJavaDatabase(@NonNull FileSystemProvider fsProvider,
-                                @NonNull FSOptions fsOptions,
-                                @NonNull FileDescriptor file,
-                                @NonNull EncryptedDatabaseKey key,
-                                @NonNull SimpleDatabase db,
-                                @NonNull DatabaseStatus status,
-                                @Nullable OnStatusChangeListener statusListener) {
+    private KeepassJavaDatabase(
+            @NonNull FileSystemProvider fsProvider,
+            @NonNull FSOptions fsOptions,
+            @NonNull FileDescriptor file,
+            @NonNull EncryptedDatabaseKey key,
+            @NonNull SimpleDatabase db,
+            @NonNull DatabaseStatus status,
+            @Nullable OnStatusChangeListener statusListener) {
         this.fsProvider = fsProvider;
         this.fsOptions = fsOptions;
         this.file = file;
@@ -255,19 +243,21 @@ public class KeepassJavaDatabase implements EncryptedDatabase {
 
             byte[] keyBytes = getKeyResult.getObj();
 
-            FileDescriptor updatedFile = file.copy(file.getFsAuthority(),
-                    file.getPath(),
-                    file.getUid(),
-                    FileUtils.getFileNameFromPath(file.getPath()),
-                    file.isDirectory(),
-                    file.isRoot(),
-                    System.currentTimeMillis());
+            FileDescriptor updatedFile =
+                    file.copy(
+                            file.getFsAuthority(),
+                            file.getPath(),
+                            file.getUid(),
+                            FileUtils.getFileNameFromPath(file.getPath()),
+                            file.isDirectory(),
+                            file.isRoot(),
+                            System.currentTimeMillis());
 
             OutputStream out = null;
             try {
-                OperationResult<OutputStream> outResult = fsProvider.openFileForWrite(updatedFile,
-                        OnConflictStrategy.CANCEL,
-                        fsOptions);
+                OperationResult<OutputStream> outResult =
+                        fsProvider.openFileForWrite(
+                                updatedFile, OnConflictStrategy.CANCEL, fsOptions);
                 if (outResult.isFailed()) {
                     return outResult.takeError();
                 }
@@ -348,8 +338,8 @@ public class KeepassJavaDatabase implements EncryptedDatabase {
 
     @NonNull
     @Override
-    public OperationResult<Boolean> changeKey(@NonNull EncryptedDatabaseKey oldKey,
-                                              @NonNull EncryptedDatabaseKey newKey) {
+    public OperationResult<Boolean> changeKey(
+            @NonNull EncryptedDatabaseKey oldKey, @NonNull EncryptedDatabaseKey newKey) {
         OperationResult<Boolean> result;
         lock.lock();
         try {

@@ -1,11 +1,9 @@
 package com.ivanovsky.passnotes.data.repository.encdb.dao;
 
 import androidx.annotation.NonNull;
-
 import com.ivanovsky.passnotes.data.entity.Note;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher;
-
 import java.util.List;
 import java.util.UUID;
 

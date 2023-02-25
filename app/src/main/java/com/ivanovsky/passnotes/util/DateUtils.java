@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.util;
 
 import androidx.annotation.Nullable;
-
 import java.util.Date;
 
 public class DateUtils {

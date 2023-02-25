@@ -1,11 +1,5 @@
 package com.ivanovsky.passnotes.data.repository.keepass.keepass_java;
 
-import android.util.Pair;
-import androidx.annotation.NonNull;
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
-import com.ivanovsky.passnotes.data.entity.Group;
-import com.ivanovsky.passnotes.data.entity.Note;
 import static com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_NOT_FOUND;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_DUPLICATED_NOTE;
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ADD_ENTRY;
@@ -16,14 +10,20 @@ import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_
 import static com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newDbError;
 import static com.ivanovsky.passnotes.data.entity.OperationError.newGenericError;
+
+import android.util.Pair;
+import androidx.annotation.NonNull;
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
+import com.ivanovsky.passnotes.data.entity.Group;
+import com.ivanovsky.passnotes.data.entity.Note;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.Property;
 import com.ivanovsky.passnotes.data.entity.PropertyType;
-import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher;
+import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.extensions.NoteExtKt;
 import com.ivanovsky.passnotes.extensions.SimpleDatabaseExtensionsKt;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -164,7 +164,8 @@ public class KeepassJavaNoteDao implements NoteDao {
             }
         }
 
-        return new Note(uid, groupUid, created, modified, title, properties, Collections.emptyList());
+        return new Note(
+                uid, groupUid, created, modified, title, properties, Collections.emptyList());
     }
 
     private Property createProperty(String name, String value, boolean isProtected) {
@@ -225,14 +226,15 @@ public class KeepassJavaNoteDao implements NoteDao {
         UUID newEntryUid = newEntry.getUuid();
 
         if (notifyListener) {
-            Note newNote = note.copy(
-                    newEntryUid,
-                    note.getGroupUid(),
-                    note.getCreated(),
-                    note.getModified(),
-                    note.getTitle(),
-                    note.getProperties(),
-                    note.getAttachments());
+            Note newNote =
+                    note.copy(
+                            newEntryUid,
+                            note.getGroupUid(),
+                            note.getCreated(),
+                            note.getModified(),
+                            note.getTitle(),
+                            note.getProperties(),
+                            note.getAttachments());
             contentWatcher.notifyEntryInserted(newNote);
         }
 
@@ -248,12 +250,16 @@ public class KeepassJavaNoteDao implements NoteDao {
     @NonNull
     @Override
     public OperationResult<Boolean> insert(@NonNull List<Note> notes, boolean doCommit) {
-        List<Pair<Note, OperationResult<UUID>>> results = Stream.of(notes)
-                .map(note -> new Pair<>(note, insert(note, false, false)))
-                .collect(Collectors.toList());
+        List<Pair<Note, OperationResult<UUID>>> results =
+                Stream.of(notes)
+                        .map(note -> new Pair<>(note, insert(note, false, false)))
+                        .collect(Collectors.toList());
 
-        boolean success = Stream.of(results)
-                .allMatch(noteToResultPair -> noteToResultPair.second.isSucceededOrDeferred());
+        boolean success =
+                Stream.of(results)
+                        .allMatch(
+                                noteToResultPair ->
+                                        noteToResultPair.second.isSucceededOrDeferred());
 
         if (success) {
             if (doCommit) {
@@ -263,23 +269,25 @@ public class KeepassJavaNoteDao implements NoteDao {
                 }
             }
 
-            List<Note> newNotes = Stream.of(results)
-                    .map(noteToResultPair -> noteToResultPair.first)
-                    .collect(Collectors.toList());
+            List<Note> newNotes =
+                    Stream.of(results)
+                            .map(noteToResultPair -> noteToResultPair.first)
+                            .collect(Collectors.toList());
 
             contentWatcher.notifyEntriesInserted(newNotes);
 
             return OperationResult.success(true);
         } else {
-            OperationResult<UUID> failedOperation = Stream.of(results)
-                    .filter(noteToResultPair -> noteToResultPair.second.isFailed())
-                    .map(noteToResultPair -> noteToResultPair.second)
-                    .findFirst()
-                    .orElse(null);
+            OperationResult<UUID> failedOperation =
+                    Stream.of(results)
+                            .filter(noteToResultPair -> noteToResultPair.second.isFailed())
+                            .map(noteToResultPair -> noteToResultPair.second)
+                            .findFirst()
+                            .orElse(null);
 
             if (failedOperation == null) {
-                return OperationResult.error(newDbError(
-                        String.format(GENERIC_MESSAGE_NOT_FOUND, "Operation")));
+                return OperationResult.error(
+                        newDbError(String.format(GENERIC_MESSAGE_NOT_FOUND, "Operation")));
             }
 
             return failedOperation.takeError();
@@ -351,8 +359,8 @@ public class KeepassJavaNoteDao implements NoteDao {
             }
 
             List<? extends SimpleEntry> entries =
-                    SimpleDatabaseExtensionsKt.findEntries(group, false,
-                            entry -> currentUid.equals(entry.getUuid()));
+                    SimpleDatabaseExtensionsKt.findEntries(
+                            group, false, entry -> currentUid.equals(entry.getUuid()));
             if (entries.size() == 0) {
                 return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE));
             } else if (entries.size() > 1) {
@@ -410,7 +418,9 @@ public class KeepassJavaNoteDao implements NoteDao {
         for (String propertyName : newNames) {
             PropertyType type = parsePropertyType(propertyName);
             if (!PropertyType.DEFAULT_TYPES.contains(type)) {
-                oldEntry.setProperty(propertyName, newEntry.getProperty(propertyName),
+                oldEntry.setProperty(
+                        propertyName,
+                        newEntry.getProperty(propertyName),
                         newEntry.isPropertyProtected(propertyName));
             }
         }
@@ -422,9 +432,8 @@ public class KeepassJavaNoteDao implements NoteDao {
         return remove(noteUid, true, true);
     }
 
-    private OperationResult<Boolean> remove(UUID noteUid,
-                                            boolean notifyListeners,
-                                            boolean doCommit) {
+    private OperationResult<Boolean> remove(
+            UUID noteUid, boolean notifyListeners, boolean doCommit) {
         boolean deleted;
         Note note;
 

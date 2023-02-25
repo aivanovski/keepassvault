@@ -73,7 +73,9 @@ class MainActivity :
             }
 
             override fun onDrawerStateChanged(newState: Int) {
-                if (newState == DrawerLayout.STATE_DRAGGING || newState == DrawerLayout.STATE_SETTLING) {
+                if (newState == DrawerLayout.STATE_DRAGGING ||
+                    newState == DrawerLayout.STATE_SETTLING
+                ) {
                     navigationViewModel.onMenuDragging()
                 }
             }

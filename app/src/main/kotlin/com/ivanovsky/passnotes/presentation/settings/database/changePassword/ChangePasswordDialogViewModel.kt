@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.presentation.settings.database.change_password
+package com.ivanovsky.passnotes.presentation.settings.database.changePassword
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

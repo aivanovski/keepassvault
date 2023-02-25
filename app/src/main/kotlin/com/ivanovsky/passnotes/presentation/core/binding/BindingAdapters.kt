@@ -186,7 +186,9 @@ fun setInputType(editText: EditText, textInputType: TextInputType?) {
         TextInputType.DIGITS -> InputType.TYPE_CLASS_NUMBER
         TextInputType.URL -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_URI
         TextInputType.TEXT -> InputType.TYPE_CLASS_TEXT
-        TextInputType.EMAIL -> InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+        TextInputType.EMAIL -> {
+            InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
+        }
         TextInputType.TEXT_CAP_SENTENCES -> {
             InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
         }

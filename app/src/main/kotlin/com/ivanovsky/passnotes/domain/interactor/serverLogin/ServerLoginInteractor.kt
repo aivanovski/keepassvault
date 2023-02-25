@@ -1,11 +1,11 @@
-package com.ivanovsky.passnotes.domain.interactor.server_login
+package com.ivanovsky.passnotes.domain.interactor.serverLogin
 
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.DispatcherProvider
-import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestCredentialsUseCase
+import com.ivanovsky.passnotes.domain.usecases.test.GetTestCredentialsUseCase
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import kotlinx.coroutines.withContext

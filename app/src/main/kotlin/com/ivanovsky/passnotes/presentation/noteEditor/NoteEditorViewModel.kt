@@ -18,7 +18,7 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.entity.PropertyMap
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
-import com.ivanovsky.passnotes.domain.interactor.note_editor.NoteEditorInteractor
+import com.ivanovsky.passnotes.domain.interactor.noteEditor.NoteEditorInteractor
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.PasswordGeneratorScreen

@@ -7,8 +7,8 @@ import com.ivanovsky.passnotes.presentation.about.AboutFragment
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuFragment
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment
-import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorArgs
-import com.ivanovsky.passnotes.presentation.group_editor.GroupEditorFragment
+import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
+import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorFragment
 import com.ivanovsky.passnotes.presentation.groups.GroupsFragment
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseFragment

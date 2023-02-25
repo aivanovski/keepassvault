@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.presentation.group_editor
+package com.ivanovsky.passnotes.presentation.groupEditor
 
 import android.os.Bundle
 import android.view.LayoutInflater

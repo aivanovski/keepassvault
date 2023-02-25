@@ -84,7 +84,10 @@ class ViewModelsAdapter(
         override fun getNewListSize(): Int = newItems.size
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return if (oldItems[oldItemPosition].model.id != null && newItems[newItemPosition].model.id != null) {
+            val oldItem = oldItems[oldItemPosition]
+            val newItem = newItems[newItemPosition]
+
+            return if (oldItem.model.id != null && newItem.model.id != null) {
                 oldItems[oldItemPosition].model.id == newItems[newItemPosition].model.id
             } else {
                 oldItems[oldItemPosition].model == newItems[newItemPosition].model

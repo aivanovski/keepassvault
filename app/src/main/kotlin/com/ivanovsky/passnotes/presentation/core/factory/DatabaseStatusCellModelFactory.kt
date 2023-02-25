@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.presentation.core.factory
 
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
+import com.ivanovsky.passnotes.domain.entity.DatabaseStatus.NORMAL
+import com.ivanovsky.passnotes.domain.entity.DatabaseStatus.POSTPONED_CHANGES
 import com.ivanovsky.passnotes.extensions.getNameResId
 import com.ivanovsky.passnotes.presentation.core.model.DatabaseStatusCellModel
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -20,7 +22,7 @@ class DatabaseStatusCellModelFactory(
     fun createStatusCellModel(status: DatabaseStatus): DatabaseStatusCellModel {
         return DatabaseStatusCellModel(
             text = status.getNameResId()?.let { resourceProvider.getString(it) } ?: EMPTY,
-            isVisible = (status != DatabaseStatus.NORMAL && status != DatabaseStatus.POSTPONED_CHANGES)
+            isVisible = (status != NORMAL && status != POSTPONED_CHANGES)
         )
     }
 }

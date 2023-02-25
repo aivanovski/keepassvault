@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.domain.interactor.password_generator
+package com.ivanovsky.passnotes.domain.interactor.passwordGenerator
 
 import com.ivanovsky.passnotes.domain.entity.PasswordResource
 import com.ivanovsky.passnotes.domain.usecases.GeneratePasswordUseCase

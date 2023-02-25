@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.presentation.group_editor
+package com.ivanovsky.passnotes.presentation.groupEditor
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,7 +13,7 @@ import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
-import com.ivanovsky.passnotes.domain.interactor.group_editor.GroupEditorInteractor
+import com.ivanovsky.passnotes.domain.interactor.groupEditor.GroupEditorInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState

@@ -47,7 +47,9 @@ class PropertySpreader(
 
     fun getVisibleNotEmptyWithoutTitle(): List<Property> {
         return getVisibleProperties().filter { property ->
-            property.type != PropertyType.TITLE && !property.name.isNullOrEmpty() && !property.value.isNullOrEmpty()
+            property.type != PropertyType.TITLE &&
+                !property.name.isNullOrEmpty() &&
+                !property.value.isNullOrEmpty()
         }
     }
 

@@ -34,7 +34,7 @@ import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
-import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestPasswordUseCase
+import com.ivanovsky.passnotes.domain.usecases.test.GetTestPasswordUseCase
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import kotlinx.coroutines.withContext
 
@@ -91,7 +91,9 @@ class UnlockInteractor(
         withContext(dispatchers.IO) {
             val syncState = syncUseCases.getSyncState(file)
 
-            if (syncState.status == SyncStatus.LOCAL_CHANGES || syncState.status == SyncStatus.REMOTE_CHANGES) {
+            if (syncState.status == SyncStatus.LOCAL_CHANGES ||
+                syncState.status == SyncStatus.REMOTE_CHANGES
+            ) {
                 val syncResult = syncUseCases.processSync(file)
                 if (syncResult.isFailed && syncResult.error.type != NETWORK_IO_ERROR) {
                     return@withContext syncResult.takeError()

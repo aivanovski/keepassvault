@@ -20,7 +20,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
-import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestCredentialsUseCase
+import com.ivanovsky.passnotes.domain.usecases.test.GetTestCredentialsUseCase
 import com.ivanovsky.passnotes.extensions.toFileDescriptor
 import com.ivanovsky.passnotes.util.InputOutputUtils
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull

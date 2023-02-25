@@ -275,8 +275,12 @@ class GroupsFragment : BaseFragment() {
             R.id.menu_search to { vm -> vm.onSearchButtonClicked() },
             R.id.menu_settings to { vm -> vm.onSettingsButtonClicked() },
             R.id.menu_sort_and_view to { vm -> vm.onSortAndViewButtonClicked() },
-            R.id.menu_enable_biometric_unlock to { vm -> vm.onEnableBiometricUnlockButtonClicked() },
-            R.id.menu_disable_biometric_unlock to { vm -> vm.onDisableBiometricUnlockButtonClicked() }
+            R.id.menu_enable_biometric_unlock to { vm ->
+                vm.onEnableBiometricUnlockButtonClicked()
+            },
+            R.id.menu_disable_biometric_unlock to { vm ->
+                vm.onDisableBiometricUnlockButtonClicked()
+            }
         )
 
         fun newInstance(args: GroupsScreenArgs) = GroupsFragment()

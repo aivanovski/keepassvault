@@ -17,7 +17,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showErrorDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.throwPreferenceNotFound
 import com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
-import com.ivanovsky.passnotes.presentation.settings.database.change_password.ChangePasswordDialog
+import com.ivanovsky.passnotes.presentation.settings.database.changePassword.ChangePasswordDialog
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import org.koin.androidx.viewmodel.ext.android.viewModel
 

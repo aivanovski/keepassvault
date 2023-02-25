@@ -29,7 +29,8 @@ class RegularFileSystemSyncProcessor(
 
         return when {
             getFileResult.isSucceeded -> SyncStatus.NO_CHANGES
-            getFileResult.isFailed && getFileResult.error.type == OperationError.Type.FILE_NOT_FOUND_ERROR -> {
+            getFileResult.isFailed &&
+                getFileResult.error.type == OperationError.Type.FILE_NOT_FOUND_ERROR -> {
                 SyncStatus.FILE_NOT_FOUND
             }
             else -> SyncStatus.ERROR

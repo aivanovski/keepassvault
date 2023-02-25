@@ -40,7 +40,8 @@ open class DefaultScreenStateHandler : ScreenStateHandler {
                     view.state = ScreenStateView.State.EMPTY
                     view.isVisible = true
                 } else {
-                    view.isVisible = (view is FloatingActionButton || view is ExpandableFloatingActionButton)
+                    view.isVisible =
+                        (view is FloatingActionButton || view is ExpandableFloatingActionButton)
                 }
             }
             LOADING -> {

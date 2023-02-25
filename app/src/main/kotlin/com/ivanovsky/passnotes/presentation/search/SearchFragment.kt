@@ -86,9 +86,9 @@ class SearchFragment : BaseFragment() {
             }
 
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
                 viewModel.savedScrollPosition.value =
-                    (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    (rv.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             }
         })
         return binding.root

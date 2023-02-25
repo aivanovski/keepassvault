@@ -9,6 +9,14 @@ interface RemoteApiClientV2 {
     fun getParent(file: FileDescriptor): OperationResult<FileDescriptor>
     fun getRoot(): OperationResult<FileDescriptor>
     fun getFileMetadata(file: FileDescriptor): OperationResult<RemoteFileMetadata>
-    fun downloadFile(remotePath: String, destinationPath: String): OperationResult<RemoteFileMetadata>
-    fun uploadFile(remotePath: String, localPath: String): OperationResult<RemoteFileMetadata>
+
+    fun downloadFile(
+        remotePath: String,
+        destinationPath: String
+    ): OperationResult<RemoteFileMetadata>
+
+    fun uploadFile(
+        remotePath: String,
+        localPath: String
+    ): OperationResult<RemoteFileMetadata>
 }

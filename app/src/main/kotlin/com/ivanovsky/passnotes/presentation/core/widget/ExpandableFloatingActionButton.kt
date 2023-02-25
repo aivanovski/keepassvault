@@ -45,7 +45,8 @@ class ExpandableFloatingActionButton constructor(context: Context, attrs: Attrib
     }
 
     private fun createFabItem(text: String): ExtendedFloatingActionButton {
-        val fab = inflater.inflate(R.layout.core_expandable_fab_item, fabContainer, false) as ExtendedFloatingActionButton
+        val fab = inflater.inflate(R.layout.core_expandable_fab_item, fabContainer, false)
+            as ExtendedFloatingActionButton
         fab.text = text
         return fab
     }

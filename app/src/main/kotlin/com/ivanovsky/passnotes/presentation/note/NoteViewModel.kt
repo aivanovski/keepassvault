@@ -525,7 +525,8 @@ class NoteViewModel(
                     if (hasHiddenProperties) NoteMenuItem.TOGGLE_HIDDEN else null
                 )
             }
-            screenState.isDisplayingData && args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
+            screenState.isDisplayingData &&
+                args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
                 listOfNotNull(
                     NoteMenuItem.SELECT,
                     NoteMenuItem.LOCK,

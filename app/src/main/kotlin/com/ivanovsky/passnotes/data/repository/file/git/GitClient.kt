@@ -102,7 +102,7 @@ class GitClient(
 
         val metadata = getMetadataResult.obj
         Timber.d(
-            "getFileMetadata(result): localModified=%s, serverModified=%s, clientModified=%s, revision=%s",
+            "getFileMetadata(result): local=%s, server=%s, client=%s, revision=%s",
             file.modified,
             metadata.serverModified,
             metadata.clientModified,

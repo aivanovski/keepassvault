@@ -51,7 +51,7 @@ class AutofillStructureParser(
 
     private fun parseViewNode(result: MutableAutofillStructure, node: ViewNode) {
         Timber.d(
-            "parseViewNode: className=%s, autofillHints=%s, htmlAttributes=%s, inputType=0x%s, hint=%s",
+            "parseViewNode: className=%s, hints=%s, htmlAttrs=%s, inputType=0x%s, hint=%s",
             node.className,
             node.autofillHints?.toList(),
             node.htmlInfo?.attributes,

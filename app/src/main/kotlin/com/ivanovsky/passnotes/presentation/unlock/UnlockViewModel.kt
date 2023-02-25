@@ -612,7 +612,9 @@ class UnlockViewModel(
             SyncStatus.FILE_NOT_FOUND -> {
                 setScreenState(
                     ScreenState.dataWithError(
-                        errorText = resourceProvider.getString(R.string.sync_file_not_found_message),
+                        errorText = resourceProvider.getString(
+                            R.string.sync_file_not_found_message
+                        ),
                         errorButtonText = resourceProvider.getString(R.string.remove)
                     )
                 )

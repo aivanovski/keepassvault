@@ -20,7 +20,9 @@ class RemoteFileRepository(
 
     fun findByRemotePath(remotePath: String, fsAuthority: FSAuthority): RemoteFile? {
         return dao.all
-            .firstOrNull { file -> file.remotePath == remotePath && file.fsAuthority == fsAuthority }
+            .firstOrNull { file ->
+                file.remotePath == remotePath && file.fsAuthority == fsAuthority
+            }
     }
 
     fun insert(file: RemoteFile) {

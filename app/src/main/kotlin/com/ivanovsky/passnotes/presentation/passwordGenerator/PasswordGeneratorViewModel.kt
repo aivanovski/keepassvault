@@ -8,7 +8,7 @@ import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PasswordResource
-import com.ivanovsky.passnotes.domain.interactor.password_generator.PasswordGeneratorInteractor
+import com.ivanovsky.passnotes.domain.interactor.passwordGenerator.PasswordGeneratorInteractor
 import com.ivanovsky.passnotes.presentation.Screens.PasswordGeneratorScreen
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY

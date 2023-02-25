@@ -23,8 +23,8 @@ import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateUsedFileUseCase
-import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestCredentialsUseCase
-import com.ivanovsky.passnotes.domain.usecases.test_data.GetTestPasswordUseCase
+import com.ivanovsky.passnotes.domain.usecases.test.GetTestCredentialsUseCase
+import com.ivanovsky.passnotes.domain.usecases.test.GetTestPasswordUseCase
 import org.koin.dsl.module
 
 object UseCaseModule {

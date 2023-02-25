@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.domain.interactor.note_editor
+package com.ivanovsky.passnotes.domain.interactor.noteEditor
 
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus

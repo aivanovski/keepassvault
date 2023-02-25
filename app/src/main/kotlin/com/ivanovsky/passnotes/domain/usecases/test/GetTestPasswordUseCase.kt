@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.domain.usecases.test_data
+package com.ivanovsky.passnotes.domain.usecases.test
 
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.entity.TestData

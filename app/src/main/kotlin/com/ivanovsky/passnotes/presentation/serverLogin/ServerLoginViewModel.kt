@@ -9,7 +9,7 @@ import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
-import com.ivanovsky.passnotes.domain.interactor.server_login.ServerLoginInteractor
+import com.ivanovsky.passnotes.domain.interactor.serverLogin.ServerLoginInteractor
 import com.ivanovsky.passnotes.extensions.getUrl
 import com.ivanovsky.passnotes.presentation.Screens.ServerLoginScreen
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler

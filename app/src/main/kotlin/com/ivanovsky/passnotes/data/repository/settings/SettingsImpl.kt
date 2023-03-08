@@ -17,6 +17,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FIL
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_SSL_CERTIFICATE_VALIDATION_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SEARCH_TYPE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_DIRECTION
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_TYPE
@@ -51,6 +52,12 @@ class SettingsImpl(private val context: Context) : Settings {
         get() = getBoolean(IS_EXTERNAL_STORAGE_CACHE_ENABLED)
         set(value) {
             putBoolean(IS_EXTERNAL_STORAGE_CACHE_ENABLED, value)
+        }
+
+    override var isSslCertificateValidationEnabled: Boolean
+        get() = getBoolean(IS_SSL_CERTIFICATE_VALIDATION_ENABLED)
+        set(value) {
+            putBoolean(IS_SSL_CERTIFICATE_VALIDATION_ENABLED, value)
         }
 
     override var isPostponedSyncEnabled: Boolean
@@ -235,6 +242,11 @@ class SettingsImpl(private val context: Context) : Settings {
             keyId = R.string.pref_is_external_storage_cache_enabled,
             type = BOOLEAN,
             defaultValue = false
+        ),
+        IS_SSL_CERTIFICATE_VALIDATION_ENABLED(
+            keyId = R.string.pref_is_ssl_certificate_validation_enabled,
+            type = BOOLEAN,
+            defaultValue = true
         ),
         IS_LOCK_NOTIFICATION_VISIBLE(
             keyId = R.string.pref_is_lock_notification_visible,

@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.domain.entity.SortType
 
 interface Settings {
     var isExternalStorageCacheEnabled: Boolean
+    var isSslCertificateValidationEnabled: Boolean
     var isPostponedSyncEnabled: Boolean
     var autoLockDelayInMs: Int
     var autoClearClipboardDelayInMs: Int

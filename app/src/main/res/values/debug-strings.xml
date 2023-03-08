@@ -16,6 +16,7 @@
     <string name="add_entry" translatable="false">Add entry</string>
     <string name="hooks_with_dots" translatable="false">Hooks:</string>
     <string name="use_external_storage_for_remote_files" translatable="false">Use External storage for remote files</string>
+    <string name="ignore_ssl_certificate_validation" translatable="false">Ignore SSL certificate validation</string>
     <string name="test_toggles" translatable="false">Test Toggles</string>
     <string name="fake_biometric_enabled" translatable="false">Use Fake Biometric (requires restart)</string>
     <string name="device_file_system" translatable="false">Device file system</string>

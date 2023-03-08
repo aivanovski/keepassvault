@@ -372,6 +372,21 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/hooksDivider" />
 
+                <CheckBox
+                    android:id="@+id/ignoreSslCertificateCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/element_margin"
+                    android:checked="@={viewModel.isIgnoreSslCertificate}"
+                    android:onCheckedChanged="@{(button, isChecked) -> viewModel.onIgnoreSslCertificateCheckBoxChanged(isChecked)}"
+                    android:text="@string/ignore_ssl_certificate_validation"
+                    android:textColor="@color/primary_text"
+                    android:textSize="@dimen/material_primary_text_size"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/externalStorageCheckBox" />
+
                 <TextView
                     android:id="@+id/togglesText"
                     style="@style/Material.PrimaryText.SingleLine"
@@ -381,7 +396,7 @@
                     android:layout_marginTop="@dimen/group_margin"
                     android:text="@string/test_toggles"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/externalStorageCheckBox" />
+                    app:layout_constraintTop_toBottomOf="@+id/ignoreSslCertificateCheckBox" />
 
                 <View
                     android:id="@+id/togglesDivider"

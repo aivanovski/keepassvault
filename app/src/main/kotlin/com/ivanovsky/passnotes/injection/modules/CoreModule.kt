@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.injection.modules
 
+import android.annotation.SuppressLint
+import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.crypto.DataCipherProviderImpl
@@ -27,6 +29,10 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.dsl.module
 import timber.log.Timber
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.SSLContext
+import javax.net.ssl.X509TrustManager
 
 object CoreModule {
 
@@ -48,7 +54,7 @@ object CoreModule {
             single { FileHelper(get(), get()) }
 
             // Network
-            single { provideOkHttp() }
+            single { provideOkHttp(get()) }
 
             // Database
             single { AppDatabase.buildDatabase(get(), get()) }
@@ -63,7 +69,7 @@ object CoreModule {
             }
         }
 
-    private fun provideOkHttp(): OkHttpClient {
+    private fun provideOkHttp(settings: Settings): OkHttpClient {
         val builder = OkHttpClient.Builder()
 
         val interceptor = HttpLoggingInterceptor {
@@ -74,7 +80,33 @@ object CoreModule {
 
         builder.addInterceptor(interceptor)
 
+        if (BuildConfig.DEBUG && !settings.isSslCertificateValidationEnabled) {
+            Timber.w("SSL Certificate validation is disabled")
+            val unsecuredTrustManager = createUnsecuredTrustManager()
+            val sslContext = SSLContext.getInstance("TLS")
+            sslContext.init(null, arrayOf(unsecuredTrustManager), SecureRandom())
+
+            builder.sslSocketFactory(sslContext.socketFactory, unsecuredTrustManager)
+            builder.hostnameVerifier { _, _ -> true }
+        }
+
         return builder.build()
+    }
+
+    private fun createUnsecuredTrustManager(): X509TrustManager {
+        return object : X509TrustManager {
+            @SuppressLint("TrustAllX509TrustManager")
+            override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+            }
+
+            @SuppressLint("TrustAllX509TrustManager")
+            override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {
+            }
+
+            override fun getAcceptedIssuers(): Array<X509Certificate> {
+                return arrayOf()
+            }
+        }
     }
 
     private fun provideRemoteFileRepository(database: AppDatabase) =

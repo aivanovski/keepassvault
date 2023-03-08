@@ -53,6 +53,7 @@ class DebugMenuViewModel(
     val isCloseDbButtonEnabled = MutableLiveData(false)
     val isAddEntryButtonEnabled = MutableLiveData(false)
     val isExternalStorageEnabled = MutableLiveData(settings.isExternalStorageCacheEnabled)
+    val isIgnoreSslCertificate = MutableLiveData(!settings.isSslCertificateValidationEnabled)
     val isFakeBiometricEnabled = MutableLiveData(
         settings.testToggles?.isFakeBiometricEnabled ?: false
     )
@@ -297,6 +298,10 @@ class DebugMenuViewModel(
 
     fun onExternalStorageCheckBoxChanged(isChecked: Boolean) {
         settings.isExternalStorageCacheEnabled = isChecked
+    }
+
+    fun onIgnoreSslCertificateCheckBoxChanged(isChecked: Boolean) {
+        settings.isSslCertificateValidationEnabled = !isChecked
     }
 
     fun onFakeBiometricCheckBoxChanged(isChecked: Boolean) {

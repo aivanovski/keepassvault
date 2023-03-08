@@ -12,7 +12,9 @@ import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
+import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
 import com.ivanovsky.passnotes.data.repository.settings.Settings
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
@@ -35,7 +37,8 @@ class DebugMenuViewModel(
     private val resourceProvider: ResourceProvider,
     private val settings: Settings,
     private val router: Router
-) : ViewModel() {
+) : ViewModel(),
+    OnSettingsChangeListener {
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.data())
@@ -68,6 +71,21 @@ class DebugMenuViewModel(
     private var selectedFsType = FSType.INTERNAL_STORAGE
     private var selectedImplementationType = KeepassImplementation.KOTPASS
     private var uriFileDescriptor: FileDescriptor? = null
+
+    init {
+        settings.register(this)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        settings.unregister(this)
+    }
+
+    override fun onSettingsChanged(pref: SettingsImpl.Pref) {
+        if (pref == SettingsImpl.Pref.TEST_TOGGLES) {
+            isFakeBiometricEnabled.value = settings.testToggles?.isFakeBiometricEnabled ?: false
+        }
+    }
 
     fun onScreenStart() {
         loadTestCredentials()
@@ -359,6 +377,12 @@ class DebugMenuViewModel(
 
     fun onKeepassImplementationSelected(index: Int) {
         selectedImplementationType = KEEPASS_IMPLEMENTATION_TYPE[index]
+    }
+
+    fun onResetTestDataButtonClicked() {
+        settings.testData = null
+        settings.testToggles = null
+        showSnackbarEvent.call(resourceProvider.getString(R.string.test_data_removed))
     }
 
     private fun getSelectedFile(): FileDescriptor? {

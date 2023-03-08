@@ -387,6 +387,19 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/externalStorageCheckBox" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/resetTestDataButton"
+                    style="@style/Material.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/element_margin"
+                    android:onClick="@{() -> viewModel.onResetTestDataButtonClicked()}"
+                    android:text="@string/reset_test_data"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/ignoreSslCertificateCheckBox" />
+
                 <TextView
                     android:id="@+id/togglesText"
                     style="@style/Material.PrimaryText.SingleLine"
@@ -396,7 +409,7 @@
                     android:layout_marginTop="@dimen/group_margin"
                     android:text="@string/test_toggles"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/ignoreSslCertificateCheckBox" />
+                    app:layout_constraintTop_toBottomOf="@+id/resetTestDataButton" />
 
                 <View
                     android:id="@+id/togglesDivider"

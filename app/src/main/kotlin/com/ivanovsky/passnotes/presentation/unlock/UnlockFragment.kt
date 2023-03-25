@@ -27,7 +27,6 @@ import com.ivanovsky.passnotes.presentation.core.extensions.showKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
-import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 import java.util.Date
 import org.apache.commons.lang3.StringUtils.EMPTY
 
@@ -82,9 +81,6 @@ class UnlockFragment : BaseFragment() {
     override fun onStart() {
         super.onStart()
         viewModel.onScreenStart()
-        navigationViewModel.setVisibleItems(
-            NavigationMenuViewModel.createNavigationItemsForBasicScreens()
-        )
         navigationViewModel.setNavigationEnabled(true)
     }
 

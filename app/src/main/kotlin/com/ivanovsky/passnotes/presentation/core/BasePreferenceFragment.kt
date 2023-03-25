@@ -7,7 +7,7 @@ import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewMo
 abstract class BasePreferenceFragment : PreferenceFragmentCompat() {
 
     protected val navigationViewModel: NavigationMenuViewModel by lazy {
-        ViewModelProvider(requireActivity(), NavigationMenuViewModel.FACTORY)
+        ViewModelProvider(requireActivity(), NavigationMenuViewModel.Factory())
             .get(NavigationMenuViewModel::class.java)
     }
 

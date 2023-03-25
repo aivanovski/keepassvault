@@ -40,6 +40,8 @@ import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFa
 import com.ivanovsky.passnotes.presentation.main.MainScreenArgs
 import com.ivanovsky.passnotes.presentation.main.MainViewModel
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
+import com.ivanovsky.passnotes.presentation.main.navigation.cells.factory.NavigationMenuCellModelFactory
+import com.ivanovsky.passnotes.presentation.main.navigation.cells.factory.NavigationMenuCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseViewModel
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel
@@ -154,6 +156,9 @@ object UiModule {
 
             single { StorageListCellModelFactory(get()) }
             single { StorageListCellViewModelFactory() }
+
+            single { NavigationMenuCellModelFactory(get()) }
+            single { NavigationMenuCellViewModelFactory() }
 
             // Cicerone
             single { Cicerone.create() }
@@ -294,7 +299,7 @@ object UiModule {
             viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
             viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
             factory { (args: SortAndViewDialogArgs) -> SortAndViewDialogViewModel(get(), args) }
-            factory { NavigationMenuViewModel(get()) }
+            factory { NavigationMenuViewModel(get(), get(), get(), get()) }
             factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }
         }
 

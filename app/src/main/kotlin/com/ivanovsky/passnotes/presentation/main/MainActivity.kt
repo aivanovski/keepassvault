@@ -14,9 +14,9 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.github.terrakok.cicerone.NavigatorHolder
 import com.github.terrakok.cicerone.androidx.AppNavigator
-import com.google.android.material.navigation.NavigationView
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.NoteCandidate
+import com.ivanovsky.passnotes.databinding.CoreBaseActivityWithSideMenuBinding
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
@@ -24,7 +24,6 @@ import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryExtra
 import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
-import com.ivanovsky.passnotes.presentation.main.navigation.model.NavigationItem
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
 import com.ivanovsky.passnotes.util.InputMethodUtils
 import com.ivanovsky.passnotes.util.IntentUtils.immutablePendingIntentFlags
@@ -33,19 +32,18 @@ class MainActivity :
     AppCompatActivity(),
     PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
-    private lateinit var drawer: DrawerLayout
-    private lateinit var navigationView: NavigationView
+    private lateinit var binding: CoreBaseActivityWithSideMenuBinding
 
     private val navigatorHolder: NavigatorHolder by inject()
     private val settingsRouter: SettingsRouter by inject()
-    private val navigator = AppNavigator(this, R.id.fragment_container)
+    private val navigator = AppNavigator(this, R.id.fragmentContainer)
     private val args by lazy {
         getMandatoryExtra<Bundle>(ARGUMENTS_BUNDLE).getParcelable(ARGUMENTS) as? MainScreenArgs
             ?: throw IllegalStateException()
     }
 
     private val navigationViewModel: NavigationMenuViewModel by lazy {
-        ViewModelProvider(this, NavigationMenuViewModel.FACTORY)
+        ViewModelProvider(this, NavigationMenuViewModel.Factory())
             .get(NavigationMenuViewModel::class.java)
     }
 
@@ -57,12 +55,16 @@ class MainActivity :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.core_base_activity_with_side_menu)
+        binding = CoreBaseActivityWithSideMenuBinding.inflate(layoutInflater)
+            .also {
+                it.lifecycleOwner = this
+                it.navigationViewModel = navigationViewModel
+            }
 
-        initActionBar(R.id.tool_bar)
+        setContentView(binding.root)
+        initActionBar(R.id.toolBar)
 
-        drawer = findViewById(R.id.drawer_layout)
-        drawer.addDrawerListener(object : DrawerLayout.DrawerListener {
+        binding.drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
             }
 
@@ -80,11 +82,8 @@ class MainActivity :
                 }
             }
         })
-        navigationView = findViewById(R.id.navigation_view)
 
         viewModel.navigateToRootScreen()
-
-        navigationView.setNavigationItemSelectedListener { item -> onNavigationItemSelected(item) }
 
         subscribeToLiveData()
         subscribeToEvents()
@@ -119,7 +118,7 @@ class MainActivity :
 
         return when (item.itemId) {
             android.R.id.home -> {
-                drawer.openDrawer(GravityCompat.START)
+                binding.drawerLayout.openDrawer(GravityCompat.START)
                 true
             }
 
@@ -131,40 +130,23 @@ class MainActivity :
         navigationViewModel.isNavigationMenuEnabled.observe(this) {
             setDrawerEnabled(it)
         }
-        navigationViewModel.visibleItems.observe(this) {
-            setVisibleNavigationItems(it)
-        }
     }
 
     private fun subscribeToEvents() {
         navigationViewModel.hideKeyboardEvent.observe(this) {
             InputMethodUtils.hideSoftInput(this)
         }
+        navigationViewModel.hideMenuEvent.observe(this) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        }
     }
 
     private fun setDrawerEnabled(isEnabled: Boolean) {
         if (isEnabled) {
-            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+            binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
         } else {
-            drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         }
-    }
-
-    private fun setVisibleNavigationItems(visibleItems: List<NavigationItem>) {
-        for (item in NavigationItem.values()) {
-            val isVisible = visibleItems.contains(item)
-            navigationView.menu.findItem(item.menuId).isVisible = isVisible
-        }
-    }
-
-    private fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val navigationItem = NavigationItem.findByMenuId(item.itemId)
-            ?: throw IllegalStateException()
-
-        navigationViewModel.onMenuItemSelected(navigationItem)
-        drawer.closeDrawer(GravityCompat.START)
-
-        return true
     }
 
     override fun onPreferenceStartFragment(
@@ -193,7 +175,7 @@ class MainActivity :
                 .apply {
                     // Wrap arguments with Bundle in order to make it work
                     // when application is launched from autofill
-                    val args = Bundle()
+                    val bundle = Bundle()
                         .apply {
                             putParcelable(
                                 ARGUMENTS,
@@ -201,7 +183,7 @@ class MainActivity :
                             )
                         }
 
-                    putExtra(ARGUMENTS_BUNDLE, args)
+                    putExtra(ARGUMENTS_BUNDLE, bundle)
                 }
         }
 

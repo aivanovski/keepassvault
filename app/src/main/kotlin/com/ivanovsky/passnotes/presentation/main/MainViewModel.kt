@@ -61,7 +61,7 @@ class MainViewModel(
     class Factory(private val args: MainScreenArgs) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return GlobalInjector.get<MainViewModel>(
                 parametersOf(args)
             ) as T

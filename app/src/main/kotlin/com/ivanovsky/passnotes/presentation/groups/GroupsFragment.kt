@@ -33,7 +33,6 @@ import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibi
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.GroupsMenuItem
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
-import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 
 class GroupsFragment : BaseFragment() {
@@ -99,9 +98,6 @@ class GroupsFragment : BaseFragment() {
 
     override fun onStart() {
         super.onStart()
-        navigationViewModel.setVisibleItems(
-            NavigationMenuViewModel.createNavigationItemsForDbScreens()
-        )
         navigationViewModel.setNavigationEnabled(true)
     }
 

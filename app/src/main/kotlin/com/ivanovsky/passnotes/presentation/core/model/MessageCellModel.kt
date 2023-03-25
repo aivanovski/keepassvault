@@ -1,6 +1,10 @@
 package com.ivanovsky.passnotes.presentation.core.model
 
-data class DatabaseStatusCellModel(
+import androidx.annotation.ColorInt
+
+data class MessageCellModel(
     val text: String,
+    @ColorInt
+    val backgroundColor: Int,
     val isVisible: Boolean
 ) : BaseCellModel()

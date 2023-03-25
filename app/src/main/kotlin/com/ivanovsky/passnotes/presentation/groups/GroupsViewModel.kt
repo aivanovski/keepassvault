@@ -48,8 +48,8 @@ import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
-import com.ivanovsky.passnotes.presentation.core.viewmodel.MessageCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.MessageCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs

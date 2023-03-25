@@ -27,8 +27,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/ic_settings_grey_600_24dp"
-            tools:tint="@color/icon_gray" />
+            app:tint="@color/primary_text"
+            tools:src="@drawable/ic_settings_grey_600_24dp" />
 
         <TextView
             android:id="@+id/title"
@@ -38,6 +38,7 @@
             android:layout_marginHorizontal="@dimen/element_margin"
             android:gravity="center_vertical"
             android:text="@{viewModel.model.title}"
+            android:textSize="@dimen/material_secondary_text_size"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

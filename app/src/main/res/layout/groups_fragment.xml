@@ -33,7 +33,7 @@
 
         <include
             android:id="@+id/statusView"
-            layout="@layout/cell_database_status"
+            layout="@layout/cell_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"

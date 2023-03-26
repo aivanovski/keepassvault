@@ -9,7 +9,6 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseViewModel.Companion.PASSWORD_PATTERN
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 
@@ -62,24 +61,16 @@ class ChangePasswordDialogViewModel(
         newPassword: String,
         confirmation: String
     ): Boolean {
-        passwordError.value = when {
-            password.isBlank() -> {
-                resourceProvider.getString(R.string.empty_field)
-            }
-            !PASSWORD_PATTERN.matcher(password).matches() -> {
-                resourceProvider.getString(R.string.field_contains_illegal_character)
-            }
-            else -> null
+        passwordError.value = if (password.isBlank()) {
+            resourceProvider.getString(R.string.empty_field)
+        } else {
+            null
         }
 
-        newPasswordError.value = when {
-            newPassword.isBlank() -> {
-                resourceProvider.getString(R.string.empty_field)
-            }
-            !PASSWORD_PATTERN.matcher(newPassword).matches() -> {
-                resourceProvider.getString(R.string.field_contains_illegal_character)
-            }
-            else -> null
+        newPasswordError.value = if (newPassword.isBlank()) {
+            resourceProvider.getString(R.string.empty_field)
+        } else {
+            null
         }
 
         confirmationError.value = when {

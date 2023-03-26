@@ -25,7 +25,6 @@ import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.FileUtils.removeFileExtensionsIfNeed
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import java.io.File
-import java.util.regex.Pattern
 import kotlinx.coroutines.launch
 
 class NewDatabaseViewModel(
@@ -134,19 +133,8 @@ class NewDatabaseViewModel(
             return false
         }
 
-        if (FILE_NAME_PATTERN.matcher(filename).matches()) {
-            filenameError.value = null
-        } else {
-            filenameError.value =
-                resourceProvider.getString(R.string.field_contains_illegal_character)
-        }
-
-        if (PASSWORD_PATTERN.matcher(password).matches()) {
-            passwordError.value = null
-        } else {
-            passwordError.value =
-                resourceProvider.getString(R.string.field_contains_illegal_character)
-        }
+        filenameError.value = null
+        passwordError.value = null
 
         if (password == confirmation) {
             confirmationError.value = null
@@ -232,14 +220,5 @@ class NewDatabaseViewModel(
     private sealed interface SelectedStorage {
         data class ParentDir(val dir: FileDescriptor) : SelectedStorage
         data class File(val file: FileDescriptor) : SelectedStorage
-    }
-
-    companion object {
-
-        private val FILE_NAME_PATTERN = Pattern.compile("[\\w-_]{1,50}")
-
-        // TODO: Refactor, create Validator entity which will be able to validate
-        //  different text
-        val PASSWORD_PATTERN = Pattern.compile("[\\w@#$!%^&+=]{4,20}")
     }
 }

@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.domain.interactor.storagelist
 
+import android.net.Uri
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
@@ -7,6 +8,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
+import com.ivanovsky.passnotes.data.repository.file.saf.SAFHelper
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
@@ -22,8 +24,13 @@ import kotlinx.coroutines.withContext
 class StorageListInteractor(
     private val resourceProvider: ResourceProvider,
     private val fileSystemResolver: FileSystemResolver,
+    private val safHelper: SAFHelper,
     private val dispatchers: DispatcherProvider
 ) {
+
+    fun setupPermissionForSaf(uri: Uri): OperationResult<Unit> {
+        return safHelper.setupPermissionIfNeed(uri)
+    }
 
     suspend fun getStorageOptions(action: Action): OperationResult<List<StorageOption>> =
         withContext(dispatchers.IO) {

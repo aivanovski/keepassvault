@@ -15,14 +15,6 @@ class StorageListCellModelFactory(
     fun createCellModel(options: List<StorageOption>): List<BaseCellModel> {
         return options.map { option ->
             when (option.type) {
-                StorageOptionType.SAF_STORAGE -> {
-                    TwoTextWithIconCellModel(
-                        id = option.type.name,
-                        title = option.title,
-                        description = resourceProvider.getString(R.string.saf_warning_message),
-                        iconResId = R.drawable.ic_info_grey_600_24dp
-                    )
-                }
                 StorageOptionType.EXTERNAL_STORAGE -> {
                     TwoTextWithIconCellModel(
                         id = option.type.name,

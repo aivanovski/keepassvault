@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
+import com.ivanovsky.passnotes.data.repository.file.saf.SAFHelper
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
@@ -50,6 +51,7 @@ object CoreModule {
             single<Settings> { SettingsImpl(get()) }
             single<DataCipherProvider> { DataCipherProviderImpl(get()) }
             single { FileHelper(get(), get()) }
+            single { SAFHelper(get()) }
 
             // Network
             single { provideOkHttp(get()) }

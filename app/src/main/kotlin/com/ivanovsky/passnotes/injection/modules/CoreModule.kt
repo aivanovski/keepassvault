@@ -13,7 +13,6 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
-import com.ivanovsky.passnotes.domain.ClipboardHelper
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
@@ -45,7 +44,6 @@ object CoreModule {
             single { LocaleProvider(get()) }
             single { DispatcherProvider() }
             single { ObserverBus() }
-            single { ClipboardHelper(get()) }
             single { DateFormatProvider(get()) }
             single { NoteDiffer() }
             single { SelectionHolder() }

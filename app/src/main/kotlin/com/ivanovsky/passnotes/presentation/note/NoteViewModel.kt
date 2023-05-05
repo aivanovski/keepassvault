@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.note
 
+import android.os.Build
 import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -384,12 +385,14 @@ class NoteViewModel(
     }
 
     private fun copyText(text: String) {
-        interactor.copyToClipboard(text)
-        showSnackbarMessageEvent.call(resourceProvider.getString(R.string.copied))
+        interactor.copyToClipboard(text, isProtected = false)
+        if (Build.VERSION.SDK_INT < 33) {
+            showSnackbarMessageEvent.call(resourceProvider.getString(R.string.copied))
+        }
     }
 
     private fun copyProtectedText(text: String) {
-        interactor.copyToClipboardWithTimeout(text)
+        interactor.copyToClipboardWithTimeout(text, isProtected = true)
 
         val delayInSeconds = interactor.getTimeoutValueInMillis() / 1000L
 
@@ -397,7 +400,9 @@ class NoteViewModel(
             R.string.copied_clipboard_will_be_cleared_in_seconds,
             delayInSeconds
         )
-        showSnackbarMessageEvent.call(message)
+        if (Build.VERSION.SDK_INT < 33) {
+            showSnackbarMessageEvent.call(message)
+        }
     }
 
     private fun onNotePropertyLongClicked(cellId: String) {

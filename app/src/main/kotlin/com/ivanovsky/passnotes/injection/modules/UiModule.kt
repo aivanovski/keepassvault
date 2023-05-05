@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.injection.modules
 
 import com.github.terrakok.cicerone.Cicerone
 import com.github.terrakok.cicerone.Router
+import com.ivanovsky.passnotes.domain.ClipboardInteractor
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.interactor.autofill.AutofillInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
@@ -79,7 +80,8 @@ object UiModule {
     fun build() =
         module {
             // Interactors
-            single { DatabaseLockInteractor(get(), get(), get()) }
+            single { ClipboardInteractor(get()) }
+            single { DatabaseLockInteractor(get(), get(), get(), get()) }
             single { FilePickerInteractor(get(), get()) }
             single {
                 UnlockInteractor(

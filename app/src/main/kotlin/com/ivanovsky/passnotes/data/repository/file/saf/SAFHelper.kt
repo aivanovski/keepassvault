@@ -67,8 +67,8 @@ class SAFHelper(context: Context) {
     private fun hasPersistablePermission(uri: Uri): Boolean {
         return contentResolver.persistedUriPermissions.any { persistedUri ->
             persistedUri.uri == uri &&
-                    persistedUri.isReadPermission &&
-                    persistedUri.isWritePermission
+                persistedUri.isReadPermission &&
+                persistedUri.isWritePermission
         }
     }
 }

@@ -23,7 +23,8 @@ import timber.log.Timber
 class DatabaseLockInteractor(
     private val context: Context,
     private val settings: Settings,
-    private val lockUseCase: LockDatabaseUseCase
+    private val lockUseCase: LockDatabaseUseCase,
+    private val clipboardInteractor: ClipboardInteractor
 ) {
 
     private val handler = Handler(Looper.getMainLooper())
@@ -54,6 +55,7 @@ class DatabaseLockInteractor(
         isDatabaseOpened.set(false)
         databaseFsOptions.set(null)
         databaseStatus.set(null)
+        clipboardInteractor.clearIfNeed()
     }
 
     @UiThread

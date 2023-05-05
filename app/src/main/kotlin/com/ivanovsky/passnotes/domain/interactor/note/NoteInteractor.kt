@@ -1,12 +1,10 @@
 package com.ivanovsky.passnotes.domain.interactor.note
 
-import android.os.Handler
-import android.os.Looper
 import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.settings.Settings
-import com.ivanovsky.passnotes.domain.ClipboardHelper
+import com.ivanovsky.passnotes.domain.ClipboardInteractor
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
@@ -25,7 +23,7 @@ import java.util.UUID
 import kotlinx.coroutines.withContext
 
 class NoteInteractor(
-    private val clipboardHelper: ClipboardHelper,
+    private val clipboardInteractor: ClipboardInteractor,
     private val lockUseCase: LockDatabaseUseCase,
     private val getStatusUseCase: GetDatabaseStatusUseCase,
     private val getDbUseCase: GetDatabaseUseCase,
@@ -66,15 +64,12 @@ class NoteInteractor(
             db.noteDao.getNoteByUid(noteUid)
         }
 
-    fun copyToClipboardWithTimeout(text: String) {
-        clipboardHelper.copy(text)
-
-        val handler = Handler(Looper.getMainLooper())
-        handler.postDelayed({ clipboardHelper.clear() }, getTimeoutValueInMillis())
+    fun copyToClipboardWithTimeout(text: String, isProtected: Boolean) {
+        clipboardInteractor.copyWithTimeout(text, isProtected, getTimeoutValueInMillis())
     }
 
-    fun copyToClipboard(text: String) {
-        clipboardHelper.copy(text)
+    fun copyToClipboard(text: String, isProtected: Boolean) {
+        clipboardInteractor.copy(text, isProtected)
     }
 
     fun getTimeoutValueInMillis(): Long {

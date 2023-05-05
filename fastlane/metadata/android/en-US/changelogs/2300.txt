@@ -1,0 +1,5 @@
+- Improve Fuzzy search alghorithm
+- Remove screen orientation lock
+- Fix access to files selected with system file picker
+- Fix work with clipboard
+- Fix 'illegal character' error in password validation

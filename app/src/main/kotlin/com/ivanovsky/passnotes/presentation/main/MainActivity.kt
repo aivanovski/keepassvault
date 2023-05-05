@@ -83,7 +83,9 @@ class MainActivity :
             }
         })
 
-        viewModel.navigateToRootScreen()
+        if (savedInstanceState == null) {
+            viewModel.navigateToRootScreen()
+        }
 
         subscribeToLiveData()
         subscribeToEvents()

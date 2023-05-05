@@ -17,14 +17,12 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        tools:ignore="LockedOrientationActivity">
+        android:theme="@style/AppTheme">
 
         <!-- Activities -->
         <activity
             android:name=".presentation.StartActivity"
-            android:exported="true"
-            android:screenOrientation="portrait">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -35,7 +33,6 @@
             android:name=".presentation.main.MainActivity"
             android:exported="false"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
         <!-- Services -->

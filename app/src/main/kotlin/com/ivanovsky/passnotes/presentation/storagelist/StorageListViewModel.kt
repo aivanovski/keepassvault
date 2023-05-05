@@ -100,6 +100,15 @@ class StorageListViewModel(
     fun onExternalStorageFileSelected(uri: Uri) {
         val fsAuthority = selectedOption?.root?.fsAuthority ?: return
 
+        if (fsAuthority.type == FSType.SAF) {
+            val setupPermissionResult = interactor.setupPermissionForSaf(uri)
+            if (setupPermissionResult.isFailed) {
+                val message = errorInteractor.processAndGetMessage(setupPermissionResult.error)
+                screenState.value = ScreenState.dataWithError(message)
+                return
+            }
+        }
+
         val path = uri.toString()
 
         viewModelScope.launch {

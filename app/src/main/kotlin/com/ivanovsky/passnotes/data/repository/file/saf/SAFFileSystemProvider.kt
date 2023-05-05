@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.file.saf
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
 import com.ivanovsky.passnotes.data.entity.FSAuthority
@@ -15,6 +14,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
+import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
 import java.io.FileNotFoundException
 import java.io.InputStream
@@ -22,7 +22,8 @@ import java.io.OutputStream
 import timber.log.Timber
 
 class SAFFileSystemProvider(
-    private val context: Context
+    private val context: Context,
+    private val safHelper: SAFHelper
 ) : FileSystemProvider {
 
     private val authenticator = SAFFileSystemAuthenticator()
@@ -55,7 +56,7 @@ class SAFFileSystemProvider(
     ): OperationResult<InputStream> {
         val uri = file.getUri()
 
-        val permissionResult = takePermission(uri)
+        val permissionResult = checkPermission(uri)
         if (permissionResult.isFailed) {
             return permissionResult.takeError()
         }
@@ -82,7 +83,7 @@ class SAFFileSystemProvider(
     ): OperationResult<OutputStream> {
         val uri = file.getUri()
 
-        val permissionResult = takePermission(uri)
+        val permissionResult = checkPermission(uri)
         if (permissionResult.isFailed) {
             return permissionResult.takeError()
         }
@@ -175,20 +176,13 @@ class SAFFileSystemProvider(
         )
     }
 
-    private fun takePermission(uri: Uri): OperationResult<Unit> {
-        return try {
-            context.contentResolver.takePersistableUriPermission(
-                uri,
-                Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            )
-            OperationResult.success(Unit)
-        } catch (e: SecurityException) {
-            Timber.d(e)
-            OperationResult.error(failedToGetAccessTo(uri))
-        } catch (e: Exception) {
-            Timber.d(e)
-            OperationResult.error(unknownError(e))
+    private fun checkPermission(uri: Uri): OperationResult<Unit> {
+        val setupPermissionResult = safHelper.setupPermissionIfNeed(uri)
+        if (setupPermissionResult.isFailed) {
+            return setupPermissionResult.mapError()
         }
+
+        return setupPermissionResult
     }
 
     private fun failedToFindColumn(columnName: String): OperationError {

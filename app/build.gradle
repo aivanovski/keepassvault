@@ -17,6 +17,9 @@ def CI_PROPERTIES_FILE = file("../ci.properties")
 def PROPERTY_KEYSTORE_PASSWORD = 'KEYSTORE_PASSWORD'
 def PROPERTY_KEYSTORE_ALIAS = 'KEYSTORE_ALIAS'
 
+def DEBUG_KEY_PATH = '../keys/debug.keystore'
+def RELEASE_KEY_PATH = '../keys/release.keystore'
+
 project.ext.customProps = new Properties()
 if (DEV_PROPERTIES_FILE.exists()) {
     project.ext.customProps.load(new FileInputStream(DEV_PROPERTIES_FILE))
@@ -100,13 +103,21 @@ android {
 
     signingConfigs {
         debug {
-            storeFile file("../keys/debug.keystore")
+            if (file(DEBUG_KEY_PATH).exists()) {
+                storeFile file(DEBUG_KEY_PATH)
+            } else {
+                project.logger.lifecycle('No signing config for debug build')
+            }
         }
         release {
-            storeFile file("../keys/release.keystore")
-            storePassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD) ?: ""
-            keyAlias getCustomProperty(PROPERTY_KEYSTORE_ALIAS) ?: ""
-            keyPassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD) ?: ""
+            if (file(RELEASE_KEY_PATH).exists()) {
+                storeFile file("../keys/release.keystore")
+                storePassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD)
+                keyAlias getCustomProperty(PROPERTY_KEYSTORE_ALIAS)
+                keyPassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD)
+            } else {
+                project.logger.lifecycle('No signing config for release build')
+            }
         }
     }
 

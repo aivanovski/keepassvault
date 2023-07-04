@@ -19,6 +19,10 @@ def PROPERTY_KEYSTORE_ALIAS = 'KEYSTORE_ALIAS'
 
 def DEBUG_KEY_PATH = '../keys/debug.keystore'
 def RELEASE_KEY_PATH = '../keys/release.keystore'
+def PUBLIC_KEY_PATH = '../keys/public.keystore'
+
+def PUBLIC_KEY_PASSWORD = 'abc123'
+def PUBLIC_KEY_ALIAS = 'testalias'
 
 project.ext.customProps = new Properties()
 if (DEV_PROPERTIES_FILE.exists()) {
@@ -105,18 +109,21 @@ android {
         debug {
             if (file(DEBUG_KEY_PATH).exists()) {
                 storeFile file(DEBUG_KEY_PATH)
-            } else {
-                project.logger.lifecycle('No signing config for debug build')
             }
         }
         release {
             if (file(RELEASE_KEY_PATH).exists()) {
-                storeFile file("../keys/release.keystore")
+                storeFile file(RELEASE_KEY_PATH)
                 storePassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD)
                 keyAlias getCustomProperty(PROPERTY_KEYSTORE_ALIAS)
                 keyPassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD)
             } else {
-                project.logger.lifecycle('No signing config for release build')
+                // This signing config is used for CI builds on forked repos
+                storeFile file(PUBLIC_KEY_PATH)
+                storePassword PUBLIC_KEY_PASSWORD
+                keyAlias PUBLIC_KEY_ALIAS
+                keyPassword PUBLIC_KEY_PASSWORD
+                project.logger.lifecycle('Configure release build with public keystore')
             }
         }
     }

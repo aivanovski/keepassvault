@@ -20,15 +20,19 @@ jobs:
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/debug.keystore -d ./keys/debug.keystore.gpg
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/release.keystore -d ./keys/release.keystore.gpg
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./ci.properties -d ./ci.properties.gpg
+          if [ -z "GPG_PASSPHRASE" ]; then
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/debug.keystore -d ./keys/debug.keystore.gpg
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/release.keystore -d ./keys/release.keystore.gpg
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./ci.properties -d ./ci.properties.gpg
+          fi
 
       - name: Validate decrypted data
         run: |
-          echo "3a15a7065ed4a62a747af2e3477b0a3e1940a7bc2946df638b902bcb186998e7 *keys/debug.keystore" | sha256sum --check
-          echo "36a3bb8b7bda141b414c2df7fac7dcd09a2775769c561e562d2b43f7b246bfa5 *keys/release.keystore" | sha256sum --check
-          echo "b009011968e80d5b99eaa181141e6c94178a538c3dac0e413c43d5f95f50f557 *ci.properties" | sha256sum --check
+          if [ -z "GPG_PASSPHRASE" ]; then
+            echo "3a15a7065ed4a62a747af2e3477b0a3e1940a7bc2946df638b902bcb186998e7 *keys/debug.keystore" | sha256sum --check
+            echo "36a3bb8b7bda141b414c2df7fac7dcd09a2775769c561e562d2b43f7b246bfa5 *keys/release.keystore" | sha256sum --check
+            echo "b009011968e80d5b99eaa181141e6c94178a538c3dac0e413c43d5f95f50f557 *ci.properties" | sha256sum --check
+          fi
 
       - name: Run spotless
         run: ./gradlew app:spotlessCheck
@@ -44,15 +48,19 @@ jobs:
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/debug.keystore -d ./keys/debug.keystore.gpg
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/release.keystore -d ./keys/release.keystore.gpg
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./ci.properties -d ./ci.properties.gpg
+          if [ -z "GPG_PASSPHRASE" ]; then
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/debug.keystore -d ./keys/debug.keystore.gpg
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/release.keystore -d ./keys/release.keystore.gpg
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./ci.properties -d ./ci.properties.gpg
+          fi
 
       - name: Validate decrypted data
         run: |
-          echo "3a15a7065ed4a62a747af2e3477b0a3e1940a7bc2946df638b902bcb186998e7 *keys/debug.keystore" | sha256sum --check
-          echo "36a3bb8b7bda141b414c2df7fac7dcd09a2775769c561e562d2b43f7b246bfa5 *keys/release.keystore" | sha256sum --check
-          echo "b009011968e80d5b99eaa181141e6c94178a538c3dac0e413c43d5f95f50f557 *ci.properties" | sha256sum --check
+          if [ -z "GPG_PASSPHRASE" ]; then
+            echo "3a15a7065ed4a62a747af2e3477b0a3e1940a7bc2946df638b902bcb186998e7 *keys/debug.keystore" | sha256sum --check
+            echo "36a3bb8b7bda141b414c2df7fac7dcd09a2775769c561e562d2b43f7b246bfa5 *keys/release.keystore" | sha256sum --check
+            echo "b009011968e80d5b99eaa181141e6c94178a538c3dac0e413c43d5f95f50f557 *ci.properties" | sha256sum --check
+          fi
 
       - name: Run tests
         run: ./gradlew app:test
@@ -69,15 +77,19 @@ jobs:
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/debug.keystore -d ./keys/debug.keystore.gpg
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/release.keystore -d ./keys/release.keystore.gpg
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./ci.properties -d ./ci.properties.gpg
+          if [ -z "GPG_PASSPHRASE" ]; then
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/debug.keystore -d ./keys/debug.keystore.gpg
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/release.keystore -d ./keys/release.keystore.gpg
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./ci.properties -d ./ci.properties.gpg
+          fi
 
       - name: Validate decrypted data
         run: |
-          echo "3a15a7065ed4a62a747af2e3477b0a3e1940a7bc2946df638b902bcb186998e7 *keys/debug.keystore" | sha256sum --check
-          echo "36a3bb8b7bda141b414c2df7fac7dcd09a2775769c561e562d2b43f7b246bfa5 *keys/release.keystore" | sha256sum --check
-          echo "b009011968e80d5b99eaa181141e6c94178a538c3dac0e413c43d5f95f50f557 *ci.properties" | sha256sum --check
+          if [ -z "GPG_PASSPHRASE" ]; then
+            echo "3a15a7065ed4a62a747af2e3477b0a3e1940a7bc2946df638b902bcb186998e7 *keys/debug.keystore" | sha256sum --check
+            echo "36a3bb8b7bda141b414c2df7fac7dcd09a2775769c561e562d2b43f7b246bfa5 *keys/release.keystore" | sha256sum --check
+            echo "b009011968e80d5b99eaa181141e6c94178a538c3dac0e413c43d5f95f50f557 *ci.properties" | sha256sum --check
+          fi
 
       - name: Build
         run: |
@@ -102,15 +114,19 @@ jobs:
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/debug.keystore -d ./keys/debug.keystore.gpg
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/release.keystore -d ./keys/release.keystore.gpg
-          gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./ci.properties -d ./ci.properties.gpg
+          if [ -z "GPG_PASSPHRASE" ]; then
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/debug.keystore -d ./keys/debug.keystore.gpg
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/release.keystore -d ./keys/release.keystore.gpg
+            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./ci.properties -d ./ci.properties.gpg
+          fi
 
       - name: Validate decrypted data
         run: |
-          echo "3a15a7065ed4a62a747af2e3477b0a3e1940a7bc2946df638b902bcb186998e7 *keys/debug.keystore" | sha256sum --check
-          echo "36a3bb8b7bda141b414c2df7fac7dcd09a2775769c561e562d2b43f7b246bfa5 *keys/release.keystore" | sha256sum --check
-          echo "b009011968e80d5b99eaa181141e6c94178a538c3dac0e413c43d5f95f50f557 *ci.properties" | sha256sum --check
+          if [ -z "GPG_PASSPHRASE" ]; then
+            echo "3a15a7065ed4a62a747af2e3477b0a3e1940a7bc2946df638b902bcb186998e7 *keys/debug.keystore" | sha256sum --check
+            echo "36a3bb8b7bda141b414c2df7fac7dcd09a2775769c561e562d2b43f7b246bfa5 *keys/release.keystore" | sha256sum --check
+            echo "b009011968e80d5b99eaa181141e6c94178a538c3dac0e413c43d5f95f50f557 *ci.properties" | sha256sum --check
+          fi
 
       - name: Build
         run: |

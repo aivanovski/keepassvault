@@ -17,6 +17,13 @@ def CI_PROPERTIES_FILE = file("../ci.properties")
 def PROPERTY_KEYSTORE_PASSWORD = 'KEYSTORE_PASSWORD'
 def PROPERTY_KEYSTORE_ALIAS = 'KEYSTORE_ALIAS'
 
+def DEBUG_KEY_PATH = '../keys/debug.keystore'
+def RELEASE_KEY_PATH = '../keys/release.keystore'
+def PUBLIC_KEY_PATH = '../keys/public.keystore'
+
+def PUBLIC_KEY_PASSWORD = 'abc123'
+def PUBLIC_KEY_ALIAS = 'testalias'
+
 project.ext.customProps = new Properties()
 if (DEV_PROPERTIES_FILE.exists()) {
     project.ext.customProps.load(new FileInputStream(DEV_PROPERTIES_FILE))
@@ -100,13 +107,24 @@ android {
 
     signingConfigs {
         debug {
-            storeFile file("../keys/debug.keystore")
+            if (file(DEBUG_KEY_PATH).exists()) {
+                storeFile file(DEBUG_KEY_PATH)
+            }
         }
         release {
-            storeFile file("../keys/release.keystore")
-            storePassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD) ?: ""
-            keyAlias getCustomProperty(PROPERTY_KEYSTORE_ALIAS) ?: ""
-            keyPassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD) ?: ""
+            if (file(RELEASE_KEY_PATH).exists()) {
+                storeFile file(RELEASE_KEY_PATH)
+                storePassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD)
+                keyAlias getCustomProperty(PROPERTY_KEYSTORE_ALIAS)
+                keyPassword getCustomProperty(PROPERTY_KEYSTORE_PASSWORD)
+            } else {
+                // This signing config is used for CI builds on forked repos
+                storeFile file(PUBLIC_KEY_PATH)
+                storePassword PUBLIC_KEY_PASSWORD
+                keyAlias PUBLIC_KEY_ALIAS
+                keyPassword PUBLIC_KEY_PASSWORD
+                project.logger.lifecycle('Configure release build with public keystore')
+            }
         }
     }
 

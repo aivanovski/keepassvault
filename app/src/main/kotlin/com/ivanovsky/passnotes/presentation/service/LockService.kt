@@ -11,9 +11,9 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
+import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.interactor.service.LockServiceInteractor
 import com.ivanovsky.passnotes.extensions.getNotificationManager
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicReference
 import timber.log.Timber
 
 class LockService : Service(),
-    ObserverBus.DatabaseStatusObserver,
+    ObserverBus.DatabaseSyncStatusObserver,
     LockServiceFacade {
 
     private val interactor: LockServiceInteractor by inject()
@@ -42,9 +42,9 @@ class LockService : Service(),
 
     private val taskProcessor = LockServiceTaskProcessor(this, dispatchers)
 
-    override fun onDatabaseStatusChanged(status: DatabaseStatus) {
+    override fun onDatabaseSyncStatusChanged(status: SyncStatus) {
         if (isRunning()) {
-            val message = getMessageByDatabaseStatus(status)
+            val message = getMessageBySyncStatus(status)
             showNotification(message)
         }
     }
@@ -159,11 +159,11 @@ class LockService : Service(),
 
     private fun isRunning() = (getCurrentState() != ServiceState.STOPPED)
 
-    private fun getMessageByDatabaseStatus(status: DatabaseStatus): String {
-        return if (status == DatabaseStatus.POSTPONED_CHANGES) {
-            getString(R.string.lock_notification_text_not_synchronized)
-        } else {
+    private fun getMessageBySyncStatus(status: SyncStatus): String {
+        return if (status == SyncStatus.NO_CHANGES) {
             getString(R.string.lock_notification_text_normal)
+        } else {
+            getString(R.string.lock_notification_text_not_synchronized)
         }
     }
 

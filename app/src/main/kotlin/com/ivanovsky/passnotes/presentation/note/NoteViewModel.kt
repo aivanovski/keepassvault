@@ -13,10 +13,10 @@ import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
+import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.LocaleProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
@@ -71,8 +71,8 @@ class NoteViewModel(
     private val statusCellModelFactory: DatabaseStatusCellModelFactory,
     private val args: NoteScreenArgs
 ) : BaseScreenViewModel(),
-    ObserverBus.NoteContentObserver,
-    ObserverBus.DatabaseStatusObserver {
+    ObserverBus.DatabaseSyncStatusObserver,
+    ObserverBus.NoteContentObserver {
 
     val viewTypes = ViewModelTypes()
         .add(NotePropertyCellViewModel::class, R.layout.cell_note_property)
@@ -128,7 +128,7 @@ class NoteViewModel(
         subscribeToCellEvents()
     }
 
-    override fun onDatabaseStatusChanged(status: DatabaseStatus) {
+    override fun onDatabaseSyncStatusChanged(status: SyncStatus) {
         updateStatusViewModel(status)
     }
 
@@ -246,7 +246,7 @@ class NoteViewModel(
 
         viewModelScope.launch {
             val getNoteResult = interactor.getNoteByUid(noteUid)
-            val getDbStatus = interactor.getDatabaseStatus()
+            val getDbStatus = interactor.getLastSyncStatus()
 
             if (getNoteResult.isSucceededOrDeferred) {
                 onNoteLoaded(getNoteResult.getOrThrow(), getDbStatus.getOrNull())
@@ -283,7 +283,7 @@ class NoteViewModel(
         onNoteLoaded(note, null)
     }
 
-    private fun onNoteLoaded(note: Note, dbStatus: DatabaseStatus?) {
+    private fun onNoteLoaded(note: Note, syncStatus: SyncStatus?) {
         this.note = note
 
         actionBarTitle.value = note.title
@@ -319,8 +319,8 @@ class NoteViewModel(
 
         setCellElements(cellViewModelFactory.createCellViewModels(models, eventProvider))
 
-        if (dbStatus != null) {
-            updateStatusViewModel(dbStatus)
+        if (syncStatus != null) {
+            updateStatusViewModel(syncStatus)
         }
 
         setScreenState(ScreenState.data())
@@ -504,7 +504,7 @@ class NoteViewModel(
         return saveResult.getOrThrow()
     }
 
-    private fun updateStatusViewModel(status: DatabaseStatus) {
+    private fun updateStatusViewModel(status: SyncStatus) {
         statusViewModel.value = cellViewModelFactory.createCellViewModel(
             model = statusCellModelFactory.createStatusCellModel(status),
             eventProvider = eventProvider

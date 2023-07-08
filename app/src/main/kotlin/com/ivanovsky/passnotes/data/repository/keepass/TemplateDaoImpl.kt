@@ -25,6 +25,7 @@ class TemplateDaoImpl(
     private val templatesRef = AtomicReference<List<Template>>(emptyList())
 
     init {
+        // TODO: unsubscribe may be called after db is closed
         noteDao.contentWatcher.subscribe(object : ContentWatcher.OnEntryChangeListener<Note> {
             override fun onEntryChanged(oldEntry: Note, newEntry: Note) {
                 checkGroupUid(newEntry.groupUid)

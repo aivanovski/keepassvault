@@ -81,7 +81,7 @@ object UiModule {
         module {
             // Interactors
             single { ClipboardInteractor(get()) }
-            single { DatabaseLockInteractor(get(), get(), get(), get()) }
+            single { DatabaseLockInteractor(get(), get(), get(), get(), get()) }
             single { FilePickerInteractor(get(), get()) }
             single {
                 UnlockInteractor(

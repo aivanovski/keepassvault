@@ -6,7 +6,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.TemplateDao;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao;
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
-import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
+import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import java.util.concurrent.locks.ReentrantLock;
 
 public interface EncryptedDatabase {
@@ -21,7 +21,7 @@ public interface EncryptedDatabase {
     EncryptedDatabaseKey getKey();
 
     @NonNull
-    DatabaseStatus getStatus();
+    FSOptions getFSOptions();
 
     @NonNull
     OperationResult<EncryptedDatabaseConfig> getConfig();
@@ -45,4 +45,7 @@ public interface EncryptedDatabase {
 
     @NonNull
     OperationResult<Boolean> commit();
+
+    @NonNull
+    DatabaseWatcher getWatcher();
 }

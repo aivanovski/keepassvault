@@ -11,10 +11,9 @@ import com.ivanovsky.passnotes.data.repository.file.FSOptions.Companion.defaultO
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
-import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.OnStatusChangeListener
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
-import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
@@ -23,6 +22,7 @@ import kotlin.concurrent.withLock
 class KeepassDatabaseRepository(
     private val fileSystemResolver: FileSystemResolver,
     private val lockInteractor: DatabaseLockInteractor,
+    private val syncStatusProvider: DatabaseSyncStatusProvider,
     private val observerBus: ObserverBus
 ) : EncryptedDatabaseRepository {
 
@@ -55,18 +55,13 @@ class KeepassDatabaseRepository(
                 return@withLock openFileResult.takeError()
             }
 
-            val statusListener = { status: DatabaseStatus ->
-                observerBus.notifyDatabaseStatusChanged(status)
-            }
-
             val openResult = openDatabase(
                 type,
                 fsProvider,
                 options,
                 file,
                 openFileResult,
-                key,
-                statusListener
+                key
             )
             if (openResult.isFailed) {
                 return@withLock openResult.takeError()
@@ -78,7 +73,7 @@ class KeepassDatabaseRepository(
         }
 
         if (openDbResult.isSucceededOrDeferred) {
-            onDatabaseOpened(options, openDbResult.obj.status)
+            onDatabaseOpened(openDbResult.getOrThrow(), openDbResult)
         }
 
         return openDbResult
@@ -111,6 +106,9 @@ class KeepassDatabaseRepository(
     override fun close(): OperationResult<Boolean> {
         lock.withLock {
             if (isOpened) {
+                val db = database.get().database
+                db.watcher.unsubscribe(syncStatusProvider)
+
                 database.set(null)
             }
         }
@@ -120,13 +118,18 @@ class KeepassDatabaseRepository(
         return OperationResult.success(true)
     }
 
-    private fun onDatabaseOpened(fsOptions: FSOptions, status: DatabaseStatus) {
-        lockInteractor.onDatabaseOpened(fsOptions, status)
-        observerBus.notifyDatabaseOpened(fsOptions, status)
+    private fun onDatabaseOpened(
+        db: EncryptedDatabase,
+        openResult: OperationResult<EncryptedDatabase>
+    ) {
+        lockInteractor.onDatabaseOpened(db)
+        syncStatusProvider.onCommit(db, openResult)
+        observerBus.notifyDatabaseOpened(db)
     }
 
     private fun onDatabaseClosed() {
         lockInteractor.onDatabaseClosed()
+        syncStatusProvider.clear()
         observerBus.notifyDatabaseClosed()
     }
 
@@ -136,8 +139,7 @@ class KeepassDatabaseRepository(
         fsOptions: FSOptions,
         file: FileDescriptor,
         input: OperationResult<InputStream>,
-        key: EncryptedDatabaseKey,
-        statusListener: OnStatusChangeListener?
+        key: EncryptedDatabaseKey
     ): OperationResult<EncryptedDatabase> {
         val openResult = when (type) {
             KeepassImplementation.KOTPASS -> KotpassDatabase.open(
@@ -145,15 +147,20 @@ class KeepassDatabaseRepository(
                 fsOptions,
                 file,
                 input,
-                key,
-                statusListener
+                key
             )
         }
+
         if (openResult.isFailed) {
             return openResult.takeError()
         }
 
-        return openResult.takeStatusWith(openResult.obj)
+        val db = openResult.getOrThrow()
+            .apply {
+                this.watcher.subscribe(syncStatusProvider)
+            }
+
+        return openResult.takeStatusWith(db)
     }
 
     private data class DatabaseReference(

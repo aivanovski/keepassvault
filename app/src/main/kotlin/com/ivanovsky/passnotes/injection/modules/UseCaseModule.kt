@@ -6,7 +6,7 @@ import com.ivanovsky.passnotes.domain.usecases.DecodePasswordWithBiometricUseCas
 import com.ivanovsky.passnotes.domain.usecases.EncodePasswordWithBiometricUseCase
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GeneratePasswordUseCase
-import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
+import com.ivanovsky.passnotes.domain.usecases.GetLastSyncStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetNoteUseCase
@@ -36,7 +36,7 @@ object UseCaseModule {
             single { LockDatabaseUseCase() }
             single { GetRecentlyOpenedFilesUseCase(get(), get()) }
             single { SyncUseCases(get(), get()) }
-            single { GetDatabaseStatusUseCase(get(), get()) }
+            single { GetLastSyncStatusUseCase(get(), get()) }
             single { AddTemplatesUseCase(get(), get(), get()) }
             single { GetDatabaseUseCase(get(), get()) }
             single { MoveNoteUseCase(get(), get(), get()) }

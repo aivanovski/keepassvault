@@ -11,8 +11,6 @@ import app.keemobile.kotpass.models.Entry
 import app.keemobile.kotpass.models.Group as RawGroup
 import app.keemobile.kotpass.models.Meta
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.GroupEntity
-import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP
@@ -23,6 +21,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.TemplateDao
+import com.ivanovsky.passnotes.data.repository.encdb.DatabaseWatcher
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseConfig
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
@@ -36,9 +35,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateDaoImpl
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateFactory
-import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.OnStatusChangeListener
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
-import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.extensions.getOrNull
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.util.InputOutputUtils
@@ -56,9 +53,7 @@ class KotpassDatabase(
     private val fsOptions: FSOptions,
     private val file: FileDescriptor,
     key: EncryptedDatabaseKey,
-    db: KeePassDatabase,
-    private val statusListener: OnStatusChangeListener?,
-    status: DatabaseStatus
+    db: KeePassDatabase
 ) : EncryptedDatabase {
 
     private val lock = ReentrantLock()
@@ -66,18 +61,20 @@ class KotpassDatabase(
     private val key = AtomicReference(key)
     private val autotypeOptionMap = AtomicReference(createInheritableOptionsMap())
     private val groupUidToParentMap = AtomicReference(createGroupUidToParentMap())
-    private val status = AtomicReference(status)
     private val groupDao = KotpassGroupDao(this)
     private val noteDao = KotpassNoteDao(this)
     private val templateDao = TemplateDaoImpl(groupDao, noteDao)
+    private val dbWatcher = DatabaseWatcher()
+
+    override fun getWatcher(): DatabaseWatcher = dbWatcher
 
     override fun getLock(): ReentrantLock = lock
 
     override fun getFile(): FileDescriptor = file
 
-    override fun getKey(): EncryptedDatabaseKey = key.get()
+    override fun getFSOptions(): FSOptions = fsOptions
 
-    override fun getStatus(): DatabaseStatus = status.get()
+    override fun getKey(): EncryptedDatabaseKey = key.get()
 
     override fun getGroupDao(): GroupDao = groupDao
 
@@ -155,7 +152,7 @@ class KotpassDatabase(
     }
 
     override fun commit(): OperationResult<Boolean> {
-        return lock.withLock {
+        val commitResult = lock.withLock {
             val updatedFile = file.copy(modified = System.currentTimeMillis())
 
             val outResult =
@@ -168,21 +165,19 @@ class KotpassDatabase(
             val db = database.get()
             try {
                 db.encode(out)
-
-                val result = outResult.takeStatusWith(true)
-                val newStatus = determineDatabaseStatus(fsOptions, result)
-                if (status.get() != newStatus) {
-                    status.set(newStatus)
-                    statusListener?.onDatabaseStatusChanged(newStatus)
-                }
-
-                result
+                outResult.takeStatusWith(true)
             } catch (e: IOException) {
                 InputOutputUtils.close(out)
 
                 OperationResult.error(newGenericIOError(e))
             }
         }
+
+        if (commitResult.isSucceededOrDeferred) {
+            dbWatcher.notifyOnCommit(this, commitResult)
+        }
+
+        return commitResult
     }
 
     fun swapDatabase(db: KeePassDatabase) {
@@ -423,9 +418,7 @@ class KotpassDatabase(
                 fsOptions = fsOptions,
                 file = file,
                 key = key,
-                db = rawDb,
-                statusListener = null,
-                status = DatabaseStatus.NORMAL
+                db = rawDb
             )
 
             val setupRecycleBinResult = db.setupRecycleBin()
@@ -454,7 +447,6 @@ class KotpassDatabase(
             file: FileDescriptor,
             content: OperationResult<InputStream>,
             key: EncryptedDatabaseKey,
-            statusListener: OnStatusChangeListener?
         ): OperationResult<KotpassDatabase> {
             if (content.isFailed) {
                 return content.mapError()
@@ -477,9 +469,7 @@ class KotpassDatabase(
                         fsOptions = fsOptions,
                         file = file,
                         key = key,
-                        db = db,
-                        statusListener = statusListener,
-                        status = determineDatabaseStatus(fsOptions, content)
+                        db = db
                     )
                 )
             } catch (e: Exception) {
@@ -498,21 +488,6 @@ class KotpassDatabase(
                 }
             } finally {
                 InputOutputUtils.close(contentStream)
-            }
-        }
-
-        private fun determineDatabaseStatus(
-            fsOptions: FSOptions,
-            lastOperation: OperationResult<*>
-        ): DatabaseStatus {
-            return if (!fsOptions.isWriteEnabled) {
-                DatabaseStatus.READ_ONLY
-            } else if (lastOperation.isDeferred && !fsOptions.isPostponedSyncEnabled) {
-                DatabaseStatus.CACHED
-            } else if (lastOperation.isDeferred && fsOptions.isPostponedSyncEnabled) {
-                DatabaseStatus.POSTPONED_CHANGES
-            } else {
-                DatabaseStatus.NORMAL
             }
         }
 

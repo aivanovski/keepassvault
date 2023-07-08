@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
@@ -23,13 +24,13 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
-import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
+import com.ivanovsky.passnotes.extensions.getOrNull
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
@@ -86,7 +87,7 @@ class GroupsViewModel(
     ObserverBus.GroupDataSetObserver,
     ObserverBus.NoteDataSetChanged,
     ObserverBus.NoteContentObserver,
-    ObserverBus.DatabaseStatusObserver,
+    ObserverBus.DatabaseSyncStatusObserver,
     OnSettingsChangeListener {
 
     val viewTypes = ViewModelTypes()
@@ -155,10 +156,6 @@ class GroupsViewModel(
         }
     }
 
-    override fun onDatabaseStatusChanged(status: DatabaseStatus) {
-        updateStatusViewModel(status)
-    }
-
     override fun onSettingsChanged(pref: SettingsImpl.Pref) {
         if (pref == SettingsImpl.Pref.SORT_TYPE ||
             pref == SettingsImpl.Pref.SORT_DIRECTION ||
@@ -166,6 +163,10 @@ class GroupsViewModel(
         ) {
             loadData()
         }
+    }
+
+    override fun onDatabaseSyncStatusChanged(status: SyncStatus) {
+        updateStatusViewModel(status)
     }
 
     fun start() {
@@ -205,7 +206,7 @@ class GroupsViewModel(
                 }
             }
 
-            val status = interactor.getDatabaseStatus()
+            val getSyncStatusResult = interactor.getLastSyncStatus()
             val getUsedFileResult = interactor.getDatabaseUsedFile()
             if (getUsedFileResult.isFailed) {
                 setErrorState(getUsedFileResult.error)
@@ -228,9 +229,11 @@ class GroupsViewModel(
                     val emptyText = resourceProvider.getString(R.string.no_items)
                     setScreenState(ScreenState.empty(emptyText))
                 }
-
-                if (status.isSucceededOrDeferred) {
-                    updateStatusViewModel(status.obj)
+                if (getSyncStatusResult.isSucceededOrDeferred) {
+                    val status = getSyncStatusResult.getOrNull()
+                    if (status != null) {
+                        updateStatusViewModel(status)
+                    }
                 }
 
                 visibleMenuItems.value = getVisibleMenuItems()
@@ -617,10 +620,10 @@ class GroupsViewModel(
     }
 
     private fun hideStatusCell() {
-        updateStatusViewModel(DatabaseStatus.NORMAL)
+        statusViewModel.setModel(statusCellModelFactory.createDefaultStatusCellModel())
     }
 
-    private fun updateStatusViewModel(status: DatabaseStatus) {
+    private fun updateStatusViewModel(status: SyncStatus) {
         statusViewModel.setModel(statusCellModelFactory.createStatusCellModel(status))
     }
 

@@ -1,9 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.keepass
 
-import android.content.Context
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
@@ -13,22 +11,16 @@ import com.ivanovsky.passnotes.data.repository.file.FSOptions.Companion.defaultO
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
-import com.ivanovsky.passnotes.data.repository.keepass.TemplateFactory.createDefaultTemplates
-import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.KeepassJavaDatabase
+import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.OnStatusChangeListener
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
-import com.ivanovsky.passnotes.extensions.mapError
-import java.io.BufferedInputStream
-import java.io.IOException
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
-import timber.log.Timber
 
 class KeepassDatabaseRepository(
-    private val context: Context,
     private val fileSystemResolver: FileSystemResolver,
     private val lockInteractor: DatabaseLockInteractor,
     private val observerBus: ObserverBus
@@ -99,86 +91,20 @@ class KeepassDatabaseRepository(
         addTemplates: Boolean
     ): OperationResult<Boolean> {
         val fsProvider = fileSystemResolver.resolveProvider(file.fsAuthority)
-        val unencryptedKey = DefaultDatabaseKey()
 
         return lock.withLock {
-            val content: OperationResult<InputStream> = try {
-                // 'emptyDbStream' will be closed in openDatabase()
-                val emptyDbStream = BufferedInputStream(context.assets.open(EMPTY_DB_PATH))
-                OperationResult.success(emptyDbStream)
-            } catch (e: IOException) {
-                Timber.d(e)
-                return@withLock OperationResult.error(
-                    OperationError.newGenericError(
-                        OperationError.MESSAGE_FAILED_TO_OPEN_DEFAULT_DB_FILE
-                    )
-                )
-            }
-
-            // Create a new file with KeePassJava2, because KotPass doesn't allow
-            // to open file in xml format
-            val openResult = openDatabase(
-                KeepassImplementation.KEEPASS_JAVA_2,
-                fsProvider,
-                defaultOptions(),
-                file,
-                content,
-                unencryptedKey,
-                statusListener = null
+            val dbResult = KotpassDatabase.new(
+                fsProvider = fsProvider,
+                fsOptions = defaultOptions(),
+                file = file,
+                key = key,
+                isAddTemplates = true
             )
-            if (openResult.isFailed) {
-                return@withLock openResult.takeError()
+            if (dbResult.isFailed) {
+                return@withLock dbResult.takeError()
             }
 
-            val db = openResult.obj
-
-            // 'changeKey' will invoke commit and write db content to 'file'
-            val changeKeyResult = db.changeKey(unencryptedKey, key)
-            if (changeKeyResult.isFailed) {
-                return@withLock changeKeyResult.takeError()
-            }
-
-            val result = if (addTemplates) {
-                // Reopen db with Kotpass implementation and write templates into it.
-                // We need Kotpass implementation as group options 'EnableAutoType' and 'EnableSearching'
-                // can't be specified with KeePassJava2
-                val openFileResult = fsProvider.openFileForRead(
-                    file,
-                    OnConflictStrategy.CANCEL,
-                    defaultOptions()
-                )
-                if (openFileResult.isFailed) {
-                    return@withLock openFileResult.takeError()
-                }
-
-                val reopenResult = openDatabase(
-                    KeepassImplementation.KOTPASS,
-                    fsProvider,
-                    defaultOptions(),
-                    file,
-                    openFileResult,
-                    key,
-                    statusListener = null
-                )
-                if (reopenResult.isFailed) {
-                    return@withLock reopenResult.mapError()
-                }
-
-                val reopenedDb = reopenResult.obj
-                val addTemplateResult = reopenedDb.templateDao.addTemplates(
-                    createDefaultTemplates(),
-                    doInterstitialCommits = false
-                )
-                if (addTemplateResult.isFailed) {
-                    return@withLock addTemplateResult.takeError()
-                }
-
-                reopenedDb.commit()
-            } else {
-                changeKeyResult
-            }
-
-            result
+            OperationResult.success(true)
         }
     }
 
@@ -211,17 +137,9 @@ class KeepassDatabaseRepository(
         file: FileDescriptor,
         input: OperationResult<InputStream>,
         key: EncryptedDatabaseKey,
-        statusListener: KeepassJavaDatabase.OnStatusChangeListener?
+        statusListener: OnStatusChangeListener?
     ): OperationResult<EncryptedDatabase> {
         val openResult = when (type) {
-            KeepassImplementation.KEEPASS_JAVA_2 -> KeepassJavaDatabase.open(
-                fsProvider,
-                fsOptions,
-                file,
-                input,
-                key,
-                statusListener
-            )
             KeepassImplementation.KOTPASS -> KotpassDatabase.open(
                 fsProvider,
                 fsOptions,
@@ -242,8 +160,4 @@ class KeepassDatabaseRepository(
         val type: KeepassImplementation,
         val database: EncryptedDatabase
     )
-
-    companion object {
-        private const val EMPTY_DB_PATH = "base.kdbx.xml"
-    }
 }

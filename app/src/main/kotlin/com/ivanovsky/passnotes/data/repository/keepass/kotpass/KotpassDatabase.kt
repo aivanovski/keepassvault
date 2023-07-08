@@ -9,7 +9,10 @@ import app.keemobile.kotpass.database.modifiers.modifyCredentials
 import app.keemobile.kotpass.database.modifiers.modifyMeta
 import app.keemobile.kotpass.models.Entry
 import app.keemobile.kotpass.models.Group as RawGroup
+import app.keemobile.kotpass.models.Meta
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.GroupEntity
+import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP
@@ -32,9 +35,11 @@ import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateDaoImpl
-import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.KeepassJavaDatabase
+import com.ivanovsky.passnotes.data.repository.keepass.TemplateFactory
+import com.ivanovsky.passnotes.data.repository.keepass.keepass_java.OnStatusChangeListener
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
 import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
+import com.ivanovsky.passnotes.extensions.getOrNull
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.util.InputOutputUtils
 import java.io.IOException
@@ -52,7 +57,7 @@ class KotpassDatabase(
     private val file: FileDescriptor,
     key: EncryptedDatabaseKey,
     db: KeePassDatabase,
-    private val statusListener: KeepassJavaDatabase.OnStatusChangeListener?,
+    private val statusListener: OnStatusChangeListener?,
     status: DatabaseStatus
 ) : EncryptedDatabase {
 
@@ -340,9 +345,108 @@ class KotpassDatabase(
         return result
     }
 
+    private fun setupRecycleBin(): OperationResult<Unit> {
+        swapDatabase(
+            getRawDatabase().modifyMeta {
+                this.copy(
+                    recycleBinEnabled = true,
+                    recycleBinUuid = UUID.randomUUID()
+                )
+            }
+        )
+
+        return OperationResult.success(Unit)
+    }
+
+    private fun setupTemplates(doCommit: Boolean): OperationResult<Unit> {
+        val addTemplatesResult = templateDao.addTemplates(
+            templates = TemplateFactory.createDefaultTemplates(),
+            doInterstitialCommits = doCommit
+        )
+        if (addTemplatesResult.isFailed) {
+            return addTemplatesResult.mapError()
+        }
+
+        val getTemplateUidResult = templateDao.getTemplateGroupUid()
+        if (getTemplateUidResult.isFailed) {
+            return getTemplateUidResult.mapError()
+        }
+
+        val templateGroupUid = getTemplateUidResult.getOrNull()
+            ?: return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP))
+
+        swapDatabase(
+            getRawDatabase().modifyMeta {
+                this.copy(
+                    entryTemplatesGroup = templateGroupUid
+                )
+            }
+        )
+
+        return if (doCommit) {
+            commit().takeStatusWith(Unit)
+        } else {
+            OperationResult.success(Unit)
+        }
+    }
+
     companion object {
 
         const val DEFAULT_ROOT_INHERITABLE_VALUE = true
+
+        private const val DEFAULT_ROOT_GROUP_NAME = "Database"
+
+        fun new(
+            fsProvider: FileSystemProvider,
+            fsOptions: FSOptions,
+            file: FileDescriptor,
+            key: EncryptedDatabaseKey,
+            isAddTemplates: Boolean
+        ): OperationResult<KotpassDatabase> {
+            val getCredentialsResult = getCredentials(key)
+            if (getCredentialsResult.isFailed) {
+                return getCredentialsResult.mapError()
+            }
+
+            val credentials = getCredentialsResult.obj
+
+            val rawDb = KeePassDatabase.Ver4x.create(
+                rootName = DEFAULT_ROOT_GROUP_NAME,
+                meta = Meta(
+                    recycleBinEnabled = true
+                ),
+                credentials = credentials
+            )
+
+            val db = KotpassDatabase(
+                fsProvider = fsProvider,
+                fsOptions = fsOptions,
+                file = file,
+                key = key,
+                db = rawDb,
+                statusListener = null,
+                status = DatabaseStatus.NORMAL
+            )
+
+            val setupRecycleBinResult = db.setupRecycleBin()
+            if (setupRecycleBinResult.isFailed) {
+                return setupRecycleBinResult.mapError()
+            }
+
+            if (isAddTemplates) {
+                val setupTemplatesResult = db.setupTemplates(doCommit = false)
+                if (setupTemplatesResult.isFailed) {
+                    return setupTemplatesResult.mapError()
+                }
+            }
+
+            val commitResult = db.commit()
+            if (commitResult.isFailed) {
+                return commitResult.mapError()
+            }
+
+            return OperationResult.success(db)
+        }
 
         fun open(
             fsProvider: FileSystemProvider,
@@ -350,7 +454,7 @@ class KotpassDatabase(
             file: FileDescriptor,
             content: OperationResult<InputStream>,
             key: EncryptedDatabaseKey,
-            statusListener: KeepassJavaDatabase.OnStatusChangeListener?
+            statusListener: OnStatusChangeListener?
         ): OperationResult<KotpassDatabase> {
             if (content.isFailed) {
                 return content.mapError()
@@ -420,6 +524,7 @@ class KotpassDatabase(
                     val credentials = Credentials.from(key.getKey().obj)
                     OperationResult.success(credentials)
                 }
+
                 is FileKeepassKey -> {
                     val getBytesResult = key.getKey()
                     if (getBytesResult.isFailed) {
@@ -440,6 +545,7 @@ class KotpassDatabase(
 
                     OperationResult.success(credentials)
                 }
+
                 else -> throw IllegalArgumentException()
             }
         }

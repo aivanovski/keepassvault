@@ -106,6 +106,8 @@ class TemplateDaoImpl(
             return insertNotesResult.takeError()
         }
 
+        findTemplateNotes()
+
         return OperationResult.success(true)
     }
 
@@ -136,6 +138,7 @@ class TemplateDaoImpl(
             .sortedBy { template -> template.title }
 
         templatesRef.set(templates)
+        templateGroupUidRef.set(templateGroup.uid)
 
         return OperationResult.success(true)
     }

@@ -37,7 +37,6 @@
     <string name="create_file" translatable="false">Create file</string>
     <string name="get_root" translatable="false">Get root</string>
     <string name="kotpass" translatable="false">KotPass</string>
-    <string name="keepass_java_2" translatable="false">KeePassJava2</string>
     <string name="fake_biometric_setup_message" translatable="false">This is a fake biometric setup dialog. Allow biometric setup?</string>
     <string name="fake_biometric_auth_message" translatable="false">This is a fake biometric authentication dialog. Allow biometric authentication?</string>
 

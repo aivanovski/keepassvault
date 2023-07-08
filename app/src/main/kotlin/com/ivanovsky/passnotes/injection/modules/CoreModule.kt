@@ -65,7 +65,7 @@ object CoreModule {
             // Files, Keepass
             single { FileSystemResolver(get(), get(), get(), get(), get(), get(), get()) }
             single<EncryptedDatabaseRepository> {
-                KeepassDatabaseRepository(get(), get(), get(), get())
+                KeepassDatabaseRepository(get(), get(), get())
             }
         }
 

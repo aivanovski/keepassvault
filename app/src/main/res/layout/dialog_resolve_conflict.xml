@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minWidth="@dimen/min_dialog_width">
+
+        <!-- This view prevents Dialog from collapsing the
+         the view size to zero when only progress is displayed -->
+        <View
+            android:id="@+id/placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/message"
+            style="@style/Material.PrimaryText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/element_margin"
+            android:layout_marginVertical="@dimen/element_margin"
+            android:text="@{viewModel.message}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/remoteButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            tools:text="@string/resolve_conflict_dialog_message" />
+
+        <Button
+            android:id="@+id/remoteButton"
+            style="@style/Material.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:layout_marginBottom="@dimen/quarter_margin"
+            android:onClick="@{() -> viewModel.onRemoteButtonClicked()}"
+            android:text="@string/remote_database"
+            android:textColor="@color/primary"
+            app:layout_constraintBottom_toTopOf="@id/localButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <Button
+            android:id="@+id/localButton"
+            style="@style/Material.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:layout_marginBottom="@dimen/quarter_margin"
+            android:onClick="@{() -> viewModel.onLocalButtonClicked()}"
+            android:text="@string/local_database"
+            android:textColor="@color/primary"
+            app:layout_constraintBottom_toTopOf="@id/cancelButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <Button
+            android:id="@+id/cancelButton"
+            style="@style/Material.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:layout_marginBottom="@dimen/element_margin"
+            android:onClick="@{() -> viewModel.onCancelButtonClicked()}"
+            android:text="@string/cancel"
+            android:textColor="@color/primary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

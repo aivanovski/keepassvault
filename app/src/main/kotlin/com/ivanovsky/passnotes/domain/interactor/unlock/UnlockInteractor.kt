@@ -72,9 +72,6 @@ class UnlockInteractor(
     suspend fun removeFromUsedFiles(file: FileDescriptor): OperationResult<Boolean> =
         removeFileUseCase.removeUsedFile(file.uid, file.fsAuthority)
 
-    suspend fun getSyncConflictInfo(file: FileDescriptor): OperationResult<SyncConflictInfo> =
-        syncUseCases.getSyncConflictInfo(file)
-
     suspend fun getSyncState(file: FileDescriptor): SyncState =
         syncUseCases.getSyncState(file)
 

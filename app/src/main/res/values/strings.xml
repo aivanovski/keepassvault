@@ -66,7 +66,7 @@
     <string name="sync_error_message">Error has been occurred, file can\'t be synchronized with remote server. Please try to remove this file and add it again</string>
 
     <!-- Resolve Conflict Dialog -->
-    <string name="resolve_conflict_dialog_message">There is a conflict between version of local and remote databases. Please resolve this conflict before accessing database.\n\nTHIS ACTION MAY CAUSE TO DATA LOSS!\n\nLocal file was modified at:\n%1$s\nRemote file was modified at:\n%2$s\n\nPlease specify which version you want to use?</string>
+    <string name="resolve_conflict_dialog_message">There is a conflict between version of local and remote databases. Please resolve this conflict before accessing database.\n\nTHIS ACTION MAY LEAD TO DATA LOSS!\n\nLocal file was modified at:\n%1$s\nRemote file was modified at:\n%2$s\n\nPlease specify which version you want to use?</string>
     <string name="local_database">Local database</string>
     <string name="remote_database">Remote database</string>
 

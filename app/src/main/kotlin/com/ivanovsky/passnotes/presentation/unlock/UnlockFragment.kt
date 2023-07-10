@@ -8,16 +8,14 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE
-import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
+import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding
-import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
-import com.ivanovsky.passnotes.presentation.core.dialog.ThreeButtonDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
@@ -27,13 +25,10 @@ import com.ivanovsky.passnotes.presentation.core.extensions.showKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
-import java.util.Date
-import org.apache.commons.lang3.StringUtils.EMPTY
 
 class UnlockFragment : BaseFragment() {
 
     private lateinit var binding: UnlockFragmentBinding
-    private val dateFormatProvider: DateFormatProvider by inject()
     private val biometricAuthenticator: BiometricAuthenticator by inject()
     private val viewModel: UnlockViewModel by lazy {
         ViewModelProvider(
@@ -106,8 +101,8 @@ class UnlockFragment : BaseFragment() {
         viewModel.showSnackbarMessage.observe(viewLifecycleOwner) { message ->
             showSnackbarMessage(message)
         }
-        viewModel.showResolveConflictDialog.observe(viewLifecycleOwner) { info ->
-            showResolveConflictDialog(info)
+        viewModel.showResolveConflictDialog.observe(viewLifecycleOwner) { file ->
+            showResolveConflictDialog(file)
         }
         viewModel.sendAutofillResponseEvent.observe(viewLifecycleOwner) { (note, structure) ->
             sendAutofillResult(note, structure)
@@ -125,42 +120,11 @@ class UnlockFragment : BaseFragment() {
         }
     }
 
-    private fun showResolveConflictDialog(info: SyncConflictInfo) {
-        val localDate = info.localFile.modified?.let { Date(it) }
-        val remoteDate = info.remoteFile.modified?.let { Date(it) }
-        val dateFormat = dateFormatProvider.getLongDateFormat()
-        val timeFormat = dateFormatProvider.getTimeFormat()
-
-        val localDateText = localDate
-            ?.let { dateFormat.format(it) + " " + timeFormat.format(it) }
-            ?: EMPTY
-
-        val remoteDateText = remoteDate
-            ?.let { dateFormat.format(it) + " " + timeFormat.format(it) }
-            ?: EMPTY
-
-        val message = getString(
-            R.string.resolve_conflict_dialog_message,
-            localDateText,
-            remoteDateText
+    private fun showResolveConflictDialog(file: FileDescriptor) {
+        val dialog = ResolveConflictDialog.newInstance(
+            args = ResolveConflictDialogArgs(file)
         )
-
-        val dialog = ThreeButtonDialog.newInstance(
-            message = message,
-            positiveButtonText = getString(R.string.remote_database),
-            negativeButtonText = getString(R.string.local_database),
-            neutralButtonText = getString(R.string.cancel)
-        )
-            .apply {
-                onPositiveClicked = {
-                    viewModel.onResolveConflictConfirmed(RESOLVE_WITH_REMOTE_FILE)
-                }
-                onNegativeClicked = {
-                    viewModel.onResolveConflictConfirmed(RESOLVE_WITH_LOCAL_FILE)
-                }
-            }
-
-        dialog.show(childFragmentManager, ThreeButtonDialog.TAG)
+        dialog.show(childFragmentManager, ResolveConflictDialog.TAG)
     }
 
     private fun showFileActionsDialog(file: UsedFile) {

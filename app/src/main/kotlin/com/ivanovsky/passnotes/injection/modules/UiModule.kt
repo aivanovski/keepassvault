@@ -24,6 +24,9 @@ import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteract
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.presentation.about.AboutViewModel
 import com.ivanovsky.passnotes.presentation.autofill.AutofillViewFactory
+import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
+import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogInteractor
+import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogViewModel
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogViewModel
 import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
@@ -131,6 +134,7 @@ object UiModule {
             single { MainInteractor(get()) }
             single { LockServiceInteractor(get(), get(), get(), get(), get()) }
             single { PasswordGeneratorInteractor(get()) }
+            single { ResolveConflictDialogInteractor(get()) }
 
             // Autofill
             single { AutofillViewFactory(get(), get()) }
@@ -301,6 +305,15 @@ object UiModule {
             viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
             viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
             factory { (args: SortAndViewDialogArgs) -> SortAndViewDialogViewModel(get(), args) }
+            factory { (args: ResolveConflictDialogArgs) ->
+                ResolveConflictDialogViewModel(
+                    get(),
+                    get(),
+                    get(),
+                    get(),
+                    args
+                )
+            }
             factory { NavigationMenuViewModel(get(), get(), get(), get()) }
             factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }
         }

@@ -10,14 +10,12 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
@@ -91,7 +89,7 @@ class UnlockViewModel(
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
     val fileCellViewModels = MutableLiveData<List<BaseCellViewModel>>()
     val isFabButtonVisible = MutableLiveData(false)
-    val showResolveConflictDialog = SingleLiveEvent<SyncConflictInfo>()
+    val showResolveConflictDialog = SingleLiveEvent<FileDescriptor>()
     val isAddKeyButtonVisible = MutableLiveData(false)
     val showBiometricUnlockDialog = SingleLiveEvent<BiometricDecoder>()
     val showFileActionsDialog = SingleLiveEvent<UsedFile>()
@@ -192,25 +190,6 @@ class UnlockViewModel(
             }
             ErrorPanelButtonAction.AUTHORISATION -> {
                 onLoginButtonClicked()
-            }
-        }
-    }
-
-    fun onResolveConflictConfirmed(resolutionStrategy: ConflictResolutionStrategy) {
-        val selectFile = selectedUsedFile?.getFileDescriptor() ?: return
-
-        setScreenState(ScreenState.loading())
-
-        viewModelScope.launch {
-            val resolvedConflict = interactor.resolveConflict(selectFile, resolutionStrategy)
-
-            if (resolvedConflict.isSucceeded) {
-                loadData(
-                    isResetSelection = false,
-                    isShowKeyboard = false
-                )
-            } else {
-                setErrorPanelState(resolvedConflict.error)
             }
         }
     }
@@ -359,6 +338,7 @@ class UnlockViewModel(
         val selectedFile = recentlyUsedFiles?.firstOrNull { it.id == usedFileId } ?: return
 
         setSelectedFile(selectedFile)
+        setScreenState(ScreenState.data())
     }
 
     private fun onDatabaseFileLongClicked(usedFileId: Int) {
@@ -655,19 +635,8 @@ class UnlockViewModel(
 
     private fun onResolveConflictButtonClicked() {
         val selectedFile = selectedUsedFile?.getFileDescriptor() ?: return
-        val lastState = screenState.value ?: return
 
-        setScreenState(ScreenState.loading())
-
-        viewModelScope.launch {
-            val conflict = interactor.getSyncConflictInfo(selectedFile)
-            if (conflict.isSucceeded) {
-                showResolveConflictDialog.call(conflict.obj)
-                setScreenState(lastState)
-            } else {
-                setErrorPanelState(conflict.error)
-            }
-        }
+        showResolveConflictDialog.call(selectedFile)
     }
 
     private fun onRemoveSelectedFileButtonClicked() {

@@ -19,6 +19,7 @@
     <string name="ignore_ssl_certificate_validation" translatable="false">Ignore SSL certificate validation</string>
     <string name="test_toggles" translatable="false">Test Toggles</string>
     <string name="fake_biometric_enabled" translatable="false">Use Fake Biometric (requires restart)</string>
+    <string name="fake_file_system_enabled" translatable="false">Use Fake File System (requires restart)</string>
     <string name="device_file_system" translatable="false">Device file system</string>
     <string name="internal_storage" translatable="false">Internal storage</string>
     <string name="external_storage" translatable="false">External storage</string>
@@ -30,6 +31,7 @@
     <string name="db_closed" translatable="false">DB closed</string>
     <string name="entry_added" translatable="false">Entry added</string>
     <string name="storage_access_framework" translatable="false">Storage Access Framework</string>
+    <string name="fake_file_system" translatable="false">Fake File System</string>
     <string name="pick_file" translatable="false">Pick file</string>
     <string name="reset_test_data" translatable="false">Reset test data</string>
     <string name="check_exists" translatable="false">Check exists</string>

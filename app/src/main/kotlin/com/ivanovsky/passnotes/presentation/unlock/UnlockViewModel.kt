@@ -628,6 +628,7 @@ class UnlockViewModel(
                 errorPanelButtonAction = ErrorPanelButtonAction.AUTHORISATION
             }
             else -> {
+                setScreenState(ScreenState.data())
                 errorPanelButtonAction = null
             }
         }

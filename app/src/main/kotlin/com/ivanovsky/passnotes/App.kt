@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.LoggerInteractor
 import com.ivanovsky.passnotes.injection.modules.BiometricModule
 import com.ivanovsky.passnotes.injection.modules.CoreModule
+import com.ivanovsky.passnotes.injection.modules.FileSystemProvidersModule
 import com.ivanovsky.passnotes.injection.modules.UiModule
 import com.ivanovsky.passnotes.injection.modules.UseCaseModule
 import org.koin.android.ext.koin.androidContext
@@ -21,6 +22,7 @@ open class App : MultiDexApplication() {
     ): List<Module> {
         return listOf(
             CoreModule.build(loggerInteractor),
+            FileSystemProvidersModule.build(),
             BiometricModule.build(),
             UseCaseModule.build(),
             UiModule.build()

@@ -41,5 +41,9 @@ fun FileDescriptor.formatReadablePath(resourceProvider: ResourceProvider): Strin
             val url = fsAuthority.credentials?.formatReadableUrl() ?: EMPTY
             url + path
         }
+        FSType.FAKE -> {
+            val url = fsAuthority.credentials?.formatReadableUrl() ?: EMPTY
+            url + path
+        }
     }
 }

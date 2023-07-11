@@ -60,6 +60,9 @@ class DebugMenuViewModel(
     val isFakeBiometricEnabled = MutableLiveData(
         settings.testToggles?.isFakeBiometricEnabled ?: false
     )
+    val isFakeFileSystemEnabled = MutableLiveData(
+        settings.testToggles?.isFakeFileSystemEnabled ?: false
+    )
     val showSnackbarEvent = SingleLiveEvent<String>()
     val showSystemFilePickerEvent = SingleLiveEvent<Unit>()
     val showSystemFileCreatorEvent = SingleLiveEvent<Unit>()
@@ -84,6 +87,7 @@ class DebugMenuViewModel(
     override fun onSettingsChanged(pref: SettingsImpl.Pref) {
         if (pref == SettingsImpl.Pref.TEST_TOGGLES) {
             isFakeBiometricEnabled.value = settings.testToggles?.isFakeBiometricEnabled ?: false
+            isFakeFileSystemEnabled.value = settings.testToggles?.isFakeFileSystemEnabled ?: false
         }
     }
 
@@ -330,6 +334,14 @@ class DebugMenuViewModel(
         )
     }
 
+    fun onFakeFileSystemCheckBoxChanged(isChecked: Boolean) {
+        val toggles = settings.testToggles ?: TestToggles()
+
+        settings.testToggles = toggles.copy(
+            isFakeFileSystemEnabled = isChecked
+        )
+    }
+
     fun onPickFileButtonClicked() {
         showSystemFilePickerEvent.call()
     }
@@ -423,6 +435,12 @@ class DebugMenuViewModel(
                     type = selectedFsType
                 )
             }
+            FSType.FAKE -> {
+                FSAuthority(
+                    credentials = null,
+                    type = selectedFsType
+                )
+            }
             FSType.UNDEFINED -> throw IllegalArgumentException()
         }
     }
@@ -463,6 +481,7 @@ class DebugMenuViewModel(
             FSType.SAF -> resourceProvider.getString(R.string.storage_access_framework)
             FSType.WEBDAV -> resourceProvider.getString(R.string.webdav)
             FSType.GIT -> resourceProvider.getString(R.string.git)
+            FSType.FAKE -> resourceProvider.getString(R.string.fake_file_system)
             FSType.UNDEFINED -> FSType.UNDEFINED.name
         }
     }

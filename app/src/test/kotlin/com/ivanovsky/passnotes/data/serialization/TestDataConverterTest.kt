@@ -3,6 +3,9 @@ package com.ivanovsky.passnotes.data.serialization
 import com.google.common.truth.Truth.assertThat
 import com.ivanovsky.passnotes.RobolectricApp
 import com.ivanovsky.passnotes.data.entity.TestData
+import com.ivanovsky.passnotes.data.serialization.TestDataConverter.KEY_FAKE_FS_PASSWORD
+import com.ivanovsky.passnotes.data.serialization.TestDataConverter.KEY_FAKE_FS_URL
+import com.ivanovsky.passnotes.data.serialization.TestDataConverter.KEY_FAKE_FS_USERNAME
 import com.ivanovsky.passnotes.data.serialization.TestDataConverter.KEY_FILENAME_PATTERNS
 import com.ivanovsky.passnotes.data.serialization.TestDataConverter.KEY_GIT_URL
 import com.ivanovsky.passnotes.data.serialization.TestDataConverter.KEY_PASSWORDS
@@ -40,6 +43,9 @@ class TestDataConverterTest {
         assertThat(obj.optString(KEY_WEBDAV_USERNAME)).isEqualTo(USERNAME)
         assertThat(obj.optString(KEY_WEBDAV_PASSWORD)).isEqualTo(PASSWORD)
         assertThat(obj.optString(KEY_GIT_URL)).isEqualTo(GIT_URL)
+        assertThat(obj.optString(KEY_FAKE_FS_URL)).isEqualTo(FAKE_FS_URL)
+        assertThat(obj.optString(KEY_FAKE_FS_USERNAME)).isEqualTo(FAKE_FS_USERNAME)
+        assertThat(obj.optString(KEY_FAKE_FS_PASSWORD)).isEqualTo(FAKE_FS_PASSWORD)
     }
 
     @Test
@@ -54,6 +60,9 @@ class TestDataConverterTest {
                 put(KEY_WEBDAV_USERNAME, expectedData.webdavUsername)
                 put(KEY_WEBDAV_PASSWORD, expectedData.webdavPassword)
                 put(KEY_GIT_URL, expectedData.gitUrl)
+                put(KEY_FAKE_FS_URL, expectedData.fakeFsUrl)
+                put(KEY_FAKE_FS_USERNAME, expectedData.fakeFsUsername)
+                put(KEY_FAKE_FS_PASSWORD, expectedData.fakeFsPassword)
             }
             .toString()
 
@@ -77,7 +86,10 @@ class TestDataConverterTest {
             webdavUrl = WEBDAV_URL,
             webdavUsername = USERNAME,
             webdavPassword = PASSWORD,
-            gitUrl = GIT_URL
+            gitUrl = GIT_URL,
+            fakeFsUrl = FAKE_FS_URL,
+            fakeFsUsername = FAKE_FS_USERNAME,
+            fakeFsPassword = FAKE_FS_PASSWORD
         )
 
     companion object {
@@ -85,6 +97,9 @@ class TestDataConverterTest {
         private const val GIT_URL = "https://git-url.com"
         private const val USERNAME = "username"
         private const val PASSWORD = "password"
+        private const val FAKE_FS_URL = "fake_url"
+        private const val FAKE_FS_USERNAME = "fake_username"
+        private const val FAKE_FS_PASSWORD = "fake_password"
         private val FILENAME_PATTERNS = listOf("pattern1", "pattern2")
         private val PASSWORDS = listOf("password1", "password2")
     }

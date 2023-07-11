@@ -5,5 +5,6 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class TestToggles(
-    val isFakeBiometricEnabled: Boolean = false
+    val isFakeBiometricEnabled: Boolean = false,
+    val isFakeFileSystemEnabled: Boolean = false
 ) : Parcelable

@@ -5,6 +5,8 @@ import com.ivanovsky.passnotes.domain.LoggerInteractor
 import com.ivanovsky.passnotes.injection.modules.BiometricModule
 import com.ivanovsky.passnotes.injection.modules.CoreModule
 import com.ivanovsky.passnotes.injection.modules.FakeBiometricModule
+import com.ivanovsky.passnotes.injection.modules.FakeFileSystemProvidersModule
+import com.ivanovsky.passnotes.injection.modules.FileSystemProvidersModule
 import com.ivanovsky.passnotes.injection.modules.UiModule
 import com.ivanovsky.passnotes.injection.modules.UseCaseModule
 import org.koin.core.module.Module
@@ -15,11 +17,17 @@ class DebugApp : App() {
         loggerInteractor: LoggerInteractor,
         settings: Settings
     ): List<Module> {
-        val isLoadTestBiometricModule = settings.testToggles?.isFakeBiometricEnabled ?: false
+        val isLoadFakeBiometricModule = settings.testToggles?.isFakeBiometricEnabled ?: false
+        val isLoadFakeFileSystem = settings.testToggles?.isFakeFileSystemEnabled ?: false
 
         return listOf(
             CoreModule.build(loggerInteractor),
-            if (isLoadTestBiometricModule) {
+            if (isLoadFakeFileSystem) {
+                FakeFileSystemProvidersModule.build(this)
+            } else {
+                FileSystemProvidersModule.build()
+            },
+            if (isLoadFakeBiometricModule) {
                 FakeBiometricModule.build()
             } else {
                 BiometricModule.build()

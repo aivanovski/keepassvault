@@ -65,7 +65,6 @@ object CoreModule {
 
             // Files, Keepass
             single { DatabaseSyncStatusProvider(get(), get(), get()) }
-            single { FileSystemResolver(get(), get(), get(), get(), get(), get(), get()) }
             single<EncryptedDatabaseRepository> {
                 KeepassDatabaseRepository(get(), get(), get(), get())
             }

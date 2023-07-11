@@ -102,7 +102,7 @@ object UiModule {
                     get()
                 )
             }
-            single { StorageListInteractor(get(), get(), get(), get()) }
+            single { StorageListInteractor(get(), get(), get(), get(), get()) }
             single { NewDatabaseInteractor(get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get()) }
             single { DebugMenuInteractor(get(), get(), get(), get(), get()) }

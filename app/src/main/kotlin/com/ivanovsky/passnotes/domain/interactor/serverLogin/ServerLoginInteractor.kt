@@ -20,6 +20,8 @@ class ServerLoginInteractor(
 
     fun getTestGitCredentials() = getTestCredentialsUseCase.getDebugGitCredentials()
 
+    fun getTestFakeCredentials() = getTestCredentialsUseCase.getDebugFakeCredentials()
+
     suspend fun authenticate(
         credentials: FSCredentials,
         fsAuthority: FSAuthority

@@ -434,6 +434,20 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/togglesDivider" />
 
+                <CheckBox
+                    android:id="@+id/fakeFileSystemCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/element_margin"
+                    android:checked="@={viewModel.isFakeFileSystemEnabled}"
+                    android:onCheckedChanged="@{(button, isChecked) -> viewModel.onFakeFileSystemCheckBoxChanged(isChecked)}"
+                    android:text="@string/fake_file_system_enabled"
+                    android:textColor="@color/primary_text"
+                    android:textSize="@dimen/material_primary_text_size"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/fakeBiometricCheckBox" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>

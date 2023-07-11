@@ -43,4 +43,23 @@ class GetTestCredentialsUseCase(
             null
         }
     }
+
+    fun getDebugFakeCredentials(): FSCredentials.BasicCredentials? {
+        if (!BuildConfig.DEBUG) return null
+
+        val data = settings.testData ?: return null
+
+        return if (data.fakeFsUrl.isNotEmpty() ||
+            data.fakeFsUsername.isNotEmpty() ||
+            data.fakeFsPassword.isNotEmpty()
+        ) {
+            FSCredentials.BasicCredentials(
+                url = data.fakeFsUrl,
+                username = data.fakeFsUsername,
+                password = data.fakeFsPassword
+            )
+        } else {
+            null
+        }
+    }
 }

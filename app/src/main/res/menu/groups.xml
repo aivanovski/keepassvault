@@ -11,9 +11,13 @@
 
     <item
         android:id="@+id/menu_lock"
-        android:icon="@drawable/ic_lock_white_24dp"
         android:title="@string/lock"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_synchronize"
+        android:title="@string/synchronize_with_source"
+        app:showAsAction="never"/>
 
     <item
         android:id="@+id/menu_enable_biometric_unlock"

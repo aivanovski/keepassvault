@@ -17,11 +17,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <include
+            android:id="@+id/syncStateView"
+            layout="@layout/cell_sync_state"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:viewModel="@{viewModel.syncStateViewModel}"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
             android:id="@+id/errorPanelView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/syncStateView"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
@@ -32,23 +40,13 @@
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <include
-            android:id="@+id/statusView"
-            layout="@layout/cell_message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/errorPanelView"
-            app:viewModel="@{viewModel.statusViewModel}" />
-
-        <include
             android:id="@+id/optionPanelView"
             layout="@layout/cell_option_panel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/statusView"
+            app:layout_constraintTop_toBottomOf="@id/errorPanelView"
             app:viewModel="@{viewModel.optionPanelViewModel}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.DecoratedRecyclerView

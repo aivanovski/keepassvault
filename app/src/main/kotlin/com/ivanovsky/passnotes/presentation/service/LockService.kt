@@ -11,10 +11,11 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
-import com.ivanovsky.passnotes.data.entity.SyncStatus
+import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.service.LockServiceInteractor
+import com.ivanovsky.passnotes.extensions.getLockServiceMessage
 import com.ivanovsky.passnotes.extensions.getNotificationManager
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
@@ -32,7 +33,7 @@ import java.util.concurrent.atomic.AtomicReference
 import timber.log.Timber
 
 class LockService : Service(),
-    ObserverBus.DatabaseSyncStatusObserver,
+    ObserverBus.DatabaseSyncStateObserver,
     LockServiceFacade {
 
     private val interactor: LockServiceInteractor by inject()
@@ -42,9 +43,9 @@ class LockService : Service(),
 
     private val taskProcessor = LockServiceTaskProcessor(this, dispatchers)
 
-    override fun onDatabaseSyncStatusChanged(status: SyncStatus) {
+    override fun onDatabaseSyncStateChanges(syncState: SyncState) {
         if (isRunning()) {
-            val message = getMessageBySyncStatus(status)
+            val message = syncState.getLockServiceMessage(resourceProvider)
             showNotification(message)
         }
     }
@@ -158,14 +159,6 @@ class LockService : Service(),
     }
 
     private fun isRunning() = (getCurrentState() != ServiceState.STOPPED)
-
-    private fun getMessageBySyncStatus(status: SyncStatus): String {
-        return if (status == SyncStatus.NO_CHANGES) {
-            getString(R.string.lock_notification_text_normal)
-        } else {
-            getString(R.string.lock_notification_text_not_synchronized)
-        }
-    }
 
     private fun LockServiceCommand.toTask(): LockServiceTask {
         return when (this) {

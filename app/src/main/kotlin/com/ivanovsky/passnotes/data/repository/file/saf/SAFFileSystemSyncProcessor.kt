@@ -13,8 +13,8 @@ import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
 
 class SAFFileSystemSyncProcessor : FileSystemSyncProcessor {
 
-    override fun getLocallyModifiedFiles(): MutableList<FileDescriptor> {
-        return mutableListOf()
+    override fun getCachedFile(uid: String): FileDescriptor? {
+        return null
     }
 
     override fun getSyncProgressStatusForFile(uid: String): SyncProgressStatus =
@@ -22,6 +22,8 @@ class SAFFileSystemSyncProcessor : FileSystemSyncProcessor {
 
     override fun getSyncStatusForFile(uid: String): SyncStatus =
         SyncStatus.NO_CHANGES
+
+    override fun getRevision(uid: String): String? = null
 
     override fun getSyncConflictForFile(uid: String): OperationResult<SyncConflictInfo> {
         return OperationResult.error(newGenericError(MESSAGE_INCORRECT_USE_CASE))

@@ -13,14 +13,12 @@ import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
-import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.LocaleProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
-import com.ivanovsky.passnotes.extensions.getOrNull
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
@@ -35,11 +33,9 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
-import com.ivanovsky.passnotes.presentation.core.viewmodel.MessageCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.AttachmentCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel
@@ -68,10 +64,8 @@ class NoteViewModel(
     private val cellModelFactory: NoteCellModelFactory,
     private val cellViewModelFactory: NoteCellViewModelFactory,
     private val router: Router,
-    private val statusCellModelFactory: DatabaseStatusCellModelFactory,
     private val args: NoteScreenArgs
 ) : BaseScreenViewModel(),
-    ObserverBus.DatabaseSyncStatusObserver,
     ObserverBus.NoteContentObserver {
 
     val viewTypes = ViewModelTypes()
@@ -99,12 +93,6 @@ class NoteViewModel(
     val shareFileEvent = SingleLiveEvent<File>()
     val openFileEvent = SingleLiveEvent<File>()
 
-    val statusViewModel = MutableLiveData(
-        cellViewModelFactory.createCellViewModel(
-            model = statusCellModelFactory.createDefaultStatusCellModel(),
-            eventProvider = eventProvider
-        ) as MessageCellViewModel
-    )
 
     private var cellIdToPropertyMap: Map<String, Property>? = null
     private var cellIdToAttachmentMap: Map<String, Attachment>? = null
@@ -126,10 +114,6 @@ class NoteViewModel(
     init {
         observerBus.register(this)
         subscribeToCellEvents()
-    }
-
-    override fun onDatabaseSyncStatusChanged(status: SyncStatus) {
-        updateStatusViewModel(status)
     }
 
     override fun onCleared() {
@@ -246,10 +230,9 @@ class NoteViewModel(
 
         viewModelScope.launch {
             val getNoteResult = interactor.getNoteByUid(noteUid)
-            val getDbStatus = interactor.getLastSyncStatus()
 
             if (getNoteResult.isSucceededOrDeferred) {
-                onNoteLoaded(getNoteResult.getOrThrow(), getDbStatus.getOrNull())
+                onNoteLoaded(getNoteResult.getOrThrow())
             } else {
                 setScreenState(
                     ScreenState.error(
@@ -280,10 +263,10 @@ class NoteViewModel(
 
         isShowHiddenProperties = !isShowHiddenProperties
 
-        onNoteLoaded(note, null)
+        onNoteLoaded(note)
     }
 
-    private fun onNoteLoaded(note: Note, syncStatus: SyncStatus?) {
+    private fun onNoteLoaded(note: Note) {
         this.note = note
 
         actionBarTitle.value = note.title
@@ -318,10 +301,6 @@ class NoteViewModel(
         )
 
         setCellElements(cellViewModelFactory.createCellViewModels(models, eventProvider))
-
-        if (syncStatus != null) {
-            updateStatusViewModel(syncStatus)
-        }
 
         setScreenState(ScreenState.data())
     }
@@ -502,13 +481,6 @@ class NoteViewModel(
         }
 
         return saveResult.getOrThrow()
-    }
-
-    private fun updateStatusViewModel(status: SyncStatus) {
-        statusViewModel.value = cellViewModelFactory.createCellViewModel(
-            model = statusCellModelFactory.createStatusCellModel(status),
-            eventProvider = eventProvider
-        ) as MessageCellViewModel
     }
 
     private fun getVisibleMenuItems(): List<NoteMenuItem> {

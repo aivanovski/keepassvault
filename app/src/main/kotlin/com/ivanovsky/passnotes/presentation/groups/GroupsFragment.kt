@@ -11,8 +11,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.observe
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
 import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
@@ -22,6 +24,8 @@ import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.ScreenType
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
@@ -172,6 +176,9 @@ class GroupsFragment : BaseFragment() {
                 onSuccess = { encoder -> viewModel.onBiometricSetupSuccess(encoder) }
             )
         }
+        viewModel.showResolveConflictDialogEvent.observe(viewLifecycleOwner) { file ->
+            showResolveConflictDialog(file)
+        }
     }
 
     private fun showNewEntryDialog(templates: List<Template>) {
@@ -260,6 +267,13 @@ class GroupsFragment : BaseFragment() {
         dialog.show(childFragmentManager, SortAndViewDialog.TAG)
     }
 
+    private fun showResolveConflictDialog(file: FileDescriptor) {
+        val dialog = ResolveConflictDialog.newInstance(
+            args = ResolveConflictDialogArgs(file)
+        )
+        dialog.show(childFragmentManager, ResolveConflictDialog.TAG)
+    }
+
     companion object {
 
         private const val ARGUMENTS = "arguments"
@@ -267,6 +281,7 @@ class GroupsFragment : BaseFragment() {
         private val MENU_ACTIONS = mapOf<Int, (vm: GroupsViewModel) -> Unit>(
             android.R.id.home to { vm -> vm.onBackClicked() },
             R.id.menu_lock to { vm -> vm.onLockButtonClicked() },
+            R.id.menu_synchronize to { vm -> vm.onSynchronizeButtonClicked() },
             R.id.menu_add_templates to { vm -> vm.onAddTemplatesClicked() },
             R.id.menu_search to { vm -> vm.onSearchButtonClicked() },
             R.id.menu_settings to { vm -> vm.onSettingsButtonClicked() },

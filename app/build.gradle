@@ -231,7 +231,7 @@ dependencies {
     // AndroidX libraries
     implementation "androidx.appcompat:appcompat:$androidXVersion"
     implementation "androidx.legacy:legacy-support-v4:$legacySupportV4Version"
-    implementation "com.google.android.material:material:$androidXVersion"
+    implementation "com.google.android.material:material:1.6.1"
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
     implementation "androidx.cardview:cardview:$cardViewVersion"
     implementation "androidx.annotation:annotation:$androidAnnotationVersion"

@@ -20,7 +20,7 @@ class SyncAndLockTask(
 
         Timber.d("Synchronizing: %s", file)
 
-        val syncResult = interactor.syncAndLock(file)
+        val syncResult = interactor.syncAndLockIfNeed(file)
         if (syncResult.isFailed) {
             service.hideNotification()
             return

@@ -38,7 +38,13 @@ class FakeFileSystemProvider(
 
     private val allFiles = listOf(
         fileFactory.createNoChangesFile(),
-        fileFactory.createConflictLocalFile()
+        fileFactory.createRemoteChangesFile(),
+        fileFactory.createLocalChangesFile(),
+        fileFactory.createLocalChangesTimeoutFile(),
+        fileFactory.createConflictLocalFile(),
+        fileFactory.createAuthErrorFile(),
+        fileFactory.createNotFoundFile(),
+        fileFactory.createErrorFile()
     )
 
     override fun getAuthenticator(): FileSystemAuthenticator {

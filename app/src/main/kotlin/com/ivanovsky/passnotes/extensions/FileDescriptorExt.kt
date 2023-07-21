@@ -7,6 +7,10 @@ import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
+fun FileDescriptor.isSameFile(other: FileDescriptor): Boolean {
+    return fsAuthority == other.fsAuthority && uid == other.uid
+}
+
 fun FileDescriptor.toUsedFile(
     addedTime: Long,
     lastAccessTime: Long? = null,

@@ -7,11 +7,9 @@ import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.factory.CellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.GroupCellModel
-import com.ivanovsky.passnotes.presentation.core.model.MessageCellModel
 import com.ivanovsky.passnotes.presentation.core.model.NoteCellModel
 import com.ivanovsky.passnotes.presentation.core.model.OptionPanelCellModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
-import com.ivanovsky.passnotes.presentation.core.viewmodel.MessageCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewModel
 
@@ -27,7 +25,6 @@ class GroupsCellViewModelFactory(
         return when (model) {
             is GroupCellModel -> GroupCellViewModel(model, eventProvider, resourceProvider)
             is NoteCellModel -> NoteCellViewModel(model, eventProvider, localeProvider)
-            is MessageCellModel -> MessageCellViewModel(model)
             is OptionPanelCellModel -> OptionPanelCellViewModel(model, eventProvider)
             else -> throwUnsupportedModelException(model)
         }

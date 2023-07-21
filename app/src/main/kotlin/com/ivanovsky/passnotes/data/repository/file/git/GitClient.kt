@@ -18,6 +18,8 @@ import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.InputOutputUtils
 import java.io.File
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import timber.log.Timber
 
 class GitClient(
@@ -26,10 +28,11 @@ class GitClient(
     private val gitRootDao: GitRootDao
 ) : RemoteApiClientV2 {
 
+    private val lock = ReentrantLock()
+
     override fun listFiles(dir: FileDescriptor): OperationResult<List<FileDescriptor>> {
         Timber.d("listFiles: path=%s", dir.path)
-
-        val openRepoResult = openAndUpdateGitRepository()
+        val openRepoResult = lock.withLock { openAndUpdateGitRepository() }
         if (openRepoResult.isFailed) {
             return openRepoResult.mapError()
         }
@@ -53,8 +56,7 @@ class GitClient(
 
     override fun getParent(file: FileDescriptor): OperationResult<FileDescriptor> {
         Timber.d("getParent: path=%s", file.path)
-
-        val openRepoResult = openAndUpdateGitRepository()
+        val openRepoResult = lock.withLock { openAndUpdateGitRepository() }
         if (openRepoResult.isFailed) {
             return openRepoResult.mapError()
         }
@@ -74,7 +76,7 @@ class GitClient(
     override fun getRoot(): OperationResult<FileDescriptor> {
         Timber.d("getRoot:")
 
-        val openRepoResult = openAndUpdateGitRepository()
+        val openRepoResult = lock.withLock { openAndUpdateGitRepository() }
         if (openRepoResult.isFailed) {
             return openRepoResult.mapError()
         }
@@ -89,13 +91,20 @@ class GitClient(
     override fun getFileMetadata(file: FileDescriptor): OperationResult<RemoteFileMetadata> {
         Timber.d("getFileMetadata: path=%s", file.path)
 
-        val openRepoResult = openAndUpdateGitRepository()
-        if (openRepoResult.isFailed) {
-            return openRepoResult.mapError()
-        }
+        val getMetadataResult = lock.withLock {
+            val openRepoResult = openAndUpdateGitRepository()
+            if (openRepoResult.isFailed) {
+                return@withLock openRepoResult.mapError()
+            }
 
-        val repository = openRepoResult.obj
-        val getMetadataResult = repository.getFileMetadata(file)
+            val repository = openRepoResult.obj
+            val getMetadataResult = repository.getFileMetadata(file)
+            if (getMetadataResult.isFailed) {
+                return@withLock getMetadataResult.mapError()
+            }
+
+            getMetadataResult
+        }
         if (getMetadataResult.isFailed) {
             return getMetadataResult.mapError()
         }
@@ -117,28 +126,29 @@ class GitClient(
         destinationPath: String
     ): OperationResult<RemoteFileMetadata> {
         Timber.d("downloadFile: path=%s", remotePath)
+        return lock.withLock {
+            val openRepoResult = openAndUpdateGitRepository()
+            if (openRepoResult.isFailed) {
+                return@withLock openRepoResult.mapError()
+            }
 
-        val openRepoResult = openAndUpdateGitRepository()
-        if (openRepoResult.isFailed) {
-            return openRepoResult.mapError()
+            val repository = openRepoResult.obj
+            val localRoot = repository.root
+            val localFile = File(localRoot, remotePath)
+            if (!localFile.exists()) {
+                return@withLock OperationResult.error(failedToFindFile(localFile.path))
+            }
+
+            val copyResult = InputOutputUtils.copy(
+                sourceFile = localFile,
+                destinationFile = File(destinationPath)
+            )
+            if (copyResult.isFailed) {
+                return@withLock copyResult.mapError()
+            }
+
+            repository.getFileMetadata(localFile.toFileDescriptor(repository))
         }
-
-        val repository = openRepoResult.obj
-        val localRoot = repository.root
-        val localFile = File(localRoot, remotePath)
-        if (!localFile.exists()) {
-            return OperationResult.error(failedToFindFile(localFile.path))
-        }
-
-        val copyResult = InputOutputUtils.copy(
-            sourceFile = localFile,
-            destinationFile = File(destinationPath)
-        )
-        if (copyResult.isFailed) {
-            return copyResult.mapError()
-        }
-
-        return repository.getFileMetadata(localFile.toFileDescriptor(repository))
     }
 
     override fun uploadFile(
@@ -146,65 +156,66 @@ class GitClient(
         localPath: String
     ): OperationResult<RemoteFileMetadata> {
         Timber.d("uploadFile: path=%s", remotePath)
-
-        val openRepoResult = openAndUpdateGitRepository()
-        if (openRepoResult.isFailed) {
-            return openRepoResult.mapError()
-        }
-
-        val repository = openRepoResult.obj
-
-        val fetchResult = repository.fetch()
-        if (fetchResult.isFailed) {
-            return fetchResult.mapError()
-        }
-
-        val isUpToDateResult = repository.isUpToDate()
-        if (isUpToDateResult.isFailed) {
-            return isUpToDateResult.mapError()
-        }
-
-        val versionedFile = VersionedFile(localPath = remotePath.removePrefix("/"))
-        val isUpToDate = isUpToDateResult.obj
-        if (!isUpToDate) {
-            val pullResult = repository.pull(
-                file = versionedFile,
-                changedFile = File(localPath)
-            )
-            if (pullResult.isFailed) {
-                return pullResult.mapError()
+        return lock.withLock {
+            val openRepoResult = openAndUpdateGitRepository()
+            if (openRepoResult.isFailed) {
+                return@withLock openRepoResult.mapError()
             }
-        }
 
-        val localFile = File(repository.root, remotePath)
-        if (!localFile.exists()) {
-            return OperationResult.error(failedToFindFile(localFile.path))
-        }
+            val repository = openRepoResult.obj
 
-        val copyResult = InputOutputUtils.copy(
-            sourceFile = File(localPath),
-            destinationFile = localFile
-        )
-        if (copyResult.isFailed) {
-            return copyResult.mapError()
-        }
+            val fetchResult = repository.fetch()
+            if (fetchResult.isFailed) {
+                return@withLock fetchResult.mapError()
+            }
 
-        val addResult = repository.addToIndex(versionedFile)
-        if (addResult.isFailed) {
-            return addResult.mapError()
-        }
+            val isUpToDateResult = repository.isUpToDate()
+            if (isUpToDateResult.isFailed) {
+                return@withLock isUpToDateResult.mapError()
+            }
 
-        val commitResult = repository.commit(versionedFile)
-        if (commitResult.isFailed) {
-            return commitResult.mapError()
-        }
+            val versionedFile = VersionedFile(localPath = remotePath.removePrefix("/"))
+            val isUpToDate = isUpToDateResult.obj
+            if (!isUpToDate) {
+                val pullResult = repository.pull(
+                    file = versionedFile,
+                    changedFile = File(localPath)
+                )
+                if (pullResult.isFailed) {
+                    return@withLock pullResult.mapError()
+                }
+            }
 
-        val pushResult = repository.push()
-        if (pushResult.isFailed) {
-            return pushResult.mapError()
-        }
+            val localFile = File(repository.root, remotePath)
+            if (!localFile.exists()) {
+                return@withLock OperationResult.error(failedToFindFile(localFile.path))
+            }
 
-        return repository.getFileMetadata(localFile.toFileDescriptor(repository))
+            val copyResult = InputOutputUtils.copy(
+                sourceFile = File(localPath),
+                destinationFile = localFile
+            )
+            if (copyResult.isFailed) {
+                return@withLock copyResult.mapError()
+            }
+
+            val addResult = repository.addToIndex(versionedFile)
+            if (addResult.isFailed) {
+                return@withLock addResult.mapError()
+            }
+
+            val commitResult = repository.commit(versionedFile)
+            if (commitResult.isFailed) {
+                return@withLock commitResult.mapError()
+            }
+
+            val pushResult = repository.push()
+            if (pushResult.isFailed) {
+                return@withLock pushResult.mapError()
+            }
+
+            repository.getFileMetadata(localFile.toFileDescriptor(repository))
+        }
     }
 
     private fun openAndUpdateGitRepository(): OperationResult<GitRepository> {

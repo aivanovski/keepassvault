@@ -5,10 +5,8 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.UiThread
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
-import com.ivanovsky.passnotes.data.repository.keepass.DatabaseSyncStatusProvider
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
-import com.ivanovsky.passnotes.extensions.hasLocalChanges
 import com.ivanovsky.passnotes.presentation.service.LockService
 import com.ivanovsky.passnotes.presentation.service.model.LockServiceCommand
 import com.ivanovsky.passnotes.presentation.service.model.ServiceState
@@ -17,7 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import timber.log.Timber
 
 class DatabaseLockInteractor(
-    private val syncStatusProvider: DatabaseSyncStatusProvider,
     private val context: Context,
     private val settings: Settings,
     private val lockUseCase: LockDatabaseUseCase,
@@ -79,11 +76,13 @@ class DatabaseLockInteractor(
     }
 
     private fun startServiceIfNeed(db: EncryptedDatabase) {
-        val status = syncStatusProvider.status
-        val shouldShowNotification = (settings.isLockNotificationVisible ||
-            (db.fsOptions.isPostponedSyncEnabled && status?.hasLocalChanges() == true))
+        val shouldShowNotification =
+            (settings.isLockNotificationVisible || db.fsOptions.isPostponedSyncEnabled)
+        val shouldStart =
+            (LockService.getCurrentState() == ServiceState.STOPPED && shouldShowNotification)
+        Timber.d("startServiceIfNeed: shouldStart=%s", shouldStart)
 
-        if (LockService.getCurrentState() == ServiceState.STOPPED && shouldShowNotification) {
+        if (shouldStart) {
             LockService.runCommand(context, LockServiceCommand.ShowNotification)
         }
     }

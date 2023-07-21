@@ -7,6 +7,7 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus;
+import com.ivanovsky.passnotes.data.entity.SyncState;
 import com.ivanovsky.passnotes.data.entity.SyncStatus;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.util.ReflectionUtils;
@@ -51,8 +52,14 @@ public class ObserverBus {
         void onDatabaseOpened(@NonNull EncryptedDatabase database);
     }
 
+    @Deprecated
     public interface DatabaseSyncStatusObserver extends Observer {
+        @Deprecated
         void onDatabaseSyncStatusChanged(@NonNull SyncStatus status);
+    }
+
+    public interface DatabaseSyncStateObserver extends Observer {
+        void onDatabaseSyncStateChanges(@NonNull SyncState syncState);
     }
 
     public interface SyncProgressStatusObserver extends Observer {
@@ -60,6 +67,14 @@ public class ObserverBus {
                 @NonNull FSAuthority fsAuthority,
                 @NonNull String uid,
                 @NonNull SyncProgressStatus status);
+    }
+
+    /**
+     * This observer is used to notify about changes in database data.
+     * It is used to update UI when database data is changed.
+     */
+    public interface DatabaseDataSetObserver extends Observer {
+        void onDatabaseDataSetChanged();
     }
 
     public ObserverBus() {
@@ -135,6 +150,18 @@ public class ObserverBus {
         for (DatabaseSyncStatusObserver observer :
                 filterObservers(DatabaseSyncStatusObserver.class)) {
             handler.post(() -> observer.onDatabaseSyncStatusChanged(status));
+        }
+    }
+
+    public void notifyDatabaseDataSetChanged() {
+        for (DatabaseDataSetObserver observer : filterObservers(DatabaseDataSetObserver.class)) {
+            handler.post(observer::onDatabaseDataSetChanged);
+        }
+    }
+
+    public void notifyDatabaseSyncStateChanged(SyncState syncState) {
+        for (DatabaseSyncStateObserver observer : filterObservers(DatabaseSyncStateObserver.class)) {
+            handler.post(() -> observer.onDatabaseSyncStateChanges(syncState));
         }
     }
 

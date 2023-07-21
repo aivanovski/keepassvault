@@ -11,7 +11,6 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
 import com.ivanovsky.passnotes.data.entity.FSAuthority
-import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
@@ -31,6 +30,7 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.extensions.getFileDescriptor
 import com.ivanovsky.passnotes.extensions.getKeyFileDescriptor
+import com.ivanovsky.passnotes.extensions.getLoginType
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
@@ -49,7 +49,6 @@ import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
-import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
@@ -588,6 +587,11 @@ class UnlockViewModel(
         val models = modelFactory.createFileModels(files, selectedFile, usedFileIdToSyncStateMap)
         fileCellViewModels.value = viewModelFactory.createCellViewModels(models, eventProvider)
 
+        val currentScreenState = screenState.value ?: return
+        if (currentScreenState.isDisplayingLoading) {
+            return
+        }
+
         when (syncState.status) {
             SyncStatus.FILE_NOT_FOUND -> {
                 setScreenState(
@@ -677,11 +681,8 @@ class UnlockViewModel(
             Screens.ServerLoginScreen(
                 ServerLoginArgs(
                     fsAuthority = oldFsAuthority,
-                    loginType = when (selectedFile.fsAuthority.type) {
-                        FSType.WEBDAV -> LoginType.USERNAME_PASSWORD
-                        FSType.GIT -> LoginType.GIT
-                        else -> throw IllegalStateException()
-                    }
+                    loginType = selectedFile.fsAuthority.type.getLoginType()
+                        ?: throw IllegalStateException()
                 )
             )
         )

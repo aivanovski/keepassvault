@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.data.repository.keepass
 
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_GET_DATABASE
+import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
@@ -14,6 +16,7 @@ import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
+import com.ivanovsky.passnotes.extensions.mapWithObject
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
@@ -22,7 +25,7 @@ import kotlin.concurrent.withLock
 class KeepassDatabaseRepository(
     private val fileSystemResolver: FileSystemResolver,
     private val lockInteractor: DatabaseLockInteractor,
-    private val syncStatusProvider: DatabaseSyncStatusProvider,
+    private val syncStatusProvider: DatabaseSyncStateProvider,
     private val observerBus: ObserverBus
 ) : EncryptedDatabaseRepository {
 
@@ -79,6 +82,52 @@ class KeepassDatabaseRepository(
         return openDbResult
     }
 
+    override fun reload(): OperationResult<Boolean> {
+        val result = lock.withLock {
+            if (!isOpened) {
+                return@withLock OperationResult.error(newDbError(MESSAGE_FAILED_TO_GET_DATABASE))
+            }
+
+            val oldDb = database.get().database
+            val type = database.get().type
+            val fsProvider = fileSystemResolver.resolveProvider(oldDb.file.fsAuthority)
+            val fsOptions = oldDb.fsOptions
+            val file = oldDb.file
+            val key = oldDb.key
+
+            val openFileResult = fsProvider.openFileForRead(
+                file,
+                OnConflictStrategy.CANCEL,
+                fsOptions
+            )
+            if (openFileResult.isFailed) {
+                return@withLock openFileResult.takeError()
+            }
+
+            val openResult = openDatabase(
+                type = type,
+                fsProvider = fsProvider,
+                fsOptions = fsOptions,
+                file = file,
+                input = openFileResult,
+                key = key,
+            )
+            if (openResult.isFailed) {
+                return@withLock openResult.takeError()
+            }
+
+            val db = openResult.obj
+            database.set(DatabaseReference(type, db))
+            openResult.takeStatusWith(db)
+        }
+
+        if (result.isSucceededOrDeferred) {
+            observerBus.notifyDatabaseDataSetChanged()
+        }
+
+        return result.mapWithObject(true)
+    }
+
     override fun createNew(
         type: KeepassImplementation,
         key: EncryptedDatabaseKey,
@@ -106,8 +155,10 @@ class KeepassDatabaseRepository(
     override fun close(): OperationResult<Boolean> {
         lock.withLock {
             if (isOpened) {
-                val db = database.get().database
-                db.watcher.unsubscribe(syncStatusProvider)
+                database.get().database
+                    .apply {
+                        this.watcher.unsubscribe(syncStatusProvider)
+                    }
 
                 database.set(null)
             }
@@ -123,13 +174,13 @@ class KeepassDatabaseRepository(
         openResult: OperationResult<EncryptedDatabase>
     ) {
         lockInteractor.onDatabaseOpened(db)
-        syncStatusProvider.onCommit(db, openResult)
+        syncStatusProvider.onDatabaseOpened(db, openResult)
         observerBus.notifyDatabaseOpened(db)
     }
 
     private fun onDatabaseClosed() {
         lockInteractor.onDatabaseClosed()
-        syncStatusProvider.clear()
+        syncStatusProvider.onDatabaseClosed()
         observerBus.notifyDatabaseClosed()
     }
 

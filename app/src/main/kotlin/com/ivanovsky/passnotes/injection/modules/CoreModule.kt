@@ -9,9 +9,8 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
-import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.saf.SAFHelper
-import com.ivanovsky.passnotes.data.repository.keepass.DatabaseSyncStatusProvider
+import com.ivanovsky.passnotes.data.repository.keepass.DatabaseSyncStateProvider
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
@@ -64,7 +63,7 @@ object CoreModule {
             single { provideGitRootDao(get()) }
 
             // Files, Keepass
-            single { DatabaseSyncStatusProvider(get(), get(), get()) }
+            single { DatabaseSyncStateProvider(get(), get(), get()) }
             single<EncryptedDatabaseRepository> {
                 KeepassDatabaseRepository(get(), get(), get(), get())
             }

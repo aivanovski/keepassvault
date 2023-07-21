@@ -21,6 +21,8 @@ import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInterac
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.main.MainSettingsInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
+import com.ivanovsky.passnotes.domain.interactor.syncState.SyncStateCache
+import com.ivanovsky.passnotes.domain.interactor.syncState.SyncStateInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.presentation.about.AboutViewModel
 import com.ivanovsky.passnotes.presentation.autofill.AutofillViewFactory
@@ -29,7 +31,6 @@ import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveC
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogViewModel
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogViewModel
-import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
@@ -71,6 +72,7 @@ import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellModelFactory
 import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.syncState.factory.SyncStateCellModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
@@ -84,7 +86,7 @@ object UiModule {
         module {
             // Interactors
             single { ClipboardInteractor(get()) }
-            single { DatabaseLockInteractor(get(), get(), get(), get(), get()) }
+            single { DatabaseLockInteractor(get(), get(), get(), get()) }
             single { FilePickerInteractor(get(), get()) }
             single {
                 UnlockInteractor(
@@ -106,10 +108,9 @@ object UiModule {
             single { NewDatabaseInteractor(get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get()) }
             single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
-            single { NoteInteractor(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+            single { NoteInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
             single {
                 GroupsInteractor(
-                    get(),
                     get(),
                     get(),
                     get(),
@@ -135,13 +136,13 @@ object UiModule {
             single { LockServiceInteractor(get(), get(), get(), get(), get()) }
             single { PasswordGeneratorInteractor(get()) }
             single { ResolveConflictDialogInteractor(get()) }
+            single { SyncStateCache(get()) }
+            single { SyncStateInteractor(get(), get(), get()) }
 
             // Autofill
             single { AutofillViewFactory(get(), get()) }
 
             // Cell factories
-            single { DatabaseStatusCellModelFactory(get()) }
-
             single { GroupsCellModelFactory(get()) }
             single { GroupsCellViewModelFactory(get(), get()) }
 
@@ -165,6 +166,8 @@ object UiModule {
 
             single { NavigationMenuCellModelFactory(get()) }
             single { NavigationMenuCellViewModelFactory() }
+
+            single { SyncStateCellModelFactory(get()) }
 
             // Cicerone
             single { Cicerone.create() }
@@ -221,12 +224,13 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
             factory { (args: GroupsScreenArgs) ->
                 GroupsViewModel(
+                    get(),
+                    get(),
                     get(),
                     get(),
                     get(),

@@ -39,6 +39,8 @@
     <string name="refresh">Refresh</string>
     <string name="grant">Grant</string>
     <string name="toggle_hidden">Toggle hidden</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="synchronize_with_source">Synchronize with source</string>
 
     <!-- Lock notification -->
     <string name="lock_notification_channel">Quick Lock</string>

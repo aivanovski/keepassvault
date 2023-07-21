@@ -30,6 +30,10 @@ public interface EncryptedDatabaseRepository {
             @NonNull FileDescriptor file,
             boolean addTemplates);
 
+
+    @NonNull
+    OperationResult<Boolean> reload();
+
     @NonNull
     OperationResult<Boolean> close();
 }

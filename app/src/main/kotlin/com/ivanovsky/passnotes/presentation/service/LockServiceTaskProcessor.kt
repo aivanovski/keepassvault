@@ -55,6 +55,7 @@ class LockServiceTaskProcessor(
     }
 
     private fun onTaskFinished() {
+        Timber.d("onTaskFinished:")
         val nextTask = lock.withLock {
             if (queue.isNotEmpty()) {
                 queue.poll()

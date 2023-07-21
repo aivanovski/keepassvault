@@ -18,12 +18,36 @@ class FakeFileFactory(
         return create(fsAuthority, FileUid.NO_CHANGES, Time.NO_CHANGES)
     }
 
+    fun createRemoteChangesFile(): FileDescriptor {
+        return create(fsAuthority, FileUid.REMOTE_CHANGES, Time.LOCAL)
+    }
+
+    fun createLocalChangesFile(): FileDescriptor {
+        return create(fsAuthority, FileUid.LOCAL_CHANGES, Time.LOCAL)
+    }
+
+    fun createLocalChangesTimeoutFile(): FileDescriptor {
+        return create(fsAuthority, FileUid.LOCAL_CHANGES_TIMEOUT, Time.LOCAL)
+    }
+
     fun createConflictLocalFile(): FileDescriptor {
-        return create(fsAuthority, FileUid.CONFLICT, Time.CONFLICT_LOCAL)
+        return create(fsAuthority, FileUid.CONFLICT, Time.LOCAL)
     }
 
     fun createConflictRemoteFile(): FileDescriptor {
-        return create(fsAuthority, FileUid.CONFLICT, Time.CONFLICT_REMOTE)
+        return create(fsAuthority, FileUid.CONFLICT, Time.REMOTE)
+    }
+
+    fun createErrorFile(): FileDescriptor {
+        return create(fsAuthority, FileUid.ERROR, Time.LOCAL)
+    }
+
+    fun createAuthErrorFile(): FileDescriptor {
+        return create(fsAuthority, FileUid.AUTH_ERROR, Time.LOCAL)
+    }
+
+    fun createNotFoundFile(): FileDescriptor {
+        return create(fsAuthority, FileUid.NOT_FOUND, Time.LOCAL)
     }
 
     private fun create(
@@ -46,17 +70,21 @@ class FakeFileFactory(
 
     private fun pathFromUid(uid: String): String {
         return when (uid) {
-            FileUid.NO_CHANGES -> "/test-no-changes.kdbx"
-            FileUid.CONFLICT -> "/test-conflict.kdbx"
             FileUid.ROOT -> "/"
-            else -> throw IllegalArgumentException("Unknown uid: $uid")
+            else -> "/test-$uid.kdbx"
         }
     }
 
     object FileUid {
         const val NO_CHANGES = "no-changes"
-        const val CONFLICT = "conflict"
         const val ROOT = "/"
+        const val REMOTE_CHANGES = "remote-changes"
+        const val LOCAL_CHANGES = "local-changes"
+        const val LOCAL_CHANGES_TIMEOUT = "local-changes-timeout"
+        const val CONFLICT = "conflict"
+        const val AUTH_ERROR = "auth-error"
+        const val NOT_FOUND = "not-found"
+        const val ERROR = "error"
     }
 
     private object Time {
@@ -65,8 +93,8 @@ class FakeFileFactory(
 
         val ROOT = parseDate("2020-01-01")
         val NO_CHANGES = parseDate("2020-02-01")
-        val CONFLICT_LOCAL = parseDate("2020-03-01")
-        val CONFLICT_REMOTE = parseDate("2020-03-02")
+        val LOCAL = parseDate("2020-03-01")
+        val REMOTE = parseDate("2020-03-02")
 
         private fun parseDate(str: String): Long {
             return DATE_FORMAT.parse(str)?.time ?: throw IllegalArgumentException()

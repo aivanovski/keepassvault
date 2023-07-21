@@ -47,7 +47,7 @@ public class OperationError {
     public static final String MESSAGE_FAILED_TO_REMOVE_ROOT_GROUP = "Failed to remove root group";
     public static final String MESSAGE_FAILED_TO_GET_PARENT_PATH = "Failed to get parent path";
     public static final String MESSAGE_FAILED_TO_RESOLVE_SYNC_PROCESSOR =
-            "Failed to resolve sync processot";
+            "Failed to resolve sync processor";
     public static final String MESSAGE_FILE_IS_NOT_MODIFIED = "File is not modified";
     public static final String MESSAGE_INCORRECT_SYNC_STATUS = "Incorrect sync status";
     public static final String MESSAGE_INCORRECT_USE_CASE = "Incorrect use case";
@@ -68,6 +68,8 @@ public class OperationError {
     public static final String MESSAGE_INVALID_KEY_FILE = "Invalid key file";
     public static final String MESSAGE_FAILED_TO_CREATE_A_DIRECTORY =
             "Failed to create a directory";
+    public static final String MESSAGE_SYNCHRONIZATION_TAKES_TOO_LONG =
+            "Synchronization takes too long";
 
     public static final String GENERIC_MESSAGE_NOT_FOUND = "%s not found";
     public static final String GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST = "Group '%s' already exists";

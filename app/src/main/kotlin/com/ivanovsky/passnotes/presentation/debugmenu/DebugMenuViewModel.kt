@@ -505,7 +505,7 @@ class DebugMenuViewModel(
         )
 
         private val KEEPASS_IMPLEMENTATION_TYPE = listOf(
-            KeepassImplementation.KOTPASS,
+            KeepassImplementation.KOTPASS
         )
     }
 }

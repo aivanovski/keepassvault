@@ -32,7 +32,8 @@ import com.ivanovsky.passnotes.util.getParcelable
 import java.util.concurrent.atomic.AtomicReference
 import timber.log.Timber
 
-class LockService : Service(),
+class LockService :
+    Service(),
     ObserverBus.DatabaseSyncStateObserver,
     LockServiceFacade {
 

@@ -37,13 +37,16 @@ class SyncStateCellModelFactory(
         syncState: SyncState,
         isForceMessage: Boolean = false
     ): SyncStateModel {
-
         val message = formatSyncStateMessage(syncState)
         val action = getButtonAction(syncState)
-        val isInProgress = (syncState.progress == SyncProgressStatus.DOWNLOADING ||
-            syncState.progress == SyncProgressStatus.UPLOADING)
-        val isHideMessage = (syncState.status == SyncStatus.NO_CHANGES ||
-            syncState.status == SyncStatus.LOCAL_CHANGES)
+        val isInProgress = (
+            syncState.progress == SyncProgressStatus.DOWNLOADING ||
+                syncState.progress == SyncProgressStatus.UPLOADING
+            )
+        val isHideMessage = (
+            syncState.status == SyncStatus.NO_CHANGES ||
+                syncState.status == SyncStatus.LOCAL_CHANGES
+            )
 
         return SyncStateModel(
             message = when {
@@ -63,10 +66,12 @@ class SyncStateCellModelFactory(
     }
 
     private fun getMessageColor(syncState: SyncState): Int {
-        val isError = (syncState.status == SyncStatus.ERROR ||
-            syncState.status == SyncStatus.AUTH_ERROR ||
-            syncState.status == SyncStatus.FILE_NOT_FOUND ||
-            syncState.status == SyncStatus.CONFLICT)
+        val isError = (
+            syncState.status == SyncStatus.ERROR ||
+                syncState.status == SyncStatus.AUTH_ERROR ||
+                syncState.status == SyncStatus.FILE_NOT_FOUND ||
+                syncState.status == SyncStatus.CONFLICT
+            )
 
         return if (!syncState.progress.isSyncInProgress() && isError) {
             resourceProvider.getColor(R.color.error_text)

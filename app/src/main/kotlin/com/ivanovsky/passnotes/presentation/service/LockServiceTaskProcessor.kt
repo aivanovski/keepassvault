@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.presentation.service
 
 import com.ivanovsky.passnotes.domain.DispatcherProvider
-import com.ivanovsky.passnotes.presentation.service.task.LockServiceTask
 import com.ivanovsky.passnotes.presentation.service.model.TaskProcessorState
+import com.ivanovsky.passnotes.presentation.service.task.LockServiceTask
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
@@ -69,5 +69,4 @@ class LockServiceTaskProcessor(
             processTask(nextTask)
         }
     }
-
 }

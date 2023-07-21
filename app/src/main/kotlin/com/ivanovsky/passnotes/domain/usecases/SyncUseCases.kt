@@ -58,8 +58,10 @@ class SyncUseCases(
         withContext(dispatchers.IO) {
             val syncState = getSyncState(file)
 
-            val isNeeded = (syncState.status == SyncStatus.LOCAL_CHANGES ||
-                syncState.status == SyncStatus.REMOTE_CHANGES)
+            val isNeeded = (
+                syncState.status == SyncStatus.LOCAL_CHANGES ||
+                    syncState.status == SyncStatus.REMOTE_CHANGES
+                )
 
             OperationResult.success(isNeeded)
         }

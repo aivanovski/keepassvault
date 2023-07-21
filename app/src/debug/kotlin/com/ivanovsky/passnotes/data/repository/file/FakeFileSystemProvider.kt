@@ -98,7 +98,6 @@ class FakeFileSystemProvider(
         } catch (exception: FileNotFoundException) {
             Timber.w(exception)
             OperationResult.error(newFileNotFoundError())
-
         } catch (exception: IOException) {
             Timber.w(exception)
             OperationResult.error(OperationError.newGenericIOError(exception))

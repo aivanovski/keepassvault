@@ -93,7 +93,6 @@ class NoteViewModel(
     val shareFileEvent = SingleLiveEvent<File>()
     val openFileEvent = SingleLiveEvent<File>()
 
-
     private var cellIdToPropertyMap: Map<String, Property>? = null
     private var cellIdToAttachmentMap: Map<String, Attachment>? = null
     private var note: Note? = null

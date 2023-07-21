@@ -446,7 +446,7 @@ class KotpassDatabase(
             fsOptions: FSOptions,
             file: FileDescriptor,
             content: OperationResult<InputStream>,
-            key: EncryptedDatabaseKey,
+            key: EncryptedDatabaseKey
         ): OperationResult<KotpassDatabase> {
             if (content.isFailed) {
                 return content.mapError()

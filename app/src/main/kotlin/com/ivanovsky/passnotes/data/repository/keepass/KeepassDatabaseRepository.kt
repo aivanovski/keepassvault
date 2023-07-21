@@ -110,7 +110,7 @@ class KeepassDatabaseRepository(
                 fsOptions = fsOptions,
                 file = file,
                 input = openFileResult,
-                key = key,
+                key = key
             )
             if (openResult.isFailed) {
                 return@withLock openResult.takeError()

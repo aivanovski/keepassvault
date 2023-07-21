@@ -58,14 +58,16 @@ class SyncStateViewModel(
     }
 
     override fun onDatabaseSyncStateChanges(syncState: SyncState) {
-        val isSyncProgressChanged = (lastSyncState != null &&
-            lastSyncState?.progress != syncState.progress)
+        val isSyncProgressChanged = (
+            lastSyncState != null &&
+                lastSyncState?.progress != syncState.progress
+            )
 
         Timber.d(
             "onDatabaseSyncStateChanges: isCheckingStatus=%s, isSyncProgressChanged=%s",
-            isCheckingStatus, isSyncProgressChanged
+            isCheckingStatus,
+            isSyncProgressChanged
         )
-
 
         if (isCheckingStatus && !isSyncProgressChanged) {
             return

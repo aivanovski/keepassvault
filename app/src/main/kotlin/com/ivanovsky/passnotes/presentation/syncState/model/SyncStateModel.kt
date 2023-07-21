@@ -7,5 +7,5 @@ data class SyncStateModel(
     val messageColor: Int,
     val isProgressVisible: Boolean,
     val isMessageDismissed: Boolean,
-    val buttonAction: ButtonAction = ButtonAction.NONE,
+    val buttonAction: ButtonAction = ButtonAction.NONE
 ) : BaseCellModel()

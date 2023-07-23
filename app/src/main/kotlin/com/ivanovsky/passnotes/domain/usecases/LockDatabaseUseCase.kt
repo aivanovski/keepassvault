@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.domain.usecases
 
 import android.content.Context
+import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.keepass.DatabaseSyncStateProvider
@@ -17,6 +18,7 @@ class LockDatabaseUseCase {
     private val syncStateProvider: DatabaseSyncStateProvider by inject()
     private val lockInteractor: DatabaseLockInteractor by inject()
     private val context: Context by inject()
+    private val observerBus: ObserverBus by inject()
 
     fun lockIfNeed(): OperationResult<Unit> {
         val db = dbRepository.database ?: return OperationResult.success(Unit)
@@ -26,6 +28,7 @@ class LockDatabaseUseCase {
 
         if (syncState == null || syncState.status.isNeedToSync()) {
             LockService.runCommand(context, LockServiceCommand.SyncAndLock(db.file))
+            observerBus.notifyDatabaseClosed()
             return OperationResult.success(Unit)
         }
 

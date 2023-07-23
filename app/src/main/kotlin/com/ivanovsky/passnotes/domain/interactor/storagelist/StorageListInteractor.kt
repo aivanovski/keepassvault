@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.domain.interactor.storagelist
 
 import android.net.Uri
-import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
@@ -9,27 +8,27 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.saf.SAFHelper
-import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
-import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.presentation.storagelist.Action
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.EXTERNAL_STORAGE
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.FAKE
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.GIT
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.PRIVATE_STORAGE
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.SAF_STORAGE
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.WEBDAV
 import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
 import kotlinx.coroutines.withContext
 
 class StorageListInteractor(
-    private val resourceProvider: ResourceProvider,
     private val fileSystemResolver: FileSystemResolver,
-    private val settings: Settings,
     private val safHelper: SAFHelper,
     private val dispatchers: DispatcherProvider
 ) {
+
+    private val optionFactories = mapOf(
+        FSType.INTERNAL_STORAGE to { createPrivateStorageOption() },
+        FSType.EXTERNAL_STORAGE to { createExternalStorageOption() },
+        FSType.SAF to { createSafStorageOption() },
+        FSType.WEBDAV to { createWebDavOption() },
+        FSType.GIT to { createGitOption() },
+        FSType.FAKE to { createFakeFsOption() }
+    )
 
     fun setupPermissionForSaf(uri: Uri): OperationResult<Unit> {
         return safHelper.setupPermissionIfNeed(uri)
@@ -37,140 +36,117 @@ class StorageListInteractor(
 
     suspend fun getStorageOptions(action: Action): OperationResult<List<StorageOption>> =
         withContext(dispatchers.IO) {
-            val getInternalRootResult = fileSystemResolver
-                .resolveProvider(FSAuthority.INTERNAL_FS_AUTHORITY)
-                .rootFile
-            if (getInternalRootResult.isFailed) {
-                return@withContext getInternalRootResult.takeError()
-            }
+            val availableFsTypes = fileSystemResolver.getAvailableFsTypes()
 
-            val getExternalRootResult = fileSystemResolver
-                .resolveProvider(FSAuthority.EXTERNAL_FS_AUTHORITY)
-                .rootFile
+            val options = mutableListOf<StorageOption>()
 
-            val internalRoot = getInternalRootResult.obj
-            val externalRoot = if (getExternalRootResult.isSucceeded) {
-                getExternalRootResult.obj
-            } else {
-                null
-            }
+            for (fsType in SORTED_FS_TYPES) {
+                if (fsType !in availableFsTypes) {
+                    continue
+                }
 
-            val options = mutableListOf(
-                createPrivateStorageOption(internalRoot),
-                createSafStorageOption()
-            )
+                val optionFactory = optionFactories[fsType] ?: continue
 
-            if (externalRoot != null) {
-                options.add(createExternalStorageOption(externalRoot))
-            }
+                val option = withContext(dispatchers.IO) {
+                    optionFactory.invoke()
+                } ?: continue
 
-            options.add(createWebDavOption())
-            options.add(createGitOption())
-
-            if (settings.testToggles?.isFakeFileSystemEnabled == true) {
-                options.add(createFakeFsOption())
+                options.add(option)
             }
 
             OperationResult.success(options)
         }
 
-    private fun createPrivateStorageOption(root: FileDescriptor): StorageOption {
+    private fun createPrivateStorageOption(): StorageOption? {
+        val getRootResult = fileSystemResolver
+            .resolveProvider(FSAuthority.INTERNAL_FS_AUTHORITY)
+            .rootFile
+
+        if (getRootResult.isFailed) {
+            return null
+        }
+
+        val root = getRootResult.getOrThrow()
         return StorageOption(
-            PRIVATE_STORAGE,
-            resourceProvider.getString(R.string.private_app_storage),
             root
         )
     }
 
-    private fun createExternalStorageOption(root: FileDescriptor): StorageOption {
+    private fun createExternalStorageOption(): StorageOption? {
+        val getRootResult = fileSystemResolver
+            .resolveProvider(FSAuthority.EXTERNAL_FS_AUTHORITY)
+            .rootFile
+
+        if (getRootResult.isFailed) {
+            return null
+        }
+
+        val root = getRootResult.getOrThrow()
         return StorageOption(
-            EXTERNAL_STORAGE,
-            resourceProvider.getString(R.string.external_storage_app_picker),
             root
         )
     }
 
     private fun createSafStorageOption(): StorageOption {
         return StorageOption(
-            SAF_STORAGE,
-            resourceProvider.getString(R.string.external_storage_system_picker),
-            createSafStorageDir()
+            root = FileDescriptor(
+                fsAuthority = FSAuthority.SAF_FS_AUTHORITY,
+                path = ROOT_PATH,
+                uid = ROOT_PATH,
+                name = ROOT_PATH,
+                isDirectory = true,
+                isRoot = true
+            )
         )
     }
 
     private fun createWebDavOption(): StorageOption {
         return StorageOption(
-            WEBDAV,
-            resourceProvider.getString(R.string.webdav),
-            createWebdavStorageDir()
+            root = FileDescriptor(
+                fsAuthority = FSAuthority(
+                    credentials = null,
+                    type = FSType.WEBDAV
+                ),
+                path = ROOT_PATH,
+                uid = ROOT_PATH,
+                name = ROOT_PATH,
+                isDirectory = true,
+                isRoot = true
+            )
         )
     }
 
     private fun createGitOption(): StorageOption {
         return StorageOption(
-            GIT,
-            resourceProvider.getString(R.string.git),
-            createGitStorageDir()
+            root = FileDescriptor(
+                fsAuthority = FSAuthority(
+                    credentials = null,
+                    type = FSType.GIT
+                ),
+                path = ROOT_PATH,
+                uid = ROOT_PATH,
+                name = ROOT_PATH,
+                isDirectory = true,
+                isRoot = true
+            )
         )
     }
 
     private fun createFakeFsOption(): StorageOption {
         return StorageOption(
-            FAKE,
-            resourceProvider.getString(R.string.fake_file_system),
-            createFakeFsStorageDir()
+            FileDescriptor(
+                fsAuthority = FSAuthority(
+                    credentials = null,
+                    type = FSType.FAKE
+                ),
+                path = ROOT_PATH,
+                uid = ROOT_PATH,
+                name = ROOT_PATH,
+                isDirectory = true,
+                isRoot = true
+            )
         )
     }
-
-    private fun createSafStorageDir(): FileDescriptor {
-        return FileDescriptor(
-            fsAuthority = FSAuthority.SAF_FS_AUTHORITY,
-            path = ROOT_PATH,
-            uid = ROOT_PATH,
-            name = ROOT_PATH,
-            isDirectory = true,
-            isRoot = true
-        )
-    }
-
-    private fun createWebdavStorageDir(): FileDescriptor =
-        FileDescriptor(
-            fsAuthority = FSAuthority(
-                credentials = null,
-                type = FSType.WEBDAV
-            ),
-            path = ROOT_PATH,
-            uid = ROOT_PATH,
-            name = ROOT_PATH,
-            isDirectory = true,
-            isRoot = true
-        )
-
-    private fun createGitStorageDir(): FileDescriptor =
-        FileDescriptor(
-            fsAuthority = FSAuthority(
-                credentials = null,
-                type = FSType.GIT
-            ),
-            path = ROOT_PATH,
-            uid = ROOT_PATH,
-            name = ROOT_PATH,
-            isDirectory = true,
-            isRoot = true
-        )
-
-    private fun createFakeFsStorageDir(): FileDescriptor =
-        FileDescriptor(
-            fsAuthority = FSAuthority(
-                credentials = null,
-                type = FSType.FAKE
-            ),
-            path = ROOT_PATH,
-            uid = ROOT_PATH,
-            name = ROOT_PATH,
-            isDirectory = true,
-            isRoot = true
-        )
 
     suspend fun getFileSystemRoot(
         fsAuthority: FSAuthority
@@ -190,4 +166,15 @@ class StorageListInteractor(
                 .resolveProvider(fsAuthority)
                 .getFile(path, FSOptions.DEFAULT)
         }
+
+    companion object {
+        private val SORTED_FS_TYPES = listOf(
+            FSType.INTERNAL_STORAGE,
+            FSType.SAF,
+            FSType.EXTERNAL_STORAGE,
+            FSType.WEBDAV,
+            FSType.GIT,
+            FSType.FAKE
+        )
+    }
 }

@@ -128,6 +128,16 @@ android {
         }
     }
 
+    flavorDimensions "default"
+    productFlavors {
+        fdroid {
+            dimension "default"
+        }
+        gplay {
+            dimension "default"
+        }
+    }
+
     buildTypes {
         debug {
             debuggable true

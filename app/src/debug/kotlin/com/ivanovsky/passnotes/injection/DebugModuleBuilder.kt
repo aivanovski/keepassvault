@@ -1,5 +1,6 @@
-package com.ivanovsky.passnotes
+package com.ivanovsky.passnotes.injection
 
+import android.content.Context
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.LoggerInteractor
 import com.ivanovsky.passnotes.injection.modules.BiometricModule
@@ -11,21 +12,30 @@ import com.ivanovsky.passnotes.injection.modules.UiModule
 import com.ivanovsky.passnotes.injection.modules.UseCaseModule
 import org.koin.core.module.Module
 
-class DebugApp : App() {
+// Is loaded via reflection in App.kt
+class DebugModuleBuilder(
+    private val context: Context,
+    private val loggerInteractor: LoggerInteractor,
+    private val settings: Settings
+) : DIModuleBuilder {
 
-    override fun createKoinModules(
-        loggerInteractor: LoggerInteractor,
-        settings: Settings
-    ): List<Module> {
+    override var isExternalStorageAccessEnabled: Boolean = false
+
+    override fun buildModules(): List<Module> {
         val isLoadFakeBiometricModule = settings.testToggles?.isFakeBiometricEnabled ?: false
-        val isLoadFakeFileSystem = settings.testToggles?.isFakeFileSystemEnabled ?: false
+        val isFakeFileSystemEnabled = settings.testToggles?.isFakeFileSystemEnabled ?: false
 
         return listOf(
             CoreModule.build(loggerInteractor),
-            if (isLoadFakeFileSystem) {
-                FakeFileSystemProvidersModule.build(this)
+            if (isFakeFileSystemEnabled) {
+                FakeFileSystemProvidersModule.build(
+                    context = context,
+                    isExternalStorageAccessEnabled = isExternalStorageAccessEnabled
+                )
             } else {
-                FileSystemProvidersModule.build()
+                FileSystemProvidersModule.build(
+                    isExternalStorageAccessEnabled = isExternalStorageAccessEnabled
+                )
             },
             if (isLoadFakeBiometricModule) {
                 FakeBiometricModule.build()

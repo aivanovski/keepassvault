@@ -28,11 +28,16 @@ class FileSystemResolver(
     private val fileHelper: FileHelper,
     private val observerBus: ObserverBus,
     private val httpClient: OkHttpClient,
+    private val fsTypes: Set<FSType>,
     private val factories: Map<FSType, Factory> = emptyMap()
 ) {
 
     private val providers: MutableMap<FSAuthority, FileSystemProvider> = HashMap()
     private val lock = ReentrantLock()
+
+    fun getAvailableFsTypes(): Set<FSType> {
+        return fsTypes
+    }
 
     fun resolveProvider(fsAuthority: FSAuthority): FileSystemProvider {
         var result: FileSystemProvider
@@ -99,7 +104,7 @@ class FileSystemResolver(
                     fsAuthority
                 )
             }
-            else -> throw IllegalStateException()
+            else -> throw IllegalStateException("Invalid file system type: ${fsAuthority.type}")
         }
     }
 

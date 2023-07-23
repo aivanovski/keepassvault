@@ -11,7 +11,10 @@ import org.koin.dsl.module
 
 object FakeFileSystemProvidersModule {
 
-    fun build(context: Context) = module {
+    fun build(
+        context: Context,
+        isExternalStorageAccessEnabled: Boolean
+    ) = module {
         val fsFactories = mapOf(
             FSType.FAKE to FileSystemResolver.Factory { fsAuthority ->
                 val observerBus: ObserverBus = GlobalInjector.get()
@@ -21,6 +24,30 @@ object FakeFileSystemProvidersModule {
             }
         )
 
-        single { FileSystemResolver(get(), get(), get(), get(), get(), get(), get(), fsFactories) }
+        val fsTypes = mutableSetOf<FSType>()
+            .apply {
+                add(FSType.INTERNAL_STORAGE)
+                if (isExternalStorageAccessEnabled) {
+                    add(FSType.EXTERNAL_STORAGE)
+                }
+                add(FSType.WEBDAV)
+                add(FSType.SAF)
+                add(FSType.GIT)
+                add(FSType.FAKE)
+            }
+
+        single {
+            FileSystemResolver(
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                fsTypes,
+                fsFactories
+            )
+        }
     }
 }

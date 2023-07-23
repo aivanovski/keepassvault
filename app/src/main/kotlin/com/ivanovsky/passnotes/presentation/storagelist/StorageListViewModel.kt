@@ -9,6 +9,12 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
+import com.ivanovsky.passnotes.data.entity.FSType.EXTERNAL_STORAGE
+import com.ivanovsky.passnotes.data.entity.FSType.FAKE
+import com.ivanovsky.passnotes.data.entity.FSType.GIT
+import com.ivanovsky.passnotes.data.entity.FSType.INTERNAL_STORAGE
+import com.ivanovsky.passnotes.data.entity.FSType.SAF
+import com.ivanovsky.passnotes.data.entity.FSType.WEBDAV
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.AuthType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
@@ -32,13 +38,6 @@ import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellModelFactory
 import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.EXTERNAL_STORAGE
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.FAKE
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.GIT
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.PRIVATE_STORAGE
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.SAF_STORAGE
-import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.WEBDAV
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
@@ -175,19 +174,19 @@ class StorageListViewModel(
 
     private fun navigateToServerLogin(fsAuthority: FSAuthority) {
         val screenArgs = when (fsAuthority.type) {
-            FSType.WEBDAV -> {
+            WEBDAV -> {
                 ServerLoginArgs(
                     loginType = LoginType.USERNAME_PASSWORD,
                     fsAuthority = fsAuthority
                 )
             }
-            FSType.GIT -> {
+            GIT -> {
                 ServerLoginArgs(
                     loginType = LoginType.GIT,
                     fsAuthority = fsAuthority
                 )
             }
-            FSType.FAKE -> {
+            FAKE -> {
                 ServerLoginArgs(
                     loginType = LoginType.USERNAME_PASSWORD,
                     fsAuthority = fsAuthority
@@ -219,30 +218,32 @@ class StorageListViewModel(
             when {
                 event.containsKey(SingleTextCellViewModel.CLICK_EVENT) -> {
                     val id = event.getString(SingleTextCellViewModel.CLICK_EVENT) ?: EMPTY
-                    onStorageOptionClicked(StorageOptionType.valueOf(id))
+                    val fsType = FSType.findByValue(id) ?: throw IllegalArgumentException()
+                    onStorageOptionClicked(fsType)
                 }
                 event.containsKey(TwoTextWithIconCellViewModel.CLICK_EVENT) -> {
                     val id = event.getString(TwoTextWithIconCellViewModel.CLICK_EVENT) ?: EMPTY
-                    onStorageOptionClicked(StorageOptionType.valueOf(id))
+                    val fsType = FSType.findByValue(id) ?: throw IllegalArgumentException()
+                    onStorageOptionClicked(fsType)
                 }
             }
         }
     }
 
-    private fun onStorageOptionClicked(type: StorageOptionType) {
-        val selectedOption = storageOptions?.find { type == it.type } ?: return
+    private fun onStorageOptionClicked(fsType: FSType) {
+        val selectedOption = storageOptions?.find { fsType == it.root.fsAuthority.type } ?: return
         this.selectedOption = selectedOption
 
-        when (selectedOption.type) {
-            PRIVATE_STORAGE, EXTERNAL_STORAGE -> {
-                onDeviceStorageSelected(selectedOption.root, selectedOption.type)
+        when (selectedOption.root.fsAuthority.type) {
+            INTERNAL_STORAGE, EXTERNAL_STORAGE -> {
+                onDeviceStorageSelected(selectedOption.root, selectedOption.root.fsAuthority.type)
             }
-            SAF_STORAGE -> onSafStorageSelected()
+            SAF -> onSafStorageSelected()
             WEBDAV, GIT, FAKE -> onRemoteFileStorageSelected(selectedOption.root)
         }
     }
 
-    private fun onDeviceStorageSelected(root: FileDescriptor, type: StorageOptionType) {
+    private fun onDeviceStorageSelected(root: FileDescriptor, type: FSType) {
         if (args.action == Action.PICK_FILE) {
             navigateToFilePicker(
                 FilePickerArgs(
@@ -256,7 +257,7 @@ class StorageListViewModel(
                 EXTERNAL_STORAGE -> {
                     loadRootAndNavigateToPicker(root.fsAuthority)
                 }
-                PRIVATE_STORAGE -> {
+                INTERNAL_STORAGE -> {
                     router.sendResult(StorageListScreen.RESULT_KEY, root)
                     router.exit()
                 }

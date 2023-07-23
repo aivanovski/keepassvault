@@ -625,7 +625,9 @@ class UnlockViewModel(
             SyncStatus.AUTH_ERROR -> {
                 setScreenState(
                     ScreenState.dataWithError(
-                        errorText = resourceProvider.getString(R.string.sync_auth_error_login_message),
+                        errorText = resourceProvider.getString(
+                            R.string.sync_auth_error_login_message
+                        ),
                         errorButtonText = resourceProvider.getString(R.string.login)
                     )
                 )

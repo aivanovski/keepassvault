@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.core.widget
 
 import android.content.Context
+import android.graphics.drawable.ColorDrawable
 import android.util.AttributeSet
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +23,7 @@ class DecoratedRecyclerView(
         val layoutManager = this.layoutManager
         if (isShowDividers && layoutManager is LinearLayoutManager) {
             val itemDecoration = DividerItemDecoration(context, layoutManager.orientation)
+            itemDecoration.setDrawable(ColorDrawable(context.getColor(R.color.divider)))
             addItemDecoration(itemDecoration)
         }
 

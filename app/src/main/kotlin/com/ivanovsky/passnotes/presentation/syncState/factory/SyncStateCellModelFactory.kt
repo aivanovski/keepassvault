@@ -8,7 +8,7 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.extensions.isSyncInProgress
 import com.ivanovsky.passnotes.presentation.syncState.model.ButtonAction
 import com.ivanovsky.passnotes.presentation.syncState.model.SyncStateModel
-import com.ivanovsky.passnotes.util.StringUtils
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class SyncStateCellModelFactory(
     private val resourceProvider: ResourceProvider
@@ -16,29 +16,37 @@ class SyncStateCellModelFactory(
 
     fun createLoadingState(): SyncStateModel {
         return SyncStateModel(
-            message = StringUtils.EMPTY,
+            message = resourceProvider.getString(
+                R.string.text_with_dots,
+                resourceProvider.getString(R.string.checking)
+            ),
+            detailsMessage = EMPTY,
             messageColor = resourceProvider.getColor(R.color.primary_text),
-            isProgressVisible = true,
-            isMessageDismissed = true,
+            isSyncIconVisible = true,
+            isMessageDismissed = false,
             buttonAction = ButtonAction.NONE
         )
     }
 
     fun createHiddenState(): SyncStateModel {
         return SyncStateModel(
-            message = StringUtils.EMPTY,
+            message = EMPTY,
+            detailsMessage = EMPTY,
             messageColor = resourceProvider.getColor(R.color.primary_text),
-            isProgressVisible = false,
+            isSyncIconVisible = false,
             isMessageDismissed = false
         )
     }
 
     fun createFromSyncState(
         syncState: SyncState,
-        isForceMessage: Boolean = false
+        isForceShowMessage: Boolean = false
     ): SyncStateModel {
-        val message = formatSyncStateMessage(syncState)
-        val action = getButtonAction(syncState)
+        val message = formatMessage(syncState)
+        val action = getButtonAction(
+            syncState = syncState,
+            isForceShowMessage = isForceShowMessage
+        )
         val isInProgress = (
             syncState.progress == SyncProgressStatus.DOWNLOADING ||
                 syncState.progress == SyncProgressStatus.UPLOADING
@@ -50,18 +58,15 @@ class SyncStateCellModelFactory(
 
         return SyncStateModel(
             message = when {
-                isForceMessage || isInProgress -> message
-                isHideMessage -> StringUtils.EMPTY
+                isForceShowMessage || isInProgress -> message
+                isHideMessage -> EMPTY
                 else -> message
             },
+            detailsMessage = formatDetailedMessage(syncState),
             messageColor = getMessageColor(syncState),
-            isProgressVisible = false,
+            isSyncIconVisible = isInProgress,
             isMessageDismissed = false,
-            buttonAction = if (isForceMessage && syncState.status == SyncStatus.NO_CHANGES) {
-                ButtonAction.DISMISS
-            } else {
-                action
-            }
+            buttonAction = action
         )
     }
 
@@ -80,68 +85,116 @@ class SyncStateCellModelFactory(
         }
     }
 
-    private fun getButtonAction(state: SyncState): ButtonAction {
+    private fun getButtonAction(
+        syncState: SyncState,
+        isForceShowMessage: Boolean
+    ): ButtonAction {
         return when {
-            state.progress.isSyncInProgress() -> ButtonAction.NONE
-            state.status == SyncStatus.CONFLICT -> ButtonAction.RESOLVE
+            syncState.progress.isSyncInProgress() -> {
+                ButtonAction.NONE
+            }
+
+            isForceShowMessage && syncState.status == SyncStatus.NO_CHANGES -> {
+                ButtonAction.DISMISS
+            }
+
+            syncState.status == SyncStatus.ERROR ||
+                syncState.status == SyncStatus.AUTH_ERROR ||
+                syncState.status == SyncStatus.FILE_NOT_FOUND -> {
+                ButtonAction.DETAILS
+            }
+
+            syncState.status == SyncStatus.LOCAL_CHANGES_NO_NETWORK ||
+                syncState.status == SyncStatus.NO_NETWORK -> {
+                ButtonAction.DISMISS
+            }
+
+            syncState.status == SyncStatus.CONFLICT -> {
+                ButtonAction.RESOLVE
+            }
+
             else -> ButtonAction.NONE
         }
     }
 
-    private fun formatSyncStateMessage(
-        state: SyncState?
-    ): String {
-        return when {
-            state?.progress == SyncProgressStatus.SYNCING -> {
-                StringUtils.EMPTY
+    private fun formatDetailedMessage(state: SyncState): String {
+        return when (state.status) {
+            SyncStatus.AUTH_ERROR -> {
+                resourceProvider.getString(R.string.sync_auth_error_remove_message)
             }
 
-            state?.progress == SyncProgressStatus.DOWNLOADING -> {
-                resourceProvider.getString(R.string.downloading)
-            }
-
-            state?.progress == SyncProgressStatus.UPLOADING -> {
-                resourceProvider.getString(R.string.uploading)
-            }
-
-            state?.status == SyncStatus.NO_CHANGES -> {
-                resourceProvider.getString(R.string.file_is_up_to_date)
-            }
-
-            state?.status == SyncStatus.LOCAL_CHANGES -> {
-                resourceProvider.getString(R.string.not_synchronized)
-            }
-
-            state?.status == SyncStatus.REMOTE_CHANGES -> {
-                StringUtils.EMPTY
-            }
-
-            state?.status == SyncStatus.LOCAL_CHANGES_NO_NETWORK -> {
-                resourceProvider.getString(R.string.not_synchronized_and_offline_mode)
-            }
-
-            state?.status == SyncStatus.NO_NETWORK -> {
-                resourceProvider.getString(R.string.offline_mode)
-            }
-
-            state?.status == SyncStatus.ERROR -> {
-                resourceProvider.getString(R.string.sync_error_message)
-            }
-
-            state?.status == SyncStatus.AUTH_ERROR -> {
-                resourceProvider.getString(R.string.sync_auth_error_message)
-            }
-
-            state?.status == SyncStatus.FILE_NOT_FOUND -> {
+            SyncStatus.FILE_NOT_FOUND -> {
                 resourceProvider.getString(R.string.sync_file_not_found_message)
             }
 
-            state?.status == SyncStatus.CONFLICT -> {
-                resourceProvider.getString(R.string.sync_conflict_message)
+            SyncStatus.ERROR -> {
+                resourceProvider.getString(R.string.sync_error_message)
+            }
+
+            else -> EMPTY
+        }
+    }
+
+    private fun formatMessage(
+        state: SyncState
+    ): String {
+        return when {
+            state.progress == SyncProgressStatus.SYNCING -> {
+                EMPTY
+            }
+
+            state.progress == SyncProgressStatus.DOWNLOADING -> {
+                resourceProvider.getString(
+                    R.string.text_with_dots,
+                    resourceProvider.getString(R.string.downloading)
+                )
+            }
+
+            state.progress == SyncProgressStatus.UPLOADING -> {
+                resourceProvider.getString(
+                    R.string.text_with_dots,
+                    resourceProvider.getString(R.string.uploading)
+                )
+            }
+
+            state.status == SyncStatus.NO_CHANGES -> {
+                resourceProvider.getString(R.string.file_is_up_to_date)
+            }
+
+            state.status == SyncStatus.LOCAL_CHANGES -> {
+                resourceProvider.getString(R.string.not_synchronized)
+            }
+
+            state.status == SyncStatus.REMOTE_CHANGES -> {
+                EMPTY
+            }
+
+            state.status == SyncStatus.LOCAL_CHANGES_NO_NETWORK -> {
+                resourceProvider.getString(R.string.not_synchronized_and_offline_mode)
+            }
+
+            state.status == SyncStatus.NO_NETWORK -> {
+                resourceProvider.getString(R.string.offline_mode)
+            }
+
+            state.status == SyncStatus.ERROR -> {
+                resourceProvider.getString(R.string.sync_error)
+            }
+
+            state.status == SyncStatus.AUTH_ERROR -> {
+                resourceProvider.getString(R.string.sync_error)
+            }
+
+            state.status == SyncStatus.FILE_NOT_FOUND -> {
+                resourceProvider.getString(R.string.sync_error)
+            }
+
+            state.status == SyncStatus.CONFLICT -> {
+                resourceProvider.getString(R.string.conflict)
             }
 
             else -> {
-                StringUtils.EMPTY
+                EMPTY
             }
         }
     }

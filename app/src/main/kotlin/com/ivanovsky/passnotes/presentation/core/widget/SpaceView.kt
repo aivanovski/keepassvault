@@ -11,8 +11,8 @@ class SpaceView(
 
     var heightInPixels: Int = 0
         set(value) {
-            requestLayout()
             field = value
+            requestLayout()
         }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

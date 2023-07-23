@@ -21,7 +21,6 @@ import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
-import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
@@ -49,9 +48,11 @@ import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
+import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
@@ -80,7 +81,6 @@ class GroupsViewModel(
     private val observerBus: ObserverBus,
     private val settings: Settings,
     private val resourceProvider: ResourceProvider,
-    private val dispatchers: DispatcherProvider,
     private val cellModelFactory: GroupsCellModelFactory,
     private val cellViewModelFactory: GroupsCellViewModelFactory,
     private val selectionHolder: SelectionHolder,
@@ -96,6 +96,8 @@ class GroupsViewModel(
     val viewTypes = ViewModelTypes()
         .add(NoteCellViewModel::class, R.layout.cell_note)
         .add(GroupCellViewModel::class, R.layout.cell_group)
+        .add(SpaceCellViewModel::class, R.layout.cell_space)
+        .add(DividerCellViewModel::class, R.layout.cell_divider)
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
@@ -105,9 +107,11 @@ class GroupsViewModel(
         modelFactory = syncStateModelFactory,
         resourceProvider = resourceProvider,
         observerBus = observerBus,
-        initModel = syncStateModelFactory.createHiddenState()
+        initModel = syncStateInteractor.cache.getValue()
+            ?: syncStateModelFactory.createHiddenState()
     )
     val showResolveConflictDialogEvent = syncStateViewModel.showResolveConflictDialogEvent
+    val showMessageDialogEvent = syncStateViewModel.showMessageDialogEvent
 
     val optionPanelViewModel = cellViewModelFactory.createCellViewModel(
         model = cellModelFactory.createOptionPanelCellModel(OptionPanelState.HIDDEN),
@@ -187,8 +191,8 @@ class GroupsViewModel(
             screenTitle.value = resourceProvider.getString(R.string.groups)
         }
 
-        loadData()
         syncStateViewModel.start()
+        loadData()
     }
 
     fun loadData() {

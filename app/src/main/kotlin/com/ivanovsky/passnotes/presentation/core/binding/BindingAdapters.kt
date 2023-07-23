@@ -324,27 +324,27 @@ private fun buildShapeAppearanceModel(context: Context, shape: RoundedShape): Sh
         RoundedShape.ALL -> {
             builder.setAllCorners(
                 CornerFamily.ROUNDED,
-                context.resources.getDimension(R.dimen.half_margin)
+                context.resources.getDimension(R.dimen.card_corner_radius)
             )
         }
         RoundedShape.BOTTOM -> {
             builder.setBottomLeftCorner(
                 CornerFamily.ROUNDED,
-                context.resources.getDimension(R.dimen.half_margin)
+                context.resources.getDimension(R.dimen.card_corner_radius)
             )
             builder.setBottomRightCorner(
                 CornerFamily.ROUNDED,
-                context.resources.getDimension(R.dimen.half_margin)
+                context.resources.getDimension(R.dimen.card_corner_radius)
             )
         }
         RoundedShape.TOP -> {
             builder.setTopLeftCorner(
                 CornerFamily.ROUNDED,
-                context.resources.getDimension(R.dimen.half_margin)
+                context.resources.getDimension(R.dimen.card_corner_radius)
             )
             builder.setTopRightCorner(
                 CornerFamily.ROUNDED,
-                context.resources.getDimension(R.dimen.half_margin)
+                context.resources.getDimension(R.dimen.card_corner_radius)
             )
         }
         RoundedShape.NONE -> {

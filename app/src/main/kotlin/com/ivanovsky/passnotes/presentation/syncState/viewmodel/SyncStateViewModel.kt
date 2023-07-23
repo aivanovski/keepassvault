@@ -32,15 +32,16 @@ class SyncStateViewModel(
     ObserverBus.DatabaseSyncStateObserver,
     SyncStateCache.OnSyncStateChangeListener {
 
-    val isProgressVisible = MutableLiveData(initModel.isProgressVisible)
-    val isActionButtonVisible = MutableLiveData(false)
-    val isDismissButtonVisible = MutableLiveData(initModel.buttonAction == ButtonAction.DISMISS)
-    val isMessageVisible = MutableLiveData(initModel.message.isNotEmpty())
+    val isVisible = MutableLiveData(initModel.isVisibleInternal())
+    val isSyncIconVisible = MutableLiveData(initModel.isSyncIconVisible)
+    val isActionButtonVisible = MutableLiveData(initModel.isButtonVisibleInternal())
+    val isMessageVisible = MutableLiveData(initModel.isMessageVisibleInternal())
     val message = MutableLiveData(initModel.message)
     val messageColor = MutableLiveData(initModel.messageColor)
     val buttonText = MutableLiveData(EMPTY)
     val actionButtonTextColor = MutableLiveData(resourceProvider.getColor(R.color.primary))
     val showResolveConflictDialogEvent = SingleLiveEvent<FileDescriptor>()
+    val showMessageDialogEvent = SingleLiveEvent<String>()
 
     private lateinit var dbFile: FileDescriptor
     private var isCheckingStatus = false
@@ -79,11 +80,10 @@ class SyncStateViewModel(
 
     override fun setModel(newModel: SyncStateModel) {
         super.setModel(newModel)
-        isProgressVisible.value = newModel.isProgressVisible
-        isMessageVisible.value = newModel.message.isNotEmpty() && !newModel.isMessageDismissed
-        isActionButtonVisible.value = (newModel.buttonAction == ButtonAction.RESOLVE)
-        isDismissButtonVisible.value =
-            (newModel.buttonAction == ButtonAction.DISMISS) && !newModel.isMessageDismissed
+        isVisible.value = newModel.isVisibleInternal()
+        isSyncIconVisible.value = newModel.isSyncIconVisible
+        isMessageVisible.value = newModel.isMessageVisibleInternal()
+        isActionButtonVisible.value = newModel.isButtonVisibleInternal()
         buttonText.value = newModel.buttonAction.getActionButtonText()
         actionButtonTextColor.value = newModel.buttonAction.getActionButtonColor()
         message.value = newModel.message
@@ -109,7 +109,7 @@ class SyncStateViewModel(
             return
         }
 
-        loadData()
+        loadData(isForceShowMessage = false)
     }
 
     fun synchronize() {
@@ -117,10 +117,10 @@ class SyncStateViewModel(
             return
         }
 
-        loadData()
+        loadData(isForceShowMessage = true)
     }
 
-    private fun loadData() {
+    private fun loadData(isForceShowMessage: Boolean) {
         setModel(modelFactory.createLoadingState())
 
         viewModelScope.launch {
@@ -135,7 +135,7 @@ class SyncStateViewModel(
             dbFile = db.file
 
             val syncState = interactor.getSyncState(db.file)
-            onSyncDataLoaded(syncState, db)
+            onSyncDataLoaded(syncState, db, isForceShowMessage)
         }
     }
 
@@ -144,11 +144,13 @@ class SyncStateViewModel(
 
         when (model.buttonAction) {
             ButtonAction.RESOLVE -> onResolveConflictButtonClicked()
+            ButtonAction.DISMISS -> onDismissButtonClicked()
+            ButtonAction.DETAILS -> onDetailsButtonClicked()
             else -> throw IllegalStateException()
         }
     }
 
-    fun onDismissButtonClicked() {
+    private fun onDismissButtonClicked() {
         val model = getModel()
         if (!model.isMessageDismissed) {
             val newModel = model.copy(isMessageDismissed = true)
@@ -157,7 +159,20 @@ class SyncStateViewModel(
         }
     }
 
-    private fun onSyncDataLoaded(syncState: SyncState, db: EncryptedDatabase) {
+    private fun onDetailsButtonClicked() {
+        val message = getModel().detailsMessage
+        if (message.isEmpty()) {
+            return
+        }
+
+        showMessageDialogEvent.value = message
+    }
+
+    private fun onSyncDataLoaded(
+        syncState: SyncState,
+        db: EncryptedDatabase,
+        isForceShowMessage: Boolean
+    ) {
         val hasRemoteChanges = (syncState.status == SyncStatus.REMOTE_CHANGES)
         val hasLocalChanges = (syncState.status == SyncStatus.LOCAL_CHANGES)
         val isSyncInIdle = (syncState.progress == SyncProgressStatus.IDLE)
@@ -178,14 +193,17 @@ class SyncStateViewModel(
                 interactor.processSync(dbFile)
 
                 showSyncState(
-                    interactor.getSyncState(dbFile),
-                    isForceMessage = hasRemoteChanges
+                    syncState = interactor.getSyncState(dbFile),
+                    isForceShowMessage = (hasRemoteChanges || isForceShowMessage)
                 )
                 updateCachedModel()
                 isCheckingStatus = false
             }
         } else {
-            showSyncState(syncState)
+            showSyncState(
+                syncState = syncState,
+                isForceShowMessage = isForceShowMessage
+            )
             updateCachedModel()
             isCheckingStatus = false
             lastSyncState = syncState
@@ -198,16 +216,16 @@ class SyncStateViewModel(
 
     private fun showSyncState(
         syncState: SyncState,
-        isForceMessage: Boolean = false
+        isForceShowMessage: Boolean = false
     ) {
-        Timber.d("showSyncState: syncStatus=%s", syncState.status)
+        Timber.d("showSyncState: syncState=%s, isForceMessage=%s", syncState, isForceShowMessage)
 
         if (syncState.progress == SyncProgressStatus.SYNCING) {
             setModel(modelFactory.createLoadingState())
             return
         }
 
-        setModel(modelFactory.createFromSyncState(syncState, isForceMessage))
+        setModel(modelFactory.createFromSyncState(syncState, isForceShowMessage))
     }
 
     private fun updateCachedModel() {
@@ -220,6 +238,7 @@ class SyncStateViewModel(
 
     private fun ButtonAction.getActionButtonText(): String {
         return when (this) {
+            ButtonAction.DETAILS -> resourceProvider.getString(R.string.details)
             ButtonAction.DISMISS -> resourceProvider.getString(R.string.dismiss)
             ButtonAction.RESOLVE -> resourceProvider.getString(R.string.resolve)
             ButtonAction.NONE -> EMPTY
@@ -228,11 +247,27 @@ class SyncStateViewModel(
 
     private fun ButtonAction.getActionButtonColor(): Int {
         return when (this) {
-            ButtonAction.RESOLVE -> {
+            ButtonAction.RESOLVE, ButtonAction.DETAILS -> {
                 resourceProvider.getColor(R.color.error_text)
             }
 
-            else -> resourceProvider.getColor(R.color.primary)
+            else -> {
+                resourceProvider.getColor(R.color.primary)
+            }
         }
+    }
+
+    private fun SyncStateModel.isMessageVisibleInternal(): Boolean {
+        return message.isNotEmpty() && !isMessageDismissed
+    }
+
+    private fun SyncStateModel.isButtonVisibleInternal(): Boolean {
+        return buttonAction != ButtonAction.NONE && !isMessageDismissed
+    }
+
+    private fun SyncStateModel.isVisibleInternal(): Boolean {
+        return this.isSyncIconVisible ||
+            isButtonVisibleInternal() ||
+            isMessageVisibleInternal()
     }
 }

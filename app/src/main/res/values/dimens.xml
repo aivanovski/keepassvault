@@ -10,6 +10,9 @@
     <dimen name="group_margin">24dp</dimen>
     <dimen name="double_element_margin">32dp</dimen>
     <dimen name="huge_margin">72dp</dimen>
+    <dimen name="card_corner_radius">8dp</dimen>
+    <dimen name="card_corner_radius_large">16dp</dimen>
+    <dimen name="card_elevation">5dp</dimen>
 
     <dimen name="material_primary_text_size">16sp</dimen>
     <dimen name="material_secondary_text_size">14sp</dimen>

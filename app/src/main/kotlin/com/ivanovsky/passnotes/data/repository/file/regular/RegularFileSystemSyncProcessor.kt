@@ -17,12 +17,14 @@ class RegularFileSystemSyncProcessor(
     private val provider: RegularFileSystemProvider
 ) : FileSystemSyncProcessor {
 
-    override fun getLocallyModifiedFiles(): MutableList<FileDescriptor> {
-        return mutableListOf()
+    override fun getCachedFile(uid: String): FileDescriptor? {
+        return null
     }
 
     override fun getSyncProgressStatusForFile(uid: String): SyncProgressStatus =
         SyncProgressStatus.IDLE
+
+    override fun getRevision(uid: String): String? = null
 
     override fun getSyncStatusForFile(uid: String): SyncStatus {
         val getFileResult = provider.getFile(uid, FSOptions.noCache())

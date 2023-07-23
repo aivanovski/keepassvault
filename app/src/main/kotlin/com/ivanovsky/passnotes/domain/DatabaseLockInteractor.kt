@@ -4,20 +4,14 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.UiThread
-import com.ivanovsky.passnotes.data.repository.file.FSOptions
+import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
 import com.ivanovsky.passnotes.data.repository.settings.Settings
-import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.presentation.service.LockService
 import com.ivanovsky.passnotes.presentation.service.model.LockServiceCommand
 import com.ivanovsky.passnotes.presentation.service.model.ServiceState
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class DatabaseLockInteractor(
@@ -31,19 +25,12 @@ class DatabaseLockInteractor(
     private val activeScreens = CopyOnWriteArrayList<String>()
     private val isDatabaseOpened = AtomicBoolean(false)
     private val isTimerStarted = AtomicBoolean(false)
-    private val databaseFsOptions = AtomicReference<FSOptions>()
-    private val databaseStatus = AtomicReference<DatabaseStatus>()
-
-    private val job = Job()
-    private val scope = CoroutineScope(Dispatchers.IO + job)
 
     fun isDatabaseOpened(): Boolean = isDatabaseOpened.get()
 
-    fun onDatabaseOpened(fsOptions: FSOptions, status: DatabaseStatus) {
-        startServiceIfNeed()
+    fun onDatabaseOpened(db: EncryptedDatabase) {
+        startServiceIfNeed(db)
         isDatabaseOpened.set(true)
-        databaseFsOptions.set(fsOptions)
-        databaseStatus.set(status)
         if (settings.autoLockDelayInMs != -1) {
             startLockTimer()
         }
@@ -53,8 +40,6 @@ class DatabaseLockInteractor(
         cancelLockTimer()
         stopServiceIfNeed()
         isDatabaseOpened.set(false)
-        databaseFsOptions.set(null)
-        databaseStatus.set(null)
         clipboardInteractor.clearIfNeed()
     }
 
@@ -86,20 +71,19 @@ class DatabaseLockInteractor(
     fun stopServiceIfNeed() {
         if (LockService.getCurrentState() != ServiceState.STOPPED) {
             Timber.d("stopServiceIfNeed:")
-            scope.launch {
-                LockService.runCommand(context, LockServiceCommand.Stop)
-            }
+            LockService.runCommand(context, LockServiceCommand.Stop)
         }
     }
 
-    private fun startServiceIfNeed() {
-        val status = databaseStatus.get()
-        if (LockService.getCurrentState() == ServiceState.STOPPED &&
-            (settings.isLockNotificationVisible || status == DatabaseStatus.POSTPONED_CHANGES)
-        ) {
-            scope.launch {
-                LockService.runCommand(context, LockServiceCommand.ShowNotification)
-            }
+    private fun startServiceIfNeed(db: EncryptedDatabase) {
+        val shouldShowNotification =
+            (settings.isLockNotificationVisible || db.fsOptions.isPostponedSyncEnabled)
+        val shouldStart =
+            (LockService.getCurrentState() == ServiceState.STOPPED && shouldShowNotification)
+        Timber.d("startServiceIfNeed: shouldStart=%s", shouldStart)
+
+        if (shouldStart) {
+            LockService.runCommand(context, LockServiceCommand.ShowNotification)
         }
     }
 

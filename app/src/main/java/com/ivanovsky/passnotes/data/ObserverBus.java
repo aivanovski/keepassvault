@@ -7,8 +7,8 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus;
-import com.ivanovsky.passnotes.data.repository.file.FSOptions;
-import com.ivanovsky.passnotes.domain.entity.DatabaseStatus;
+import com.ivanovsky.passnotes.data.entity.SyncState;
+import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.util.ReflectionUtils;
 import java.util.List;
 import java.util.UUID;
@@ -48,11 +48,11 @@ public class ObserverBus {
     }
 
     public interface DatabaseOpenObserver extends Observer {
-        void onDatabaseOpened(@NonNull FSOptions fsOptions, @NonNull DatabaseStatus status);
+        void onDatabaseOpened(@NonNull EncryptedDatabase database);
     }
 
-    public interface DatabaseStatusObserver extends Observer {
-        void onDatabaseStatusChanged(@NonNull DatabaseStatus status);
+    public interface DatabaseSyncStateObserver extends Observer {
+        void onDatabaseSyncStateChanges(@NonNull SyncState syncState);
     }
 
     public interface SyncProgressStatusObserver extends Observer {
@@ -60,6 +60,14 @@ public class ObserverBus {
                 @NonNull FSAuthority fsAuthority,
                 @NonNull String uid,
                 @NonNull SyncProgressStatus status);
+    }
+
+    /**
+     * This observer is used to notify about changes in database data. It is used to update UI when
+     * database data is changed.
+     */
+    public interface DatabaseDataSetObserver extends Observer {
+        void onDatabaseDataSetChanged();
     }
 
     public ObserverBus() {
@@ -115,15 +123,9 @@ public class ObserverBus {
         }
     }
 
-    public void notifyDatabaseOpened(FSOptions fsOptions, DatabaseStatus status) {
+    public void notifyDatabaseOpened(EncryptedDatabase database) {
         for (DatabaseOpenObserver observer : filterObservers(DatabaseOpenObserver.class)) {
-            handler.post(() -> observer.onDatabaseOpened(fsOptions, status));
-        }
-    }
-
-    public void notifyDatabaseStatusChanged(DatabaseStatus status) {
-        for (DatabaseStatusObserver observer : filterObservers(DatabaseStatusObserver.class)) {
-            handler.post(() -> observer.onDatabaseStatusChanged(status));
+            handler.post(() -> observer.onDatabaseOpened(database));
         }
     }
 
@@ -134,6 +136,19 @@ public class ObserverBus {
         for (SyncProgressStatusObserver observer :
                 filterObservers(SyncProgressStatusObserver.class)) {
             handler.post(() -> observer.onSyncProgressStatusChanged(fsAuthority, uid, status));
+        }
+    }
+
+    public void notifyDatabaseDataSetChanged() {
+        for (DatabaseDataSetObserver observer : filterObservers(DatabaseDataSetObserver.class)) {
+            handler.post(observer::onDatabaseDataSetChanged);
+        }
+    }
+
+    public void notifyDatabaseSyncStateChanged(SyncState syncState) {
+        for (DatabaseSyncStateObserver observer :
+                filterObservers(DatabaseSyncStateObserver.class)) {
+            handler.post(() -> observer.onDatabaseSyncStateChanges(syncState));
         }
     }
 

@@ -9,13 +9,11 @@ import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
-import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.EncodePasswordWithBiometricUseCase
-import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
@@ -33,7 +31,6 @@ class GroupsInteractor(
     private val observerBus: ObserverBus,
     private val dispatchers: DispatcherProvider,
     private val lockUseCase: LockDatabaseUseCase,
-    private val getStatusUseCase: GetDatabaseStatusUseCase,
     private val addTemplatesUseCase: AddTemplatesUseCase,
     private val moveNoteUseCase: MoveNoteUseCase,
     private val moveGroupUseCae: MoveGroupUseCase,
@@ -160,9 +157,6 @@ class GroupsInteractor(
     fun lockDatabase() {
         lockUseCase.lockIfNeed()
     }
-
-    suspend fun getDatabaseStatus(): OperationResult<DatabaseStatus> =
-        getStatusUseCase.getDatabaseStatus()
 
     suspend fun addTemplates(): OperationResult<Boolean> =
         addTemplatesUseCase.addTemplates()

@@ -9,11 +9,13 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.saf.SAFHelper
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.EXTERNAL_STORAGE
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.FAKE
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.GIT
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.PRIVATE_STORAGE
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.SAF_STORAGE
@@ -24,6 +26,7 @@ import kotlinx.coroutines.withContext
 class StorageListInteractor(
     private val resourceProvider: ResourceProvider,
     private val fileSystemResolver: FileSystemResolver,
+    private val settings: Settings,
     private val safHelper: SAFHelper,
     private val dispatchers: DispatcherProvider
 ) {
@@ -63,6 +66,10 @@ class StorageListInteractor(
 
             options.add(createWebDavOption())
             options.add(createGitOption())
+
+            if (settings.testToggles?.isFakeFileSystemEnabled == true) {
+                options.add(createFakeFsOption())
+            }
 
             OperationResult.success(options)
         }
@@ -107,6 +114,14 @@ class StorageListInteractor(
         )
     }
 
+    private fun createFakeFsOption(): StorageOption {
+        return StorageOption(
+            FAKE,
+            resourceProvider.getString(R.string.fake_file_system),
+            createFakeFsStorageDir()
+        )
+    }
+
     private fun createSafStorageDir(): FileDescriptor {
         return FileDescriptor(
             fsAuthority = FSAuthority.SAF_FS_AUTHORITY,
@@ -136,6 +151,19 @@ class StorageListInteractor(
             fsAuthority = FSAuthority(
                 credentials = null,
                 type = FSType.GIT
+            ),
+            path = ROOT_PATH,
+            uid = ROOT_PATH,
+            name = ROOT_PATH,
+            isDirectory = true,
+            isRoot = true
+        )
+
+    private fun createFakeFsStorageDir(): FileDescriptor =
+        FileDescriptor(
+            fsAuthority = FSAuthority(
+                credentials = null,
+                type = FSType.FAKE
             ),
             path = ROOT_PATH,
             uid = ROOT_PATH,

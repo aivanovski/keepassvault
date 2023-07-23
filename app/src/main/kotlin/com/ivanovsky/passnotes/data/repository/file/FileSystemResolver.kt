@@ -27,7 +27,8 @@ class FileSystemResolver(
     private val gitRootDao: GitRootDao,
     private val fileHelper: FileHelper,
     private val observerBus: ObserverBus,
-    private val httpClient: OkHttpClient
+    private val httpClient: OkHttpClient,
+    private val factories: Map<FSType, Factory> = emptyMap()
 ) {
 
     private val providers: MutableMap<FSAuthority, FileSystemProvider> = HashMap()
@@ -55,6 +56,12 @@ class FileSystemResolver(
     }
 
     private fun instantiateProvider(fsAuthority: FSAuthority): FileSystemProvider {
+        // Factory is used to instantiate FileSystemProvider for test usage
+        val factory = factories[fsAuthority.type]
+        if (factory != null) {
+            return factory.createProvider(fsAuthority)
+        }
+
         return when (fsAuthority.type) {
             FSType.INTERNAL_STORAGE -> {
                 RegularFileSystemProvider(context, FSAuthority.INTERNAL_FS_AUTHORITY)
@@ -92,7 +99,11 @@ class FileSystemResolver(
                     fsAuthority
                 )
             }
-            FSType.UNDEFINED -> throw IllegalStateException()
+            else -> throw IllegalStateException()
         }
+    }
+
+    fun interface Factory {
+        fun createProvider(fsAuthority: FSAuthority): FileSystemProvider
     }
 }

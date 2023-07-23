@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.syncState.viewmodel.SyncStateViewModel" />
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:visible="@{viewModel.isVisible}"
+        app:cardCornerRadius="@dimen/card_corner_radius_large"
+        app:cardElevation="@dimen/card_elevation">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/light_grey"
+            android:minHeight="48dp">
+
+            <ImageView
+                android:id="@+id/syncIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/element_margin"
+                android:src="@drawable/ic_sync_24dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/primary_text"
+                app:visible="@{viewModel.isSyncIconVisible}" />
+
+            <TextView
+                android:id="@+id/message"
+                style="@style/Material.PrimaryText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/element_margin"
+                android:layout_marginVertical="@dimen/small_margin"
+                android:gravity="center"
+                android:text="@{viewModel.message}"
+                android:textColor="@{viewModel.messageColor}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/actionButton"
+                app:layout_constraintStart_toEndOf="@id/syncIcon"
+                app:layout_constraintTop_toTopOf="parent"
+                app:visible="@{viewModel.isMessageVisible}"
+                tools:text="Message" />
+
+            <Button
+                android:id="@+id/actionButton"
+                style="@style/Material.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/element_margin"
+                android:onClick="@{() -> viewModel.onActionButtonClicked() }"
+                android:text="@{viewModel.buttonText}"
+                android:textColor="@{viewModel.actionButtonTextColor}"
+                android:textSize="@dimen/material_secondary_text_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:visible="@{viewModel.isActionButtonVisible}"
+                tools:text="Action"
+                tools:visibility="visible" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+</layout>

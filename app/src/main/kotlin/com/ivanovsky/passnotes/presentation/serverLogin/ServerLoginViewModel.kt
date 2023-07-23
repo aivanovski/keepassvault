@@ -115,6 +115,7 @@ class ServerLoginViewModel(
         val credentials = when (args.fsAuthority.type) {
             FSType.WEBDAV -> interactor.getTestWebDavCredentials()
             FSType.GIT -> interactor.getTestGitCredentials()
+            FSType.FAKE -> interactor.getTestFakeCredentials()
             else -> null
         }
 

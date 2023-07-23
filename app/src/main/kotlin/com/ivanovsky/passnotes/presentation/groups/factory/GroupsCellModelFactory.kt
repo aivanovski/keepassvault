@@ -7,22 +7,26 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.presentation.core.factory.CellModelFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
+import com.ivanovsky.passnotes.presentation.core.model.DividerCellModel
 import com.ivanovsky.passnotes.presentation.core.model.GroupCellModel
 import com.ivanovsky.passnotes.presentation.core.model.NoteCellModel
 import com.ivanovsky.passnotes.presentation.core.model.OptionPanelCellModel
+import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.OptionPanelState
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.OptionPanelState.HIDDEN
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.OptionPanelState.PASTE
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.OptionPanelState.SAVE_AUTOFILL_DATA
-import com.ivanovsky.passnotes.util.StringUtils
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class GroupsCellModelFactory(
     private val resourceProvider: ResourceProvider
 ) : CellModelFactory<List<EncryptedDatabaseEntry>> {
 
-    override fun createCellModels(data: List<EncryptedDatabaseEntry>): List<BaseCellModel> {
-        return data.map { item ->
-            when (item) {
+    override fun createCellModels(items: List<EncryptedDatabaseEntry>): List<BaseCellModel> {
+        val result = mutableListOf<BaseCellModel>()
+
+        for (item in items) {
+            val model = when (item) {
                 is Group -> {
                     GroupCellModel(
                         id = item.uid.toString(),
@@ -31,15 +35,24 @@ class GroupsCellModelFactory(
                         childGroupCount = item.groupCount
                     )
                 }
+
                 is Note -> {
                     NoteCellModel(
-                        id = item.uid?.toString() ?: "",
+                        id = item.uid?.toString() ?: EMPTY,
                         note = item
                     )
                 }
-                else -> throw IllegalStateException()
+
+                else -> throw IllegalArgumentException()
             }
+
+            result.add(model)
+            result.add(createDividerCell())
         }
+
+        result.add(createSpaceCell())
+
+        return result
     }
 
     fun createOptionPanelCellModel(state: OptionPanelState): OptionPanelCellModel {
@@ -48,9 +61,10 @@ class GroupsCellModelFactory(
                 id = OPTION_PANEL_CELL_ID,
                 positiveText = resourceProvider.getString(R.string.paste),
                 negativeText = resourceProvider.getString(R.string.cancel),
-                message = StringUtils.EMPTY,
+                message = EMPTY,
                 isVisible = true
             )
+
             SAVE_AUTOFILL_DATA -> OptionPanelCellModel(
                 id = OPTION_PANEL_CELL_ID,
                 positiveText = resourceProvider.getString(R.string.yes),
@@ -58,15 +72,26 @@ class GroupsCellModelFactory(
                 message = resourceProvider.getString(R.string.autofill_save_note_message),
                 isVisible = true
             )
+
             HIDDEN -> OptionPanelCellModel(
                 id = OPTION_PANEL_CELL_ID,
-                positiveText = StringUtils.EMPTY,
-                negativeText = StringUtils.EMPTY,
-                message = StringUtils.EMPTY,
+                positiveText = EMPTY,
+                negativeText = EMPTY,
+                message = EMPTY,
                 isVisible = false
             )
         }
     }
+
+    private fun createDividerCell(): DividerCellModel =
+        DividerCellModel(
+            color = resourceProvider.getColor(R.color.divider),
+            paddingStart = null,
+            paddingEnd = null
+        )
+
+    private fun createSpaceCell(): SpaceCellModel =
+        SpaceCellModel(R.dimen.huge_margin)
 
     companion object {
         private const val OPTION_PANEL_CELL_ID = "optionPanelCellId"

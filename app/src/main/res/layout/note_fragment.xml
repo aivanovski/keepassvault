@@ -32,35 +32,18 @@
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/mainContentLayout"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@id/bottomPanelLayout"
             app:layout_constraintTop_toBottomOf="@id/errorPanelView"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}">
-
-            <include
-                android:id="@+id/statusView"
-                layout="@layout/cell_message"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                app:viewModel="@{viewModel.statusViewModel}" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:orientation="vertical"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/statusView"
-                app:viewModels="@{viewModel.cellViewModels}"
-                app:viewTypes="@{viewModel.viewTypes}" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            app:viewModels="@{viewModel.cellViewModels}"
+            app:viewTypes="@{viewModel.viewTypes}" />
 
         <androidx.cardview.widget.CardView
             android:id="@+id/bottomPanelLayout"
@@ -69,7 +52,7 @@
             app:cardCornerRadius="0dp"
             app:cardElevation="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/mainContentLayout"
+            app:layout_constraintTop_toBottomOf="@id/recyclerView"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}">
 
@@ -97,7 +80,7 @@
             app:layout_constraintBottom_toTopOf="@id/bottomPanelLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_edit_white_24dp"
-            app:visible="@{viewModel.isFabButtonVisible}"/>
+            app:visible="@{viewModel.isFabButtonVisible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

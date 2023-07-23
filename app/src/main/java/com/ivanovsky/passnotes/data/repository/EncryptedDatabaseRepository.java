@@ -31,5 +31,8 @@ public interface EncryptedDatabaseRepository {
             boolean addTemplates);
 
     @NonNull
+    OperationResult<Boolean> reload();
+
+    @NonNull
     OperationResult<Boolean> close();
 }

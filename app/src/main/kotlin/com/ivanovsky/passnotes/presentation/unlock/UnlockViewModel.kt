@@ -10,14 +10,11 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FSAuthority
-import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
@@ -33,6 +30,7 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.extensions.getFileDescriptor
 import com.ivanovsky.passnotes.extensions.getKeyFileDescriptor
+import com.ivanovsky.passnotes.extensions.getLoginType
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
@@ -51,7 +49,6 @@ import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
-import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
@@ -91,7 +88,7 @@ class UnlockViewModel(
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
     val fileCellViewModels = MutableLiveData<List<BaseCellViewModel>>()
     val isFabButtonVisible = MutableLiveData(false)
-    val showResolveConflictDialog = SingleLiveEvent<SyncConflictInfo>()
+    val showResolveConflictDialog = SingleLiveEvent<FileDescriptor>()
     val isAddKeyButtonVisible = MutableLiveData(false)
     val showBiometricUnlockDialog = SingleLiveEvent<BiometricDecoder>()
     val showFileActionsDialog = SingleLiveEvent<UsedFile>()
@@ -192,25 +189,6 @@ class UnlockViewModel(
             }
             ErrorPanelButtonAction.AUTHORISATION -> {
                 onLoginButtonClicked()
-            }
-        }
-    }
-
-    fun onResolveConflictConfirmed(resolutionStrategy: ConflictResolutionStrategy) {
-        val selectFile = selectedUsedFile?.getFileDescriptor() ?: return
-
-        setScreenState(ScreenState.loading())
-
-        viewModelScope.launch {
-            val resolvedConflict = interactor.resolveConflict(selectFile, resolutionStrategy)
-
-            if (resolvedConflict.isSucceeded) {
-                loadData(
-                    isResetSelection = false,
-                    isShowKeyboard = false
-                )
-            } else {
-                setErrorPanelState(resolvedConflict.error)
             }
         }
     }
@@ -359,6 +337,7 @@ class UnlockViewModel(
         val selectedFile = recentlyUsedFiles?.firstOrNull { it.id == usedFileId } ?: return
 
         setSelectedFile(selectedFile)
+        setScreenState(ScreenState.data())
     }
 
     private fun onDatabaseFileLongClicked(usedFileId: Int) {
@@ -608,6 +587,11 @@ class UnlockViewModel(
         val models = modelFactory.createFileModels(files, selectedFile, usedFileIdToSyncStateMap)
         fileCellViewModels.value = viewModelFactory.createCellViewModels(models, eventProvider)
 
+        val currentScreenState = screenState.value ?: return
+        if (currentScreenState.isDisplayingLoading) {
+            return
+        }
+
         when (syncState.status) {
             SyncStatus.FILE_NOT_FOUND -> {
                 setScreenState(
@@ -641,13 +625,16 @@ class UnlockViewModel(
             SyncStatus.AUTH_ERROR -> {
                 setScreenState(
                     ScreenState.dataWithError(
-                        errorText = resourceProvider.getString(R.string.sync_auth_error_message),
+                        errorText = resourceProvider.getString(
+                            R.string.sync_auth_error_login_message
+                        ),
                         errorButtonText = resourceProvider.getString(R.string.login)
                     )
                 )
                 errorPanelButtonAction = ErrorPanelButtonAction.AUTHORISATION
             }
             else -> {
+                setScreenState(ScreenState.data())
                 errorPanelButtonAction = null
             }
         }
@@ -655,19 +642,8 @@ class UnlockViewModel(
 
     private fun onResolveConflictButtonClicked() {
         val selectedFile = selectedUsedFile?.getFileDescriptor() ?: return
-        val lastState = screenState.value ?: return
 
-        setScreenState(ScreenState.loading())
-
-        viewModelScope.launch {
-            val conflict = interactor.getSyncConflictInfo(selectedFile)
-            if (conflict.isSucceeded) {
-                showResolveConflictDialog.call(conflict.obj)
-                setScreenState(lastState)
-            } else {
-                setErrorPanelState(conflict.error)
-            }
-        }
+        showResolveConflictDialog.call(selectedFile)
     }
 
     private fun onRemoveSelectedFileButtonClicked() {
@@ -707,11 +683,8 @@ class UnlockViewModel(
             Screens.ServerLoginScreen(
                 ServerLoginArgs(
                     fsAuthority = oldFsAuthority,
-                    loginType = when (selectedFile.fsAuthority.type) {
-                        FSType.WEBDAV -> LoginType.USERNAME_PASSWORD
-                        FSType.GIT -> LoginType.GIT
-                        else -> throw IllegalStateException()
-                    }
+                    loginType = selectedFile.fsAuthority.type.getLoginType()
+                        ?: throw IllegalStateException()
                 )
             )
         )

@@ -7,8 +7,7 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
-import com.ivanovsky.passnotes.data.repository.file.FSOptions
-import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
+import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.AboutScreen
@@ -54,7 +53,7 @@ class NavigationMenuViewModel(
         cellViewModels.value = buildCellViewModels()
     }
 
-    override fun onDatabaseOpened(fsOptions: FSOptions, status: DatabaseStatus) {
+    override fun onDatabaseOpened(database: EncryptedDatabase) {
         isDbOpened = true
         cellViewModels.value = buildCellViewModels()
     }

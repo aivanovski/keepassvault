@@ -7,9 +7,7 @@ import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.ClipboardInteractor
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
-import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.usecases.CheckNoteAutofillDataUseCase
-import com.ivanovsky.passnotes.domain.usecases.GetDatabaseStatusUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
@@ -25,7 +23,6 @@ import kotlinx.coroutines.withContext
 class NoteInteractor(
     private val clipboardInteractor: ClipboardInteractor,
     private val lockUseCase: LockDatabaseUseCase,
-    private val getStatusUseCase: GetDatabaseStatusUseCase,
     private val getDbUseCase: GetDatabaseUseCase,
     private val autofillUseCase: UpdateNoteWithAutofillDataUseCase,
     private val checkNoteAutofillDataUseCase: CheckNoteAutofillDataUseCase,
@@ -79,9 +76,6 @@ class NoteInteractor(
     fun lockDatabase() {
         lockUseCase.lockIfNeed()
     }
-
-    suspend fun getDatabaseStatus(): OperationResult<DatabaseStatus> =
-        getStatusUseCase.getDatabaseStatus()
 
     suspend fun updateNoteWithAutofillData(
         note: Note,

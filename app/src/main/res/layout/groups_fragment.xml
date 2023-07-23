@@ -32,31 +32,20 @@
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <include
-            android:id="@+id/statusView"
-            layout="@layout/cell_message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/errorPanelView"
-            app:viewModel="@{viewModel.statusViewModel}" />
-
-        <include
             android:id="@+id/optionPanelView"
             layout="@layout/cell_option_panel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/statusView"
+            app:layout_constraintTop_toBottomOf="@id/errorPanelView"
             app:viewModel="@{viewModel.optionPanelViewModel}" />
 
-        <com.ivanovsky.passnotes.presentation.core.widget.DecoratedRecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:orientation="vertical"
-            app:isShowDividers="true"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/optionPanelView"
@@ -77,6 +66,19 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_add_white_24dp"
             app:visible="@{viewModel.isFabButtonVisible}" />
+
+        <include
+            android:id="@+id/syncStateView"
+            layout="@layout/cell_sync_state"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:layout_marginBottom="@dimen/element_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/fab"
+            app:layout_constraintStart_toStartOf="parent"
+            app:viewModel="@{viewModel.syncStateViewModel}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

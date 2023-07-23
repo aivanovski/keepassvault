@@ -44,8 +44,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import timber.log.Timber;
@@ -77,15 +75,14 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
         this.statuses = new ConcurrentHashMap<>();
     }
 
-    @NonNull
+    @Nullable
     @Override
-    public List<FileDescriptor> getLocallyModifiedFiles() {
-        List<FileDescriptor> result = new ArrayList<>();
+    public FileDescriptor getCachedFile(@NonNull String uid) {
+        FileDescriptor result = null;
 
-        List<RemoteFile> remoteFiles = cache.getLocallyModifiedFiles();
-        for (RemoteFile file : remoteFiles) {
-            FileDescriptor descriptor = RemoteFileExtKt.toFileDescriptor(file);
-            result.add(descriptor);
+        RemoteFile file = cache.getByUid(uid);
+        if (file != null) {
+            result = RemoteFileExtKt.toFileDescriptor(file);
         }
 
         return result;
@@ -162,6 +159,19 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
         } else {
             return SyncStatus.NO_CHANGES;
         }
+    }
+
+    @Nullable
+    @Override
+    public String getRevision(@NonNull String uid) {
+        String revision = null;
+
+        RemoteFile file = cache.getByUid(uid);
+        if (file != null) {
+            revision = file.getRevision();
+        }
+
+        return revision;
     }
 
     @NonNull
@@ -441,10 +451,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
     private void updateProgressStatusForFile(String uid, SyncProgressStatus status) {
         Timber.d("updateStatusForFile: status=%s, uid=%s", status, uid);
-        SyncProgressStatus oldStatus =
-                progressStatuses.containsKey(uid)
-                        ? progressStatuses.get(uid)
-                        : SyncProgressStatus.IDLE;
+        SyncProgressStatus oldStatus = progressStatuses.getOrDefault(uid, SyncProgressStatus.IDLE);
 
         if (status != oldStatus) {
             observerBus.notifySyncProgressStatusChanged(fsAuthority, uid, status);

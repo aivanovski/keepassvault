@@ -51,7 +51,6 @@
     </style>
 
     <style name="Material.TextButton" parent="@style/Widget.MaterialComponents.Button.TextButton">
-        <item name="android:textSize">@dimen/material_primary_text_size</item>
     </style>
 
     <style name="Material.OutlinedButton" parent="@style/Widget.MaterialComponents.Button.OutlinedButton"></style>

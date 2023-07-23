@@ -7,6 +7,10 @@ import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
+fun FileDescriptor.isSameFile(other: FileDescriptor): Boolean {
+    return fsAuthority == other.fsAuthority && uid == other.uid
+}
+
 fun FileDescriptor.toUsedFile(
     addedTime: Long,
     lastAccessTime: Long? = null,
@@ -38,6 +42,10 @@ fun FileDescriptor.formatReadablePath(resourceProvider: ResourceProvider): Strin
             path
         }
         FSType.GIT -> {
+            val url = fsAuthority.credentials?.formatReadableUrl() ?: EMPTY
+            url + path
+        }
+        FSType.FAKE -> {
             val url = fsAuthority.credentials?.formatReadableUrl() ?: EMPTY
             url + path
         }

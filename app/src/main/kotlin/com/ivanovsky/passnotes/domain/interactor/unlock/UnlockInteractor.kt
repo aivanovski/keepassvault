@@ -4,18 +4,19 @@ import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
 import com.ivanovsky.passnotes.data.crypto.entity.BiometricData
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FSAuthority
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_RECORD_IS_ALREADY_EXISTS
-import com.ivanovsky.passnotes.data.entity.OperationError.Type.NETWORK_IO_ERROR
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_SYNCHRONIZATION_TAKES_TOO_LONG
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
+import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
+import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
-import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
@@ -35,7 +36,11 @@ import com.ivanovsky.passnotes.domain.usecases.GetUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.domain.usecases.test.GetTestPasswordUseCase
+import com.ivanovsky.passnotes.extensions.isSyncInProgress
+import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
+import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
 class UnlockInteractor(
@@ -72,9 +77,6 @@ class UnlockInteractor(
     suspend fun removeFromUsedFiles(file: FileDescriptor): OperationResult<Boolean> =
         removeFileUseCase.removeUsedFile(file.uid, file.fsAuthority)
 
-    suspend fun getSyncConflictInfo(file: FileDescriptor): OperationResult<SyncConflictInfo> =
-        syncUseCases.getSyncConflictInfo(file)
-
     suspend fun getSyncState(file: FileDescriptor): SyncState =
         syncUseCases.getSyncState(file)
 
@@ -89,36 +91,29 @@ class UnlockInteractor(
         file: FileDescriptor
     ): OperationResult<Boolean> =
         withContext(dispatchers.IO) {
-            val syncState = syncUseCases.getSyncState(file)
-
-            if (syncState.status == SyncStatus.LOCAL_CHANGES ||
-                syncState.status == SyncStatus.REMOTE_CHANGES
-            ) {
-                val syncResult = syncUseCases.processSync(file)
-                if (syncResult.isFailed && syncResult.error.type != NETWORK_IO_ERROR) {
-                    return@withContext syncResult.takeError()
-                }
+            val awaitResult = awaitIfSyncInProgress(file)
+            if (awaitResult.isFailed) {
+                return@withContext awaitResult.mapError()
             }
 
-            val fsOptions = FSOptions.DEFAULT.copy(
-                isPostponedSyncEnabled = settings.isPostponedSyncEnabled
-            )
-            val open = dbRepo.open(KeepassImplementation.KOTPASS, key, file, fsOptions)
-
-            val result = if (shouldOpenDbFromCache(open)) {
-                val cachedDb = dbRepo.open(
+            val result = if (canBeOpenedFromCache(file)) {
+                dbRepo.open(
                     KeepassImplementation.KOTPASS,
                     key,
                     file,
                     FSOptions.CACHE_ONLY
                 )
-                if (cachedDb.isSucceededOrDeferred) {
-                    cachedDb
-                } else {
-                    open
-                }
             } else {
-                open
+                val fsOptions = FSOptions.DEFAULT.copy(
+                    isPostponedSyncEnabled = settings.isPostponedSyncEnabled
+                )
+
+                dbRepo.open(
+                    KeepassImplementation.KOTPASS,
+                    key,
+                    file,
+                    fsOptions
+                )
             }
 
             if (result.isSucceededOrDeferred) {
@@ -127,6 +122,45 @@ class UnlockInteractor(
 
             result.takeStatusWith(true)
         }
+
+    private suspend fun awaitIfSyncInProgress(
+        file: FileDescriptor
+    ): OperationResult<Unit> =
+        withContext(dispatchers.IO) {
+            var syncProgress: SyncProgressStatus? = null
+            var totalAwaitTime = 0L
+
+            while (syncProgress == null || syncProgress.isSyncInProgress()) {
+                syncProgress = syncUseCases.getSyncProgressStatus(file)
+
+                if (syncProgress.isSyncInProgress()) {
+                    delay(SYNC_AWAIT_STEP)
+                    totalAwaitTime += SYNC_AWAIT_STEP
+
+                    if (totalAwaitTime >= SYNC_AWAIT_TIMEOUT) {
+                        return@withContext OperationResult.error(
+                            newGenericError(MESSAGE_SYNCHRONIZATION_TAKES_TOO_LONG)
+                        )
+                    }
+                }
+            }
+
+            OperationResult.success(Unit)
+        }
+
+    private fun canBeOpenedFromCache(file: FileDescriptor): Boolean {
+        val fsType = file.fsAuthority.type
+        if (fsType == FSType.EXTERNAL_STORAGE ||
+            fsType == FSType.INTERNAL_STORAGE ||
+            fsType == FSType.SAF
+        ) {
+            return false
+        }
+
+        val fsProvider = fileSystemResolver.resolveProvider(file.fsAuthority)
+        val cachedFile = fsProvider.syncProcessor.getCachedFile(file.uid)
+        return cachedFile != null
+    }
 
     private fun shouldOpenDbFromCache(openResult: OperationResult<EncryptedDatabase>): Boolean {
         if (openResult.isSucceededOrDeferred) {
@@ -157,6 +191,7 @@ class UnlockInteractor(
                         keyFileName = null
                     )
                 }
+
                 is FileKeepassKey -> {
                     usedFile.copy(
                         lastAccessTime = System.currentTimeMillis(),
@@ -167,6 +202,7 @@ class UnlockInteractor(
                         keyFileName = key.file.name
                     )
                 }
+
                 else -> throw IllegalStateException()
             }
 
@@ -266,4 +302,9 @@ class UnlockInteractor(
         filename: String
     ): String? =
         getTestPasswordUseCase.getTestPasswordForFile(filename)
+
+    companion object {
+        private val SYNC_AWAIT_TIMEOUT = TimeUnit.SECONDS.toMillis(15L)
+        private val SYNC_AWAIT_STEP = TimeUnit.MILLISECONDS.toMillis(200L)
+    }
 }

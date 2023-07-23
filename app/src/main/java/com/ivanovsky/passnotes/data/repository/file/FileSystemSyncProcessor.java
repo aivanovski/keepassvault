@@ -8,18 +8,20 @@ import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo;
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus;
 import com.ivanovsky.passnotes.data.entity.SyncStatus;
-import java.util.List;
 
 public interface FileSystemSyncProcessor {
 
-    @NonNull
-    List<FileDescriptor> getLocallyModifiedFiles();
+    @Nullable
+    FileDescriptor getCachedFile(@NonNull String uid);
 
     @NonNull
     SyncProgressStatus getSyncProgressStatusForFile(@NonNull String uid);
 
     @NonNull
     SyncStatus getSyncStatusForFile(@NonNull String uid);
+
+    @Nullable
+    String getRevision(@NonNull String uid);
 
     @NonNull
     OperationResult<SyncConflictInfo> getSyncConflictForFile(@NonNull String uid);

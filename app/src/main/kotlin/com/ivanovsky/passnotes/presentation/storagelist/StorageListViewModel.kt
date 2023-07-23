@@ -34,6 +34,7 @@ import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellM
 import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.EXTERNAL_STORAGE
+import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.FAKE
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.GIT
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.PRIVATE_STORAGE
 import com.ivanovsky.passnotes.presentation.storagelist.model.StorageOptionType.SAF_STORAGE
@@ -186,6 +187,12 @@ class StorageListViewModel(
                     fsAuthority = fsAuthority
                 )
             }
+            FSType.FAKE -> {
+                ServerLoginArgs(
+                    loginType = LoginType.USERNAME_PASSWORD,
+                    fsAuthority = fsAuthority
+                )
+            }
             else -> throw IllegalArgumentException()
         }
 
@@ -231,7 +238,7 @@ class StorageListViewModel(
                 onDeviceStorageSelected(selectedOption.root, selectedOption.type)
             }
             SAF_STORAGE -> onSafStorageSelected()
-            WEBDAV, GIT -> onRemoteFileStorageSelected(selectedOption.root)
+            WEBDAV, GIT, FAKE -> onRemoteFileStorageSelected(selectedOption.root)
         }
     }
 

@@ -23,13 +23,14 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
-import com.ivanovsky.passnotes.domain.entity.DatabaseStatus
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
+import com.ivanovsky.passnotes.domain.interactor.syncState.SyncStateInteractor
+import com.ivanovsky.passnotes.extensions.isRequireSynchronization
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
@@ -46,12 +47,12 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.core.factory.DatabaseStatusCellModelFactory
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
+import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
-import com.ivanovsky.passnotes.presentation.core.viewmodel.MessageCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
@@ -59,6 +60,8 @@ import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
+import com.ivanovsky.passnotes.presentation.syncState.factory.SyncStateCellModelFactory
+import com.ivanovsky.passnotes.presentation.syncState.viewmodel.SyncStateViewModel
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toUUID
@@ -70,6 +73,8 @@ import org.koin.core.parameter.parametersOf
 
 class GroupsViewModel(
     private val interactor: GroupsInteractor,
+    syncStateInteractor: SyncStateInteractor,
+    syncStateModelFactory: SyncStateCellModelFactory,
     private val biometricInteractor: BiometricInteractor,
     private val errorInteractor: ErrorInteractor,
     lockInteractor: DatabaseLockInteractor,
@@ -77,7 +82,6 @@ class GroupsViewModel(
     private val settings: Settings,
     private val resourceProvider: ResourceProvider,
     private val cellModelFactory: GroupsCellModelFactory,
-    private val statusCellModelFactory: DatabaseStatusCellModelFactory,
     private val cellViewModelFactory: GroupsCellViewModelFactory,
     private val selectionHolder: SelectionHolder,
     private val router: Router,
@@ -86,20 +90,28 @@ class GroupsViewModel(
     ObserverBus.GroupDataSetObserver,
     ObserverBus.NoteDataSetChanged,
     ObserverBus.NoteContentObserver,
-    ObserverBus.DatabaseStatusObserver,
+    ObserverBus.DatabaseDataSetObserver,
     OnSettingsChangeListener {
 
     val viewTypes = ViewModelTypes()
         .add(NoteCellViewModel::class, R.layout.cell_note)
         .add(GroupCellViewModel::class, R.layout.cell_group)
+        .add(SpaceCellViewModel::class, R.layout.cell_space)
+        .add(DividerCellViewModel::class, R.layout.cell_divider)
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
 
-    val statusViewModel = cellViewModelFactory.createCellViewModel(
-        model = statusCellModelFactory.createDefaultStatusCellModel(),
-        eventProvider = eventProvider
-    ) as MessageCellViewModel
+    val syncStateViewModel = SyncStateViewModel(
+        interactor = syncStateInteractor,
+        modelFactory = syncStateModelFactory,
+        resourceProvider = resourceProvider,
+        observerBus = observerBus,
+        initModel = syncStateInteractor.cache.getValue()
+            ?: syncStateModelFactory.createHiddenState()
+    )
+    val showResolveConflictDialogEvent = syncStateViewModel.showResolveConflictDialogEvent
+    val showMessageDialogEvent = syncStateViewModel.showMessageDialogEvent
 
     val optionPanelViewModel = cellViewModelFactory.createCellViewModel(
         model = cellModelFactory.createOptionPanelCellModel(OptionPanelState.HIDDEN),
@@ -131,12 +143,18 @@ class GroupsViewModel(
         observerBus.register(this)
         settings.register(this)
         subscribeToEvents()
+        syncStateViewModel.onAttach()
+
+        if (groupUid == null) {
+            syncStateInteractor.cache.setValue(null)
+        }
     }
 
     override fun onCleared() {
         super.onCleared()
         observerBus.unregister(this)
         settings.register(this)
+        syncStateViewModel.onDetach()
     }
 
     override fun onGroupDataSetChanged() {
@@ -155,10 +173,6 @@ class GroupsViewModel(
         }
     }
 
-    override fun onDatabaseStatusChanged(status: DatabaseStatus) {
-        updateStatusViewModel(status)
-    }
-
     override fun onSettingsChanged(pref: SettingsImpl.Pref) {
         if (pref == SettingsImpl.Pref.SORT_TYPE ||
             pref == SettingsImpl.Pref.SORT_DIRECTION ||
@@ -168,11 +182,16 @@ class GroupsViewModel(
         }
     }
 
+    override fun onDatabaseDataSetChanged() {
+        loadData()
+    }
+
     fun start() {
         if (groupUid == null) {
             screenTitle.value = resourceProvider.getString(R.string.groups)
         }
 
+        syncStateViewModel.start()
         loadData()
     }
 
@@ -205,7 +224,6 @@ class GroupsViewModel(
                 }
             }
 
-            val status = interactor.getDatabaseStatus()
             val getUsedFileResult = interactor.getDatabaseUsedFile()
             if (getUsedFileResult.isFailed) {
                 setErrorState(getUsedFileResult.error)
@@ -227,10 +245,6 @@ class GroupsViewModel(
                 } else {
                     val emptyText = resourceProvider.getString(R.string.no_items)
                     setScreenState(ScreenState.empty(emptyText))
-                }
-
-                if (status.isSucceededOrDeferred) {
-                    updateStatusViewModel(status.obj)
                 }
 
                 visibleMenuItems.value = getVisibleMenuItems()
@@ -480,6 +494,10 @@ class GroupsViewModel(
         }
     }
 
+    fun onSynchronizeButtonClicked() {
+        syncStateViewModel.synchronize()
+    }
+
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
             when {
@@ -616,14 +634,6 @@ class GroupsViewModel(
         }
     }
 
-    private fun hideStatusCell() {
-        updateStatusViewModel(DatabaseStatus.NORMAL)
-    }
-
-    private fun updateStatusViewModel(status: DatabaseStatus) {
-        statusViewModel.setModel(statusCellModelFactory.createStatusCellModel(status))
-    }
-
     private fun updateOptionPanelState() {
         optionPanelViewModel.setModel(
             cellModelFactory.createOptionPanelCellModel(
@@ -737,7 +747,6 @@ class GroupsViewModel(
         when (state.screenDisplayingType) {
             ScreenDisplayingType.LOADING -> {
                 visibleMenuItems.value = getVisibleMenuItems()
-                hideStatusCell()
                 updateOptionPanelState()
             }
         }
@@ -758,26 +767,30 @@ class GroupsViewModel(
 
         return when {
             isShowMenu && args.appMode == ApplicationLaunchMode.NORMAL -> {
-                val items = mutableListOf(
-                    GroupsMenuItem.SEARCH,
-                    GroupsMenuItem.LOCK,
-                    GroupsMenuItem.VIEW_MODE,
-                    GroupsMenuItem.SETTINGS
-                )
+                mutableListOf<GroupsMenuItem>()
+                    .apply {
+                        add(GroupsMenuItem.SEARCH)
+                        add(GroupsMenuItem.LOCK)
 
-                if (templates.isNullOrEmpty()) {
-                    items.add(GroupsMenuItem.ADD_TEMPLATES)
-                }
+                        if (usedFile.fsAuthority.type.isRequireSynchronization()) {
+                            add(GroupsMenuItem.SYNCHRONIZE)
+                        }
 
-                if (isBiometricUnlockAllowedForDatabase()) {
-                    if (usedFile.biometricData == null) {
-                        items.add(GroupsMenuItem.ENABLE_BIOMETRIC_UNLOCK)
-                    } else {
-                        items.add(GroupsMenuItem.DISABLE_BIOMETRIC_UNLOCK)
+                        add(GroupsMenuItem.VIEW_MODE)
+                        add(GroupsMenuItem.SETTINGS)
+
+                        if (templates.isNullOrEmpty()) {
+                            add(GroupsMenuItem.ADD_TEMPLATES)
+                        }
+
+                        if (isBiometricUnlockAllowedForDatabase()) {
+                            if (usedFile.biometricData == null) {
+                                add(GroupsMenuItem.ENABLE_BIOMETRIC_UNLOCK)
+                            } else {
+                                add(GroupsMenuItem.DISABLE_BIOMETRIC_UNLOCK)
+                            }
+                        }
                     }
-                }
-
-                items
             }
             isShowMenu && args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
                 listOf(
@@ -819,6 +832,7 @@ class GroupsViewModel(
         VIEW_MODE(R.id.menu_sort_and_view),
         ADD_TEMPLATES(R.id.menu_add_templates),
         SETTINGS(R.id.menu_settings),
+        SYNCHRONIZE(R.id.menu_synchronize),
         ENABLE_BIOMETRIC_UNLOCK(R.id.menu_enable_biometric_unlock),
         DISABLE_BIOMETRIC_UNLOCK(R.id.menu_disable_biometric_unlock)
     }

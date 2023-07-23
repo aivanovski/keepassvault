@@ -5,5 +5,6 @@ enum class StorageOptionType {
     EXTERNAL_STORAGE,
     SAF_STORAGE,
     WEBDAV,
-    GIT
+    GIT,
+    FAKE
 }

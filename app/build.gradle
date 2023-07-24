@@ -5,7 +5,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
 
 def versionMajor = 0
-def versionMinor = 24
+def versionMinor = 25
 def versionPatch = 0
 
 def formattedVersionCode = (versionMajor * 10000 + versionMinor * 100 + versionPatch).toString()

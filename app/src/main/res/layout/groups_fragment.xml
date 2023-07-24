@@ -67,18 +67,26 @@
             app:srcCompat="@drawable/ic_add_white_24dp"
             app:visible="@{viewModel.isFabButtonVisible}" />
 
-        <include
-            android:id="@+id/syncStateView"
-            layout="@layout/cell_sync_state"
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/element_margin"
-            android:layout_marginEnd="@dimen/element_margin"
-            android:layout_marginBottom="@dimen/element_margin"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/fab"
             app:layout_constraintStart_toStartOf="parent"
-            app:viewModel="@{viewModel.syncStateViewModel}" />
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}">
+
+            <include
+                android:id="@+id/syncStateView"
+                layout="@layout/cell_sync_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/element_margin"
+                android:layout_marginEnd="@dimen/element_margin"
+                android:layout_marginBottom="@dimen/element_margin"
+                app:viewModel="@{viewModel.syncStateViewModel}" />
+
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

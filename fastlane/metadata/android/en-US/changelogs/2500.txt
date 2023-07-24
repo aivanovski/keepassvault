@@ -1,0 +1,1 @@
+- Synchronization work completely in background

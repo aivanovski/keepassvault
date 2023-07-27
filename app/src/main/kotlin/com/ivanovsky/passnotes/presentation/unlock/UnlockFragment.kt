@@ -118,6 +118,9 @@ class UnlockFragment : BaseFragment() {
         viewModel.showFileActionsDialog.observe(viewLifecycleOwner) { file ->
             showFileActionsDialog(file)
         }
+        viewModel.showAddMenuDialog.observe(viewLifecycleOwner) {
+            showAddMenuDialog()
+        }
     }
 
     private fun showResolveConflictDialog(file: FileDescriptor) {
@@ -136,6 +139,24 @@ class UnlockFragment : BaseFragment() {
                 0 -> viewModel.onRemoveFileClicked(file)
             }
         }
+        dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
+    }
+
+    private fun showAddMenuDialog() {
+        val entries = listOf(
+            resources.getString(R.string.new_file),
+            resources.getString(R.string.open_file)
+        )
+
+        val dialog = ChooseOptionDialog.newInstance(null, entries)
+            .apply {
+                onItemClickListener = { itemIdx ->
+                    when (itemIdx) {
+                        0 -> viewModel.onNewFileClicked()
+                        1 -> viewModel.onOpenFileClicked()
+                    }
+                }
+            }
         dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
     }
 

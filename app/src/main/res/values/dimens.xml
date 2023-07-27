@@ -40,7 +40,6 @@
 
     <!-- floating action bar -->
     <dimen name="material_fab_size">56dp</dimen>
-    <dimen name="material_fab_margin">16dp</dimen>
 
     <!-- Groups screen parameters -->
     <dimen name="groups_grid_item_horizontal_padding">16dp</dimen>

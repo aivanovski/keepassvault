@@ -168,17 +168,17 @@
             tools:itemCount="5"
             tools:listitem="@layout/cell_database_file" />
 
-        <com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
             style="@style/Material.FloatingActionButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/material_fab_margin"
-            android:layout_marginBottom="@dimen/half_margin"
-            app:fabItems="@{viewModel.fabItems}"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:layout_marginBottom="@dimen/element_margin"
+            android:onClick="@{() -> viewModel.onAddButtonClicked()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:onFabItemClicked="@{viewModel.fabClickListener}"
+            app:srcCompat="@drawable/ic_add_white_24dp"
             app:visible="@{viewModel.isFabButtonVisible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

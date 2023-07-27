@@ -25,7 +25,7 @@
                 android:id="@+id/toolBar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="@color/action_bar_background"
+                android:background="@color/primary"
                 android:minHeight="?attr/actionBarSize"
                 android:theme="@style/ActionBarStyle"
                 app:layout_constraintEnd_toEndOf="parent"

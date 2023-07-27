@@ -17,31 +17,9 @@
     <color name="primary_text_light">#F2F2F2</color>
     <color name="error_text">#C00020</color>
 
-    <!-- Color for icons -->
     <color name="icon_gray">#757575</color>
-    <color name="icon_white">#ffffff</color>
-    <color name="icon_gray_inactive">#aaaaaa</color>
-
     <color name="material_icon_background">#9d9d9d</color>
-
-    <!-- text fields colors -->
-    <color name="material_edit_text_primary_text">@color/primary_text</color>
-
-    <!-- list item colors -->
-    <color name="material_list_item_primary_text">@color/primary_text</color>
-    <color name="material_list_item_secondary_text">#757575</color>
-    <color name="material_list_item_selected">#283F51B5</color>
-
-    <!-- error panel -->
-    <color name="material_error_panel_background">#e7e7e7</color>
-
-    <!-- action bar -->
-    <color name="action_bar_background">@color/primary</color>
-
-    <!-- progress bar -->
-    <color name="material_progress_bar">@color/primary</color>
-
-    <!-- errors -->
-    <color name="material_error_secondary_text">#b0b0b0</color>
+    <color name="selected_item_background">#283F51B5</color>
+    <color name="error_panel_background">#e7e7e7</color>
 
 </resources>

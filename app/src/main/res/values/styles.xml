@@ -137,7 +137,7 @@
 
     <style name="Material.SecondarySmallText">
         <item name="android:textSize">@dimen/material_small_text_size</item>
-        <item name="android:textColor">@color/material_list_item_secondary_text</item>
+        <item name="android:textColor">@color/secondary_text</item>
     </style>
 
     <style name="Material.SecondarySmallText.SingleLine">
@@ -150,7 +150,7 @@
 
     <style name="Material.ListItem.PrimaryText">
         <item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
-        <item name="android:textColor">@color/material_list_item_primary_text</item>
+        <item name="android:textColor">@color/primary_text</item>
     </style>
 
     <style name="Material.ListItem.PrimaryText.SingleLine" parent="Material.ListItem.PrimaryText">
@@ -161,7 +161,7 @@
 
     <style name="Material.ListItem.SecondaryText">
         <item name="android:textSize">@dimen/material_list_item_secondary_text_size</item>
-        <item name="android:textColor">@color/material_list_item_secondary_text</item>
+        <item name="android:textColor">@color/secondary_text</item>
     </style>
 
     <style name="Material.ListItem.SecondaryText.SingleLine" parent="Material.ListItem.SecondaryText">
@@ -172,7 +172,7 @@
 
     <style name="Material.EditText">
         <item name="android:textSize">@dimen/material_edit_text_primary_text_size</item>
-        <item name="android:textColor">@color/material_edit_text_primary_text</item>
+        <item name="android:textColor">@color/primary_text</item>
     </style>
 
     <style name="Material.EditText.PrimaryMultiLine"></style>

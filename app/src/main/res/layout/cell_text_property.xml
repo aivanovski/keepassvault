@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@={viewModel.text}"
-            android:textColor="@color/material_edit_text_primary_text"
+            android:textColor="@color/primary_text"
             android:textSize="@dimen/material_edit_text_primary_text_size"
             app:textInputLines="@{viewModel.model.inputLines}"
             app:textInputType="@{viewModel.model.textInputType}"

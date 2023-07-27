@@ -42,7 +42,7 @@ class ErrorPanelView(
     private val retryButton: Button
 
     init {
-        setBackgroundResource(R.color.material_error_panel_background)
+        setBackgroundResource(R.color.error_panel_background)
 
         LayoutInflater.from(context).inflate(R.layout.view_error_panel, this, true)
 

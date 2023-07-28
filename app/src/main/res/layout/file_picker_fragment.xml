@@ -37,7 +37,7 @@
             style="@style/Material.SecondaryText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/error_panel_background"
+            android:background="?attr/kpSecondaryBackgroundColor"
             android:paddingHorizontal="@dimen/element_margin"
             android:paddingVertical="@dimen/half_margin"
             android:text="@{viewModel.currentPath}"

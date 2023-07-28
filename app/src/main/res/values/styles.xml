@@ -1,18 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Customize your theme here. -->
+    <!-- Application attributes -->
+    <attr name="kpBackgroundColor" format="reference|color" />
+    <attr name="kpActionBarBackgroundColor" format="reference|color" />
+    <attr name="kpDialogBackgroundColor" format="reference|color" />
+    <attr name="kpSecondaryBackgroundColor" format="reference|color" />
+    <attr name="kpErrorBackgroundColor" format="reference|color" />
+    <attr name="kpSelectedBackgroundColor" format="reference|color" />
+    <attr name="kpIconPrimaryColor" format="reference|color" />
+    <attr name="kpIconSecondaryColor" format="reference|color" />
+    <attr name="kpIconSecondaryBackgroundColor" format="reference|color" />
+    <attr name="kpIconImportantColor" format="reference|color" />
+    <attr name="kpPrimaryColor" format="reference|color" />
+    <attr name="kpPrimaryTextColor" format="reference|color" />
+    <attr name="kpSecondaryTextColor" format="reference|color" />
+    <attr name="kpErrorTextColor" format="reference|color" />
+    <attr name="kpDividerColor" format="reference|color" />
+
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- System attributes -->
+        <item name="android:windowBackground">@color/background</item>
+        <item name="android:textColorPrimary">@color/primary_text</item>
+        <item name="android:textColorSecondary">@color/secondary_text</item>
+
+        <item name="dialogTheme">@style/AppDialogTheme</item>
+        <item name="alertDialogTheme">@style/AppDialogTheme</item>
+
+        <!-- Material design attributes -->
         <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryDark">@color/primary_dark</item>
-        <item name="colorAccent">@color/accent</item>
+        <item name="colorOnPrimary">@color/primary_text</item>
+        <item name="colorPrimaryContainer">@color/fab_color</item>
+        <item name="colorOnPrimaryContainer">@color/fab_text</item>
+        <item name="colorSurface">@color/surface</item>
+
+        <item name="colorOnSurface">@color/primary_text</item>
+        <item name="colorOutline">@color/outline</item>
+        <item name="colorErrorContainer">@color/error_background</item>
+        <item name="colorOnError">@color/error_text</item>
+
+        <!-- Application specific attributes -->
+        <item name="kpBackgroundColor">@color/background</item>
+        <item name="kpDialogBackgroundColor">@color/dialog_background</item>
+        <item name="kpActionBarBackgroundColor">@color/action_bar_background</item>
+        <item name="kpSecondaryBackgroundColor">@color/surface</item>
+        <item name="kpErrorBackgroundColor">@color/error_background</item>
+        <item name="kpSelectedBackgroundColor">@color/selected_background</item>
+        <item name="kpIconPrimaryColor">@color/primary_icon</item>
+        <item name="kpIconSecondaryBackgroundColor">@color/secondary_icon_background</item>
+        <item name="kpIconSecondaryColor">@color/secondary_icon</item>
+        <item name="kpIconImportantColor">@color/important_icon</item>
+        <item name="kpPrimaryColor">@color/primary</item>
+        <item name="kpPrimaryTextColor">@color/primary_text</item>
+        <item name="kpSecondaryTextColor">@color/secondary_text</item>
+        <item name="kpErrorTextColor">@color/error_text</item>
+        <item name="kpDividerColor">@color/divider</item>
     </style>
 
-    <style name="ActionBarStyle" parent="ThemeOverlay.AppCompat.Dark.ActionBar"></style>
+    <style name="AppDialogTheme" parent="Theme.Material3.DayNight.Dialog.Alert">
+        <item name="android:windowBackground">@color/dialog_background</item>
+        <item name="colorPrimary">@color/dialog_primary</item>
+
+        <item name="kpBackgroundColor">@color/dialog_background</item>
+        <item name="kpPrimaryColor">@color/primary</item>
+        <item name="materialButtonStyle">@style/Material.TextButton</item>
+    </style>
+
+    <style name="ActionBarStyle" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:textColorPrimary">@color/action_bar_text</item>
+    </style>
 
     <style name="ActionBarPopupStyle" parent="ThemeOverlay.AppCompat.Light">
-        <item name="android:textColorPrimary">@android:color/black</item>
+        <item name="android:textColorPrimary">@color/primary_text</item>
     </style>
 
     <!-- Material design styles -->
@@ -33,7 +93,7 @@
     <style name="Material.Navigation"></style>
 
     <style name="Material.Navigation.HeaderText">
-        <item name="android:textColor">@color/primary_text_light</item>
+        <item name="android:textColor">@color/action_bar_text</item>
         <item name="android:textSize">@dimen/material_header_text_size</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
@@ -41,7 +101,7 @@
     </style>
 
     <style name="Material.CheckBox">
-        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:textColor">?attr/kpPrimaryTextColor</item>
         <item name="android:textSize">@dimen/material_primary_text_size</item>
     </style>
 
@@ -53,7 +113,7 @@
     <style name="Material.TextButton" parent="@style/Widget.MaterialComponents.Button.TextButton">
     </style>
 
-    <style name="Material.OutlinedButton" parent="@style/Widget.MaterialComponents.Button.OutlinedButton"></style>
+    <style name="Material.OutlinedButton" parent="@style/Widget.Material3.Button.OutlinedButton"></style>
 
     <style name="Material.BorderlessButton">
         <item name="android:minWidth">@dimen/borderless_icon_button_size</item>
@@ -80,15 +140,9 @@
         <item name="android:minHeight">@dimen/material_fab_size</item>
     </style>
 
-    <style name="Material.ExpandedFloatingActionButton" />
-
-    <style name="Material.ExpandedFloatingActionButton.Item">
-        <item name="android:textColor">@android:color/black</item>
-    </style>
-
     <style name="Material.HeaderText">
         <item name="android:textSize">@dimen/material_header_text_size</item>
-        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:textColor">?attr/kpPrimaryTextColor</item>
     </style>
 
     <style name="Material.HeaderText.SingleLine">
@@ -99,7 +153,7 @@
 
     <style name="Material.PrimaryText">
         <item name="android:textSize">@dimen/material_primary_text_size</item>
-        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:textColor">?attr/kpPrimaryTextColor</item>
     </style>
 
     <style name="Material.SingleLineText">
@@ -116,7 +170,7 @@
 
     <style name="Material.SecondaryText">
         <item name="android:textSize">@dimen/material_secondary_text_size</item>
-        <item name="android:textColor">@color/secondary_text</item>
+        <item name="android:textColor">?attr/kpSecondaryTextColor</item>
     </style>
 
     <style name="Material.SecondaryText.SingleLine" parent="Material.SecondaryText">
@@ -127,30 +181,19 @@
 
     <style name="Material.ErrorSecondaryText">
         <item name="android:textSize">@dimen/material_primary_text_size</item>
-        <item name="android:textColor">@color/error_text</item>
+        <item name="android:textColor">?attr/kpErrorTextColor</item>
     </style>
 
     <style name="Material.ErrorPrimaryText">
         <item name="android:textSize">@dimen/material_header_text_size</item>
-        <item name="android:textColor">@color/error_text</item>
-    </style>
-
-    <style name="Material.SecondarySmallText">
-        <item name="android:textSize">@dimen/material_small_text_size</item>
-        <item name="android:textColor">@color/secondary_text</item>
-    </style>
-
-    <style name="Material.SecondarySmallText.SingleLine">
-        <item name="android:maxLines">1</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:lines">1</item>
+        <item name="android:textColor">?attr/kpErrorTextColor</item>
     </style>
 
     <style name="Material.ListItem"></style>
 
     <style name="Material.ListItem.PrimaryText">
         <item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
-        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:textColor">?attr/kpPrimaryTextColor</item>
     </style>
 
     <style name="Material.ListItem.PrimaryText.SingleLine" parent="Material.ListItem.PrimaryText">
@@ -161,7 +204,7 @@
 
     <style name="Material.ListItem.SecondaryText">
         <item name="android:textSize">@dimen/material_list_item_secondary_text_size</item>
-        <item name="android:textColor">@color/secondary_text</item>
+        <item name="android:textColor">?attr/kpSecondaryTextColor</item>
     </style>
 
     <style name="Material.ListItem.SecondaryText.SingleLine" parent="Material.ListItem.SecondaryText">
@@ -172,7 +215,7 @@
 
     <style name="Material.EditText">
         <item name="android:textSize">@dimen/material_edit_text_primary_text_size</item>
-        <item name="android:textColor">@color/primary_text</item>
+        <item name="android:textColor">?attr/kpPrimaryTextColor</item>
     </style>
 
     <style name="Material.EditText.PrimaryMultiLine"></style>
@@ -185,32 +228,6 @@
 
     <style name="Material.EditText.Password">
         <item name="android:inputType">textWebPassword</item>
-        <item name="android:maxLines">1</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:lines">1</item>
-    </style>
-
-    <style name="Groups"></style>
-
-    <style name="Groups.TitleText">
-        <item name="android:textSize">@dimen/material_primary_text_size</item>
-        <item name="android:textColor">@color/primary_text_light</item>
-        <item name="android:maxLines">1</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:lines">1</item>
-    </style>
-
-    <style name="Groups.NotTitleText">
-        <item name="android:textSize">@dimen/material_primary_text_size</item>
-        <item name="android:textColor">@color/primary_text</item>
-        <item name="android:maxLines">3</item>
-        <item name="android:ellipsize">end</item>
-    </style>
-
-    <style name="Groups.CountText">
-        <item name="android:textSize">@dimen/material_secondary_text_size</item>
-        <item name="android:textColor">@color/primary_text</item>
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
         <item name="android:lines">1</item>

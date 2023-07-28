@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.presentation.unlock
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
@@ -45,7 +44,7 @@ class UnlockFragment : BaseFragment() {
         setupActionBar {
             title = getString(R.string.app_name)
             setDisplayHomeAsUpEnabled(true)
-            setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
+            setHomeAsUpIndicator(R.drawable.ic_menu_24dp)
         }
     }
 
@@ -61,16 +60,6 @@ class UnlockFragment : BaseFragment() {
             }
 
         return binding.root
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_refresh -> {
-                viewModel.onRefreshButtonClicked()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     override fun onStart() {

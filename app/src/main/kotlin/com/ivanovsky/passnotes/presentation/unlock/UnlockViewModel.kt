@@ -82,6 +82,7 @@ class UnlockViewModel(
     val keyFilename = MutableLiveData(EMPTY)
     val password = MutableLiveData(EMPTY)
     val unlockIconResId = MutableLiveData(getUnlockIconResIdInternal())
+    val unlockButtonColor = MutableLiveData(getUnlockButtonColorInternal())
     val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
     val showSnackbarMessage = SingleLiveEvent<String>()
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
@@ -131,6 +132,7 @@ class UnlockViewModel(
 
     fun onScreenStart() {
         closeActiveDatabaseIfNeed()
+        unlockButtonColor.value = getUnlockButtonColorInternal()
     }
 
     fun loadData(
@@ -750,10 +752,14 @@ class UnlockViewModel(
             selectedUsedFile?.biometricData != null &&
             selectedKeyFile == null
         ) {
-            R.drawable.ic_fingerprint_white_24dp
+            R.drawable.ic_fingerprint_24dp
         } else {
-            R.drawable.ic_lock_open_white_24dp
+            R.drawable.ic_lock_open_24dp
         }
+    }
+
+    private fun getUnlockButtonColorInternal(): Int {
+        return resourceProvider.getAttributeColor(R.attr.kpPrimaryColor)
     }
 
     private fun isBiometricAuthenticationAvailable(): Boolean {

@@ -49,11 +49,11 @@
             android:id="@+id/attachmentIcon"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:src="@drawable/ic_attach_file_white_24dp"
+            android:src="@drawable/ic_attachment_24dp"
             app:layout_constraintBottom_toBottomOf="@id/title"
             app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
             app:layout_constraintTop_toTopOf="@id/title"
-            app:tint="@color/icon_gray"
+            app:tint="?attr/kpIconPrimaryColor"
             app:visible="@{viewModel.isAttachmentIconVisible}"
             tools:visibility="visible" />
 

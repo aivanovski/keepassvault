@@ -26,7 +26,7 @@ class StorageListCellModelFactory(
                         id = fsType.value,
                         title = fsType.getTitle(isExternalStorageEnabled),
                         description = resourceProvider.getString(R.string.requires_permission),
-                        iconResId = R.drawable.ic_info_grey_600_24dp
+                        iconResId = R.drawable.ic_info_24dp
                     )
                 }
 

@@ -17,7 +17,7 @@ class AllFilesPermissionDialog : DialogFragment(), DialogInterface.OnClickListen
     private val permissionHelper: PermissionHelper by inject()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(context)
+        return AlertDialog.Builder(context, R.style.AppDialogTheme)
             .setTitle(R.string.all_files_permission_dialog_title)
             .setMessage(R.string.all_files_permission_dialog_message)
             .setPositiveButton(R.string.grant, this)

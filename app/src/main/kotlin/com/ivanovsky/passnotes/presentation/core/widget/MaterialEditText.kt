@@ -335,7 +335,7 @@ class MaterialEditText(
                 binding.actionButton.setImageResource(getEyeIcon(isTextVisible))
             }
             ActionButton.CLEAR -> {
-                binding.actionButton.setImageResource(R.drawable.ic_close_white_24dp)
+                binding.actionButton.setImageResource(R.drawable.ic_close_24dp)
             }
         }
     }

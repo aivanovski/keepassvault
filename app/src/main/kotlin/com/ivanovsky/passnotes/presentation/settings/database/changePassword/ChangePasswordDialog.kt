@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
+import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.DialogChangePasswordBinding
+import com.ivanovsky.passnotes.extensions.cloneInContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ChangePasswordDialog : DialogFragment() {
@@ -17,7 +19,7 @@ class ChangePasswordDialog : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return DialogChangePasswordBinding.inflate(inflater)
+        return DialogChangePasswordBinding.inflate(inflater.cloneInContext(R.style.AppDialogTheme))
             .also {
                 it.lifecycleOwner = this
                 it.viewModel = viewModel

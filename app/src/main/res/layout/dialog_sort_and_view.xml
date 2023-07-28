@@ -22,6 +22,7 @@
         android:layout_height="wrap_content"
         android:minWidth="@dimen/min_dialog_width"
         android:padding="@dimen/group_margin"
+        android:background="?attr/kpDialogBackgroundColor"
         tools:layout_width="300dp">
 
         <TextView

@@ -85,7 +85,7 @@ class GroupsCellModelFactory(
 
     private fun createDividerCell(): DividerCellModel =
         DividerCellModel(
-            color = resourceProvider.getColor(R.color.divider),
+            color = resourceProvider.getAttributeColor(R.attr.kpDividerColor),
             paddingStart = null,
             paddingEnd = null
         )

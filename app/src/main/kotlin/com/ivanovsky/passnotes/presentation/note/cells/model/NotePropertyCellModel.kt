@@ -8,6 +8,7 @@ data class NotePropertyCellModel(
     val name: String,
     val value: String,
     val backgroundShape: RoundedShape,
+    val backgroundColor: Int,
     val isVisibilityButtonVisible: Boolean,
     val isValueProtected: Boolean
 ) : BaseCellModel()

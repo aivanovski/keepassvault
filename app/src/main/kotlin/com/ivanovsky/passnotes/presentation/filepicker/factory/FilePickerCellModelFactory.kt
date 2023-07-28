@@ -36,9 +36,9 @@ class FilePickerCellModelFactory {
     @DrawableRes
     private fun getIconResId(file: FileDescriptor): Int {
         return if (file.isDirectory) {
-            R.drawable.ic_folder_white_24dp
+            R.drawable.ic_folder_24dp
         } else {
-            R.drawable.ic_file_white_24dp
+            R.drawable.ic_file_24dp
         }
     }
 

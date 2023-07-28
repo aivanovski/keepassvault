@@ -84,7 +84,7 @@
             app:layout_constraintBottom_toBottomOf="@id/password"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/password"
-            app:materialBackgroundColor="@{@color/primary}"
+            app:materialBackgroundColor="@{viewModel.unlockButtonColor}"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
@@ -124,7 +124,7 @@
                     android:enabled="false"
                     android:maxWidth="200dp"
                     android:text="@{viewModel.keyFilename}"
-                    android:textColor="@color/primary"
+                    android:textColor="?attr/kpPrimaryColor"
                     tools:text="key-file-name" />
 
                 <ImageButton
@@ -133,8 +133,8 @@
                     android:layout_width="@dimen/small_borderless_icon_button_size"
                     android:layout_height="@dimen/small_borderless_icon_button_size"
                     android:onClick="@{() -> viewModel.onRemoveKeyFileButtonClicked()}"
-                    android:src="@drawable/ic_close_white_24dp"
-                    android:tint="@color/primary" />
+                    android:src="@drawable/ic_close_24dp"
+                    android:tint="?attr/kpPrimaryColor" />
 
             </LinearLayout>
 
@@ -178,7 +178,7 @@
             android:onClick="@{() -> viewModel.onAddButtonClicked()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/ic_add_white_24dp"
+            app:srcCompat="@drawable/ic_add_24dp"
             app:visible="@{viewModel.isFabButtonVisible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

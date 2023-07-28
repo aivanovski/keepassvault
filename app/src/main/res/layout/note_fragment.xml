@@ -50,7 +50,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="0dp"
-            app:cardElevation="5dp"
+            app:cardElevation="@dimen/card_elevation"
+            app:cardBackgroundColor="?attr/kpSecondaryBackgroundColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/recyclerView"
             app:screenState="@{viewModel.screenState}"
@@ -79,7 +80,7 @@
             android:onClick="@{() -> viewModel.onFabButtonClicked()}"
             app:layout_constraintBottom_toTopOf="@id/bottomPanelLayout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:srcCompat="@drawable/ic_edit_white_24dp"
+            app:srcCompat="@drawable/ic_edit_24dp"
             app:visible="@{viewModel.isFabButtonVisible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

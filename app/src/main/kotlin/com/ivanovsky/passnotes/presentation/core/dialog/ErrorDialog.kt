@@ -11,7 +11,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 class ErrorDialog : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(requireContext())
+        return AlertDialog.Builder(requireContext(), R.style.AppDialogTheme)
             .setTitle(R.string.error_has_been_occurred)
             .setMessage(getMandatoryStringArgument(ARG_MESSAGE))
             .create()

@@ -3,5 +3,5 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
 
-    <solid android:color="@color/material_icon_background" />
+    <solid android:color="?attr/kpIconSecondaryBackgroundColor" />
 </shape>

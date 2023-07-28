@@ -22,6 +22,7 @@ import com.ivanovsky.passnotes.domain.LoggerInteractor
 import com.ivanovsky.passnotes.domain.NoteDiffer
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.ThemeProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import java.security.SecureRandom
@@ -39,7 +40,8 @@ object CoreModule {
     fun build(loggerInteractor: LoggerInteractor) =
         module {
             single { loggerInteractor }
-            single { ResourceProvider(get()) }
+            single { ThemeProvider(get()) }
+            single { ResourceProvider(get(), get()) }
             single { PermissionHelper(get()) }
             single { ErrorInteractor(get()) }
             single { LocaleProvider(get()) }

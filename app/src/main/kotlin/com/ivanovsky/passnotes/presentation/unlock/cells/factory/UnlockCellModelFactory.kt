@@ -65,10 +65,10 @@ class UnlockCellModelFactory(
             SyncStatus.ERROR,
             SyncStatus.AUTH_ERROR,
             SyncStatus.FILE_NOT_FOUND -> {
-                resourceProvider.getColor(R.color.error_text)
+                resourceProvider.getAttributeColor(R.attr.kpErrorTextColor)
             }
             else -> {
-                resourceProvider.getColor(R.color.secondary_text)
+                resourceProvider.getAttributeColor(R.attr.kpSecondaryTextColor)
             }
         }
     }

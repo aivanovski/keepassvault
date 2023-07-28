@@ -14,7 +14,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/light_grey"
+        android:background="?attr/kpSecondaryBackgroundColor"
         app:visible="@{viewModel.isVisible}">
 
         <TextView
@@ -44,7 +44,7 @@
             android:layout_marginBottom="@dimen/half_margin"
             android:onClick="@{() -> viewModel.onPositiveButtonClicked()}"
             android:text="@{viewModel.positiveText}"
-            android:textColor="@color/primary_dark"
+            android:textColor="?attr/kpPrimaryTextColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/space"
             app:layout_constraintStart_toEndOf="@id/message"
@@ -71,7 +71,7 @@
             android:layout_marginEnd="@dimen/element_margin"
             android:onClick="@{() -> viewModel.onNegativeButtonClicked()}"
             android:text="@{viewModel.negativeText}"
-            android:textColor="@color/primary_dark"
+            android:textColor="?attr/kpPrimaryTextColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/space"

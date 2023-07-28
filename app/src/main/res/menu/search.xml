@@ -5,13 +5,12 @@
 
     <item
         android:id="@+id/menu_lock"
-        android:icon="@drawable/ic_lock_white_24dp"
         android:title="@string/lock"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/menu_sort_and_view"
-        android:icon="@drawable/ic_sort_white_24dp"
+        android:icon="@drawable/ic_sort_24dp"
         android:title="@string/sort_and_view"
         app:showAsAction="never" />
 

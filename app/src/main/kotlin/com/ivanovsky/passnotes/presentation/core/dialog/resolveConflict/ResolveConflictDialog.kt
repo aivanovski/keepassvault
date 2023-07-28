@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
+import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.DialogResolveConflictBinding
+import com.ivanovsky.passnotes.extensions.cloneInContext
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
@@ -27,7 +29,9 @@ class ResolveConflictDialog : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return DialogResolveConflictBinding.inflate(inflater)
+        return DialogResolveConflictBinding.inflate(
+            inflater.cloneInContext(R.style.AppDialogTheme)
+        )
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
                 it.viewModel = viewModel

@@ -27,8 +27,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/primary_text"
-            tools:src="@drawable/ic_settings_grey_600_24dp" />
+            app:tint="?attr/kpPrimaryTextColor"
+            tools:src="@drawable/ic_settings_24dp" />
 
         <TextView
             android:id="@+id/title"

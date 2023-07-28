@@ -5,21 +5,27 @@
     <color name="launcher_icon_foreground">#2c3e73</color>
 
     <color name="primary">#3F51B5</color>
-    <color name="primary_dark">#303F9F</color>
-    <color name="accent">#FF4081</color>
-    <color name="light_grey">#EEEEEE</color>
-    <color name="transparent">#00000000</color>
-    <color name="white">#ffffff</color>
-    <color name="divider">#e0e0e0</color>
+    <color name="background">#f6f7fb</color>
+    <color name="action_bar_background">@color/primary</color>
+    <color name="dialog_background">@color/background</color>
+    <color name="dialog_primary">@color/primary</color>
+    <color name="selected_background">#dee1f9</color>
+    <color name="surface">#ffffff</color>
+    <color name="error_background">#fff2f0</color>
+    <color name="divider">#e5e8f1</color>
+    <color name="fab_color">#eaddff</color>
+    <color name="outline">#e3e3e4</color>
 
-    <color name="primary_text">#212121</color>
-    <color name="secondary_text">#757575</color>
-    <color name="primary_text_light">#F2F2F2</color>
+    <color name="fab_text">@color/primary_text</color>
+    <color name="primary_text">#282e3e</color>
+    <color name="secondary_text">#586380</color>
     <color name="error_text">#C00020</color>
+    <color name="action_bar_text">#ffffff</color>
 
-    <color name="icon_gray">#757575</color>
-    <color name="material_icon_background">#9d9d9d</color>
-    <color name="selected_item_background">#283F51B5</color>
-    <color name="error_panel_background">#e7e7e7</color>
+    <color name="primary_icon">#586380</color>
+    <color name="secondary_icon">#ffffff</color>
+    <color name="secondary_icon_background">#d9dde8</color>
+    <color name="important_icon">#EF5350</color>
 
+    <color name="transparent">#00000000</color>
 </resources>

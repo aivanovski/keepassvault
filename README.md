@@ -20,6 +20,7 @@ Another Android client app for KeePass databases.
 - Autofill for Android >= 8.0
 - Attachments handling
 - Fuzzy search
+- Dark theme (controlled by system settings)
 
 # License
 ```

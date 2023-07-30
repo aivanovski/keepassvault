@@ -38,7 +38,7 @@
             android:id="@+id/selectedBackground"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/material_list_item_selected"
+            android:background="?attr/kpSelectedBackgroundColor"
             app:visible="@{viewModel.model.selected}" />
 
         <View
@@ -59,7 +59,8 @@
             app:layout_constraintStart_toStartOf="@id/iconBackground"
             app:layout_constraintTop_toTopOf="parent"
             app:imageResourceId="@{viewModel.model.iconResId}"
-            tools:src="@drawable/ic_file_white_24dp" />
+            app:tint="?attr/kpIconSecondaryColor"
+            tools:src="@drawable/ic_file_24dp" />
 
         <TextView
             android:id="@+id/primaryText"

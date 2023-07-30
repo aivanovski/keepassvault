@@ -21,7 +21,7 @@ class SyncStateCellModelFactory(
                 resourceProvider.getString(R.string.checking)
             ),
             detailsMessage = EMPTY,
-            messageColor = resourceProvider.getColor(R.color.primary_text),
+            messageColor = resourceProvider.getAttributeColor(R.attr.kpPrimaryTextColor),
             isSyncIconVisible = true,
             isMessageDismissed = false,
             buttonAction = ButtonAction.NONE
@@ -32,7 +32,7 @@ class SyncStateCellModelFactory(
         return SyncStateModel(
             message = EMPTY,
             detailsMessage = EMPTY,
-            messageColor = resourceProvider.getColor(R.color.primary_text),
+            messageColor = resourceProvider.getAttributeColor(R.attr.kpPrimaryTextColor),
             isSyncIconVisible = false,
             isMessageDismissed = false
         )
@@ -79,9 +79,9 @@ class SyncStateCellModelFactory(
             )
 
         return if (!syncState.progress.isSyncInProgress() && isError) {
-            resourceProvider.getColor(R.color.error_text)
+            resourceProvider.getAttributeColor(R.attr.kpErrorTextColor)
         } else {
-            resourceProvider.getColor(R.color.primary_text)
+            resourceProvider.getAttributeColor(R.attr.kpPrimaryTextColor)
         }
     }
 

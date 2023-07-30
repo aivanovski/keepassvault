@@ -131,10 +131,10 @@ class LockService :
         val builder = NotificationCompat.Builder(this, getChannelId())
             .setContentTitle(getString(R.string.app_name))
             .setContentText(message)
-            .setSmallIcon(R.drawable.ic_lock_open_white_24dp)
+            .setSmallIcon(R.drawable.ic_lock_open_24dp)
             .setContentIntent(contentIntent)
             .addAction(
-                R.drawable.ic_lock_grey_600_24dp,
+                R.drawable.ic_lock_24dp,
                 getString(R.string.lock_database),
                 actionIntent
             )

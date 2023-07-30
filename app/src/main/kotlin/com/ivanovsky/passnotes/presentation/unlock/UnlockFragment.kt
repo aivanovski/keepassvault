@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.presentation.unlock
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
@@ -45,7 +44,7 @@ class UnlockFragment : BaseFragment() {
         setupActionBar {
             title = getString(R.string.app_name)
             setDisplayHomeAsUpEnabled(true)
-            setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp)
+            setHomeAsUpIndicator(R.drawable.ic_menu_24dp)
         }
     }
 
@@ -61,16 +60,6 @@ class UnlockFragment : BaseFragment() {
             }
 
         return binding.root
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_refresh -> {
-                viewModel.onRefreshButtonClicked()
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 
     override fun onStart() {
@@ -118,6 +107,9 @@ class UnlockFragment : BaseFragment() {
         viewModel.showFileActionsDialog.observe(viewLifecycleOwner) { file ->
             showFileActionsDialog(file)
         }
+        viewModel.showAddMenuDialog.observe(viewLifecycleOwner) {
+            showAddMenuDialog()
+        }
     }
 
     private fun showResolveConflictDialog(file: FileDescriptor) {
@@ -136,6 +128,24 @@ class UnlockFragment : BaseFragment() {
                 0 -> viewModel.onRemoveFileClicked(file)
             }
         }
+        dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
+    }
+
+    private fun showAddMenuDialog() {
+        val entries = listOf(
+            resources.getString(R.string.new_file),
+            resources.getString(R.string.open_file)
+        )
+
+        val dialog = ChooseOptionDialog.newInstance(null, entries)
+            .apply {
+                onItemClickListener = { itemIdx ->
+                    when (itemIdx) {
+                        0 -> viewModel.onNewFileClicked()
+                        1 -> viewModel.onOpenFileClicked()
+                    }
+                }
+            }
         dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
     }
 

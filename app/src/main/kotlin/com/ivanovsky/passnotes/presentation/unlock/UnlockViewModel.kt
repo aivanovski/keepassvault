@@ -46,7 +46,6 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
@@ -83,6 +82,7 @@ class UnlockViewModel(
     val keyFilename = MutableLiveData(EMPTY)
     val password = MutableLiveData(EMPTY)
     val unlockIconResId = MutableLiveData(getUnlockIconResIdInternal())
+    val unlockButtonColor = MutableLiveData(getUnlockButtonColorInternal())
     val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
     val showSnackbarMessage = SingleLiveEvent<String>()
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
@@ -92,18 +92,10 @@ class UnlockViewModel(
     val isAddKeyButtonVisible = MutableLiveData(false)
     val showBiometricUnlockDialog = SingleLiveEvent<BiometricDecoder>()
     val showFileActionsDialog = SingleLiveEvent<UsedFile>()
+    val showAddMenuDialog = SingleLiveEvent<Unit>()
 
     val fileCellTypes = ViewModelTypes()
         .add(DatabaseFileCellViewModel::class, R.layout.cell_database_file)
-
-    val fabItems = FAB_ITEMS
-        .map { (_, resId) -> resourceProvider.getString(resId) }
-
-    val fabClickListener = object : OnItemClickListener {
-        override fun onItemClicked(position: Int) {
-            onFabItemClicked(position)
-        }
-    }
 
     private val eventProvider = EventProviderImpl()
     private var selectedUsedFile: UsedFile? = null
@@ -140,6 +132,7 @@ class UnlockViewModel(
 
     fun onScreenStart() {
         closeActiveDatabaseIfNeed()
+        unlockButtonColor.value = getUnlockButtonColorInternal()
     }
 
     fun loadData(
@@ -318,6 +311,20 @@ class UnlockViewModel(
         }
     }
 
+    fun onAddButtonClicked() {
+        showAddMenuDialog.call()
+    }
+
+    fun onNewFileClicked() {
+        isKeyboardVisibleEvent.call(false)
+        router.navigateTo(NewDatabaseScreen())
+    }
+
+    fun onOpenFileClicked() {
+        isKeyboardVisibleEvent.call(false)
+        navigateToFilePickerToSelectDatabase()
+    }
+
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
             event.getInt(DatabaseFileCellViewModel.CLICK_EVENT)?.let { id ->
@@ -463,19 +470,6 @@ class UnlockViewModel(
 
                 val message = errorInteractor.processAndGetMessage(saveResult.error)
                 showSnackbarMessage.call(message)
-            }
-        }
-    }
-
-    private fun onFabItemClicked(position: Int) {
-        when (position) {
-            FAB_ITEM_NEW_FILE -> {
-                isKeyboardVisibleEvent.call(false)
-                router.navigateTo(NewDatabaseScreen())
-            }
-            FAB_ITEM_OPEN_FILE -> {
-                isKeyboardVisibleEvent.call(false)
-                navigateToFilePickerToSelectDatabase()
             }
         }
     }
@@ -758,10 +752,14 @@ class UnlockViewModel(
             selectedUsedFile?.biometricData != null &&
             selectedKeyFile == null
         ) {
-            R.drawable.ic_fingerprint_white_24dp
+            R.drawable.ic_fingerprint_24dp
         } else {
-            R.drawable.ic_lock_open_white_24dp
+            R.drawable.ic_lock_open_24dp
         }
+    }
+
+    private fun getUnlockButtonColorInternal(): Int {
+        return resourceProvider.getAttributeColor(R.attr.kpPrimaryColor)
     }
 
     private fun isBiometricAuthenticationAvailable(): Boolean {
@@ -784,16 +782,5 @@ class UnlockViewModel(
                 parametersOf(args)
             ) as T
         }
-    }
-
-    companion object {
-
-        private const val FAB_ITEM_NEW_FILE = 0
-        private const val FAB_ITEM_OPEN_FILE = 1
-
-        private val FAB_ITEMS = listOf(
-            FAB_ITEM_NEW_FILE to R.string.new_file,
-            FAB_ITEM_OPEN_FILE to R.string.open_file
-        )
     }
 }

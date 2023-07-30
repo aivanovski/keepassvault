@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView.State.HIDDEN
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView.State.MESSAGE
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView.State.MESSAGE_WITH_RETRY
@@ -40,9 +41,10 @@ class ErrorPanelView(
 
     private val errorTextView: TextView
     private val retryButton: Button
+    private val resourceProvider = ResourceProvider(context)
 
     init {
-        setBackgroundResource(R.color.material_error_panel_background)
+        setBackgroundColor(resourceProvider.getAttributeColor(R.attr.kpErrorBackgroundColor))
 
         LayoutInflater.from(context).inflate(R.layout.view_error_panel, this, true)
 

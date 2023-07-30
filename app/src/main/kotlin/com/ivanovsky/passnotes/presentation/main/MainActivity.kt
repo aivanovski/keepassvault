@@ -17,6 +17,7 @@ import com.github.terrakok.cicerone.androidx.AppNavigator
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.NoteCandidate
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityWithSideMenuBinding
+import com.ivanovsky.passnotes.domain.ThemeProvider
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
@@ -34,6 +35,7 @@ class MainActivity :
 
     private lateinit var binding: CoreBaseActivityWithSideMenuBinding
 
+    private val themeProvider: ThemeProvider by inject()
     private val navigatorHolder: NavigatorHolder by inject()
     private val settingsRouter: SettingsRouter by inject()
     private val navigator = AppNavigator(this, R.id.fragmentContainer)
@@ -54,6 +56,7 @@ class MainActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        themeProvider.onThemeContextCreated(this)
 
         binding = CoreBaseActivityWithSideMenuBinding.inflate(layoutInflater)
             .also {
@@ -62,7 +65,7 @@ class MainActivity :
             }
 
         setContentView(binding.root)
-        initActionBar(R.id.toolBar)
+        initActionBar(R.id.toolbar)
 
         binding.drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {

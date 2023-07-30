@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/element_margin"
         android:layout_marginEnd="@dimen/element_margin"
-        android:textColor="@color/error_text"
+        android:textColor="?attr/kpErrorTextColor"
         android:textSize="@dimen/material_primary_text_size"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

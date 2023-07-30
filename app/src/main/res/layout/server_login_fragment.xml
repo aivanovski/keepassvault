@@ -122,7 +122,7 @@
                         android:layout_marginTop="@dimen/element_margin"
                         android:checked="@={viewModel.isSecretUrlChecked}"
                         android:text="@string/url_contains_secret_message"
-                        android:textColor="@color/primary_text"
+                        android:textColor="?attr/kpPrimaryTextColor"
                         android:textSize="@dimen/material_primary_text_size"
                         app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
                         app:layout_constraintStart_toEndOf="@id/guidelineStart"

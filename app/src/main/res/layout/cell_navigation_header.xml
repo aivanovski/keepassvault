@@ -14,7 +14,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="192dp"
-        android:background="@color/primary_dark">
+        android:background="?attr/kpPrimaryColor">
 
         <TextView
             style="@style/Material.Navigation.HeaderText"

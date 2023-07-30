@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
+import com.ivanovsky.passnotes.R
 
 class ChooseOptionDialog : DialogFragment(), DialogInterface.OnClickListener {
 
@@ -22,7 +23,7 @@ class ChooseOptionDialog : DialogFragment(), DialogInterface.OnClickListener {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(context, R.style.AppDialogTheme)
             .setItems(entries.toTypedArray(), this)
 
         if (title != null) {

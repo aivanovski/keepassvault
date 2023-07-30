@@ -41,7 +41,8 @@
             app:layout_constraintBottom_toBottomOf="@id/description"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/description"
-            tools:src="@drawable/ic_info_grey_600_24dp" />
+            app:tint="?attr/kpIconPrimaryColor"
+            tools:src="@drawable/ic_info_24dp" />
 
         <TextView
             android:id="@+id/description"

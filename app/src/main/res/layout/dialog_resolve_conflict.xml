@@ -14,6 +14,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?attr/kpDialogBackgroundColor"
         android:minWidth="@dimen/min_dialog_width">
 
         <!-- This view prevents Dialog from collapsing the
@@ -50,7 +51,6 @@
             android:layout_marginBottom="@dimen/quarter_margin"
             android:onClick="@{() -> viewModel.onRemoteButtonClicked()}"
             android:text="@string/remote_database"
-            android:textColor="@color/primary"
             app:layout_constraintBottom_toTopOf="@id/localButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:screenState="@{viewModel.screenState}"
@@ -65,7 +65,6 @@
             android:layout_marginBottom="@dimen/quarter_margin"
             android:onClick="@{() -> viewModel.onLocalButtonClicked()}"
             android:text="@string/local_database"
-            android:textColor="@color/primary"
             app:layout_constraintBottom_toTopOf="@id/cancelButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:screenState="@{viewModel.screenState}"
@@ -80,7 +79,6 @@
             android:layout_marginBottom="@dimen/element_margin"
             android:onClick="@{() -> viewModel.onCancelButtonClicked()}"
             android:text="@string/cancel"
-            android:textColor="@color/primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:screenState="@{viewModel.screenState}"

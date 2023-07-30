@@ -15,23 +15,11 @@
         android:id="@+id/drawerLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white">
+        android:background="?attr/kpBackgroundColor">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
-            <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolBar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@color/action_bar_background"
-                android:minHeight="?attr/actionBarSize"
-                android:theme="@style/ActionBarStyle"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:popupTheme="@style/ActionBarPopupStyle" />
 
             <FrameLayout
                 android:id="@+id/fragmentContainer"
@@ -40,15 +28,29 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/toolBar" />
+                app:layout_constraintTop_toBottomOf="@id/toolbarLayout" />
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="5dp"
-                android:background="@drawable/action_bar_shadow"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/toolBar" />
+            <androidx.cardview.widget.CardView
+                android:id="@+id/toolbarLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="0dp"
+                app:cardElevation="@dimen/card_elevation"
+                app:cardBackgroundColor="?attr/kpActionBarBackgroundColor"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.appcompat.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="?attr/actionBarSize"
+                    android:theme="@style/ActionBarStyle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:popupTheme="@style/ActionBarPopupStyle" />
+
+            </androidx.cardview.widget.CardView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -56,7 +58,7 @@
             android:layout_width="260dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:background="@color/white"
+            android:background="?attr/kpBackgroundColor"
             android:orientation="vertical">
 
             <androidx.recyclerview.widget.RecyclerView

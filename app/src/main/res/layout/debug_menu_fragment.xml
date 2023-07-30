@@ -367,7 +367,7 @@
                     android:checked="@={viewModel.isExternalStorageEnabled}"
                     android:onCheckedChanged="@{(button, isChecked) -> viewModel.onExternalStorageCheckBoxChanged(isChecked)}"
                     android:text="@string/use_external_storage_for_remote_files"
-                    android:textColor="@color/primary_text"
+                    android:textColor="?attr/kpPrimaryTextColor"
                     android:textSize="@dimen/material_primary_text_size"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/hooksDivider" />
@@ -381,7 +381,7 @@
                     android:checked="@={viewModel.isIgnoreSslCertificate}"
                     android:onCheckedChanged="@{(button, isChecked) -> viewModel.onIgnoreSslCertificateCheckBoxChanged(isChecked)}"
                     android:text="@string/ignore_ssl_certificate_validation"
-                    android:textColor="@color/primary_text"
+                    android:textColor="?attr/kpPrimaryTextColor"
                     android:textSize="@dimen/material_primary_text_size"
                     android:visibility="gone"
                     app:layout_constraintStart_toStartOf="parent"
@@ -429,7 +429,7 @@
                     android:checked="@={viewModel.isFakeBiometricEnabled}"
                     android:onCheckedChanged="@{(button, isChecked) -> viewModel.onFakeBiometricCheckBoxChanged(isChecked)}"
                     android:text="@string/fake_biometric_enabled"
-                    android:textColor="@color/primary_text"
+                    android:textColor="?attr/kpPrimaryTextColor"
                     android:textSize="@dimen/material_primary_text_size"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/togglesDivider" />
@@ -443,7 +443,7 @@
                     android:checked="@={viewModel.isFakeFileSystemEnabled}"
                     android:onCheckedChanged="@{(button, isChecked) -> viewModel.onFakeFileSystemCheckBoxChanged(isChecked)}"
                     android:text="@string/fake_file_system_enabled"
-                    android:textColor="@color/primary_text"
+                    android:textColor="?attr/kpPrimaryTextColor"
                     android:textSize="@dimen/material_primary_text_size"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/fakeBiometricCheckBox" />

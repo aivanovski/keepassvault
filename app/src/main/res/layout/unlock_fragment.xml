@@ -84,7 +84,7 @@
             app:layout_constraintBottom_toBottomOf="@id/password"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/password"
-            app:materialBackgroundColor="@{@color/primary}"
+            app:materialBackgroundColor="@{viewModel.unlockButtonColor}"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
@@ -124,7 +124,7 @@
                     android:enabled="false"
                     android:maxWidth="200dp"
                     android:text="@{viewModel.keyFilename}"
-                    android:textColor="@color/primary"
+                    android:textColor="?attr/kpPrimaryColor"
                     tools:text="key-file-name" />
 
                 <ImageButton
@@ -133,8 +133,8 @@
                     android:layout_width="@dimen/small_borderless_icon_button_size"
                     android:layout_height="@dimen/small_borderless_icon_button_size"
                     android:onClick="@{() -> viewModel.onRemoveKeyFileButtonClicked()}"
-                    android:src="@drawable/ic_close_white_24dp"
-                    android:tint="@color/primary" />
+                    android:src="@drawable/ic_close_24dp"
+                    android:tint="?attr/kpPrimaryColor" />
 
             </LinearLayout>
 
@@ -168,17 +168,17 @@
             tools:itemCount="5"
             tools:listitem="@layout/cell_database_file" />
 
-        <com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
             style="@style/Material.FloatingActionButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/material_fab_margin"
-            android:layout_marginBottom="@dimen/half_margin"
-            app:fabItems="@{viewModel.fabItems}"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:layout_marginBottom="@dimen/element_margin"
+            android:onClick="@{() -> viewModel.onAddButtonClicked()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:onFabItemClicked="@{viewModel.fabClickListener}"
+            app:srcCompat="@drawable/ic_add_24dp"
             app:visible="@{viewModel.isFabButtonVisible}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

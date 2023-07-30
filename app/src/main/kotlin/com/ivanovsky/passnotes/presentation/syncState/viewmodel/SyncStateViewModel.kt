@@ -39,7 +39,8 @@ class SyncStateViewModel(
     val message = MutableLiveData(initModel.message)
     val messageColor = MutableLiveData(initModel.messageColor)
     val buttonText = MutableLiveData(EMPTY)
-    val actionButtonTextColor = MutableLiveData(resourceProvider.getColor(R.color.primary))
+    val actionButtonTextColor =
+        MutableLiveData(resourceProvider.getAttributeColor(R.attr.kpPrimaryColor))
     val showResolveConflictDialogEvent = SingleLiveEvent<FileDescriptor>()
     val showMessageDialogEvent = SingleLiveEvent<String>()
 
@@ -248,11 +249,11 @@ class SyncStateViewModel(
     private fun ButtonAction.getActionButtonColor(): Int {
         return when (this) {
             ButtonAction.RESOLVE, ButtonAction.DETAILS -> {
-                resourceProvider.getColor(R.color.error_text)
+                resourceProvider.getAttributeColor(R.attr.kpErrorTextColor)
             }
 
             else -> {
-                resourceProvider.getColor(R.color.primary)
+                resourceProvider.getAttributeColor(R.attr.kpPrimaryColor)
             }
         }
     }

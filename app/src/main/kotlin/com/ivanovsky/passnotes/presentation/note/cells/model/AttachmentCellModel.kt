@@ -7,5 +7,6 @@ data class AttachmentCellModel(
     override val id: String,
     val name: String,
     val size: String,
-    val backgroundShape: RoundedShape
+    val backgroundShape: RoundedShape,
+    val backgroundColor: Int
 ) : BaseCellModel(id)

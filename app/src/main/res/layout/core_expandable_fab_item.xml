@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Material.ExpandedFloatingActionButton.Item"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="@dimen/element_margin" />

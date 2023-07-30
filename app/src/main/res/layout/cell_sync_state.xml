@@ -21,7 +21,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/light_grey"
+            android:background="?attr/kpSecondaryBackgroundColor"
             android:minHeight="48dp">
 
             <ImageView
@@ -33,7 +33,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/primary_text"
+                app:tint="?attr/kpPrimaryTextColor"
                 app:visible="@{viewModel.isSyncIconVisible}" />
 
             <TextView

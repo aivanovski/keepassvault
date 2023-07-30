@@ -129,7 +129,8 @@
                     app:layout_constraintBottom_toBottomOf="@id/addTemplatesCheckBox"
                     app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
                     app:layout_constraintTop_toTopOf="@id/addTemplatesCheckBox"
-                    app:srcCompat="@drawable/ic_info_grey_600_24dp" />
+                    app:srcCompat="@drawable/ic_info_24dp"
+                    app:tint="?attr/kpIconPrimaryColor"/>
 
                 <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
                     android:id="@+id/fileExtension"

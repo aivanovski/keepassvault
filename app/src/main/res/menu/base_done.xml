@@ -5,7 +5,7 @@
 
     <item
         android:id="@+id/menu_done"
-        android:icon="@drawable/ic_done_white_24dp"
+        android:icon="@drawable/ic_done_24dp"
         android:title="@string/done"
         app:showAsAction="always" />
 

@@ -13,16 +13,16 @@
         android:layout_height="@dimen/autofill_icon_size"
         android:layout_gravity="center"
         android:layout_marginStart="@dimen/element_margin"
-        android:src="@drawable/ic_arrow_right_grey_600_24dp" />
+        android:src="@drawable/ic_arrow_autofill_24dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:gravity="center_vertical"
         android:layout_marginStart="@dimen/element_margin"
         android:layout_marginEnd="@dimen/element_margin"
-        android:textAppearance="?android:attr/textAppearanceListItemSmall"
-        android:text="@string/select_entry_with_dots" />
+        android:gravity="center_vertical"
+        android:text="@string/select_entry_with_dots"
+        android:textAppearance="?android:attr/textAppearanceListItemSmall" />
 
 </LinearLayout>

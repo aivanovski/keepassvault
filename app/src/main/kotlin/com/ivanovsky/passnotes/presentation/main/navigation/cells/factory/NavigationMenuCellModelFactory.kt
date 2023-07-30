@@ -46,27 +46,27 @@ class NavigationMenuCellModelFactory(
             CellId.SELECT_FILE -> SingleTextWithIconCellModel(
                 id = cellId,
                 title = resourceProvider.getString(R.string.select_file),
-                iconResId = R.drawable.ic_folder_grey_600_24dp
+                iconResId = R.drawable.ic_folder_24dp
             )
             CellId.LOCK -> SingleTextWithIconCellModel(
                 id = cellId,
                 title = resourceProvider.getString(R.string.lock),
-                iconResId = R.drawable.ic_lock_grey_600_24dp
+                iconResId = R.drawable.ic_lock_24dp
             )
             CellId.SETTINGS -> SingleTextWithIconCellModel(
                 id = cellId,
                 title = resourceProvider.getString(R.string.settings),
-                iconResId = R.drawable.ic_settings_grey_600_24dp
+                iconResId = R.drawable.ic_settings_24dp
             )
             CellId.DEBUG_MENU -> SingleTextWithIconCellModel(
                 id = cellId,
                 title = resourceProvider.getString(R.string.debug_menu),
-                iconResId = R.drawable.ic_developer_mode_grey_600_24dp
+                iconResId = R.drawable.ic_developer_mode_24dp
             )
             CellId.ABOUT -> SingleTextWithIconCellModel(
                 id = cellId,
                 title = resourceProvider.getString(R.string.about),
-                iconResId = R.drawable.ic_info_grey_600_24dp
+                iconResId = R.drawable.ic_info_24dp
             )
             else -> throw IllegalArgumentException()
         }

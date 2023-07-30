@@ -55,7 +55,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}"
-            app:srcCompat="@drawable/ic_add_white_24dp" />
+            app:srcCompat="@drawable/ic_add_24dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

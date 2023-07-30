@@ -6,7 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
+import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.DialogSortAndViewBinding
+import com.ivanovsky.passnotes.extensions.cloneInContext
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
@@ -27,7 +29,7 @@ class SortAndViewDialog : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return DialogSortAndViewBinding.inflate(inflater)
+        return DialogSortAndViewBinding.inflate(inflater.cloneInContext(R.style.AppDialogTheme))
             .also {
                 it.lifecycleOwner = this
                 it.viewModel = viewModel

@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
+import com.ivanovsky.passnotes.R
 
 class ConfirmationDialog : DialogFragment(), DialogInterface.OnClickListener {
 
@@ -22,7 +23,7 @@ class ConfirmationDialog : DialogFragment(), DialogInterface.OnClickListener {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(context)
+        return AlertDialog.Builder(context, R.style.AppDialogTheme)
             .setMessage(message)
             .setPositiveButton(positiveButtonText, this)
             .setNegativeButton(negativeButtonText, this)

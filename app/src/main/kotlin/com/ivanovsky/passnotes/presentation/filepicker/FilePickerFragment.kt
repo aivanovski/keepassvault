@@ -52,7 +52,7 @@ class FilePickerFragment : FragmentWithDoneButton() {
                 PICK_FILE -> getString(R.string.select_file)
                 PICK_DIRECTORY -> getString(R.string.select_directory)
             }
-            setHomeAsUpIndicator(R.drawable.ic_close_white_24dp)
+            setHomeAsUpIndicator(R.drawable.ic_close_24dp)
             setDisplayHomeAsUpEnabled(true)
         }
     }

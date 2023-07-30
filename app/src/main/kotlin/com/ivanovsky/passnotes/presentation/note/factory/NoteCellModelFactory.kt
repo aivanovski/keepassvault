@@ -44,6 +44,9 @@ class NoteCellModelFactory(
                     name = property.name ?: StringUtils.EMPTY,
                     value = property.value ?: StringUtils.EMPTY,
                     backgroundShape = shape,
+                    backgroundColor = resourceProvider.getAttributeColor(
+                        R.attr.kpSecondaryBackgroundColor
+                    ),
                     isVisibilityButtonVisible = property.isProtected,
                     isValueProtected = property.isProtected
                 )
@@ -77,7 +80,10 @@ class NoteCellModelFactory(
                     id = cellId,
                     name = attachment.name,
                     size = StringUtils.formatFileSize(attachment.data.size.toLong()),
-                    backgroundShape = shape
+                    backgroundShape = shape,
+                    backgroundColor = resourceProvider.getAttributeColor(
+                        R.attr.kpSecondaryBackgroundColor
+                    )
                 )
             )
 
@@ -110,6 +116,9 @@ class NoteCellModelFactory(
                     name = property.name ?: StringUtils.EMPTY,
                     value = property.value ?: StringUtils.EMPTY,
                     backgroundShape = shape,
+                    backgroundColor = resourceProvider.getAttributeColor(
+                        R.attr.kpSecondaryBackgroundColor
+                    ),
                     isVisibilityButtonVisible = property.isProtected,
                     isValueProtected = property.isProtected
                 )
@@ -138,7 +147,7 @@ class NoteCellModelFactory(
         HeaderCellModel(
             id = null,
             title = title,
-            color = resourceProvider.getColor(R.color.secondary_text),
+            color = resourceProvider.getAttributeColor(R.attr.kpSecondaryTextColor),
             isBold = false,
             paddingHorizontal = R.dimen.double_element_margin
         )

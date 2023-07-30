@@ -10,7 +10,6 @@ import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingType.ERROR
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingType.LOADING
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingType.NOT_INITIALIZED
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
-import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
 import com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
 
 open class DefaultScreenStateHandler : ScreenStateHandler {
@@ -40,8 +39,7 @@ open class DefaultScreenStateHandler : ScreenStateHandler {
                     view.state = ScreenStateView.State.EMPTY
                     view.isVisible = true
                 } else {
-                    view.isVisible =
-                        (view is FloatingActionButton || view is ExpandableFloatingActionButton)
+                    view.isVisible = (view is FloatingActionButton)
                 }
             }
             LOADING -> {

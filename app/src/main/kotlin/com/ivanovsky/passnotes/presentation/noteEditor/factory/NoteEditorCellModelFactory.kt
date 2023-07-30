@@ -324,7 +324,7 @@ class NoteEditorCellModelFactory(
         return HeaderCellModel(
             id = id,
             title = title,
-            color = resourceProvider.getColor(R.color.secondary_text),
+            color = resourceProvider.getAttributeColor(R.attr.kpSecondaryTextColor),
             isBold = false,
             paddingHorizontal = R.dimen.element_margin
         )

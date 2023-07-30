@@ -37,8 +37,6 @@ import com.ivanovsky.passnotes.presentation.core.adapter.StringArraySpinnerAdapt
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.widget.CellLinearLayout
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
-import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton
-import com.ivanovsky.passnotes.presentation.core.widget.ExpandableFloatingActionButton.OnItemClickListener
 import com.ivanovsky.passnotes.presentation.core.widget.SecureTextView
 import com.ivanovsky.passnotes.presentation.core.widget.TextMovementMethod
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnButtonClickListener
@@ -243,22 +241,6 @@ fun setOnButtonClickListener(
     listener: OnButtonClickListener?
 ) {
     errorPanelView.buttonClickListener = listener
-}
-
-@BindingAdapter("fabItems")
-fun setFabItems(
-    fab: ExpandableFloatingActionButton,
-    items: List<String>?
-) {
-    fab.inflate(items ?: emptyList())
-}
-
-@BindingAdapter("onFabItemClicked")
-fun setFabClickListener(
-    fab: ExpandableFloatingActionButton,
-    onItemClickListener: OnItemClickListener?
-) {
-    fab.onItemClickListener = onItemClickListener
 }
 
 @BindingAdapter("onItemSelected")

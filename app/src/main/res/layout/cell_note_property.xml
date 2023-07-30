@@ -20,7 +20,7 @@
         android:foreground="?attr/selectableItemBackground"
         android:onClick="@{() -> viewModel.onClicked()}"
         app:backgroundShape="@{viewModel.model.backgroundShape}"
-        app:backgroundShapeColor="@{@color/light_grey}"
+        app:backgroundShapeColor="@{viewModel.model.backgroundColor}"
         app:onLongClick="@{() -> viewModel.onLongClicked()}">
 
         <TextView
@@ -64,7 +64,7 @@
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:onClick="@{() -> viewModel.onVisibilityButtonClicked()}"
-            android:tint="@color/icon_gray"
+            android:tint="?attr/kpIconPrimaryColor"
             app:imageResourceId="@{viewModel.visibilityIconResId}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

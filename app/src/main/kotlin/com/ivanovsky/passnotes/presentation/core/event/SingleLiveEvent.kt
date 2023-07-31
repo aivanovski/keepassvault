@@ -25,19 +25,7 @@ open class SingleLiveEvent<T> : MutableLiveData<T>() {
         super.setValue(value)
     }
 
-    fun call() {
-        value = null
-    }
-
     fun call(value: T) {
         this.value = value
-    }
-
-    fun postCall() {
-        postValue(null)
-    }
-
-    fun postCall(value: T) {
-        postValue(value)
     }
 }

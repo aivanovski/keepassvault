@@ -380,7 +380,7 @@ class GroupsViewModel(
         }
 
         if (args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION && groupUid == rootGroupUid) {
-            finishActivityEvent.call()
+            finishActivityEvent.call(Unit)
         } else {
             router.exit()
         }
@@ -390,7 +390,7 @@ class GroupsViewModel(
         interactor.lockDatabase()
         when (args.appMode) {
             ApplicationLaunchMode.AUTOFILL_SELECTION -> {
-                finishActivityEvent.call()
+                finishActivityEvent.call(Unit)
             }
             else -> {
                 router.backTo(
@@ -406,7 +406,7 @@ class GroupsViewModel(
     }
 
     fun onAddTemplatesClicked() {
-        showAddTemplatesDialogEvent.call()
+        showAddTemplatesDialogEvent.call(Unit)
     }
 
     fun onAddTemplatesConfirmed() {
@@ -439,7 +439,7 @@ class GroupsViewModel(
     }
 
     fun onSortAndViewButtonClicked() {
-        showSortAndViewDialogEvent.call()
+        showSortAndViewDialogEvent.call(Unit)
     }
 
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
@@ -749,6 +749,8 @@ class GroupsViewModel(
                 visibleMenuItems.value = getVisibleMenuItems()
                 updateOptionPanelState()
             }
+
+            else -> {}
         }
     }
 

@@ -144,7 +144,7 @@ class SearchViewModel(
         interactor.lockDatabase()
         when (args.appMode) {
             AUTOFILL_SELECTION -> {
-                finishActivityEvent.call()
+                finishActivityEvent.call(Unit)
             }
             else -> {
                 router.backTo(UnlockScreen(UnlockScreenArgs(args.appMode)))
@@ -153,7 +153,7 @@ class SearchViewModel(
     }
 
     fun onSortAndViewButtonClicked() {
-        showSortAndViewDialogEvent.call()
+        showSortAndViewDialogEvent.call(Unit)
     }
 
     fun onAddAutofillDataConfirmed(note: Note) {

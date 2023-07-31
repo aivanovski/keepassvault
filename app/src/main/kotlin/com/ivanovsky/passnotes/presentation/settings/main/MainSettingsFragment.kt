@@ -33,8 +33,8 @@ class MainSettingsFragment :
     }
 
     override fun onPreferenceStartFragment(
-        caller: PreferenceFragmentCompat?,
-        pref: Preference?
+        caller: PreferenceFragmentCompat,
+        pref: Preference
     ): Boolean {
         return true
     }

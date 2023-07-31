@@ -137,7 +137,7 @@ class AppSettingsFragment : BasePreferenceFragment() {
         return view
     }
 
-    override fun onDisplayPreferenceDialog(preference: Preference?) {
+    override fun onDisplayPreferenceDialog(preference: Preference) {
         if (preference is CustomDialogPreference) {
             onCustomDialogPreferenceClicked(preference)
         } else {

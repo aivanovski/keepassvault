@@ -146,7 +146,7 @@ class NoteViewModel(
         interactor.lockDatabase()
         when (args.appMode) {
             ApplicationLaunchMode.AUTOFILL_SELECTION -> {
-                finishActivityEvent.call()
+                finishActivityEvent.call(Unit)
             }
             else -> {
                 router.backTo(

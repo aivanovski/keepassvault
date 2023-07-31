@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.presentation.core.viewmodel
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import com.ivanovsky.passnotes.presentation.core.BaseMutableCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
@@ -16,8 +15,8 @@ class OptionPanelCellViewModel(
     val positiveText = MutableLiveData(initModel.positiveText)
     val negativeText = MutableLiveData(initModel.negativeText)
     val message = MutableLiveData(initModel.message)
-    val isSpaceVisible = Transformations.map(message) { it.isEmpty() }
-    val isMessageVisible = Transformations.map(message) { it.isNotEmpty() }
+    val isSpaceVisible = MutableLiveData(initModel.message.isEmpty())
+    val isMessageVisible = MutableLiveData(initModel.message.isNotEmpty())
 
     override fun setModel(newModel: OptionPanelCellModel) {
         super.setModel(newModel)
@@ -25,6 +24,8 @@ class OptionPanelCellViewModel(
         positiveText.value = newModel.positiveText
         negativeText.value = newModel.negativeText
         message.value = newModel.message
+        isSpaceVisible.value = newModel.message.isEmpty()
+        isMessageVisible.value = newModel.message.isNotEmpty()
     }
 
     fun onPositiveButtonClicked() {

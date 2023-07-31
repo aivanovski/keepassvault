@@ -168,42 +168,42 @@ android {
 }
 
 def koinVersion = '2.0.1'
-def roomVersion = '2.4.2'
+def roomVersion = '2.5.2'
 def lifecycleVersion = '2.2.0'
-def androidXVersion = '1.2.0'
-def legacySupportV4Version = '1.0.0'
-def androidAnnotationVersion = '1.1.0'
+def appCompatVersion = '1.6.1'
+def androidAnnotationVersion = '1.6.0'
 def multidexVersion = '2.0.1'
-def coroutinesVersion = '1.5.0'
-def recyclerViewVersion = '1.1.0'
-def constrainLayoutVersion = '1.1.3'
+def coroutinesVersion = '1.6.4'
+def recyclerViewVersion = '1.3.1'
+def materialVersion = '1.9.0'
+def constrainLayoutVersion = '2.1.4'
 def cardViewVersion = '1.0.0'
-def coreKtxVersion = '1.3.1'
-def activityKtxVersion = '1.1.0'
+def coreKtxVersion = '1.10.1'
+def activityKtxVersion = '1.7.2'
 def preferenceKtxVersion = '1.1.1'
 def biometricVersion = '1.2.0-alpha05'
+def liveDataKtxVersion = '2.6.1'
 
 def annimonStreamApiVersion = '1.1.4'
 def okHttpVersion = '4.9.1'
 def apacheCommonsLangVersion = '3.0'
-def sardineAndroidVersion = 'v0.8'
+def sardineAndroidVersion = '0.8'
 def ciceroneVersion = '7.0'
 def timberVersion = '5.0.1'
 def treessenceVersion = '1.0.5'
-def kotpassVersion = '0.4.10'
+def kotpassVersion = '0.4.12'
 def fzf4jVersion = '0.2.1'
-def jgitVersion = '6.2.0.202206071550-r'
+def jgitVersion = '6.5.0.202303070854-r'
 
 // Test
 def jUnitVersion = '4.13'
 def robolectricVersion = '4.9'
-def androidXRulesVersion = '1.4.0'
-def androidXJunitVersion = '1.1.3'
-def mockkVersion = '1.11.0'
+def androidXRulesVersion = '1.5.0'
+def androidXJunitVersion = '1.1.5'
+def mockkVersion = '1.12.3'
 def truthVersion = '1.1.3'
-def androidXArchVersion = '2.1.0'
-def androidXCoreVersion = '1.2.0'
-def roomTesting = '2.4.2'
+def androidXArchVersion = '2.2.0'
+def androidXCoreVersion = '1.5.0'
 
 dependencies {
     // Test dependencies
@@ -218,7 +218,7 @@ dependencies {
     // Android test dependencies
     androidTestImplementation "androidx.test.ext:junit:$androidXJunitVersion"
     androidTestImplementation "androidx.test:rules:$androidXRulesVersion"
-    androidTestImplementation "androidx.room:room-testing:$roomTesting"
+    androidTestImplementation "androidx.room:room-testing:$roomVersion"
     androidTestImplementation "com.google.truth:truth:$truthVersion"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
 
@@ -235,30 +235,21 @@ dependencies {
     kapt "androidx.room:room-compiler:$roomVersion"
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
 
-    // Lifecycle libraries
-    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
-
     // AndroidX libraries
-    implementation "androidx.appcompat:appcompat:$androidXVersion"
-    implementation "androidx.legacy:legacy-support-v4:$legacySupportV4Version"
-    implementation "com.google.android.material:material:1.6.1"
+    implementation "androidx.appcompat:appcompat:$appCompatVersion"
+    implementation "com.google.android.material:material:$materialVersion"
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
     implementation "androidx.cardview:cardview:$cardViewVersion"
     implementation "androidx.annotation:annotation:$androidAnnotationVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constrainLayoutVersion"
     implementation "androidx.biometric:biometric:$biometricVersion"
-
-    // Android KTX
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
     implementation "androidx.core:core-ktx:$coreKtxVersion"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-livedata-core-ktx:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-core-ktx:$liveDataKtxVersion"
     implementation "androidx.activity:activity-ktx:$activityKtxVersion"
     implementation "androidx.preference:preference-ktx:$preferenceKtxVersion"
 
-    // Java stream API
-    implementation "com.annimon:stream:$annimonStreamApiVersion"
-
-    //Apache Commons Lang
+    //Apache Commons Lang (TODO: remove)
     implementation "org.apache.commons:commons-lang3:$apacheCommonsLangVersion"
 
     // Kotlin

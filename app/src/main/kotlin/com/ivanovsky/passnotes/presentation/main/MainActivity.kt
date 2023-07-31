@@ -155,10 +155,10 @@ class MainActivity :
     }
 
     override fun onPreferenceStartFragment(
-        caller: PreferenceFragmentCompat?,
-        pref: Preference?
+        caller: PreferenceFragmentCompat,
+        pref: Preference
     ): Boolean {
-        val settingsFragmentName = pref?.fragment ?: throw IllegalStateException()
+        val settingsFragmentName = pref.fragment ?: throw IllegalStateException()
         settingsRouter.navigateTo(settingsFragmentName)
         return true
     }

@@ -343,11 +343,11 @@ class DebugMenuViewModel(
     }
 
     fun onPickFileButtonClicked() {
-        showSystemFilePickerEvent.call()
+        showSystemFilePickerEvent.call(Unit)
     }
 
     fun onCreateFileButtonClicked() {
-        showSystemFileCreatorEvent.call()
+        showSystemFileCreatorEvent.call(Unit)
     }
 
     fun onFilePicked(uri: Uri) {

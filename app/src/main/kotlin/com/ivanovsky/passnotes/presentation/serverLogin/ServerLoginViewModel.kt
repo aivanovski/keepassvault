@@ -70,7 +70,7 @@ class ServerLoginViewModel(
         }
 
         screenState.value = ScreenState.loading()
-        hideKeyboardEvent.call()
+        hideKeyboardEvent.call(Unit)
         isDoneButtonVisible.value = false
 
         viewModelScope.launch {
@@ -117,7 +117,7 @@ class ServerLoginViewModel(
             FSType.GIT -> interactor.getTestGitCredentials()
             FSType.FAKE -> interactor.getTestFakeCredentials()
             else -> null
-        }
+        } ?: return
 
         when (credentials) {
             is FSCredentials.BasicCredentials -> {

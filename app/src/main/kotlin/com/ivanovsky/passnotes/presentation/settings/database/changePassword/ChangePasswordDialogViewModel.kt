@@ -44,7 +44,7 @@ class ChangePasswordDialogViewModel(
             val changeResult = interactor.changePassword(password, newPassword)
 
             if (changeResult.isSucceededOrDeferred) {
-                finishScreenEvent.call()
+                finishScreenEvent.call(Unit)
             } else {
                 val message = errorInteractor.processAndGetMessage(changeResult.error)
                 screenState.value = ScreenState.dataWithError(message)
@@ -53,7 +53,7 @@ class ChangePasswordDialogViewModel(
     }
 
     fun onCancelButtonClicked() {
-        finishScreenEvent.call()
+        finishScreenEvent.call(Unit)
     }
 
     private fun isFieldsValid(

@@ -57,7 +57,7 @@ class DatabaseSettingsFragment : BasePreferenceFragment() {
         }
     }
 
-    override fun onDisplayPreferenceDialog(preference: Preference?) {
+    override fun onDisplayPreferenceDialog(preference: Preference) {
         if (preference is CustomDialogPreference &&
             preference.key == getString(R.string.pref_change_password)
         ) {

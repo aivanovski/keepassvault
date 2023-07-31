@@ -70,7 +70,7 @@ class NewDatabaseViewModel(
             return
         }
 
-        hideKeyboardEvent.call()
+        hideKeyboardEvent.call(Unit)
         doneButtonVisibility.value = false
         screenState.value = ScreenState.loading()
 
@@ -185,8 +185,7 @@ class NewDatabaseViewModel(
                 storageType.value = resourceProvider.getString(R.string.public_storage)
                 filename.value = removeFileExtensionsIfNeed(selectedFile.name)
             }
-            FSType.UNDEFINED -> {
-            }
+            FSType.UNDEFINED, FSType.FAKE, FSType.GIT -> {}
         }
 
         storagePath.value = selectedFile.path

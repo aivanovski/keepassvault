@@ -312,7 +312,7 @@ class UnlockViewModel(
     }
 
     fun onAddButtonClicked() {
-        showAddMenuDialog.call()
+        showAddMenuDialog.call(Unit)
     }
 
     fun onNewFileClicked() {

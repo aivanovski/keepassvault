@@ -3,13 +3,13 @@ package com.ivanovsky.passnotes.data;
 import android.os.Handler;
 import android.os.Looper;
 import androidx.annotation.NonNull;
-import com.annimon.stream.Collectors;
-import com.annimon.stream.Stream;
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus;
 import com.ivanovsky.passnotes.data.entity.SyncState;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.util.ReflectionUtils;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -158,11 +158,14 @@ public class ObserverBus {
 
     @SuppressWarnings("unchecked")
     private <T> List<T> filterObservers(Class<T> type) {
-        return Stream.of(observers)
-                .filter(
-                        observer ->
-                                ReflectionUtils.containsInterfaceInClass(observer.getClass(), type))
-                .map(observer -> (T) observer)
-                .collect(Collectors.toList());
+        List<T> result = new ArrayList<>();
+
+        for (Observer observer : observers) {
+            if (ReflectionUtils.containsInterfaceInClass(observer.getClass(), type)) {
+                result.add((T) observer);
+            }
+        }
+
+        return result;
     }
 }

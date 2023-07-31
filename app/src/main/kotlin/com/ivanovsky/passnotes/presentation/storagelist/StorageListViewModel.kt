@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.data.entity.FSType.FAKE
 import com.ivanovsky.passnotes.data.entity.FSType.GIT
 import com.ivanovsky.passnotes.data.entity.FSType.INTERNAL_STORAGE
 import com.ivanovsky.passnotes.data.entity.FSType.SAF
+import com.ivanovsky.passnotes.data.entity.FSType.UNDEFINED
 import com.ivanovsky.passnotes.data.entity.FSType.WEBDAV
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.file.AuthType
@@ -240,6 +241,7 @@ class StorageListViewModel(
             }
             SAF -> onSafStorageSelected()
             WEBDAV, GIT, FAKE -> onRemoteFileStorageSelected(selectedOption.root)
+            UNDEFINED -> {}
         }
     }
 
@@ -271,10 +273,10 @@ class StorageListViewModel(
 
         when (args.action) {
             Action.PICK_FILE -> {
-                showSystemFilePickerEvent.call()
+                showSystemFilePickerEvent.call(Unit)
             }
             Action.PICK_STORAGE -> {
-                showSystemFileCreatorEvent.call()
+                showSystemFileCreatorEvent.call(Unit)
             }
         }
     }

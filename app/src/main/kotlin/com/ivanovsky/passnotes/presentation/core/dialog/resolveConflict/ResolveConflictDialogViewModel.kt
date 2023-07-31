@@ -53,7 +53,7 @@ class ResolveConflictDialogViewModel(
     }
 
     fun onCancelButtonClicked() {
-        dismissEvent.call()
+        dismissEvent.call(Unit)
     }
 
     fun onLocalButtonClicked() {
@@ -70,7 +70,7 @@ class ResolveConflictDialogViewModel(
         viewModelScope.launch {
             val resolvedConflict = interactor.resolveConflict(args.file, resolutionStrategy)
             if (resolvedConflict.isSucceededOrDeferred) {
-                dismissEvent.call()
+                dismissEvent.call(Unit)
             } else {
                 setScreenState(
                     ScreenState.error(

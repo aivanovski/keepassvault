@@ -6,9 +6,9 @@ import app.keemobile.kotpass.database.KeePassDatabase
 import app.keemobile.kotpass.models.BinaryData
 import app.keemobile.kotpass.models.BinaryReference
 import app.keemobile.kotpass.models.Entry as RawEntry
+import app.keemobile.kotpass.models.EntryFields
 import app.keemobile.kotpass.models.EntryValue
 import app.keemobile.kotpass.models.Group as RawGroup
-import app.keemobile.kotpass.models.EntryFields
 import app.keemobile.kotpass.models.TimeData
 import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Group

@@ -8,7 +8,6 @@ import com.ivanovsky.passnotes.data.entity.SyncProgressStatus;
 import com.ivanovsky.passnotes.data.entity.SyncState;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
 import com.ivanovsky.passnotes.util.ReflectionUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

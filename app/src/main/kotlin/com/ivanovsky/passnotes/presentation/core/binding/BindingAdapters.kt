@@ -162,6 +162,10 @@ fun setOnLongClickListener(
 
 @BindingAdapter("textInputLines")
 fun setInputLines(editText: EditText, inputLines: TextInputLines?) {
+    if (inputLines == null) {
+        return
+    }
+
     when (inputLines) {
         TextInputLines.SINGLE_LINE -> {
             editText.minLines = 1
@@ -212,6 +216,10 @@ fun setMovementMethod(
     textView: TextView,
     movementMethod: TextMovementMethod?
 ) {
+    if (movementMethod == null) {
+        return
+    }
+
     when (movementMethod) {
         TextMovementMethod.LINK_MOVEMENT_METHOD -> {
             textView.movementMethod = LinkMovementMethod.getInstance()

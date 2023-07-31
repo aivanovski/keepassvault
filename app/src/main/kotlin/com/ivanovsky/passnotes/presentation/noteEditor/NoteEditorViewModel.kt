@@ -127,7 +127,7 @@ class NoteEditorViewModel(
 
             val note = createNewNoteFromCells(groupUid, template)
             isDoneButtonVisible.value = false
-            hideKeyboardEvent.call()
+            hideKeyboardEvent.call(Unit)
             screenState.value = ScreenState.loading()
 
             viewModelScope.launch {
@@ -148,7 +148,7 @@ class NoteEditorViewModel(
             val sourceTemplate = template
 
             isDoneButtonVisible.value = false
-            hideKeyboardEvent.call()
+            hideKeyboardEvent.call(Unit)
             screenState.value = ScreenState.loading()
 
             val newNote = createModifiedNoteFromCells(sourceNote, sourceTemplate)

@@ -6,6 +6,7 @@ import app.keemobile.kotpass.database.KeePassDatabase
 import app.keemobile.kotpass.models.BinaryData
 import app.keemobile.kotpass.models.BinaryReference
 import app.keemobile.kotpass.models.Entry as RawEntry
+import app.keemobile.kotpass.models.EntryFields
 import app.keemobile.kotpass.models.EntryValue
 import app.keemobile.kotpass.models.Group as RawGroup
 import app.keemobile.kotpass.models.TimeData
@@ -183,7 +184,7 @@ fun Note.convertToEntry(): RawEntry {
 
     return RawEntry(
         uuid = uid ?: throw IllegalStateException(),
-        fields = fields,
+        fields = EntryFields(fields),
         times = TimeData(
             creationTime = Instant.ofEpochMilli(created.time),
             lastModificationTime = Instant.ofEpochMilli(modified.time),

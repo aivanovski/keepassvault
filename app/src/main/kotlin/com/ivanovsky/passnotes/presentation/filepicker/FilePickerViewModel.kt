@@ -113,7 +113,7 @@ class FilePickerViewModel(
 
             permissionHelper.getRequiredFilePermissionType()?.let { permission ->
                 if (permission == StoragePermissionType.ALL_FILES_ACCESS) {
-                    showAllFilePermissionDialogEvent.call()
+                    showAllFilePermissionDialogEvent.call(Unit)
                 } else {
                     requestPermissionEvent.call(permission)
                 }

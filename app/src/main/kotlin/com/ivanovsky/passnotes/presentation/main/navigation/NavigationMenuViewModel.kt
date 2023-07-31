@@ -108,7 +108,7 @@ class NavigationMenuViewModel(
                 router.navigateTo(DebugMenuScreen())
             }
         }
-        hideMenuEvent.call()
+        hideMenuEvent.call(Unit)
     }
 
     private fun buildCellViewModels(): List<BaseCellViewModel> {

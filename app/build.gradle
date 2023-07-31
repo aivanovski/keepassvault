@@ -196,7 +196,7 @@ def fzf4jVersion = '0.2.1'
 def jgitVersion = '6.5.0.202303070854-r'
 
 // Test
-def jUnitVersion = '4.13'
+def jUnitVersion = '4.13.2'
 def robolectricVersion = '4.9'
 def androidXRulesVersion = '1.5.0'
 def androidXJunitVersion = '1.1.5'

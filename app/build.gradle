@@ -167,7 +167,7 @@ android {
     preBuild.dependsOn(generateVersionPropertiesFile)
 }
 
-def koinVersion = '2.0.1'
+def koinVersion = '2.2.3'
 def roomVersion = '2.5.2'
 def lifecycleVersion = '2.2.0'
 def appCompatVersion = '1.6.1'

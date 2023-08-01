@@ -191,7 +191,7 @@ def sardineAndroidVersion = '0.8'
 def ciceroneVersion = '7.0'
 def timberVersion = '5.0.1'
 def treessenceVersion = '1.0.5'
-def kotpassVersion = '0.4.12'
+def kotpassVersion = '0.6.0'
 def fzf4jVersion = '0.2.1'
 def jgitVersion = '6.5.0.202303070854-r'
 

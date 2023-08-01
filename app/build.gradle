@@ -197,7 +197,7 @@ def jgitVersion = '6.5.0.202303070854-r'
 
 // Test
 def jUnitVersion = '4.13.2'
-def robolectricVersion = '4.9'
+def robolectricVersion = '4.10.3'
 def androidXRulesVersion = '1.5.0'
 def androidXJunitVersion = '1.1.5'
 def mockkVersion = '1.13.5'

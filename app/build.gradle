@@ -186,7 +186,7 @@ def liveDataKtxVersion = '2.6.1'
 
 def annimonStreamApiVersion = '1.1.4'
 def okHttpVersion = '4.9.1'
-def apacheCommonsLangVersion = '3.0'
+def apacheCommonsLangVersion = '3.13.0'
 def sardineAndroidVersion = '0.8'
 def ciceroneVersion = '7.0'
 def timberVersion = '5.0.1'

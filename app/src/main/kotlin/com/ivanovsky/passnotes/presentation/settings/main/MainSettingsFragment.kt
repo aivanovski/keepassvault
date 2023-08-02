@@ -36,7 +36,7 @@ class MainSettingsFragment :
         caller: PreferenceFragmentCompat,
         pref: Preference
     ): Boolean {
-        return true
+        return false
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

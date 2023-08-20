@@ -1,0 +1,1 @@
+- Fix requirements for Google Play

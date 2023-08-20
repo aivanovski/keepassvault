@@ -62,7 +62,7 @@ task generateVersionPropertiesFile {
 android {
     def ext = rootProject.extensions.ext
 
-    compileSdkVersion ext.android.compileSdk
+    compileSdk ext.android.compileSdk
 
     defaultConfig {
         applicationId 'com.ivanovsky.passnotes'

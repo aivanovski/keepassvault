@@ -7,6 +7,7 @@ import android.os.Looper
 import androidx.annotation.StringRes
 import androidx.preference.PreferenceManager
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.PasswordGeneratorSettings
 import com.ivanovsky.passnotes.data.entity.TestData
 import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
@@ -18,6 +19,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_GRO
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_SSL_CERTIFICATE_VALIDATION_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.PASSWORD_GENERATOR_SETTINGS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SEARCH_TYPE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_DIRECTION
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_TYPE
@@ -26,6 +28,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.TEST_T
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.BOOLEAN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.INT
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.STRING
+import com.ivanovsky.passnotes.data.serialization.PasswordGeneratorSettingsConverter
 import com.ivanovsky.passnotes.data.serialization.TestDataConverter
 import com.ivanovsky.passnotes.data.serialization.TestTogglesConverter
 import com.ivanovsky.passnotes.domain.entity.SearchType
@@ -129,6 +132,15 @@ class SettingsImpl(private val context: Context) : Settings {
         get() = getBoolean(IS_GROUPS_AT_START_ENABLED)
         set(value) {
             putBoolean(IS_GROUPS_AT_START_ENABLED, value)
+        }
+
+    override var passwordGeneratorSettings: PasswordGeneratorSettings
+        get() = getString(PASSWORD_GENERATOR_SETTINGS)?.let {
+            PasswordGeneratorSettingsConverter.fromString(it)
+        } ?: PasswordGeneratorSettings.DEFAULT
+        set(value) {
+            val strValue = value.let { PasswordGeneratorSettingsConverter.toString(it) }
+            putString(PASSWORD_GENERATOR_SETTINGS, strValue)
         }
 
     override var testData: TestData?
@@ -299,6 +311,11 @@ class SettingsImpl(private val context: Context) : Settings {
         ),
         SORT_DIRECTION(
             keyId = R.string.pref_sort_direction,
+            type = STRING,
+            defaultValue = null
+        ),
+        PASSWORD_GENERATOR_SETTINGS(
+            keyId = R.string.pref_password_generator_settings,
             type = STRING,
             defaultValue = null
         ),

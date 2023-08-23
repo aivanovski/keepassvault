@@ -7,6 +7,6 @@ enum class PasswordResource(val symbols: String) {
     MINUS("-"),
     UNDERSCORE("_"),
     SPACE(" "),
-    SPECIAL("&/,^@.#:%\\='$!*`;+"),
+    SPECIAL("&/,^@.#:%\\\"='$!*`;+"),
     BRACKETS("[](){}<>")
 }

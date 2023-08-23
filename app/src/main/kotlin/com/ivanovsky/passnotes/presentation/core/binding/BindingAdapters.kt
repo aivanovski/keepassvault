@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
+import com.google.android.material.slider.Slider
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.ivanovsky.passnotes.R
@@ -41,6 +42,7 @@ import com.ivanovsky.passnotes.presentation.core.widget.SecureTextView
 import com.ivanovsky.passnotes.presentation.core.widget.TextMovementMethod
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnButtonClickListener
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnItemSelectListener
+import com.ivanovsky.passnotes.presentation.core.widget.entity.OnSliderValueSelectedListener
 import com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape
 import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType
 import com.ivanovsky.passnotes.presentation.core.widget.entity.SecretInputType.DIGITS
@@ -274,6 +276,26 @@ fun setSpinnerItemSelectedListener(
     } else {
         spinner.onItemSelectedListener = null
     }
+}
+
+@BindingAdapter("onSliderValueChanged")
+fun setSliderValueSelectedListener(
+    slider: Slider,
+    listener: OnSliderValueSelectedListener?
+) {
+    slider.clearOnSliderTouchListeners()
+    if (listener == null) {
+        return
+    }
+
+    slider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+        override fun onStartTrackingTouch(slider: Slider) {
+        }
+
+        override fun onStopTrackingTouch(slider: Slider) {
+            listener.onValueSelected(slider.value.toInt())
+        }
+    })
 }
 
 @BindingAdapter("items")

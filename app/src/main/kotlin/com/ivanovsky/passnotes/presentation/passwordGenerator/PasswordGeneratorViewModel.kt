@@ -149,7 +149,7 @@ class PasswordGeneratorViewModel(
 
         val newSettings = when (resource) {
             PasswordResource.UPPERCASE -> currentSettings.copy(
-                isUpperCaseLettersEnabled = isEnabled,
+                isUpperCaseLettersEnabled = isEnabled
             )
 
             PasswordResource.LOWERCASE -> currentSettings.copy(

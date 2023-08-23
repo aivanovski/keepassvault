@@ -296,7 +296,6 @@ fun setSliderValueSelectedListener(
             listener.onValueSelected(slider.value.toInt())
         }
     })
-
 }
 
 @BindingAdapter("items")

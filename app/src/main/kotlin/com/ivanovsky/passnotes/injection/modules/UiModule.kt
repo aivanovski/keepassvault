@@ -304,7 +304,7 @@ object UiModule {
             viewModel { AppSettingsViewModel(get(), get(), get(), get(), get(), get()) }
             viewModel { DatabaseSettingsViewModel(get(), get(), get(), get()) }
             viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
-            viewModel { PasswordGeneratorViewModel(get(), get(), get(), get(), get()) }
+            viewModel { PasswordGeneratorViewModel(get(), get(), get(), get(), get(), get(), get()) }
             viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
             viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
             factory { (args: SortAndViewDialogArgs) -> SortAndViewDialogViewModel(get(), args) }

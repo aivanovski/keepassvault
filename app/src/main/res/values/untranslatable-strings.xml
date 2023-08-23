@@ -15,6 +15,7 @@
     <string name="pref_sort_direction" translatable="false">sortDirection</string>
     <string name="pref_is_groups_at_start_enabled" translatable="false">isGroupsAtStartEnabled</string>
     <string name="pref_is_biometric_unlock_enabled" translatable="false">isBiometricUnlockEnabled</string>
+    <string name="pref_password_generator_settings" translatable="false">passwordGeneratorSettings</string>
     <string name="pref_test_data" translatable="false">testData</string>
     <string name="pref_test_toggles" translatable="false">testToggles</string>
 

@@ -105,11 +105,6 @@
         <item name="android:textSize">@dimen/material_primary_text_size</item>
     </style>
 
-    <!-- TODO: create style according to new material guideline-->
-    <style name="Material.ContainedButton" parent="@style/Widget.MaterialComponents.Button.UnelevatedButton">
-        <item name="android:textSize">@dimen/material_list_item_primary_text_size</item>
-    </style>
-
     <style name="Material.TextButton" parent="@style/Widget.MaterialComponents.Button.TextButton">
     </style>
 

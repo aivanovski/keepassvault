@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.presentation.core.widget
 import android.content.Context
 import android.os.Parcelable
 import android.text.Editable
+import android.text.InputFilter
 import android.text.InputType
 import android.text.TextWatcher
 import android.text.method.HideReturnsTransformationMethod
@@ -19,6 +20,7 @@ import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.WidgetMaterialEditTextBinding
+import com.ivanovsky.passnotes.presentation.core.binding.OnTextChangeListener
 import com.ivanovsky.passnotes.presentation.core.widget.entity.ImeOptions
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnEditorActionListener
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines
@@ -81,6 +83,12 @@ class MaterialEditText(
     var inputType: TextInputType = TextInputType.TEXT
         set(value) {
             setInputTypeInternal(value)
+            field = value
+        }
+
+    var maxLength: Int = Int.MAX_VALUE
+        set(value) {
+            setMaxLengthInternal(value)
             field = value
         }
 
@@ -284,7 +292,7 @@ class MaterialEditText(
             TextInputLines.MULTIPLE_LINES -> {
                 binding.textInput.isSingleLine = false
                 binding.textInput.minLines = 1
-                binding.textInput.maxLines = 5
+                binding.textInput.maxLines = 25
             }
             else -> {}
         }
@@ -340,6 +348,10 @@ class MaterialEditText(
         }
     }
 
+    private fun setMaxLengthInternal(maxLength: Int) {
+        binding.textInput.filters = arrayOf(InputFilter.LengthFilter(maxLength))
+    }
+
     private fun determineIsActionButtonVisibleInternal(): Boolean {
         val shouldBeVisible = actionButton == ActionButton.EYE ||
             (actionButton == ActionButton.CLEAR && getTextInternal().isNotEmpty())
@@ -354,6 +366,14 @@ class MaterialEditText(
         } else {
             R.drawable.ic_visibility_off_24dp
         }
+    }
+
+    private fun addTextWatcher(textWatcher: TextWatcher) {
+        binding.textInput.addTextChangedListener(textWatcher)
+    }
+
+    private fun removeTextWatcher(textWatcher: TextWatcher) {
+        binding.textInput.removeTextChangedListener(textWatcher)
     }
 
     private inner class CustomTextWatcher : TextWatcher {
@@ -401,6 +421,36 @@ class MaterialEditText(
             }
 
             view.twoWayBindingTextChangedListener = { textAttrChanged.onChange() }
+        }
+
+        @JvmStatic
+        @BindingAdapter("onTextChanged")
+        fun setOnTextChangedListener(
+            view: MaterialEditText,
+            onTextChangeListener: OnTextChangeListener?
+        ) {
+            val existingListener = view.getTag(R.id.tagTextWatcher) as? TextWatcher
+            existingListener?.let {
+                view.removeTextWatcher(it)
+            }
+
+            if (onTextChangeListener == null) {
+                return
+            }
+
+            val listener = object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    onTextChangeListener.onTextChanged(s.toString())
+                }
+
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                }
+            }
+            view.setTag(R.id.tagTextWatcher, listener)
+            view.addTextWatcher(listener)
         }
 
         @JvmStatic

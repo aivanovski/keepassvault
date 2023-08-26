@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.data.entity
 
 import android.os.Parcelable
 import java.util.UUID
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Template(

@@ -17,6 +17,7 @@ import com.ivanovsky.passnotes.data.repository.db.dao.UsedFileDao
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom1To2
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom2To3
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom3To4
+import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom4To5
 
 // TODO(improvement): Unused data from should be removed from database
 
@@ -26,7 +27,7 @@ import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom3To4
         RemoteFile::class,
         GitRoot::class
     ],
-    version = 4
+    version = 5
 )
 @TypeConverters(
     FSAuthorityTypeConverter::class
@@ -59,7 +60,8 @@ abstract class AppDatabase : RoomDatabase() {
             return arrayOf(
                 MigrationFrom1To2(),
                 MigrationFrom2To3(cipherProvider),
-                MigrationFrom3To4()
+                MigrationFrom3To4(),
+                MigrationFrom4To5()
             )
         }
     }

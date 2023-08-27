@@ -10,7 +10,7 @@ fun UsedFile.getFileDescriptor(): FileDescriptor =
         uid = fileUid,
         name = fileName,
         isDirectory = false,
-        isRoot = false,
+        isRoot = isRoot,
         modified = null
     )
 

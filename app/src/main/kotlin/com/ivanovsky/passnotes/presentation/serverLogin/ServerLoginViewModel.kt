@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.serverLogin.ServerLoginInteractor
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.getUrl
 import com.ivanovsky.passnotes.presentation.Screens.ServerLoginScreen
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
@@ -69,33 +70,28 @@ class ServerLoginViewModel(
             )
         }
 
-        screenState.value = ScreenState.loading()
+        setScreenState(ScreenState.loading())
         hideKeyboardEvent.call(Unit)
-        isDoneButtonVisible.value = false
 
         viewModelScope.launch {
             val authentication = interactor.authenticate(credentials, args.fsAuthority)
             if (authentication.isFailed) {
                 val message = errorInteractor.processAndGetMessage(authentication.error)
-                screenState.value = ScreenState.dataWithError(message)
-                isDoneButtonVisible.value = true
+                setScreenState(ScreenState.dataWithError(message))
                 return@launch
             }
 
-            val save = interactor.saveCredentials(credentials, args.fsAuthority)
+            val file = authentication.getOrThrow()
+
+            val save = interactor.saveCredentials(credentials, file.fsAuthority)
             if (save.isFailed) {
                 val message = errorInteractor.processAndGetMessage(save.error)
-                screenState.value = ScreenState.dataWithError(message)
-                isDoneButtonVisible.value = true
+                setScreenState(ScreenState.dataWithError(message))
                 return@launch
             }
 
-            val fsAuthority = args.fsAuthority.copy(
-                credentials = credentials
-            )
-
-            router.sendResult(ServerLoginScreen.RESULT_KEY, fsAuthority)
             router.exit()
+            router.sendResult(ServerLoginScreen.RESULT_KEY, file)
         }
     }
 
@@ -130,6 +126,11 @@ class ServerLoginViewModel(
                 isSecretUrlChecked.value = credentials.isSecretUrl
             }
         }
+    }
+
+    private fun setScreenState(state: ScreenState) {
+        screenState.value = state
+        isDoneButtonVisible.value = !state.isDisplayingLoading
     }
 
     private fun getUrlHint(loginType: LoginType): String {

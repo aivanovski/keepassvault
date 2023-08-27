@@ -27,6 +27,9 @@ data class UsedFile(
     @ColumnInfo(name = "file_name")
     val fileName: String,
 
+    @ColumnInfo(name = "is_root")
+    val isRoot: Boolean,
+
     @ColumnInfo(name = "added_time")
     val addedTime: Long,
 

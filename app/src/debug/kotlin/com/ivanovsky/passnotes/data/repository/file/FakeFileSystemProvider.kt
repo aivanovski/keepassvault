@@ -29,7 +29,11 @@ class FakeFileSystemProvider(
 
     private val provider = RegularFileSystemProvider(
         context,
-        FSAuthority(credentials = null, type = FSType.EXTERNAL_STORAGE)
+        FSAuthority(
+            credentials = null,
+            type = FSType.EXTERNAL_STORAGE,
+            isBrowsable = true
+        )
     )
 
     private val fileFactory = FakeFileFactory(fsAuthority)

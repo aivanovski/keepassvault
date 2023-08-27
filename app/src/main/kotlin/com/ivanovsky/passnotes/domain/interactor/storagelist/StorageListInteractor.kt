@@ -105,7 +105,8 @@ class StorageListInteractor(
             root = FileDescriptor(
                 fsAuthority = FSAuthority(
                     credentials = null,
-                    type = FSType.WEBDAV
+                    type = FSType.WEBDAV,
+                    isBrowsable = true
                 ),
                 path = ROOT_PATH,
                 uid = ROOT_PATH,
@@ -121,7 +122,8 @@ class StorageListInteractor(
             root = FileDescriptor(
                 fsAuthority = FSAuthority(
                     credentials = null,
-                    type = FSType.GIT
+                    type = FSType.GIT,
+                    isBrowsable = true
                 ),
                 path = ROOT_PATH,
                 uid = ROOT_PATH,
@@ -137,7 +139,8 @@ class StorageListInteractor(
             FileDescriptor(
                 fsAuthority = FSAuthority(
                     credentials = null,
-                    type = FSType.FAKE
+                    type = FSType.FAKE,
+                    isBrowsable = true
                 ),
                 path = ROOT_PATH,
                 uid = ROOT_PATH,

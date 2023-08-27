@@ -426,19 +426,22 @@ class DebugMenuViewModel(
             FSType.WEBDAV -> {
                 FSAuthority(
                     credentials = interactor.getTestWebDavCredentials(),
-                    type = selectedFsType
+                    type = selectedFsType,
+                    isBrowsable = true
                 )
             }
             FSType.GIT -> {
                 FSAuthority(
                     credentials = interactor.getTestGitCredentials(),
-                    type = selectedFsType
+                    type = selectedFsType,
+                    isBrowsable = true
                 )
             }
             FSType.FAKE -> {
                 FSAuthority(
                     credentials = null,
-                    type = selectedFsType
+                    type = selectedFsType,
+                    isBrowsable = true
                 )
             }
             FSType.UNDEFINED -> throw IllegalArgumentException()

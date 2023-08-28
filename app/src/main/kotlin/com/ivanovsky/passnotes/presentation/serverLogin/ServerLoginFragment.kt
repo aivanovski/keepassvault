@@ -5,13 +5,13 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.ServerLoginFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.showHelpDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -66,11 +66,22 @@ class ServerLoginFragment : FragmentWithDoneButton() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        subscribeToLiveData()
+        subscribeToLiveEvents()
+    }
+
+    private fun subscribeToLiveData() {
         viewModel.isDoneButtonVisible.observe(viewLifecycleOwner) { isVisible ->
             setDoneButtonVisibility(isVisible)
         }
+    }
+
+    private fun subscribeToLiveEvents() {
         viewModel.hideKeyboardEvent.observe(viewLifecycleOwner) {
             hideKeyboard()
+        }
+        viewModel.showHelpDialogEvent.observe(viewLifecycleOwner) { args ->
+            showHelpDialog(args)
         }
     }
 

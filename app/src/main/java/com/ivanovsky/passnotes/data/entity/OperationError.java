@@ -129,6 +129,13 @@ public class OperationError {
         return error;
     }
 
+    public static OperationError newGenericError(Throwable cause) {
+        OperationError error = new OperationError(Type.GENERIC_ERROR);
+        error.message = cause.toString();
+        error.throwable = cause;
+        return error;
+    }
+
     public static OperationError newGenericError(String message, Throwable throwable) {
         OperationError error = new OperationError(Type.GENERIC_ERROR);
         error.message = message;
@@ -196,6 +203,13 @@ public class OperationError {
     public static OperationError newNetworkIOError() {
         OperationError error = new OperationError(Type.NETWORK_IO_ERROR);
         error.message = MESSAGE_IO_ERROR;
+        return error;
+    }
+
+    public static OperationError newNetworkIOError(Exception cause) {
+        OperationError error = new OperationError(Type.NETWORK_IO_ERROR);
+        error.message = cause.toString();
+        error.throwable = cause;
         return error;
     }
 

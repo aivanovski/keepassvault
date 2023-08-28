@@ -15,6 +15,7 @@ import com.ivanovsky.passnotes.extensions.getUrl
 import com.ivanovsky.passnotes.presentation.Screens.ServerLoginScreen
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialogArgs
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -34,6 +35,7 @@ class ServerLoginViewModel(
 
     val url = MutableLiveData(EMPTY)
     val urlHint = MutableLiveData(getUrlHint(args.loginType))
+    val isUrlIconVisible = MutableLiveData(args.loginType == LoginType.USERNAME_PASSWORD)
     val username = MutableLiveData(EMPTY)
     val password = MutableLiveData(EMPTY)
     val urlError = MutableLiveData<String?>()
@@ -43,6 +45,7 @@ class ServerLoginViewModel(
     val isPasswordVisible = MutableLiveData(args.loginType == LoginType.USERNAME_PASSWORD)
     val isSecretUrlCheckboxVisible = MutableLiveData(args.loginType == LoginType.GIT)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
+    val showHelpDialogEvent = SingleLiveEvent<HelpDialogArgs>()
 
     init {
         loadTestCredentials()
@@ -96,6 +99,13 @@ class ServerLoginViewModel(
     }
 
     fun navigateBack() = router.exit()
+
+    fun onUrlInfoIconClicked() {
+        showHelpDialogEvent.value = HelpDialogArgs(
+            title = resourceProvider.getString(R.string.help_webdav_url_title),
+            layoutId = R.layout.help_webdav_url
+        )
+    }
 
     private fun isFieldsValid(url: String): Boolean {
         urlError.value = if (url.isBlank()) {

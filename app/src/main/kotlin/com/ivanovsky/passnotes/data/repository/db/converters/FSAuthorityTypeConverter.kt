@@ -33,7 +33,8 @@ class FSAuthorityTypeConverter(
 
             return FSAuthority(
                 credentials = credentials,
-                type = FSType.findByValue(obj.optString(FS_TYPE)) ?: FSType.UNDEFINED
+                type = FSType.findByValue(obj.optString(FS_TYPE)) ?: FSType.UNDEFINED,
+                isBrowsable = obj.optBoolean(IS_BROWSABLE, true)
             )
         } catch (e: JSONException) {
             Timber.e("Failed to parse %s object: exception=%s", FSAuthority::class.simpleName, e)
@@ -55,6 +56,7 @@ class FSAuthorityTypeConverter(
         }
 
         obj.put(FS_TYPE, fsAuthority.type.value)
+        obj.put(IS_BROWSABLE, fsAuthority.isBrowsable)
 
         return obj.toString()
     }
@@ -81,7 +83,6 @@ class FSAuthorityTypeConverter(
                     )
                 }
                 else -> {
-                    // TODO: parse to FSCredentials.LoginCredentials
                     null
                 }
             }
@@ -122,6 +123,7 @@ class FSAuthorityTypeConverter(
         private const val FS_TYPE = "fsType"
         private const val TYPE = "type"
         private const val URL = "url"
+        private const val IS_BROWSABLE = "isBrowsable"
 
         private const val USERNAME = "username"
         private const val PASSWORD = "password"

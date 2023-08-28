@@ -112,11 +112,13 @@ class UsedFileDaoTest {
                     username = "firstUsername",
                     password = "firstPassword"
                 ),
-                type = FSType.INTERNAL_STORAGE
+                type = FSType.INTERNAL_STORAGE,
+                isBrowsable = true
             ),
             filePath = "/firsFilePath",
             fileUid = "firstFileUir",
             fileName = "firstFileName",
+            isRoot = true,
             addedTime = dateInMillis(2018, 1, 1),
             keyType = KeyType.PASSWORD,
             keyFileFsAuthority = FSAuthority(
@@ -125,7 +127,8 @@ class UsedFileDaoTest {
                     username = "keyFilUsername",
                     password = "keyFilePassword"
                 ),
-                type = FSType.INTERNAL_STORAGE
+                type = FSType.INTERNAL_STORAGE,
+                isBrowsable = true
             ),
             keyFilePath = "firstKeyFilePath",
             keyFileUid = "firstKeyFileUid",
@@ -140,11 +143,13 @@ class UsedFileDaoTest {
                     isSecretUrl = false,
                     salt = "salt"
                 ),
-                type = FSType.GIT
+                type = FSType.GIT,
+                isBrowsable = true
             ),
             filePath = "/secondFilePath",
             fileUid = "secondFileUId",
             fileName = "secondFileName",
+            isRoot = false,
             addedTime = dateInMillis(2018, 2, 2),
             lastAccessTime = dateInMillis(2018, 3, 3),
             keyType = KeyType.KEY_FILE

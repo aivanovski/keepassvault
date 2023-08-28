@@ -251,9 +251,15 @@
     <!-- Server login screen -->
     <string name="login_to_server">Login to server</string>
     <string name="login_to_git">Login to Git repository</string>
-    <string name="server_url_hint">WebDAV server url (e.g. https://webdav.example.com)</string>
-    <string name="git_repository_url_hint">Git repository url (e.g. https://git.example.com)</string>
-    <string name="url_contains_secret_message">Url contains secret key, hide it if need</string>
+    <string name="server_url_hint">URL to WebDAV server, file or folder</string>
+    <string name="git_repository_url_hint">Git repository URL (e.g. https://git.example.com)</string>
+    <string name="url_contains_secret_message">URL contains secret key, hide it if need</string>
+
+    <!-- Help: WebDAV url -->
+    <string name="help_webdav_url_title">URL to WebDAV server, file or folder</string>
+    <string name="help_webdav_url_only_https">Only HTTPS URLs are supported.</string>
+    <string name="help_webdav_url_examples">Examples:</string>
+    <string name="help_webdav_url_urls">https://webdav.example.com\nhttps://webdav.example.com/folder/file.kdbx\nhttps://webdav.example.com/folder</string>
 
     <!-- Debug menu screen -->
     <string name="debug_menu">Debug menu</string>

@@ -10,10 +10,12 @@ import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.serverLogin.ServerLoginInteractor
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.getUrl
 import com.ivanovsky.passnotes.presentation.Screens.ServerLoginScreen
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialogArgs
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -33,6 +35,7 @@ class ServerLoginViewModel(
 
     val url = MutableLiveData(EMPTY)
     val urlHint = MutableLiveData(getUrlHint(args.loginType))
+    val isUrlIconVisible = MutableLiveData(args.loginType == LoginType.USERNAME_PASSWORD)
     val username = MutableLiveData(EMPTY)
     val password = MutableLiveData(EMPTY)
     val urlError = MutableLiveData<String?>()
@@ -42,6 +45,7 @@ class ServerLoginViewModel(
     val isPasswordVisible = MutableLiveData(args.loginType == LoginType.USERNAME_PASSWORD)
     val isSecretUrlCheckboxVisible = MutableLiveData(args.loginType == LoginType.GIT)
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
+    val showHelpDialogEvent = SingleLiveEvent<HelpDialogArgs>()
 
     init {
         loadTestCredentials()
@@ -69,37 +73,39 @@ class ServerLoginViewModel(
             )
         }
 
-        screenState.value = ScreenState.loading()
+        setScreenState(ScreenState.loading())
         hideKeyboardEvent.call(Unit)
-        isDoneButtonVisible.value = false
 
         viewModelScope.launch {
             val authentication = interactor.authenticate(credentials, args.fsAuthority)
             if (authentication.isFailed) {
                 val message = errorInteractor.processAndGetMessage(authentication.error)
-                screenState.value = ScreenState.dataWithError(message)
-                isDoneButtonVisible.value = true
+                setScreenState(ScreenState.dataWithError(message))
                 return@launch
             }
 
-            val save = interactor.saveCredentials(credentials, args.fsAuthority)
+            val file = authentication.getOrThrow()
+
+            val save = interactor.saveCredentials(credentials, file.fsAuthority)
             if (save.isFailed) {
                 val message = errorInteractor.processAndGetMessage(save.error)
-                screenState.value = ScreenState.dataWithError(message)
-                isDoneButtonVisible.value = true
+                setScreenState(ScreenState.dataWithError(message))
                 return@launch
             }
 
-            val fsAuthority = args.fsAuthority.copy(
-                credentials = credentials
-            )
-
-            router.sendResult(ServerLoginScreen.RESULT_KEY, fsAuthority)
             router.exit()
+            router.sendResult(ServerLoginScreen.RESULT_KEY, file)
         }
     }
 
     fun navigateBack() = router.exit()
+
+    fun onUrlInfoIconClicked() {
+        showHelpDialogEvent.value = HelpDialogArgs(
+            title = resourceProvider.getString(R.string.help_webdav_url_title),
+            layoutId = R.layout.help_webdav_url
+        )
+    }
 
     private fun isFieldsValid(url: String): Boolean {
         urlError.value = if (url.isBlank()) {
@@ -130,6 +136,11 @@ class ServerLoginViewModel(
                 isSecretUrlChecked.value = credentials.isSecretUrl
             }
         }
+    }
+
+    private fun setScreenState(state: ScreenState) {
+        screenState.value = state
+        isDoneButtonVisible.value = !state.isDisplayingLoading
     }
 
     private fun getUrlHint(loginType: LoginType): String {

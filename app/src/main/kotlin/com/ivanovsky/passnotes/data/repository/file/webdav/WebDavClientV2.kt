@@ -13,6 +13,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientV2
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.getUrl
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
@@ -46,12 +47,28 @@ class WebDavClientV2(
             return OperationResult.error(newFileAccessError(MESSAGE_FILE_IS_NOT_A_DIRECTORY))
         }
 
-        val files = fetchFileList(dir.path)
-        if (files.isFailed) {
-            return files.takeError()
+        val path = if (!dir.isRoot) {
+            dir.path
+        } else {
+            EMPTY
         }
 
-        return OperationResult.success(files.obj.excludeByPath(dir.path))
+        val filesResult = fetchFileList(path)
+        if (filesResult.isFailed) {
+            return filesResult.takeError()
+        }
+
+        val files = filesResult.getOrThrow()
+            .excludeByPath(dir.path)
+            .let { files ->
+                if (dir.isRoot && dir.path != ROOT_PATH) {
+                    files.removePathPrefix(dir.path)
+                } else {
+                    files
+                }
+            }
+
+        return OperationResult.success(files)
     }
 
     override fun getParent(file: FileDescriptor): OperationResult<FileDescriptor> {
@@ -78,15 +95,32 @@ class WebDavClientV2(
 
     override fun getRoot(): OperationResult<FileDescriptor> {
         Timber.d("getRoot:")
-        val files = fetchFileList(EMPTY)
-        if (files.isFailed) {
-            return files.takeError()
+        val filesResult = fetchFileList(EMPTY)
+        if (filesResult.isFailed) {
+            return filesResult.takeError()
         }
 
-        val root = files.obj.firstOrNull { it.isRoot }
-            ?: return OperationResult.error(newFileNotFoundError())
+        val files = filesResult.getOrThrow()
+        var root = files.firstOrNull { file -> file.isRoot }
+        if (root == null) {
+            if (files.size == 1 && !fsAuthority.isBrowsable) {
+                root = files.first()
+                    .copy(
+                        isRoot = true
+                    )
+            } else if (files.size > 1) {
+                root = files.firstOrNull { file -> file.isDirectory }
+                    ?.copy(
+                        isRoot = true
+                    )
+            }
+        }
 
-        return OperationResult.success(root)
+        return if (root != null) {
+            OperationResult.success(root)
+        } else {
+            OperationResult.error(newFileNotFoundError())
+        }
     }
 
     override fun getFileMetadata(file: FileDescriptor): OperationResult<RemoteFileMetadata> {
@@ -95,17 +129,36 @@ class WebDavClientV2(
             return checkAuthority.takeError()
         }
 
-        return getFileMetadata(file.path)
+        val path = if (file.isRoot) {
+            EMPTY
+        } else {
+            file.path
+        }
+
+        return getFileMetadata(path)
     }
 
     private fun getFileMetadata(path: String): OperationResult<RemoteFileMetadata> {
         Timber.d("getFileMetadata: path=%s", path)
-        val metadata = fetchDavResource(path)
-        if (metadata.isFailed) {
-            return metadata.takeError()
+        val fetchResourceResult = fetchDavResource(path)
+        if (fetchResourceResult.isFailed) {
+            return fetchResourceResult.takeError()
         }
 
-        return OperationResult.success(metadata.obj.toRemoteFileMetadata())
+        val resource = fetchResourceResult.getOrThrow()
+        val remotePath = FileUtils.removeSeparatorIfNeed(resource.href.toString())
+
+        val metadata = if (remotePath != path && remotePath.endsWith(path)) {
+            val prefix = remotePath.removeSuffix(path)
+            Timber.d("getFileMetadata: prefix=%s", prefix)
+            resource.toRemoteFileMetadata(
+                removePathPrefix = prefix
+            )
+        } else {
+            resource.toRemoteFileMetadata()
+        }
+
+        return OperationResult.success(metadata)
     }
 
     override fun downloadFile(
@@ -215,7 +268,11 @@ class WebDavClientV2(
     }
 
     private fun formatUrl(path: String): String {
-        return getServerUrl() + path
+        return if (fsAuthority.isBrowsable) {
+            getServerUrl() + path
+        } else {
+            getServerUrl()
+        }
     }
 
     private fun getServerUrl(): String {
@@ -226,8 +283,24 @@ class WebDavClientV2(
         return this.map { it.toFileDescriptor() }
     }
 
-    private fun List<FileDescriptor>.excludeByPath(excludePath: String): List<FileDescriptor> {
-        return this.filter { it.path != excludePath }
+    private fun List<FileDescriptor>.excludeByPath(
+        excludePath: String
+    ): List<FileDescriptor> {
+        return this.filter { file -> file.path != excludePath }
+    }
+
+    private fun List<FileDescriptor>.removePathPrefix(
+        prefix: String
+    ): List<FileDescriptor> {
+        return this.map { file ->
+            file.removePathPrefix(prefix)
+        }
+    }
+
+    private fun FileDescriptor.removePathPrefix(
+        prefix: String
+    ): FileDescriptor {
+        return copy(path = path.removePrefix(prefix))
     }
 
     private fun DavResource.toFileDescriptor(): FileDescriptor {
@@ -243,10 +316,17 @@ class WebDavClientV2(
         )
     }
 
-    private fun DavResource.toRemoteFileMetadata(): RemoteFileMetadata {
-        val path = FileUtils.removeSeparatorIfNeed(href.toString())
+    private fun DavResource.toRemoteFileMetadata(
+        removePathPrefix: String? = null
+    ): RemoteFileMetadata {
+        val fullPath = FileUtils.removeSeparatorIfNeed(href.toString())
+        val path = if (removePathPrefix != null) {
+            fullPath.removePrefix(removePathPrefix)
+        } else {
+            fullPath
+        }
         return RemoteFileMetadata(
-            uid = path,
+            uid = fullPath,
             path = path,
             serverModified = this.modified,
             clientModified = this.modified,
@@ -256,6 +336,5 @@ class WebDavClientV2(
 
     companion object {
         private const val CONTENT_TYPE = "application/octet-stream"
-        private val TAG = WebDavClientV2::class.simpleName
     }
 }

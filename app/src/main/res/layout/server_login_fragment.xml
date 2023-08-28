@@ -78,10 +78,23 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/group_margin"
-                        app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+                        app:layout_constraintEnd_toStartOf="@id/urlInfoIcon"
                         app:layout_constraintStart_toEndOf="@id/guidelineStart"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:hint="@string/server_url_hint" />
+
+                    <ImageButton
+                        android:id="@+id/urlInfoIcon"
+                        style="@style/Material.BorderlessButton.Borderless"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{() -> viewModel.onUrlInfoIconClicked()}"
+                        app:visible="@{viewModel.isUrlIconVisible}"
+                        app:layout_constraintBottom_toBottomOf="@id/url"
+                        app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+                        app:layout_constraintTop_toTopOf="@id/url"
+                        app:srcCompat="@drawable/ic_info_24dp"
+                        app:tint="?attr/kpIconPrimaryColor" />
 
                     <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
                         android:id="@+id/username"

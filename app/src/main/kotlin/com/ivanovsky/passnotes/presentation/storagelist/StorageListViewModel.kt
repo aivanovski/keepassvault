@@ -198,10 +198,21 @@ class StorageListViewModel(
 
         screenState.value = ScreenState.loading()
         isReloadOnStart = true
-        router.setResultListener(ServerLoginScreen.RESULT_KEY) { fsAuthorityWithCreds ->
-            if (fsAuthorityWithCreds is FSAuthority) {
+        router.setResultListener(ServerLoginScreen.RESULT_KEY) { file ->
+            if (file is FileDescriptor) {
                 isReloadOnStart = false
-                onInternalAuthSuccess(fsAuthorityWithCreds)
+                screenState.value = ScreenState.loading()
+                if (file.isDirectory) {
+                    navigateToFilePicker(
+                        FilePickerArgs(
+                            action = args.action.toFilePickerAction(),
+                            rootFile = file,
+                            isBrowsingEnabled = true
+                        )
+                    )
+                } else {
+                    onFilePickedByPicker(file)
+                }
             } else {
                 onInternalAuthFailed()
             }

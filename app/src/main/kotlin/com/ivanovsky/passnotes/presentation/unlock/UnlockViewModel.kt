@@ -664,12 +664,12 @@ class UnlockViewModel(
         val selectedFile = selectedUsedFile?.getFileDescriptor() ?: return
         val oldFsAuthority = selectedFile.fsAuthority
 
-        router.setResultListener(Screens.ServerLoginScreen.RESULT_KEY) { newFsAuthority ->
-            if (newFsAuthority is FSAuthority) {
+        router.setResultListener(Screens.ServerLoginScreen.RESULT_KEY) { file ->
+            if (file is FileDescriptor) {
                 onServerLoginSuccess(
                     fileUid = selectedFile.uid,
                     oldFSAuthority = oldFsAuthority,
-                    newFsAuthority = newFsAuthority
+                    newFsAuthority = file.fsAuthority
                 )
             }
         }

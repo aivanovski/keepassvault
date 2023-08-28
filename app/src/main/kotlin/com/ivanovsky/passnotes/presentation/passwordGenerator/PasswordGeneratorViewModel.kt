@@ -64,7 +64,7 @@ class PasswordGeneratorViewModel(
     }
 
     fun onGenerateButtonClicked() {
-        val length = getLength()
+        val length = getLengthInternal()
         if (length != null) {
             invalidatePassword(length)
         }
@@ -93,7 +93,7 @@ class PasswordGeneratorViewModel(
             getErrorMessage(resources)
         }
 
-        val length = getLength()
+        val length = getLengthInternal()
         if (lastSelectedResources != resources && length != null) {
             lastSelectedResources = resources
             invalidatePassword(length = length, resources = resources)
@@ -212,7 +212,7 @@ class PasswordGeneratorViewModel(
         }
     }
 
-    private fun getLength(): Int? {
+    private fun getLengthInternal(): Int? {
         val length = length.value?.toIntSafely() ?: return null
 
         return if (length in LENGTH_RANGE) {

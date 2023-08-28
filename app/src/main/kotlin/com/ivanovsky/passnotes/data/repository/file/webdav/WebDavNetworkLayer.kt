@@ -31,12 +31,10 @@ class WebDavNetworkLayer(
             }
         } catch (exception: IOException) {
             Timber.d(exception)
-            return OperationResult.error(OperationError.newNetworkIOError())
+            return OperationResult.error(OperationError.newNetworkIOError(exception))
         } catch (exception: Exception) {
             Timber.d(exception)
-            return OperationResult.error(
-                OperationError.newGenericError(OperationError.MESSAGE_UNKNOWN_ERROR)
-            )
+            return OperationResult.error(OperationError.newGenericError(exception))
         }
     }
 

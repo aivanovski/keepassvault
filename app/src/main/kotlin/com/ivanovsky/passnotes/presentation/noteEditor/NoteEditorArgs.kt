@@ -4,7 +4,7 @@ import android.os.Parcelable
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.Template
 import java.util.UUID
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class NoteEditorArgs(

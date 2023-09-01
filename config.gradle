@@ -6,7 +6,7 @@ ext {
     ]
 
     kotlinVersion = '1.8.20'
-    gradlePluginVersion = '7.4.2'
+    gradlePluginVersion = '8.1.1'
     spotlessVersion = '6.21.0'
     ktlintVersion = '0.48.2'
 }

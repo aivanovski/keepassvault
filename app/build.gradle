@@ -182,7 +182,7 @@ def coreKtxVersion = '1.10.1'
 def activityKtxVersion = '1.7.2'
 def preferenceKtxVersion = '1.2.1'
 def biometricVersion = '1.2.0-alpha05'
-def liveDataKtxVersion = '2.6.1'
+def liveDataKtxVersion = '2.6.2'
 
 def okHttpVersion = '4.11.0'
 def apacheCommonsLangVersion = '3.13.0'

@@ -192,7 +192,7 @@ def timberVersion = '5.0.1'
 def treessenceVersion = '1.0.5'
 def kotpassVersion = '0.6.0'
 def fzf4jVersion = '0.2.1'
-def jgitVersion = '6.6.0.202305301015-r'
+def jgitVersion = '6.7.0.202309050840-r'
 
 // Test
 def jUnitVersion = '4.13.2'

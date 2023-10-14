@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.data.repository.file
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.util.FileUtils
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -50,10 +51,14 @@ class FakeFileFactory(
         return create(fsAuthority, FileUid.NOT_FOUND, Time.LOCAL)
     }
 
+    fun createAutoTestsFile(): FileDescriptor {
+        return create(fsAuthority, FileUid.AUTO_TESTS, Time.NO_CHANGES)
+    }
+
     private fun create(
         fsAuthority: FSAuthority,
         uid: String,
-        modified: Long = System.currentTimeMillis()
+        modified: Long = System.currentTimeMillis(),
     ): FileDescriptor {
         val path = pathFromUid(uid)
 
@@ -71,6 +76,7 @@ class FakeFileFactory(
     private fun pathFromUid(uid: String): String {
         return when (uid) {
             FileUid.ROOT -> "/"
+            FileUid.AUTO_TESTS -> "/automation.kdbx"
             else -> "/test-$uid.kdbx"
         }
     }
@@ -85,6 +91,7 @@ class FakeFileFactory(
         const val AUTH_ERROR = "auth-error"
         const val NOT_FOUND = "not-found"
         const val ERROR = "error"
+        const val AUTO_TESTS = "auto-tests"
     }
 
     private object Time {

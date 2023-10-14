@@ -48,7 +48,8 @@ class FakeFileSystemProvider(
         fileFactory.createConflictLocalFile(),
         fileFactory.createAuthErrorFile(),
         fileFactory.createNotFoundFile(),
-        fileFactory.createErrorFile()
+        fileFactory.createErrorFile(),
+        fileFactory.createAutoTestsFile()
     )
 
     override fun getAuthenticator(): FileSystemAuthenticator {
@@ -68,7 +69,9 @@ class FakeFileSystemProvider(
             return OperationResult.error(newFileAccessError(MESSAGE_FAILED_TO_ACCESS_TO_FILE))
         }
 
-        return OperationResult.success(allFiles)
+        val files = allFiles.map { file -> file.substituteFsAuthority() }
+
+        return OperationResult.success(files)
     }
 
     override fun getParent(file: FileDescriptor): OperationResult<FileDescriptor> {
@@ -85,7 +88,9 @@ class FakeFileSystemProvider(
             return newAuthError()
         }
 
-        return OperationResult.success(fileFactory.createRootFile())
+        val root = fileFactory.createRootFile().substituteFsAuthority()
+
+        return OperationResult.success(root)
     }
 
     override fun openFileForRead(
@@ -135,6 +140,7 @@ class FakeFileSystemProvider(
         }
 
         val file = allFiles.find { it.path == path }
+            ?.substituteFsAuthority()
 
         return if (file != null) {
             OperationResult.success(file)

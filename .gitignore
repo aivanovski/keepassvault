@@ -11,3 +11,9 @@
 project.properties
 /.project
 /tmp
+
+# Clojure
+.lsp/
+.clj-kondo/
+.cpcache/
+.nrepl-port

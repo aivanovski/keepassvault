@@ -90,11 +90,11 @@ def main
     output_dir = ARGV[0].strip.gsub('~', '$HOME')
     version = get_app_version
     destinations = [
-      "#{output_dir}/app-gplay-debug-#{version}.apk",
-      "#{output_dir}/app-gplay-release-#{version}.apk",
-      "#{output_dir}/app-gplay-release-#{version}.aab",
-      "#{output_dir}/app-fdroid-debug-#{version}.apk",
-      "#{output_dir}/app-fdroid-release-#{version}.apk",
+      "#{output_dir}/kpassnotes-gplay-debug-#{version}.apk",
+      "#{output_dir}/kpassnotes-gplay-release-#{version}.apk",
+      "#{output_dir}/kpassnotes-gplay-release-#{version}.aab",
+      "#{output_dir}/kpassnotes-fdroid-debug-#{version}.apk",
+      "#{output_dir}/kpassnotes-fdroid-release-#{version}.apk",
     ]
     copy_files(files, destinations)
   else

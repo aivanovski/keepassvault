@@ -81,7 +81,9 @@ object KotpassTreeDsl {
             val fields = mutableMapOf(
                 BasicField.Title.key to EntryValue.Plain(entity.title),
                 BasicField.UserName.key to EntryValue.Plain(entity.username),
-                BasicField.Password.key to EntryValue.Encrypted(EncryptedValue.fromString(entity.password)),
+                BasicField.Password.key to EntryValue.Encrypted(
+                    EncryptedValue.fromString(entity.password)
+                ),
                 BasicField.Url.key to EntryValue.Plain(entity.url),
                 BasicField.Notes.key to EntryValue.Plain(entity.notes)
             )

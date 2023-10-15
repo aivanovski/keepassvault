@@ -3,9 +3,6 @@ package com.ivanovsky.passnotes.data.repository.file
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.util.FileUtils
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class FakeFileFactory(
     private val fsAuthority: FSAuthority
@@ -62,7 +59,7 @@ class FakeFileFactory(
     private fun create(
         fsAuthority: FSAuthority,
         uid: String,
-        modified: Long,
+        modified: Long
     ): FileDescriptor {
         val path = pathFromUid(uid)
 

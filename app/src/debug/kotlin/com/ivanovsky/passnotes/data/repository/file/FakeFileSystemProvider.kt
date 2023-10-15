@@ -27,6 +27,7 @@ class FakeFileSystemProvider(
 ) : FileSystemProvider {
 
     private val storage = FakeFileStorage(
+        fsAuthority = fsAuthority,
         defaultStatuses = mapOf(
             FileUid.CONFLICT to SyncStatus.CONFLICT,
             FileUid.REMOTE_CHANGES to SyncStatus.REMOTE_CHANGES,
@@ -38,7 +39,6 @@ class FakeFileSystemProvider(
         )
     )
 
-    private val authenticator = FakeFileSystemAuthenticator(fsAuthority)
     private val syncProcessor = FakeFileSystemSyncProcessor(
         storage = storage,
         observerBus = observerBus,
@@ -46,8 +46,8 @@ class FakeFileSystemProvider(
         fsAuthority = fsAuthority
     )
 
-    private val fileFactory = FakeFileFactory(authenticator.getFsAuthority())
-    private val allFiles = createFileDescriptors()
+    private val authenticator = FakeFileSystemAuthenticator(fsAuthority)
+    private val fileFactory = FakeFileFactory(fsAuthority)
 
     override fun getAuthenticator(): FileSystemAuthenticator {
         return authenticator
@@ -66,7 +66,8 @@ class FakeFileSystemProvider(
             return OperationResult.error(newFileAccessError(MESSAGE_FAILED_TO_ACCESS_TO_FILE))
         }
 
-        val files = allFiles.map { file -> file.substituteFsAuthority() }
+        val files = storage.getFiles()
+            .map { file -> file.substituteFsAuthority() }
 
         return OperationResult.success(files)
     }
@@ -93,6 +94,13 @@ class FakeFileSystemProvider(
         onConflictStrategy: OnConflictStrategy,
         options: FSOptions
     ): OperationResult<InputStream> {
+        Timber.d(
+            "openFileForRead: uid=%s, options=%s, isAuthenticated=%s",
+            file.uid,
+            options,
+            isAuthenticated()
+        )
+
         if (!isAuthenticated()) {
             return newAuthError()
         }
@@ -116,6 +124,13 @@ class FakeFileSystemProvider(
         onConflictStrategy: OnConflictStrategy,
         options: FSOptions
     ): OperationResult<OutputStream> {
+        Timber.d(
+            "openFileForWrite: uid=%s, options=%s, isAuthenticated=%s",
+            file.uid,
+            options,
+            isAuthenticated()
+        )
+
         if (!isAuthenticated()) {
             return newAuthError()
         }
@@ -134,7 +149,7 @@ class FakeFileSystemProvider(
             return newAuthError()
         }
 
-        val isExist = allFiles.any { it.uid == file.uid }
+        val isExist = (storage.getFileByPath(file.path) != null)
         return OperationResult.success(isExist)
     }
 
@@ -143,7 +158,7 @@ class FakeFileSystemProvider(
             return newAuthError()
         }
 
-        val file = allFiles.find { it.path == path }
+        val file = storage.getFileByPath(path)
             ?.substituteFsAuthority()
 
         return if (file != null) {
@@ -167,20 +182,6 @@ class FakeFileSystemProvider(
 
     private fun <T> newAuthError(): OperationResult<T> {
         return OperationResult.error(OperationError.newAuthError())
-    }
-
-    private fun createFileDescriptors(): List<FileDescriptor> {
-        return listOf(
-            fileFactory.createNoChangesFile(),
-            fileFactory.createRemoteChangesFile(),
-            fileFactory.createLocalChangesFile(),
-            fileFactory.createLocalChangesTimeoutFile(),
-            fileFactory.createConflictLocalFile(),
-            fileFactory.createAuthErrorFile(),
-            fileFactory.createNotFoundFile(),
-            fileFactory.createErrorFile(),
-            fileFactory.createAutoTestsFile()
-        )
     }
 
     companion object {

@@ -1,24 +1,32 @@
 package com.ivanovsky.passnotes.data.repository.file
 
+import com.ivanovsky.passnotes.data.entity.FSAuthority
+import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.file.FakeFileFactory.FileUid
 import com.ivanovsky.passnotes.data.repository.file.entity.StorageDestinationType
 import com.ivanovsky.passnotes.data.repository.file.entity.StorageDestinationType.LOCAL
 import com.ivanovsky.passnotes.data.repository.file.entity.StorageDestinationType.REMOTE
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import timber.log.Timber
 
 class FakeFileStorage(
+    fsAuthority: FSAuthority,
     private val defaultStatuses: Map<String, SyncStatus>
 ) {
 
     private val fileContentFactory = FakeFileContentFactory()
-
+    private val fileFactory = FakeFileFactory(fsAuthority)
     private val localContent = ConcurrentHashMap<String, ByteArray>()
     private val remoteContent = ConcurrentHashMap<String, ByteArray>()
     private val statuses = ConcurrentHashMap<String, SyncStatus>()
         .apply {
             putAll(defaultStatuses)
+        }
+    private val files = CopyOnWriteArrayList<FileDescriptor>()
+        .apply {
+            addAll(createDefaultFiles())
         }
 
     fun getSyncStatus(uid: String): SyncStatus {
@@ -69,6 +77,18 @@ class FakeFileStorage(
         return contentMap[uid]
     }
 
+    fun getFileByUid(uid: String): FileDescriptor? {
+        return files.firstOrNull { file -> file.uid == uid }
+    }
+
+    fun getFileByPath(path: String): FileDescriptor? {
+        return files.firstOrNull { file -> file.path == path }
+    }
+
+    fun getFiles(): List<FileDescriptor> {
+        return files
+    }
+
     private fun determineDestination(
         uid: String,
         fsOptions: FSOptions
@@ -110,7 +130,40 @@ class FakeFileStorage(
 
                 localContent[uid] = content
                 remoteContent[uid] = content
+
+                createFileIfNeed(uid)
             }
         }
+    }
+
+    private fun createFileIfNeed(uid: String) {
+        val isExist = files.any { file -> file.uid == uid }
+
+        Timber.d(
+            "createFileIfNeed: isExist=%s, uid=%s",
+            isExist,
+            uid
+        )
+
+        if (isExist) {
+            return
+        }
+
+        val file = fileFactory.createNewFromUid(uid)
+        files.add(file)
+    }
+
+    private fun createDefaultFiles(): List<FileDescriptor> {
+        return listOf(
+            fileFactory.createNoChangesFile(),
+            fileFactory.createRemoteChangesFile(),
+            fileFactory.createLocalChangesFile(),
+            fileFactory.createLocalChangesTimeoutFile(),
+            fileFactory.createConflictLocalFile(),
+            fileFactory.createAuthErrorFile(),
+            fileFactory.createNotFoundFile(),
+            fileFactory.createErrorFile(),
+            fileFactory.createAutoTestsFile()
+        )
     }
 }

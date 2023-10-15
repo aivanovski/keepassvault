@@ -55,10 +55,14 @@ class FakeFileFactory(
         return create(fsAuthority, FileUid.AUTO_TESTS, Time.NO_CHANGES)
     }
 
+    fun createNewFromUid(uid: String): FileDescriptor {
+        return create(fsAuthority, uid, System.currentTimeMillis())
+    }
+
     private fun create(
         fsAuthority: FSAuthority,
         uid: String,
-        modified: Long = System.currentTimeMillis(),
+        modified: Long,
     ): FileDescriptor {
         val path = pathFromUid(uid)
 
@@ -74,10 +78,11 @@ class FakeFileFactory(
     }
 
     private fun pathFromUid(uid: String): String {
-        return when (uid) {
-            FileUid.ROOT -> "/"
-            FileUid.AUTO_TESTS -> "/automation.kdbx"
-            else -> "/test-$uid.kdbx"
+        return when {
+            uid == FileUid.ROOT -> "/"
+            uid == FileUid.AUTO_TESTS -> "/automation.kdbx"
+            uid in FileUid.DEFAULT_UIDS -> "/test-$uid.kdbx"
+            else -> uid
         }
     }
 
@@ -92,6 +97,19 @@ class FakeFileFactory(
         const val NOT_FOUND = "not-found"
         const val ERROR = "error"
         const val AUTO_TESTS = "auto-tests"
+
+        val DEFAULT_UIDS = listOf(
+            NO_CHANGES,
+            ROOT,
+            REMOTE_CHANGES,
+            LOCAL_CHANGES,
+            LOCAL_CHANGES_TIMEOUT,
+            CONFLICT,
+            AUTH_ERROR,
+            NOT_FOUND,
+            ERROR,
+            AUTO_TESTS
+        )
     }
 
     private object Time {

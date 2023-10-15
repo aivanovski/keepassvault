@@ -3,8 +3,6 @@ package com.ivanovsky.passnotes.data.repository.file
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.util.FileUtils
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class FakeFileFactory(
     private val fsAuthority: FSAuthority
@@ -50,10 +48,18 @@ class FakeFileFactory(
         return create(fsAuthority, FileUid.NOT_FOUND, Time.LOCAL)
     }
 
+    fun createAutoTestsFile(): FileDescriptor {
+        return create(fsAuthority, FileUid.AUTO_TESTS, Time.NO_CHANGES)
+    }
+
+    fun createNewFromUid(uid: String): FileDescriptor {
+        return create(fsAuthority, uid, System.currentTimeMillis())
+    }
+
     private fun create(
         fsAuthority: FSAuthority,
         uid: String,
-        modified: Long = System.currentTimeMillis()
+        modified: Long
     ): FileDescriptor {
         val path = pathFromUid(uid)
 
@@ -69,9 +75,11 @@ class FakeFileFactory(
     }
 
     private fun pathFromUid(uid: String): String {
-        return when (uid) {
-            FileUid.ROOT -> "/"
-            else -> "/test-$uid.kdbx"
+        return when {
+            uid == FileUid.ROOT -> "/"
+            uid == FileUid.AUTO_TESTS -> "/automation.kdbx"
+            uid in FileUid.DEFAULT_UIDS -> "/test-$uid.kdbx"
+            else -> uid
         }
     }
 
@@ -85,19 +93,26 @@ class FakeFileFactory(
         const val AUTH_ERROR = "auth-error"
         const val NOT_FOUND = "not-found"
         const val ERROR = "error"
+        const val AUTO_TESTS = "auto-tests"
+
+        val DEFAULT_UIDS = listOf(
+            NO_CHANGES,
+            ROOT,
+            REMOTE_CHANGES,
+            LOCAL_CHANGES,
+            LOCAL_CHANGES_TIMEOUT,
+            CONFLICT,
+            AUTH_ERROR,
+            NOT_FOUND,
+            ERROR,
+            AUTO_TESTS
+        )
     }
 
     private object Time {
-
-        private val DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-
         val ROOT = parseDate("2020-01-01")
         val NO_CHANGES = parseDate("2020-02-01")
         val LOCAL = parseDate("2020-03-01")
         val REMOTE = parseDate("2020-03-02")
-
-        private fun parseDate(str: String): Long {
-            return DATE_FORMAT.parse(str)?.time ?: throw IllegalArgumentException()
-        }
     }
 }

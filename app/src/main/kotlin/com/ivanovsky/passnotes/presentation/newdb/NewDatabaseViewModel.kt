@@ -22,6 +22,7 @@ import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.util.FileUtils
+import com.ivanovsky.passnotes.util.FileUtils.createPath
 import com.ivanovsky.passnotes.util.FileUtils.removeFileExtensionsIfNeed
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import java.io.File
@@ -185,7 +186,11 @@ class NewDatabaseViewModel(
                 storageType.value = resourceProvider.getString(R.string.public_storage)
                 filename.value = removeFileExtensionsIfNeed(selectedFile.name)
             }
-            FSType.UNDEFINED, FSType.FAKE, FSType.GIT -> {}
+            FSType.FAKE -> {
+                selectedStorage = SelectedStorage.ParentDir(selectedFile)
+                storageType.value = resourceProvider.getString(R.string.fake_file_system)
+            }
+            FSType.UNDEFINED, FSType.GIT -> {} // TODO: Implement file creation for GIT
         }
 
         storagePath.value = selectedFile.path
@@ -198,7 +203,10 @@ class NewDatabaseViewModel(
         return when (selectedStorage) {
             is SelectedStorage.ParentDir -> {
                 val name = this.filename.value ?: throw IllegalStateException()
-                val path = selectedStorage.dir.path + File.separator + name + ".kdbx"
+                val path = createPath(
+                    parentPath = selectedStorage.dir.path,
+                    name = "$name.kdbx"
+                )
 
                 FileDescriptor(
                     fsAuthority = selectedStorage.dir.fsAuthority,

@@ -88,4 +88,13 @@ object FileUtils {
         val output: OutputStream = BufferedOutputStream(FileOutputStream(destination))
         InputOutputUtils.copyOrThrow(input, output, true)
     }
+
+    @JvmStatic
+    fun createPath(parentPath: String, name: String): String {
+        return if (parentPath.endsWith(SEPARATOR)) {
+            parentPath + name
+        } else {
+            parentPath + SEPARATOR + name
+        }
+    }
 }

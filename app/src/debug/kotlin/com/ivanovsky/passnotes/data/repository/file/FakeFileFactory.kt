@@ -95,16 +95,9 @@ class FakeFileFactory(
     }
 
     private object Time {
-
-        private val DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-
         val ROOT = parseDate("2020-01-01")
         val NO_CHANGES = parseDate("2020-02-01")
         val LOCAL = parseDate("2020-03-01")
         val REMOTE = parseDate("2020-03-02")
-
-        private fun parseDate(str: String): Long {
-            return DATE_FORMAT.parse(str)?.time ?: throw IllegalArgumentException()
-        }
     }
 }

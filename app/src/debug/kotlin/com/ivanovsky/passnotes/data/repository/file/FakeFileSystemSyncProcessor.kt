@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_SYNC_STATUS
+import com.ivanovsky.passnotes.data.entity.OperationError.newFileNotFoundError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
@@ -15,16 +16,16 @@ import com.ivanovsky.passnotes.data.repository.file.delay.ThreadThrottler
 import com.ivanovsky.passnotes.data.repository.file.delay.ThreadThrottler.Type.LONG_DELAY
 import com.ivanovsky.passnotes.data.repository.file.delay.ThreadThrottler.Type.MEDIUM_DELAY
 import com.ivanovsky.passnotes.data.repository.file.delay.ThreadThrottler.Type.SHORT_DELAY
+import com.ivanovsky.passnotes.data.repository.file.entity.StorageDestinationType
 
 class FakeFileSystemSyncProcessor(
+    private val storage: FakeFileStorage,
     private val observerBus: ObserverBus,
     private val throttler: ThreadThrottler,
     private val fsAuthority: FSAuthority
 ) : FileSystemSyncProcessor {
 
     private val fileFactory = FakeFileFactory(fsAuthority)
-
-    private val statuses = mutableMapOf<String, SyncStatus>()
     private val uidToSyncProgressStatusMap = mutableMapOf<String, SyncProgressStatus>()
 
     override fun getCachedFile(uid: String): FileDescriptor? {
@@ -42,21 +43,7 @@ class FakeFileSystemSyncProcessor(
     override fun getSyncStatusForFile(uid: String): SyncStatus {
         throttler.delay(SHORT_DELAY)
 
-        val status = statuses[uid]
-        if (status != null) {
-            return status
-        }
-
-        return when (uid) {
-            FileUid.CONFLICT -> SyncStatus.CONFLICT
-            FileUid.REMOTE_CHANGES -> SyncStatus.REMOTE_CHANGES
-            FileUid.LOCAL_CHANGES -> SyncStatus.LOCAL_CHANGES
-            FileUid.LOCAL_CHANGES_TIMEOUT -> SyncStatus.LOCAL_CHANGES
-            FileUid.ERROR -> SyncStatus.ERROR
-            FileUid.AUTH_ERROR -> SyncStatus.AUTH_ERROR
-            FileUid.NOT_FOUND -> SyncStatus.FILE_NOT_FOUND
-            else -> SyncStatus.NO_CHANGES
-        }
+        return storage.getSyncStatus(uid)
     }
 
     override fun getSyncConflictForFile(uid: String): OperationResult<SyncConflictInfo> {
@@ -77,71 +64,83 @@ class FakeFileSystemSyncProcessor(
         syncStrategy: SyncStrategy,
         resolutionStrategy: ConflictResolutionStrategy?
     ): OperationResult<FileDescriptor> {
-        return when (file.uid) {
-            FileUid.LOCAL_CHANGES, FileUid.LOCAL_CHANGES_TIMEOUT -> {
-                uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.SYNCING
-                notifySyncProgressChanges(file.uid, SyncProgressStatus.SYNCING)
-                throttler.delay(MEDIUM_DELAY)
+        return file.let { file ->
+            when (file.uid) {
+                FileUid.LOCAL_CHANGES, FileUid.LOCAL_CHANGES_TIMEOUT -> {
+                    uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.SYNCING
+                    notifySyncProgressChanges(file.uid, SyncProgressStatus.SYNCING)
+                    throttler.delay(MEDIUM_DELAY)
 
-                uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.UPLOADING
-                notifySyncProgressChanges(file.uid, SyncProgressStatus.UPLOADING)
-                if (file.uid == FileUid.LOCAL_CHANGES_TIMEOUT) {
-                    throttler.delay(50000L)
-                } else {
+                    uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.UPLOADING
+                    notifySyncProgressChanges(file.uid, SyncProgressStatus.UPLOADING)
+                    if (file.uid == FileUid.LOCAL_CHANGES_TIMEOUT) {
+                        throttler.delay(50000L)
+                    } else {
+                        throttler.delay(LONG_DELAY)
+                    }
+
+                    uidToSyncProgressStatusMap.remove(file.uid)
+                    storage.putSyncStatus(file.uid, SyncStatus.NO_CHANGES)
+                    notifySyncProgressChanges(file.uid, SyncProgressStatus.IDLE)
+
+                    return@let OperationResult.success(file)
+                }
+
+                FileUid.REMOTE_CHANGES -> {
+                    uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.SYNCING
+                    notifySyncProgressChanges(file.uid, SyncProgressStatus.SYNCING)
+                    throttler.delay(MEDIUM_DELAY)
+
+                    uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.DOWNLOADING
+                    notifySyncProgressChanges(file.uid, SyncProgressStatus.DOWNLOADING)
                     throttler.delay(LONG_DELAY)
+
+                    uidToSyncProgressStatusMap.remove(file.uid)
+                    storage.putSyncStatus(file.uid, SyncStatus.NO_CHANGES)
+                    notifySyncProgressChanges(file.uid, SyncProgressStatus.IDLE)
+
+                    return@let OperationResult.success(file)
                 }
 
-                uidToSyncProgressStatusMap.remove(file.uid)
-                statuses[file.uid] = SyncStatus.NO_CHANGES
-                notifySyncProgressChanges(file.uid, SyncProgressStatus.IDLE)
+                FileUid.CONFLICT -> {
+                    uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.SYNCING
+                    notifySyncProgressChanges(file.uid, SyncProgressStatus.SYNCING)
+                    throttler.delay(MEDIUM_DELAY)
 
-                OperationResult.success(file)
-            }
+                    when (resolutionStrategy) {
+                        ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE -> {
+                            uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.UPLOADING
+                            notifySyncProgressChanges(file.uid, SyncProgressStatus.UPLOADING)
+                            throttler.delay(LONG_DELAY)
 
-            FileUid.REMOTE_CHANGES -> {
-                uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.SYNCING
-                notifySyncProgressChanges(file.uid, SyncProgressStatus.SYNCING)
-                throttler.delay(MEDIUM_DELAY)
+                            val content = storage.get(file.uid, StorageDestinationType.LOCAL)
+                                ?: return@let OperationResult.error(newFileNotFoundError())
 
-                uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.DOWNLOADING
-                notifySyncProgressChanges(file.uid, SyncProgressStatus.DOWNLOADING)
-                throttler.delay(LONG_DELAY)
+                            storage.put(file.uid, StorageDestinationType.REMOTE, content)
+                        }
 
-                uidToSyncProgressStatusMap.remove(file.uid)
-                statuses[file.uid] = SyncStatus.NO_CHANGES
-                notifySyncProgressChanges(file.uid, SyncProgressStatus.IDLE)
+                        else -> {
+                            uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.DOWNLOADING
+                            notifySyncProgressChanges(file.uid, SyncProgressStatus.DOWNLOADING)
+                            throttler.delay(LONG_DELAY)
 
-                OperationResult.success(file)
-            }
+                            val content = storage.get(file.uid, StorageDestinationType.REMOTE)
+                                ?: return@let OperationResult.error(newFileNotFoundError())
 
-            FileUid.CONFLICT -> {
-                uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.SYNCING
-                notifySyncProgressChanges(file.uid, SyncProgressStatus.SYNCING)
-                throttler.delay(MEDIUM_DELAY)
-
-                when (resolutionStrategy) {
-                    ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE -> {
-                        uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.UPLOADING
-                        notifySyncProgressChanges(file.uid, SyncProgressStatus.UPLOADING)
-                        throttler.delay(LONG_DELAY)
+                            storage.put(file.uid, StorageDestinationType.LOCAL, content)
+                        }
                     }
 
-                    else -> {
-                        uidToSyncProgressStatusMap[file.uid] = SyncProgressStatus.DOWNLOADING
-                        notifySyncProgressChanges(file.uid, SyncProgressStatus.DOWNLOADING)
-                        throttler.delay(LONG_DELAY)
-                    }
+                    uidToSyncProgressStatusMap.remove(file.uid)
+                    storage.putSyncStatus(file.uid, SyncStatus.NO_CHANGES)
+                    notifySyncProgressChanges(file.uid, SyncProgressStatus.IDLE)
+
+                    return@let OperationResult.success(file)
                 }
 
-                uidToSyncProgressStatusMap.remove(file.uid)
-                statuses[file.uid] = SyncStatus.NO_CHANGES
-                notifySyncProgressChanges(file.uid, SyncProgressStatus.IDLE)
-
-                OperationResult.success(file)
-            }
-
-            else -> {
-                OperationResult.error(newGenericError(MESSAGE_INCORRECT_SYNC_STATUS))
+                else -> {
+                    return@let OperationResult.error(newGenericError(MESSAGE_INCORRECT_SYNC_STATUS))
+                }
             }
         }
     }

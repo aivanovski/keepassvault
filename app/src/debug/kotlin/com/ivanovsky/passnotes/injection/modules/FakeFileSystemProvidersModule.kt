@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.injection.modules
 
-import android.content.Context
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.repository.file.FakeFileSystemProvider
@@ -12,7 +11,6 @@ import org.koin.dsl.module
 object FakeFileSystemProvidersModule {
 
     fun build(
-        context: Context,
         isExternalStorageAccessEnabled: Boolean
     ) = module {
         val fsFactories = mapOf(
@@ -20,7 +18,7 @@ object FakeFileSystemProvidersModule {
                 val observerBus: ObserverBus = GlobalInjector.get()
                 val throttler = ThreadThrottlerImpl()
 
-                FakeFileSystemProvider(context, throttler, observerBus, fsAuthority)
+                FakeFileSystemProvider(throttler, observerBus, fsAuthority)
             }
         )
 

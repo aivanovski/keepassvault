@@ -29,7 +29,6 @@ class DebugModuleBuilder(
             CoreModule.build(loggerInteractor),
             if (isFakeFileSystemEnabled) {
                 FakeFileSystemProvidersModule.build(
-                    context = context,
                     isExternalStorageAccessEnabled = isExternalStorageAccessEnabled
                 )
             } else {

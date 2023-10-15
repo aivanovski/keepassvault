@@ -1,19 +1,19 @@
 package com.ivanovsky.passnotes.data.repository.file
 
-import android.content.Context
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSCredentials
-import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ACCESS_TO_FILE
 import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
 import com.ivanovsky.passnotes.data.entity.OperationError.newFileNotFoundError
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.data.entity.SyncStatus
+import com.ivanovsky.passnotes.data.repository.file.FakeFileFactory.FileUid
 import com.ivanovsky.passnotes.data.repository.file.delay.ThreadThrottler
-import com.ivanovsky.passnotes.data.repository.file.regular.RegularFileSystemProvider
-import com.ivanovsky.passnotes.extensions.map
+import com.ivanovsky.passnotes.data.repository.file.entity.StorageDestinationType
+import java.io.ByteArrayInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
@@ -21,36 +21,33 @@ import java.io.OutputStream
 import timber.log.Timber
 
 class FakeFileSystemProvider(
-    private val context: Context,
     throttler: ThreadThrottler,
     observerBus: ObserverBus,
     fsAuthority: FSAuthority
 ) : FileSystemProvider {
 
-    private val provider = RegularFileSystemProvider(
-        context,
-        FSAuthority(
-            credentials = null,
-            type = FSType.EXTERNAL_STORAGE,
-            isBrowsable = true
+    private val storage = FakeFileStorage(
+        defaultStatuses = mapOf(
+            FileUid.CONFLICT to SyncStatus.CONFLICT,
+            FileUid.REMOTE_CHANGES to SyncStatus.REMOTE_CHANGES,
+            FileUid.LOCAL_CHANGES to SyncStatus.LOCAL_CHANGES,
+            FileUid.LOCAL_CHANGES_TIMEOUT to SyncStatus.LOCAL_CHANGES,
+            FileUid.ERROR to SyncStatus.ERROR,
+            FileUid.AUTH_ERROR to SyncStatus.AUTH_ERROR,
+            FileUid.NOT_FOUND to SyncStatus.FILE_NOT_FOUND
         )
     )
 
-    private val fileFactory = FakeFileFactory(fsAuthority)
     private val authenticator = FakeFileSystemAuthenticator(fsAuthority)
-    private val syncProcessor = FakeFileSystemSyncProcessor(observerBus, throttler, fsAuthority)
-
-    private val allFiles = listOf(
-        fileFactory.createNoChangesFile(),
-        fileFactory.createRemoteChangesFile(),
-        fileFactory.createLocalChangesFile(),
-        fileFactory.createLocalChangesTimeoutFile(),
-        fileFactory.createConflictLocalFile(),
-        fileFactory.createAuthErrorFile(),
-        fileFactory.createNotFoundFile(),
-        fileFactory.createErrorFile(),
-        fileFactory.createAutoTestsFile()
+    private val syncProcessor = FakeFileSystemSyncProcessor(
+        storage = storage,
+        observerBus = observerBus,
+        throttler = throttler,
+        fsAuthority = fsAuthority
     )
+
+    private val fileFactory = FakeFileFactory(authenticator.getFsAuthority())
+    private val allFiles = createFileDescriptors()
 
     override fun getAuthenticator(): FileSystemAuthenticator {
         return authenticator
@@ -79,8 +76,7 @@ class FakeFileSystemProvider(
             return newAuthError()
         }
 
-        return provider.getParent(file)
-            .map { descriptor -> descriptor.substituteFsAuthority() }
+        return rootFile
     }
 
     override fun getRootFile(): OperationResult<FileDescriptor> {
@@ -101,32 +97,17 @@ class FakeFileSystemProvider(
             return newAuthError()
         }
 
-        val realPath = getRealFilePath(file, options)
+        val content = storage.get(file.uid, options)
+            ?: return OperationResult.error(newFileNotFoundError())
+
         return try {
-            OperationResult.success(context.assets.open(realPath))
+            OperationResult.success(ByteArrayInputStream(content))
         } catch (exception: FileNotFoundException) {
             Timber.w(exception)
             OperationResult.error(newFileNotFoundError())
         } catch (exception: IOException) {
             Timber.w(exception)
             OperationResult.error(OperationError.newGenericIOError(exception))
-        }
-    }
-
-    private fun getRealFilePath(
-        file: FileDescriptor,
-        options: FSOptions
-    ): String {
-        return when (file.uid) {
-            FakeFileFactory.FileUid.CONFLICT -> {
-                if (options.isCacheEnabled && options.isCacheOnly) {
-                    DATABASE_FILE_NAME
-                } else {
-                    MODIFIED_DATABASE_FILE_NAME
-                }
-            }
-
-            else -> DATABASE_FILE_NAME
         }
     }
 
@@ -139,7 +120,13 @@ class FakeFileSystemProvider(
             return newAuthError()
         }
 
-        return provider.openFileForWrite(file, onConflictStrategy, options)
+        val stream = FakeFileOutputStream(
+            onFinished = { bytes ->
+                storage.put(file.uid, StorageDestinationType.LOCAL, bytes)
+            }
+        )
+
+        return OperationResult.success(stream)
     }
 
     override fun exists(file: FileDescriptor): OperationResult<Boolean> {
@@ -182,11 +169,23 @@ class FakeFileSystemProvider(
         return OperationResult.error(OperationError.newAuthError())
     }
 
+    private fun createFileDescriptors(): List<FileDescriptor> {
+        return listOf(
+            fileFactory.createNoChangesFile(),
+            fileFactory.createRemoteChangesFile(),
+            fileFactory.createLocalChangesFile(),
+            fileFactory.createLocalChangesTimeoutFile(),
+            fileFactory.createConflictLocalFile(),
+            fileFactory.createAuthErrorFile(),
+            fileFactory.createNotFoundFile(),
+            fileFactory.createErrorFile(),
+            fileFactory.createAutoTestsFile()
+        )
+    }
+
     companion object {
         private const val SERVER_URL = "test://server.com"
         private const val USERNAME = "user"
         private const val PASSWORD = "abc123"
-        private const val DATABASE_FILE_NAME = "fake-fs-database.kdbx"
-        private const val MODIFIED_DATABASE_FILE_NAME = "fake-fs-database-modified.kdbx"
     }
 }

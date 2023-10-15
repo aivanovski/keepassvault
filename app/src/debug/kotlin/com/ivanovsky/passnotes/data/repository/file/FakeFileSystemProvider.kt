@@ -89,7 +89,6 @@ class FakeFileSystemProvider(
         }
 
         val root = fileFactory.createRootFile().substituteFsAuthority()
-
         return OperationResult.success(root)
     }
 
@@ -102,14 +101,32 @@ class FakeFileSystemProvider(
             return newAuthError()
         }
 
+        val realPath = getRealFilePath(file, options)
         return try {
-            OperationResult.success(context.assets.open(DB_NAME))
+            OperationResult.success(context.assets.open(realPath))
         } catch (exception: FileNotFoundException) {
             Timber.w(exception)
             OperationResult.error(newFileNotFoundError())
         } catch (exception: IOException) {
             Timber.w(exception)
             OperationResult.error(OperationError.newGenericIOError(exception))
+        }
+    }
+
+    private fun getRealFilePath(
+        file: FileDescriptor,
+        options: FSOptions
+    ): String {
+        return when (file.uid) {
+            FakeFileFactory.FileUid.CONFLICT -> {
+                if (options.isCacheEnabled && options.isCacheOnly) {
+                    DATABASE_FILE_NAME
+                } else {
+                    MODIFIED_DATABASE_FILE_NAME
+                }
+            }
+
+            else -> DATABASE_FILE_NAME
         }
     }
 
@@ -169,6 +186,7 @@ class FakeFileSystemProvider(
         private const val SERVER_URL = "test://server.com"
         private const val USERNAME = "user"
         private const val PASSWORD = "abc123"
-        private const val DB_NAME = "fake-fs-database.kdbx"
+        private const val DATABASE_FILE_NAME = "fake-fs-database.kdbx"
+        private const val MODIFIED_DATABASE_FILE_NAME = "fake-fs-database-modified.kdbx"
     }
 }

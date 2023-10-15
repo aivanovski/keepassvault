@@ -1,7 +1,5 @@
 package com.ivanovsky.passnotes.data.repository.keepass.kotpass
 
-import app.keemobile.kotpass.cryptography.EncryptedValue
-import app.keemobile.kotpass.database.Credentials
 import app.keemobile.kotpass.database.KeePassDatabase
 import app.keemobile.kotpass.database.decode
 import app.keemobile.kotpass.database.encode
@@ -29,10 +27,8 @@ import com.ivanovsky.passnotes.data.repository.encdb.MutableEncryptedDatabaseCon
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
-import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
-import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
-import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateDaoImpl
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateFactory
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
@@ -49,7 +45,7 @@ import kotlin.concurrent.withLock
 import timber.log.Timber
 
 class KotpassDatabase(
-    private val fsProvider: FileSystemProvider,
+    private val fsResolver: FileSystemResolver,
     private val fsOptions: FSOptions,
     private val file: FileDescriptor,
     key: EncryptedDatabaseKey,
@@ -65,6 +61,7 @@ class KotpassDatabase(
     private val noteDao = KotpassNoteDao(this)
     private val templateDao = TemplateDaoImpl(groupDao, noteDao)
     private val dbWatcher = DatabaseWatcher()
+    private val fsProvider = fsResolver.resolveProvider(file.fsAuthority)
 
     override fun getWatcher(): DatabaseWatcher = dbWatcher
 
@@ -135,7 +132,7 @@ class KotpassDatabase(
                 )
             }
 
-            val getCredentialsResult = getCredentials(newKey)
+            val getCredentialsResult = newKey.toCredentials(fsResolver)
             if (getCredentialsResult.isFailed) {
                 return getCredentialsResult.mapError()
             }
@@ -392,13 +389,13 @@ class KotpassDatabase(
         private const val DEFAULT_ROOT_GROUP_NAME = "Database"
 
         fun new(
-            fsProvider: FileSystemProvider,
+            fsResolver: FileSystemResolver,
             fsOptions: FSOptions,
             file: FileDescriptor,
             key: EncryptedDatabaseKey,
             isAddTemplates: Boolean
         ): OperationResult<KotpassDatabase> {
-            val getCredentialsResult = getCredentials(key)
+            val getCredentialsResult = key.toCredentials(fsResolver)
             if (getCredentialsResult.isFailed) {
                 return getCredentialsResult.mapError()
             }
@@ -414,7 +411,7 @@ class KotpassDatabase(
             )
 
             val db = KotpassDatabase(
-                fsProvider = fsProvider,
+                fsResolver = fsResolver,
                 fsOptions = fsOptions,
                 file = file,
                 key = key,
@@ -442,7 +439,7 @@ class KotpassDatabase(
         }
 
         fun open(
-            fsProvider: FileSystemProvider,
+            fsResolver: FileSystemResolver,
             fsOptions: FSOptions,
             file: FileDescriptor,
             content: OperationResult<InputStream>,
@@ -453,7 +450,7 @@ class KotpassDatabase(
             }
 
             val contentStream = content.obj
-            val getCredentialsResult = getCredentials(key)
+            val getCredentialsResult = key.toCredentials(fsResolver)
             if (getCredentialsResult.isFailed) {
                 return getCredentialsResult.mapError()
             }
@@ -465,7 +462,7 @@ class KotpassDatabase(
 
                 return OperationResult.success(
                     KotpassDatabase(
-                        fsProvider = fsProvider,
+                        fsResolver = fsResolver,
                         fsOptions = fsOptions,
                         file = file,
                         key = key,
@@ -488,40 +485,6 @@ class KotpassDatabase(
                 }
             } finally {
                 InputOutputUtils.close(contentStream)
-            }
-        }
-
-        private fun getCredentials(
-            key: EncryptedDatabaseKey
-        ): OperationResult<Credentials> {
-            return when (key) {
-                is PasswordKeepassKey -> {
-                    val credentials = Credentials.from(key.getKey().obj)
-                    OperationResult.success(credentials)
-                }
-
-                is FileKeepassKey -> {
-                    val getBytesResult = key.getKey()
-                    if (getBytesResult.isFailed) {
-                        return getBytesResult.mapError()
-                    }
-
-                    val bytes = getBytesResult.obj
-                    val credentials = if (key.password == null) {
-                        Credentials.from(
-                            EncryptedValue.fromBinary(bytes)
-                        )
-                    } else {
-                        Credentials.from(
-                            passphrase = EncryptedValue.fromString(key.password),
-                            keyData = bytes
-                        )
-                    }
-
-                    OperationResult.success(credentials)
-                }
-
-                else -> throw IllegalArgumentException()
             }
         }
     }

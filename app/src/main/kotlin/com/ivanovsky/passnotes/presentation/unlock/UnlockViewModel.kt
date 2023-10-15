@@ -205,10 +205,7 @@ class UnlockViewModel(
             selectedKeyFile != null -> {
                 FileKeepassKey(
                     file = selectedKeyFile,
-                    password = password.ifEmpty { null },
-                    fileSystemProvider = fileSystemResolver.resolveProvider(
-                        selectedFile.fsAuthority
-                    )
+                    password = password.ifEmpty { null }
                 )
             }
             else -> PasswordKeepassKey(password)

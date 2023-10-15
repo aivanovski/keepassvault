@@ -10,7 +10,6 @@ import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FSOptions.Companion.defaultOptions
-import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
@@ -60,7 +59,7 @@ class KeepassDatabaseRepository(
 
             val openResult = openDatabase(
                 type,
-                fsProvider,
+                fileSystemResolver,
                 options,
                 file,
                 openFileResult,
@@ -106,7 +105,7 @@ class KeepassDatabaseRepository(
 
             val openResult = openDatabase(
                 type = type,
-                fsProvider = fsProvider,
+                fsResolver = fileSystemResolver,
                 fsOptions = fsOptions,
                 file = file,
                 input = openFileResult,
@@ -134,11 +133,9 @@ class KeepassDatabaseRepository(
         file: FileDescriptor,
         addTemplates: Boolean
     ): OperationResult<Boolean> {
-        val fsProvider = fileSystemResolver.resolveProvider(file.fsAuthority)
-
         return lock.withLock {
             val dbResult = KotpassDatabase.new(
-                fsProvider = fsProvider,
+                fsResolver = fileSystemResolver,
                 fsOptions = defaultOptions(),
                 file = file,
                 key = key,
@@ -186,7 +183,7 @@ class KeepassDatabaseRepository(
 
     private fun openDatabase(
         type: KeepassImplementation,
-        fsProvider: FileSystemProvider,
+        fsResolver: FileSystemResolver,
         fsOptions: FSOptions,
         file: FileDescriptor,
         input: OperationResult<InputStream>,
@@ -194,7 +191,7 @@ class KeepassDatabaseRepository(
     ): OperationResult<EncryptedDatabase> {
         val openResult = when (type) {
             KeepassImplementation.KOTPASS -> KotpassDatabase.open(
-                fsProvider,
+                fsResolver,
                 fsOptions,
                 file,
                 input,

@@ -171,6 +171,10 @@ class AutofillStructureParser(
         }
 
         for (hint in hints) {
+            if (hint == null) {
+                continue
+            }
+
             when {
                 isAutofillHintMatchUsername(hint) -> return AutofillNode(
                     AutofillFieldType.USERNAME,

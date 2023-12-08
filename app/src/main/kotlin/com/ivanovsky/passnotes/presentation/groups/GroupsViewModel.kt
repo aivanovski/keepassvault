@@ -397,7 +397,7 @@ class GroupsViewModel(
                     UnlockScreen(
                         UnlockScreenArgs(
                             appMode = args.appMode,
-                            autofillStructure = args.autofillStructure
+                            autofillParams = args.autofillParams
                         )
                     )
                 )
@@ -432,7 +432,7 @@ class GroupsViewModel(
             SearchScreen(
                 SearchScreenArgs(
                     appMode = args.appMode,
-                    autofillStructure = args.autofillStructure
+                    autofillParams = args.autofillParams
                 )
             )
         )
@@ -538,7 +538,7 @@ class GroupsViewModel(
                     appMode = args.appMode,
                     groupUid = groupUid,
                     isCloseDatabaseOnExit = false,
-                    autofillStructure = args.autofillStructure
+                    autofillParams = args.autofillParams
                 )
             )
         )
@@ -566,7 +566,7 @@ class GroupsViewModel(
                 NoteScreenArgs(
                     appMode = args.appMode,
                     noteUid = noteUid,
-                    autofillStructure = args.autofillStructure
+                    autofillParams = args.autofillParams
                 )
             )
         )

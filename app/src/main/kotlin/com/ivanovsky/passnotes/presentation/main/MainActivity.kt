@@ -20,7 +20,7 @@ import com.ivanovsky.passnotes.databinding.CoreBaseActivityWithSideMenuBinding
 import com.ivanovsky.passnotes.domain.ThemeProvider
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillParams
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryExtra
 import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
@@ -194,13 +194,13 @@ class MainActivity :
 
         fun createAutofillAuthenticationPendingIntent(
             context: Context,
-            autofillStructure: AutofillStructure
+            autofillParams: AutofillParams
         ): PendingIntent {
             val intent = createStartIntent(
                 context,
                 MainScreenArgs(
                     appMode = ApplicationLaunchMode.AUTOFILL_AUTHORIZATION,
-                    autofillStructure = autofillStructure
+                    autofillParams = autofillParams
                 )
             )
             return PendingIntent.getActivity(
@@ -213,13 +213,13 @@ class MainActivity :
 
         fun createAutofillSelectionPendingIntent(
             context: Context,
-            autofillStructure: AutofillStructure
+            autofillParams: AutofillParams
         ): PendingIntent {
             val intent = createStartIntent(
                 context,
                 MainScreenArgs(
                     appMode = ApplicationLaunchMode.AUTOFILL_SELECTION,
-                    autofillStructure = autofillStructure
+                    autofillParams = autofillParams
                 )
             )
 

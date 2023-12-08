@@ -18,7 +18,7 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.extensions.setItemVisibility
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
-import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillParams
 import com.ivanovsky.passnotes.presentation.core.dialog.ErrorDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialogArgs
@@ -81,16 +81,16 @@ fun Fragment.showSnackbarMessage(message: String) {
         .show()
 }
 
-fun Fragment.sendAutofillResult(note: Note?, structure: AutofillStructure) {
+fun Fragment.sendAutofillResult(note: Note?, params: AutofillParams) {
     if (Build.VERSION.SDK_INT < 26) {
         return
     }
 
     val factory = AutofillResponseFactory(requireContext(), GlobalInjector.get())
     val response = if (note != null) {
-        factory.createResponseWithNoteAndSelection(note, structure)
+        factory.createResponseWithNoteAndSelection(note, params)
     } else {
-        factory.createResponseWithSelection(structure)
+        factory.createResponseWithSelection(params)
     }
 
     val result = Intent()

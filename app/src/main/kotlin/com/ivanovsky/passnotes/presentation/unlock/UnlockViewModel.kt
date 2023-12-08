@@ -39,7 +39,7 @@ import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NewDatabaseScreen
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
-import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillParams
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -85,7 +85,7 @@ class UnlockViewModel(
     val unlockButtonColor = MutableLiveData(getUnlockButtonColorInternal())
     val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
     val showSnackbarMessage = SingleLiveEvent<String>()
-    val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
+    val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillParams>>()
     val fileCellViewModels = MutableLiveData<List<BaseCellViewModel>>()
     val isFabButtonVisible = MutableLiveData(false)
     val showResolveConflictDialog = SingleLiveEvent<FileDescriptor>()
@@ -395,13 +395,13 @@ class UnlockViewModel(
     private suspend fun onDatabaseUnlocked() {
         when (args.appMode) {
             AUTOFILL_AUTHORIZATION -> {
-                val structure = args.autofillStructure ?: return
+                val params = args.autofillParams ?: return
 
-                val autofillNoteResult = interactor.findNoteForAutofill(structure)
+                val autofillNoteResult = interactor.findNoteForAutofill(params.structure)
                 if (autofillNoteResult.isSucceeded) {
                     val note = autofillNoteResult.obj
 
-                    sendAutofillResponseEvent.call(Pair(note, structure))
+                    sendAutofillResponseEvent.call(Pair(note, params))
                 } else {
                     setErrorPanelState(autofillNoteResult.error)
                 }
@@ -415,7 +415,7 @@ class UnlockViewModel(
                             appMode = args.appMode,
                             groupUid = null,
                             isCloseDatabaseOnExit = true,
-                            autofillStructure = args.autofillStructure,
+                            autofillParams = args.autofillParams,
                             note = args.note
                         )
                     )

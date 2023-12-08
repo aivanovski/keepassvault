@@ -93,8 +93,8 @@ class UnlockFragment : BaseFragment() {
         viewModel.showResolveConflictDialog.observe(viewLifecycleOwner) { file ->
             showResolveConflictDialog(file)
         }
-        viewModel.sendAutofillResponseEvent.observe(viewLifecycleOwner) { (note, structure) ->
-            sendAutofillResult(note, structure)
+        viewModel.sendAutofillResponseEvent.observe(viewLifecycleOwner) { (note, params) ->
+            sendAutofillResult(note, params)
             finishActivity()
         }
         viewModel.showBiometricUnlockDialog.observe(viewLifecycleOwner) { cipher ->

@@ -163,8 +163,8 @@ class NoteFragment : BaseFragment() {
         viewModel.finishActivityEvent.observe(viewLifecycleOwner) {
             finishActivity()
         }
-        viewModel.sendAutofillResponseEvent.observe(viewLifecycleOwner) { (note, structure) ->
-            sendAutofillResult(note, structure)
+        viewModel.sendAutofillResponseEvent.observe(viewLifecycleOwner) { (note, params) ->
+            sendAutofillResult(note, params)
             finishActivity()
         }
         viewModel.showAddAutofillDataDialog.observe(viewLifecycleOwner) {

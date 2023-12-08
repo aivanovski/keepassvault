@@ -26,7 +26,7 @@ class MainViewModel(
                 UnlockScreen(
                     UnlockScreenArgs(
                         appMode = args.appMode,
-                        autofillStructure = args.autofillStructure
+                        autofillParams = args.autofillParams
                     )
                 ),
                 GroupsScreen(
@@ -34,13 +34,13 @@ class MainViewModel(
                         appMode = args.appMode,
                         groupUid = null,
                         isCloseDatabaseOnExit = false,
-                        autofillStructure = args.autofillStructure
+                        autofillParams = args.autofillParams
                     )
                 ),
                 SearchScreen(
                     SearchScreenArgs(
                         appMode = args.appMode,
-                        autofillStructure = args.autofillStructure
+                        autofillParams = args.autofillParams
                     )
                 )
             )
@@ -50,7 +50,7 @@ class MainViewModel(
                 UnlockScreen(
                     UnlockScreenArgs(
                         appMode = args.appMode,
-                        autofillStructure = args.autofillStructure,
+                        autofillParams = args.autofillParams,
                         note = args.note
                     )
                 )

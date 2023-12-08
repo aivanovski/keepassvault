@@ -26,7 +26,7 @@ import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
-import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillParams
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -84,7 +84,7 @@ class NoteViewModel(
     val isFabButtonVisible = MutableLiveData(false)
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
-    val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
+    val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillParams>>()
     val showAddAutofillDataDialog = SingleLiveEvent<Note>()
     val showPropertyActionDialog = SingleLiveEvent<List<PropertyAction>>()
     val showAttachmentActionDialog = SingleLiveEvent<List<AttachmentAction>>()
@@ -153,7 +153,7 @@ class NoteViewModel(
                     UnlockScreen(
                         UnlockScreenArgs(
                             appMode = args.appMode,
-                            autofillStructure = args.autofillStructure
+                            autofillParams = args.autofillParams
                         )
                     )
                 )
@@ -166,7 +166,7 @@ class NoteViewModel(
             SearchScreen(
                 SearchScreenArgs(
                     appMode = args.appMode,
-                    autofillStructure = args.autofillStructure
+                    autofillParams = args.autofillParams
                 )
             )
         )
@@ -177,7 +177,7 @@ class NoteViewModel(
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
 
     fun onSelectButtonClicked() {
-        val structure = args.autofillStructure ?: return
+        val params = args.autofillParams ?: return
 
         if (args.appMode != ApplicationLaunchMode.AUTOFILL_SELECTION) {
             return
@@ -185,26 +185,26 @@ class NoteViewModel(
 
         val note = this.note
         if (note == null) {
-            sendAutofillResponseEvent.call(Pair(null, structure))
+            sendAutofillResponseEvent.call(Pair(null, params))
             return
         }
 
         viewModelScope.launch {
-            if (interactor.shouldUpdateNoteAutofillData(note, structure)) {
+            if (interactor.shouldUpdateNoteAutofillData(note, params.structure)) {
                 showAddAutofillDataDialog.call(note)
             } else {
-                sendAutofillResponseEvent.call(Pair(note, structure))
+                sendAutofillResponseEvent.call(Pair(note, params))
             }
         }
     }
 
     fun onAddAutofillDataConfirmed(note: Note) {
-        val structure = args.autofillStructure ?: return
+        val params = args.autofillParams ?: return
 
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val updateNoteResult = interactor.updateNoteWithAutofillData(note, structure)
+            val updateNoteResult = interactor.updateNoteWithAutofillData(note, params.structure)
             if (updateNoteResult.isFailed) {
                 setScreenState(
                     ScreenState.dataWithError(
@@ -214,12 +214,12 @@ class NoteViewModel(
                 return@launch
             }
 
-            sendAutofillResponseEvent.call(Pair(note, structure))
+            sendAutofillResponseEvent.call(Pair(note, params))
         }
     }
 
     fun onAddAutofillDataDenied(note: Note) {
-        val structure = args.autofillStructure ?: return
+        val structure = args.autofillParams ?: return
 
         sendAutofillResponseEvent.call(Pair(note, structure))
     }

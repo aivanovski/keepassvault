@@ -26,7 +26,7 @@ import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
-import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillParams
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -75,7 +75,7 @@ class SearchViewModel(
     val query = MutableLiveData(EMPTY)
     val visibleMenuItems = MutableLiveData(getVisibleMenuItems())
     val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
-    val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note, AutofillStructure>>()
+    val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note, AutofillParams>>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
     val showAddAutofillDataDialog = SingleLiveEvent<Note>()
     val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
@@ -157,12 +157,12 @@ class SearchViewModel(
     }
 
     fun onAddAutofillDataConfirmed(note: Note) {
-        val structure = args.autofillStructure ?: return
+        val params = args.autofillParams ?: return
 
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val updateNoteResult = interactor.updateNoteWithAutofillData(note, structure)
+            val updateNoteResult = interactor.updateNoteWithAutofillData(note, params.structure)
             if (updateNoteResult.isFailed) {
                 setScreenState(
                     ScreenState.dataWithError(
@@ -172,12 +172,12 @@ class SearchViewModel(
                 return@launch
             }
 
-            sendAutofillResponseEvent.call(Pair(note, structure))
+            sendAutofillResponseEvent.call(Pair(note, params))
         }
     }
 
     fun onAddAutofillDataDenied(note: Note) {
-        val structure = args.autofillStructure ?: return
+        val structure = args.autofillParams ?: return
 
         sendAutofillResponseEvent.call(Pair(note, structure))
     }
@@ -287,7 +287,7 @@ class SearchViewModel(
                     appMode = args.appMode,
                     groupUid = groupUid,
                     isCloseDatabaseOnExit = false,
-                    autofillStructure = args.autofillStructure
+                    autofillParams = args.autofillParams
                 )
             )
         )
@@ -300,7 +300,7 @@ class SearchViewModel(
             AUTOFILL_SELECTION -> {
                 setScreenState(ScreenState.loading())
 
-                val structure = args.autofillStructure ?: return
+                val params = args.autofillParams ?: return
 
                 viewModelScope.launch {
                     val getNoteResult = interactor.getNoteByUid(noteUid)
@@ -316,10 +316,10 @@ class SearchViewModel(
                     }
 
                     val note = getNoteResult.obj
-                    if (interactor.shouldUpdateNoteAutofillData(note, structure)) {
+                    if (interactor.shouldUpdateNoteAutofillData(note, params.structure)) {
                         showAddAutofillDataDialog.call(note)
                     } else {
-                        sendAutofillResponseEvent.call(Pair(note, structure))
+                        sendAutofillResponseEvent.call(Pair(note, params))
                     }
 
                     setScreenState(ScreenState.data())
@@ -331,7 +331,7 @@ class SearchViewModel(
                         NoteScreenArgs(
                             appMode = args.appMode,
                             noteUid = noteUid,
-                            autofillStructure = args.autofillStructure
+                            autofillParams = args.autofillParams
                         )
                     )
                 )

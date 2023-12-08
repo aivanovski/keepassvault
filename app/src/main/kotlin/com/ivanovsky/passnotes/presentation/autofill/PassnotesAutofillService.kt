@@ -16,7 +16,9 @@ import com.ivanovsky.passnotes.domain.PropertyFactory.createUsernameProperty
 import com.ivanovsky.passnotes.domain.interactor.autofill.AutofillInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector.get
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillParams
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
+import com.ivanovsky.passnotes.presentation.autofill.model.InlineSpec
 import com.ivanovsky.passnotes.presentation.main.MainActivity
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.CoroutineScope
@@ -58,8 +60,13 @@ class PassnotesAutofillService : AutofillService() {
             return
         }
 
+        val params = AutofillParams(
+            structure = structure,
+            inlineSpec = InlineSpec.fromAutofillRequest(request)
+        )
+
         if (!interactor.isDatabaseOpened()) {
-            val response = responseFactory.createResponseWithUnlock(structure)
+            val response = responseFactory.createResponseWithUnlock(params)
             callback.onSuccess(response)
             return
         }
@@ -73,12 +80,12 @@ class PassnotesAutofillService : AutofillService() {
                     Timber.d("Show note and selection")
                     val response = responseFactory.createResponseWithNoteAndSelection(
                         note,
-                        structure
+                        params
                     )
                     callback.onSuccess(response)
                 } else {
                     Timber.d("Show selection")
-                    val response = responseFactory.createResponseWithSelection(structure)
+                    val response = responseFactory.createResponseWithSelection(params)
                     callback.onSuccess(response)
                 }
             } else {

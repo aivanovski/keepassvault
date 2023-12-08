@@ -13,6 +13,7 @@ import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.presentation.autofill.extensions.getFields
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillFieldType
+import com.ivanovsky.passnotes.presentation.autofill.model.AutofillParams
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.main.MainActivity
 import com.ivanovsky.passnotes.util.StringUtils
@@ -23,37 +24,39 @@ class AutofillResponseFactory(
     private val viewFactory: AutofillViewFactory
 ) {
 
-    fun createResponseWithUnlock(structure: AutofillStructure): FillResponse {
-        val intent = MainActivity.createAutofillAuthenticationPendingIntent(context, structure)
+    fun createResponseWithUnlock(params: AutofillParams): FillResponse {
+        val intent = MainActivity.createAutofillAuthenticationPendingIntent(context, params)
 
         return FillResponse.Builder()
             .setAuthentication(
-                structure.getAutofillIds().toTypedArray(),
+                params.structure.getAutofillIds().toTypedArray(),
                 intent.intentSender,
                 viewFactory.createUnlockView()
             )
-            .setSaveInfo(createSaveInfo(structure))
+            .setSaveInfo(createSaveInfo(params.structure))
             .build()
     }
 
-    fun createResponseWithSelection(structure: AutofillStructure): FillResponse {
-        val intent = MainActivity.createAutofillSelectionPendingIntent(context, structure)
+    fun createResponseWithSelection(params: AutofillParams): FillResponse {
+        val intent = MainActivity.createAutofillSelectionPendingIntent(context, params)
 
         return FillResponse.Builder()
             .setAuthentication(
-                structure.getAutofillIds().toTypedArray(),
+                params.structure.getAutofillIds().toTypedArray(),
                 intent.intentSender,
                 viewFactory.createSelectionView()
             )
-            .setSaveInfo(createSaveInfo(structure))
+            .setSaveInfo(createSaveInfo(params.structure))
             .build()
     }
 
     fun createResponseWithNoteAndSelection(
         note: Note,
-        structure: AutofillStructure
+        params: AutofillParams
     ): FillResponse {
         val builder = FillResponse.Builder()
+
+        val structure = params.structure
 
         val noteDataset = buildDatasetForNote(note, structure)
         if (noteDataset != null) {
@@ -61,7 +64,7 @@ class AutofillResponseFactory(
         }
 
         val view = viewFactory.createSelectionView()
-        val intent = MainActivity.createAutofillSelectionPendingIntent(context, structure)
+        val intent = MainActivity.createAutofillSelectionPendingIntent(context, params)
 
         val selectionDataset = Dataset.Builder()
             .apply {

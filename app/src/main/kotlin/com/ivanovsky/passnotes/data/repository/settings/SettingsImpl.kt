@@ -302,7 +302,7 @@ class SettingsImpl(private val context: Context) : Settings {
         SEARCH_TYPE(
             keyId = R.string.pref_search_type,
             type = STRING,
-            defaultValue = null
+            defaultValue = SearchType.default().name
         ),
         SORT_TYPE(
             keyId = R.string.pref_sort_type,

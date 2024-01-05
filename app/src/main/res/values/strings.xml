@@ -304,6 +304,8 @@
     <string name="pref_is_postponed_sync_enabled_summary">Synchronization via network will be postponed until database will be locked</string>
     <string name="pref_is_biometric_unlock_enabled_title">Enable biometric unlock</string>
     <string name="pref_is_biometric_unlock_enabled_summary">Allows to unlock database with fingerprint</string>
+    <string name="pref_search_type_title">Search algorithm</string>
+    <string name="pref_search_type_summary">Algorithm used in the app to look up entries</string>
     <string name="general">General</string>
     <string name="notifications">Notifications</string>
     <string name="logging">Logging</string>

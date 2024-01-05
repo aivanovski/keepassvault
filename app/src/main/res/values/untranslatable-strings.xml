@@ -29,6 +29,7 @@
     <string name="pref_category_biometrics" translatable="false">categoryBiometrics</string>
     <string name="pref_category_notifications" translatable="false">categoryNotifications</string>
     <string name="pref_category_logging" translatable="false">categoryLogging</string>
+    <string name="pref_category_search" translatable="false">categorySearch</string>
 
     <string name="failed_to_parse_test_data" translatable="false">Failed to parse test data</string>
     <string name="test_data_successfully_imported" translatable="false">Test data successfully imported</string>
@@ -72,6 +73,16 @@
         <item>60000</item>
         <item>120000</item>
         <item>300000</item>
+    </string-array>
+
+    <string-array name="pref_search_type_entries">
+        <item>Strict(exact matching)</item>
+        <item>Fuzzy(approximate matching)</item>
+    </string-array>
+
+    <string-array name="pref_search_type_values">
+        <item>STRICT</item>
+        <item>FUZZY</item>
     </string-array>
 
 </resources>

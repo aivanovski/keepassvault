@@ -18,6 +18,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIO
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SEARCH_TYPE
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BasePreferenceFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
@@ -67,7 +68,8 @@ class AppSettingsFragment : BasePreferenceFragment() {
             AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS,
             IS_FILE_LOG_ENABLED,
             IS_POSTPONED_SYNC_ENABLED,
-            IS_BIOMETRIC_UNLOCK_ENABLED
+            IS_BIOMETRIC_UNLOCK_ENABLED,
+            SEARCH_TYPE
         )
             .forEach { settings.initDefaultIfNeed(it) }
 

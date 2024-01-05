@@ -6,7 +6,7 @@ enum class SearchType {
 
     companion object {
 
-        fun default(): SearchType = FUZZY
+        fun default(): SearchType = STRICT
 
         fun getByName(name: String): SearchType? {
             return values().firstOrNull { it.name == name }

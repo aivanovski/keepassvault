@@ -646,7 +646,9 @@ class GroupsViewModel(
         val screenState = this.screenState.value ?: return OptionPanelState.HIDDEN
 
         return when {
-            !screenState.isDisplayingData -> OptionPanelState.HIDDEN
+            screenState.isDisplayingLoading || screenState.isDisplayingError -> {
+                OptionPanelState.HIDDEN
+            }
             args.note != null && !isAutofillSavingCancelled -> OptionPanelState.SAVE_AUTOFILL_DATA
             selectionHolder.hasSelection() -> OptionPanelState.PASTE
             else -> OptionPanelState.HIDDEN

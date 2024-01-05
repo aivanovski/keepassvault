@@ -20,6 +20,9 @@ data class ScreenState private constructor(
     val isNotInitialized: Boolean
         get() = screenDisplayingType == ScreenDisplayingType.NOT_INITIALIZED
 
+    val isDisplayingError: Boolean
+        get() = screenDisplayingType == ScreenDisplayingType.ERROR
+
     companion object {
 
         fun data(): ScreenState {

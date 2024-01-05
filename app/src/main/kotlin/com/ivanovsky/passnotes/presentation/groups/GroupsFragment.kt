@@ -80,6 +80,8 @@ class GroupsFragment : BaseFragment() {
                 it.viewModel = viewModel
             }
 
+        binding.recyclerView.itemAnimator = null
+
         syncIconAnimation = AnimationFactory.createRotationAnimation(binding.syncStateView.syncIcon)
             .apply {
                 start()

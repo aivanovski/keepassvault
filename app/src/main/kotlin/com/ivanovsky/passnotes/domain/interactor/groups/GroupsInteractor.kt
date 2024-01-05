@@ -22,6 +22,7 @@ import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveBiometricDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateUsedFileUseCase
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import java.util.UUID
@@ -53,61 +54,64 @@ class GroupsInteractor(
             db.templateDao.getTemplates()
         }
 
-    fun getRootUid(): UUID? {
-        val getDbResult = getDbUseCase.getDatabaseSynchronously()
-        if (getDbResult.isFailed) {
-            return null
+    suspend fun getRootUid(): UUID? =
+        withContext(dispatchers.IO) {
+            val getDbResult = getDbUseCase.getDatabaseSynchronously()
+            if (getDbResult.isFailed) {
+                return@withContext null
+            }
+
+            val db = getDbResult.obj
+            val rootResult = db.groupDao.rootGroup
+            if (rootResult.isFailed) {
+                return@withContext null
+            }
+
+            rootResult.getOrThrow().uid
         }
 
-        val db = getDbResult.obj
-        val rootResult = db.groupDao.rootGroup
-        if (rootResult.isFailed) {
-            return null
+    suspend fun getRootGroupData(): OperationResult<List<EncryptedDatabaseEntry>> =
+        withContext(dispatchers.IO) {
+            val getDbResult = getDbUseCase.getDatabaseSynchronously()
+            if (getDbResult.isFailed) {
+                return@withContext getDbResult.takeError()
+            }
+
+            val db = getDbResult.obj
+
+            val rootGroupResult = db.groupDao.rootGroup
+            if (rootGroupResult.isFailed) {
+                return@withContext rootGroupResult.takeError()
+            }
+
+            val groupUid = rootGroupResult.obj.uid
+
+            getGroupData(groupUid)
         }
 
-        return rootResult.obj.uid
-    }
+    suspend fun getGroupData(groupUid: UUID): OperationResult<List<EncryptedDatabaseEntry>> =
+        withContext(dispatchers.IO) {
+            val getDbResult = getDbUseCase.getDatabaseSynchronously()
+            if (getDbResult.isFailed) {
+                return@withContext getDbResult.takeError()
+            }
 
-    fun getRootGroupData(): OperationResult<List<EncryptedDatabaseEntry>> {
-        val getDbResult = getDbUseCase.getDatabaseSynchronously()
-        if (getDbResult.isFailed) {
-            return getDbResult.takeError()
+            val db = getDbResult.obj
+            val groupsResult = db.groupDao.getChildGroups(groupUid)
+            if (groupsResult.isFailed) {
+                return@withContext groupsResult.takeError()
+            }
+
+            val notesResult = db.noteDao.getNotesByGroupUid(groupUid)
+            if (notesResult.isFailed) {
+                return@withContext groupsResult.takeError()
+            }
+
+            val groups = groupsResult.obj
+            val notes = notesResult.obj
+
+            OperationResult.success(groups + notes)
         }
-
-        val db = getDbResult.obj
-
-        val rootGroupResult = db.groupDao.rootGroup
-        if (rootGroupResult.isFailed) {
-            return rootGroupResult.takeError()
-        }
-
-        val groupUid = rootGroupResult.obj.uid
-
-        return getGroupData(groupUid)
-    }
-
-    fun getGroupData(groupUid: UUID): OperationResult<List<EncryptedDatabaseEntry>> {
-        val getDbResult = getDbUseCase.getDatabaseSynchronously()
-        if (getDbResult.isFailed) {
-            return getDbResult.takeError()
-        }
-
-        val db = getDbResult.obj
-        val groupsResult = db.groupDao.getChildGroups(groupUid)
-        if (groupsResult.isFailed) {
-            return groupsResult.takeError()
-        }
-
-        val notesResult = db.noteDao.getNotesByGroupUid(groupUid)
-        if (notesResult.isFailed) {
-            return groupsResult.takeError()
-        }
-
-        val groups = groupsResult.obj
-        val notes = notesResult.obj
-
-        return OperationResult.success(groups + notes)
-    }
 
     suspend fun sortData(
         data: List<EncryptedDatabaseEntry>
@@ -231,6 +235,7 @@ class GroupsInteractor(
                         selection.uid,
                         selectedGroupUid
                     )
+
                     SelectionItemType.GROUP_UID -> moveGroupUseCae.moveGroup(
                         selection.uid,
                         selectedGroupUid

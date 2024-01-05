@@ -30,11 +30,11 @@ import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.domain.interactor.syncState.SyncStateInteractor
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.isRequireSynchronization
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
-import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
@@ -65,6 +65,8 @@ import com.ivanovsky.passnotes.presentation.syncState.viewmodel.SyncStateViewMod
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toUUID
+import java.util.Deque
+import java.util.LinkedList
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -74,7 +76,6 @@ import org.koin.core.parameter.parametersOf
 class GroupsViewModel(
     private val interactor: GroupsInteractor,
     syncStateInteractor: SyncStateInteractor,
-    syncStateModelFactory: SyncStateCellModelFactory,
     private val biometricInteractor: BiometricInteractor,
     private val errorInteractor: ErrorInteractor,
     lockInteractor: DatabaseLockInteractor,
@@ -83,6 +84,7 @@ class GroupsViewModel(
     private val resourceProvider: ResourceProvider,
     private val cellModelFactory: GroupsCellModelFactory,
     private val cellViewModelFactory: GroupsCellViewModelFactory,
+    syncStateModelFactory: SyncStateCellModelFactory,
     private val selectionHolder: SelectionHolder,
     private val router: Router,
     private val args: GroupsScreenArgs
@@ -134,7 +136,8 @@ class GroupsViewModel(
 
     private var currentDataItems: List<EncryptedDatabaseEntry>? = null
     private var rootGroupUid: UUID? = null
-    private var groupUid: UUID? = args.groupUid
+    private var currentGroupUid: UUID? = null
+    private val selectedGroupUids: Deque<UUID?> = LinkedList<UUID?>()
     private var dbUsedFile: UsedFile? = null
     private var templates: List<Template>? = null
     private var isAutofillSavingCancelled = false
@@ -145,7 +148,10 @@ class GroupsViewModel(
         subscribeToEvents()
         syncStateViewModel.onAttach()
 
-        if (groupUid == null) {
+        selectedGroupUids.push(args.groupUid)
+        currentGroupUid = args.groupUid
+
+        if (args.groupUid == null) {
             syncStateInteractor.cache.setValue(null)
         }
     }
@@ -187,7 +193,7 @@ class GroupsViewModel(
     }
 
     fun start() {
-        if (groupUid == null) {
+        if (currentGroupUid == null) {
             screenTitle.value = resourceProvider.getString(R.string.groups)
         }
 
@@ -199,26 +205,22 @@ class GroupsViewModel(
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            templates = interactor.getTemplates().obj
+            templates = interactor.getTemplates().getOrThrow()
 
-            val data = withContext(Dispatchers.IO) {
-                groupUid.let {
-                    if (it == null) {
-                        interactor.getRootGroupData()
-                    } else {
-                        interactor.getGroupData(it)
-                    }
+            val data = currentGroupUid.let { groupUid ->
+                if (groupUid == null) {
+                    interactor.getRootGroupData()
+                } else {
+                    interactor.getGroupData(groupUid)
                 }
             }
 
-            if (groupUid == null && rootGroupUid == null) {
-                rootGroupUid = withContext(Dispatchers.IO) {
-                    interactor.getRootUid()
-                }
+            if (currentGroupUid == null && rootGroupUid == null) {
+                rootGroupUid = interactor.getRootUid()
             }
 
-            groupUid?.let {
-                val group = interactor.getGroup(it)
+            currentGroupUid?.let { groupUid ->
+                val group = interactor.getGroup(groupUid)
                 if (group.isSucceededOrDeferred) {
                     screenTitle.value = group.obj.title
                 }
@@ -233,7 +235,7 @@ class GroupsViewModel(
             dbUsedFile = getUsedFileResult.obj
 
             if (data.isSucceededOrDeferred) {
-                val dataItems = interactor.sortData(data.obj)
+                val dataItems = interactor.sortData(data.getOrThrow())
                 currentDataItems = dataItems
 
                 if (dataItems.isNotEmpty()) {
@@ -375,14 +377,20 @@ class GroupsViewModel(
     }
 
     fun onBackClicked() {
-        if (args.isCloseDatabaseOnExit) {
-            interactor.lockDatabase()
-        }
-
-        if (args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION && groupUid == rootGroupUid) {
-            finishActivityEvent.call(Unit)
+        if (selectedGroupUids.size > 1) {
+            selectedGroupUids.pop()
+            currentGroupUid = selectedGroupUids.peek()
+            loadData()
         } else {
-            router.exit()
+            if (args.isCloseDatabaseOnExit) {
+                interactor.lockDatabase()
+            }
+
+            if (args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION && currentGroupUid == rootGroupUid) {
+                finishActivityEvent.call(Unit)
+            } else {
+                router.exit()
+            }
         }
     }
 
@@ -532,16 +540,10 @@ class GroupsViewModel(
     }
 
     private fun onGroupClicked(groupUid: UUID) {
-        router.navigateTo(
-            GroupsScreen(
-                GroupsScreenArgs(
-                    appMode = args.appMode,
-                    groupUid = groupUid,
-                    isCloseDatabaseOnExit = false,
-                    autofillStructure = args.autofillStructure
-                )
-            )
-        )
+        selectedGroupUids.push(groupUid)
+        currentGroupUid = groupUid
+
+        loadData()
     }
 
     private fun onGroupLongClicked(groupUid: UUID) {
@@ -590,7 +592,7 @@ class GroupsViewModel(
 
     private fun getCurrentGroupUid(): UUID? {
         return when {
-            groupUid != null -> groupUid
+            currentGroupUid != null -> currentGroupUid
             rootGroupUid != null -> rootGroupUid
             else -> null
         }

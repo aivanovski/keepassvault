@@ -398,13 +398,13 @@ class UnlockViewModel(
                 val params = args.autofillParams ?: return
 
                 val autofillNoteResult = interactor.findNoteForAutofill(params.structure)
-                if (autofillNoteResult.isSucceeded) {
-                    val note = autofillNoteResult.obj
-
-                    sendAutofillResponseEvent.call(Pair(note, params))
-                } else {
+                if (autofillNoteResult.isFailed) {
                     setErrorPanelState(autofillNoteResult.error)
+                    return
                 }
+
+                val note = autofillNoteResult.obj?.firstOrNull() // TODO:
+                sendAutofillResponseEvent.call(Pair(note, params))
             }
             else -> {
                 clearEnteredPassword()

@@ -88,7 +88,8 @@ fun Fragment.sendAutofillResult(note: Note?, params: AutofillParams) {
 
     val factory = AutofillResponseFactory(requireContext(), GlobalInjector.get())
     val response = if (note != null) {
-        factory.createResponseWithNoteAndSelection(note, params)
+        // TODO: function should accept list of notes
+        factory.createResponseWithNoteAndSelection(listOf(note), params)
     } else {
         factory.createResponseWithSelection(params)
     }

@@ -248,6 +248,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-core-ktx:$liveDataKtxVersion"
     implementation "androidx.activity:activity-ktx:$activityKtxVersion"
     implementation "androidx.preference:preference-ktx:$preferenceKtxVersion"
+    implementation "androidx.autofill:autofill:1.1.0"
 
     //Apache Commons Lang (TODO: remove)
     implementation "org.apache.commons:commons-lang3:$apacheCommonsLangVersion"

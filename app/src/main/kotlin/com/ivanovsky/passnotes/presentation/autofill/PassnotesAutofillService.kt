@@ -72,20 +72,22 @@ class PassnotesAutofillService : AutofillService() {
         }
 
         scope.launch {
-            val findNoteResult = interactor.findNoteForAutofill(structure)
-            if (findNoteResult.isSucceeded) {
-                val note = findNoteResult.obj
+            val findNotesResult = interactor.findNoteForAutofill(structure)
+            if (findNotesResult.isSucceeded) {
+                val notes = findNotesResult.obj
 
-                if (note != null) {
+                if (notes.isNotEmpty()) {
                     Timber.d("Show note and selection")
                     val response = responseFactory.createResponseWithNoteAndSelection(
-                        note,
-                        params
+                        notes = notes,
+                        params = params
                     )
                     callback.onSuccess(response)
                 } else {
                     Timber.d("Show selection")
-                    val response = responseFactory.createResponseWithSelection(params)
+                    val response = responseFactory.createResponseWithSelection(
+                        params = params
+                    )
                     callback.onSuccess(response)
                 }
             } else {

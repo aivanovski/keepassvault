@@ -30,7 +30,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.DecodePasswordWithBiometricUseCase
-import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
+import com.ivanovsky.passnotes.domain.usecases.FindNotesForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveUsedFileUseCase
@@ -49,7 +49,7 @@ class UnlockInteractor(
     private val fileSystemResolver: FileSystemResolver,
     private val getFilesUseCase: GetRecentlyOpenedFilesUseCase,
     private val removeFileUseCase: RemoveUsedFileUseCase,
-    private val autofillUseCase: FindNoteForAutofillUseCase,
+    private val autofillUseCase: FindNotesForAutofillUseCase,
     private val getTestPasswordUseCase: GetTestPasswordUseCase,
     private val syncUseCases: SyncUseCases,
     private val getUsedFileUseCase: GetUsedFileUseCase,
@@ -174,8 +174,8 @@ class UnlockInteractor(
 
     suspend fun findNoteForAutofill(
         structure: AutofillStructure
-    ): OperationResult<Note?> =
-        autofillUseCase.findNoteForAutofill(structure)
+    ): OperationResult<List<Note>> =
+        autofillUseCase.findNotesForAutofill(structure)
 
     private fun updateUsedFile(file: FileDescriptor, key: EncryptedDatabaseKey) {
         val usedFile = fileRepository.findByUid(file.uid, file.fsAuthority)

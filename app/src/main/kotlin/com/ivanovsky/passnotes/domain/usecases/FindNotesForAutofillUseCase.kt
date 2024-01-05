@@ -6,13 +6,14 @@ import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.util.UrlUtils
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
-class FindNoteForAutofillUseCase(
+class FindNotesForAutofillUseCase(
     private val getDbUseCase: GetDatabaseUseCase,
     private val dispatchers: DispatcherProvider
 ) {
 
-    suspend fun findNoteForAutofill(structure: AutofillStructure): OperationResult<Note?> =
+    suspend fun findNotesForAutofill(structure: AutofillStructure): OperationResult<List<Note>> =
         withContext(dispatchers.IO) {
             if (structure.webDomain.isNullOrEmpty() && structure.applicationId.isNullOrEmpty()) {
                 return@withContext OperationResult.success(null)
@@ -29,30 +30,28 @@ class FindNoteForAutofillUseCase(
 
             // TODO(autofill): to improve search, autofill-properties should be also checked after
             //  noteDao.find()
+
+            Timber.d("domain=$domain, applicationId=$applicationId")
+
+            val results = mutableListOf<Note>()
             if (applicationId != null) {
-                val findResult = db.noteDao.find(applicationId)
-                if (findResult.isFailed) {
-                    return@withContext findResult.takeError()
+                val finByApplicationIdResult = db.noteDao.find(applicationId)
+                if (finByApplicationIdResult.isFailed) {
+                    return@withContext finByApplicationIdResult.takeError()
                 }
 
-                val notes = findResult.obj
-                if (notes.isNotEmpty()) {
-                    return@withContext OperationResult.success(notes.firstOrNull())
-                }
+                results.addAll(finByApplicationIdResult.obj)
             }
 
-            if (domain != null && domain.isNotEmpty()) {
-                val findResult = db.noteDao.find(domain)
-                if (findResult.isFailed) {
-                    return@withContext findResult.takeError()
+            if (!domain.isNullOrEmpty()) {
+                val findByDomainResult = db.noteDao.find(domain)
+                if (findByDomainResult.isFailed) {
+                    return@withContext findByDomainResult.takeError()
                 }
 
-                val notes = findResult.obj
-                if (notes.isNotEmpty()) {
-                    return@withContext OperationResult.success(notes.firstOrNull())
-                }
+                results.addAll(findByDomainResult.obj)
             }
 
-            OperationResult.success(null)
+            OperationResult.success(results)
         }
 }

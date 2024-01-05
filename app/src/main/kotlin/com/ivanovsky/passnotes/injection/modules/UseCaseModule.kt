@@ -4,7 +4,7 @@ import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.CheckNoteAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.DecodePasswordWithBiometricUseCase
 import com.ivanovsky.passnotes.domain.usecases.EncodePasswordWithBiometricUseCase
-import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
+import com.ivanovsky.passnotes.domain.usecases.FindNotesForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GeneratePasswordUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetGroupUseCase
@@ -42,7 +42,7 @@ object UseCaseModule {
             single { GetGroupUseCase(get(), get()) }
             single { IsDatabaseOpenedUseCase(get()) }
             single { GetNoteUseCase(get(), get()) }
-            single { FindNoteForAutofillUseCase(get(), get()) }
+            single { FindNotesForAutofillUseCase(get(), get()) }
             single { UpdateNoteWithAutofillDataUseCase(get(), get(), get()) }
             single { CheckNoteAutofillDataUseCase(get()) }
             single { UpdateNoteUseCase(get(), get(), get()) }

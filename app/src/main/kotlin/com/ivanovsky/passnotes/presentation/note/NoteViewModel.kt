@@ -22,11 +22,9 @@ import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
-import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
@@ -46,7 +44,6 @@ import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorMode
-import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.STAR
 import com.ivanovsky.passnotes.util.UrlUtils

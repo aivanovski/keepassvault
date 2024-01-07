@@ -7,10 +7,8 @@ import com.ivanovsky.passnotes.domain.interactor.main.MainInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_SELECTION
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
-import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
-import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import org.koin.core.parameter.parametersOf
 
@@ -38,12 +36,6 @@ class MainViewModel(
                         autofillStructure = args.autofillStructure
                     )
                 )
-//                SearchScreen(
-//                    SearchScreenArgs(
-//                        appMode = args.appMode,
-//                        autofillStructure = args.autofillStructure
-//                    )
-//                )
             )
             router.newRootChain(*chain)
         } else {

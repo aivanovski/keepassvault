@@ -287,7 +287,8 @@ class SearchViewModel(
                     appMode = args.appMode,
                     groupUid = groupUid,
                     isCloseDatabaseOnExit = false,
-                    autofillStructure = args.autofillStructure
+                    autofillStructure = args.autofillStructure,
+                    isSearchModeEnabled = false
                 )
             )
         )

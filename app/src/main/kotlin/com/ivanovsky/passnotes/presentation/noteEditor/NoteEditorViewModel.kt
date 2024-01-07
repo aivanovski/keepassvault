@@ -312,7 +312,8 @@ class NoteEditorViewModel(
                 GroupsScreenArgs(
                     appMode = ApplicationLaunchMode.NORMAL,
                     groupUid = args.groupUid,
-                    isCloseDatabaseOnExit = (args.groupUid == null)
+                    isCloseDatabaseOnExit = (args.groupUid == null),
+                    isSearchModeEnabled = false
                 )
             )
         )

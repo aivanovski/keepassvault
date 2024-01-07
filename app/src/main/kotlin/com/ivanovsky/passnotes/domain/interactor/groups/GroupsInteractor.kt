@@ -20,6 +20,7 @@ import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveBiometricDataUseCase
+import com.ivanovsky.passnotes.domain.usecases.SearchUseCases
 import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateUsedFileUseCase
 import com.ivanovsky.passnotes.extensions.getOrThrow
@@ -40,7 +41,8 @@ class GroupsInteractor(
     private val getUsedFileUseCase: GetUsedFileUseCase,
     private val updateUsedFileUseCase: UpdateUsedFileUseCase,
     private val removeBiometricDataUseCase: RemoveBiometricDataUseCase,
-    private val encodePasswordUseCase: EncodePasswordWithBiometricUseCase
+    private val encodePasswordUseCase: EncodePasswordWithBiometricUseCase,
+    private val searchUseCases: SearchUseCases
 ) {
 
     suspend fun getTemplates(): OperationResult<List<Template>> =
@@ -70,7 +72,7 @@ class GroupsInteractor(
             rootResult.getOrThrow().uid
         }
 
-    suspend fun getRootGroupData(): OperationResult<List<EncryptedDatabaseEntry>> =
+    suspend fun getRootEntries(): OperationResult<List<EncryptedDatabaseEntry>> =
         withContext(dispatchers.IO) {
             val getDbResult = getDbUseCase.getDatabaseSynchronously()
             if (getDbResult.isFailed) {
@@ -86,10 +88,10 @@ class GroupsInteractor(
 
             val groupUid = rootGroupResult.obj.uid
 
-            getGroupData(groupUid)
+            getGroupEntries(groupUid)
         }
 
-    suspend fun getGroupData(groupUid: UUID): OperationResult<List<EncryptedDatabaseEntry>> =
+    suspend fun getGroupEntries(groupUid: UUID): OperationResult<List<EncryptedDatabaseEntry>> =
         withContext(dispatchers.IO) {
             val getDbResult = getDbUseCase.getDatabaseSynchronously()
             if (getDbResult.isFailed) {
@@ -244,4 +246,15 @@ class GroupsInteractor(
             }
         }
     }
+
+    suspend fun getAllSearchableEntries(
+        isRespectAutotypeProperty: Boolean
+    ): OperationResult<List<EncryptedDatabaseEntry>> =
+        searchUseCases.getAllSearchableEntries(isRespectAutotypeProperty)
+
+    suspend fun filterEntries(
+        entries: List<EncryptedDatabaseEntry>,
+        query: String
+    ): List<EncryptedDatabaseEntry> =
+        searchUseCases.filterEntries(entries, query)
 }

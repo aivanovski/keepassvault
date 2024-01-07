@@ -22,6 +22,8 @@ import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.Screens
+import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
@@ -37,6 +39,7 @@ import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
+import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.AttachmentCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
@@ -163,9 +166,12 @@ class NoteViewModel(
 
     fun onSearchButtonClicked() {
         router.navigateTo(
-            SearchScreen(
-                SearchScreenArgs(
+            GroupsScreen(
+                GroupsScreenArgs(
                     appMode = args.appMode,
+                    groupUid = null,
+                    isCloseDatabaseOnExit = false,
+                    isSearchModeEnabled = true,
                     autofillStructure = args.autofillStructure
                 )
             )

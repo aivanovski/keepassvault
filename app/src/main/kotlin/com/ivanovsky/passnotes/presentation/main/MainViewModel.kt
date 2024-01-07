@@ -34,15 +34,16 @@ class MainViewModel(
                         appMode = args.appMode,
                         groupUid = null,
                         isCloseDatabaseOnExit = false,
-                        autofillStructure = args.autofillStructure
-                    )
-                ),
-                SearchScreen(
-                    SearchScreenArgs(
-                        appMode = args.appMode,
+                        isSearchModeEnabled = true,
                         autofillStructure = args.autofillStructure
                     )
                 )
+//                SearchScreen(
+//                    SearchScreenArgs(
+//                        appMode = args.appMode,
+//                        autofillStructure = args.autofillStructure
+//                    )
+//                )
             )
             router.newRootChain(*chain)
         } else {

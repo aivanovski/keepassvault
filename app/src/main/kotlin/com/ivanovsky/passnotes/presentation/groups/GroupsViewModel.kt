@@ -45,28 +45,28 @@ import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
+import com.ivanovsky.passnotes.presentation.core.BackNavigationIcon
+import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingType
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
+import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.ScreenType
+import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
+import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
+import com.ivanovsky.passnotes.presentation.core.model.NavigationPanelCellModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.NavigationPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
-import com.ivanovsky.passnotes.presentation.core.BackNavigationIcon
-import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
-import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.ScreenType
-import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
-import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
-import com.ivanovsky.passnotes.presentation.core.model.NavigationPanelCellModel
-import com.ivanovsky.passnotes.presentation.core.viewmodel.NavigationPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.model.CellsData
 import com.ivanovsky.passnotes.presentation.groups.model.NavigationStackItem
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
@@ -955,7 +955,9 @@ class GroupsViewModel(
         }
     }
 
-    private suspend fun loadSearchEntries(query: String): OperationResult<List<EncryptedDatabaseEntry>> {
+    private suspend fun loadSearchEntries(
+        query: String
+    ): OperationResult<List<EncryptedDatabaseEntry>> {
         var allEntries = searchableEntries
         if (allEntries == null) {
             val getAllEntriesResult = interactor.getAllSearchableEntries(
@@ -977,7 +979,7 @@ class GroupsViewModel(
         val searchEntries = if (query.isNotEmpty()) {
             interactor.filterEntries(
                 entries = allEntries,
-                query = query,
+                query = query
             )
         } else {
             emptyList()

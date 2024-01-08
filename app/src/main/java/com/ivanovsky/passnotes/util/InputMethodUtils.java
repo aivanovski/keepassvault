@@ -6,8 +6,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.Nullable;
 
-import timber.log.Timber;
-
 public class InputMethodUtils {
 
     public static void hideSoftInput(@Nullable Activity activity) {
@@ -32,7 +30,6 @@ public class InputMethodUtils {
                     InputMethodManager imm =
                             (InputMethodManager)
                                     context.getSystemService(Context.INPUT_METHOD_SERVICE);
-                    Timber.d("showSoftInput: hasWindowFocus=%s", view.hasWindowFocus());
 
                     if (imm != null) {
                         imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);

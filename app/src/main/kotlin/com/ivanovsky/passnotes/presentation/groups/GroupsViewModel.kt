@@ -171,7 +171,7 @@ class GroupsViewModel(
     private var isAutofillSavingCancelled = false
     private var isSearchModeEnabled = false
     private var isFillNavigationStack = false
-    private var currentEntries: List<EncryptedDatabaseEntry>? = null
+    private var currentEntries: List<EncryptedDatabaseEntry> = emptyList()
     private var searchableEntries: List<EncryptedDatabaseEntry>? = null
     private var navigationPanelGroups: List<Group> = emptyList()
     private var loadDataJob: Job? = null
@@ -285,13 +285,16 @@ class GroupsViewModel(
             }
 
             if (getEntriesResult.isSucceededOrDeferred) {
-                val dataItems = interactor.sortData(getEntriesResult.getOrThrow())
-                currentEntries = dataItems
+                currentEntries = if (!isSearchModeEnabled) {
+                    interactor.sortData(getEntriesResult.getOrThrow())
+                } else {
+                    getEntriesResult.getOrThrow()
+                }
 
-                if (dataItems.isNotEmpty()) {
+                if (currentEntries.isNotEmpty()) {
                     cellViewModels.value = CellsData(
                         isResetScroll = isResetScroll,
-                        viewModels = createCellViewModels(dataItems)
+                        viewModels = createCellViewModels(currentEntries)
                     )
                     setScreenState(ScreenState.data())
                 } else {
@@ -728,7 +731,7 @@ class GroupsViewModel(
     }
 
     private fun findGroupInItems(groupUid: UUID): Group? {
-        return currentEntries?.firstOrNull { item ->
+        return currentEntries.firstOrNull { item ->
             if (item is Group) {
                 item.uid == groupUid
             } else {
@@ -756,7 +759,7 @@ class GroupsViewModel(
     }
 
     private fun findNoteInItems(noteUid: UUID): Note? {
-        return currentEntries?.firstOrNull { item ->
+        return currentEntries.firstOrNull { item ->
             if (item is Note) {
                 item.uid == noteUid
             } else {

@@ -30,6 +30,7 @@ public class InputMethodUtils {
                     InputMethodManager imm =
                             (InputMethodManager)
                                     context.getSystemService(Context.INPUT_METHOD_SERVICE);
+
                     if (imm != null) {
                         imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
                     }

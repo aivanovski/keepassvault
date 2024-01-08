@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.repository.file.databaseDsl.EntryEntity
 import com.ivanovsky.passnotes.data.repository.file.databaseDsl.GroupEntity
 import com.ivanovsky.passnotes.data.repository.file.databaseDsl.KotpassTreeDsl
 import java.io.ByteArrayOutputStream
+import java.util.UUID
 
 class FakeFileContentFactory {
 
@@ -71,13 +72,12 @@ class FakeFileContentFactory {
 
     companion object {
         private val ROOT = GroupEntity(title = "Database")
-        private val GROUP_INTERNET = GroupEntity(title = "Internet")
-        private val GROUP_EMAIL = GroupEntity(title = "Email")
-
-        private val GROUP_CODING = GroupEntity(title = "Coding")
-        private val GROUP_GAMING = GroupEntity(title = "Gaming")
-        private val GROUP_SHOPPING = GroupEntity(title = "Shopping")
-        private val GROUP_SOCIAL = GroupEntity(title = "Social")
+        private val GROUP_EMAIL = GroupEntity(title = "Email", uuid = UUID(100L, 1L))
+        private val GROUP_INTERNET = GroupEntity(title = "Internet", uuid = UUID(100L, 2L))
+        private val GROUP_CODING = GroupEntity(title = "Coding", uuid = UUID(100L, 3L))
+        private val GROUP_GAMING = GroupEntity(title = "Gaming", uuid = UUID(100L, 4L))
+        private val GROUP_SHOPPING = GroupEntity(title = "Shopping", uuid = UUID(100L, 5L))
+        private val GROUP_SOCIAL = GroupEntity(title = "Social", uuid = UUID(100L, 6L))
 
         private val ENTRY_LOCAL = EntryEntity(
             title = "Local",

@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.domain.interactor.note
 
 import com.ivanovsky.passnotes.data.entity.Attachment
+import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.settings.Settings
@@ -8,7 +9,9 @@ import com.ivanovsky.passnotes.domain.ClipboardInteractor
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.usecases.CheckNoteAutofillDataUseCase
+import com.ivanovsky.passnotes.domain.usecases.FindParentGroupsUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
+import com.ivanovsky.passnotes.domain.usecases.GetGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.extensions.getOrThrow
@@ -26,6 +29,8 @@ class NoteInteractor(
     private val getDbUseCase: GetDatabaseUseCase,
     private val autofillUseCase: UpdateNoteWithAutofillDataUseCase,
     private val checkNoteAutofillDataUseCase: CheckNoteAutofillDataUseCase,
+    private val getGroupUseCase: GetGroupUseCase,
+    private val findParentGroupsUseCase: FindParentGroupsUseCase,
     private val settings: Settings,
     private val fileHelper: FileHelper,
     private val dispatchers: DispatcherProvider
@@ -60,6 +65,15 @@ class NoteInteractor(
             val db = getDbResult.obj
             db.noteDao.getNoteByUid(noteUid)
         }
+
+    suspend fun getGroup(groupUid: UUID): OperationResult<Group> =
+        getGroupUseCase.getGroupByUid(groupUid)
+
+    suspend fun getAllParents(groupUid: UUID): OperationResult<List<Group>> =
+        findParentGroupsUseCase.findAllParents(
+            groupUid = groupUid,
+            isAddCurrentGroup = true
+        )
 
     fun copyToClipboardWithTimeout(text: String, isProtected: Boolean) {
         clipboardInteractor.copyWithTimeout(text, isProtected, getTimeoutValueInMillis())

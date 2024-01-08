@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.core.widget
 
+import android.app.Activity
 import android.content.Context
 import android.os.Parcelable
 import android.text.Editable
@@ -25,6 +26,7 @@ import com.ivanovsky.passnotes.presentation.core.widget.entity.ImeOptions
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnEditorActionListener
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
+import com.ivanovsky.passnotes.util.InputMethodUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class MaterialEditText(
@@ -110,7 +112,7 @@ class MaterialEditText(
         }
         binding.textInput.isEnabled = isEnabled
 
-        binding.actionButton.setOnClickListener {
+        binding.editTextActionButton.setOnClickListener {
             handleActionButtonClicked()
         }
 
@@ -179,6 +181,15 @@ class MaterialEditText(
 
     fun getEditText(): EditText = binding.textInput
 
+    fun requestSoftInput() {
+        binding.textInput.requestFocus()
+        InputMethodUtils.showSoftInput(context, binding.textInput)
+    }
+
+    fun hideSoftInput() {
+        InputMethodUtils.hideSoftInput(context as Activity)
+    }
+
     private fun handleEditorAction(actionId: Int): Boolean {
         return if (onEditorAction != null || onDoneAction != null) {
             if (actionId == EditorInfo.IME_ACTION_DONE && onDoneAction != null) {
@@ -225,7 +236,7 @@ class MaterialEditText(
         }
 
         if (actionButton == ActionButton.EYE) {
-            binding.actionButton.setImageResource(getEyeIcon(isVisible))
+            binding.editTextActionButton.setImageResource(getEyeIcon(isVisible))
         }
     }
 
@@ -313,7 +324,7 @@ class MaterialEditText(
     }
 
     private fun setActionButtonVisibleInternal(isVisible: Boolean) {
-        binding.actionButton.isVisible = isVisible
+        binding.editTextActionButton.isVisible = isVisible
 
         val textInput = binding.textInput
 
@@ -340,10 +351,10 @@ class MaterialEditText(
                 if (isResetTextVisibility && isTextVisible) {
                     isTextVisible = false
                 }
-                binding.actionButton.setImageResource(getEyeIcon(isTextVisible))
+                binding.editTextActionButton.setImageResource(getEyeIcon(isTextVisible))
             }
             ActionButton.CLEAR -> {
-                binding.actionButton.setImageResource(R.drawable.ic_close_24dp)
+                binding.editTextActionButton.setImageResource(R.drawable.ic_close_24dp)
             }
         }
     }

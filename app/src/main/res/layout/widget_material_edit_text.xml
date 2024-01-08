@@ -25,7 +25,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <ImageButton
-        android:id="@+id/actionButton"
+        android:id="@+id/editTextActionButton"
         style="@style/Material.BorderlessButton.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

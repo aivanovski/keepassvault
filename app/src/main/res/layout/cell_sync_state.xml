@@ -47,14 +47,14 @@
                 android:text="@{viewModel.message}"
                 android:textColor="@{viewModel.messageColor}"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/actionButton"
+                app:layout_constraintEnd_toStartOf="@id/syncPanelActionButton"
                 app:layout_constraintStart_toEndOf="@id/syncIcon"
                 app:layout_constraintTop_toTopOf="parent"
                 app:visible="@{viewModel.isMessageVisible}"
                 tools:text="Message" />
 
             <Button
-                android:id="@+id/actionButton"
+                android:id="@+id/syncPanelActionButton"
                 style="@style/Material.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

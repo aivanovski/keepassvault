@@ -9,7 +9,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
@@ -21,13 +20,15 @@ import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens
+import com.ivanovsky.passnotes.presentation.core.BackNavigationIcon
+import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
+import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.animation.AnimationFactory
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
-import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.ScreenType
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
@@ -56,6 +57,7 @@ class GroupsFragment : BaseFragment() {
     private val biometricAuthenticator: BiometricAuthenticator by inject()
 
     private lateinit var binding: GroupsFragmentBinding
+    private lateinit var adapter: ViewModelsAdapter
     private var syncIconAnimation: Animator? = null
     private var menu: Menu? = null
 
@@ -65,7 +67,7 @@ class GroupsFragment : BaseFragment() {
     }
 
     override fun onBackPressed(): Boolean {
-        viewModel.onBackClicked()
+        viewModel.navigateBack()
         return true
     }
 
@@ -79,6 +81,13 @@ class GroupsFragment : BaseFragment() {
                 it.lifecycleOwner = viewLifecycleOwner
                 it.viewModel = viewModel
             }
+
+        adapter = ViewModelsAdapter(
+            viewLifecycleOwner,
+            viewModel.viewTypes
+        )
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.itemAnimator = null
 
         syncIconAnimation = AnimationFactory.createRotationAnimation(binding.syncStateView.syncIcon)
             .apply {
@@ -117,11 +126,6 @@ class GroupsFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         viewLifecycleOwner.lifecycle.addObserver(DatabaseInteractionWatcher(this))
 
-        setupActionBar {
-            setHomeAsUpIndicator(null)
-            setDisplayHomeAsUpEnabled(true)
-        }
-
         subscribeToLiveData()
         subscribeToEvents()
 
@@ -151,6 +155,21 @@ class GroupsFragment : BaseFragment() {
                 )
             }
         }
+        viewModel.backIcon.observe(viewLifecycleOwner) { icon ->
+            setupActionBar {
+                when (icon) {
+                    is BackNavigationIcon.Arrow -> setHomeAsUpIndicator(null)
+                    is BackNavigationIcon.Icon -> setHomeAsUpIndicator(icon.iconResourceId)
+                }
+                setDisplayHomeAsUpEnabled(true)
+            }
+        }
+        viewModel.cellViewModels.observe(viewLifecycleOwner) { data ->
+            setCellViewModels(
+                isResetScroll = data.isResetScroll,
+                viewModels = data.viewModels
+            )
+        }
     }
 
     private fun subscribeToEvents() {
@@ -179,8 +198,8 @@ class GroupsFragment : BaseFragment() {
                 )
             )
         }
-        viewModel.showSortAndViewDialogEvent.observe(viewLifecycleOwner) {
-            showSortAndViewDialog()
+        viewModel.showSortAndViewDialogEvent.observe(viewLifecycleOwner) { args ->
+            showSortAndViewDialog(args)
         }
         viewModel.showBiometricSetupDialog.observe(viewLifecycleOwner) { cipher ->
             biometricAuthenticator.authenticateForSetup(
@@ -194,6 +213,24 @@ class GroupsFragment : BaseFragment() {
         }
         viewModel.showMessageDialogEvent.observe(viewLifecycleOwner) { message ->
             showErrorDialog(message)
+        }
+        viewModel.isKeyboardVisibleEvent.observe(viewLifecycleOwner) { isVisible ->
+            if (isVisible) {
+                binding.searchText.requestSoftInput()
+            } else {
+                binding.searchText.hideSoftInput()
+            }
+        }
+    }
+
+    private fun setCellViewModels(
+        isResetScroll: Boolean,
+        viewModels: List<BaseCellViewModel>
+    ) {
+        adapter.updateItems(viewModels)
+
+        if (isResetScroll) {
+            binding.recyclerView.layoutManager?.scrollToPosition(0)
         }
     }
 
@@ -276,10 +313,8 @@ class GroupsFragment : BaseFragment() {
         dialog.show(childFragmentManager, ConfirmationDialog.TAG)
     }
 
-    private fun showSortAndViewDialog() {
-        val dialog = SortAndViewDialog.newInstance(
-            args = SortAndViewDialogArgs(ScreenType.GROUPS)
-        )
+    private fun showSortAndViewDialog(args: SortAndViewDialogArgs) {
+        val dialog = SortAndViewDialog.newInstance(args)
         dialog.show(childFragmentManager, SortAndViewDialog.TAG)
     }
 
@@ -295,7 +330,7 @@ class GroupsFragment : BaseFragment() {
         private const val ARGUMENTS = "arguments"
 
         private val MENU_ACTIONS = mapOf<Int, (vm: GroupsViewModel) -> Unit>(
-            android.R.id.home to { vm -> vm.onBackClicked() },
+            android.R.id.home to { vm -> vm.navigateBack() },
             R.id.menu_lock to { vm -> vm.onLockButtonClicked() },
             R.id.menu_synchronize to { vm -> vm.onSynchronizeButtonClicked() },
             R.id.menu_add_templates to { vm -> vm.onAddTemplatesClicked() },

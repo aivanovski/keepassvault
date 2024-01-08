@@ -159,6 +159,7 @@
     <string name="enable_biometric_unlock">Enable biometric unlock</string>
     <string name="disable_biometric_unlock">Disable biometric unlock</string>
     <string name="sync_error">Sync error</string>
+    <string name="no_search_results">No search results</string>
 
     <!-- Group editor screen -->
     <string name="new_group">New group</string>

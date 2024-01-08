@@ -17,8 +17,6 @@ import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorFragment
 import com.ivanovsky.passnotes.presentation.passwordGenerator.PasswordGeneratorFragment
-import com.ivanovsky.passnotes.presentation.search.SearchFragment
-import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginFragment
 import com.ivanovsky.passnotes.presentation.settings.app.AppSettingsFragment
@@ -92,11 +90,6 @@ object Screens {
     class NoteScreen(private val args: NoteScreenArgs) : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
             NoteFragment.newInstance(args)
-    }
-
-    class SearchScreen(private val args: SearchScreenArgs) : FragmentScreen {
-        override fun createFragment(factory: FragmentFactory) =
-            SearchFragment.newInstance(args)
     }
 
     class AboutScreen : FragmentScreen {

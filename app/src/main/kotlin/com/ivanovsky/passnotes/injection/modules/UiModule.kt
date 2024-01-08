@@ -14,7 +14,6 @@ import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.domain.interactor.noteEditor.NoteEditorInteractor
 import com.ivanovsky.passnotes.domain.interactor.passwordGenerator.PasswordGeneratorInteractor
-import com.ivanovsky.passnotes.domain.interactor.search.SearchInteractor
 import com.ivanovsky.passnotes.domain.interactor.serverLogin.ServerLoginInteractor
 import com.ivanovsky.passnotes.domain.interactor.service.LockServiceInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
@@ -57,10 +56,6 @@ import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorViewModel
 import com.ivanovsky.passnotes.presentation.noteEditor.factory.NoteEditorCellModelFactory
 import com.ivanovsky.passnotes.presentation.noteEditor.factory.NoteEditorCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.passwordGenerator.PasswordGeneratorViewModel
-import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
-import com.ivanovsky.passnotes.presentation.search.SearchViewModel
-import com.ivanovsky.passnotes.presentation.search.factory.SearchCellModelFactory
-import com.ivanovsky.passnotes.presentation.search.factory.SearchCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginViewModel
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
@@ -108,9 +103,25 @@ object UiModule {
             single { NewDatabaseInteractor(get(), get(), get(), get()) }
             single { GroupEditorInteractor(get(), get(), get(), get(), get()) }
             single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
-            single { NoteInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
+            single {
+                NoteInteractor(
+                    get(),
+                    get(),
+                    get(),
+                    get(),
+                    get(),
+                    get(),
+                    get(),
+                    get(),
+                    get(),
+                    get()
+                )
+            }
             single {
                 GroupsInteractor(
+                    get(),
+                    get(),
+                    get(),
                     get(),
                     get(),
                     get(),
@@ -127,7 +138,6 @@ object UiModule {
             }
             single { NoteEditorInteractor(get(), get(), get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
-            single { SearchInteractor(get(), get(), get(), get(), get(), get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
             single { DatabaseSettingsInteractor(get(), get()) }
             single { AppSettingsInteractor(get(), get(), get(), get()) }
@@ -151,9 +161,6 @@ object UiModule {
 
             single { UnlockCellModelFactory(get()) }
             single { UnlockCellViewModelFactory() }
-
-            single { SearchCellModelFactory() }
-            single { SearchCellViewModelFactory(get(), get()) }
 
             single { NoteCellModelFactory(get()) }
             single { NoteCellViewModelFactory(get()) }
@@ -262,20 +269,6 @@ object UiModule {
             }
             viewModel { (args: ServerLoginArgs) ->
                 ServerLoginViewModel(
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    args
-                )
-            }
-            factory { (args: SearchScreenArgs) ->
-                SearchViewModel(
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
                     get(),
                     get(),
                     get(),

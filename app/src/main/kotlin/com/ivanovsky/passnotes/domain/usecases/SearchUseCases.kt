@@ -1,7 +1,6 @@
-package com.ivanovsky.passnotes.domain.interactor.search
+package com.ivanovsky.passnotes.domain.usecases
 
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
-import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
@@ -9,24 +8,12 @@ import com.ivanovsky.passnotes.domain.entity.SearchType
 import com.ivanovsky.passnotes.domain.search.EntryMatcher
 import com.ivanovsky.passnotes.domain.search.Fzf4jFuzzyEntryMatcher
 import com.ivanovsky.passnotes.domain.search.StrictEntryMatcher
-import com.ivanovsky.passnotes.domain.usecases.CheckNoteAutofillDataUseCase
-import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
-import com.ivanovsky.passnotes.domain.usecases.GetNoteUseCase
-import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
-import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
-import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.extensions.mapError
-import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
-import java.util.UUID
 import kotlinx.coroutines.withContext
 
-class SearchInteractor(
+class SearchUseCases(
     private val dispatchers: DispatcherProvider,
     private val getDbUseCase: GetDatabaseUseCase,
-    private val getNoteUseCase: GetNoteUseCase,
-    private val autofillUseCase: UpdateNoteWithAutofillDataUseCase,
-    private val checkNoteAutofillDataUseCase: CheckNoteAutofillDataUseCase,
-    private val lockUseCase: LockDatabaseUseCase,
     private val sortUseCase: SortGroupsAndNotesUseCase,
     private val settings: Settings
 ) {
@@ -34,7 +21,7 @@ class SearchInteractor(
     private val strictMatcher: EntryMatcher = StrictEntryMatcher()
     private val fuzzyMatcher: EntryMatcher = Fzf4jFuzzyEntryMatcher()
 
-    suspend fun loadAllData(
+    suspend fun getAllSearchableEntries(
         isRespectAutotypeProperty: Boolean
     ): OperationResult<List<EncryptedDatabaseEntry>> {
         return withContext(dispatchers.IO) {
@@ -70,7 +57,7 @@ class SearchInteractor(
             val searchableNotes = allNotes
                 .filter { searchableGroupMap.containsKey(it.groupUid) }
 
-            val items = if (isRespectAutotypeProperty) {
+            val entries = if (isRespectAutotypeProperty) {
                 val autotypeableGroups = searchableGroupMap.values
                     .filter { it.uid != root.uid && it.autotypeEnabled.isEnabled }
 
@@ -86,18 +73,18 @@ class SearchInteractor(
                 searchableNotes + searchableGroupMap.values.filter { it.uid != root.uid }
             }
 
-            val result = sortUseCase.sortGroupsAndNotesAccordingToSettings(items)
+            val sortedEntries = sortUseCase.sortGroupsAndNotesAccordingToSettings(entries)
 
-            OperationResult.success(result)
+            OperationResult.success(sortedEntries)
         }
     }
 
-    suspend fun filter(
-        data: List<EncryptedDatabaseEntry>,
+    suspend fun filterEntries(
+        entries: List<EncryptedDatabaseEntry>,
         query: String
     ): List<EncryptedDatabaseEntry> {
         if (query.isEmpty()) {
-            return data
+            return entries
         }
 
         return withContext(dispatchers.IO) {
@@ -105,35 +92,16 @@ class SearchInteractor(
                 SearchType.FUZZY -> {
                     fuzzyMatcher.match(
                         query = query,
-                        entries = data
+                        entries = entries
                     )
                 }
                 SearchType.STRICT -> {
                     strictMatcher.match(
                         query = query,
-                        entries = data
+                        entries = entries
                     )
                 }
             }
         }
-    }
-
-    suspend fun getNoteByUid(noteUid: UUID): OperationResult<Note> =
-        getNoteUseCase.getNoteByUid(noteUid)
-
-    suspend fun updateNoteWithAutofillData(
-        note: Note,
-        structure: AutofillStructure
-    ): OperationResult<Boolean> =
-        autofillUseCase.updateNoteWithAutofillData(note, structure)
-
-    suspend fun shouldUpdateNoteAutofillData(
-        note: Note,
-        structure: AutofillStructure
-    ): Boolean =
-        checkNoteAutofillDataUseCase.shouldUpdateNoteAutofillData(note, structure)
-
-    fun lockDatabase() {
-        lockUseCase.lockIfNeed()
     }
 }

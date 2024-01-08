@@ -14,6 +14,9 @@ import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL
+import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
+import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
@@ -30,43 +33,56 @@ import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
 import com.ivanovsky.passnotes.domain.interactor.syncState.SyncStateInteractor
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.isRequireSynchronization
+import com.ivanovsky.passnotes.extensions.mapError
+import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_SELECTION
 import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
-import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
-import com.ivanovsky.passnotes.presentation.Screens.SearchScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
-import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
+import com.ivanovsky.passnotes.presentation.core.BackNavigationIcon
+import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenDisplayingType
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
+import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.ScreenType
+import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
+import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
+import com.ivanovsky.passnotes.presentation.core.model.NavigationPanelCellModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.NavigationPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.groups.model.CellsData
+import com.ivanovsky.passnotes.presentation.groups.model.NavigationStackItem
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorMode
-import com.ivanovsky.passnotes.presentation.search.SearchScreenArgs
 import com.ivanovsky.passnotes.presentation.syncState.factory.SyncStateCellModelFactory
 import com.ivanovsky.passnotes.presentation.syncState.viewmodel.SyncStateViewModel
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toUUID
+import java.util.Deque
+import java.util.LinkedList
 import java.util.UUID
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.parameter.parametersOf
@@ -74,7 +90,6 @@ import org.koin.core.parameter.parametersOf
 class GroupsViewModel(
     private val interactor: GroupsInteractor,
     syncStateInteractor: SyncStateInteractor,
-    syncStateModelFactory: SyncStateCellModelFactory,
     private val biometricInteractor: BiometricInteractor,
     private val errorInteractor: ErrorInteractor,
     lockInteractor: DatabaseLockInteractor,
@@ -83,10 +98,11 @@ class GroupsViewModel(
     private val resourceProvider: ResourceProvider,
     private val cellModelFactory: GroupsCellModelFactory,
     private val cellViewModelFactory: GroupsCellViewModelFactory,
+    syncStateModelFactory: SyncStateCellModelFactory,
     private val selectionHolder: SelectionHolder,
     private val router: Router,
     private val args: GroupsScreenArgs
-) : BaseScreenViewModel(),
+) : ViewModel(),
     ObserverBus.GroupDataSetObserver,
     ObserverBus.NoteDataSetChanged,
     ObserverBus.NoteContentObserver,
@@ -101,6 +117,14 @@ class GroupsViewModel(
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
+    val eventProvider = EventProviderImpl()
+
+    val navigationPanelViewModel = NavigationPanelCellViewModel(
+        initModel = NavigationPanelCellModel(
+            items = emptyList()
+        ),
+        eventProvider = eventProvider
+    )
 
     val syncStateViewModel = SyncStateViewModel(
         interactor = syncStateInteractor,
@@ -118,9 +142,13 @@ class GroupsViewModel(
         eventProvider = eventProvider
     ) as OptionPanelCellViewModel
 
+    val cellViewModels = MutableLiveData<CellsData>()
+    val searchQuery = MutableLiveData(EMPTY)
     val screenTitle = MutableLiveData(EMPTY)
     val visibleMenuItems = MutableLiveData<List<GroupsMenuItem>>(emptyList())
     val isFabButtonVisible = MutableLiveData(false)
+    val isSearchQueryVisible = MutableLiveData(false)
+    val isNavigationPanelVisible = MutableLiveData(false)
     val showToastEvent = SingleLiveEvent<String>()
     val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
     val showGroupActionsDialogEvent = SingleLiveEvent<Group>()
@@ -128,16 +156,25 @@ class GroupsViewModel(
     val showRemoveConfirmationDialogEvent = SingleLiveEvent<Pair<Group?, Note?>>()
     val showAddTemplatesDialogEvent = SingleLiveEvent<Unit>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
-    val showSortAndViewDialogEvent = SingleLiveEvent<Unit>()
+    val showSortAndViewDialogEvent = SingleLiveEvent<SortAndViewDialogArgs>()
     val showBiometricSetupDialog = SingleLiveEvent<BiometricEncoder>()
     val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
+    val backIcon = MutableLiveData<BackNavigationIcon>(BackNavigationIcon.Arrow)
+    val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
 
-    private var currentDataItems: List<EncryptedDatabaseEntry>? = null
-    private var rootGroupUid: UUID? = null
-    private var groupUid: UUID? = args.groupUid
+    private var rootGroup: Group? = null
+    private var currentGroup: Group? = null
+    private var currentGroupUid: UUID? = null
+    private val navigationStack: Deque<NavigationStackItem> = LinkedList()
     private var dbUsedFile: UsedFile? = null
     private var templates: List<Template>? = null
     private var isAutofillSavingCancelled = false
+    private var isSearchModeEnabled = false
+    private var isFillNavigationStack = false
+    private var currentEntries: List<EncryptedDatabaseEntry> = emptyList()
+    private var searchableEntries: List<EncryptedDatabaseEntry>? = null
+    private var navigationPanelGroups: List<Group> = emptyList()
+    private var loadDataJob: Job? = null
 
     init {
         observerBus.register(this)
@@ -145,7 +182,19 @@ class GroupsViewModel(
         subscribeToEvents()
         syncStateViewModel.onAttach()
 
-        if (groupUid == null) {
+        if (args.groupUid == null) {
+            navigationStack.push(NavigationStackItem.RootGroup)
+        } else {
+            navigationStack.push(NavigationStackItem.Group(args.groupUid))
+            isFillNavigationStack = true
+        }
+        currentGroupUid = args.groupUid
+
+        if (args.isSearchModeEnabled) {
+            enableSearchMode()
+        }
+
+        if (args.groupUid == null) {
             syncStateInteractor.cache.setValue(null)
         }
     }
@@ -158,16 +207,19 @@ class GroupsViewModel(
     }
 
     override fun onGroupDataSetChanged() {
+        searchableEntries = null
         loadData()
     }
 
     override fun onNoteDataSetChanged(groupUid: UUID) {
+        searchableEntries = null
         if (groupUid == getCurrentGroupUid()) {
             loadData()
         }
     }
 
     override fun onNoteContentChanged(groupUid: UUID, oldNoteUid: UUID, newNoteUid: UUID) {
+        searchableEntries = null
         if (groupUid == getCurrentGroupUid()) {
             loadData()
         }
@@ -183,76 +235,86 @@ class GroupsViewModel(
     }
 
     override fun onDatabaseDataSetChanged() {
+        searchableEntries = null
+        templates = null
         loadData()
     }
 
     fun start() {
-        if (groupUid == null) {
-            screenTitle.value = resourceProvider.getString(R.string.groups)
-        }
-
         syncStateViewModel.start()
         loadData()
     }
 
-    fun loadData() {
+    fun loadData(
+        isResetScroll: Boolean = false
+    ) {
         setScreenState(ScreenState.loading())
 
-        viewModelScope.launch {
-            templates = interactor.getTemplates().obj
-
-            val data = withContext(Dispatchers.IO) {
-                groupUid.let {
-                    if (it == null) {
-                        interactor.getRootGroupData()
-                    } else {
-                        interactor.getGroupData(it)
-                    }
-                }
+        loadDataJob?.cancel()
+        loadDataJob = viewModelScope.launch {
+            if (loadTemplates().isFailed) {
+                return@launch
             }
-
-            if (groupUid == null && rootGroupUid == null) {
-                rootGroupUid = withContext(Dispatchers.IO) {
-                    interactor.getRootUid()
-                }
-            }
-
-            groupUid?.let {
-                val group = interactor.getGroup(it)
-                if (group.isSucceededOrDeferred) {
-                    screenTitle.value = group.obj.title
-                }
-            }
-
-            val getUsedFileResult = interactor.getDatabaseUsedFile()
-            if (getUsedFileResult.isFailed) {
-                setErrorState(getUsedFileResult.error)
+            if (loadRootGroup().isFailed) {
                 return@launch
             }
 
-            dbUsedFile = getUsedFileResult.obj
+            if (currentGroupUid == null) {
+                currentGroupUid = rootGroup?.uid
+            }
 
-            if (data.isSucceededOrDeferred) {
-                val dataItems = interactor.sortData(data.obj)
-                currentDataItems = dataItems
+            if (loadCurrentGroup().isFailed) {
+                return@launch
+            }
+            if (loadUsedFile().isFailed) {
+                return@launch
+            }
+            if (loadNavigationPanelData().isFailed) {
+                return@launch
+            }
 
-                if (dataItems.isNotEmpty()) {
-                    val models = cellModelFactory.createCellModels(dataItems)
-                    val viewModels =
-                        cellViewModelFactory.createCellViewModels(models, eventProvider)
-                    setCellElements(viewModels)
+            if (isFillNavigationStack) {
+                fillNavigationStack()
+                isFillNavigationStack = false
+            }
+
+            val getEntriesResult = when {
+                isSearchModeEnabled -> loadSearchEntries(searchQuery.value ?: EMPTY)
+                currentGroupUid == null -> interactor.getRootEntries()
+                else -> interactor.getGroupEntries(currentGroupUid ?: EMPTY_UUID)
+            }
+
+            if (getEntriesResult.isSucceededOrDeferred) {
+                currentEntries = if (!isSearchModeEnabled) {
+                    interactor.sortData(getEntriesResult.getOrThrow())
+                } else {
+                    getEntriesResult.getOrThrow()
+                }
+
+                if (currentEntries.isNotEmpty()) {
+                    cellViewModels.value = CellsData(
+                        isResetScroll = isResetScroll,
+                        viewModels = createCellViewModels(currentEntries)
+                    )
                     setScreenState(ScreenState.data())
                 } else {
-                    val emptyText = resourceProvider.getString(R.string.no_items)
+                    val emptyText = if (isSearchModeEnabled) {
+                        resourceProvider.getString(R.string.no_search_results)
+                    } else {
+                        resourceProvider.getString(R.string.no_items)
+                    }
+
                     setScreenState(ScreenState.empty(emptyText))
                 }
 
                 visibleMenuItems.value = getVisibleMenuItems()
             } else {
-                setErrorState(data.error)
+                setErrorState(getEntriesResult.error)
             }
 
             updateOptionPanelState()
+
+            loadDataJob = null
         }
     }
 
@@ -374,24 +436,60 @@ class GroupsViewModel(
         }
     }
 
-    fun onBackClicked() {
-        if (args.isCloseDatabaseOnExit) {
-            interactor.lockDatabase()
+    fun navigateBack() {
+        if (isSearchModeEnabled) {
+            if (navigationStack.peek() is NavigationStackItem.Search) {
+                navigationStack.pop()
+            }
+
+            disableSearchMode()
+            loadData(isResetScroll = true)
+            return
         }
 
-        if (args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION && groupUid == rootGroupUid) {
-            finishActivityEvent.call(Unit)
+        if (navigationStack.size > 1) {
+            navigationStack.pop()
+
+            when (val nextItem = navigationStack.peek()) {
+                is NavigationStackItem.RootGroup -> {
+                    currentGroupUid = rootGroup?.uid
+                }
+
+                is NavigationStackItem.Group -> {
+                    currentGroupUid = nextItem.groupUid
+                }
+
+                is NavigationStackItem.Search -> {
+                    currentGroupUid = nextItem.groupUid
+
+                    searchQuery.value = nextItem.query
+                    if (!isSearchModeEnabled) {
+                        enableSearchMode()
+                    }
+                }
+            }
+
+            loadData(isResetScroll = true)
         } else {
-            router.exit()
+            if (args.isCloseDatabaseOnExit) {
+                interactor.lockDatabase()
+            }
+
+            if (args.appMode == AUTOFILL_SELECTION && currentGroupUid == rootGroup?.uid) {
+                finishActivityEvent.call(Unit)
+            } else {
+                router.exit()
+            }
         }
     }
 
     fun onLockButtonClicked() {
         interactor.lockDatabase()
         when (args.appMode) {
-            ApplicationLaunchMode.AUTOFILL_SELECTION -> {
+            AUTOFILL_SELECTION -> {
                 finishActivityEvent.call(Unit)
             }
+
             else -> {
                 router.backTo(
                     UnlockScreen(
@@ -428,18 +526,18 @@ class GroupsViewModel(
     }
 
     fun onSearchButtonClicked() {
-        router.navigateTo(
-            SearchScreen(
-                SearchScreenArgs(
-                    appMode = args.appMode,
-                    autofillStructure = args.autofillStructure
-                )
-            )
-        )
+        searchQuery.value = EMPTY
+        enableSearchMode()
     }
 
     fun onSortAndViewButtonClicked() {
-        showSortAndViewDialogEvent.call(Unit)
+        val dialogArgs = if (isSearchModeEnabled) {
+            SortAndViewDialogArgs(ScreenType.SEARCH)
+        } else {
+            SortAndViewDialogArgs(ScreenType.GROUPS)
+        }
+
+        showSortAndViewDialogEvent.call(dialogArgs)
     }
 
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
@@ -498,6 +596,10 @@ class GroupsViewModel(
         syncStateViewModel.synchronize()
     }
 
+    fun onSearchQueryChanged(query: String) {
+        loadData(isResetScroll = true)
+    }
+
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
             when {
@@ -506,42 +608,55 @@ class GroupsViewModel(
                         onGroupClicked(it)
                     }
                 }
+
                 event.containsKey(GroupCellViewModel.LONG_CLICK_EVENT) -> {
                     event.getString(GroupCellViewModel.LONG_CLICK_EVENT)?.toUUID()?.let {
                         onGroupLongClicked(it)
                     }
                 }
+
                 event.containsKey(NoteCellViewModel.CLICK_EVENT) -> {
                     event.getString(NoteCellViewModel.CLICK_EVENT)?.toUUID()?.let {
                         onNoteClicked(it)
                     }
                 }
+
                 event.containsKey(NoteCellViewModel.LONG_CLICK_EVENT) -> {
                     event.getString(NoteCellViewModel.LONG_CLICK_EVENT)?.toUUID()?.let {
                         onNoteLongClicked(it)
                     }
                 }
+
                 event.containsKey(OptionPanelCellViewModel.POSITIVE_BUTTON_CLICK_EVENT) -> {
                     onPositiveOptionSelected()
                 }
+
                 event.containsKey(OptionPanelCellViewModel.NEGATIVE_BUTTON_CLICK_EVENT) -> {
                     onNegativeOptionSelected()
+                }
+
+                event.containsKey(NavigationPanelCellViewModel.ITEM_CLICK_EVENT) -> {
+                    event.getInt(NavigationPanelCellViewModel.ITEM_CLICK_EVENT)?.let { index ->
+                        onNavigationPanelClicked(index)
+                    }
                 }
             }
         }
     }
 
     private fun onGroupClicked(groupUid: UUID) {
-        router.navigateTo(
-            GroupsScreen(
-                GroupsScreenArgs(
-                    appMode = args.appMode,
-                    groupUid = groupUid,
-                    isCloseDatabaseOnExit = false,
-                    autofillStructure = args.autofillStructure
-                )
-            )
-        )
+        if (isSearchModeEnabled) {
+            val currentQuery = searchQuery.value ?: EMPTY
+            navigationStack.push(NavigationStackItem.Search(currentQuery, currentGroupUid))
+            navigationStack.push(NavigationStackItem.Group(groupUid))
+            disableSearchMode()
+        } else {
+            navigationStack.push(NavigationStackItem.Group(groupUid))
+        }
+
+        currentGroupUid = groupUid
+
+        loadData(isResetScroll = true)
     }
 
     private fun onGroupLongClicked(groupUid: UUID) {
@@ -550,8 +665,73 @@ class GroupsViewModel(
         showGroupActionsDialogEvent.call(group)
     }
 
+    private fun onNavigationPanelClicked(index: Int) {
+        val groupUid = navigationPanelGroups.getOrNull(index)?.uid ?: return
+
+        if (currentGroupUid != groupUid) {
+            cleanNavigationStackUntil(groupUid)
+
+            val isRootGroup = (groupUid == rootGroup?.uid)
+            if (!isRootGroup) {
+                navigationStack.push(NavigationStackItem.Group(groupUid))
+            }
+
+            currentGroupUid = groupUid
+
+            loadData(isResetScroll = true)
+        }
+    }
+
+    private fun cleanNavigationStackUntil(groupUid: UUID) {
+        if (navigationStack.size == 1) {
+            return
+        }
+
+        val isRootGroup = (groupUid == rootGroup?.uid)
+        if (isRootGroup) {
+            while (navigationStack.size > 1) {
+                navigationStack.pop()
+            }
+            return
+        }
+
+        val hasGroup = navigationStack.any { item ->
+            item is NavigationStackItem.Group && item.groupUid == groupUid
+        }
+        if (!hasGroup) {
+            return
+        }
+
+        while (true) {
+            val stackItem = navigationStack.peek()
+            if (stackItem is NavigationStackItem.Group && stackItem.groupUid == groupUid) {
+                navigationStack.pop()
+                break
+            } else {
+                navigationStack.pop()
+            }
+        }
+    }
+
+    private fun fillNavigationStack() {
+        val isRootGroup = (currentGroupUid == rootGroup?.uid)
+        if (isRootGroup) {
+            return
+        }
+
+        navigationStack.clear()
+
+        for (parent in navigationPanelGroups) {
+            if (parent.uid == rootGroup?.uid) {
+                navigationStack.push(NavigationStackItem.RootGroup)
+            } else {
+                navigationStack.push(NavigationStackItem.Group(parent.uid))
+            }
+        }
+    }
+
     private fun findGroupInItems(groupUid: UUID): Group? {
-        return currentDataItems?.firstOrNull { item ->
+        return currentEntries.firstOrNull { item ->
             if (item is Group) {
                 item.uid == groupUid
             } else {
@@ -579,7 +759,7 @@ class GroupsViewModel(
     }
 
     private fun findNoteInItems(noteUid: UUID): Note? {
-        return currentDataItems?.firstOrNull { item ->
+        return currentEntries.firstOrNull { item ->
             if (item is Note) {
                 item.uid == noteUid
             } else {
@@ -590,9 +770,8 @@ class GroupsViewModel(
 
     private fun getCurrentGroupUid(): UUID? {
         return when {
-            groupUid != null -> groupUid
-            rootGroupUid != null -> rootGroupUid
-            else -> null
+            currentGroupUid != null -> currentGroupUid
+            else -> rootGroup?.uid
         }
     }
 
@@ -649,6 +828,7 @@ class GroupsViewModel(
             screenState.isDisplayingLoading || screenState.isDisplayingError -> {
                 OptionPanelState.HIDDEN
             }
+
             args.note != null && !isAutofillSavingCancelled -> OptionPanelState.SAVE_AUTOFILL_DATA
             selectionHolder.hasSelection() -> OptionPanelState.PASTE
             else -> OptionPanelState.HIDDEN
@@ -660,9 +840,11 @@ class GroupsViewModel(
             OptionPanelState.PASTE -> {
                 onPasteButtonClicked()
             }
+
             OptionPanelState.SAVE_AUTOFILL_DATA -> {
                 onSaveAutofillNoteClicked()
             }
+
             else -> {}
         }
     }
@@ -717,13 +899,190 @@ class GroupsViewModel(
             OptionPanelState.PASTE -> {
                 selectionHolder.clear()
             }
+
             OptionPanelState.SAVE_AUTOFILL_DATA -> {
                 isAutofillSavingCancelled = true
             }
+
             else -> {
             }
         }
         updateOptionPanelState()
+    }
+
+    private fun enableSearchMode() {
+        isSearchModeEnabled = true
+
+        isSearchQueryVisible.value = isSearchModeEnabled
+        backIcon.value = getBackIconInternal()
+        isKeyboardVisibleEvent.value = true
+
+        setScreenState(
+            ScreenState.empty(
+                emptyText = resourceProvider.getString(R.string.no_search_results)
+            )
+        )
+
+        if (searchableEntries == null) {
+            loadAllSearchableEntries()
+        }
+    }
+
+    private fun disableSearchMode() {
+        isSearchModeEnabled = false
+        isSearchQueryVisible.value = isSearchModeEnabled
+        backIcon.value = getBackIconInternal()
+        isKeyboardVisibleEvent.value = false
+        screenTitle.value = currentGroup?.title ?: EMPTY
+        visibleMenuItems.value = getVisibleMenuItems()
+    }
+
+    private fun loadAllSearchableEntries() {
+        viewModelScope.launch {
+            val getAllEntries = interactor.getAllSearchableEntries(
+                isRespectAutotypeProperty = (args.appMode == AUTOFILL_SELECTION)
+            )
+            if (getAllEntries.isFailed) {
+                setScreenState(
+                    ScreenState.error(
+                        errorText = errorInteractor.processAndGetMessage(getAllEntries.error)
+                    )
+                )
+                return@launch
+            }
+
+            searchableEntries = getAllEntries.getOrThrow()
+        }
+    }
+
+    private suspend fun loadSearchEntries(
+        query: String
+    ): OperationResult<List<EncryptedDatabaseEntry>> {
+        var allEntries = searchableEntries
+        if (allEntries == null) {
+            val getAllEntriesResult = interactor.getAllSearchableEntries(
+                isRespectAutotypeProperty = (args.appMode == AUTOFILL_SELECTION)
+            )
+            if (getAllEntriesResult.isFailed) {
+                setErrorPanelState(getAllEntriesResult.error)
+                return getAllEntriesResult
+            }
+
+            searchableEntries = getAllEntriesResult.getOrThrow()
+            allEntries = getAllEntriesResult.getOrThrow()
+        }
+
+        if (query.isNotEmpty()) {
+            delay(SEARCH_DELAY)
+        }
+
+        val searchEntries = if (query.isNotEmpty()) {
+            interactor.filterEntries(
+                entries = allEntries,
+                query = query
+            )
+        } else {
+            emptyList()
+        }
+
+        return OperationResult.success(searchEntries)
+    }
+
+    private suspend fun loadTemplates(): OperationResult<Unit> {
+        if (templates == null) {
+            val getTemplatesResult = interactor.getTemplates()
+            if (getTemplatesResult.isFailed) {
+                setErrorPanelState(getTemplatesResult.error)
+                return getTemplatesResult.mapError()
+            }
+
+            templates = getTemplatesResult.getOrThrow()
+        }
+
+        return OperationResult.success(Unit)
+    }
+
+    private suspend fun loadRootGroup(): OperationResult<Unit> {
+        if (rootGroup == null) {
+            val getRootGroupResult = interactor.getRootGroup()
+            if (getRootGroupResult.isFailed) {
+                setErrorState(getRootGroupResult.error)
+                return getRootGroupResult.mapError()
+            }
+
+            rootGroup = getRootGroupResult.getOrThrow()
+        }
+
+        return OperationResult.success(Unit)
+    }
+
+    private suspend fun loadUsedFile(): OperationResult<Unit> {
+        val getUsedFileResult = interactor.getDatabaseUsedFile()
+        if (getUsedFileResult.isFailed) {
+            setErrorState(getUsedFileResult.error)
+            return getUsedFileResult.mapError()
+        }
+
+        dbUsedFile = getUsedFileResult.obj
+
+        return getUsedFileResult.mapWithObject(Unit)
+    }
+
+    private suspend fun loadNavigationPanelData(): OperationResult<Unit> {
+        val groupUid = currentGroupUid
+        if (groupUid == null) {
+            val error = newGenericError(MESSAGE_UID_IS_NULL)
+            setErrorState(error)
+            return OperationResult.error(error)
+        }
+
+        val getParentsResult = interactor.getAllParents(groupUid)
+        if (getParentsResult.isFailed) {
+            setErrorState(getParentsResult.error)
+            return getParentsResult.mapError()
+        }
+
+        navigationPanelGroups = getParentsResult.getOrThrow()
+
+        val items = navigationPanelGroups.map { group -> group.title }
+
+        navigationPanelViewModel.setModel(
+            NavigationPanelCellModel(
+                items = items
+            )
+        )
+
+        return OperationResult.success(Unit)
+    }
+
+    private suspend fun loadCurrentGroup(): OperationResult<Unit> {
+        if (currentGroupUid == rootGroup?.uid) {
+            currentGroup = rootGroup
+            return OperationResult.success(Unit)
+        }
+
+        val groupUid = currentGroupUid
+        if (groupUid == null) {
+            val error = newGenericError(MESSAGE_UID_IS_NULL)
+            setErrorState(error)
+            return OperationResult.error(error)
+        }
+
+        val getGroupResult = interactor.getGroup(groupUid)
+        if (getGroupResult.isFailed) {
+            setErrorState(getGroupResult.error)
+            return getGroupResult.mapError()
+        }
+
+        currentGroup = getGroupResult.getOrThrow()
+        return OperationResult.success(Unit)
+    }
+
+    private fun createCellViewModels(
+        data: List<EncryptedDatabaseEntry>
+    ): List<BaseCellViewModel> {
+        val models = cellModelFactory.createCellModels(data)
+        return cellViewModelFactory.createCellViewModels(models, eventProvider)
     }
 
     private fun setErrorState(error: OperationError) {
@@ -745,6 +1104,8 @@ class GroupsViewModel(
     private fun setScreenState(state: ScreenState) {
         screenState.value = state
         isFabButtonVisible.value = getFabButtonVisibility()
+        isNavigationPanelVisible.value = getNavigationPanelVisibility()
+        screenTitle.value = getScreenTitleInternal()
 
         when (state.screenDisplayingType) {
             ScreenDisplayingType.LOADING -> {
@@ -756,11 +1117,34 @@ class GroupsViewModel(
         }
     }
 
+    private fun getBackIconInternal(): BackNavigationIcon {
+        return if (isSearchModeEnabled) {
+            BackNavigationIcon.Icon(R.drawable.ic_close_24dp)
+        } else {
+            BackNavigationIcon.Arrow
+        }
+    }
+
+    private fun getScreenTitleInternal(): String {
+        return if (isSearchModeEnabled) {
+            resourceProvider.getString(R.string.search)
+        } else {
+            currentGroup?.title ?: EMPTY
+        }
+    }
+
     private fun getFabButtonVisibility(): Boolean {
         val screenState = this.screenState.value ?: return false
 
         return (screenState.isDisplayingData || screenState.isDisplayingEmptyState) &&
             args.appMode == ApplicationLaunchMode.NORMAL
+    }
+
+    private fun getNavigationPanelVisibility(): Boolean {
+        val screenState = this.screenState.value ?: return false
+
+        return (screenState.isDisplayingData || screenState.isDisplayingEmptyState) &&
+            !isSearchModeEnabled
     }
 
     private fun getVisibleMenuItems(): List<GroupsMenuItem> {
@@ -773,7 +1157,9 @@ class GroupsViewModel(
             isShowMenu && args.appMode == ApplicationLaunchMode.NORMAL -> {
                 mutableListOf<GroupsMenuItem>()
                     .apply {
-                        add(GroupsMenuItem.SEARCH)
+                        if (!isSearchModeEnabled) {
+                            add(GroupsMenuItem.SEARCH)
+                        }
                         add(GroupsMenuItem.LOCK)
 
                         if (usedFile.fsAuthority.type.isRequireSynchronization()) {
@@ -796,14 +1182,19 @@ class GroupsViewModel(
                         }
                     }
             }
-            isShowMenu && args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
-                listOf(
-                    GroupsMenuItem.SEARCH,
-                    GroupsMenuItem.LOCK,
-                    GroupsMenuItem.VIEW_MODE,
-                    GroupsMenuItem.SETTINGS
-                )
+
+            isShowMenu && args.appMode == AUTOFILL_SELECTION -> {
+                mutableListOf<GroupsMenuItem>()
+                    .apply {
+                        if (!isSearchModeEnabled) {
+                            add(GroupsMenuItem.SEARCH)
+                        }
+                        add(GroupsMenuItem.LOCK)
+                        add(GroupsMenuItem.VIEW_MODE)
+                        add(GroupsMenuItem.SETTINGS)
+                    }
             }
+
             else -> emptyList()
         }
     }
@@ -839,5 +1230,10 @@ class GroupsViewModel(
         SYNCHRONIZE(R.id.menu_synchronize),
         ENABLE_BIOMETRIC_UNLOCK(R.id.menu_enable_biometric_unlock),
         DISABLE_BIOMETRIC_UNLOCK(R.id.menu_disable_biometric_unlock)
+    }
+
+    companion object {
+        private val EMPTY_UUID = UUID(0, 0)
+        private const val SEARCH_DELAY = 300L
     }
 }

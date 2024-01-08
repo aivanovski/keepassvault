@@ -18,11 +18,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <FrameLayout
+            android:id="@+id/navigationPanelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/kpBackgroundColor"
+            app:layout_constraintTop_toTopOf="parent"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}">
+
+            <include
+                layout="@layout/cell_navigation_panel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/element_margin"
+                app:viewModel="@{viewModel.navigationPanelViewModel}" />
+
+        </FrameLayout>
+
         <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
             android:id="@+id/errorPanelView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/navigationPanelLayout"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 

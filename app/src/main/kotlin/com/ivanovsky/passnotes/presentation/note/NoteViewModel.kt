@@ -10,6 +10,7 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Attachment
+import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
@@ -34,8 +35,10 @@ import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
+import com.ivanovsky.passnotes.presentation.core.model.NavigationPanelCellModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.NavigationPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.AttachmentCellViewModel
@@ -78,6 +81,13 @@ class NoteViewModel(
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
 
+    val navigationPanelViewModel = NavigationPanelCellViewModel(
+        initModel = NavigationPanelCellModel(
+            items = emptyList()
+        ),
+        eventProvider = eventProvider
+    )
+
     val actionBarTitle = MutableLiveData<String>()
     val modifiedText = MutableLiveData<String>()
     val visibleMenuItems = MutableLiveData<List<NoteMenuItem>>(emptyList())
@@ -97,6 +107,7 @@ class NoteViewModel(
     private var cellIdToAttachmentMap: Map<String, Attachment>? = null
     private var note: Note? = null
     private var noteUid: UUID = args.noteUid
+    private var navigationPanelGroups: List<Group> = emptyList()
     private var isShowHiddenProperties = false
 
     private val visiblePropertiesFilter = PropertyFilter.Builder()
@@ -148,6 +159,7 @@ class NoteViewModel(
             ApplicationLaunchMode.AUTOFILL_SELECTION -> {
                 finishActivityEvent.call(Unit)
             }
+
             else -> {
                 router.backTo(
                     UnlockScreen(
@@ -232,16 +244,46 @@ class NoteViewModel(
 
         viewModelScope.launch {
             val getNoteResult = interactor.getNoteByUid(noteUid)
-
-            if (getNoteResult.isSucceededOrDeferred) {
-                onNoteLoaded(getNoteResult.getOrThrow())
-            } else {
+            if (getNoteResult.isFailed) {
                 setScreenState(
                     ScreenState.error(
                         errorText = errorInteractor.processAndGetMessage(getNoteResult.error)
                     )
                 )
+                return@launch
             }
+
+            val note = getNoteResult.getOrThrow()
+            val getGroupResult = interactor.getGroup(note.groupUid)
+            if (getGroupResult.isFailed) {
+                setScreenState(
+                    ScreenState.error(
+                        errorText = errorInteractor.processAndGetMessage(getGroupResult.error)
+                    )
+                )
+                return@launch
+            }
+
+            val group = getGroupResult.getOrThrow()
+            val getParentsResult = interactor.getAllParents(group.uid)
+            if (getParentsResult.isFailed) {
+                setScreenState(
+                    ScreenState.error(
+                        errorText = errorInteractor.processAndGetMessage(getParentsResult.error)
+                    )
+                )
+                return@launch
+            }
+
+            navigationPanelGroups = getParentsResult.getOrThrow()
+            val parentItems = navigationPanelGroups.map { parent -> parent.title }
+            navigationPanelViewModel.setModel(
+                NavigationPanelCellModel(
+                    items = parentItems
+                )
+            )
+
+            onNoteLoaded(note)
         }
     }
 
@@ -254,6 +296,7 @@ class NoteViewModel(
                     copyText(action.text)
                 }
             }
+
             is PropertyAction.OpenUrl -> {
                 openUrlEvent.call(action.url)
             }
@@ -316,29 +359,40 @@ class NoteViewModel(
 
                     onNotePropertyClicked(id)
                 }
+
                 event.containsKey(NotePropertyCellViewModel.LONG_CLICK_EVENT) -> {
                     val id = event.getString(NotePropertyCellViewModel.LONG_CLICK_EVENT)
                         ?: return@subscribe
 
                     onNotePropertyLongClicked(id)
                 }
+
                 event.containsKey(AttachmentCellViewModel.CLICK_EVENT) -> {
                     val id = event.getString(AttachmentCellViewModel.CLICK_EVENT)
                         ?: return@subscribe
 
                     onOpenAttachmentClicked(id)
                 }
+
                 event.containsKey(AttachmentCellViewModel.LONG_CLICK_EVENT) -> {
                     val id = event.getString(AttachmentCellViewModel.LONG_CLICK_EVENT)
                         ?: return@subscribe
 
                     onAttachmentLongClicked(id)
                 }
+
                 event.containsKey(AttachmentCellViewModel.SHARE_ICON_CLICK_EVENT) -> {
                     val id = event.getString(AttachmentCellViewModel.SHARE_ICON_CLICK_EVENT)
                         ?: return@subscribe
 
                     onShareAttachmentClicked(id)
+                }
+
+                event.containsKey(NavigationPanelCellViewModel.ITEM_CLICK_EVENT) -> {
+                    val index = event.getInt(NavigationPanelCellViewModel.ITEM_CLICK_EVENT)
+                        ?: return@subscribe
+
+                    onNavigationPanelItemClicked(index)
                 }
             }
         }
@@ -485,6 +539,23 @@ class NoteViewModel(
         return saveResult.getOrThrow()
     }
 
+    private fun onNavigationPanelItemClicked(index: Int) {
+        val groupUid = navigationPanelGroups.getOrNull(index)?.uid ?: return
+
+        router.exit()
+        router.newChain(
+            GroupsScreen(
+                GroupsScreenArgs(
+                    appMode = args.appMode,
+                    groupUid = groupUid,
+                    isCloseDatabaseOnExit = true,
+                    isSearchModeEnabled = false,
+                    autofillStructure = args.autofillStructure
+                )
+            )
+        )
+    }
+
     private fun getVisibleMenuItems(): List<NoteMenuItem> {
         val screenState = this.screenState.value ?: return emptyList()
         val note = this.note
@@ -504,6 +575,7 @@ class NoteViewModel(
                     if (hasHiddenProperties) NoteMenuItem.TOGGLE_HIDDEN else null
                 )
             }
+
             screenState.isDisplayingData &&
                 args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
                 listOfNotNull(
@@ -513,6 +585,7 @@ class NoteViewModel(
                     if (hasHiddenProperties) NoteMenuItem.TOGGLE_HIDDEN else null
                 )
             }
+
             else -> emptyList()
         }
     }

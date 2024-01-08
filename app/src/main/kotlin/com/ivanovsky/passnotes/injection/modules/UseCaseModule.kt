@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.domain.usecases.CheckNoteAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.DecodePasswordWithBiometricUseCase
 import com.ivanovsky.passnotes.domain.usecases.EncodePasswordWithBiometricUseCase
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
+import com.ivanovsky.passnotes.domain.usecases.FindParentGroupsUseCase
 import com.ivanovsky.passnotes.domain.usecases.GeneratePasswordUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetGroupUseCase
@@ -56,5 +57,6 @@ object UseCaseModule {
             single { DecodePasswordWithBiometricUseCase(get()) }
             single { EncodePasswordWithBiometricUseCase(get()) }
             single { SearchUseCases(get(), get(), get(), get()) }
+            single { FindParentGroupsUseCase(get(), get()) }
         }
 }

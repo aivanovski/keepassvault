@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.presentation.groups
 
-import android.graphics.Path.Op
 import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -171,6 +170,7 @@ class GroupsViewModel(
     private var templates: List<Template>? = null
     private var isAutofillSavingCancelled = false
     private var isSearchModeEnabled = false
+    private var isFillNavigationStack = false
     private var currentEntries: List<EncryptedDatabaseEntry>? = null
     private var searchableEntries: List<EncryptedDatabaseEntry>? = null
     private var navigationPanelGroups: List<Group> = emptyList()
@@ -186,6 +186,7 @@ class GroupsViewModel(
             navigationStack.push(NavigationStackItem.RootGroup)
         } else {
             navigationStack.push(NavigationStackItem.Group(args.groupUid))
+            isFillNavigationStack = true
         }
         currentGroupUid = args.groupUid
 
@@ -265,12 +266,16 @@ class GroupsViewModel(
             if (loadCurrentGroup().isFailed) {
                 return@launch
             }
-
             if (loadUsedFile().isFailed) {
                 return@launch
             }
             if (loadNavigationPanelData().isFailed) {
                 return@launch
+            }
+
+            if (isFillNavigationStack) {
+                fillNavigationStack()
+                isFillNavigationStack = false
             }
 
             val getEntriesResult = when {
@@ -705,6 +710,23 @@ class GroupsViewModel(
         }
     }
 
+    private fun fillNavigationStack() {
+        val isRootGroup = (currentGroupUid == rootGroup?.uid)
+        if (isRootGroup) {
+            return
+        }
+
+        navigationStack.clear()
+
+        for (parent in navigationPanelGroups) {
+            if (parent.uid == rootGroup?.uid) {
+                navigationStack.push(NavigationStackItem.RootGroup)
+            } else {
+                navigationStack.push(NavigationStackItem.Group(parent.uid))
+            }
+        }
+    }
+
     private fun findGroupInItems(groupUid: UUID): Group? {
         return currentEntries?.firstOrNull { item ->
             if (item is Group) {
@@ -1009,7 +1031,7 @@ class GroupsViewModel(
             return OperationResult.error(error)
         }
 
-        val getParentsResult = interactor.getParents(groupUid)
+        val getParentsResult = interactor.getAllParents(groupUid)
         if (getParentsResult.isFailed) {
             setErrorState(getParentsResult.error)
             return getParentsResult.mapError()

@@ -4,9 +4,6 @@ import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.Group
-import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP
-import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.UsedFile
@@ -17,7 +14,9 @@ import com.ivanovsky.passnotes.domain.entity.SelectionItemType
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.EncodePasswordWithBiometricUseCase
+import com.ivanovsky.passnotes.domain.usecases.FindParentGroupsUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
+import com.ivanovsky.passnotes.domain.usecases.GetGroupUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.MoveGroupUseCase
@@ -45,7 +44,9 @@ class GroupsInteractor(
     private val updateUsedFileUseCase: UpdateUsedFileUseCase,
     private val removeBiometricDataUseCase: RemoveBiometricDataUseCase,
     private val encodePasswordUseCase: EncodePasswordWithBiometricUseCase,
-    private val searchUseCases: SearchUseCases
+    private val searchUseCases: SearchUseCases,
+    private val findParentGroupsUseCase: FindParentGroupsUseCase,
+    private val getGroupUseCase: GetGroupUseCase
 ) {
 
     suspend fun getTemplates(): OperationResult<List<Template>> =
@@ -146,74 +147,14 @@ class GroupsInteractor(
         return removeResult.takeStatusWith(Unit)
     }
 
-    suspend fun getGroup(groupUid: UUID): OperationResult<Group> {
-        return withContext(dispatchers.IO) {
-            val getDbResult = getDbUseCase.getDatabaseSynchronously()
-            if (getDbResult.isFailed) {
-                return@withContext getDbResult.mapError()
-            }
+    suspend fun getGroup(groupUid: UUID): OperationResult<Group> =
+        getGroupUseCase.getGroupByUid(groupUid)
 
-            val db = getDbResult.obj
-            db.groupDao.getGroupByUid(groupUid)
-        }
-    }
-
-    suspend fun getParents(groupUid: UUID): OperationResult<List<Group>> {
-        return withContext(dispatchers.IO) {
-            val getDbResult = getDbUseCase.getDatabaseSynchronously()
-            if (getDbResult.isFailed) {
-                return@withContext getDbResult.mapError()
-            }
-
-            val getAllGroupsResult = getDbResult.getOrThrow().groupDao.all
-            if (getAllGroupsResult.isFailed) {
-                return@withContext getAllGroupsResult.mapError()
-            }
-
-            val allGroups = getAllGroupsResult.getOrThrow()
-            val rootGroup = allGroups.firstOrNull { group -> group.parentUid == null }
-                ?: return@withContext OperationResult.error(
-                    newDbError(MESSAGE_FAILED_TO_FIND_ROOT_GROUP)
-                )
-
-            if (groupUid == rootGroup.uid) {
-                return@withContext OperationResult.success(listOf(rootGroup))
-            }
-
-            val selectedGroup = allGroups.firstOrNull { group -> group.uid == groupUid }
-                ?: return@withContext OperationResult.error(
-                    newDbError(String.format(GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID, groupUid))
-                )
-
-            val uidToGroupMap = allGroups.associateBy { group -> group.uid }
-            val uidToParentUidMap: Map<UUID, UUID?> = HashMap<UUID, UUID?>()
-                .apply {
-                    for (group in allGroups) {
-                        this[group.uid] = group.parentUid
-                    }
-                }
-
-            val parents = mutableListOf<Group>()
-                .apply {
-                    add(selectedGroup)
-                }
-
-            var currentUid: UUID? = groupUid
-            while (currentUid != null) {
-                val parentUid = uidToParentUidMap[currentUid]
-                if (parentUid != null) {
-                    val parentGroup = uidToGroupMap[parentUid]
-                    if (parentGroup != null) {
-                        parents.add(parentGroup)
-                    }
-                }
-
-                currentUid = parentUid
-            }
-
-            OperationResult.success(parents.reversed())
-        }
-    }
+    suspend fun getAllParents(groupUid: UUID): OperationResult<List<Group>> =
+        findParentGroupsUseCase.findAllParents(
+            groupUid = groupUid,
+            isAddCurrentGroup = true
+        )
 
     fun lockDatabase() {
         lockUseCase.lockIfNeed()

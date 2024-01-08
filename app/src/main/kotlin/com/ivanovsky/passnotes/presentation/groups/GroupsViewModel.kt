@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.groups
 
+import android.graphics.Path.Op
 import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,6 +15,8 @@ import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL
+import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.UsedFile
@@ -63,6 +66,8 @@ import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.ScreenType
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
+import com.ivanovsky.passnotes.presentation.core.model.NavigationPanelCellModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.NavigationPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.model.CellsData
 import com.ivanovsky.passnotes.presentation.groups.model.NavigationStackItem
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
@@ -115,6 +120,13 @@ class GroupsViewModel(
     val screenState = MutableLiveData(ScreenState.notInitialized())
     val eventProvider = EventProviderImpl()
 
+    val navigationPanelViewModel = NavigationPanelCellViewModel(
+        initModel = NavigationPanelCellModel(
+            items = emptyList()
+        ),
+        eventProvider = eventProvider
+    )
+
     val syncStateViewModel = SyncStateViewModel(
         interactor = syncStateInteractor,
         modelFactory = syncStateModelFactory,
@@ -137,6 +149,7 @@ class GroupsViewModel(
     val visibleMenuItems = MutableLiveData<List<GroupsMenuItem>>(emptyList())
     val isFabButtonVisible = MutableLiveData(false)
     val isSearchQueryVisible = MutableLiveData(false)
+    val isNavigationPanelVisible = MutableLiveData(false)
     val showToastEvent = SingleLiveEvent<String>()
     val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
     val showGroupActionsDialogEvent = SingleLiveEvent<Group>()
@@ -150,7 +163,8 @@ class GroupsViewModel(
     val backIcon = MutableLiveData<BackNavigationIcon>(BackNavigationIcon.Arrow)
     val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
 
-    private var rootGroupUid: UUID? = null
+    private var rootGroup: Group? = null
+    private var currentGroup: Group? = null
     private var currentGroupUid: UUID? = null
     private val navigationStack: Deque<NavigationStackItem> = LinkedList()
     private var dbUsedFile: UsedFile? = null
@@ -159,6 +173,7 @@ class GroupsViewModel(
     private var isSearchModeEnabled = false
     private var currentEntries: List<EncryptedDatabaseEntry>? = null
     private var searchableEntries: List<EncryptedDatabaseEntry>? = null
+    private var navigationPanelGroups: List<Group> = emptyList()
     private var loadDataJob: Job? = null
 
     init {
@@ -239,19 +254,30 @@ class GroupsViewModel(
             if (loadTemplates().isFailed) {
                 return@launch
             }
+            if (loadRootGroup().isFailed) {
+                return@launch
+            }
 
-            val getEntriesResult = when {
-                isSearchModeEnabled -> loadSearchEntries(searchQuery.value ?: EMPTY)
-                currentGroupUid == null -> interactor.getRootEntries()
-                else -> interactor.getGroupEntries(currentGroupUid ?: UUID(0, 0))
+            if (currentGroupUid == null) {
+                currentGroupUid = rootGroup?.uid
+            }
+
+            if (loadCurrentGroup().isFailed) {
+                return@launch
             }
 
             if (loadUsedFile().isFailed) {
                 return@launch
             }
+            if (loadNavigationPanelData().isFailed) {
+                return@launch
+            }
 
-            loadRootUid()
-            loadScreenTitle()
+            val getEntriesResult = when {
+                isSearchModeEnabled -> loadSearchEntries(searchQuery.value ?: EMPTY)
+                currentGroupUid == null -> interactor.getRootEntries()
+                else -> interactor.getGroupEntries(currentGroupUid ?: EMPTY_UUID)
+            }
 
             if (getEntriesResult.isSucceededOrDeferred) {
                 val dataItems = interactor.sortData(getEntriesResult.getOrThrow())
@@ -418,7 +444,7 @@ class GroupsViewModel(
 
             when (val nextItem = navigationStack.peek()) {
                 is NavigationStackItem.RootGroup -> {
-                    currentGroupUid = null
+                    currentGroupUid = rootGroup?.uid
                 }
 
                 is NavigationStackItem.Group -> {
@@ -441,7 +467,7 @@ class GroupsViewModel(
                 interactor.lockDatabase()
             }
 
-            if (args.appMode == AUTOFILL_SELECTION && currentGroupUid == rootGroupUid) {
+            if (args.appMode == AUTOFILL_SELECTION && currentGroupUid == rootGroup?.uid) {
                 finishActivityEvent.call(Unit)
             } else {
                 router.exit()
@@ -600,6 +626,12 @@ class GroupsViewModel(
                 event.containsKey(OptionPanelCellViewModel.NEGATIVE_BUTTON_CLICK_EVENT) -> {
                     onNegativeOptionSelected()
                 }
+
+                event.containsKey(NavigationPanelCellViewModel.ITEM_CLICK_EVENT) -> {
+                    event.getInt(NavigationPanelCellViewModel.ITEM_CLICK_EVENT)?.let { index ->
+                        onNavigationPanelClicked(index)
+                    }
+                }
             }
         }
     }
@@ -623,6 +655,54 @@ class GroupsViewModel(
         val group = findGroupInItems(groupUid) ?: return
 
         showGroupActionsDialogEvent.call(group)
+    }
+
+    private fun onNavigationPanelClicked(index: Int) {
+        val groupUid = navigationPanelGroups.getOrNull(index)?.uid ?: return
+
+        if (currentGroupUid != groupUid) {
+            cleanNavigationStackUntil(groupUid)
+
+            val isRootGroup = (groupUid == rootGroup?.uid)
+            if (!isRootGroup) {
+                navigationStack.push(NavigationStackItem.Group(groupUid))
+            }
+
+            currentGroupUid = groupUid
+
+            loadData(isResetScroll = true)
+        }
+    }
+
+    private fun cleanNavigationStackUntil(groupUid: UUID) {
+        if (navigationStack.size == 1) {
+            return
+        }
+
+        val isRootGroup = (groupUid == rootGroup?.uid)
+        if (isRootGroup) {
+            while (navigationStack.size > 1) {
+                navigationStack.pop()
+            }
+            return
+        }
+
+        val hasGroup = navigationStack.any { item ->
+            item is NavigationStackItem.Group && item.groupUid == groupUid
+        }
+        if (!hasGroup) {
+            return
+        }
+
+        while (true) {
+            val stackItem = navigationStack.peek()
+            if (stackItem is NavigationStackItem.Group && stackItem.groupUid == groupUid) {
+                navigationStack.pop()
+                break
+            } else {
+                navigationStack.pop()
+            }
+        }
     }
 
     private fun findGroupInItems(groupUid: UUID): Group? {
@@ -666,8 +746,7 @@ class GroupsViewModel(
     private fun getCurrentGroupUid(): UUID? {
         return when {
             currentGroupUid != null -> currentGroupUid
-            rootGroupUid != null -> rootGroupUid
-            else -> null
+            else -> rootGroup?.uid
         }
     }
 
@@ -812,8 +891,6 @@ class GroupsViewModel(
         isSearchQueryVisible.value = isSearchModeEnabled
         backIcon.value = getBackIconInternal()
         isKeyboardVisibleEvent.value = true
-        screenTitle.value = resourceProvider.getString(R.string.search)
-        visibleMenuItems.value = getVisibleMenuItems()
 
         setScreenState(
             ScreenState.empty(
@@ -831,7 +908,7 @@ class GroupsViewModel(
         isSearchQueryVisible.value = isSearchModeEnabled
         backIcon.value = getBackIconInternal()
         isKeyboardVisibleEvent.value = false
-        screenTitle.value = EMPTY
+        screenTitle.value = currentGroup?.title ?: EMPTY
         visibleMenuItems.value = getVisibleMenuItems()
     }
 
@@ -898,23 +975,18 @@ class GroupsViewModel(
         return OperationResult.success(Unit)
     }
 
-    private suspend fun loadRootUid() {
-        if (currentGroupUid == null && rootGroupUid == null) {
-            rootGroupUid = interactor.getRootUid()
-        }
-    }
-
-    private suspend fun loadScreenTitle() {
-        val groupUid = currentGroupUid
-
-        if (groupUid != null) {
-            val getGroupResult = interactor.getGroup(groupUid)
-            if (getGroupResult.isSucceededOrDeferred) {
-                screenTitle.value = getGroupResult.getOrThrow().title
+    private suspend fun loadRootGroup(): OperationResult<Unit> {
+        if (rootGroup == null) {
+            val getRootGroupResult = interactor.getRootGroup()
+            if (getRootGroupResult.isFailed) {
+                setErrorState(getRootGroupResult.error)
+                return getRootGroupResult.mapError()
             }
-        } else {
-            screenTitle.value = resourceProvider.getString(R.string.groups)
+
+            rootGroup = getRootGroupResult.getOrThrow()
         }
+
+        return OperationResult.success(Unit)
     }
 
     private suspend fun loadUsedFile(): OperationResult<Unit> {
@@ -927,6 +999,56 @@ class GroupsViewModel(
         dbUsedFile = getUsedFileResult.obj
 
         return getUsedFileResult.mapWithObject(Unit)
+    }
+
+    private suspend fun loadNavigationPanelData(): OperationResult<Unit> {
+        val groupUid = currentGroupUid
+        if (groupUid == null) {
+            val error = newGenericError(MESSAGE_UID_IS_NULL)
+            setErrorState(error)
+            return OperationResult.error(error)
+        }
+
+        val getParentsResult = interactor.getParents(groupUid)
+        if (getParentsResult.isFailed) {
+            setErrorState(getParentsResult.error)
+            return getParentsResult.mapError()
+        }
+
+        navigationPanelGroups = getParentsResult.getOrThrow()
+
+        val items = navigationPanelGroups.map { group -> group.title }
+
+        navigationPanelViewModel.setModel(
+            NavigationPanelCellModel(
+                items = items
+            )
+        )
+
+        return OperationResult.success(Unit)
+    }
+
+    private suspend fun loadCurrentGroup(): OperationResult<Unit> {
+        if (currentGroupUid == rootGroup?.uid) {
+            currentGroup = rootGroup
+            return OperationResult.success(Unit)
+        }
+
+        val groupUid = currentGroupUid
+        if (groupUid == null) {
+            val error = newGenericError(MESSAGE_UID_IS_NULL)
+            setErrorState(error)
+            return OperationResult.error(error)
+        }
+
+        val getGroupResult = interactor.getGroup(groupUid)
+        if (getGroupResult.isFailed) {
+            setErrorState(getGroupResult.error)
+            return getGroupResult.mapError()
+        }
+
+        currentGroup = getGroupResult.getOrThrow()
+        return OperationResult.success(Unit)
     }
 
     private fun createCellViewModels(
@@ -955,6 +1077,8 @@ class GroupsViewModel(
     private fun setScreenState(state: ScreenState) {
         screenState.value = state
         isFabButtonVisible.value = getFabButtonVisibility()
+        isNavigationPanelVisible.value = getNavigationPanelVisibility()
+        screenTitle.value = getScreenTitleInternal()
 
         when (state.screenDisplayingType) {
             ScreenDisplayingType.LOADING -> {
@@ -974,11 +1098,26 @@ class GroupsViewModel(
         }
     }
 
+    private fun getScreenTitleInternal(): String {
+        return if (isSearchModeEnabled) {
+            resourceProvider.getString(R.string.search)
+        } else {
+            currentGroup?.title ?: EMPTY
+        }
+    }
+
     private fun getFabButtonVisibility(): Boolean {
         val screenState = this.screenState.value ?: return false
 
         return (screenState.isDisplayingData || screenState.isDisplayingEmptyState) &&
             args.appMode == ApplicationLaunchMode.NORMAL
+    }
+
+    private fun getNavigationPanelVisibility(): Boolean {
+        val screenState = this.screenState.value ?: return false
+
+        return (screenState.isDisplayingData || screenState.isDisplayingEmptyState) &&
+            !isSearchModeEnabled
     }
 
     private fun getVisibleMenuItems(): List<GroupsMenuItem> {
@@ -1067,6 +1206,7 @@ class GroupsViewModel(
     }
 
     companion object {
+        private val EMPTY_UUID = UUID(0, 0)
         private const val SEARCH_DELAY = 300L
     }
 }

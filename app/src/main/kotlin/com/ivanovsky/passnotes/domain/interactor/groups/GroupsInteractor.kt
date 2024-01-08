@@ -4,6 +4,9 @@ import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP
+import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.UsedFile
@@ -47,43 +50,38 @@ class GroupsInteractor(
 
     suspend fun getTemplates(): OperationResult<List<Template>> =
         withContext(dispatchers.IO) {
-            val getDbResult = getDbUseCase.getDatabase()
+            val getDbResult = getDbUseCase.getDatabaseSynchronously()
             if (getDbResult.isFailed) {
-                return@withContext getDbResult.takeError()
+                return@withContext getDbResult.mapError()
             }
 
             val db = getDbResult.obj
             db.templateDao.getTemplates()
         }
 
-    suspend fun getRootUid(): UUID? =
+    suspend fun getRootGroup(): OperationResult<Group> =
         withContext(dispatchers.IO) {
             val getDbResult = getDbUseCase.getDatabaseSynchronously()
             if (getDbResult.isFailed) {
-                return@withContext null
+                return@withContext getDbResult.mapError()
             }
 
-            val db = getDbResult.obj
-            val rootResult = db.groupDao.rootGroup
-            if (rootResult.isFailed) {
-                return@withContext null
-            }
-
-            rootResult.getOrThrow().uid
+            val db = getDbResult.getOrThrow()
+            db.groupDao.rootGroup
         }
 
     suspend fun getRootEntries(): OperationResult<List<EncryptedDatabaseEntry>> =
         withContext(dispatchers.IO) {
             val getDbResult = getDbUseCase.getDatabaseSynchronously()
             if (getDbResult.isFailed) {
-                return@withContext getDbResult.takeError()
+                return@withContext getDbResult.mapError()
             }
 
             val db = getDbResult.obj
 
             val rootGroupResult = db.groupDao.rootGroup
             if (rootGroupResult.isFailed) {
-                return@withContext rootGroupResult.takeError()
+                return@withContext rootGroupResult.mapError()
             }
 
             val groupUid = rootGroupResult.obj.uid
@@ -95,18 +93,18 @@ class GroupsInteractor(
         withContext(dispatchers.IO) {
             val getDbResult = getDbUseCase.getDatabaseSynchronously()
             if (getDbResult.isFailed) {
-                return@withContext getDbResult.takeError()
+                return@withContext getDbResult.mapError()
             }
 
             val db = getDbResult.obj
             val groupsResult = db.groupDao.getChildGroups(groupUid)
             if (groupsResult.isFailed) {
-                return@withContext groupsResult.takeError()
+                return@withContext groupsResult.mapError()
             }
 
             val notesResult = db.noteDao.getNotesByGroupUid(groupUid)
             if (notesResult.isFailed) {
-                return@withContext groupsResult.takeError()
+                return@withContext groupsResult.mapError()
             }
 
             val groups = groupsResult.obj
@@ -123,7 +121,7 @@ class GroupsInteractor(
     fun removeGroup(groupUid: UUID): OperationResult<Unit> {
         val getDbResult = getDbUseCase.getDatabaseSynchronously()
         if (getDbResult.isFailed) {
-            return getDbResult.takeError()
+            return getDbResult.mapError()
         }
 
         val db = getDbResult.obj
@@ -137,7 +135,7 @@ class GroupsInteractor(
     fun removeNote(groupUid: UUID, noteUid: UUID): OperationResult<Unit> {
         val getDbResult = getDbUseCase.getDatabaseSynchronously()
         if (getDbResult.isFailed) {
-            return getDbResult.takeError()
+            return getDbResult.mapError()
         }
 
         val db = getDbResult.obj
@@ -150,13 +148,70 @@ class GroupsInteractor(
 
     suspend fun getGroup(groupUid: UUID): OperationResult<Group> {
         return withContext(dispatchers.IO) {
-            val getDbResult = getDbUseCase.getDatabase()
+            val getDbResult = getDbUseCase.getDatabaseSynchronously()
             if (getDbResult.isFailed) {
-                return@withContext getDbResult.takeError()
+                return@withContext getDbResult.mapError()
             }
 
             val db = getDbResult.obj
             db.groupDao.getGroupByUid(groupUid)
+        }
+    }
+
+    suspend fun getParents(groupUid: UUID): OperationResult<List<Group>> {
+        return withContext(dispatchers.IO) {
+            val getDbResult = getDbUseCase.getDatabaseSynchronously()
+            if (getDbResult.isFailed) {
+                return@withContext getDbResult.mapError()
+            }
+
+            val getAllGroupsResult = getDbResult.getOrThrow().groupDao.all
+            if (getAllGroupsResult.isFailed) {
+                return@withContext getAllGroupsResult.mapError()
+            }
+
+            val allGroups = getAllGroupsResult.getOrThrow()
+            val rootGroup = allGroups.firstOrNull { group -> group.parentUid == null }
+                ?: return@withContext OperationResult.error(
+                    newDbError(MESSAGE_FAILED_TO_FIND_ROOT_GROUP)
+                )
+
+            if (groupUid == rootGroup.uid) {
+                return@withContext OperationResult.success(listOf(rootGroup))
+            }
+
+            val selectedGroup = allGroups.firstOrNull { group -> group.uid == groupUid }
+                ?: return@withContext OperationResult.error(
+                    newDbError(String.format(GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID, groupUid))
+                )
+
+            val uidToGroupMap = allGroups.associateBy { group -> group.uid }
+            val uidToParentUidMap: Map<UUID, UUID?> = HashMap<UUID, UUID?>()
+                .apply {
+                    for (group in allGroups) {
+                        this[group.uid] = group.parentUid
+                    }
+                }
+
+            val parents = mutableListOf<Group>()
+                .apply {
+                    add(selectedGroup)
+                }
+
+            var currentUid: UUID? = groupUid
+            while (currentUid != null) {
+                val parentUid = uidToParentUidMap[currentUid]
+                if (parentUid != null) {
+                    val parentGroup = uidToGroupMap[parentUid]
+                    if (parentGroup != null) {
+                        parents.add(parentGroup)
+                    }
+                }
+
+                currentUid = parentUid
+            }
+
+            OperationResult.success(parents.reversed())
         }
     }
 
@@ -203,13 +258,13 @@ class GroupsInteractor(
         withContext(dispatchers.IO) {
             val getDbResult = getDbUseCase.getDatabaseSynchronously()
             if (getDbResult.isFailed) {
-                return@withContext getDbResult.takeError()
+                return@withContext getDbResult.mapError()
             }
 
             val dbFile = getDbResult.obj.file
             val getUsedFileResult = getUsedFileUseCase.getUsedFile(dbFile.uid, dbFile.fsAuthority)
             if (getUsedFileResult.isFailed) {
-                return@withContext getUsedFileResult.takeError()
+                return@withContext getUsedFileResult.mapError()
             }
 
             OperationResult.success(getUsedFileResult.obj)
@@ -219,7 +274,7 @@ class GroupsInteractor(
         withContext(dispatchers.IO) {
             val getDbResult = getDbUseCase.getDatabaseSynchronously()
             if (getDbResult.isFailed) {
-                return@withContext getDbResult.takeError()
+                return@withContext getDbResult.mapError()
             }
 
             OperationResult.success(getDbResult.obj.key)

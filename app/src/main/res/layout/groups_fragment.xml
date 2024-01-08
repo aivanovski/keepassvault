@@ -17,6 +17,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <FrameLayout
+            android:id="@+id/navigationPanelLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/kpSecondaryBackgroundColor"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.isNavigationPanelVisible}">
+
+            <include
+                layout="@layout/cell_navigation_panel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/element_margin"
+                app:viewModel="@{viewModel.navigationPanelViewModel}" />
+
+        </FrameLayout>
+
         <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
             android:id="@+id/searchText"
             text="@={viewModel.searchQuery}"
@@ -27,7 +44,7 @@
             android:layout_marginEnd="@dimen/element_margin"
             app:hint="@string/query"
             app:isClearButtonEnabled="true"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/navigationPanelLayout"
             app:onTextChanged="@{(text) -> viewModel.onSearchQueryChanged(text)}"
             app:visible="@{viewModel.isSearchQueryVisible}" />
 
@@ -64,8 +81,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/optionPanelView"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}"
-             />
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"

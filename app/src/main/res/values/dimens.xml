@@ -58,4 +58,7 @@
     <dimen name="password_length_button_width">54dp</dimen>
     <dimen name="password_length_edit_text_min_width">64dp</dimen>
 
+    <!-- Navigation Panel -->
+    <dimen name="navigation_panel_item_width">54dp</dimen>
+
 </resources>

@@ -13,7 +13,7 @@
         style="@style/Material.SecondaryText.SingleLine"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="@dimen/small_margin"
+        android:layout_marginVertical="@dimen/half_margin"
         android:layout_marginStart="@dimen/quarter_margin"
         android:gravity="center_horizontal"
         android:minWidth="@dimen/navigation_panel_item_width"

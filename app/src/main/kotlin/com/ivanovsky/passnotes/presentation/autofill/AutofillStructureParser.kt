@@ -164,7 +164,9 @@ class AutofillStructureParser(
     }
 
     private fun getAutofillNodeByAutofillHint(node: ViewNode): AutofillNode? {
-        val hints = node.autofillHints ?: return null
+        val hints = node.autofillHints
+            ?.filterNotNull()
+            ?: return null
 
         if (!node.hasValidData()) {
             return null

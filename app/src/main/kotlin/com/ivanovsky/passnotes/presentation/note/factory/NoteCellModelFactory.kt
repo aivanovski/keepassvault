@@ -28,7 +28,7 @@ class NoteCellModelFactory(
             val (cellId, property) = cellIdAndProperty
 
             if (idx == 0) {
-                models.add(SpaceCellModel(R.dimen.element_margin))
+                models.add(SpaceCellModel(R.dimen.half_margin))
             }
 
             val shape = when {

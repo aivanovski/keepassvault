@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/widget_navigation_panel_view_item"
         tools:itemCount="4" />
 
 </merge>

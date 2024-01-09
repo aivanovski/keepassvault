@@ -14,11 +14,10 @@ class NavigationPanelView(
     attrs: AttributeSet
 ) : FrameLayout(context, attrs) {
 
-    var items: List<String> = emptyList()
+    var items: List<String>? = emptyList()
         set(values) {
             field = values
-            adapter.updateItems(values)
-            binding.recyclerView.scrollToPosition(values.lastIndex)
+            setValuesInternal(values)
         }
 
     private val binding: WidgetNavigationPanelViewBinding
@@ -38,6 +37,13 @@ class NavigationPanelView(
 
         binding.recyclerView.adapter = adapter
         binding.recyclerView.itemAnimator = null
+    }
+
+    private fun setValuesInternal(values: List<String>?) {
+        adapter.updateItems(values ?: emptyList())
+        if (values != null) {
+            binding.recyclerView.scrollToPosition(values.lastIndex)
+        }
     }
 
     companion object {

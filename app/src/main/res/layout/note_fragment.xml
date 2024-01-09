@@ -31,7 +31,6 @@
                 layout="@layout/cell_navigation_panel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/element_margin"
                 app:viewModel="@{viewModel.navigationPanelViewModel}" />
 
         </FrameLayout>

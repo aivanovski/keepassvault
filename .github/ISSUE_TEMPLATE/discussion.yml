@@ -1,0 +1,9 @@
+name: Discussion/Feature request
+description: General discussion template
+body:
+  - type: textarea
+    attributes:
+      label: Overview
+      description: Please describe exactly your question or feature request
+    validations:
+      required: true

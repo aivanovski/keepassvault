@@ -1,5 +1,5 @@
 # KPassNotes
-Another Android client app for KeePass databases.
+Android client app for KeePass databases.
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
      alt="Get it on F-Droid"

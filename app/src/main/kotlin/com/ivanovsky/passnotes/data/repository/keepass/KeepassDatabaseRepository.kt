@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
+import com.ivanovsky.passnotes.data.repository.file.FSOptions.Companion.READ_ONLY
 import com.ivanovsky.passnotes.data.repository.file.FSOptions.Companion.defaultOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
@@ -79,6 +80,34 @@ class KeepassDatabaseRepository(
         }
 
         return openDbResult
+    }
+
+    override fun canOpen(
+        type: KeepassImplementation,
+        key: EncryptedDatabaseKey,
+        file: FileDescriptor
+    ): OperationResult<Unit> {
+        val fsProvider = fileSystemResolver.resolveProvider(file.fsAuthority)
+
+        val openFileResult = fsProvider.openFileForRead(
+            file,
+            OnConflictStrategy.CANCEL,
+            READ_ONLY
+        )
+        if (openFileResult.isFailed) {
+            return openFileResult.takeError()
+        }
+
+        val openResult = openDatabase(
+            type,
+            fileSystemResolver,
+            READ_ONLY,
+            file,
+            openFileResult,
+            key
+        )
+
+        return openResult.mapWithObject(Unit)
     }
 
     override fun reload(): OperationResult<Boolean> {

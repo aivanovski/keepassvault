@@ -127,14 +127,14 @@ class FilePickerViewModel(
         if (args.action == Action.PICK_DIRECTORY) {
             val currentDir = currentDir ?: return
 
-            router.sendResult(FilePickerScreen.RESULT_KEY, currentDir)
             router.exit()
+            router.sendResult(FilePickerScreen.RESULT_KEY, currentDir)
         } else if (args.action == Action.PICK_FILE) {
             if (isAnyFileSelected()) {
                 val selectedFile = selectedFile ?: return
 
-                router.sendResult(FilePickerScreen.RESULT_KEY, selectedFile)
                 router.exit()
+                router.sendResult(FilePickerScreen.RESULT_KEY, selectedFile)
             } else {
                 showSnackbarMessageEvent.call(
                     resourceProvider.getString(R.string.please_select_any_file)

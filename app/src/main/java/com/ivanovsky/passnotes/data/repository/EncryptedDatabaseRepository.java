@@ -9,6 +9,8 @@ import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey;
 import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation;
 
+import kotlin.Unit;
+
 public interface EncryptedDatabaseRepository {
 
     boolean isOpened();
@@ -35,4 +37,10 @@ public interface EncryptedDatabaseRepository {
 
     @NonNull
     OperationResult<Boolean> close();
+
+    @NonNull
+    OperationResult<Unit> canOpen(
+            @NonNull KeepassImplementation type,
+            @NonNull EncryptedDatabaseKey key,
+            @NonNull FileDescriptor file);
 }

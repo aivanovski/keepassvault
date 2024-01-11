@@ -117,8 +117,8 @@ class StorageListViewModel(
 
             if (getFileResult.isSucceededOrDeferred) {
                 val file = getFileResult.obj
-                router.sendResult(StorageListScreen.RESULT_KEY, file)
                 router.exit()
+                router.sendResult(StorageListScreen.RESULT_KEY, file)
             } else {
                 val message = errorInteractor.processAndGetMessage(getFileResult.error)
                 screenState.value = ScreenState.dataWithError(message)
@@ -221,8 +221,8 @@ class StorageListViewModel(
     }
 
     private fun onFilePickedByPicker(file: FileDescriptor) {
-        router.sendResult(StorageListScreen.RESULT_KEY, file)
         router.exit()
+        router.sendResult(StorageListScreen.RESULT_KEY, file)
     }
 
     private fun subscribeToEvents() {
@@ -271,8 +271,8 @@ class StorageListViewModel(
                     loadRootAndNavigateToPicker(root.fsAuthority)
                 }
                 INTERNAL_STORAGE -> {
-                    router.sendResult(StorageListScreen.RESULT_KEY, root)
                     router.exit()
+                    router.sendResult(StorageListScreen.RESULT_KEY, root)
                 }
                 else -> throw IllegalArgumentException()
             }

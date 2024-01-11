@@ -5,6 +5,8 @@ import androidx.fragment.app.FragmentFactory
 import com.github.terrakok.cicerone.androidx.FragmentScreen
 import com.ivanovsky.passnotes.presentation.about.AboutFragment
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuFragment
+import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsFragment
+import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsScreenArgs
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment
 import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
@@ -104,6 +106,15 @@ object Screens {
 
         companion object {
             val RESULT_KEY = PasswordGeneratorScreen::class.simpleName + "_result"
+        }
+    }
+
+    class EnterDbCredentialsScreen(private val args: EnterDbCredentialsScreenArgs) : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            EnterDbCredentialsFragment.newInstance(args)
+
+        companion object {
+            val RESULT_KEY = EnterDbCredentialsScreen::class.simpleName + "_result"
         }
     }
 

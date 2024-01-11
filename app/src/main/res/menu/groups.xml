@@ -41,6 +41,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_diff_with"
+        android:title="Diff with"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_settings"
         android:title="@string/settings"
         app:showAsAction="never" />

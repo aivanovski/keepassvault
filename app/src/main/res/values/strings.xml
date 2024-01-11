@@ -319,4 +319,7 @@
     <string name="new_password">New password</string>
     <string name="change_password">Change password</string>
 
+    <!-- Enter database credentials screen -->
+    <string name="type_a_password">Type a password</string>
+
 </resources>

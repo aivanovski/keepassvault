@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
+
+    <TextView
+        android:id="@+id/filename"
+        style="@style/Material.PrimaryText.SingleLine"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/material_header_text_size"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Filename.kdbx" />
+
+    <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
+        android:id="@+id/password"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/half_margin"
+        android:layout_marginEnd="@dimen/half_margin"
+        app:hint="@string/password"
+        app:isEyeButtonEnabled="true"
+        app:layout_constraintEnd_toStartOf="@id/unlockButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/filename" />
+
+    <ImageButton
+        android:id="@+id/unlockButton"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/small_margin"
+        android:foreground="?attr/selectableItemBackground"
+        android:minWidth="@dimen/unlock_button_size"
+        app:layout_constraintBottom_toBottomOf="@id/password"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/password" />
+
+    <Button
+        android:id="@+id/addKeyButton"
+        style="@style/Material.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/quarter_margin"
+        android:text="@string/add_key"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/password" />
+
+    <LinearLayout
+        android:id="@+id/removeKeyButtonLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/addKeyButton">
+
+        <Button
+            android:id="@+id/removeKeyText"
+            style="@style/Material.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:maxWidth="200dp"
+            android:textColor="?attr/kpPrimaryColor"
+            tools:text="key-file-name" />
+
+        <ImageButton
+            android:id="@+id/removeKeyButton"
+            style="@style/Material.BorderlessButton.Borderless"
+            android:layout_width="@dimen/small_borderless_icon_button_size"
+            android:layout_height="@dimen/small_borderless_icon_button_size"
+            android:src="@drawable/ic_close_24dp"
+            app:tint="?attr/kpPrimaryColor" />
+
+    </LinearLayout>
+
+</merge>

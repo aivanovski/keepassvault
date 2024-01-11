@@ -94,10 +94,10 @@ class MaterialEditText(
             field = value
         }
 
+    var onEditorAction: OnEditorActionListener? = null
     private val textWatcher: CustomTextWatcher
     private val binding: WidgetMaterialEditTextBinding
     private var twoWayBindingTextChangedListener: ((String) -> Unit)? = null
-    private var onEditorAction: OnEditorActionListener? = null
     private var onDoneAction: (() -> Unit)? = null
 
     init {
@@ -379,11 +379,11 @@ class MaterialEditText(
         }
     }
 
-    private fun addTextWatcher(textWatcher: TextWatcher) {
+    fun addTextWatcher(textWatcher: TextWatcher) {
         binding.textInput.addTextChangedListener(textWatcher)
     }
 
-    private fun removeTextWatcher(textWatcher: TextWatcher) {
+    fun removeTextWatcher(textWatcher: TextWatcher) {
         binding.textInput.removeTextChangedListener(textWatcher)
     }
 

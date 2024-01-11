@@ -19,7 +19,6 @@ import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.entity.UsedFile
-import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.Settings
@@ -62,7 +61,6 @@ class UnlockViewModel(
     private val interactor: UnlockInteractor,
     private val biometricInteractor: BiometricInteractor,
     private val errorInteractor: ErrorInteractor,
-    private val fileSystemResolver: FileSystemResolver,
     private val observerBus: ObserverBus,
     private val resourceProvider: ResourceProvider,
     private val dispatchers: DispatcherProvider,
@@ -177,9 +175,11 @@ class UnlockViewModel(
             ErrorPanelButtonAction.RESOLVE_CONFLICT -> {
                 onResolveConflictButtonClicked()
             }
+
             ErrorPanelButtonAction.REMOVE_FILE -> {
                 onRemoveSelectedFileButtonClicked()
             }
+
             ErrorPanelButtonAction.AUTHORISATION -> {
                 onLoginButtonClicked()
             }
@@ -208,6 +208,7 @@ class UnlockViewModel(
                     password = password.ifEmpty { null }
                 )
             }
+
             else -> PasswordKeepassKey(password)
         }
 
@@ -223,13 +224,6 @@ class UnlockViewModel(
                 setErrorPanelState(open.error)
             }
         }
-    }
-
-    fun onRefreshButtonClicked() {
-        loadData(
-            isResetSelection = false,
-            isShowKeyboard = false
-        )
     }
 
     fun onAddKeyFileButtonClicked() {
@@ -322,6 +316,12 @@ class UnlockViewModel(
         navigateToFilePickerToSelectDatabase()
     }
 
+    fun onEditorAction(actionId: Int) {
+        if (actionId == EditorInfo.IME_ACTION_DONE) {
+            onUnlockButtonClicked()
+        }
+    }
+
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
             event.getInt(DatabaseFileCellViewModel.CLICK_EVENT)?.let { id ->
@@ -386,6 +386,7 @@ class UnlockViewModel(
                     password.value = testPassword
                 }
             }
+
             else -> {
                 checkAndSetSelectedKeyFile(selectedKeyFile)
             }
@@ -406,6 +407,7 @@ class UnlockViewModel(
                     setErrorPanelState(autofillNoteResult.error)
                 }
             }
+
             else -> {
                 clearEnteredPassword()
 
@@ -596,6 +598,7 @@ class UnlockViewModel(
                 )
                 errorPanelButtonAction = ErrorPanelButtonAction.REMOVE_FILE
             }
+
             SyncStatus.CONFLICT -> {
                 setScreenState(
                     ScreenState.dataWithError(
@@ -605,6 +608,7 @@ class UnlockViewModel(
                 )
                 errorPanelButtonAction = ErrorPanelButtonAction.RESOLVE_CONFLICT
             }
+
             SyncStatus.ERROR -> {
                 setScreenState(
                     ScreenState.dataWithError(
@@ -614,6 +618,7 @@ class UnlockViewModel(
                 )
                 errorPanelButtonAction = ErrorPanelButtonAction.REMOVE_FILE
             }
+
             SyncStatus.AUTH_ERROR -> {
                 setScreenState(
                     ScreenState.dataWithError(
@@ -625,6 +630,7 @@ class UnlockViewModel(
                 )
                 errorPanelButtonAction = ErrorPanelButtonAction.AUTHORISATION
             }
+
             else -> {
                 setScreenState(ScreenState.data())
                 errorPanelButtonAction = null

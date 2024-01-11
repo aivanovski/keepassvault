@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.UsedFile
@@ -17,10 +16,8 @@ import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveC
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
-import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
-import com.ivanovsky.passnotes.presentation.core.extensions.showKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
@@ -81,10 +78,9 @@ class UnlockFragment : BaseFragment() {
     private fun subscribeToLiveEvents() {
         viewModel.isKeyboardVisibleEvent.observe(viewLifecycleOwner) { isVisible ->
             if (isVisible) {
-                binding.password.getEditText().requestFocus()
-                showKeyboard(binding.password.getEditText())
+                binding.unlockView.requestSoftInput()
             } else {
-                hideKeyboard()
+                binding.unlockView.hideSoftInput()
             }
         }
         viewModel.showSnackbarMessage.observe(viewLifecycleOwner) { message ->

@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.domain.ClipboardInteractor
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.interactor.autofill.AutofillInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.domain.interactor.groupEditor.GroupEditorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
@@ -31,6 +32,10 @@ import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveC
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogViewModel
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerViewModel
+import com.ivanovsky.passnotes.presentation.diffViewer.factory.DiffViewerCellModelFactory
+import com.ivanovsky.passnotes.presentation.diffViewer.factory.DiffViewerCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsInteractor
 import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsScreenArgs
 import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsViewModel
@@ -152,6 +157,7 @@ object UiModule {
             single { SyncStateCache(get()) }
             single { SyncStateInteractor(get(), get(), get()) }
             single { EnterDbCredentialsInteractor(get(), get(), get()) }
+            single { DiffViewerInteractor(get(), get(), get(), get(), get()) }
 
             // Autofill
             single { AutofillViewFactory(get(), get()) }
@@ -179,6 +185,9 @@ object UiModule {
             single { NavigationMenuCellViewModelFactory() }
 
             single { SyncStateCellModelFactory(get()) }
+
+            single { DiffViewerCellModelFactory(get(), get()) }
+            single { DiffViewerCellViewModelFactory(get()) }
 
             // Cicerone
             single { Cicerone.create() }
@@ -332,6 +341,9 @@ object UiModule {
                     get(),
                     args
                 )
+            }
+            factory { (args: DiffViewerScreenArgs) ->
+                DiffViewerViewModel(get(), get(), get(), get(), get(), get(), args)
             }
         }
 

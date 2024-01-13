@@ -9,20 +9,22 @@ import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.extensions.mapWithObject
 import kotlinx.coroutines.withContext
 
 class EnterDbCredentialsInteractor(
-    private val dbRepo: EncryptedDatabaseRepository,
+    private val dbRepository: EncryptedDatabaseRepository,
     private val fileSystemResolver: FileSystemResolver,
     private val dispatchers: DispatcherProvider
 ) {
 
-    suspend fun canOpenDatabase(
+    suspend fun isValidKey(
         key: EncryptedDatabaseKey,
         file: FileDescriptor
     ): OperationResult<Unit> =
         withContext(dispatchers.IO) {
-            dbRepo.canOpen(KeepassImplementation.KOTPASS, key, file)
+            dbRepository.read(KeepassImplementation.KOTPASS, key, file)
+                .mapWithObject(Unit)
         }
 
     suspend fun getFile(

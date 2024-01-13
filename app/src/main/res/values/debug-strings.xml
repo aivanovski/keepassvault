@@ -14,6 +14,8 @@
     <string name="password_with_default" translatable="false">Password (default: abc123)</string>
     <string name="close" translatable="false">Close</string>
     <string name="add_entry" translatable="false">Add entry</string>
+    <string name="scenarios_with_dots" translatable="false">Scenarios:</string>
+    <string name="view_test_diff" translatable="false">View test diff</string>
     <string name="hooks_with_dots" translatable="false">Hooks:</string>
     <string name="use_external_storage_for_remote_files" translatable="false">Use External storage for remote files</string>
     <string name="ignore_ssl_certificate_validation" translatable="false">Ignore SSL certificate validation</string>
@@ -31,7 +33,6 @@
     <string name="entry_added" translatable="false">Entry added</string>
     <string name="storage_access_framework" translatable="false">Storage Access Framework</string>
     <string name="fake_file_system" translatable="false">Fake File System</string>
-    <string name="pick_file" translatable="false">Pick file</string>
     <string name="reset_test_data" translatable="false">Reset test data</string>
     <string name="check_exists" translatable="false">Check exists</string>
     <string name="file_exits_with_str" translatable="false">File exists: %s</string>

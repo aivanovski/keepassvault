@@ -17,6 +17,7 @@ import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.EnterDbCredentialsScreen.Companion.RESULT_KEY
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -37,29 +38,37 @@ class EnterDbCredentialsViewModel(
     val isAddKeyButtonVisible = MutableLiveData(true)
     val password = MutableLiveData(EMPTY)
     val unlockIconResId = R.drawable.ic_lock_open_24dp
+    val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
 
     private var selectedKeyFile: FileDescriptor? = null
 
+    fun start() {
+        isKeyboardVisibleEvent.call(true)
+    }
+
     fun onUnlockButtonClicked() {
+        isKeyboardVisibleEvent.call(false)
+
         setScreenState(ScreenState.loading())
 
         val key = createKey()
 
         viewModelScope.launch {
-            val canOpenResult = interactor.canOpenDatabase(
+            val isValidKey = interactor.isValidKey(
                 key = key,
                 file = args.file
             )
 
-            if (canOpenResult.isSucceededOrDeferred) {
+            if (isValidKey.isSucceededOrDeferred) {
                 router.exit()
                 router.sendResult(RESULT_KEY, key)
             } else {
                 setScreenState(
                     ScreenState.dataWithError(
-                        errorText = errorInteractor.processAndGetMessage(canOpenResult.error)
+                        errorText = errorInteractor.processAndGetMessage(isValidKey.error)
                     )
                 )
+                isKeyboardVisibleEvent.call(true)
             }
         }
     }

@@ -17,7 +17,7 @@
     <item
         android:id="@+id/menu_synchronize"
         android:title="@string/synchronize_with_source"
-        app:showAsAction="never"/>
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/menu_enable_biometric_unlock"
@@ -42,7 +42,7 @@
 
     <item
         android:id="@+id/menu_diff_with"
-        android:title="Diff with"
+        android:title="@string/compare_with"
         app:showAsAction="never" />
 
     <item

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.diffViewer.cells.viewmodel.DiffFilesCellViewModel" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/leftTitle"
+            style="@style/Material.HeaderText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/element_margin"
+            android:layout_marginTop="@dimen/half_margin"
+            android:gravity="center"
+            android:text="@{viewModel.leftTitle}"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="left.kdbx" />
+
+        <TextView
+            android:id="@+id/leftTime"
+            style="@style/Material.SecondaryText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@{viewModel.leftTime}"
+            app:layout_constraintTop_toBottomOf="@id/leftTitle"
+            app:visible="@{viewModel.leftTimeVisible}"
+            tools:text="March 1, 2020 13:42:00" />
+
+        <ImageButton
+            android:id="@+id/changeButton"
+            style="@style/Material.BorderlessButton.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:onClick="@{() -> viewModel.onChangeButtonClicked()}"
+            android:rotation="90"
+            android:src="@drawable/ic_double_arrow_24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/leftTime"
+            app:tint="?attr/kpIconPrimaryColor" />
+
+        <TextView
+            android:id="@+id/rightTitle"
+            style="@style/Material.HeaderText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/element_margin"
+            android:gravity="center"
+            android:text="@{viewModel.rightTitle}"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/changeButton"
+            tools:text="right.kdbx" />
+
+        <TextView
+            android:id="@+id/rightTime"
+            style="@style/Material.SecondaryText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@{viewModel.rightTime}"
+            app:layout_constraintTop_toBottomOf="@id/rightTitle"
+            app:visible="@{viewModel.rightTimeVisible}"
+            tools:text="March 1, 2020 13:42:00" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

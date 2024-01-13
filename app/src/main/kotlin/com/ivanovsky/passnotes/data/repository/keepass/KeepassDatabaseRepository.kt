@@ -16,6 +16,7 @@ import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
+import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicReference
@@ -82,32 +83,37 @@ class KeepassDatabaseRepository(
         return openDbResult
     }
 
-    override fun canOpen(
+    override fun read(
         type: KeepassImplementation,
         key: EncryptedDatabaseKey,
         file: FileDescriptor
-    ): OperationResult<Unit> {
+    ): OperationResult<EncryptedDatabase> {
         val fsProvider = fileSystemResolver.resolveProvider(file.fsAuthority)
 
+        val reloadFileResult = fsProvider.getFile(file.path, READ_ONLY)
+        if (reloadFileResult.isFailed) {
+            return reloadFileResult.mapError()
+        }
+
+        val reloadedFile = reloadFileResult.getOrThrow()
+
         val openFileResult = fsProvider.openFileForRead(
-            file,
+            reloadedFile,
             OnConflictStrategy.CANCEL,
             READ_ONLY
         )
         if (openFileResult.isFailed) {
-            return openFileResult.takeError()
+            return openFileResult.mapError()
         }
 
-        val openResult = openDatabase(
+        return openDatabase(
             type,
             fileSystemResolver,
             READ_ONLY,
-            file,
+            reloadedFile,
             openFileResult,
             key
         )
-
-        return openResult.mapWithObject(Unit)
     }
 
     override fun reload(): OperationResult<Boolean> {

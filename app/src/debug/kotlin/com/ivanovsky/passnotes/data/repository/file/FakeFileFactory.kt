@@ -61,7 +61,7 @@ class FakeFileFactory(
     }
 
     fun createDemoModifiedFile(): FileDescriptor {
-        return create(fsAuthority, FileUid.DEMO_MODIFIED, Time.LOCAL)
+        return create(fsAuthority, FileUid.DEMO_MODIFIED, Time.REMOTE)
     }
 
     private fun create(
@@ -86,6 +86,8 @@ class FakeFileFactory(
         return when {
             uid == FileUid.ROOT -> "/"
             uid == FileUid.AUTO_TESTS -> "/automation.kdbx"
+            uid == FileUid.DEMO -> "/demo.kdbx"
+            uid == FileUid.DEMO_MODIFIED -> "/demo-modified.kdbx"
             uid in FileUid.DEFAULT_UIDS -> "/test-$uid.kdbx"
             else -> uid
         }

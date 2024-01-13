@@ -274,8 +274,8 @@
                     android:paddingBottom="@dimen/element_margin"
                     android:textSize="@dimen/material_primary_text_size"
                     app:items="@{viewModel.keepassImplementationNames}"
-                    app:onItemSelected="@{(item, idx) -> viewModel.onKeepassImplementationSelected(idx)}"
-                    app:layout_constraintTop_toBottomOf="@id/passwordLayout" />
+                    app:layout_constraintTop_toBottomOf="@id/passwordLayout"
+                    app:onItemSelected="@{(item, idx) -> viewModel.onKeepassImplementationSelected(idx)}" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/openButton"
@@ -339,6 +339,37 @@
                     app:layout_constraintTop_toBottomOf="@id/closeButton" />
 
                 <TextView
+                    android:id="@+id/scenariosText"
+                    style="@style/Material.PrimaryText.SingleLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/group_margin"
+                    android:layout_marginTop="@dimen/group_margin"
+                    android:text="@string/scenarios_with_dots"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/addEntryButton" />
+
+                <View
+                    android:id="@+id/scenariosDivider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#666666"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/scenariosText" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/viewDiffButton"
+                    style="@style/Material.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/group_margin"
+                    android:layout_marginEnd="@dimen/element_margin"
+                    android:onClick="@{() -> viewModel.onViewTestDiffButtonClicked()}"
+                    android:text="@string/view_test_diff"
+                    app:layout_constraintTop_toBottomOf="@id/scenariosDivider" />
+
+                <TextView
                     android:id="@+id/hooksText"
                     style="@style/Material.PrimaryText.SingleLine"
                     android:layout_width="wrap_content"
@@ -347,7 +378,7 @@
                     android:layout_marginTop="@dimen/group_margin"
                     android:text="@string/hooks_with_dots"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/addEntryButton" />
+                    app:layout_constraintTop_toBottomOf="@+id/viewDiffButton" />
 
                 <View
                     android:id="@+id/hooksDivider"
@@ -396,8 +427,8 @@
                     android:layout_marginTop="@dimen/element_margin"
                     android:onClick="@{() -> viewModel.onResetTestDataButtonClicked()}"
                     android:text="@string/reset_test_data"
-                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/ignoreSslCertificateCheckBox" />
 
                 <TextView

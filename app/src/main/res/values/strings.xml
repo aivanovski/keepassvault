@@ -73,6 +73,19 @@
     <string name="resolve_conflict_dialog_message">There is a conflict between version of local and remote databases. Please resolve this conflict before accessing database.\n\nTHIS ACTION MAY LEAD TO DATA LOSS!\n\nLocal file was modified at:\n%1$s\nRemote file was modified at:\n%2$s\n\nPlease specify which version you want to use?</string>
     <string name="local_database">Local database</string>
     <string name="remote_database">Remote database</string>
+    <string name="view_diff">View diff</string>
+
+    <!-- Diff Viewer screen -->
+    <string name="diff_event_group">Group \'%s\'</string>
+    <string name="diff_event_note">Entry \'%s\'</string>
+    <string name="diff_event_property">Field \'%s\': \'%s\'</string>
+    <string name="diff_event_property_update">Field \'%s\': \'%s\' changed to \'%s\'</string>
+    <string name="unknown_entity">Unknown entity</string>
+    <string name="compare_files">Compare files</string>
+    <string name="pick_file">Pick file</string>
+    <string name="opened_database">Opened database</string>
+    <string name="compare">Compare</string>
+    <string name="files_are_identical">Files are identical</string>
 
     <!-- Unlock screen -->
     <string name="recently_used">Recently used</string>
@@ -160,6 +173,7 @@
     <string name="disable_biometric_unlock">Disable biometric unlock</string>
     <string name="sync_error">Sync error</string>
     <string name="no_search_results">No search results</string>
+    <string name="compare_with">Compare with</string>
 
     <!-- Group editor screen -->
     <string name="new_group">New group</string>

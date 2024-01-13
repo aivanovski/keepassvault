@@ -42,6 +42,7 @@ import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_SELECTION
+import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.EnterDbCredentialsScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
@@ -68,6 +69,8 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.NavigationPanelCellVi
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
+import com.ivanovsky.passnotes.presentation.diffViewer.model.DiffEntity
 import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsScreenArgs
 import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
@@ -93,7 +96,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.parameter.parametersOf
-import timber.log.Timber
 
 class GroupsViewModel(
     private val interactor: GroupsInteractor,
@@ -622,8 +624,6 @@ class GroupsViewModel(
     }
 
     private fun onDiffFileSelected(file: FileDescriptor) {
-        Timber.d("onDiffWithButtonClicked: file=$file")
-
         router.setResultListener(EnterDbCredentialsScreen.RESULT_KEY) { key ->
             if (key is EncryptedDatabaseKey) {
                 onDiffFileUnlocked(key, file)
@@ -639,10 +639,18 @@ class GroupsViewModel(
     }
 
     private fun onDiffFileUnlocked(key: EncryptedDatabaseKey, file: FileDescriptor) {
-        Timber.d("onDiffFileUnlocked: key=$key")
-
-
-        // TODO:
+        router.navigateTo(
+            Screens.DiffViewerScreen(
+                DiffViewerScreenArgs(
+                    left = DiffEntity.OpenedDatabase,
+                    right = DiffEntity.File(
+                        key = key,
+                        file = file
+                    ),
+                    isHoldDatabaseInteraction = true
+                )
+            )
+        )
     }
 
     private fun subscribeToEvents() {

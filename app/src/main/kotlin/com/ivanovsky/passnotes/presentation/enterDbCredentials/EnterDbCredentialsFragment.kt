@@ -47,6 +47,20 @@ class EnterDbCredentialsFragment : BaseFragment() {
             setHomeAsUpIndicator(null)
             setDisplayHomeAsUpEnabled(true)
         }
+
+        subscribeToEvents()
+
+        viewModel.start()
+    }
+
+    private fun subscribeToEvents() {
+        viewModel.isKeyboardVisibleEvent.observe(viewLifecycleOwner) { isVisible ->
+            if (isVisible) {
+                binding.unlockView.requestSoftInput()
+            } else {
+                binding.unlockView.hideSoftInput()
+            }
+        }
     }
 
     companion object {

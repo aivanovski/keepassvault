@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/rootLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
+            android:id="@+id/errorPanelView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/contentLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/errorPanelView"
+            app:screenState="@{viewModel.screenState}"
+            app:screenStateHandler="@{viewModel.screenStateHandler}">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineStart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.25" />
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guidelineEnd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.75" />
+
+            <Button
+                android:id="@+id/leftFileButton"
+                style="@style/Material.OutlinedButton"
+                android:layout_width="192dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/element_margin"
+                android:drawableLeft="@drawable/ic_file_24dp"
+                android:drawableTint="?attr/kpIconPrimaryColor"
+                android:enabled="@{viewModel.isLeftButtonEnabled}"
+                android:onClick="@{() -> viewModel.onSelectLeftFileClicked()}"
+                android:text="@{viewModel.leftFilename}"
+                app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+                app:layout_constraintStart_toEndOf="@id/guidelineStart"
+                app:layout_constraintTop_toTopOf="parent"
+                app:visible="@{viewModel.isButtonsVisible}"
+                tools:text="@string/pick_file" />
+
+            <ImageButton
+                android:id="@+id/changeButton"
+                style="@style/Material.BorderlessButton.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> viewModel.onChangeButtonClicked()}"
+                android:rotation="90"
+                android:src="@drawable/ic_double_arrow_24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/leftFileButton"
+                app:tint="?attr/kpIconPrimaryColor"
+                app:visible="@{viewModel.isButtonsVisible}" />
+
+            <Button
+                android:id="@+id/rightFileButton"
+                style="@style/Material.OutlinedButton"
+                android:layout_width="192dp"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/ic_file_24dp"
+                android:drawableTint="?attr/kpIconPrimaryColor"
+                android:enabled="@{viewModel.isRightButtonEnabled}"
+                android:onClick="@{() -> viewModel.onSelectRightFileClicked()}"
+                android:text="@{viewModel.rightFilename}"
+                app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
+                app:layout_constraintStart_toEndOf="@id/guidelineStart"
+                app:layout_constraintTop_toBottomOf="@id/changeButton"
+                app:visible="@{viewModel.isButtonsVisible}"
+                tools:text="@string/pick_file" />
+
+            <Button
+                android:id="@+id/compareButton"
+                style="@style/Material.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/element_margin"
+                android:layout_marginTop="@dimen/group_margin"
+                android:enabled="@{viewModel.isCompareButtonEnabled}"
+                android:onClick="@{() -> viewModel.onCompareButtonClicked()}"
+                android:text="@string/compare"
+                app:layout_constraintTop_toBottomOf="@id/rightFileButton"
+                app:visible="@{viewModel.isButtonsVisible}" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/compareButton"
+                app:viewModels="@{viewModel.cellViewModels}"
+                app:viewTypes="@{viewModel.viewTypes}"
+                app:visible="@{!viewModel.isButtonsVisible}" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

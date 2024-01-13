@@ -31,6 +31,7 @@ class NavigationMenuCellModelFactory(
                     add(newModelById(CellId.SELECT_FILE))
                 }
 
+                add(newModelById(CellId.COMPARE_FILES))
                 add(newModelById(CellId.SETTINGS))
 
                 if (isDebugMenuVisible) {
@@ -48,26 +49,37 @@ class NavigationMenuCellModelFactory(
                 title = resourceProvider.getString(R.string.select_file),
                 iconResId = R.drawable.ic_folder_24dp
             )
+
             CellId.LOCK -> SingleTextWithIconCellModel(
                 id = cellId,
                 title = resourceProvider.getString(R.string.lock),
                 iconResId = R.drawable.ic_lock_24dp
             )
+
             CellId.SETTINGS -> SingleTextWithIconCellModel(
                 id = cellId,
                 title = resourceProvider.getString(R.string.settings),
                 iconResId = R.drawable.ic_settings_24dp
             )
+
             CellId.DEBUG_MENU -> SingleTextWithIconCellModel(
                 id = cellId,
                 title = resourceProvider.getString(R.string.debug_menu),
                 iconResId = R.drawable.ic_developer_mode_24dp
             )
+
+            CellId.COMPARE_FILES -> SingleTextWithIconCellModel(
+                id = cellId,
+                title = resourceProvider.getString(R.string.compare_files),
+                iconResId = R.drawable.ic_compare_24dp
+            )
+
             CellId.ABOUT -> SingleTextWithIconCellModel(
                 id = cellId,
                 title = resourceProvider.getString(R.string.about),
                 iconResId = R.drawable.ic_info_24dp
             )
+
             else -> throw IllegalArgumentException()
         }
     }
@@ -78,6 +90,7 @@ class NavigationMenuCellModelFactory(
         const val LOCK = 20
         const val SETTINGS = 30
         const val DEBUG_MENU = 40
-        const val ABOUT = 50
+        const val COMPARE_FILES = 50
+        const val ABOUT = 60
     }
 }

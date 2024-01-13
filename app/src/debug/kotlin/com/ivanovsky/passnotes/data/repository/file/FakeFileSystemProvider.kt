@@ -185,8 +185,8 @@ class FakeFileSystemProvider(
     }
 
     companion object {
-        private const val SERVER_URL = "test://server.com"
-        private const val USERNAME = "user"
-        private const val PASSWORD = "abc123"
+        const val SERVER_URL = "content://fakefs.com"
+        const val USERNAME = "user"
+        const val PASSWORD = "abc123"
     }
 }

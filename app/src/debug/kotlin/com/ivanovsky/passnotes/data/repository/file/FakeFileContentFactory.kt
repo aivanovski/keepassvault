@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository.file
 
 import app.keemobile.kotpass.database.KeePassDatabase
 import app.keemobile.kotpass.database.encode
+import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.data.repository.file.databaseDsl.EntryEntity
 import com.ivanovsky.passnotes.data.repository.file.databaseDsl.GroupEntity
 import com.ivanovsky.passnotes.data.repository.file.databaseDsl.KotpassTreeDsl
@@ -47,12 +48,14 @@ class FakeFileContentFactory {
                 group(GROUP_GAMING) {
                     entry(ENTRY_STADIA)
                 }
-                group(GROUP_SHOPPING)
+                group(GROUP_SHOPPING) {
+                    entry(ENTRY_AMAZON)
+                }
                 group(GROUP_SOCIAL)
 
                 entry(ENTRY_GOOGLE)
                 entry(ENTRY_APPLE)
-                entry(ENTRY_MICROSOFT)
+                entry(ENTRY_MICROSOFT_MODIFIED)
             }
             entry(ENTRY_NAS_LOGIN)
             entry(ENTRY_LAPTOP_LOGIN)
@@ -75,7 +78,7 @@ class FakeFileContentFactory {
         private val GROUP_CODING = GroupEntity(title = "Coding", uuid = UUID(100L, 3L))
         private val GROUP_GAMING = GroupEntity(title = "Gaming", uuid = UUID(100L, 4L))
         private val GROUP_SHOPPING = GroupEntity(title = "Shopping", uuid = UUID(100L, 5L))
-        private val GROUP_SOCIAL = GroupEntity(title = "Social", uuid = UUID(100L, 6L))
+        private val GROUP_SOCIAL = GroupEntity(title = "Social", uuid = UUID(100L, 7L))
 
         private val ENTRY_NAS_LOGIN = EntryEntity(
             title = "NAS Login",
@@ -94,7 +97,7 @@ class FakeFileContentFactory {
         )
 
         private val ENTRY_MAC_BOOK_LOGIN = EntryEntity(
-            title = "Mac Book Login",
+            title = "MacBook Login",
             username = "john.doe",
             password = "abc123",
             created = parseDate("2020-02-01"),
@@ -123,6 +126,15 @@ class FakeFileContentFactory {
             title = "Microsoft",
             username = "john.doe@example.com",
             password = "abc123",
+            url = "https://microsoft.com",
+            created = parseDate("2020-01-05"),
+            modified = parseDate("2020-01-05")
+        )
+
+        private val ENTRY_MICROSOFT_MODIFIED = EntryEntity(
+            title = "Microsoft",
+            username = "john.galt@example.com",
+            password = "qwerty",
             url = "https://microsoft.com",
             created = parseDate("2020-01-05"),
             modified = parseDate("2020-01-05")
@@ -169,6 +181,17 @@ class FakeFileContentFactory {
             password = "abc123",
             created = parseDate("2020-01-09"),
             modified = parseDate("2020-01-09")
+        )
+
+        private val ENTRY_AMAZON = EntryEntity(
+            title = "Amazon.com",
+            username = "john.doe@example.com",
+            password = "abc123",
+            created = parseDate("2020-01-09"),
+            modified = parseDate("2020-01-09"),
+            custom = mapOf(
+                PropertyType.URL.propertyName to "https://amazon.com",
+            )
         )
     }
 }

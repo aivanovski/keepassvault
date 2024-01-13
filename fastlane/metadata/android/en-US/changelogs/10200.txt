@@ -1,0 +1,4 @@
+- Add panel to navigate between groups
+- Add search algorithm to application settings
+- Make strict search algorithm as default
+- Fix bug with cut/paste in empty group

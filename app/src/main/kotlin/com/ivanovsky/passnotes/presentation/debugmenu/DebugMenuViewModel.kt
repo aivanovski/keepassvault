@@ -11,7 +11,6 @@ import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.TestToggles
-import com.ivanovsky.passnotes.data.repository.file.FakeFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
@@ -406,9 +405,9 @@ class DebugMenuViewModel(
     fun onViewTestDiffButtonClicked() {
         val fsAuthority = FSAuthority(
             credentials = FSCredentials.BasicCredentials(
-                url = FakeFileSystemProvider.SERVER_URL,
-                username = FakeFileSystemProvider.USERNAME,
-                password = FakeFileSystemProvider.PASSWORD
+                url = "content://fakefs.com",
+                username = "user",
+                password = "abc123"
             ),
             type = FSType.FAKE,
             isBrowsable = true

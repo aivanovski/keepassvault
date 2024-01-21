@@ -71,7 +71,7 @@ class DiffViewerFragment : Fragment() {
         private const val ARGUMENTS = "arguments"
 
         private val MENU_ACTIONS = mapOf<Int, (vm: DiffViewerViewModel) -> Unit>(
-            android.R.id.home to { vm -> vm.navigateBack() },
+            android.R.id.home to { vm -> vm.navigateBack() }
         )
 
         fun newInstance(

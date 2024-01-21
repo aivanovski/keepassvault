@@ -3,20 +3,20 @@ package com.ivanovsky.passnotes.presentation.diffViewer
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_DATABASE_TYPE
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
-import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
-import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
-import com.ivanovsky.passnotes.domain.DispatcherProvider
-import kotlinx.coroutines.withContext
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
+import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
+import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.diff.GetDiffUseCase
 import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffListItem
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
+import kotlinx.coroutines.withContext
 
 class DiffViewerInteractor(
     private val dispatchers: DispatcherProvider,

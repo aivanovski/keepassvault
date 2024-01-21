@@ -190,7 +190,7 @@ class FakeFileContentFactory {
             created = parseDate("2020-01-09"),
             modified = parseDate("2020-01-09"),
             custom = mapOf(
-                PropertyType.URL.propertyName to "https://amazon.com",
+                PropertyType.URL.propertyName to "https://amazon.com"
             )
         )
     }

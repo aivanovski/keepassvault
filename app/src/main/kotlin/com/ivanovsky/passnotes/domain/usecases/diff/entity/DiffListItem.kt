@@ -5,10 +5,10 @@ import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseElement
 sealed class DiffListItem {
 
     data class Parent(
-        val entity: EncryptedDatabaseElement?,
+        val entity: EncryptedDatabaseElement?
     ) : DiffListItem()
 
     data class Event(
-        val event: DiffEvent<EncryptedDatabaseElement>,
+        val event: DiffEvent<EncryptedDatabaseElement>
     ) : DiffListItem()
 }

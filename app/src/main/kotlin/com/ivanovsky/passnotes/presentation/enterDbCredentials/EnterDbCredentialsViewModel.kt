@@ -115,7 +115,6 @@ class EnterDbCredentialsViewModel(
                     )
                 )
             }
-
         }
     }
 

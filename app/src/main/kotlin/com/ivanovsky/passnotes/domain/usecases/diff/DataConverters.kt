@@ -1,14 +1,14 @@
 package com.ivanovsky.passnotes.domain.usecases.diff
 
+import app.keemobile.kotpass.models.Entry
 import app.keemobile.kotpass.models.Group as KotpassGroup
 import com.github.aivanovski.keepasstreediff.entity.DiffEvent as ExternalDiffEvent
 import com.github.aivanovski.keepasstreediff.entity.Entity as DiffEntity
+import com.github.aivanovski.keepasstreediff.entity.EntryEntity
 import com.github.aivanovski.keepasstreediff.entity.EntryEntity as DiffEntryEntity
+import com.github.aivanovski.keepasstreediff.entity.FieldEntity
 import com.github.aivanovski.keepasstreediff.entity.FieldEntity as DiffFieldEntity
 import com.github.aivanovski.keepasstreediff.entity.GroupEntity as DiffGroupEntity
-import app.keemobile.kotpass.models.Entry
-import com.github.aivanovski.keepasstreediff.entity.EntryEntity
-import com.github.aivanovski.keepasstreediff.entity.FieldEntity
 import com.github.aivanovski.keepasstreediff.entity.MutableNode
 import com.github.aivanovski.keepasstreediff.entity.TreeNode
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseElement
@@ -79,7 +79,7 @@ fun DiffEntryEntity.toNote(groupUid: UUID): Note {
         groupUid = groupUid,
         created = Date(),
         modified = Date(),
-        properties = properties,
+        properties = properties
     )
 }
 
@@ -93,7 +93,7 @@ fun DiffGroupEntity.toGroup(parentUid: UUID?): Group {
         groupCount = 0,
         noteCount = 0,
         autotypeEnabled = InheritableBooleanOption.ENABLED,
-        searchEnabled = InheritableBooleanOption.ENABLED,
+        searchEnabled = InheritableBooleanOption.ENABLED
     )
 }
 

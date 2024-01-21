@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.data.repository;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
 import com.ivanovsky.passnotes.data.entity.OperationResult;
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase;
@@ -20,9 +19,9 @@ public interface EncryptedDatabaseRepository {
     /**
      * Reads database from provided file and saves it as current opened database
      *
-     * @param type    the implementation of Keepass
-     * @param key     the key to decrypt database
-     * @param file    file to read database from
+     * @param type the implementation of Keepass
+     * @param key the key to decrypt database
+     * @param file file to read database from
      * @param options options for reading file
      * @return database
      */
@@ -50,7 +49,7 @@ public interface EncryptedDatabaseRepository {
      * Reads database from provided file and returns the result
      *
      * @param type the implementation of Keepass
-     * @param key  the key to decrypt database
+     * @param key the key to decrypt database
      * @param file file to read database from
      * @return database
      */

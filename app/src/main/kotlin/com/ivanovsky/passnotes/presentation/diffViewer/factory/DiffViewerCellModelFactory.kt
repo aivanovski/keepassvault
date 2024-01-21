@@ -55,7 +55,6 @@ class DiffViewerCellModelFactory(
         var cellId = 1
         var indentLevel = 0
         for ((idx, item) in diff.withIndex()) {
-
             when (item) {
                 is DiffListItem.Parent -> {
                     val model = createParentCell(
@@ -220,7 +219,9 @@ class DiffViewerCellModelFactory(
                     val customProperties = CUSTOM_PROPERTY_FILTER.apply(entity.properties)
 
                     for (property in (defaultProperties + customProperties)) {
-                        if (PropertyType.DEFAULT_TYPES.contains(property.type) && property.value.isNullOrEmpty()) {
+                        if (PropertyType.DEFAULT_TYPES.contains(property.type) &&
+                            property.value.isNullOrEmpty()
+                        ) {
                             continue
                         }
 
@@ -261,7 +262,7 @@ class DiffViewerCellModelFactory(
                                     )
                                 )
                             }
-                            .toString(),
+                            .toString()
                     )
 
                     models.add(model)
@@ -309,7 +310,7 @@ class DiffViewerCellModelFactory(
                         )
                     )
                 }
-                .toString(),
+                .toString()
         )
     }
 

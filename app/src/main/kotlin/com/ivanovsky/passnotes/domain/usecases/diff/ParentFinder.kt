@@ -1,11 +1,11 @@
 package com.ivanovsky.passnotes.domain.usecases.diff
 
-import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
-import app.keemobile.kotpass.models.Group as KotpassGroup
-import app.keemobile.kotpass.models.Entry as KotpassEntry
 import app.keemobile.kotpass.models.DatabaseElement as KotpassDatabaseElement
+import app.keemobile.kotpass.models.Entry as KotpassEntry
 import app.keemobile.kotpass.models.Group
+import app.keemobile.kotpass.models.Group as KotpassGroup
 import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
+import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.convertToGroup
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.convertToNote
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
@@ -87,7 +87,7 @@ class ParentFinder(
                     parentGroupUid = uuidToParentMap[group.uuid],
                     options = InheritableOptions(
                         autotypeEnabled = InheritableBooleanOption.ENABLED,
-                        searchEnabled = InheritableBooleanOption.ENABLED,
+                        searchEnabled = InheritableBooleanOption.ENABLED
                     )
                 )
             }

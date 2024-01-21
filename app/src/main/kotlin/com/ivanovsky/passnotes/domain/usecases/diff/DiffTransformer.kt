@@ -1,14 +1,14 @@
 package com.ivanovsky.passnotes.domain.usecases.diff
 
-import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseElement
-import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffEvent
-import java.util.UUID
-import app.keemobile.kotpass.models.Group as KotpassGroup
 import app.keemobile.kotpass.models.DatabaseElement as KotpassDatabaseElement
+import app.keemobile.kotpass.models.Group as KotpassGroup
+import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseElement
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
-import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffOriginType
+import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffEvent
 import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffListItem
+import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffOriginType
 import java.util.LinkedList
+import java.util.UUID
 
 class DiffTransformer {
 
@@ -192,5 +192,4 @@ class DiffTransformer {
             is DiffEvent.Update -> newParentUuid
         }
     }
-
 }

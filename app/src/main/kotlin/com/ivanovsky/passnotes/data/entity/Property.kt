@@ -1,7 +1,6 @@
 package com.ivanovsky.passnotes.data.entity
 
 import android.os.Parcelable
-import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -10,10 +9,7 @@ data class Property(
     val name: String? = null,
     val value: String? = null,
     val isProtected: Boolean = false
-) : Parcelable {
-
-    @IgnoredOnParcel
-    val isDefault = (type != null && PropertyType.DEFAULT_TYPES.contains(type))
+) : EncryptedDatabaseElement, Parcelable {
 
     companion object {
         const val PROPERTY_NAME_TEMPLATE = "_etm_template"

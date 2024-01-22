@@ -103,10 +103,10 @@ class PasswordGeneratorViewModel(
     fun onDoneButtonClicked() {
         val password = password.value?.toString() ?: return
 
+        router.exit()
         if (password.isNotEmpty()) {
             router.sendResult(PasswordGeneratorScreen.RESULT_KEY, password)
         }
-        router.exit()
     }
 
     fun navigateBack() = router.exit()

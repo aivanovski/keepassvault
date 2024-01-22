@@ -1,3 +1,6 @@
 package com.ivanovsky.passnotes.data.entity
 
-interface EncryptedDatabaseEntry
+/**
+ * Interface for [Group] and [Note]
+ */
+interface EncryptedDatabaseEntry : EncryptedDatabaseElement

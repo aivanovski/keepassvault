@@ -342,7 +342,8 @@ class GroupsFragment : BaseFragment() {
             },
             R.id.menu_disable_biometric_unlock to { vm ->
                 vm.onDisableBiometricUnlockButtonClicked()
-            }
+            },
+            R.id.menu_diff_with to { vm -> vm.onDiffWithButtonClicked() }
         )
 
         fun newInstance(args: GroupsScreenArgs) = GroupsFragment()

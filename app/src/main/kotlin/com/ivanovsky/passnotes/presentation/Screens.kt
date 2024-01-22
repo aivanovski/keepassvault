@@ -5,6 +5,10 @@ import androidx.fragment.app.FragmentFactory
 import com.github.terrakok.cicerone.androidx.FragmentScreen
 import com.ivanovsky.passnotes.presentation.about.AboutFragment
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuFragment
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerFragment
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
+import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsFragment
+import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsScreenArgs
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerFragment
 import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
@@ -107,6 +111,17 @@ object Screens {
         }
     }
 
+    class EnterDbCredentialsScreen(
+        private val args: EnterDbCredentialsScreenArgs
+    ) : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            EnterDbCredentialsFragment.newInstance(args)
+
+        companion object {
+            val RESULT_KEY = EnterDbCredentialsScreen::class.simpleName + "_result"
+        }
+    }
+
     // Settings
     class MainSettingsScreen : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
@@ -121,6 +136,12 @@ object Screens {
     class DatabaseSettingsScreen : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
             DatabaseSettingsFragment.newInstance()
+    }
+
+    // Diff
+    class DiffViewerScreen(private val args: DiffViewerScreenArgs) : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            DiffViewerFragment.newInstance(args)
     }
 
     // Debug

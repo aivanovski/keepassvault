@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.diffViewer.cells.viewmodel.DiffHeaderCellViewModel" />
+    </data>
+
+    <TextView
+        style="@style/Material.PrimaryText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/small_margin"
+        android:background="@{viewModel.model.backgroundColor}"
+        android:fontFamily="monospace"
+        android:text="@{viewModel.model.text}"
+        android:textSize="@dimen/material_secondary_text_size"
+        tools:text="~ Group 'Root'" />
+
+</layout>

@@ -70,6 +70,7 @@ public class OperationError {
             "Failed to create a directory";
     public static final String MESSAGE_SYNCHRONIZATION_TAKES_TOO_LONG =
             "Synchronization takes too long";
+    public static final String MESSAGE_UNSUPPORTED_DATABASE_TYPE = "Unsupported database type";
 
     public static final String GENERIC_MESSAGE_NOT_FOUND = "%s not found";
     public static final String GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST = "Group '%s' already exists";

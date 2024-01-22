@@ -17,6 +17,9 @@
     <attr name="kpSecondaryTextColor" format="reference|color" />
     <attr name="kpErrorTextColor" format="reference|color" />
     <attr name="kpDividerColor" format="reference|color" />
+    <attr name="kpDiffInsertColor" format="reference|color" />
+    <attr name="kpDiffDeleteColor" format="reference|color" />
+    <attr name="kpDiffUpdateColor" format="reference|color" />
 
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- System attributes -->
@@ -55,6 +58,9 @@
         <item name="kpSecondaryTextColor">@color/secondary_text</item>
         <item name="kpErrorTextColor">@color/error_text</item>
         <item name="kpDividerColor">@color/divider</item>
+        <item name="kpDiffInsertColor">@color/diff_insert</item>
+        <item name="kpDiffDeleteColor">@color/diff_delete</item>
+        <item name="kpDiffUpdateColor">@color/diff_update</item>
     </style>
 
     <style name="AppDialogTheme" parent="Theme.Material3.DayNight.Dialog.Alert">

@@ -9,12 +9,14 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
+import com.ivanovsky.passnotes.data.repository.file.FSOptions.Companion.READ_ONLY
 import com.ivanovsky.passnotes.data.repository.file.FSOptions.Companion.defaultOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
+import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicReference
@@ -79,6 +81,39 @@ class KeepassDatabaseRepository(
         }
 
         return openDbResult
+    }
+
+    override fun read(
+        type: KeepassImplementation,
+        key: EncryptedDatabaseKey,
+        file: FileDescriptor
+    ): OperationResult<EncryptedDatabase> {
+        val fsProvider = fileSystemResolver.resolveProvider(file.fsAuthority)
+
+        val reloadFileResult = fsProvider.getFile(file.path, READ_ONLY)
+        if (reloadFileResult.isFailed) {
+            return reloadFileResult.mapError()
+        }
+
+        val reloadedFile = reloadFileResult.getOrThrow()
+
+        val openFileResult = fsProvider.openFileForRead(
+            reloadedFile,
+            OnConflictStrategy.CANCEL,
+            READ_ONLY
+        )
+        if (openFileResult.isFailed) {
+            return openFileResult.mapError()
+        }
+
+        return openDatabase(
+            type,
+            fileSystemResolver,
+            READ_ONLY,
+            reloadedFile,
+            openFileResult,
+            key
+        )
     }
 
     override fun reload(): OperationResult<Boolean> {

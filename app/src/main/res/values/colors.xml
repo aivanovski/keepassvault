@@ -27,5 +27,9 @@
     <color name="secondary_icon_background">#d9dde8</color>
     <color name="important_icon">#EF5350</color>
 
+    <color name="diff_insert">#beffbb</color>
+    <color name="diff_delete">#ffd5d5</color>
+    <color name="diff_update">#f0efaa</color>
+
     <color name="transparent">#00000000</color>
 </resources>

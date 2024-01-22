@@ -31,6 +31,14 @@ import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveC
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogViewModel
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerInteractor
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerViewModel
+import com.ivanovsky.passnotes.presentation.diffViewer.factory.DiffViewerCellModelFactory
+import com.ivanovsky.passnotes.presentation.diffViewer.factory.DiffViewerCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsInteractor
+import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsScreenArgs
+import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.factory.FilePickerCellModelFactory
@@ -148,6 +156,8 @@ object UiModule {
             single { ResolveConflictDialogInteractor(get()) }
             single { SyncStateCache(get()) }
             single { SyncStateInteractor(get(), get(), get()) }
+            single { EnterDbCredentialsInteractor(get(), get(), get()) }
+            single { DiffViewerInteractor(get(), get(), get(), get(), get()) }
 
             // Autofill
             single { AutofillViewFactory(get(), get()) }
@@ -175,6 +185,9 @@ object UiModule {
             single { NavigationMenuCellViewModelFactory() }
 
             single { SyncStateCellModelFactory(get()) }
+
+            single { DiffViewerCellModelFactory(get(), get()) }
+            single { DiffViewerCellViewModelFactory(get()) }
 
             // Cicerone
             single { Cicerone.create() }
@@ -288,7 +301,6 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
@@ -322,6 +334,17 @@ object UiModule {
             }
             factory { NavigationMenuViewModel(get(), get(), get(), get()) }
             factory { (args: MainScreenArgs) -> MainViewModel(get(), get(), args) }
+            factory { (args: EnterDbCredentialsScreenArgs) ->
+                EnterDbCredentialsViewModel(
+                    get(),
+                    get(),
+                    get(),
+                    args
+                )
+            }
+            factory { (args: DiffViewerScreenArgs) ->
+                DiffViewerViewModel(get(), get(), get(), get(), get(), get(), args)
+            }
         }
 
     private fun provideCiceroneRouter(cicerone: Cicerone<Router>) =

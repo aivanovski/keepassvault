@@ -12,6 +12,7 @@ import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
+import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
@@ -19,10 +20,13 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.Screens.DiffViewerScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
+import com.ivanovsky.passnotes.presentation.diffViewer.model.DiffEntity
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -398,6 +402,53 @@ class DebugMenuViewModel(
         showSnackbarEvent.call(resourceProvider.getString(R.string.test_data_removed))
     }
 
+    fun onViewTestDiffButtonClicked() {
+        val fsAuthority = FSAuthority(
+            credentials = FSCredentials.BasicCredentials(
+                url = "content://fakefs.com",
+                username = "user",
+                password = "abc123"
+            ),
+            type = FSType.FAKE,
+            isBrowsable = true
+        )
+        val key = PasswordKeepassKey("abc123")
+
+        val leftFile = FileDescriptor(
+            fsAuthority = fsAuthority,
+            path = "/demo.kdbx",
+            uid = "demo",
+            name = "demo.kdbx",
+            isDirectory = false,
+            isRoot = false
+        )
+
+        val rightFile = FileDescriptor(
+            fsAuthority = fsAuthority,
+            path = "/demo-modified.kdbx",
+            uid = "demo-modified",
+            name = "demo.kdbx",
+            isDirectory = false,
+            isRoot = false
+        )
+
+        router.navigateTo(
+            DiffViewerScreen(
+                DiffViewerScreenArgs(
+                    left = DiffEntity.File(
+                        file = leftFile,
+                        key = key
+                    ),
+                    right = DiffEntity.File(
+                        file = rightFile,
+                        key = key
+                    ),
+                    isHoldDatabaseInteraction = false
+                )
+            )
+        )
+    }
+
     private fun getSelectedFile(): FileDescriptor? {
         val filePath = this.filePath.value ?: return null
         if (filePath.isBlank()) {
@@ -431,6 +482,7 @@ class DebugMenuViewModel(
                     isBrowsable = true
                 )
             }
+
             FSType.GIT -> {
                 FSAuthority(
                     credentials = interactor.getTestGitCredentials(),
@@ -438,6 +490,7 @@ class DebugMenuViewModel(
                     isBrowsable = true
                 )
             }
+
             FSType.FAKE -> {
                 FSAuthority(
                     credentials = null,
@@ -445,6 +498,7 @@ class DebugMenuViewModel(
                     isBrowsable = true
                 )
             }
+
             FSType.UNDEFINED -> throw IllegalArgumentException()
         }
     }
@@ -460,9 +514,11 @@ class DebugMenuViewModel(
             creds != null && creds is FSCredentials.BasicCredentials -> {
                 Pair(creds.url, creds.username + " / " + creds.password)
             }
+
             creds != null && creds is FSCredentials.GitCredentials -> {
                 Pair(creds.url, EMPTY)
             }
+
             else -> Pair(EMPTY, EMPTY)
         }
 

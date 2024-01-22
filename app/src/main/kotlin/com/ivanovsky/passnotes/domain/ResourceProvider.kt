@@ -40,7 +40,7 @@ class ResourceProvider {
         return appContext.getString(resId)
     }
 
-    fun getString(@StringRes stringResId: Int, vararg formatArgs: Any): String {
+    fun getString(@StringRes stringResId: Int, vararg formatArgs: Any?): String {
         return appContext.getString(stringResId, *formatArgs)
     }
 

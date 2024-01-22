@@ -124,7 +124,11 @@ class FakeFileStorage(
             }
 
             else -> {
-                val content = fileContentFactory.createDefaultLocalDatabase()
+                val content = when (uid) {
+                    FileUid.DEMO -> fileContentFactory.createDefaultLocalDatabase()
+                    FileUid.DEMO_MODIFIED -> fileContentFactory.createDefaultRemoteDatabase()
+                    else -> fileContentFactory.createDefaultLocalDatabase()
+                }
 
                 Timber.d("Generate content: uid=$uid, size=${content.size}")
 
@@ -163,7 +167,9 @@ class FakeFileStorage(
             fileFactory.createAuthErrorFile(),
             fileFactory.createNotFoundFile(),
             fileFactory.createErrorFile(),
-            fileFactory.createAutoTestsFile()
+            fileFactory.createAutoTestsFile(),
+            fileFactory.createDemoFile(),
+            fileFactory.createDemoModifiedFile()
         )
     }
 }

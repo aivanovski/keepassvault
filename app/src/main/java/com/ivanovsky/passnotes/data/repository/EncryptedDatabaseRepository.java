@@ -16,6 +16,15 @@ public interface EncryptedDatabaseRepository {
     @Nullable
     EncryptedDatabase getDatabase();
 
+    /**
+     * Reads database from provided file and saves it as current opened database
+     *
+     * @param type the implementation of Keepass
+     * @param key the key to decrypt database
+     * @param file file to read database from
+     * @param options options for reading file
+     * @return database
+     */
     @NonNull
     OperationResult<EncryptedDatabase> open(
             @NonNull KeepassImplementation type,
@@ -35,4 +44,18 @@ public interface EncryptedDatabaseRepository {
 
     @NonNull
     OperationResult<Boolean> close();
+
+    /**
+     * Reads database from provided file and returns the result
+     *
+     * @param type the implementation of Keepass
+     * @param key the key to decrypt database
+     * @param file file to read database from
+     * @return database
+     */
+    @NonNull
+    OperationResult<EncryptedDatabase> read(
+            @NonNull KeepassImplementation type,
+            @NonNull EncryptedDatabaseKey key,
+            @NonNull FileDescriptor file);
 }

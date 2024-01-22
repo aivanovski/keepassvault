@@ -56,6 +56,14 @@ class FakeFileFactory(
         return create(fsAuthority, uid, System.currentTimeMillis())
     }
 
+    fun createDemoFile(): FileDescriptor {
+        return create(fsAuthority, FileUid.DEMO, Time.LOCAL)
+    }
+
+    fun createDemoModifiedFile(): FileDescriptor {
+        return create(fsAuthority, FileUid.DEMO_MODIFIED, Time.REMOTE)
+    }
+
     private fun create(
         fsAuthority: FSAuthority,
         uid: String,
@@ -78,6 +86,8 @@ class FakeFileFactory(
         return when {
             uid == FileUid.ROOT -> "/"
             uid == FileUid.AUTO_TESTS -> "/automation.kdbx"
+            uid == FileUid.DEMO -> "/demo.kdbx"
+            uid == FileUid.DEMO_MODIFIED -> "/demo-modified.kdbx"
             uid in FileUid.DEFAULT_UIDS -> "/test-$uid.kdbx"
             else -> uid
         }
@@ -94,6 +104,8 @@ class FakeFileFactory(
         const val NOT_FOUND = "not-found"
         const val ERROR = "error"
         const val AUTO_TESTS = "auto-tests"
+        const val DEMO = "demo"
+        const val DEMO_MODIFIED = "demo-modified"
 
         val DEFAULT_UIDS = listOf(
             NO_CHANGES,
@@ -105,7 +117,9 @@ class FakeFileFactory(
             AUTH_ERROR,
             NOT_FOUND,
             ERROR,
-            AUTO_TESTS
+            AUTO_TESTS,
+            DEMO,
+            DEMO_MODIFIED
         )
     }
 

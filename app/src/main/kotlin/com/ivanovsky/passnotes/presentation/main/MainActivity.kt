@@ -201,43 +201,6 @@ class MainActivity :
         return true
     }
 
-    private fun handleActivityResult(type: LauncherType<*>, result: Intent?) {
-        when (type) {
-            is LauncherType.Permission -> {
-                val permission = requestPermission ?: return
-
-                Timber.d("handleActivityResult: permission=%s", permission)
-
-                var isHandled = false
-                for (fragment in supportFragmentManager.fragments) {
-                    if (fragment is PermissionRequestResultReceiver) {
-                        fragment.onPermissionRequestResult(
-                            permission,
-                            permissionHelper.isPermissionGranted(permission)
-                        )
-                        isHandled = true
-                    }
-                }
-
-                if (!isHandled) {
-                    Timber.e("Unhandled permission: %s", permission)
-                }
-            }
-
-            is LauncherType.AllFilesPermission -> {
-                Timber.d("handleActivityResult: allFilesPermission")
-
-                for (fragment in supportFragmentManager.fragments) {
-                    fragment.onActivityResult(
-                        SystemPermission.ALL_FILES_PERMISSION.requestCode,
-                        RESULT_OK,
-                        null
-                    )
-                }
-            }
-        }
-    }
-
     private fun handlePermissionResult(isGranted: Boolean) {
         val permission = requestPermission ?: return
 

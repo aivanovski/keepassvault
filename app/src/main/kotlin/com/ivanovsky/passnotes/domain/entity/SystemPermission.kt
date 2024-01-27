@@ -30,6 +30,5 @@ enum class SystemPermission(
     );
 
     companion object {
-
     }
 }

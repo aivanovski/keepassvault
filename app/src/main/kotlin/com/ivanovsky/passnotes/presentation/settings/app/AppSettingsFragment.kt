@@ -20,9 +20,9 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOC
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SEARCH_TYPE
 import com.ivanovsky.passnotes.domain.PermissionHelper
+import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BasePreferenceFragment
-import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.presentation.core.extensions.requestSystemPermission
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showErrorDialog

@@ -75,11 +75,20 @@ class DatabaseLockInteractor(
         }
     }
 
+    fun invalidateNotificationIfNeed() {
+        Timber.d("invalidateNotificationIfNeed:")
+        if (LockService.getCurrentState() != ServiceState.STOPPED) {
+            LockService.runCommand(context, LockServiceCommand.ShowNotification)
+        }
+    }
+
     private fun startServiceIfNeed(db: EncryptedDatabase) {
         val shouldShowNotification =
             (settings.isLockNotificationVisible || db.fsOptions.isPostponedSyncEnabled)
-        val shouldStart =
-            (LockService.getCurrentState() == ServiceState.STOPPED && shouldShowNotification)
+        val shouldStart = (
+            LockService.getCurrentState() == ServiceState.STOPPED &&
+                shouldShowNotification
+            )
         Timber.d("startServiceIfNeed: shouldStart=%s", shouldStart)
 
         if (shouldStart) {

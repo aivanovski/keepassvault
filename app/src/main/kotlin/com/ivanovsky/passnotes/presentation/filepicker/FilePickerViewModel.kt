@@ -13,7 +13,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.entity.StoragePermissionType
+import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
@@ -52,7 +52,7 @@ class FilePickerViewModel(
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
     val isDoneButtonVisible = MutableLiveData<Boolean>()
-    val requestPermissionEvent = SingleLiveEvent<StoragePermissionType>()
+    val requestPermissionEvent = SingleLiveEvent<SystemPermission>()
     val showAllFilePermissionDialogEvent = SingleLiveEvent<Unit>()
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
     val currentPath = MutableLiveData(EMPTY)
@@ -111,8 +111,8 @@ class FilePickerViewModel(
                 )
             )
 
-            permissionHelper.getRequiredFilePermissionType()?.let { permission ->
-                if (permission == StoragePermissionType.ALL_FILES_ACCESS) {
+            permissionHelper.getRequiredFilePermission()?.let { permission ->
+                if (permission == SystemPermission.ALL_FILES_PERMISSION) {
                     showAllFilePermissionDialogEvent.call(Unit)
                 } else {
                     requestPermissionEvent.call(permission)

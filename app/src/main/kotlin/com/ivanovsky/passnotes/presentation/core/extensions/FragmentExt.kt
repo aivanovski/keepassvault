@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.extensions.setItemVisibility
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
@@ -23,6 +24,7 @@ import com.ivanovsky.passnotes.presentation.core.dialog.ErrorDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialogArgs
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
+import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestSender
 import com.ivanovsky.passnotes.util.InputMethodUtils
 import com.ivanovsky.passnotes.util.IntentUtils
 
@@ -131,4 +133,10 @@ private fun Fragment.findViewForSnackbar(): View? {
 fun Fragment.openUrl(url: String) {
     val intent = IntentUtils.newOpenUrlIntent(url)
     startActivity(Intent.createChooser(intent, null))
+}
+
+fun Fragment.requestSystemPermission(
+    permission: SystemPermission
+) {
+    (requireActivity() as PermissionRequestSender).requestPermission(permission)
 }

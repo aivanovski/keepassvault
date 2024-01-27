@@ -141,6 +141,7 @@ object UiModule {
                     get(),
                     get(),
                     get(),
+                    get(),
                     get()
                 )
             }
@@ -262,6 +263,7 @@ object UiModule {
                     get(),
                     get(),
                     get(),
+                    get(),
                     args
                 )
             }
@@ -306,7 +308,7 @@ object UiModule {
             }
             viewModel { AboutViewModel(get(), get()) }
             viewModel { MainSettingsViewModel(get(), get()) }
-            viewModel { AppSettingsViewModel(get(), get(), get(), get(), get(), get()) }
+            viewModel { AppSettingsViewModel(get(), get(), get(), get(), get(), get(), get()) }
             viewModel { DatabaseSettingsViewModel(get(), get(), get(), get()) }
             viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
             viewModel {

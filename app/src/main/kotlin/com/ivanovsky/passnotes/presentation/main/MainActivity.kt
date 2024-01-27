@@ -17,28 +17,39 @@ import com.github.terrakok.cicerone.androidx.AppNavigator
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.NoteCandidate
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityWithSideMenuBinding
+import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ThemeProvider
-import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryExtra
 import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
+import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestResultReceiver
+import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestSender
+import com.ivanovsky.passnotes.presentation.main.ActivityResultManager.LauncherType
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
 import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
 import com.ivanovsky.passnotes.util.InputMethodUtils
 import com.ivanovsky.passnotes.util.IntentUtils.immutablePendingIntentFlags
+import org.koin.android.ext.android.inject
+import timber.log.Timber
 
 class MainActivity :
     AppCompatActivity(),
-    PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
+    PreferenceFragmentCompat.OnPreferenceStartFragmentCallback,
+    PermissionRequestSender {
 
     private lateinit var binding: CoreBaseActivityWithSideMenuBinding
 
     private val themeProvider: ThemeProvider by inject()
     private val navigatorHolder: NavigatorHolder by inject()
     private val settingsRouter: SettingsRouter by inject()
+    private val permissionHelper: PermissionHelper by inject()
     private val navigator = AppNavigator(this, R.id.fragmentContainer)
+    private var requestPermission: SystemPermission? = null
+    private lateinit var activityResultManager: ActivityResultManager
+
     private val args by lazy {
         getMandatoryExtra<Bundle>(ARGUMENTS_BUNDLE).getParcelable(ARGUMENTS) as? MainScreenArgs
             ?: throw IllegalStateException()
@@ -52,6 +63,25 @@ class MainActivity :
     private val viewModel: MainViewModel by lazy {
         ViewModelProvider(this, MainViewModel.Factory(args))
             .get(MainViewModel::class.java)
+    }
+
+    override fun requestPermission(permission: SystemPermission) {
+        Timber.d("requestPermission: permission=%s", permission)
+
+        when (permission) {
+            SystemPermission.ALL_FILES_PERMISSION -> {
+                activityResultManager
+                    .getLauncherByType(LauncherType.AllFilesPermission)
+                    .launch(Unit)
+            }
+
+            else -> {
+                requestPermission = permission
+                activityResultManager
+                    .getLauncherByType(LauncherType.Permission)
+                    .launch(permission.permission)
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,6 +115,14 @@ class MainActivity :
                 }
             }
         })
+
+        activityResultManager = ActivityResultManager(
+            registry = activityResultRegistry,
+            lifecycleOwner = this,
+            onPermissionResult = { isGranted -> handlePermissionResult(isGranted) },
+            onAllFilePermissionResult = { handleAllFilePermissionResult() }
+        )
+        lifecycle.addObserver(activityResultManager)
 
         if (savedInstanceState == null) {
             viewModel.navigateToRootScreen()
@@ -161,6 +199,73 @@ class MainActivity :
         val settingsFragmentName = pref.fragment ?: throw IllegalStateException()
         settingsRouter.navigateTo(settingsFragmentName)
         return true
+    }
+
+    private fun handleActivityResult(type: LauncherType<*>, result: Intent?) {
+        when (type) {
+            is LauncherType.Permission -> {
+                val permission = requestPermission ?: return
+
+                Timber.d("handleActivityResult: permission=%s", permission)
+
+                var isHandled = false
+                for (fragment in supportFragmentManager.fragments) {
+                    if (fragment is PermissionRequestResultReceiver) {
+                        fragment.onPermissionRequestResult(
+                            permission,
+                            permissionHelper.isPermissionGranted(permission)
+                        )
+                        isHandled = true
+                    }
+                }
+
+                if (!isHandled) {
+                    Timber.e("Unhandled permission: %s", permission)
+                }
+            }
+
+            is LauncherType.AllFilesPermission -> {
+                Timber.d("handleActivityResult: allFilesPermission")
+
+                for (fragment in supportFragmentManager.fragments) {
+                    fragment.onActivityResult(
+                        SystemPermission.ALL_FILES_PERMISSION.requestCode,
+                        RESULT_OK,
+                        null
+                    )
+                }
+            }
+        }
+    }
+
+    private fun handlePermissionResult(isGranted: Boolean) {
+        val permission = requestPermission ?: return
+
+        Timber.d("handlePermissionResult: isGranted=%s, permission=%s", isGranted, permission)
+
+        var isHandled = false
+        for (fragment in supportFragmentManager.fragments) {
+            if (fragment is PermissionRequestResultReceiver) {
+                fragment.onPermissionRequestResult(permission, isGranted)
+                isHandled = true
+            }
+        }
+
+        if (!isHandled) {
+            Timber.e("Unhandled permission result: %s", permission)
+        }
+    }
+
+    private fun handleAllFilePermissionResult() {
+        Timber.d("handleAllFilePermissionResult:")
+
+        supportFragmentManager.fragments.forEach { fragment ->
+            fragment.onActivityResult(
+                SystemPermission.ALL_FILES_PERMISSION.requestCode,
+                RESULT_OK,
+                null
+            )
+        }
     }
 
     companion object {

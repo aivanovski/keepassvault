@@ -17,6 +17,7 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
 import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
+import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens
@@ -33,16 +34,19 @@ import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewD
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.requestSystemPermission
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showErrorDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestResultReceiver
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.GroupsMenuItem
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
+import timber.log.Timber
 
-class GroupsFragment : BaseFragment() {
+class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
 
     private val viewModel: GroupsViewModel by lazy {
         ViewModelProvider(
@@ -60,6 +64,13 @@ class GroupsFragment : BaseFragment() {
     private lateinit var adapter: ViewModelsAdapter
     private var syncIconAnimation: Animator? = null
     private var menu: Menu? = null
+
+    override fun onPermissionRequestResult(permission: SystemPermission, isGranted: Boolean) {
+        when (permission) {
+            SystemPermission.NOTIFICATION -> viewModel.onNotificationPermissionResult(isGranted)
+            else -> Timber.e("Invalid permission received: $permission")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -214,12 +225,18 @@ class GroupsFragment : BaseFragment() {
         viewModel.showMessageDialogEvent.observe(viewLifecycleOwner) { message ->
             showErrorDialog(message)
         }
+        viewModel.showLockNotificationDialogEvent.observe(viewLifecycleOwner) {
+            showLockNotificationDialog()
+        }
         viewModel.isKeyboardVisibleEvent.observe(viewLifecycleOwner) { isVisible ->
             if (isVisible) {
                 binding.searchText.requestSoftInput()
             } else {
                 binding.searchText.hideSoftInput()
             }
+        }
+        viewModel.requestPermissionEvent.observe(viewLifecycleOwner) { permission ->
+            requestSystemPermission(permission)
         }
     }
 
@@ -323,6 +340,23 @@ class GroupsFragment : BaseFragment() {
             args = ResolveConflictDialogArgs(file)
         )
         dialog.show(childFragmentManager, ResolveConflictDialog.TAG)
+    }
+
+    private fun showLockNotificationDialog() {
+        val dialog = ConfirmationDialog.newInstance(
+            message = getString(R.string.lock_notification_message),
+            positiveButtonText = getString(R.string.permit),
+            negativeButtonText = getString(R.string.disable),
+            neutralButtonText = getString(R.string.later)
+        ).apply {
+            onConfirmed = {
+                viewModel.onRequestNotificationPermission()
+            }
+            onDenied = {
+                viewModel.onLockNotificationDialogDisabled()
+            }
+        }
+        dialog.show(childFragmentManager, ConfirmationDialog.TAG)
     }
 
     companion object {

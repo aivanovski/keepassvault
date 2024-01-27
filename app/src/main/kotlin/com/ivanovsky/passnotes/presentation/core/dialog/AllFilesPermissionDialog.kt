@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.PermissionHelper
+import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 
 class AllFilesPermissionDialog : DialogFragment(), DialogInterface.OnClickListener {
@@ -34,7 +35,7 @@ class AllFilesPermissionDialog : DialogFragment(), DialogInterface.OnClickListen
 
     override fun onStart() {
         super.onStart()
-        if (permissionHelper.isAllFilesPermissionGranted()) {
+        if (permissionHelper.isPermissionGranted(SystemPermission.ALL_FILES_PERMISSION)) {
             dismiss()
         }
     }

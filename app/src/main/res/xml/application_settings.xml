@@ -57,7 +57,12 @@
 
         <SwitchPreferenceCompat
             app:key="@string/pref_is_lock_notification_visible"
+            app:summary="Notification permission is disabled"
             app:title="@string/pref_is_lock_notification_visible_title" />
+
+        <com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
+            app:key="@string/pref_enable_notification_permission"
+            app:title="@string/pref_enable_notification_permission_title" />
 
     </PreferenceCategory>
 

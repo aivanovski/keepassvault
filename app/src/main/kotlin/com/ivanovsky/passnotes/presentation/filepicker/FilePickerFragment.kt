@@ -7,23 +7,26 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.FilePickerFragmentBinding
 import com.ivanovsky.passnotes.domain.PermissionHelper
-import com.ivanovsky.passnotes.domain.PermissionHelper.Companion.SDCARD_PERMISSION
-import com.ivanovsky.passnotes.domain.entity.StoragePermissionType
+import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.dialog.AllFilesPermissionDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.requestSystemPermission
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestResultReceiver
 import com.ivanovsky.passnotes.presentation.filepicker.Action.PICK_DIRECTORY
 import com.ivanovsky.passnotes.presentation.filepicker.Action.PICK_FILE
+import timber.log.Timber
 
-class FilePickerFragment : FragmentWithDoneButton() {
+class FilePickerFragment :
+    FragmentWithDoneButton(),
+    PermissionRequestResultReceiver {
 
     private val viewModel: FilePickerViewModel by lazy {
         ViewModelProvider(
@@ -37,11 +40,20 @@ class FilePickerFragment : FragmentWithDoneButton() {
     private val permissionHelper: PermissionHelper by inject()
     private val args by lazy { getMandatoryArgument<FilePickerArgs>(ARGUMENTS) }
 
+    override fun onPermissionRequestResult(permission: SystemPermission, isGranted: Boolean) {
+        when (permission) {
+            SystemPermission.ALL_FILES_PERMISSION -> viewModel.onPermissionResult(isGranted)
+            SystemPermission.SDCARD_PERMISSION -> viewModel.onPermissionResult(isGranted)
+            else -> Timber.e("Invalid permission received: $permission")
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == REQUEST_CODE_ALL_FILES_PERMISSION) {
-            viewModel.onPermissionResult(
-                isGranted = permissionHelper.isAllFilesPermissionGranted()
-            )
+        if (requestCode == SystemPermission.ALL_FILES_PERMISSION.requestCode) {
+            val isGranted =
+                permissionHelper.isPermissionGranted(SystemPermission.ALL_FILES_PERMISSION)
+
+            viewModel.onPermissionResult(isGranted)
         }
     }
 
@@ -85,6 +97,7 @@ class FilePickerFragment : FragmentWithDoneButton() {
                 viewModel.navigateToPreviousScreen()
                 true
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }
@@ -105,8 +118,8 @@ class FilePickerFragment : FragmentWithDoneButton() {
         viewModel.isDoneButtonVisible.observe(viewLifecycleOwner) { isVisible ->
             setDoneButtonVisibility(isVisible)
         }
-        viewModel.requestPermissionEvent.observe(viewLifecycleOwner) { permissionType ->
-            requestPermission(permissionType)
+        viewModel.requestPermissionEvent.observe(viewLifecycleOwner) { permission ->
+            requestSystemPermission(permission)
         }
         viewModel.showSnackbarMessageEvent.observe(viewLifecycleOwner) { message ->
             showSnackbarMessage(message)
@@ -116,42 +129,11 @@ class FilePickerFragment : FragmentWithDoneButton() {
         }
     }
 
-    private fun requestPermission(type: StoragePermissionType) {
-        when (type) {
-            StoragePermissionType.ALL_FILES_ACCESS -> {
-                permissionHelper.requestManageAllFilesPermission(
-                    this,
-                    REQUEST_CODE_ALL_FILES_PERMISSION
-                )
-            }
-            StoragePermissionType.SDCARD_PERMISSION -> {
-                permissionHelper.requestPermission(this, SDCARD_PERMISSION, REQUEST_CODE_PERMISSION)
-            }
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == REQUEST_CODE_PERMISSION) {
-            viewModel.onPermissionResult(
-                isGranted = permissionHelper.isAllGranted(grantResults)
-            )
-        }
-    }
-
     private fun showAllFilePermissionDialog() {
         val dialog = AllFilesPermissionDialog.newInstance()
             .apply {
                 onPositiveClicked = {
-                    permissionHelper.requestManageAllFilesPermission(
-                        this,
-                        REQUEST_CODE_ALL_FILES_PERMISSION
-                    )
+                    requestSystemPermission(SystemPermission.ALL_FILES_PERMISSION)
                 }
                 onNegativeClicked = {
                     viewModel.navigateToPreviousScreen()
@@ -161,9 +143,6 @@ class FilePickerFragment : FragmentWithDoneButton() {
     }
 
     companion object {
-
-        private const val REQUEST_CODE_PERMISSION = 100
-        private const val REQUEST_CODE_ALL_FILES_PERMISSION = 101
 
         private const val ARGUMENTS = "arguments"
 

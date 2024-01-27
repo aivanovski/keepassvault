@@ -8,6 +8,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
+import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
@@ -34,6 +35,7 @@ import kotlinx.coroutines.withContext
 class GroupsInteractor(
     private val observerBus: ObserverBus,
     private val dispatchers: DispatcherProvider,
+    private val lockDbInteractor: DatabaseLockInteractor,
     private val lockUseCase: LockDatabaseUseCase,
     private val addTemplatesUseCase: AddTemplatesUseCase,
     private val moveNoteUseCase: MoveNoteUseCase,
@@ -48,6 +50,15 @@ class GroupsInteractor(
     private val findParentGroupsUseCase: FindParentGroupsUseCase,
     private val getGroupUseCase: GetGroupUseCase
 ) {
+
+    fun invalidateLockNotification() {
+        val getDbResult = getDbUseCase.getDatabaseSynchronously()
+        if (getDbResult.isFailed) {
+            return
+        }
+
+        lockDbInteractor.invalidateNotificationIfNeed()
+    }
 
     suspend fun getTemplates(): OperationResult<List<Template>> =
         withContext(dispatchers.IO) {

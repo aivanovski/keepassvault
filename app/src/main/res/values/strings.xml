@@ -118,6 +118,9 @@
     <string name="add_key">Add key</string>
     <string name="add_biometrics">Add biometrics</string>
     <string name="recent_files">Recent files</string>
+    <string name="lock_notification_message">Would you like to enable system notification for opened database?\n\nThis notification requires permission, it allows to display database status and lock database more easily.</string>
+    <string name="permit">Permit</string>
+    <string name="later">Later</string>
 
     <!-- New database screen -->
     <string name="new_database">New database</string>
@@ -309,6 +312,8 @@
     <string name="pref_auto_lock_delay_in_ms_title">Database lock timeout</string>
     <string name="pref_auto_lock_delay_in_ms_summary">Interval after which database will be locked due to inactivity</string>
     <string name="pref_is_lock_notification_visible_title">Show notification with lock button</string>
+    <string name="pref_is_lock_notification_visible_summary">Notification permission is disabled, please enable it in system settings</string>
+    <string name="pref_enable_notification_permission_title">Enable notification permission</string>
     <string name="pref_auto_clear_clipboard_delay_in_ms_title">Clear clipboard timeout</string>
     <string name="pref_auto_clear_clipboard_delay_in_ms_summary">Interval after which clipboard will be cleared</string>
     <string name="pref_is_file_log_enabled_title">Write log to file</string>

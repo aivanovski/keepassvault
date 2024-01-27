@@ -1,54 +1,25 @@
 package com.ivanovsky.passnotes.domain
 
-import android.Manifest
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Environment
-import android.provider.Settings
-import androidx.fragment.app.Fragment
-import com.ivanovsky.passnotes.domain.entity.StoragePermissionType
+import com.ivanovsky.passnotes.domain.entity.SystemPermission
 
 class PermissionHelper(private val context: Context) {
 
-    fun isPermissionGranted(permission: String): Boolean {
-        var result = true
-
-        if (Build.VERSION.SDK_INT >= 23) {
-            result = context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+    fun isPermissionGranted(permission: SystemPermission): Boolean {
+        if (permission.minSdk != null && Build.VERSION.SDK_INT < permission.minSdk) {
+            return true
         }
 
-        return result
-    }
+        return when (permission) {
+            SystemPermission.ALL_FILES_PERMISSION -> isAllFilesPermissionGranted()
 
-    fun isAllFilesPermissionGranted(): Boolean {
-        return if (Build.VERSION.SDK_INT >= 30) {
-            Environment.isExternalStorageManager()
-        } else {
-            true
-        }
-    }
-
-    fun requestPermission(activity: Activity, permission: String, requestCode: Int) {
-        if (Build.VERSION.SDK_INT >= 23) {
-            activity.requestPermissions(arrayOf(permission), requestCode)
-        }
-    }
-
-    fun requestPermission(fragment: Fragment, permission: String, requestCode: Int) {
-        if (Build.VERSION.SDK_INT >= 23) {
-            fragment.requestPermissions(arrayOf(permission), requestCode)
-        }
-    }
-
-    fun requestManageAllFilesPermission(fragment: Fragment, requestCode: Int) {
-        if (Build.VERSION.SDK_INT >= 30) {
-            fragment.startActivityForResult(
-                Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION),
-                requestCode
-            )
+            else -> {
+                val result = context.checkSelfPermission(permission.permission)
+                result == PackageManager.PERMISSION_GRANTED
+            }
         }
     }
 
@@ -58,21 +29,25 @@ class PermissionHelper(private val context: Context) {
 
     fun hasFileAccessPermission(): Boolean {
         return if (Build.VERSION.SDK_INT >= 30) {
-            isAllFilesPermissionGranted()
+            isPermissionGranted(SystemPermission.ALL_FILES_PERMISSION)
         } else {
-            isPermissionGranted(SDCARD_PERMISSION)
+            isPermissionGranted(SystemPermission.SDCARD_PERMISSION)
         }
     }
 
-    fun getRequiredFilePermissionType(): StoragePermissionType? {
+    fun getRequiredFilePermission(): SystemPermission? {
         return when {
             hasFileAccessPermission() -> null
-            Build.VERSION.SDK_INT >= 30 -> StoragePermissionType.ALL_FILES_ACCESS
-            else -> StoragePermissionType.SDCARD_PERMISSION
+            Build.VERSION.SDK_INT >= 30 -> SystemPermission.ALL_FILES_PERMISSION
+            else -> SystemPermission.SDCARD_PERMISSION
         }
     }
 
-    companion object {
-        const val SDCARD_PERMISSION = Manifest.permission.WRITE_EXTERNAL_STORAGE
+    private fun isAllFilesPermissionGranted(): Boolean {
+        return if (Build.VERSION.SDK_INT >= 30) {
+            Environment.isExternalStorageManager()
+        } else {
+            true
+        }
     }
 }

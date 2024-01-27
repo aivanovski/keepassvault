@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.groups
 
+import android.os.Build
 import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -26,6 +27,7 @@ import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
+import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
@@ -58,6 +60,7 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.ScreenType
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
+import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
@@ -109,6 +112,7 @@ class GroupsViewModel(
     private val cellModelFactory: GroupsCellModelFactory,
     private val cellViewModelFactory: GroupsCellViewModelFactory,
     syncStateModelFactory: SyncStateCellModelFactory,
+    private val persmissionHelper: PermissionHelper,
     private val selectionHolder: SelectionHolder,
     private val router: Router,
     private val args: GroupsScreenArgs
@@ -165,6 +169,8 @@ class GroupsViewModel(
     val showNoteActionsDialogEvent = SingleLiveEvent<Note>()
     val showRemoveConfirmationDialogEvent = SingleLiveEvent<Pair<Group?, Note?>>()
     val showAddTemplatesDialogEvent = SingleLiveEvent<Unit>()
+    val showLockNotificationDialogEvent = SingleLiveEvent<Unit>()
+    val requestPermissionEvent = SingleLiveEvent<SystemPermission>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
     val showSortAndViewDialogEvent = SingleLiveEvent<SortAndViewDialogArgs>()
     val showBiometricSetupDialog = SingleLiveEvent<BiometricEncoder>()
@@ -251,6 +257,8 @@ class GroupsViewModel(
     }
 
     fun start() {
+        showLockNotificationDialogIfNecessary()
+
         syncStateViewModel.start()
         loadData()
     }
@@ -621,6 +629,21 @@ class GroupsViewModel(
                 args = StorageListArgs(Action.PICK_FILE)
             )
         )
+    }
+
+    fun onRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= 33) {
+            requestPermissionEvent.call(SystemPermission.NOTIFICATION)
+        }
+    }
+
+    fun onNotificationPermissionResult(isGranted: Boolean) {
+        interactor.invalidateLockNotification()
+    }
+
+    fun onLockNotificationDialogDisabled() {
+        settings.isLockNotificationVisible = false
+        settings.isLockNotificationDialogEnabled = false
     }
 
     private fun onDiffFileSelected(file: FileDescriptor) {
@@ -1129,6 +1152,14 @@ class GroupsViewModel(
 
         currentGroup = getGroupResult.getOrThrow()
         return OperationResult.success(Unit)
+    }
+
+    private fun showLockNotificationDialogIfNecessary() {
+        if (settings.isLockNotificationDialogEnabled &&
+            !persmissionHelper.isPermissionGranted(SystemPermission.NOTIFICATION)
+        ) {
+            showLockNotificationDialogEvent.call(Unit)
+        }
     }
 
     private fun createCellViewModels(

@@ -11,9 +11,11 @@ class ConfirmationDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     var onConfirmed: (() -> Unit)? = null
     var onDenied: (() -> Unit)? = null
-    private lateinit var message: String
-    private lateinit var positiveButtonText: String
-    private lateinit var negativeButtonText: String
+    var onNeutral: (() -> Unit)? = null
+    private var message: String? = null
+    private var positiveButtonText: String? = null
+    private var negativeButtonText: String? = null
+    private var neutralButtonText: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,20 +26,24 @@ class ConfirmationDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return AlertDialog.Builder(context, R.style.AppDialogTheme)
-            .setMessage(message)
-            .setPositiveButton(positiveButtonText, this)
-            .setNegativeButton(negativeButtonText, this)
+            .apply {
+                setMessage(message)
+
+                setPositiveButton(positiveButtonText, this@ConfirmationDialog)
+                setNegativeButton(negativeButtonText, this@ConfirmationDialog)
+
+                if (neutralButtonText != null) {
+                    setNeutralButton(neutralButtonText, this@ConfirmationDialog)
+                }
+            }
             .create()
     }
 
     override fun onClick(dialog: DialogInterface?, which: Int) {
         when (which) {
-            DialogInterface.BUTTON_POSITIVE -> {
-                onConfirmed?.invoke()
-            }
-            DialogInterface.BUTTON_NEGATIVE -> {
-                onDenied?.invoke()
-            }
+            DialogInterface.BUTTON_POSITIVE -> onConfirmed?.invoke()
+            DialogInterface.BUTTON_NEGATIVE -> onDenied?.invoke()
+            DialogInterface.BUTTON_NEUTRAL -> onNeutral?.invoke()
         }
     }
 
@@ -48,13 +54,16 @@ class ConfirmationDialog : DialogFragment(), DialogInterface.OnClickListener {
         fun newInstance(
             message: String,
             positiveButtonText: String,
-            negativeButtonText: String
+            negativeButtonText: String,
+            neutralButtonText: String? = null
         ): ConfirmationDialog {
-            val dialog = ConfirmationDialog()
-            dialog.message = message
-            dialog.positiveButtonText = positiveButtonText
-            dialog.negativeButtonText = negativeButtonText
-            return dialog
+            return ConfirmationDialog()
+                .apply {
+                    this.message = message
+                    this.positiveButtonText = positiveButtonText
+                    this.negativeButtonText = negativeButtonText
+                    this.neutralButtonText = neutralButtonText
+                }
         }
     }
 }

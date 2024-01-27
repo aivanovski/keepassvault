@@ -22,7 +22,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.domain.PermissionHelper
-import com.ivanovsky.passnotes.domain.PermissionHelper.Companion.SDCARD_PERMISSION
+import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
@@ -216,7 +216,7 @@ class RegularFileSystemProvider(
                     OperationResult.error(newPermissionError(MESSAGE_FAILED_TO_ACCESS_TO_FILE))
                 }
             } else {
-                if (permissionHelper.isPermissionGranted(SDCARD_PERMISSION)) {
+                if (permissionHelper.isPermissionGranted(SystemPermission.SDCARD_PERMISSION)) {
                     OperationResult.success(Unit)
                 } else {
                     OperationResult.error(newPermissionError(MESSAGE_FAILED_TO_ACCESS_TO_FILE))

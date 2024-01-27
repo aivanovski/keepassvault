@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import android.provider.Settings
 import android.view.Menu
 import android.view.View
 import android.view.autofill.AutofillManager
@@ -22,7 +23,9 @@ import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.dialog.ErrorDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialogArgs
+import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
+import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestSender
 import com.ivanovsky.passnotes.util.InputMethodUtils
 import com.ivanovsky.passnotes.util.IntentUtils
 
@@ -131,4 +134,10 @@ private fun Fragment.findViewForSnackbar(): View? {
 fun Fragment.openUrl(url: String) {
     val intent = IntentUtils.newOpenUrlIntent(url)
     startActivity(Intent.createChooser(intent, null))
+}
+
+fun Fragment.requestSystemPermission(
+    permission: SystemPermission
+) {
+    (requireActivity() as PermissionRequestSender).requestPermission(permission)
 }

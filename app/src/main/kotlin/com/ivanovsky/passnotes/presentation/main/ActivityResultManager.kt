@@ -117,7 +117,7 @@ class ActivityResultManager(
         )
 
         object AllFilesPermission : LauncherType<Unit>(
-            registryKey = Permission::class.java.simpleName,
+            registryKey = AllFilesPermission::class.java.simpleName,
             inputType = Unit::class.java,
             minSdk = 30
         )

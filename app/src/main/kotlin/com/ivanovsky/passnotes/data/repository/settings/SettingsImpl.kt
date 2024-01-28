@@ -49,7 +49,9 @@ class SettingsImpl(private val context: Context) : Settings {
         .associateBy { context.getString(it.keyId) }
 
     private val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        onPreferenceChanged(key)
+        if (key != null) {
+            onPreferenceChanged(key)
+        }
     }
 
     override var isExternalStorageCacheEnabled: Boolean

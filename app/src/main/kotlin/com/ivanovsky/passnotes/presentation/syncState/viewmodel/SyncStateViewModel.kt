@@ -44,12 +44,17 @@ class SyncStateViewModel(
     val showResolveConflictDialogEvent = SingleLiveEvent<FileDescriptor>()
     val showMessageDialogEvent = SingleLiveEvent<String>()
 
-    private lateinit var dbFile: FileDescriptor
+    private var dbFile: FileDescriptor? = null
     private var isCheckingStatus = false
     private var lastSyncState: SyncState? = null
 
     override fun onAttach() {
-        dbFile = interactor.getDatabase().getOrThrow().file
+        val getDbResult = interactor.getDatabase()
+        if (getDbResult.isFailed) {
+            return
+        }
+
+        dbFile = getDbResult.getOrThrow().file
         interactor.cache.subscribe(this)
         observerBus.register(this)
     }
@@ -174,6 +179,7 @@ class SyncStateViewModel(
         db: EncryptedDatabase,
         isForceShowMessage: Boolean
     ) {
+        val dbFile = db.file
         val hasRemoteChanges = (syncState.status == SyncStatus.REMOTE_CHANGES)
         val hasLocalChanges = (syncState.status == SyncStatus.LOCAL_CHANGES)
         val isSyncInIdle = (syncState.progress == SyncProgressStatus.IDLE)
@@ -212,7 +218,9 @@ class SyncStateViewModel(
     }
 
     private fun onResolveConflictButtonClicked() {
-        showResolveConflictDialogEvent.call(dbFile)
+        val file = dbFile ?: return
+
+        showResolveConflictDialogEvent.call(file)
     }
 
     private fun showSyncState(

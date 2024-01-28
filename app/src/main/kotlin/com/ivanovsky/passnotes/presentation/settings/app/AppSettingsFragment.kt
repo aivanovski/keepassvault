@@ -146,6 +146,8 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
         }
 
         categoryBiometric.isVisible = viewModel.isBiometricUnlockAvailable()
+        enableNotificationPermissionPref.isVisible =
+            viewModel.isEnableNotificationPermissionVisible.value ?: false
     }
 
     override fun onCreateView(

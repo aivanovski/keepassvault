@@ -1,8 +1,8 @@
 ext {
     android = [
             minSdk    : 26,
-            targetSdk : 33,
-            compileSdk: 33
+            targetSdk : 34,
+            compileSdk: 34
     ]
 
     kotlinVersion = '1.8.20'

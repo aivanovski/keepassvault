@@ -1,0 +1,4 @@
+- Add diff viewer
+- Fix handling of notification permission
+- Android 14 support
+- Bugfix

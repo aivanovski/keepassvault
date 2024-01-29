@@ -21,6 +21,7 @@ Android client app for KeePass databases.
 - Attachments handling
 - Fuzzy search
 - Dark theme (controlled by system settings)
+- Built-in diff viewer for .kdbx files
 
 # License
 ```

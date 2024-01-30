@@ -13,3 +13,4 @@ This app is orientated for my personal use. It may have some bugs, so please mak
  * Autofill for Android >= 8.0
  * Fuzzy search
  * Dark theme
+ * Built-in diff viewer for .kdbx files

@@ -20,6 +20,8 @@ import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao
 import com.ivanovsky.passnotes.domain.NoteDiffer
 import com.ivanovsky.passnotes.domain.NoteDiffer.DiffAction
+import com.ivanovsky.passnotes.extensions.getOrNull
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.extensions.matches
@@ -151,7 +153,7 @@ class KotpassNoteDao(
         }
     }
 
-    override fun update(newNote: Note): OperationResult<UUID> {
+    override fun update(newNote: Note, doCommit: Boolean): OperationResult<UUID> {
         val noteUid = newNote.uid ?: return OperationResult.error(newDbError(MESSAGE_UID_IS_NULL))
 
         val getOldNoteResult = db.lock.withLock { getNoteByUid(noteUid) }
@@ -263,10 +265,45 @@ class KotpassNoteDao(
                 return@withLock getNoteResult.mapError()
             }
 
-            val note = getNoteResult.obj
-            val newDb = db.getRawDatabase().removeEntry(noteUid)
+            val getRecycleBinResult = db.getRecycleBinGroup()
+            if (getRecycleBinResult.isFailed) {
+                return getRecycleBinResult.mapError()
+            }
 
-            db.swapDatabase(newDb)
+            val note = getNoteResult.obj
+            val recycleBinGroup = getRecycleBinResult.getOrNull()
+
+            val isInsideRecycleBin = if (recycleBinGroup != null) {
+                val isInsideRecycleBinResult = db.isEntryInsideGroupTree(
+                    entryUid = noteUid,
+                    groupTreeRootUid = recycleBinGroup.uuid
+                )
+
+                if (isInsideRecycleBinResult.isFailed) {
+                    return@withLock isInsideRecycleBinResult.mapError()
+                }
+
+                isInsideRecycleBinResult.getOrThrow()
+            } else {
+                false
+            }
+
+            when {
+                recycleBinGroup != null && !isInsideRecycleBin -> {
+                    // move to recycle bin
+                    val newNote = note.copy(groupUid = recycleBinGroup.uuid)
+                    val updateResult = update(newNote, doCommit = false)
+                    if (updateResult.isFailed) {
+                        return@withLock updateResult.mapError()
+                    }
+                }
+
+                else -> {
+                    // remove permanently
+                    val newDb = db.getRawDatabase().removeEntry(noteUid)
+                    db.swapDatabase(newDb)
+                }
+            }
 
             db.commit().mapWithObject(note)
         }

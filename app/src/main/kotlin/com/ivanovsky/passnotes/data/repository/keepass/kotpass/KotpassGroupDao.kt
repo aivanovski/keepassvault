@@ -15,10 +15,12 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.map
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.extensions.matches
+import com.ivanovsky.passnotes.extensions.toEntity
 import java.util.UUID
 import kotlin.concurrent.withLock
 
@@ -168,10 +170,45 @@ class KotpassGroupDao(
                 return@withLock getGroupResult.mapError()
             }
 
-            val group = getGroupResult.obj
+            val getRecycleBinResult = db.getRecycleBinGroup()
+            if (getRecycleBinResult.isFailed) {
+                return getRecycleBinResult.mapError()
+            }
 
-            val newRawDatabase = db.getRawDatabase().removeGroup(groupUid)
-            db.swapDatabase(newRawDatabase)
+            val group = getGroupResult.getOrThrow()
+            val recycleBinGroup = getRecycleBinResult.getOrThrow()
+
+            val isInsideRecycleBin = if (recycleBinGroup != null) {
+                val isInsideRecycleBinResult = isGroupInsideGroupTree(
+                    groupUid = groupUid,
+                    groupTreeRootUid = recycleBinGroup.uuid
+                )
+
+                if (isInsideRecycleBinResult.isFailed) {
+                    return@withLock isInsideRecycleBinResult.mapError()
+                }
+
+                isInsideRecycleBinResult.getOrThrow()
+            } else {
+                false
+            }
+
+            when {
+                recycleBinGroup != null && !isInsideRecycleBin -> {
+                    // move to recycle bin
+                    val newGroup = group.copy(parentUid = recycleBinGroup.uuid)
+                    val updateResult = update(newGroup.toEntity(), doCommit = false)
+                    if (updateResult.isFailed) {
+                        return@withLock updateResult.mapError()
+                    }
+                }
+
+                else -> {
+                    // remove permanently
+                    val newDb = db.getRawDatabase().removeGroup(groupUid)
+                    db.swapDatabase(newDb)
+                }
+            }
 
             db.commit().mapWithObject(group)
         }
@@ -220,7 +257,7 @@ class KotpassGroupDao(
         }
     }
 
-    override fun update(entity: GroupEntity): OperationResult<Boolean> {
+    override fun update(entity: GroupEntity, doCommit: Boolean): OperationResult<Boolean> {
         if (entity.uid == null) {
             return OperationResult.error(newDbError(MESSAGE_UID_IS_NULL))
         }
@@ -355,6 +392,7 @@ class KotpassGroupDao(
 
         return OperationResult.success(isGroupInsideTree)
     }
+
 
     private fun InheritableBooleanOption.toRawOption(): GroupOverride {
         return when {

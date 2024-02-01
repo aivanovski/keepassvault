@@ -33,7 +33,7 @@ public interface GroupDao {
     OperationResult<Group> getGroupByUid(@NonNull UUID groupUid);
 
     @NonNull
-    OperationResult<Boolean> update(@NonNull GroupEntity group);
+    OperationResult<Boolean> update(@NonNull GroupEntity group, boolean doCommit);
 
     @NonNull
     OperationResult<List<Group>> find(@NonNull String query);

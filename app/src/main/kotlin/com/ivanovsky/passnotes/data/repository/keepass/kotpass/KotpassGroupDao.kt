@@ -393,7 +393,6 @@ class KotpassGroupDao(
         return OperationResult.success(isGroupInsideTree)
     }
 
-
     private fun InheritableBooleanOption.toRawOption(): GroupOverride {
         return when {
             isInheritValue -> GroupOverride.Inherit

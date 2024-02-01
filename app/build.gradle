@@ -168,7 +168,7 @@ android {
 }
 
 def koinVersion = '3.5.0'
-def roomVersion = '2.5.2'
+def roomVersion = '2.6.1'
 def lifecycleVersion = '2.2.0'
 def appCompatVersion = '1.6.1'
 def androidAnnotationVersion = '1.7.0'

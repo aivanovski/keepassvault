@@ -11,6 +11,7 @@ object StringUtils {
     const val DOT = '.'
     const val SPACE = ' '
     const val STAR = '*'
+    const val URL = "URL"
 
     private val UNITS = listOf("B", "KB", "MB", "GB", "TB")
 

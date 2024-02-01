@@ -79,6 +79,7 @@ android {
     }
 
     buildFeatures {
+        compose true
         dataBinding true
         viewBinding true
     }
@@ -97,12 +98,16 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "1.5.4"
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     signingConfigs {
@@ -249,6 +254,14 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-core-ktx:$liveDataKtxVersion"
     implementation "androidx.activity:activity-ktx:$activityKtxVersion"
     implementation "androidx.preference:preference-ktx:$preferenceKtxVersion"
+
+    // Compose
+    implementation platform("androidx.compose:compose-bom:2024.01.00")
+    implementation "androidx.compose.material3:material3"
+
+    // Compose preview
+    implementation "androidx.compose.ui:ui-tooling-preview"
+    debugImplementation "androidx.compose.ui:ui-tooling"
 
     //Apache Commons Lang (TODO: remove)
     implementation "org.apache.commons:commons-lang3:$apacheCommonsLangVersion"

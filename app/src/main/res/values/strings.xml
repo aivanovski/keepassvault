@@ -297,10 +297,11 @@
     <!-- About screen -->
     <string name="version_with_str">Version: %s</string>
     <string name="build_with_str">Build: %s</string>
-    <string name="about_intro"><![CDATA[is another client for KeePass password manager databases.\nIt uses <a href="https://github.com/keemobile/kotpass">Kotpass</a> library to access KeePass database files.]]></string>
+    <string name="about_intro">%s is client for KeePass password manager databases.\nIt uses %s library to access KeePass database files.</string>
     <string name="about_licence_intro">%s is open source software provided under Apache License version 2.0. This application is provided on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND.</string>
     <string name="feedback">Feedback</string>
     <string name="homepage">Homepage</string>
+    <string name="kotpass">Kotpass</string>
 
     <!-- Settings screens -->
     <string name="database">Database</string>

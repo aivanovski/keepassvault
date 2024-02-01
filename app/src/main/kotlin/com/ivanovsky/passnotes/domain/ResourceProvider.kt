@@ -9,6 +9,7 @@ import androidx.annotation.StringRes
 import androidx.core.content.res.ResourcesCompat
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.extensions.cloneWithTheme
+import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 
 class ResourceProvider {
 

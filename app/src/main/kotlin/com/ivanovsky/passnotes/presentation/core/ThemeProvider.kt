@@ -1,6 +1,7 @@
-package com.ivanovsky.passnotes.domain
+package com.ivanovsky.passnotes.presentation.core
 
 import android.content.Context
+import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.util.ThemeUtils
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicReference
@@ -42,6 +43,8 @@ class ThemeProvider(
     fun unsubscribe(listener: ThemeChangeListener) {
         listeners.remove(listener)
     }
+
+    fun getTheme(): Theme? = currentTheme.get()
 
     fun interface ThemeChangeListener {
         fun onThemeChanged(theme: Theme)

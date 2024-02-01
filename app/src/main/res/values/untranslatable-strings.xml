@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="homepage_url" translatable="false"><a href="https://github.com/aivanovski/passnotes">https://github.com/aivanovski/passnotes</a></string>
-    <string name="feedback_url" translatable="false"><a href="https://github.com/aivanovski/passnotes/issues">https://github.com/aivanovski/passnotes/issues</a></string>
+    <string name="homepage_url" translatable="false">https://github.com/aivanovski/passnotes</string>
+    <string name="feedback_url" translatable="false">https://github.com/aivanovski/passnotes/issues</string>
+    <string name="kotpass_url" translatable="false">https://github.com/keemobile/kotpass</string>
 
     <string name="pref_auto_lock_delay_in_ms" translatable="false">autoLockDelayInMs</string>
     <string name="pref_auto_clear_clipboard_delay_in_ms" translatable="false">autoClearClipboardDelayInMs</string>

@@ -18,11 +18,11 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.NoteCandidate
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityWithSideMenuBinding
 import com.ivanovsky.passnotes.domain.PermissionHelper
-import com.ivanovsky.passnotes.domain.ThemeProvider
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryExtra
 import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
 import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestResultReceiver

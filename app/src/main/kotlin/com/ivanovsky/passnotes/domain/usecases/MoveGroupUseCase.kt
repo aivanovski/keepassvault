@@ -34,7 +34,7 @@ class MoveGroupUseCase(
                 autotypeEnabled = group.autotypeEnabled,
                 searchEnabled = group.searchEnabled
             )
-            val moveResult = db.groupDao.update(newGroup)
+            val moveResult = db.groupDao.update(newGroup, true)
             if (moveResult.isFailed) {
                 return@withContext moveResult.takeError()
             }

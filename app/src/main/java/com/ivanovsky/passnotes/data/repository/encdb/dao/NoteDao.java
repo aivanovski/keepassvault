@@ -29,7 +29,7 @@ public interface NoteDao {
     OperationResult<Boolean> insert(@NonNull List<Note> notes, boolean doCommit);
 
     @NonNull
-    OperationResult<UUID> update(@NonNull Note note);
+    OperationResult<UUID> update(@NonNull Note note, boolean doCommit);
 
     @NonNull
     OperationResult<Boolean> remove(@NonNull UUID noteUid);

@@ -27,9 +27,8 @@ class MoveNoteUseCase(
 
             val note = getNoteResult.obj
             val updateNoteResult = db.noteDao.update(
-                note.copy(
-                    groupUid = newGroupUid
-                )
+                note.copy(groupUid = newGroupUid),
+                true
             )
             if (updateNoteResult.isFailed) {
                 return@withContext updateNoteResult.takeError()

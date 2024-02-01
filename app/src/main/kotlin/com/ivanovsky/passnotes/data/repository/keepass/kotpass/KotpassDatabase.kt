@@ -382,6 +382,38 @@ class KotpassDatabase(
         }
     }
 
+    fun isEntryInsideGroupTree(
+        entryUid: UUID,
+        groupTreeRootUid: UUID
+    ): OperationResult<Boolean> {
+        val getTreeRootResult = getRawGroupByUid(groupTreeRootUid)
+        if (getTreeRootResult.isFailed) {
+            return getTreeRootResult.mapError()
+        }
+
+        val rawTreeRoot = getTreeRootResult.obj
+        val tree = getRawChildEntries(rawTreeRoot)
+
+        val isEntryInsideTree = tree.any { entry -> entry.uuid == entryUid }
+
+        return OperationResult.success(isEntryInsideTree)
+    }
+
+    fun getRecycleBinGroup(): OperationResult<RawGroup?> {
+        val rawDb = getRawDatabase()
+
+        val isRecycleBinEnabled = rawDb.content.meta.recycleBinEnabled
+        if (!isRecycleBinEnabled) {
+            return OperationResult.success(null)
+        }
+
+        val recycleBinUid = rawDb.content.meta.recycleBinUuid
+            ?: return OperationResult.success(null)
+
+        val getRecycleBinResult = getRawGroupByUid(recycleBinUid)
+        return OperationResult.success(getRecycleBinResult.getOrNull())
+    }
+
     companion object {
 
         const val DEFAULT_ROOT_INHERITABLE_VALUE = true

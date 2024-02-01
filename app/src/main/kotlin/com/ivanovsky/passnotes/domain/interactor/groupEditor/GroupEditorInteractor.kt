@@ -102,7 +102,7 @@ class GroupEditorInteractor(
             }
 
             val db = getDbResult.obj
-            db.groupDao.update(group)
+            db.groupDao.update(group, true)
         }
     }
 

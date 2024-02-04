@@ -62,11 +62,10 @@ task generateVersionPropertiesFile {
 android {
     def ext = rootProject.extensions.ext
 
-    compileSdk ext.android.compileSdk
-
     defaultConfig {
-        applicationId 'com.ivanovsky.passnotes'
+        namespace 'com.ivanovsky.passnotes'
         minSdkVersion ext.android.minSdk
+        compileSdk ext.android.compileSdk
         targetSdkVersion ext.android.targetSdk
         versionCode formattedVersionCode.toInteger()
         versionName formattedVersionName
@@ -82,6 +81,7 @@ android {
         compose true
         dataBinding true
         viewBinding true
+        buildConfig true
     }
 
     kapt {

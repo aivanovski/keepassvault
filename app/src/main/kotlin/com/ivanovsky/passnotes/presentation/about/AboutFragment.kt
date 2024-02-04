@@ -5,9 +5,14 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.databinding.CoreComposeFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.presentation.core.compose.AppTheme
+import com.ivanovsky.passnotes.presentation.core.compose.getComposeTheme
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -21,6 +26,7 @@ class AboutFragment : BaseFragment() {
                 viewModel.onBackClicked()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -29,27 +35,25 @@ class AboutFragment : BaseFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-//        CoreCompo
-//        val binding = CoreComposeFragmentBinding.inflate(inflater, container, false)
-//
-//        binding.composeView.apply {
-//            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-//
-//            setContent {
-//                val theme by viewModel.theme.collectAsState(initial = context.getComposeTheme())
-//
-//                AppTheme(theme = theme) {
-//                    AboutScreen(
-//                        version = viewModel.appVersion,
-//                        buildType = viewModel.appBuildType
-//                    )
-//                }
-//            }
-//        }
+    ): View {
+        val binding = CoreComposeFragmentBinding.inflate(inflater, container, false)
 
-//        return binding.root
-        return null
+        binding.composeView.apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
+            setContent {
+                val theme by viewModel.theme.collectAsState(initial = context.getComposeTheme())
+
+                AppTheme(theme = theme) {
+                    AboutScreen(
+                        version = viewModel.appVersion,
+                        buildType = viewModel.appBuildType
+                    )
+                }
+            }
+        }
+
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

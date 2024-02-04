@@ -62,11 +62,10 @@ task generateVersionPropertiesFile {
 android {
     def ext = rootProject.extensions.ext
 
-    compileSdk ext.android.compileSdk
-
     defaultConfig {
-        applicationId 'com.ivanovsky.passnotes'
+        namespace 'com.ivanovsky.passnotes'
         minSdkVersion ext.android.minSdk
+        compileSdk ext.android.compileSdk
         targetSdkVersion ext.android.targetSdk
         versionCode formattedVersionCode.toInteger()
         versionName formattedVersionName
@@ -79,8 +78,10 @@ android {
     }
 
     buildFeatures {
+        compose true
         dataBinding true
         viewBinding true
+        buildConfig true
     }
 
     kapt {
@@ -97,12 +98,16 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "1.5.4"
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     signingConfigs {
@@ -168,7 +173,7 @@ android {
 }
 
 def koinVersion = '3.5.0'
-def roomVersion = '2.5.2'
+def roomVersion = '2.6.1'
 def lifecycleVersion = '2.2.0'
 def appCompatVersion = '1.6.1'
 def androidAnnotationVersion = '1.7.0'
@@ -249,6 +254,14 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-core-ktx:$liveDataKtxVersion"
     implementation "androidx.activity:activity-ktx:$activityKtxVersion"
     implementation "androidx.preference:preference-ktx:$preferenceKtxVersion"
+
+    // Compose
+    implementation platform("androidx.compose:compose-bom:2024.01.00")
+    implementation "androidx.compose.material3:material3"
+
+    // Compose preview
+    implementation "androidx.compose.ui:ui-tooling-preview"
+    debugImplementation "androidx.compose.ui:ui-tooling"
 
     //Apache Commons Lang (TODO: remove)
     implementation "org.apache.commons:commons-lang3:$apacheCommonsLangVersion"

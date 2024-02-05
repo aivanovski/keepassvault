@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.presentation.note.factory
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Property
+import com.ivanovsky.passnotes.domain.LocaleProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.DividerCellModel
@@ -12,15 +13,22 @@ import com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape
 import com.ivanovsky.passnotes.presentation.note.cells.model.AttachmentCellModel
 import com.ivanovsky.passnotes.presentation.note.cells.model.NotePropertyCellModel
 import com.ivanovsky.passnotes.util.StringUtils
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
+import com.ivanovsky.passnotes.util.formatAccordingLocale
+import java.util.Date
 
 class NoteCellModelFactory(
-    private val resourceProvider: ResourceProvider
+    private val resourceProvider: ResourceProvider,
+    private val localeProvider: LocaleProvider
 ) {
 
     fun createCellModels(
         visibleIdsAndProperties: List<Pair<String, Property>>,
         idsAndAttachments: List<Pair<String, Attachment>>,
-        hiddenIdsAndProperties: List<Pair<String, Property>>
+        hiddenIdsAndProperties: List<Pair<String, Property>>,
+        created: Date,
+        modified: Date,
+        isHistoryButtonEnabled: Boolean
     ): List<BaseCellModel> {
         val models = mutableListOf<BaseCellModel>()
 
@@ -41,8 +49,8 @@ class NoteCellModelFactory(
             models.add(
                 NotePropertyCellModel(
                     id = cellId,
-                    name = property.name ?: StringUtils.EMPTY,
-                    value = property.value ?: StringUtils.EMPTY,
+                    name = property.name ?: EMPTY,
+                    value = property.value ?: EMPTY,
                     backgroundShape = shape,
                     backgroundColor = resourceProvider.getAttributeColor(
                         R.attr.kpSecondaryBackgroundColor
@@ -56,6 +64,35 @@ class NoteCellModelFactory(
                 models.add(createDividerCell())
             }
         }
+
+        models.add(createHistoryHeaderCell())
+        models.add(
+            NotePropertyCellModel(
+                id = "Created",
+                name = "Created",
+                value = created.formatAccordingLocale(localeProvider.getSystemLocale()),
+                backgroundShape = RoundedShape.TOP,
+                backgroundColor = resourceProvider.getAttributeColor(
+                    R.attr.kpSecondaryBackgroundColor
+                ),
+                isVisibilityButtonVisible = false,
+                isValueProtected = false
+            )
+        )
+        models.add(createDividerCell())
+        models.add(
+            NotePropertyCellModel(
+                id = "Modified",
+                name = "Modified",
+                value = modified.formatAccordingLocale(localeProvider.getSystemLocale()),
+                backgroundShape = RoundedShape.BOTTOM,
+                backgroundColor = resourceProvider.getAttributeColor(
+                    R.attr.kpSecondaryBackgroundColor
+                ),
+                isVisibilityButtonVisible = false,
+                isValueProtected = false
+            )
+        )
 
         if (idsAndAttachments.isNotEmpty()) {
             models.add(
@@ -113,8 +150,8 @@ class NoteCellModelFactory(
             models.add(
                 NotePropertyCellModel(
                     id = cellId,
-                    name = property.name ?: StringUtils.EMPTY,
-                    value = property.value ?: StringUtils.EMPTY,
+                    name = property.name ?: EMPTY,
+                    value = property.value ?: EMPTY,
                     backgroundShape = shape,
                     backgroundColor = resourceProvider.getAttributeColor(
                         R.attr.kpSecondaryBackgroundColor
@@ -141,14 +178,31 @@ class NoteCellModelFactory(
             paddingEnd = R.dimen.element_margin
         )
 
+    private fun createHistoryHeaderCell(): HeaderCellModel =
+        HeaderCellModel(
+            id = null,
+            title = resourceProvider.getString(R.string.history),
+            description = resourceProvider.getString(R.string.previous_versions),
+            isDescriptionVisible = true,
+            descriptionIconResId = R.drawable.ic_chevron_right_24dp,
+            color = resourceProvider.getAttributeColor(R.attr.kpSecondaryTextColor),
+            isBold = false,
+            isClickable = true,
+            paddingHorizontal = R.dimen.double_element_margin
+        )
+
     private fun createHeaderCell(
         title: String
     ): HeaderCellModel =
         HeaderCellModel(
             id = null,
             title = title,
+            description = EMPTY,
+            isDescriptionVisible = false,
+            descriptionIconResId = null,
             color = resourceProvider.getAttributeColor(R.attr.kpSecondaryTextColor),
             isBold = false,
+            isClickable = true,
             paddingHorizontal = R.dimen.double_element_margin
         )
 }

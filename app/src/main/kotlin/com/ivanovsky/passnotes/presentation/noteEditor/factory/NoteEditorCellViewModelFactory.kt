@@ -58,6 +58,7 @@ class NoteEditorCellViewModelFactory(
             )
             is HeaderCellModel -> HeaderCellViewModel(
                 model,
+                eventProvider,
                 resourceProvider
             )
             else -> throwUnsupportedModelException(model)

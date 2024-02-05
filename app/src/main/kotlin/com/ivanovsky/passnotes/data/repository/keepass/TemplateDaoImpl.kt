@@ -26,19 +26,19 @@ class TemplateDaoImpl(
 
     init {
         // TODO: unsubscribe may be called after db is closed
-        noteDao.contentWatcher.subscribe(object : ContentWatcher.OnEntryChangeListener<Note> {
+        noteDao.getContentWatcher().subscribe(object : ContentWatcher.OnEntryChangeListener<Note> {
             override fun onEntryChanged(oldEntry: Note, newEntry: Note) {
                 checkGroupUid(newEntry.groupUid)
             }
         })
 
-        noteDao.contentWatcher.subscribe(object : ContentWatcher.OnEntryCreateListener<Note> {
+        noteDao.getContentWatcher().subscribe(object : ContentWatcher.OnEntryCreateListener<Note> {
             override fun onEntryCreated(entry: Note) {
                 checkGroupUid(entry.groupUid)
             }
         })
 
-        noteDao.contentWatcher.subscribe(object : ContentWatcher.OnEntryRemoveListener<Note> {
+        noteDao.getContentWatcher().subscribe(object : ContentWatcher.OnEntryRemoveListener<Note> {
             override fun onEntryRemoved(entry: Note) {
                 checkGroupUid(entry.groupUid)
             }

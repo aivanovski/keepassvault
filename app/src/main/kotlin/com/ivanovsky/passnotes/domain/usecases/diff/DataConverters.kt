@@ -132,6 +132,20 @@ fun Entry.toDiffEntryEntity(): DiffEntryEntity {
     )
 }
 
+fun Note.toDiffEntryEntity(): DiffEntryEntity {
+    val fieldsMap = mutableMapOf<String, FieldEntity>()
+
+    for (property in properties) {
+        val name = property.name ?: EMPTY
+        fieldsMap[name] = FieldEntity(name, property.value ?: EMPTY)
+    }
+
+    return EntryEntity(
+        uuid = uid!!, // TODO: fix
+        fields = fieldsMap
+    )
+}
+
 fun KotpassDatabase.buildNodeTree(): TreeNode {
     val root = MutableNode(entity = this.getRawRootGroup().toDiffGroupEntity())
 
@@ -155,4 +169,8 @@ fun KotpassDatabase.buildNodeTree(): TreeNode {
     }
 
     return root
+}
+
+fun Note.buildNodeTree(): TreeNode {
+    return MutableNode(entity = this.toDiffEntryEntity())
 }

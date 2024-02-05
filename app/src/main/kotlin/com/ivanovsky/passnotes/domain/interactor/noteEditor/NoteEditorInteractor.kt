@@ -143,7 +143,7 @@ class NoteEditorInteractor(
         }
 
         val db = getDbResult.obj
-        val getAllNotesResult = db.noteDao.all
+        val getAllNotesResult = db.noteDao.getAll()
         if (getAllNotesResult.isFailed) {
             return getAllNotesResult.mapError()
         }

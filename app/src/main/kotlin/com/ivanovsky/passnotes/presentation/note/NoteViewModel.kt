@@ -23,6 +23,7 @@ import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
@@ -41,6 +42,7 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NavigationPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
+import com.ivanovsky.passnotes.presentation.history.HistoryScreenArgs
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.AttachmentCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
@@ -109,6 +111,7 @@ class NoteViewModel(
     private var noteUid: UUID = args.noteUid
     private var navigationPanelGroups: List<Group> = emptyList()
     private var isShowHiddenProperties = false
+    private var hasHistory: Boolean = false
 
     private val visiblePropertiesFilter = PropertyFilter.Builder()
         .visible()
@@ -275,6 +278,16 @@ class NoteViewModel(
                 return@launch
             }
 
+            val getHistoryResult = interactor.getHistory(noteUid)
+            if (getHistoryResult.isFailed) {
+                setScreenState(
+                    ScreenState.error(
+                        errorText = errorInteractor.processAndGetMessage(getHistoryResult.error)
+                    )
+                )
+                return@launch
+            }
+
             navigationPanelGroups = getParentsResult.getOrThrow()
             val parentItems = navigationPanelGroups.map { parent -> parent.title }
             navigationPanelViewModel.setModel(
@@ -283,7 +296,10 @@ class NoteViewModel(
                 )
             )
 
-            onNoteLoaded(note)
+            onNoteLoaded(
+                note = note,
+                hasHistory = getHistoryResult.getOrThrow().isNotEmpty()
+            )
         }
     }
 
@@ -308,11 +324,15 @@ class NoteViewModel(
 
         isShowHiddenProperties = !isShowHiddenProperties
 
-        onNoteLoaded(note)
+        onNoteLoaded(note, hasHistory)
     }
 
-    private fun onNoteLoaded(note: Note) {
+    private fun onNoteLoaded(
+        note: Note,
+        hasHistory: Boolean
+    ) {
         this.note = note
+        this.hasHistory = hasHistory
 
         actionBarTitle.value = note.title
         modifiedText.value =
@@ -342,7 +362,10 @@ class NoteViewModel(
         val models = cellModelFactory.createCellModels(
             visibleIdsAndProperties = visibleIdsAndProperties,
             idsAndAttachments = idsAndAttachments,
-            hiddenIdsAndProperties = hiddenIdsAndProperties
+            hiddenIdsAndProperties = hiddenIdsAndProperties,
+            created = note.created,
+            modified = note.modified,
+            isHistoryButtonEnabled = hasHistory
         )
 
         setCellElements(cellViewModelFactory.createCellViewModels(models, eventProvider))
@@ -393,6 +416,19 @@ class NoteViewModel(
                         ?: return@subscribe
 
                     onNavigationPanelItemClicked(index)
+                }
+
+                event.containsKey(HeaderCellViewModel.ITEM_CLICK_EVENT) -> {
+                    // TODO: move to separate method
+                    router.navigateTo(
+                        Screens.HistoryScreen(
+                            HistoryScreenArgs(
+                                appMode = args.appMode,
+                                noteUid = noteUid,
+                                autofillStructure = args.autofillStructure
+                            )
+                        )
+                    )
                 }
             }
         }

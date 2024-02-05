@@ -49,6 +49,9 @@ import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.history.HistoryInteractor
+import com.ivanovsky.passnotes.presentation.history.HistoryScreenArgs
+import com.ivanovsky.passnotes.presentation.history.HistoryViewModel
 import com.ivanovsky.passnotes.presentation.main.MainScreenArgs
 import com.ivanovsky.passnotes.presentation.main.MainViewModel
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
@@ -159,6 +162,7 @@ object UiModule {
             single { SyncStateInteractor(get(), get(), get()) }
             single { EnterDbCredentialsInteractor(get(), get(), get()) }
             single { DiffViewerInteractor(get(), get(), get(), get(), get()) }
+            single { HistoryInteractor(get()) }
 
             // Autofill
             single { AutofillViewFactory(get(), get()) }
@@ -173,7 +177,7 @@ object UiModule {
             single { UnlockCellModelFactory(get()) }
             single { UnlockCellViewModelFactory() }
 
-            single { NoteCellModelFactory(get()) }
+            single { NoteCellModelFactory(get(), get()) }
             single { NoteCellViewModelFactory(get()) }
 
             single { FilePickerCellModelFactory() }
@@ -346,6 +350,15 @@ object UiModule {
             }
             factory { (args: DiffViewerScreenArgs) ->
                 DiffViewerViewModel(get(), get(), get(), get(), get(), get(), args)
+            }
+            factory { (args: HistoryScreenArgs) ->
+                HistoryViewModel(
+                    get(),
+                    get(),
+                    get(),
+                    get(),
+                    args
+                )
             }
         }
 

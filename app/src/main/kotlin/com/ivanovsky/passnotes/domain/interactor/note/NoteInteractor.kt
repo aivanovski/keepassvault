@@ -75,6 +75,17 @@ class NoteInteractor(
             isAddCurrentGroup = true
         )
 
+    suspend fun getHistory(noteUid: UUID): OperationResult<List<Note>> =
+        withContext(dispatchers.IO) {
+            val getDbResult = getDbUseCase.getDatabaseSynchronously()
+            if (getDbResult.isFailed) {
+                return@withContext getDbResult.mapError()
+            }
+
+            val db = getDbResult.obj
+            db.noteDao.getHistory(noteUid)
+        }
+
     fun copyToClipboardWithTimeout(text: String, isProtected: Boolean) {
         clipboardInteractor.copyWithTimeout(text, isProtected, getTimeoutValueInMillis())
     }

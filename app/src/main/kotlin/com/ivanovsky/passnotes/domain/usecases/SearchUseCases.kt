@@ -36,7 +36,7 @@ class SearchUseCases(
                 return@withContext getRootResult.mapError()
             }
 
-            val getAllNotesResult = db.noteDao.all
+            val getAllNotesResult = db.noteDao.getAll()
             if (getAllNotesResult.isFailed) {
                 return@withContext getAllNotesResult.mapError()
             }

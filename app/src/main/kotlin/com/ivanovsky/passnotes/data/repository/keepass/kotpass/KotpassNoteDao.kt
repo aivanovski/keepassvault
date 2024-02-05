@@ -20,6 +20,7 @@ import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao
 import com.ivanovsky.passnotes.domain.NoteDiffer
 import com.ivanovsky.passnotes.domain.NoteDiffer.DiffAction
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.extensions.matches
@@ -134,7 +135,7 @@ class KotpassNoteDao(
                 note.copy(uid = uid)
             }
 
-            contentWatcher.notifyEntriesInserted(newNotes)
+            watcher.notifyEntriesInserted(newNotes)
 
             commitResult ?: OperationResult.success(true)
         } else {
@@ -177,11 +178,6 @@ class KotpassNoteDao(
             }
 
             var newDb = db.getRawDatabase()
-
-            val getAllNotes = all
-            if (getAllNotes.isFailed) {
-                return@withLock getAllNotes.mapError()
-            }
 
             val attachmentsDiff = differ.getAttachmentsDiff(oldNote, newNote)
             if (attachmentsDiff.isNotEmpty()) {
@@ -250,7 +246,7 @@ class KotpassNoteDao(
         }
 
         if (result.isSucceededOrDeferred) {
-            contentWatcher.notifyEntryChanged(oldNote, newNote)
+            watcher.notifyEntryChanged(oldNote, newNote)
         }
 
         return result
@@ -273,7 +269,7 @@ class KotpassNoteDao(
 
         if (result.isSucceededOrDeferred) {
             val note = result.obj
-            contentWatcher.notifyEntryRemoved(note)
+            watcher.notifyEntryRemoved(note)
         }
 
         return result.mapWithObject(true)
@@ -281,7 +277,7 @@ class KotpassNoteDao(
 
     override fun find(query: String): OperationResult<List<Note>> {
         return db.lock.withLock {
-            val allNotesResult = all
+            val allNotesResult = getAll()
             if (allNotesResult.isFailed) {
                 return@withLock allNotesResult.mapError()
             }
@@ -338,7 +334,7 @@ class KotpassNoteDao(
         }
 
         if (notifyWatcher && result.isSucceededOrDeferred) {
-            contentWatcher.notifyEntryInserted(newNote)
+            watcher.notifyEntryInserted(newNote)
         }
 
         return result
@@ -388,6 +384,28 @@ class KotpassNoteDao(
             }
 
             binaryMap
+        }
+    }
+
+    override fun getHistory(uid: UUID): OperationResult<List<Note>> {
+        return db.lock.withLock {
+            val getEntryAndGroupResult = db.getRawEntryAndGroupByUid(uid)
+            if (getEntryAndGroupResult.isFailed) {
+                return@withLock getEntryAndGroupResult.mapError()
+            }
+
+            val group = getEntryAndGroupResult.getOrThrow().first
+            val entry = getEntryAndGroupResult.getOrThrow().second
+
+            val history = entry.history
+                .map { historyEntry ->
+                    historyEntry.convertToNote(
+                        groupUid = group.uuid,
+                        allBinaries = db.getRawDatabase().binaries
+                    )
+                }
+
+            OperationResult.success(history)
         }
     }
 }

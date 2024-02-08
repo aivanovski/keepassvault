@@ -13,9 +13,11 @@ import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
+import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.dialog.AllFilesPermissionDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.requestSystemPermission
+import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
@@ -39,6 +41,7 @@ class FilePickerFragment :
     }
     private val permissionHelper: PermissionHelper by inject()
     private val args by lazy { getMandatoryArgument<FilePickerArgs>(ARGUMENTS) }
+    private lateinit var binding: FilePickerFragmentBinding
 
     override fun onPermissionRequestResult(permission: SystemPermission, isGranted: Boolean) {
         when (permission) {
@@ -79,12 +82,18 @@ class FilePickerFragment :
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return FilePickerFragmentBinding.inflate(inflater)
+        binding = FilePickerFragmentBinding.inflate(inflater)
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
                 it.viewModel = viewModel
             }
-            .root
+
+        binding.recyclerView.adapter = ViewModelsAdapter(
+            lifecycleOwner = viewLifecycleOwner,
+            viewTypes = viewModel.viewTypes
+        )
+
+        return binding.root
     }
 
     override fun onDoneMenuClicked() {
@@ -111,7 +120,15 @@ class FilePickerFragment :
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        subscribeToLiveData()
         subscribeToEvents()
+    }
+
+    private fun subscribeToLiveData() {
+        viewModel.cellViewModels.observe(viewLifecycleOwner) { viewModels ->
+            binding.recyclerView.setViewModels(viewModels)
+        }
     }
 
     private fun subscribeToEvents() {

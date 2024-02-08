@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.repository.file.AuthType
@@ -16,7 +15,9 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.databinding.StorageListFragmentBinding
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.util.FileUtils.DEFAULT_DB_NAME
@@ -36,6 +37,8 @@ class StorageListFragment : BaseFragment() {
         )
             .get(StorageListViewModel::class.java)
     }
+
+    private lateinit var binding: StorageListFragmentBinding
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -62,12 +65,18 @@ class StorageListFragment : BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return StorageListFragmentBinding.inflate(inflater)
+        binding = StorageListFragmentBinding.inflate(inflater)
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
                 it.viewModel = viewModel
             }
-            .root
+
+        binding.recyclerView.adapter = ViewModelsAdapter(
+            lifecycleOwner = viewLifecycleOwner,
+            viewTypes = viewModel.viewTypes
+        )
+
+        return binding.root
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -76,6 +85,7 @@ class StorageListFragment : BaseFragment() {
                 viewModel.navigateBack()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -88,7 +98,14 @@ class StorageListFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        subscribeToLiveData()
         subscribeToLiveEvents()
+    }
+
+    private fun subscribeToLiveData() {
+        viewModel.cellViewModels.observe(viewLifecycleOwner) { viewModels ->
+            binding.recyclerView.setViewModels(viewModels)
+        }
     }
 
     private fun subscribeToLiveEvents() {

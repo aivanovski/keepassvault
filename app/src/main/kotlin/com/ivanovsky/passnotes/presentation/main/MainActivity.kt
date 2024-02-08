@@ -23,8 +23,10 @@ import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
+import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryExtra
 import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
 import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestResultReceiver
 import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestSender
 import com.ivanovsky.passnotes.presentation.main.ActivityResultManager.LauncherType
@@ -93,6 +95,11 @@ class MainActivity :
                 it.lifecycleOwner = this
                 it.navigationViewModel = navigationViewModel
             }
+
+        binding.navigationRecyclerView.adapter = ViewModelsAdapter(
+            lifecycleOwner = this,
+            viewTypes = navigationViewModel.cellViewTypes
+        )
 
         setContentView(binding.root)
         initActionBar(R.id.toolbar)
@@ -170,6 +177,9 @@ class MainActivity :
     }
 
     private fun subscribeToLiveData() {
+        navigationViewModel.cellViewModels.observe(this) { viewModels ->
+            binding.navigationRecyclerView.setViewModels(viewModels)
+        }
         navigationViewModel.isNavigationMenuEnabled.observe(this) {
             setDrawerEnabled(it)
         }

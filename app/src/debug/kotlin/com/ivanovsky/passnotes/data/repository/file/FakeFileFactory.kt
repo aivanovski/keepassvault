@@ -64,6 +64,10 @@ class FakeFileFactory(
         return create(fsAuthority, FileUid.DEMO_MODIFIED, Time.REMOTE)
     }
 
+    fun createOtpFile(): FileDescriptor {
+        return create(fsAuthority, FileUid.OTP, Time.LOCAL)
+    }
+
     private fun create(
         fsAuthority: FSAuthority,
         uid: String,
@@ -106,6 +110,7 @@ class FakeFileFactory(
         const val AUTO_TESTS = "auto-tests"
         const val DEMO = "demo"
         const val DEMO_MODIFIED = "demo-modified"
+        const val OTP = "otp"
 
         val DEFAULT_UIDS = listOf(
             NO_CHANGES,
@@ -119,7 +124,8 @@ class FakeFileFactory(
             ERROR,
             AUTO_TESTS,
             DEMO,
-            DEMO_MODIFIED
+            DEMO_MODIFIED,
+            OTP
         )
     }
 

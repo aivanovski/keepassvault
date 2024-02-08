@@ -127,6 +127,7 @@ class FakeFileStorage(
                 val content = when (uid) {
                     FileUid.DEMO -> fileContentFactory.createDefaultLocalDatabase()
                     FileUid.DEMO_MODIFIED -> fileContentFactory.createDefaultRemoteDatabase()
+                    FileUid.OTP -> fileContentFactory.createDatabaseWithOtpData()
                     else -> fileContentFactory.createDefaultLocalDatabase()
                 }
 
@@ -169,7 +170,8 @@ class FakeFileStorage(
             fileFactory.createErrorFile(),
             fileFactory.createAutoTestsFile(),
             fileFactory.createDemoFile(),
-            fileFactory.createDemoModifiedFile()
+            fileFactory.createDemoModifiedFile(),
+            fileFactory.createOtpFile()
         )
     }
 }

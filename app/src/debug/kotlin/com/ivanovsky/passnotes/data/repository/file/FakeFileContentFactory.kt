@@ -5,14 +5,14 @@ import app.keemobile.kotpass.database.encode
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.data.repository.file.databaseDsl.EntryEntity
 import com.ivanovsky.passnotes.data.repository.file.databaseDsl.GroupEntity
-import com.ivanovsky.passnotes.data.repository.file.databaseDsl.KotpassTreeDsl
+import com.ivanovsky.passnotes.data.repository.file.databaseDsl.KotpassTreeDsl.tree
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 class FakeFileContentFactory {
 
     fun createDefaultLocalDatabase(): ByteArray {
-        return KotpassTreeDsl.tree(ROOT) {
+        return tree(ROOT) {
             group(GROUP_EMAIL)
             group(GROUP_INTERNET) {
                 group(GROUP_CODING) {
@@ -37,7 +37,7 @@ class FakeFileContentFactory {
     }
 
     fun createDefaultRemoteDatabase(): ByteArray {
-        return KotpassTreeDsl.tree(ROOT) {
+        return tree(ROOT) {
             group(GROUP_EMAIL)
             group(GROUP_INTERNET) {
                 group(GROUP_CODING) {
@@ -64,6 +64,14 @@ class FakeFileContentFactory {
             .toByteArray()
     }
 
+    fun createDatabaseWithOtpData(): ByteArray {
+        return tree(ROOT) {
+            entry(ENTRY_TOTP)
+            entry(ENTRY_HOTP)
+        }
+            .toByteArray()
+    }
+
     private fun KeePassDatabase.toByteArray(): ByteArray {
         return ByteArrayOutputStream().use { out ->
             this.encode(out)
@@ -79,6 +87,16 @@ class FakeFileContentFactory {
         private val GROUP_GAMING = GroupEntity(title = "Gaming", uuid = UUID(100L, 4L))
         private val GROUP_SHOPPING = GroupEntity(title = "Shopping", uuid = UUID(100L, 5L))
         private val GROUP_SOCIAL = GroupEntity(title = "Social", uuid = UUID(100L, 7L))
+
+        private val TOTP_URL = """
+            otpauth://totp/Example:john.doe?secret=AAAABBBBCCCCDDDD&period=30
+            &digits=6&issuer=Example&algorithm=SHA1
+            """.trimIndent()
+
+        private val HOTP_URL = """
+            otpauth://hotp/Example:john.doe?secret=AAAABBBBCCCCDDDD&digits=6
+            &issuer=Example&algorithm=SHA1&counter=1
+        """.trimIndent()
 
         private val ENTRY_NAS_LOGIN = EntryEntity(
             title = "NAS Login",
@@ -191,6 +209,28 @@ class FakeFileContentFactory {
             modified = parseDate("2020-01-09"),
             custom = mapOf(
                 PropertyType.URL.propertyName to "https://amazon.com"
+            )
+        )
+
+        private val ENTRY_TOTP = EntryEntity(
+            title = "TOTP Entry",
+            username = "john.doe@example.com",
+            password = "",
+            created = parseDate("2020-01-09"),
+            modified = parseDate("2020-01-09"),
+            custom = mapOf(
+                "otp" to TOTP_URL
+            )
+        )
+
+        private val ENTRY_HOTP = EntryEntity(
+            title = "HOTP Entry",
+            username = "john.doe@example.com",
+            password = "",
+            created = parseDate("2020-01-09"),
+            modified = parseDate("2020-01-09"),
+            custom = mapOf(
+                "otp" to HOTP_URL
             )
         )
     }

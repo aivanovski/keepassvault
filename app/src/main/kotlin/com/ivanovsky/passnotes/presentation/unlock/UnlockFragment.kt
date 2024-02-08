@@ -12,11 +12,13 @@ import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding
 import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
+import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
+import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
@@ -56,6 +58,11 @@ class UnlockFragment : BaseFragment() {
                 it.viewModel = viewModel
             }
 
+        binding.recyclerView.adapter = ViewModelsAdapter(
+            lifecycleOwner = viewLifecycleOwner,
+            viewTypes = viewModel.fileCellTypes
+        )
+
         return binding.root
     }
 
@@ -67,12 +74,20 @@ class UnlockFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        subscribeToLiveData()
         subscribeToLiveEvents()
 
         viewModel.loadData(
             isResetSelection = false,
             isShowKeyboard = true
         )
+    }
+
+    private fun subscribeToLiveData() {
+        viewModel.fileCellViewModels.observe(viewLifecycleOwner) { viewModels ->
+            binding.recyclerView.setViewModels(viewModels)
+        }
     }
 
     private fun subscribeToLiveEvents() {

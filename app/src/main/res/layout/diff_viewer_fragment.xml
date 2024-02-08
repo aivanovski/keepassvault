@@ -123,8 +123,6 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/compareButton"
-                app:viewModels="@{viewModel.cellViewModels}"
-                app:viewTypes="@{viewModel.viewTypes}"
                 app:visible="@{!viewModel.isButtonsVisible}" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

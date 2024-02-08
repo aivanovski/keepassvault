@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
-import androidx.lifecycle.observe
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.NoteEditorFragmentBinding
@@ -16,10 +15,12 @@ import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
+import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
 import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
@@ -39,18 +40,25 @@ class NoteEditorFragment : FragmentWithDoneButton() {
     )
     private val router: Router by inject()
     private var backCallback: OnBackPressedCallback? = null
+    private lateinit var binding: NoteEditorFragmentBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return NoteEditorFragmentBinding.inflate(inflater, container, false)
+        binding = NoteEditorFragmentBinding.inflate(inflater, container, false)
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
                 it.viewModel = viewModel
             }
-            .root
+
+        binding.recyclerView.adapter = ViewModelsAdapter(
+            lifecycleOwner = viewLifecycleOwner,
+            viewTypes = viewModel.viewTypes
+        )
+
+        return binding.root
     }
 
     override fun onDoneMenuClicked() {
@@ -103,6 +111,9 @@ class NoteEditorFragment : FragmentWithDoneButton() {
     }
 
     private fun subscribeToLiveData() {
+        viewModel.cellViewModels.observe(viewLifecycleOwner) { viewModels ->
+            binding.recyclerView.setViewModels(viewModels)
+        }
         viewModel.isDoneButtonVisible.observe(viewLifecycleOwner) { isVisible ->
             setDoneButtonVisibility(isVisible)
         }

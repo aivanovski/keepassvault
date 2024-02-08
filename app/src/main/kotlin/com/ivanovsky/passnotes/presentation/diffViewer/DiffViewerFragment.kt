@@ -10,7 +10,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.DiffViewerFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
+import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
@@ -29,18 +31,27 @@ class DiffViewerFragment : Fragment() {
         )[DiffViewerViewModel::class.java]
     }
 
+    private lateinit var binding: DiffViewerFragmentBinding
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = DiffViewerFragmentBinding.inflate(inflater, container, false)
+        binding = DiffViewerFragmentBinding.inflate(inflater, container, false)
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
                 it.viewModel = viewModel
             }
 
-        binding.recyclerView.itemAnimator = null
+        binding.recyclerView
+            .apply {
+                adapter = ViewModelsAdapter(
+                    lifecycleOwner = viewLifecycleOwner,
+                    viewTypes = viewModel.viewTypes
+                )
+                itemAnimator = null
+            }
 
         return binding.root
     }
@@ -57,6 +68,8 @@ class DiffViewerFragment : Fragment() {
             setHomeAsUpIndicator(null)
         }
 
+        subscribeToLiveData()
+
         viewModel.start()
     }
 
@@ -64,6 +77,12 @@ class DiffViewerFragment : Fragment() {
         val action = MENU_ACTIONS[item.itemId] ?: throw IllegalArgumentException()
         action.invoke(viewModel)
         return true
+    }
+
+    private fun subscribeToLiveData() {
+        viewModel.cellViewModels.observe(viewLifecycleOwner) { viewModels ->
+            binding.recyclerView.setViewModels(viewModels)
+        }
     }
 
     companion object {

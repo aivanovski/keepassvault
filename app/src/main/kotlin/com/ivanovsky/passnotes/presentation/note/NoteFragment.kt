@@ -9,7 +9,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.observe
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
@@ -20,11 +19,13 @@ import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.autofill.AutofillDialogFactory
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
+import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.openUrl
 import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
+import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
@@ -52,6 +53,7 @@ class NoteFragment : BaseFragment() {
     }
     private val router: Router by inject()
     private var menu: Menu? = null
+    private lateinit var binding: NoteFragmentBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -116,12 +118,18 @@ class NoteFragment : BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return NoteFragmentBinding.inflate(inflater, container, false)
+        binding = NoteFragmentBinding.inflate(inflater, container, false)
             .also {
                 it.lifecycleOwner = viewLifecycleOwner
                 it.viewModel = viewModel
             }
-            .root
+
+        binding.recyclerView.adapter = ViewModelsAdapter(
+            lifecycleOwner = viewLifecycleOwner,
+            viewTypes = viewModel.viewTypes
+        )
+
+        return binding.root
     }
 
     override fun onStart() {
@@ -140,6 +148,9 @@ class NoteFragment : BaseFragment() {
     }
 
     private fun subscribeToLiveData() {
+        viewModel.cellViewModels.observe(viewLifecycleOwner) { viewModels ->
+            binding.recyclerView.setViewModels(viewModels)
+        }
         viewModel.visibleMenuItems.observe(viewLifecycleOwner) { visibleItems ->
             menu?.let { menu ->
                 updateMenuItemVisibility(

@@ -41,9 +41,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/errorPanelView"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}"
-            app:viewModels="@{viewModel.cellViewModels}"
-            app:viewTypes="@{viewModel.viewTypes}" />
+            app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

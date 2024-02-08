@@ -66,9 +66,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:viewModels="@{navigationViewModel.cellViewModels}"
-                app:viewTypes="@{navigationViewModel.cellViewTypes}" />
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         </FrameLayout>
 

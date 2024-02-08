@@ -22,7 +22,6 @@ import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
@@ -35,7 +34,6 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.adapter.StringArraySpinnerAdapter
-import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.widget.CellLinearLayout
 import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
 import com.ivanovsky.passnotes.presentation.core.widget.SecureTextView
@@ -52,7 +50,6 @@ import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PASSWORD
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PLANE_TEXT
-import com.ivanovsky.passnotes.util.getLifecycleOwner
 
 @BindingAdapter("screenState", "screenStateHandler")
 fun setScreenState(
@@ -63,28 +60,6 @@ fun setScreenState(
     val screenState = screenStateData.value ?: return
 
     screenStateHandler.applyScreenState(view, screenState)
-}
-
-@BindingAdapter("viewModels", "viewTypes")
-fun setViewModel(
-    recyclerView: RecyclerView,
-    viewModelsData: List<BaseCellViewModel>?,
-    viewTypes: ViewModelTypes
-) {
-    val lifecycleOwner = recyclerView.context.getLifecycleOwner()
-        ?: throw IllegalStateException("context doesn't have LifecycleOwner")
-
-    val adapter = (recyclerView.adapter as? ViewModelsAdapter)
-        ?: ViewModelsAdapter(
-            lifecycleOwner,
-            viewTypes
-        ).also {
-            recyclerView.adapter = it
-        }
-
-    viewModelsData?.let { viewModels ->
-        adapter.updateItems(viewModels)
-    }
 }
 
 @BindingAdapter("viewModels", "viewTypes")

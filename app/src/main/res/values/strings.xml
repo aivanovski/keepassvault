@@ -201,6 +201,7 @@
     <string name="view">View</string>
     <string name="view_as_text">View as text</string>
     <string name="share">Share</string>
+    <string name="one_time_password">One-time password</string>
 
     <!-- Note editor screen -->
     <string name="new_note">New note</string>

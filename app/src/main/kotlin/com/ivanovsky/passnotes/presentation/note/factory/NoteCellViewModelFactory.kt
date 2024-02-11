@@ -13,8 +13,10 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.model.AttachmentCellModel
 import com.ivanovsky.passnotes.presentation.note.cells.model.NotePropertyCellModel
+import com.ivanovsky.passnotes.presentation.note.cells.model.OtpPropertyCellModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.AttachmentCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel
+import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.OtpPropertyCellViewModel
 
 class NoteCellViewModelFactory(
     private val resourceProvider: ResourceProvider
@@ -26,6 +28,10 @@ class NoteCellViewModelFactory(
     ): BaseCellViewModel {
         return when (model) {
             is NotePropertyCellModel -> NotePropertyCellViewModel(
+                model,
+                eventProvider
+            )
+            is OtpPropertyCellModel -> OtpPropertyCellViewModel(
                 model,
                 eventProvider
             )

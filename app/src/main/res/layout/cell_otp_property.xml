@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.note.cells.viewmodel.OtpPropertyCellViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/element_margin"
+        android:foreground="?attr/selectableItemBackground"
+        android:onClick="@{() -> viewModel.onClicked()}"
+        app:backgroundShape="@{viewModel.model.backgroundShape}"
+        app:backgroundShapeColor="@{viewModel.model.backgroundColor}">
+
+        <TextView
+            android:id="@+id/name"
+            style="@style/Material.SecondaryText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:layout_marginTop="@dimen/element_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:text="@{viewModel.title}"
+            app:layout_constraintBottom_toTopOf="@id/value"
+            app:layout_constraintEnd_toStartOf="@id/progress"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed"
+            tools:text="TOTP" />
+
+        <TextView
+            android:id="@+id/value"
+            style="@style/Material.PrimaryText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:layout_marginBottom="@dimen/element_margin"
+            android:text="@{viewModel.code}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/progress"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/name"
+            tools:text="default@gmail.com" />
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/half_margin"
+            android:progress="@{viewModel.progress}"
+            app:indicatorSize="@dimen/small_progress_bar_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.isProgressVisible}"
+            tools:progress="50" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

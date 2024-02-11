@@ -186,6 +186,7 @@ class NoteEditorViewModel(
                     showDiscardDialogEvent.call(resources.getString(R.string.discard_changes))
                 }
             }
+
             NoteEditorMode.EDIT -> {
                 val sourceNote = note ?: return
                 val sourceTemplate = template
@@ -213,30 +214,36 @@ class NoteEditorViewModel(
                         resources.getString(R.string.title)
                     )
                 }
+
                 PropertyType.PASSWORD -> {
                     Pair(
                         AddDialogItem.PASSWORD,
                         resources.getString(R.string.password)
                     )
                 }
+
                 PropertyType.USER_NAME -> {
                     Pair(
                         AddDialogItem.USER_NAME,
                         resources.getString(R.string.username)
                     )
                 }
+
                 PropertyType.URL -> {
                     Pair(
                         AddDialogItem.URL,
                         resources.getString(R.string.url_cap)
                     )
                 }
+
                 PropertyType.NOTES -> {
                     Pair(
                         AddDialogItem.NOTES,
                         resources.getString(R.string.notes)
                     )
                 }
+
+                else -> throw IllegalStateException()
             }
 
             dialogItems.add(item)
@@ -273,7 +280,7 @@ class NoteEditorViewModel(
                 )
             )
         } else {
-            val newModel = modelFactory.createCustomPropertyModels(item.propertyType)
+            val newModel = modelFactory.createCustomPropertyModel(item.propertyType)
             val newViewModel = viewModelFactory.createCellViewModel(newModel, eventProvider)
 
             setCellElements(insertPropertyCell(getViewModels(), newViewModel))
@@ -386,6 +393,7 @@ class NoteEditorViewModel(
                         setCellElements(removeCellById(getViewModels(), cellId))
                     }
                 }
+
                 event.containsKey(SecretPropertyCellViewModel.GENERATE_CLICK_EVENT) -> {
                     val cellId = event.getString(SecretPropertyCellViewModel.GENERATE_CLICK_EVENT)
                     if (cellId != null) {
@@ -397,6 +405,7 @@ class NoteEditorViewModel(
                         router.navigateTo(PasswordGeneratorScreen())
                     }
                 }
+
                 event.containsKey(AttachmentCellViewModel.REMOVE_ICON_CLICK_EVENT) -> {
                     val attachmentUid =
                         event.getString(AttachmentCellViewModel.REMOVE_ICON_CLICK_EVENT)

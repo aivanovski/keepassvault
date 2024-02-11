@@ -3,7 +3,9 @@ package com.ivanovsky.passnotes.presentation.note.factory
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Property
+import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.otp.OtpUriFactory
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.DividerCellModel
 import com.ivanovsky.passnotes.presentation.core.model.HeaderCellModel
@@ -11,6 +13,7 @@ import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
 import com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape
 import com.ivanovsky.passnotes.presentation.note.cells.model.AttachmentCellModel
 import com.ivanovsky.passnotes.presentation.note.cells.model.NotePropertyCellModel
+import com.ivanovsky.passnotes.presentation.note.cells.model.OtpPropertyCellModel
 import com.ivanovsky.passnotes.util.StringUtils
 
 class NoteCellModelFactory(
@@ -38,19 +41,40 @@ class NoteCellModelFactory(
                 else -> RoundedShape.NONE
             }
 
-            models.add(
-                NotePropertyCellModel(
-                    id = cellId,
-                    name = property.name ?: StringUtils.EMPTY,
-                    value = property.value ?: StringUtils.EMPTY,
-                    backgroundShape = shape,
-                    backgroundColor = resourceProvider.getAttributeColor(
-                        R.attr.kpSecondaryBackgroundColor
-                    ),
-                    isVisibilityButtonVisible = property.isProtected,
-                    isValueProtected = property.isProtected
-                )
-            )
+            val otpToken = if (property.type == PropertyType.OTP && property.value != null) {
+                OtpUriFactory.parseUri(property.value)
+            } else {
+                null
+            }
+
+            val model = when {
+                otpToken != null -> {
+                    OtpPropertyCellModel(
+                        id = cellId,
+                        title = resourceProvider.getString(R.string.one_time_password),
+                        token = otpToken,
+                        backgroundShape = shape,
+                        backgroundColor = resourceProvider.getAttributeColor(
+                            R.attr.kpSecondaryBackgroundColor
+                        )
+                    )
+                }
+
+                else -> {
+                    NotePropertyCellModel(
+                        id = cellId,
+                        name = property.name ?: StringUtils.EMPTY,
+                        value = property.value ?: StringUtils.EMPTY,
+                        backgroundShape = shape,
+                        backgroundColor = resourceProvider.getAttributeColor(
+                            R.attr.kpSecondaryBackgroundColor
+                        ),
+                        isVisibilityButtonVisible = property.isProtected,
+                        isValueProtected = property.isProtected
+                    )
+                }
+            }
+            models.add(model)
 
             if (idx < visibleIdsAndProperties.lastIndex) {
                 models.add(createDividerCell())

@@ -5,7 +5,7 @@ import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
-import com.ivanovsky.passnotes.data.entity.PropertyType.DEFAULT_TYPES
+import com.ivanovsky.passnotes.data.entity.PropertyType.Companion.DEFAULT_TYPES
 import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffEvent
 import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffEventType
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -125,8 +125,9 @@ class DiffSorter {
             PropertyType.TITLE to 1,
             PropertyType.USER_NAME to 2,
             PropertyType.PASSWORD to 3,
-            PropertyType.URL to 4,
-            PropertyType.NOTES to 5
+            PropertyType.OTP to 4,
+            PropertyType.URL to 5,
+            PropertyType.NOTES to 6
         )
     }
 }

@@ -89,7 +89,7 @@ class NoteEditorCellModelFactory(
         }
     }
 
-    fun createCustomPropertyModels(type: PropertyType?): BaseCellModel {
+    fun createCustomPropertyModel(type: PropertyType?): BaseCellModel {
         return when (type) {
             PropertyType.TITLE,
             PropertyType.PASSWORD,
@@ -298,6 +298,7 @@ class NoteEditorCellModelFactory(
             PropertyType.USER_NAME -> createUserNameCell(value)
             PropertyType.URL -> createUrlCell(value)
             PropertyType.NOTES -> createNotesCell(value)
+            PropertyType.OTP -> createCustomPropertyModel(type)
         }
     }
 

@@ -24,7 +24,9 @@ class ActivityResultManager(
 
     override fun onCreate(owner: LifecycleOwner) {
         for (launcherType in ALL_LAUNCHER_TYPES) {
-            launchers[launcherType] = registerLauncher(launcherType)
+            if (launcherType.minSdk == null || Build.VERSION.SDK_INT >= launcherType.minSdk) {
+                launchers[launcherType] = registerLauncher(launcherType)
+            }
         }
     }
 

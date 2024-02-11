@@ -10,7 +10,7 @@ import com.ivanovsky.passnotes.util.toLongSafely
 
 object OtpUriFactory {
 
-    const val SCHEME = "otpauth"
+    private const val SCHEME = "otpauth"
 
     private const val URL_PARAM_ISSUER = "issuer"
     private const val URL_PARAM_SECRET = "secret"
@@ -135,7 +135,7 @@ object OtpUriFactory {
         type: OtpTokenType?,
         secret: String?,
         counter: Long?,
-        digits: Int?,
+        digits: Int?
     ): Boolean {
         return type == OtpTokenType.HOTP &&
             !secret.isNullOrEmpty() &&
@@ -163,5 +163,4 @@ object OtpUriFactory {
             else -> (null to null)
         }
     }
-
 }

@@ -101,7 +101,7 @@ class OtpUriFactoryTest {
                     secret = SECRET,
                     issuer = ISSUER
                 )
-            ),
+            )
         )
             .forEach { (uri, expected) ->
                 val result = OtpUriFactory.parseUri(uri)
@@ -146,7 +146,7 @@ class OtpUriFactoryTest {
             "otpauth://hotp/$NAME?secret=$SECRET", // no counter
 
             "otpauth://totp/$NAME?secret=$SECRET&period=$INVALID_PERIOD", // invalid period value
-            "otpauth://totp/$NAME?secret=$SECRET&digits=$INVALID_DIGITS", // invalid digits value
+            "otpauth://totp/$NAME?secret=$SECRET&digits=$INVALID_DIGITS" // invalid digits value
         )
             .forEach { uri ->
                 val result = OtpUriFactory.parseUri(uri)

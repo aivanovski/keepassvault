@@ -13,7 +13,7 @@ class TotpGenerator(
     private val generator = ExternalTotpGenerator(
         algorithm = token.algorithm.toExternalAlgorithm(),
         codeLength = token.digits,
-        timePeriod = Duration.ofSeconds((token.periodInSeconds ?: 0).toLong()),
+        timePeriod = Duration.ofSeconds((token.periodInSeconds ?: 0).toLong())
     )
 
     val periodInMillis = (token.periodInSeconds ?: 0) * 1000L

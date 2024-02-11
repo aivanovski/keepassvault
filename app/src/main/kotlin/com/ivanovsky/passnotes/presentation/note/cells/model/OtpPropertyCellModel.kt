@@ -9,5 +9,5 @@ data class OtpPropertyCellModel(
     val title: String,
     val token: OtpToken,
     val backgroundShape: RoundedShape,
-    val backgroundColor: Int,
+    val backgroundColor: Int
 ) : BaseCellModel()

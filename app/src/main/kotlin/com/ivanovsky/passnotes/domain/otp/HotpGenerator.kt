@@ -9,7 +9,7 @@ class HotpGenerator(
 
     private val generator = ExternalHotpGenerator(
         algorithm = token.algorithm.toExternalAlgorithm(),
-        codeLength = token.digits,
+        codeLength = token.digits
     )
 
     override fun generateCode(): String {

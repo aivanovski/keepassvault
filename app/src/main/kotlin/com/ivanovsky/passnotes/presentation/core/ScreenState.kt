@@ -1,52 +1,52 @@
 package com.ivanovsky.passnotes.presentation.core
 
 data class ScreenState private constructor(
-    val screenDisplayingType: ScreenDisplayingType,
+    val type: ScreenStateType,
     val emptyText: String? = null,
     val errorText: String? = null,
     val errorButtonText: String? = null
 ) {
 
     val isDisplayingData: Boolean
-        get() = screenDisplayingType == ScreenDisplayingType.DATA ||
-            screenDisplayingType == ScreenDisplayingType.DATA_WITH_ERROR
+        get() = type == ScreenStateType.DATA ||
+            type == ScreenStateType.DATA_WITH_ERROR
 
     val isDisplayingLoading: Boolean
-        get() = screenDisplayingType == ScreenDisplayingType.LOADING
+        get() = type == ScreenStateType.LOADING
 
     val isDisplayingEmptyState: Boolean
-        get() = screenDisplayingType == ScreenDisplayingType.EMPTY
+        get() = type == ScreenStateType.EMPTY
 
     val isNotInitialized: Boolean
-        get() = screenDisplayingType == ScreenDisplayingType.NOT_INITIALIZED
+        get() = type == ScreenStateType.NOT_INITIALIZED
 
     val isDisplayingError: Boolean
-        get() = screenDisplayingType == ScreenDisplayingType.ERROR
+        get() = type == ScreenStateType.ERROR
 
     companion object {
 
         fun data(): ScreenState {
-            return ScreenState(ScreenDisplayingType.DATA)
+            return ScreenState(ScreenStateType.DATA)
         }
 
         fun loading(): ScreenState {
-            return ScreenState(ScreenDisplayingType.LOADING)
+            return ScreenState(ScreenStateType.LOADING)
         }
 
         fun empty(emptyText: String?): ScreenState {
             return ScreenState(
-                ScreenDisplayingType.EMPTY,
+                ScreenStateType.EMPTY,
                 emptyText = emptyText
             )
         }
 
         fun notInitialized(): ScreenState {
-            return ScreenState(ScreenDisplayingType.NOT_INITIALIZED)
+            return ScreenState(ScreenStateType.NOT_INITIALIZED)
         }
 
         fun error(errorText: String?): ScreenState {
             return ScreenState(
-                ScreenDisplayingType.ERROR,
+                ScreenStateType.ERROR,
                 emptyText = null,
                 errorText = errorText
             )
@@ -54,7 +54,7 @@ data class ScreenState private constructor(
 
         fun dataWithError(errorText: String?, errorButtonText: String? = null): ScreenState {
             return ScreenState(
-                ScreenDisplayingType.DATA_WITH_ERROR,
+                ScreenStateType.DATA_WITH_ERROR,
                 emptyText = null,
                 errorText = errorText,
                 errorButtonText = errorButtonText

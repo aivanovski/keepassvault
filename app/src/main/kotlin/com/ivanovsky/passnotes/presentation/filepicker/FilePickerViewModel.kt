@@ -352,12 +352,6 @@ class FilePickerViewModel(
             (currentScreenState.isDisplayingData || currentScreenState.isDisplayingEmptyState)
     }
 
-    private fun shouldReloadData(): Boolean {
-        val currentScreenState = screenState.value ?: return false
-
-        return !currentScreenState.isDisplayingData && !currentScreenState.isDisplayingLoading
-    }
-
     class Factory(private val args: FilePickerArgs) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")

@@ -5,7 +5,9 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.MutableLiveData
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Property
+import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.otp.OtpUriFactory
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.binding.OnTextChangeListener
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
@@ -81,8 +83,17 @@ class ExtendedTextPropertyCellViewModel(
 
     override fun createProperty(): Property {
         val (name, value) = getNameAndValue()
+
+        val type = if (name == PropertyType.OTP.propertyName
+            && OtpUriFactory.parseUri(value) != null
+        ) {
+            PropertyType.OTP
+        } else {
+            null
+        }
+
         return Property(
-            type = null,
+            type = type,
             name = name,
             value = value,
             isProtected = isProtectedInternal()
@@ -146,7 +157,6 @@ class ExtendedTextPropertyCellViewModel(
         return isCollapsedInternal() || getPrimaryTextInternal().isNotEmpty()
     }
 
-    @VisibleForTesting
     fun getNameAndValue(): Pair<String, String> {
         return if (isCollapsedInternal()) {
             Pair(getPrimaryHintInternal(), getPrimaryTextInternal())

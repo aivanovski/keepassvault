@@ -17,7 +17,9 @@ object StringUtils {
     const val SLASH = '/'
     const val QUESTION_MARK = '?'
     const val COLON = ':'
+    const val COLON_URL_ENCODED = "%3A"
     const val AMPERSAND = '&'
+    const val EQUALS = '='
 
     private val UNITS = listOf("B", "KB", "MB", "GB", "TB")
 

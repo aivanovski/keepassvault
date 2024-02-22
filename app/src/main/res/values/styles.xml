@@ -12,6 +12,8 @@
     <attr name="kpIconSecondaryColor" format="reference|color" />
     <attr name="kpIconSecondaryBackgroundColor" format="reference|color" />
     <attr name="kpIconImportantColor" format="reference|color" />
+    <attr name="kpProgressColor" format="reference|color" />
+    <attr name="kpProgressSecondaryColor" format="reference|color"/>
     <attr name="kpPrimaryColor" format="reference|color" />
     <attr name="kpPrimaryTextColor" format="reference|color" />
     <attr name="kpSecondaryTextColor" format="reference|color" />
@@ -53,6 +55,8 @@
         <item name="kpIconSecondaryBackgroundColor">@color/secondary_icon_background</item>
         <item name="kpIconSecondaryColor">@color/secondary_icon</item>
         <item name="kpIconImportantColor">@color/important_icon</item>
+        <item name="kpProgressColor">@color/progress</item>
+        <item name="kpProgressSecondaryColor">@color/progress_secondary</item>
         <item name="kpPrimaryColor">@color/primary</item>
         <item name="kpPrimaryTextColor">@color/primary_text</item>
         <item name="kpSecondaryTextColor">@color/secondary_text</item>
@@ -94,6 +98,7 @@
     <style name="Material.ProgressBar" parent="@style/Base.Widget.AppCompat.ProgressBar">
         <item name="android:minWidth">@dimen/progress_bar_size</item>
         <item name="android:minHeight">@dimen/progress_bar_size</item>
+        <item name="android:indeterminateTint">@color/progress</item>
     </style>
 
     <style name="Material.Navigation"></style>

@@ -1,10 +1,20 @@
 package com.ivanovsky.passnotes.domain.otp
 
 import android.net.Uri
+import com.ivanovsky.passnotes.domain.otp.OtpParametersValidator.isCounterValid
+import com.ivanovsky.passnotes.domain.otp.OtpParametersValidator.isDigitsValid
+import com.ivanovsky.passnotes.domain.otp.OtpParametersValidator.isPeriodValid
+import com.ivanovsky.passnotes.domain.otp.OtpParametersValidator.isSecretValid
 import com.ivanovsky.passnotes.domain.otp.model.HashAlgorithmType
 import com.ivanovsky.passnotes.domain.otp.model.OtpToken
 import com.ivanovsky.passnotes.domain.otp.model.OtpTokenType
+import com.ivanovsky.passnotes.util.StringUtils.AMPERSAND
+import com.ivanovsky.passnotes.util.StringUtils.COLON
+import com.ivanovsky.passnotes.util.StringUtils.COLON_URL_ENCODED
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
+import com.ivanovsky.passnotes.util.StringUtils.EQUALS
+import com.ivanovsky.passnotes.util.StringUtils.QUESTION_MARK
+import com.ivanovsky.passnotes.util.StringUtils.SLASH
 import com.ivanovsky.passnotes.util.toIntSafely
 import com.ivanovsky.passnotes.util.toLongSafely
 
@@ -19,9 +29,44 @@ object OtpUriFactory {
     private const val URL_PARAM_COUNTER = "counter"
     private const val URL_PARAM_ALGORITHM = "algorithm"
 
-    private val HOTP_COUNTER_RANGE = 0..Long.MAX_VALUE
-    private val TOTP_PERIOD_RANGE = 1..900
-    private val DIGITS_RANGE = 4..18
+    fun createUri(token: OtpToken): String {
+        return StringBuilder()
+            .apply {
+                append(SCHEME).append("://").append(token.type.rfcName)
+
+                if (token.name.isNotEmpty() && token.issuer.isNotEmpty()) {
+                    append(SLASH)
+                    append(token.issuer).append(COLON_URL_ENCODED).append(token.name)
+                } else if (token.name.isNotEmpty()) {
+                    append(SLASH)
+                    append(token.name)
+                }
+
+                append(QUESTION_MARK)
+
+                val parameters = mutableMapOf(
+                    URL_PARAM_SECRET to token.secret,
+                    URL_PARAM_COUNTER to token.counter?.toString(),
+                    URL_PARAM_DIGITS to token.digits.toString(),
+                    URL_PARAM_PERIOD to token.periodInSeconds?.toString(),
+                    URL_PARAM_ALGORITHM to token.algorithm.rfcName,
+                    URL_PARAM_ISSUER to token.issuer
+                )
+
+                for ((key, value) in parameters) {
+                    if (value.isNullOrEmpty()) {
+                        continue
+                    }
+
+                    if (get(lastIndex) != QUESTION_MARK) {
+                        append(AMPERSAND)
+                    }
+
+                    append(key).append(EQUALS).append(value)
+                }
+            }
+            .toString()
+    }
 
     fun parseUri(otpUri: String): OtpToken? {
         if (otpUri.isBlank()) {
@@ -77,7 +122,6 @@ object OtpUriFactory {
 
         val isValidTotpToken = isValidTotpParams(
             type = type,
-            name = name,
             secret = secret,
             digits = digits,
             period = period
@@ -119,16 +163,14 @@ object OtpUriFactory {
 
     private fun isValidTotpParams(
         type: OtpTokenType?,
-        name: String?,
         secret: String?,
         digits: Int?,
         period: Int?
     ): Boolean {
         return type == OtpTokenType.TOTP &&
-            !name.isNullOrEmpty() &&
-            !secret.isNullOrEmpty() &&
-            (digits == null || digits in DIGITS_RANGE) &&
-            (period == null || period in TOTP_PERIOD_RANGE)
+            isSecretValid(secret) &&
+            (digits == null || isDigitsValid(digits)) &&
+            (period == null || isPeriodValid(period))
     }
 
     private fun isValidHotpTokenParams(
@@ -138,13 +180,13 @@ object OtpUriFactory {
         digits: Int?
     ): Boolean {
         return type == OtpTokenType.HOTP &&
-            !secret.isNullOrEmpty() &&
-            (counter != null && counter in HOTP_COUNTER_RANGE) &&
-            (digits == null || digits in DIGITS_RANGE)
+            isSecretValid(secret) &&
+            isCounterValid(counter) &&
+            (digits == null || digits in OtpToken.DIGITS_RANGE)
     }
 
     private fun parsePath(path: String?): Pair<String?, String?> {
-        if (path.isNullOrEmpty() || !path.startsWith("/")) {
+        if (path.isNullOrEmpty() || !path.startsWith(SLASH)) {
             return (null to null)
         }
 
@@ -153,7 +195,7 @@ object OtpUriFactory {
             return (null to null)
         }
 
-        val values = cleanPath.split(":", "%3A")
+        val values = cleanPath.split(COLON.toString(), COLON_URL_ENCODED)
             .map { value -> value.trim() }
             .filter { value -> value.isNotEmpty() }
 

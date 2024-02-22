@@ -20,6 +20,7 @@ import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
+import com.ivanovsky.passnotes.domain.otp.OtpUriFactory
 import com.ivanovsky.passnotes.extensions.toByteString
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import java.time.Instant
@@ -34,10 +35,12 @@ fun GroupOverride.convertToInheritableOption(parentValue: Boolean): InheritableB
             isEnabled = true,
             isInheritValue = false
         )
+
         GroupOverride.Disabled -> InheritableBooleanOption(
             isEnabled = false,
             isInheritValue = false
         )
+
         GroupOverride.Inherit -> InheritableBooleanOption(
             isEnabled = parentValue,
             isInheritValue = true
@@ -87,7 +90,7 @@ fun RawEntry.convertToNote(
     val attachments = mutableListOf<Attachment>()
 
     for (field in fields.entries) {
-        val type = PropertyType.getByName(field.key)
+        val type = determinePropertyType(field.key, field.value.content)
 
         properties.add(
             Property(
@@ -123,6 +126,20 @@ fun RawEntry.convertToNote(
         properties = properties,
         attachments = attachments
     )
+}
+
+private fun determinePropertyType(name: String, value: String): PropertyType? {
+    val type = PropertyType.getByName(name) ?: return null
+
+    return if (type == PropertyType.OTP) {
+        if (OtpUriFactory.parseUri(value) != null) {
+            PropertyType.OTP
+        } else {
+            null
+        }
+    } else {
+        type
+    }
 }
 
 private fun RawEntry.getCreationTime(): Long {

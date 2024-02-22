@@ -343,4 +343,17 @@
     <!-- Enter database credentials screen -->
     <string name="type_a_password">Type a password</string>
 
+    <!-- Setup one-time password screen -->
+    <string name="add_one_time_password">Add one-time password</string>
+    <string name="secret">Secret</string>
+    <string name="type">Type</string>
+    <string name="algorithm">Algorithm</string>
+    <string name="generation_interval">Generation interval</string>
+    <string name="code_length">Code length</string>
+    <string name="counter">Counter</string>
+    <string name="generation_interval_invalid_value_message">Should be a value between 1 and 900</string>
+    <string name="counter_invalid_value_message">Should be a positive value or 0</string>
+    <string name="code_length_invalid_value_message">Should be a value between 4 and 18</string>
+    <string name="empty_value_message">Should not be an empty value</string>
+
 </resources>

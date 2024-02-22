@@ -80,9 +80,11 @@ class NoteEditorCellModelFactory(
             isTemplateNote(note) -> {
                 createModelsForTemplateNote(note)
             }
+
             template != null -> {
                 createModelsForNoteWithTemplate(note, template)
             }
+
             else -> {
                 createModels(note.uid, note.title, note.properties, note.attachments)
             }
@@ -95,15 +97,31 @@ class NoteEditorCellModelFactory(
             PropertyType.PASSWORD,
             PropertyType.USER_NAME,
             PropertyType.URL,
-            PropertyType.NOTES -> createCellByPropertyType(type, EMPTY)
-            else -> ExtendedTextPropertyCellModel(
-                id = UUID.randomUUID().toCleanString(),
-                name = EMPTY,
-                value = EMPTY,
-                isProtected = false,
-                isCollapsed = false,
-                inputType = TextInputType.TEXT
-            )
+            PropertyType.NOTES -> {
+                createCellByPropertyType(type, EMPTY)
+            }
+
+            PropertyType.OTP -> {
+                ExtendedTextPropertyCellModel(
+                    id = CellId.OTP,
+                    name = PropertyType.OTP.propertyName,
+                    value = EMPTY,
+                    isProtected = true,
+                    isCollapsed = false,
+                    inputType = TextInputType.TEXT
+                )
+            }
+
+            else -> {
+                ExtendedTextPropertyCellModel(
+                    id = UUID.randomUUID().toCleanString(),
+                    name = EMPTY,
+                    value = EMPTY,
+                    isProtected = false,
+                    isCollapsed = false,
+                    inputType = TextInputType.TEXT
+                )
+            }
         }
     }
 
@@ -168,6 +186,7 @@ class NoteEditorCellModelFactory(
                 PropertyType.NOTES -> models.add(
                     createCellByPropertyType(property.type, property.value ?: EMPTY)
                 )
+
                 else -> {
                     models.add(
                         ExtendedTextPropertyCellModel(
@@ -201,6 +220,7 @@ class NoteEditorCellModelFactory(
                 PropertyType.NOTES -> models.add(
                     createCellByPropertyType(property.type, property.value ?: EMPTY)
                 )
+
                 else -> {
                     val cellId = note.uid.toString() + "_" + (property.name ?: EMPTY)
                     models.add(
@@ -242,6 +262,7 @@ class NoteEditorCellModelFactory(
         val url = visibleProperties.get(PropertyType.URL)?.value ?: EMPTY
         val notes = visibleProperties.get(PropertyType.NOTES)?.value ?: EMPTY
         val password = visibleProperties.get(PropertyType.PASSWORD)?.value ?: EMPTY
+        val otpUrl = visibleProperties.get(PropertyType.OTP)?.value ?: EMPTY
 
         val otherProperties = PropertyFilter.Builder()
             .visible()
@@ -253,6 +274,9 @@ class NoteEditorCellModelFactory(
         models.add(createTitleCell(title))
         models.add(createUserNameCell(userName))
         models.add(createPasswordCell(password))
+        if (otpUrl.isNotEmpty()) {
+            models.add(createOtpCell(otpUrl))
+        }
         models.add(createUrlCell(url))
         models.add(createNotesCell(notes))
 
@@ -318,6 +342,19 @@ class NoteEditorCellModelFactory(
         return createHeaderCell(
             id = CellId.ATTACHMENT_HEADER,
             title = resourceProvider.getString(R.string.attachments)
+        )
+    }
+
+    fun createOtpCell(
+        outUrl: String
+    ): BaseCellModel {
+        return ExtendedTextPropertyCellModel(
+            id = CellId.OTP,
+            name = PropertyType.OTP.propertyName,
+            value = outUrl,
+            isProtected = true,
+            isCollapsed = true,
+            inputType = TextInputType.TEXT
         )
     }
 

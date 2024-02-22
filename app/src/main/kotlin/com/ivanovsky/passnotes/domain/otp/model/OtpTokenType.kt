@@ -7,7 +7,7 @@ enum class OtpTokenType(val rfcName: String) {
     companion object {
 
         fun fromString(value: String): OtpTokenType? {
-            return entries.firstOrNull { type -> value == type.rfcName }
+            return entries.firstOrNull { type -> value.equals(type.name, ignoreCase = true) }
         }
     }
 }

@@ -18,6 +18,84 @@ import org.robolectric.annotation.Config
 class OtpUriFactoryTest {
 
     @Test
+    fun `createUri should format token correctly`() {
+        listOf(
+            Pair(
+                newTotpToken(
+                    name = NAME,
+                    issuer = ISSUER,
+                    secret = SECRET,
+                    algorithm = SHA1,
+                    digits = DIGITS,
+                    periodInSeconds = PERIOD
+                ),
+                """
+                    otpauth://totp/$ISSUER%3A$NAME?secret=$SECRET&digits=$DIGITS
+                    &period=$PERIOD&algorithm=$SHA1&issuer=$ISSUER
+                """.clearUri()
+            ),
+
+            Pair(
+                newHotpToken(
+                    name = NAME,
+                    issuer = ISSUER,
+                    secret = SECRET,
+                    algorithm = SHA1,
+                    digits = DIGITS,
+                    counter = COUNTER
+                ),
+                """
+                    otpauth://hotp/$ISSUER%3A$NAME?secret=$SECRET&counter=$COUNTER&digits=$DIGITS
+                    &algorithm=$SHA1&issuer=$ISSUER
+                """.clearUri()
+            ),
+
+            Pair(
+                newTotpToken(
+                    secret = SECRET,
+                    algorithm = SHA1,
+                    digits = DIGITS,
+                    periodInSeconds = PERIOD
+                ),
+                """
+                    otpauth://totp?secret=$SECRET&digits=$DIGITS&period=$PERIOD&algorithm=$SHA1
+                """.clearUri()
+            ),
+
+            Pair(
+                newTotpToken(
+                    name = NAME,
+                    secret = SECRET,
+                    algorithm = SHA1,
+                    digits = DIGITS,
+                    periodInSeconds = PERIOD
+                ),
+                """
+                    otpauth://totp/$NAME?secret=$SECRET&digits=$DIGITS&period=$PERIOD&algorithm=$SHA1
+                """.clearUri()
+            ),
+
+            Pair(
+                newTotpToken(
+                    issuer = ISSUER,
+                    secret = SECRET,
+                    algorithm = SHA1,
+                    digits = DIGITS,
+                    periodInSeconds = PERIOD
+                ),
+                """
+                    otpauth://totp?secret=$SECRET&digits=$DIGITS&period=$PERIOD&algorithm=$SHA1
+                    &issuer=$ISSUER
+                """.clearUri()
+            )
+        )
+            .forEach { (token, uri) ->
+                val result = OtpUriFactory.createUri(token)
+                assertThat(result).isEqualTo(uri)
+            }
+    }
+
+    @Test
     fun `parseUri should parse valid uri's`() {
         listOf(
             Pair(
@@ -48,11 +126,24 @@ class OtpUriFactoryTest {
                     counter = COUNTER,
                     digits = DIGITS
                 )
+            ),
+
+            Pair(
+                """
+                    otpauth://hotp?secret=$SECRET&digits=$DIGITS
+                    &algorithm=$SHA1&counter=$COUNTER
+                """.clearUri(),
+                newHotpToken(
+                    secret = SECRET,
+                    algorithm = SHA1,
+                    counter = COUNTER,
+                    digits = DIGITS
+                )
             )
         )
-            .forEach { (uri, expected) ->
+            .forEach { (uri, token) ->
                 val result = OtpUriFactory.parseUri(uri)
-                assertThat(result).isEqualTo(expected)
+                assertThat(result).isEqualTo(token)
             }
     }
 

@@ -26,6 +26,8 @@ import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginFragment
 import com.ivanovsky.passnotes.presentation.settings.app.AppSettingsFragment
 import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsFragment
 import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsFragment
+import com.ivanovsky.passnotes.presentation.setupOneTimePassword.SetupOneTimePasswordArgs
+import com.ivanovsky.passnotes.presentation.setupOneTimePassword.SetupOneTimePasswordFragment
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListFragment
 import com.ivanovsky.passnotes.presentation.unlock.UnlockFragment
@@ -108,6 +110,17 @@ object Screens {
 
         companion object {
             val RESULT_KEY = PasswordGeneratorScreen::class.simpleName + "_result"
+        }
+    }
+
+    class SetupOneTimePasswordScreen(
+        private val args: SetupOneTimePasswordArgs
+    ) : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            SetupOneTimePasswordFragment.newInstance(args)
+
+        companion object {
+            val RESULT_KEY = SetupOneTimePasswordScreen::class.simpleName + "_result"
         }
     }
 

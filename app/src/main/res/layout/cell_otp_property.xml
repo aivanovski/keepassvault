@@ -58,6 +58,7 @@
             android:layout_marginEnd="@dimen/half_margin"
             android:progress="@{viewModel.progress}"
             app:indicatorSize="@dimen/small_progress_bar_size"
+            app:indicatorColor="?attr/kpProgressSecondaryColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

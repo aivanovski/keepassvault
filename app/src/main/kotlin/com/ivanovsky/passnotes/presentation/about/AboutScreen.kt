@@ -21,7 +21,9 @@ import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.compose.AppTheme
 import com.ivanovsky.passnotes.presentation.core.compose.DarkTheme
+import com.ivanovsky.passnotes.presentation.core.compose.HeaderTextStyle
 import com.ivanovsky.passnotes.presentation.core.compose.LightTheme
+import com.ivanovsky.passnotes.presentation.core.compose.PrimaryTextStyle
 import com.ivanovsky.passnotes.presentation.core.compose.ThemedScreenPreview
 import com.ivanovsky.passnotes.util.StringUtils.URL
 
@@ -60,8 +62,7 @@ fun AboutScreen(
 private fun HeaderItem(text: String) {
     Text(
         text = text,
-        style = AppTheme.theme.typography.header,
-        color = AppTheme.theme.colors.primaryText,
+        style = HeaderTextStyle(),
         modifier = Modifier
             .padding(
                 start = dimensionResource(id = R.dimen.element_margin),
@@ -75,8 +76,7 @@ private fun HeaderItem(text: String) {
 private fun TextItem(text: String) {
     Text(
         text = text,
-        style = AppTheme.theme.typography.primary,
-        color = AppTheme.theme.colors.primaryText,
+        style = PrimaryTextStyle(),
         modifier = Modifier
             .padding(
                 start = dimensionResource(id = R.dimen.element_margin),
@@ -95,7 +95,7 @@ private fun TextWithUrlItem(
 
     ClickableText(
         text = text,
-        style = AppTheme.theme.typography.primary.copy(
+        style = PrimaryTextStyle(
             color = AppTheme.theme.colors.primaryText
         ),
         modifier = modifier

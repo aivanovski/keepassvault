@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.domain.otp.model
 
-enum class HashAlgorithmType {
-    SHA1,
-    SHA256,
-    SHA512;
+enum class HashAlgorithmType(val rfcName: String) {
+    SHA1(rfcName = "SHA1"),
+    SHA256(rfcName = "SHA256"),
+    SHA512(rfcName = "SHA512");
 
     companion object {
 

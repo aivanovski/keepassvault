@@ -71,6 +71,9 @@ import com.ivanovsky.passnotes.presentation.settings.app.AppSettingsViewModel
 import com.ivanovsky.passnotes.presentation.settings.database.DatabaseSettingsViewModel
 import com.ivanovsky.passnotes.presentation.settings.database.changePassword.ChangePasswordDialogViewModel
 import com.ivanovsky.passnotes.presentation.settings.main.MainSettingsViewModel
+import com.ivanovsky.passnotes.presentation.setupOneTimePassword.SetupOneTimePasswordArgs
+import com.ivanovsky.passnotes.presentation.setupOneTimePassword.SetupOneTimePasswordInteractor
+import com.ivanovsky.passnotes.presentation.setupOneTimePassword.SetupOneTimePasswordViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListViewModel
 import com.ivanovsky.passnotes.presentation.storagelist.factory.StorageListCellModelFactory
@@ -159,6 +162,7 @@ object UiModule {
             single { SyncStateInteractor(get(), get(), get()) }
             single { EnterDbCredentialsInteractor(get(), get(), get()) }
             single { DiffViewerInteractor(get(), get(), get(), get(), get()) }
+            single { SetupOneTimePasswordInteractor() }
 
             // Autofill
             single { AutofillViewFactory(get(), get()) }
@@ -346,6 +350,9 @@ object UiModule {
             }
             factory { (args: DiffViewerScreenArgs) ->
                 DiffViewerViewModel(get(), get(), get(), get(), get(), get(), args)
+            }
+            factory { (args: SetupOneTimePasswordArgs) ->
+                SetupOneTimePasswordViewModel(get(), get(), get(), get(), args)
             }
         }
 

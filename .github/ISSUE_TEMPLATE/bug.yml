@@ -26,7 +26,7 @@ body:
     id: version
     attributes:
       label: Version
-      description: On which version of KPassNotes did this bug appear? Please write the exact version.
+      description: On which version of KeePassVault did this bug appear? Please write the exact version.
     validations:
       required: true
   - type: input

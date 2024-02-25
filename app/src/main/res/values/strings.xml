@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">KPassNotes</string>
+    <string name="app_name">KeePassVault</string>
 
     <!-- Common for all screens -->
     <string name="webdav">WebDAV</string>
@@ -53,7 +53,7 @@
     <!-- Autofill -->
     <string name="sign_in_with_app">Sign in with %s</string>
     <string name="select_entry_with_dots">Select entry…</string>
-    <string name="autofill_service_name">KPassNotes Autofill</string>
+    <string name="autofill_service_name">KeePassVault Autofill</string>
     <string name="autofill_save_note_message">Save previously entered data for autofill suggestions?</string>
     <string name="add_autofill_data_message">Do you want to associate selected entry with Autofill data for future use?</string>
 

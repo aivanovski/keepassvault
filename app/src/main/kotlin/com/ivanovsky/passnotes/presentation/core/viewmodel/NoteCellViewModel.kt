@@ -11,7 +11,7 @@ import com.ivanovsky.passnotes.presentation.core.model.NoteCellModel
 import com.ivanovsky.passnotes.util.formatAccordingLocale
 
 class NoteCellViewModel(
-    model: NoteCellModel,
+    override val model: NoteCellModel,
     private val eventProvider: EventProvider,
     localeProvider: LocaleProvider
 ) : BaseCellViewModel(model) {
@@ -21,6 +21,7 @@ class NoteCellViewModel(
     val date = model.note.modified.formatAccordingLocale(localeProvider.getSystemLocale())
     val isDescriptionVisible = description.isNotEmpty()
     val isAttachmentIconVisible = model.note.attachments.isNotEmpty()
+    val isOtpIconVisible = isOtpIconVisibleInternal()
     val maxTitleLine = if (description.isNotEmpty()) {
         TITLE_MAX_LINES_WITH_DESCRIPTION
     } else {
@@ -34,6 +35,10 @@ class NoteCellViewModel(
         } else {
             ""
         }
+    }
+
+    private fun isOtpIconVisibleInternal(): Boolean {
+        return model.note.properties.any { property -> property.type == PropertyType.OTP }
     }
 
     fun onClicked() {

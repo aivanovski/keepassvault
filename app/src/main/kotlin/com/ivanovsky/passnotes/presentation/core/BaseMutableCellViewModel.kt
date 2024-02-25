@@ -7,8 +7,8 @@ abstract class BaseMutableCellViewModel<T : BaseCellModel>(
     protected var mutableModel: BaseCellModel
 ) : BaseCellViewModel(mutableModel) {
 
-    override val model: BaseCellModel
-        get() = mutableModel
+    override val model: T
+        get() = mutableModel as T
 
     @CallSuper
     open fun setModel(newModel: T) {

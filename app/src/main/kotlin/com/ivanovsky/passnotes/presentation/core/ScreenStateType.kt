@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.presentation.core
 
-enum class ScreenDisplayingType {
+enum class ScreenStateType {
     NOT_INITIALIZED,
     LOADING,
     EMPTY,

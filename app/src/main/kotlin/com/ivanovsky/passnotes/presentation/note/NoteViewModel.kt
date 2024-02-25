@@ -43,6 +43,7 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.AttachmentCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel
+import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.OtpPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellModelFactory
 import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
@@ -73,6 +74,7 @@ class NoteViewModel(
 
     val viewTypes = ViewModelTypes()
         .add(NotePropertyCellViewModel::class, R.layout.cell_note_property)
+        .add(OtpPropertyCellViewModel::class, R.layout.cell_otp_property)
         .add(DividerCellViewModel::class, R.layout.cell_divider)
         .add(SpaceCellViewModel::class, R.layout.cell_space)
         .add(HeaderCellViewModel::class, R.layout.cell_header)
@@ -394,6 +396,13 @@ class NoteViewModel(
 
                     onNavigationPanelItemClicked(index)
                 }
+
+                event.containsKey(OtpPropertyCellViewModel.CLICK_EVENT) -> {
+                    val otpCode = event.getString(OtpPropertyCellViewModel.CLICK_EVENT)
+                        ?: return@subscribe
+
+                    onOtpCodeClicked(otpCode)
+                }
             }
         }
     }
@@ -554,6 +563,10 @@ class NoteViewModel(
                 )
             )
         )
+    }
+
+    private fun onOtpCodeClicked(otpCode: String) {
+        copyProtectedText(otpCode)
     }
 
     private fun getVisibleMenuItems(): List<NoteMenuItem> {

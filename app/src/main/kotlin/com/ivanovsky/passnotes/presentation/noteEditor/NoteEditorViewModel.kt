@@ -19,9 +19,12 @@ import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.entity.PropertyMap
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.noteEditor.NoteEditorInteractor
+import com.ivanovsky.passnotes.domain.otp.OtpUriFactory
+import com.ivanovsky.passnotes.domain.otp.model.OtpToken
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.PasswordGeneratorScreen
+import com.ivanovsky.passnotes.presentation.Screens.SetupOneTimePasswordScreen
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
@@ -40,6 +43,7 @@ import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.SecretPro
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.TextPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.noteEditor.factory.NoteEditorCellModelFactory
 import com.ivanovsky.passnotes.presentation.noteEditor.factory.NoteEditorCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.setupOneTimePassword.SetupOneTimePasswordArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -186,6 +190,7 @@ class NoteEditorViewModel(
                     showDiscardDialogEvent.call(resources.getString(R.string.discard_changes))
                 }
             }
+
             NoteEditorMode.EDIT -> {
                 val sourceNote = note ?: return
                 val sourceTemplate = template
@@ -213,28 +218,39 @@ class NoteEditorViewModel(
                         resources.getString(R.string.title)
                     )
                 }
+
                 PropertyType.PASSWORD -> {
                     Pair(
                         AddDialogItem.PASSWORD,
                         resources.getString(R.string.password)
                     )
                 }
+
                 PropertyType.USER_NAME -> {
                     Pair(
                         AddDialogItem.USER_NAME,
                         resources.getString(R.string.username)
                     )
                 }
+
                 PropertyType.URL -> {
                     Pair(
                         AddDialogItem.URL,
                         resources.getString(R.string.url_cap)
                     )
                 }
+
                 PropertyType.NOTES -> {
                     Pair(
                         AddDialogItem.NOTES,
                         resources.getString(R.string.notes)
+                    )
+                }
+
+                PropertyType.OTP -> {
+                    Pair(
+                        AddDialogItem.OTP,
+                        resources.getString(R.string.one_time_password)
                     )
                 }
             }
@@ -259,25 +275,53 @@ class NoteEditorViewModel(
     }
 
     fun onAddDialogItemSelected(item: AddDialogItem) {
-        if (item == AddDialogItem.ATTACHMENT) {
-            router.setResultListener(StorageListScreen.RESULT_KEY) { file ->
-                if (file is FileDescriptor) {
-                    onFileAttached(file)
+        when (item) {
+            AddDialogItem.OTP -> {
+                router.setResultListener(SetupOneTimePasswordScreen.RESULT_KEY) { token ->
+                    if (token is OtpToken) {
+                        onOtpTokenCreated(token)
+                    }
                 }
-            }
-            router.navigateTo(
-                StorageListScreen(
-                    args = StorageListArgs(
-                        action = Action.PICK_FILE
+                router.navigateTo(
+                    SetupOneTimePasswordScreen(
+                        SetupOneTimePasswordArgs(
+                            tokenIssuer = resources.getString(R.string.app_name).lowercase()
+                        )
                     )
                 )
-            )
-        } else {
-            val newModel = modelFactory.createCustomPropertyModels(item.propertyType)
-            val newViewModel = viewModelFactory.createCellViewModel(newModel, eventProvider)
+            }
 
-            setCellElements(insertPropertyCell(getViewModels(), newViewModel))
+            AddDialogItem.ATTACHMENT -> {
+                router.setResultListener(StorageListScreen.RESULT_KEY) { file ->
+                    if (file is FileDescriptor) {
+                        onFileAttached(file)
+                    }
+                }
+                router.navigateTo(
+                    StorageListScreen(
+                        args = StorageListArgs(
+                            action = Action.PICK_FILE
+                        )
+                    )
+                )
+            }
+
+            else -> {
+                val newModel = modelFactory.createCustomPropertyModel(item.propertyType)
+                val newViewModel = viewModelFactory.createCellViewModel(newModel, eventProvider)
+
+                setCellElements(insertPropertyCell(getViewModels(), newViewModel))
+            }
         }
+    }
+
+    private fun onOtpTokenCreated(token: OtpToken) {
+        val url = OtpUriFactory.createUri(token)
+
+        val otpModel = modelFactory.createOtpCell(url)
+        val otpViewModel = viewModelFactory.createCellViewModel(otpModel, eventProvider)
+
+        setCellElements(insertPropertyCell(getViewModels(), otpViewModel))
     }
 
     private fun onFileAttached(file: FileDescriptor) {
@@ -386,6 +430,7 @@ class NoteEditorViewModel(
                         setCellElements(removeCellById(getViewModels(), cellId))
                     }
                 }
+
                 event.containsKey(SecretPropertyCellViewModel.GENERATE_CLICK_EVENT) -> {
                     val cellId = event.getString(SecretPropertyCellViewModel.GENERATE_CLICK_EVENT)
                     if (cellId != null) {
@@ -397,6 +442,7 @@ class NoteEditorViewModel(
                         router.navigateTo(PasswordGeneratorScreen())
                     }
                 }
+
                 event.containsKey(AttachmentCellViewModel.REMOVE_ICON_CLICK_EVENT) -> {
                     val attachmentUid =
                         event.getString(AttachmentCellViewModel.REMOVE_ICON_CLICK_EVENT)
@@ -456,6 +502,7 @@ class NoteEditorViewModel(
         val password = defaultPropertyMap.get(PropertyType.PASSWORD)
         val url = defaultPropertyMap.get(PropertyType.URL)
         val notes = defaultPropertyMap.get(PropertyType.NOTES)
+        val otp = defaultPropertyMap.get(PropertyType.OTP)
 
         val properties = mutableListOf<Property>()
 
@@ -500,6 +547,17 @@ class NoteEditorViewModel(
                     isProtected = notes?.isProtected ?: false
                 )
             )
+
+            if (otp != null) {
+                add(
+                    Property(
+                        type = PropertyType.OTP,
+                        name = otp.name,
+                        value = otp.value,
+                        isProtected = otp.isProtected
+                    )
+                )
+            }
         }
 
         if (customProperties.isNotEmpty()) {
@@ -606,6 +664,15 @@ class NoteEditorViewModel(
             ?.firstOrNull { it.model.id == cellId }
     }
 
+    private fun findViewModelByPropertyName(propertyName: String): BaseCellViewModel? {
+        return cellViewModels.value
+            ?.mapNotNull { viewModel -> viewModel as? ExtendedTextPropertyCellViewModel }
+            ?.firstOrNull { viewModel ->
+                val (name, _) = viewModel.getNameAndValue()
+                name == propertyName
+            }
+    }
+
     private fun createNewNoteFromCells(
         groupUid: UUID,
         template: Template?
@@ -683,6 +750,8 @@ class NoteEditorViewModel(
         val userNameCell = findViewModelByCellId(CellId.USER_NAME)
         val urlCell = findViewModelByCellId(CellId.URL)
         val notesCell = findViewModelByCellId(CellId.NOTES)
+        val otpCell = findViewModelByCellId(CellId.OTP)
+            ?: findViewModelByPropertyName(PropertyType.OTP.propertyName)
 
         val cells = mutableListOf<PropertyType>()
 
@@ -701,6 +770,9 @@ class NoteEditorViewModel(
         if (notesCell == null) {
             cells.add(PropertyType.NOTES)
         }
+        if (otpCell == null) {
+            cells.add(PropertyType.OTP)
+        }
 
         return cells
     }
@@ -712,6 +784,7 @@ class NoteEditorViewModel(
         const val NOTES = "notes"
         const val PASSWORD = "password"
         const val ATTACHMENT_HEADER = "attachment_header"
+        const val OTP = "otp"
     }
 
     enum class AddDialogItem(val propertyType: PropertyType?) {
@@ -720,6 +793,7 @@ class NoteEditorViewModel(
         USER_NAME(PropertyType.USER_NAME),
         URL(PropertyType.URL),
         NOTES(PropertyType.NOTES),
+        OTP(PropertyType.OTP),
         CUSTOM_PROPERTY(null),
         ATTACHMENT(null)
     }

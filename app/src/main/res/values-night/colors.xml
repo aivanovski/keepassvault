@@ -11,6 +11,8 @@
     <color name="surface">@color/primary</color>
     <color name="divider">#282e3e</color>
     <color name="outline">#586380</color>
+    <color name="progress">@color/primary</color>
+    <color name="progress_secondary">@color/fab_color</color>
 
     <color name="fab_text">#282e3e</color>
     <color name="primary_text">#f6f7fb</color>

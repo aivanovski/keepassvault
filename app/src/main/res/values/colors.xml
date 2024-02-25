@@ -15,6 +15,8 @@
     <color name="divider">#e5e8f1</color>
     <color name="fab_color">#eaddff</color>
     <color name="outline">#e3e3e4</color>
+    <color name="progress">@color/primary</color>
+    <color name="progress_secondary">@color/primary</color>
 
     <color name="fab_text">@color/primary_text</color>
     <color name="primary_text">#282e3e</color>

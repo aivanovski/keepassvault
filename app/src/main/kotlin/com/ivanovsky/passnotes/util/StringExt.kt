@@ -15,6 +15,14 @@ fun String.toIntSafely(): Int? {
     }
 }
 
+fun String.toLongSafely(): Long? {
+    return try {
+        java.lang.Long.parseLong(this)
+    } catch (e: NumberFormatException) {
+        null
+    }
+}
+
 fun String.substituteAll(substitution: Char): String {
     return if (isEmpty()) {
         this

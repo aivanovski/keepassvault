@@ -40,22 +40,39 @@
             android:layout_margin="@dimen/half_margin"
             android:maxLines="@{viewModel.maxTitleLine}"
             android:text="@{viewModel.title}"
-            app:layout_constraintEnd_toStartOf="@id/attachmentIcon"
+            app:layout_constraintEnd_toStartOf="@id/iconsLayout"
             app:layout_constraintStart_toEndOf="@id/guidelineStart"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Title" />
 
-        <ImageView
-            android:id="@+id/attachmentIcon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/ic_attachment_24dp"
+        <LinearLayout
+            android:id="@+id/iconsLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="@id/title"
             app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
-            app:layout_constraintTop_toTopOf="@id/title"
-            app:tint="?attr/kpIconPrimaryColor"
-            app:visible="@{viewModel.isAttachmentIconVisible}"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toTopOf="@id/title">
+
+            <ImageView
+                android:id="@+id/otpIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_otp_24dp"
+                app:tint="?attr/kpIconPrimaryColor"
+                app:visible="@{viewModel.isOtpIconVisible}"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/attachmentIcon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_attachment_24dp"
+                app:tint="?attr/kpIconPrimaryColor"
+                app:visible="@{viewModel.isAttachmentIconVisible}"
+                tools:visibility="visible" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/description"

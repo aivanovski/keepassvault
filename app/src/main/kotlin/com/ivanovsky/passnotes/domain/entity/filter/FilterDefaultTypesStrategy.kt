@@ -14,6 +14,7 @@ class FilterDefaultTypesStrategy : PropertyFilterStrategy {
             PropertyType.TITLE,
             PropertyType.USER_NAME,
             PropertyType.PASSWORD,
+            PropertyType.OTP,
             PropertyType.URL,
             PropertyType.NOTES
         )

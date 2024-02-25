@@ -22,8 +22,9 @@ class SortedByTypeStrategy : PropertyFilterStrategy {
             EnumMap<PropertyType, Int>(PropertyType::class.java).apply {
                 put(PropertyType.USER_NAME, 1)
                 put(PropertyType.PASSWORD, 2)
-                put(PropertyType.URL, 3)
-                put(PropertyType.NOTES, 4)
+                put(PropertyType.OTP, 3)
+                put(PropertyType.URL, 4)
+                put(PropertyType.NOTES, 5)
             }
     }
 }

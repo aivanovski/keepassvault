@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
 @Immutable
-data class KpassnotesColors(
+data class AppColors(
     val primary: Color,
     val background: Color,
     val actionBarBackground: Color,
@@ -33,7 +33,7 @@ data class KpassnotesColors(
     val diffUpdate: Color
 )
 
-val LightAppColors = KpassnotesColors(
+val LightAppColors = AppColors(
     primary = Color(0xFF3F51B5),
     background = Color(0xFFF6F7FB),
     actionBarBackground = Color(0xFF3F51B5),
@@ -62,7 +62,7 @@ val LightAppColors = KpassnotesColors(
     diffUpdate = Color(0xFFF0EFAA)
 )
 
-val DarkAppColors = KpassnotesColors(
+val DarkAppColors = AppColors(
     primary = Color(0xFF2E3856),
     background = Color(0xFF0A092D),
     actionBarBackground = Color(0xFF0A092D),

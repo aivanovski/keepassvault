@@ -1,4 +1,4 @@
-# KPassNotes
+# KeePassVault
 Android client app for KeePass databases.
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"

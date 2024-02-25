@@ -11,7 +11,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 
 @Immutable
 data class ComposeTheme(
-    val colors: KpassnotesColors,
+    val colors: AppColors,
     val materialColors: ColorScheme
 )
 

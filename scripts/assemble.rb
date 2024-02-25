@@ -8,7 +8,7 @@ DEBUG_FDROID_APK_PATH = 'app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
 RELEASE_FDROID_APK_PATH = 'app/build/outputs/apk/fdroid/release/app-fdroid-release.apk'.freeze
 
 def project_directory?
-  `pwd | awk -F'/' '{print $NF}'`.strip == 'kpassnotes'
+  `pwd | awk -F'/' '{print $NF}'`.strip == 'keepassvault'
 end
 
 def dir_path
@@ -90,11 +90,11 @@ def main
     output_dir = ARGV[0].strip.gsub('~', '$HOME')
     version = get_app_version
     destinations = [
-      "#{output_dir}/kpassnotes-gplay-debug-#{version}.apk",
-      "#{output_dir}/kpassnotes-gplay-release-#{version}.apk",
-      "#{output_dir}/kpassnotes-gplay-release-#{version}.aab",
-      "#{output_dir}/kpassnotes-fdroid-debug-#{version}.apk",
-      "#{output_dir}/kpassnotes-fdroid-release-#{version}.apk",
+      "#{output_dir}/keepassvault-gplay-debug-#{version}.apk",
+      "#{output_dir}/keepassvault-gplay-release-#{version}.apk",
+      "#{output_dir}/keepassvault-gplay-release-#{version}.aab",
+      "#{output_dir}/keepassvault-fdroid-debug-#{version}.apk",
+      "#{output_dir}/keepassvault-fdroid-release-#{version}.apk",
     ]
     copy_files(files, destinations)
   else

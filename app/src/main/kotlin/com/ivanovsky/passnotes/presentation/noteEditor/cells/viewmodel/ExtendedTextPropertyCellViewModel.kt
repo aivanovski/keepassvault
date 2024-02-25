@@ -84,8 +84,8 @@ class ExtendedTextPropertyCellViewModel(
     override fun createProperty(): Property {
         val (name, value) = getNameAndValue()
 
-        val type = if (name == PropertyType.OTP.propertyName
-            && OtpUriFactory.parseUri(value) != null
+        val type = if (name == PropertyType.OTP.propertyName &&
+            OtpUriFactory.parseUri(value) != null
         ) {
             PropertyType.OTP
         } else {

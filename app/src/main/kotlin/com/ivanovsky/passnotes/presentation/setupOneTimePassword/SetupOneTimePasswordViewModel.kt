@@ -5,6 +5,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.otp.HotpGenerator
+import com.ivanovsky.passnotes.domain.otp.OtpCodeFormatter
+import com.ivanovsky.passnotes.domain.otp.OtpFlowFactory
+import com.ivanovsky.passnotes.domain.otp.OtpGenerator
+import com.ivanovsky.passnotes.domain.otp.OtpUriFactory
+import com.ivanovsky.passnotes.domain.otp.TotpGenerator
 import com.ivanovsky.passnotes.domain.otp.model.HashAlgorithmType
 import com.ivanovsky.passnotes.domain.otp.model.OtpToken
 import com.ivanovsky.passnotes.domain.otp.model.OtpToken.Companion.DEFAULT_COUNTER
@@ -15,11 +21,20 @@ import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.Screens.SetupOneTimePasswordScreen
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 import com.ivanovsky.passnotes.presentation.core.compose.themeFlow
+import com.ivanovsky.passnotes.presentation.setupOneTimePassword.model.CustomTabState
 import com.ivanovsky.passnotes.presentation.setupOneTimePassword.model.SetupOneTimePasswordState
+import com.ivanovsky.passnotes.presentation.setupOneTimePassword.model.SetupOneTimePasswordTab
+import com.ivanovsky.passnotes.presentation.setupOneTimePassword.model.UrlTabState
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
+import com.ivanovsky.passnotes.util.removeSpaces
 import com.ivanovsky.passnotes.util.toIntSafely
 import com.ivanovsky.passnotes.util.toLongSafely
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combineTransform
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import org.koin.core.parameter.parametersOf
 
 class SetupOneTimePasswordViewModel(
@@ -30,6 +45,10 @@ class SetupOneTimePasswordViewModel(
     private val args: SetupOneTimePasswordArgs
 ) : ViewModel() {
 
+    private var token: OtpToken? = null
+    private var generator: OtpGenerator? = null
+    private var selectedTab = SetupOneTimePasswordTab.CUSTOM
+    private var url: String = EMPTY
     private var type = OtpTokenType.TOTP
     private var secret = EMPTY
     private var isSecretVisible = false
@@ -37,45 +56,98 @@ class SetupOneTimePasswordViewModel(
     private var period = DEFAULT_PERIOD_IN_SECONDS.toString()
     private var counter = DEFAULT_COUNTER.toString()
     private var length = DEFAULT_DIGITS.toString()
+    private var code = createCodePlaceholder()
+    private var urlError: String? = null
     private var secretError: String? = null
     private var periodError: String? = null
     private var counterError: String? = null
     private var lengthError: String? = null
 
     val theme = themeFlow(themeProvider)
-    val state = MutableStateFlow(buildState())
+
+    private val stateFlow = MutableStateFlow(buildState())
+    private val tokenFlow = MutableStateFlow<OtpToken?>(null)
+
+    val state = combineTransform(
+        stateFlow,
+        buildPeriodProgressFlow()
+    ) { state, progress ->
+        val newState = state.copy(
+            periodProgress = progress
+        )
+
+        emit(newState)
+    }
 
     fun onSecretChanged(newSecret: String) {
         secret = newSecret
         secretError = null
+
+        updateToken()
+        updateCode()
+
         updateState()
     }
 
     fun onTypeChanged(newType: String) {
         type = OtpTokenType.fromString(newType) ?: OtpTokenType.TOTP
+
+        updateToken()
+        updateCode()
+
         updateState()
     }
 
     fun onPeriodChanged(newPeriod: String) {
         period = newPeriod
         periodError = validatePeriod(newPeriod)
+
+        updateToken()
+        updateCode()
+
         updateState()
     }
 
     fun onCounterChanged(newCounter: String) {
         counter = newCounter
         counterError = validateCounter(newCounter)
+
+        updateToken()
+        updateCode()
+
         updateState()
     }
 
     fun onLengthChanged(newLength: String) {
         length = newLength
         lengthError = validateLength(newLength)
+
+        updateToken()
+        updateCode()
+
         updateState()
     }
 
-    fun onAlgorithmSelected(newAlgorithm: String) {
+    fun onAlgorithmChanged(newAlgorithm: String) {
         algorithm = HashAlgorithmType.fromString(newAlgorithm) ?: OtpToken.DEFAULT_HASH_ALGORITHM
+
+        updateToken()
+        updateCode()
+
+        updateState()
+    }
+
+    fun onUrlChanged(newUrl: String) {
+        url = newUrl
+        urlError = if (newUrl.isNotEmpty()) {
+            validateUrl(newUrl)
+        } else {
+            null
+        }
+
+        updateToken()
+        updateCode()
+
         updateState()
     }
 
@@ -85,7 +157,16 @@ class SetupOneTimePasswordViewModel(
     }
 
     fun onDoneClicked() {
-        secretError = validateSecret(secret)
+        when (selectedTab) {
+            SetupOneTimePasswordTab.CUSTOM -> {
+                secretError = validateSecret(secret)
+            }
+
+            SetupOneTimePasswordTab.URL -> {
+                urlError = validateUrl(url)
+            }
+        }
+
         updateState()
 
         if (hasError()) {
@@ -100,8 +181,39 @@ class SetupOneTimePasswordViewModel(
         }
     }
 
+    fun onTabChanged(tab: SetupOneTimePasswordTab) {
+        selectedTab = tab
+
+        when (tab) {
+            SetupOneTimePasswordTab.CUSTOM -> {
+
+            }
+
+            SetupOneTimePasswordTab.URL -> {
+
+            }
+        }
+
+        updateToken()
+        updateCode()
+
+        updateState()
+    }
+
     fun navigateBack() {
         router.exit()
+    }
+
+    private fun buildPeriodProgressFlow(): Flow<Float> {
+        return tokenFlow
+            .flatMapLatest { token ->
+                if (token != null && token.type == OtpTokenType.TOTP) {
+                    OtpFlowFactory.createProgressFlow(TotpGenerator(token))
+                        .map { progress -> progress / 100f }
+                } else {
+                    flowOf(0f)
+                }
+            }
     }
 
     private fun validatePeriod(period: String): String? {
@@ -129,22 +241,64 @@ class SetupOneTimePasswordViewModel(
     }
 
     private fun validateSecret(secret: String): String? {
-        return if (!interactor.isSecretValid(secret)) {
-            resourceProvider.getString(R.string.empty_value_message)
-        } else {
-            null
+        return when {
+            secret.isBlank() -> {
+                resourceProvider.getString(R.string.should_not_be_empty)
+            }
+
+            !interactor.isSecretValid(secret) -> {
+                resourceProvider.getString(R.string.invalid_value)
+            }
+
+            else -> {
+                null
+            }
+        }
+    }
+
+    private fun validateUrl(url: String): String? {
+        return when {
+            url.isBlank() -> {
+                resourceProvider.getString(R.string.should_not_be_empty)
+            }
+
+            !interactor.isUrlValid(url) -> {
+                resourceProvider.getString(R.string.invalid_value)
+            }
+
+            else -> null
         }
     }
 
     private fun hasError(): Boolean {
+        return when (selectedTab) {
+            SetupOneTimePasswordTab.CUSTOM -> hasCustomTabError()
+            SetupOneTimePasswordTab.URL -> hasUrlTabError()
+        }
+    }
+
+    private fun hasCustomTabError(): Boolean {
         return secretError != null ||
             periodError != null ||
             counterError != null ||
             lengthError != null
     }
 
+    private fun hasUrlTabError(): Boolean {
+        return urlError != null
+    }
+
     private fun buildToken(): OtpToken? {
-        if (hasError()) {
+        return when (selectedTab) {
+            SetupOneTimePasswordTab.CUSTOM -> buildTokenFromCustomParams()
+            SetupOneTimePasswordTab.URL -> buildTokenFromUrl()
+        }
+    }
+
+    private fun buildTokenFromCustomParams(): OtpToken? {
+        val cleanedSecret = secret.removeSpaces()
+
+        if (hasError() || !interactor.isSecretValid(cleanedSecret)) {
             return null
         }
 
@@ -154,7 +308,7 @@ class SetupOneTimePasswordViewModel(
                     type = OtpTokenType.TOTP,
                     name = args.tokenName ?: EMPTY,
                     issuer = args.tokenIssuer ?: EMPTY,
-                    secret = secret.replace(" ", ""),
+                    secret = cleanedSecret,
                     algorithm = algorithm,
                     digits = length.toIntSafely() ?: DEFAULT_DIGITS,
                     counter = null,
@@ -167,7 +321,7 @@ class SetupOneTimePasswordViewModel(
                     type = OtpTokenType.HOTP,
                     name = args.tokenName ?: EMPTY,
                     issuer = args.tokenIssuer ?: EMPTY,
-                    secret = secret,
+                    secret = cleanedSecret,
                     algorithm = algorithm,
                     digits = length.toIntSafely() ?: DEFAULT_DIGITS,
                     counter = counter.toLongSafely() ?: DEFAULT_COUNTER,
@@ -177,27 +331,70 @@ class SetupOneTimePasswordViewModel(
         }
     }
 
+    private fun buildTokenFromUrl(): OtpToken? {
+        if (hasError()) {
+            return null
+        }
+
+        return OtpUriFactory.parseUri(url)
+    }
+
+    private fun updateToken() {
+        this.token = buildToken()
+
+        tokenFlow.value = token
+    }
+
+    private fun updateCode() {
+        val token = this.token
+
+        generator = when (token?.type) {
+            OtpTokenType.TOTP -> TotpGenerator(token)
+            OtpTokenType.HOTP -> HotpGenerator(token)
+            else -> null
+        }
+
+        code = OtpCodeFormatter.format(generator?.generateCode() ?: createCodePlaceholder())
+    }
+
+    private fun createCodePlaceholder(): String {
+        val length = this.length.toIntSafely() ?: DEFAULT_DIGITS
+        return "-".repeat(length)
+    }
+
     private fun updateState() {
-        state.value = buildState()
+        stateFlow.value = buildState()
     }
 
     private fun buildState(): SetupOneTimePasswordState {
+        val token = this.token
+
         return SetupOneTimePasswordState(
-            secret = secret,
-            secretError = secretError,
-            isSecretVisible = isSecretVisible,
-            types = createTypeNames(OtpTokenType.entries),
-            selectedType = type.toReadableString(),
-            algorithms = createAlgorithmNames(HashAlgorithmType.entries),
-            selectedAlgorithm = algorithm.toReadableString(),
-            period = period,
-            periodError = periodError,
-            counter = counter,
-            counterError = counterError,
-            length = length,
-            lengthError = lengthError,
-            isPeriodVisible = (type == OtpTokenType.TOTP),
-            isCounterVisible = (type == OtpTokenType.HOTP)
+            selectedTab = selectedTab,
+            code = code,
+            periodProgress = 0f,
+            isPeriodProgressVisible = (token != null && token.type == OtpTokenType.TOTP),
+            customTabState = CustomTabState(
+                secret = secret,
+                secretError = secretError,
+                isSecretVisible = isSecretVisible,
+                types = createTypeNames(OtpTokenType.entries),
+                selectedType = type.toReadableString(),
+                algorithms = createAlgorithmNames(HashAlgorithmType.entries),
+                selectedAlgorithm = algorithm.toReadableString(),
+                period = period,
+                periodError = periodError,
+                counter = counter,
+                counterError = counterError,
+                length = length,
+                lengthError = lengthError,
+                isPeriodVisible = (type == OtpTokenType.TOTP),
+                isCounterVisible = (type == OtpTokenType.HOTP),
+            ),
+            urlTabState = UrlTabState(
+                url = url,
+                urlError = urlError
+            )
         )
     }
 

@@ -8,8 +8,12 @@ enum class HashAlgorithmType(val rfcName: String) {
     companion object {
 
         fun fromString(name: String): HashAlgorithmType? {
-            val loweredName = name.lowercase()
-            return entries.firstOrNull { algorithm -> loweredName == algorithm.name }
+            return entries.firstOrNull { algorithm ->
+                name.equals(
+                    algorithm.name,
+                    ignoreCase = true
+                )
+            }
         }
     }
 }

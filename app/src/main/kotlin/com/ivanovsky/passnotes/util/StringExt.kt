@@ -7,6 +7,12 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
+fun String.removeSpaces(): String {
+    return this.replace(" ", "")
+        .replace("\n", "")
+        .replace("\t", "")
+}
+
 fun String.toIntSafely(): Int? {
     return try {
         Integer.parseInt(this)

@@ -1,6 +1,8 @@
 package com.ivanovsky.passnotes.presentation.setupOneTimePassword
 
 import com.ivanovsky.passnotes.domain.otp.OtpParametersValidator
+import com.ivanovsky.passnotes.domain.otp.OtpUriFactory
+import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class SetupOneTimePasswordInteractor {
 
@@ -18,5 +20,9 @@ class SetupOneTimePasswordInteractor {
 
     fun isSecretValid(secret: String?): Boolean {
         return OtpParametersValidator.isSecretValid(secret)
+    }
+
+    fun isUrlValid(url: String?): Boolean {
+        return OtpUriFactory.parseUri(url ?: EMPTY) != null
     }
 }

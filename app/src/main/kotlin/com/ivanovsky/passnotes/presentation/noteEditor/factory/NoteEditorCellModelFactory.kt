@@ -37,7 +37,8 @@ class NoteEditorCellModelFactory(
             createUserNameCell(EMPTY),
             createPasswordCell(EMPTY),
             createUrlCell(EMPTY),
-            createNotesCell(EMPTY)
+            createNotesCell(EMPTY),
+            createSpaceCell()
         )
     }
 

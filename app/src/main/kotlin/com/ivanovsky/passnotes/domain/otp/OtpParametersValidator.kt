@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.domain.otp
 
 import com.ivanovsky.passnotes.domain.otp.model.OtpToken
+import com.ivanovsky.passnotes.util.removeSpaces
 
 object OtpParametersValidator {
 
@@ -17,6 +18,6 @@ object OtpParametersValidator {
     }
 
     fun isSecretValid(secret: String?): Boolean {
-        return secret != null && secret.trim().isNotEmpty()
+        return secret != null && secret.removeSpaces().isNotEmpty()
     }
 }

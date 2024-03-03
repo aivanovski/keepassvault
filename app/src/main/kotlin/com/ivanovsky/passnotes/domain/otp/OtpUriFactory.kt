@@ -15,8 +15,10 @@ import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.StringUtils.EQUALS
 import com.ivanovsky.passnotes.util.StringUtils.QUESTION_MARK
 import com.ivanovsky.passnotes.util.StringUtils.SLASH
+import com.ivanovsky.passnotes.util.removeSpaces
 import com.ivanovsky.passnotes.util.toIntSafely
 import com.ivanovsky.passnotes.util.toLongSafely
+import java.util.regex.Pattern
 
 object OtpUriFactory {
 
@@ -28,6 +30,8 @@ object OtpUriFactory {
     private const val URL_PARAM_PERIOD = "period"
     private const val URL_PARAM_COUNTER = "counter"
     private const val URL_PARAM_ALGORITHM = "algorithm"
+
+    private val OTP_URI_PATTERN = Pattern.compile("otpauth://[th]otp[\\/?][a-zA-Z0-9\\/?&=:%\\.]+")
 
     fun createUri(token: OtpToken): String {
         return StringBuilder()
@@ -68,8 +72,8 @@ object OtpUriFactory {
             .toString()
     }
 
-    fun parseUri(otpUri: String): OtpToken? {
-        if (otpUri.isBlank()) {
+    fun parseUri(text: String): OtpToken? {
+        if (text.isBlank()) {
             return null
         }
 
@@ -80,7 +84,12 @@ object OtpUriFactory {
         var period: Int? = null
         var algorithm: HashAlgorithmType? = null
 
-        val uri = Uri.parse(otpUri.trim())
+        val trimmedText = text.removeSpaces()
+        if (!OTP_URI_PATTERN.matcher(trimmedText).matches()) {
+            return null
+        }
+
+        val uri = Uri.parse(trimmedText)
         if (uri.scheme?.lowercase() != SCHEME) {
             return null
         }

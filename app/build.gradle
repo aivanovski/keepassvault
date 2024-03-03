@@ -174,7 +174,8 @@ android {
 
 def koinVersion = '3.5.0'
 def roomVersion = '2.6.1'
-def lifecycleVersion = '2.2.0'
+def lifecycleExtensionVersion = '2.2.0'
+def lifecycleVersion = '2.7.0'
 def appCompatVersion = '1.6.1'
 def androidAnnotationVersion = '1.7.0'
 def multidexVersion = '2.0.1'
@@ -250,7 +251,7 @@ dependencies {
     implementation "androidx.annotation:annotation:$androidAnnotationVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constrainLayoutVersion"
     implementation "androidx.biometric:biometric:$biometricVersion"
-    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycleExtensionVersion"
     implementation "androidx.core:core-ktx:$coreKtxVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$liveDataKtxVersion"
     implementation "androidx.activity:activity-ktx:$activityKtxVersion"
@@ -260,6 +261,7 @@ dependencies {
     implementation platform("androidx.compose:compose-bom:2024.02.00")
     implementation "androidx.compose.material3:material3"
     implementation "androidx.activity:activity-compose"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion"
 
     // Compose preview
     implementation "androidx.compose.ui:ui-tooling-preview"

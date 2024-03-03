@@ -57,6 +57,7 @@ class SetupOneTimePasswordFragment : FragmentWithDoneButton() {
                 viewModel.navigateBack()
                 true
             }
+
             else -> {
                 super.onOptionsItemSelected(item)
             }

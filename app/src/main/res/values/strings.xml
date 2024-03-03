@@ -355,5 +355,8 @@
     <string name="counter_invalid_value_message">Should be a positive value or 0</string>
     <string name="code_length_invalid_value_message">Should be a value between 4 and 18</string>
     <string name="empty_value_message">Should not be an empty value</string>
+    <string name="custom">Custom</string>
+    <string name="invalid_value">Invalid value</string>
+    <string name="your_code_is">Your code is</string>
 
 </resources>

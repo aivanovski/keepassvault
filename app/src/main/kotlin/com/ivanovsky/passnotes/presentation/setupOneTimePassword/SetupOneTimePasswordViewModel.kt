@@ -184,16 +184,6 @@ class SetupOneTimePasswordViewModel(
     fun onTabChanged(tab: SetupOneTimePasswordTab) {
         selectedTab = tab
 
-        when (tab) {
-            SetupOneTimePasswordTab.CUSTOM -> {
-
-            }
-
-            SetupOneTimePasswordTab.URL -> {
-
-            }
-        }
-
         updateToken()
         updateCode()
 
@@ -354,12 +344,15 @@ class SetupOneTimePasswordViewModel(
             else -> null
         }
 
-        code = OtpCodeFormatter.format(generator?.generateCode() ?: createCodePlaceholder())
+        code = generator?.let { generator ->
+            OtpCodeFormatter.format(generator.generateCode())
+        }
+            ?: createCodePlaceholder()
     }
 
     private fun createCodePlaceholder(): String {
         val length = this.length.toIntSafely() ?: DEFAULT_DIGITS
-        return "-".repeat(length)
+        return OtpCodeFormatter.format("-".repeat(length))
     }
 
     private fun updateState() {
@@ -389,7 +382,7 @@ class SetupOneTimePasswordViewModel(
                 length = length,
                 lengthError = lengthError,
                 isPeriodVisible = (type == OtpTokenType.TOTP),
-                isCounterVisible = (type == OtpTokenType.HOTP),
+                isCounterVisible = (type == OtpTokenType.HOTP)
             ),
             urlTabState = UrlTabState(
                 url = url,

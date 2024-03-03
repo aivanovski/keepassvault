@@ -5,5 +5,5 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class UrlTabState(
     val url: String,
-    val urlError: String?,
+    val urlError: String?
 )

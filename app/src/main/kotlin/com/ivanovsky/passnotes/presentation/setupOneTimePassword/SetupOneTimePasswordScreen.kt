@@ -1,6 +1,5 @@
 package com.ivanovsky.passnotes.presentation.setupOneTimePassword
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,6 +7,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -22,9 +23,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.compose.AppDropdownMenu
@@ -75,70 +73,15 @@ private fun SetupOneTimePasswordScreen(
     onUrlChanged: (url: String) -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = AppTheme.theme.colors.surface,
-                ),
-                modifier = Modifier
-                    .padding(
-                        top = dimensionResource(R.dimen.element_margin),
-                        start = dimensionResource(R.dimen.element_margin),
-                        end = dimensionResource(R.dimen.element_margin)
-                    )
-            ) {
-                ConstraintLayout(
-                    modifier = Modifier
-                        .padding(
-                            vertical = dimensionResource(R.dimen.element_margin),
-                            horizontal = dimensionResource(R.dimen.element_margin)
-                        )
-                        .sizeIn(
-                            minWidth = 192.dp,
-                            minHeight = 64.dp,
-                        )
-                ) {
-                    val (code, progress) = createRefs()
-
-                    Text(
-                        style = HeaderTextStyle(),
-                        textAlign = TextAlign.Center,
-                        text = state.code,
-                        modifier = Modifier
-                            .constrainAs(code) {
-                                width = Dimension.fillToConstraints
-                                top.linkTo(parent.top)
-                                bottom.linkTo(parent.bottom)
-                                start.linkTo(parent.start)
-                                if (state.isPeriodProgressVisible) {
-                                    end.linkTo(progress.start, margin = 16.dp)
-                                } else {
-                                    end.linkTo(parent.end)
-                                }
-                            }
-                    )
-
-                    if (state.isPeriodProgressVisible) {
-                        CircularProgressIndicator(
-                            progress = { state.periodProgress },
-                            color = AppTheme.theme.colors.progressSecondary,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .constrainAs(progress) {
-                                    top.linkTo(parent.top)
-                                    bottom.linkTo(parent.bottom)
-                                    end.linkTo(parent.end)
-                                }
-                        )
-                    }
-                }
-            }
-        }
+        CodeContent(
+            code = state.code,
+            periodProgress = state.periodProgress,
+            isPeriodProgressVisible = state.isPeriodProgressVisible
+        )
 
         val allTabs = SetupOneTimePasswordTab.entries
         val selectedTabIndex = allTabs.indexOf(state.selectedTab)
@@ -183,6 +126,71 @@ private fun SetupOneTimePasswordScreen(
 }
 
 @Composable
+private fun CodeContent(
+    code: String,
+    periodProgress: Float,
+    isPeriodProgressVisible: Boolean
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = AppTheme.theme.colors.surface
+        ),
+        modifier = Modifier
+            .padding(
+                horizontal = dimensionResource(R.dimen.element_margin),
+                vertical = dimensionResource(R.dimen.element_margin)
+            )
+            .fillMaxWidth()
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    vertical = dimensionResource(R.dimen.element_margin)
+                )
+        ) {
+            Text(
+                text = stringResource(
+                    R.string.text_with_colon,
+                    stringResource(R.string.your_code_is)
+                ),
+                style = PrimaryTextStyle(),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+            )
+
+            Row(
+                modifier = Modifier
+                    .padding(
+                        top = dimensionResource(R.dimen.element_margin)
+                    )
+            ) {
+                Text(
+                    style = HeaderTextStyle(),
+                    textAlign = TextAlign.Center,
+                    text = code,
+                    modifier = Modifier
+                        .sizeIn(minHeight = dimensionResource(R.dimen.medium_progress_bar_size))
+                )
+
+                if (isPeriodProgressVisible) {
+                    CircularProgressIndicator(
+                        progress = { periodProgress },
+                        color = AppTheme.theme.colors.progressSecondary,
+                        modifier = Modifier
+                            .padding(
+                                start = dimensionResource(R.dimen.half_margin)
+                            )
+                            .size(dimensionResource(R.dimen.medium_progress_bar_size))
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun TabPanel(
     selectedTab: SetupOneTimePasswordTab,
     tabs: List<SetupOneTimePasswordTab>,
@@ -192,8 +200,8 @@ private fun TabPanel(
         Tab(
             selected = (tab == selectedTab),
             modifier = Modifier
-                .height(48.dp),
-            onClick = { onTabSelected.invoke(tab) },
+                .height(dimensionResource(R.dimen.tab_panel_height)),
+            onClick = { onTabSelected.invoke(tab) }
         ) {
             val title = when (tab) {
                 SetupOneTimePasswordTab.CUSTOM -> stringResource(R.string.custom)
@@ -441,7 +449,7 @@ private fun newCustomHotpState() = SetupOneTimePasswordState(
     selectedTab = SetupOneTimePasswordTab.CUSTOM,
     code = "--- ---",
     periodProgress = 0.75f,
-    isPeriodProgressVisible = true,
+    isPeriodProgressVisible = false,
     customTabState = newHotpState(),
     urlTabState = UrlTabState(
         url = "",
@@ -494,5 +502,5 @@ private fun newHotpState() = CustomTabState(
     counterError = null,
     lengthError = null,
     isPeriodVisible = false,
-    isCounterVisible = true,
+    isCounterVisible = true
 )

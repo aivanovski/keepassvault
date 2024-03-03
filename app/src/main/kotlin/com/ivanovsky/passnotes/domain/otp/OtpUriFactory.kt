@@ -15,6 +15,7 @@ import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.StringUtils.EQUALS
 import com.ivanovsky.passnotes.util.StringUtils.QUESTION_MARK
 import com.ivanovsky.passnotes.util.StringUtils.SLASH
+import com.ivanovsky.passnotes.util.removeSpaces
 import com.ivanovsky.passnotes.util.toIntSafely
 import com.ivanovsky.passnotes.util.toLongSafely
 import java.util.regex.Pattern
@@ -83,7 +84,7 @@ object OtpUriFactory {
         var period: Int? = null
         var algorithm: HashAlgorithmType? = null
 
-        val trimmedText = text.trim()
+        val trimmedText = text.removeSpaces()
         if (!OTP_URI_PATTERN.matcher(trimmedText).matches()) {
             return null
         }

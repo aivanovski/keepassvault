@@ -37,7 +37,7 @@ data class SetupOneTimePasswordState(
             ),
             urlTabState = UrlTabState(
                 url = "",
-                urlError = null,
+                urlError = null
             )
         )
     }

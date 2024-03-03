@@ -63,7 +63,7 @@ val LightAppColors = AppColors(
     diffDelete = Color(0xFFFFD5D5),
     diffUpdate = Color(0xFFF0EFAA),
     progress = Color(0xFF3F51B5),
-    progressSecondary = Color(0xFF3F51B5),
+    progressSecondary = Color(0xFF3F51B5)
 )
 
 val DarkAppColors = AppColors(
@@ -94,5 +94,5 @@ val DarkAppColors = AppColors(
     diffDelete = Color(0xFF300406),
     diffUpdate = Color(0xFF33331B),
     progress = Color(0xFF2E3856),
-    progressSecondary = Color(0xFFEADDFF),
+    progressSecondary = Color(0xFFEADDFF)
 )

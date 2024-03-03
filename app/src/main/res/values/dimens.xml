@@ -36,6 +36,7 @@
 
     <!-- progress bar -->
     <dimen name="progress_bar_size">48dp</dimen>
+    <dimen name="medium_progress_bar_size">32dp</dimen>
     <dimen name="small_progress_bar_size">24dp</dimen>
 
     <!-- floating action bar -->
@@ -61,5 +62,8 @@
 
     <!-- Navigation Panel -->
     <dimen name="navigation_panel_item_width">54dp</dimen>
+
+    <!-- Tabs -->
+    <dimen name="tab_panel_height">48dp</dimen>
 
 </resources>

@@ -18,5 +18,5 @@ data class CustomTabState(
     val length: String,
     val lengthError: String?,
     val isPeriodVisible: Boolean,
-    val isCounterVisible: Boolean,
+    val isCounterVisible: Boolean
 )

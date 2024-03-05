@@ -24,7 +24,7 @@ object OtpFlowFactory {
             }
         }
 
-    fun createProgressFlow(generator: TotpGenerator): Flow<Int> =
+    fun createLifespanFlow(generator: TotpGenerator): Flow<Int> =
         flow {
             while (true) {
                 var remainingTime = generator.getRemainingTime()

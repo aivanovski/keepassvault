@@ -38,7 +38,7 @@ class OtpPropertyCellViewModel(
         .asLiveData()
 
     val progress = generator
-        .flatMapLatest { generator -> buildProgressFlow(generator) }
+        .flatMapLatest { generator -> buildLifespanFlow(generator) }
         .asLiveData()
 
     override fun setModel(newModel: OtpPropertyCellModel) {
@@ -71,9 +71,9 @@ class OtpPropertyCellViewModel(
         }
     }
 
-    private fun buildProgressFlow(generator: OtpGenerator): Flow<Int> {
+    private fun buildLifespanFlow(generator: OtpGenerator): Flow<Int> {
         return when (generator.token.type) {
-            OtpTokenType.TOTP -> OtpFlowFactory.createProgressFlow(generator as TotpGenerator)
+            OtpTokenType.TOTP -> OtpFlowFactory.createLifespanFlow(generator as TotpGenerator)
             OtpTokenType.HOTP -> flowOf(0)
         }
     }

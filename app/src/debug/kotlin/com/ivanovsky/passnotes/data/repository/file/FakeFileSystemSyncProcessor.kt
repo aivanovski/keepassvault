@@ -76,7 +76,6 @@ class FakeFileSystemSyncProcessor(
         syncStrategy: SyncStrategy,
         resolutionStrategy: ConflictResolutionStrategy?
     ): OperationResult<FileDescriptor> {
-
         val localFile = storage.getLocalFile(file.uid)
         val remoteFile = storage.getRemoteFile(file.uid)
 

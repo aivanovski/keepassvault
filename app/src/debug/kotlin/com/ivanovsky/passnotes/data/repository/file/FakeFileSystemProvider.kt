@@ -38,7 +38,6 @@ class FakeFileSystemProvider(
         fsAuthority = fsAuthority
     )
 
-
     override fun getAuthenticator(): FileSystemAuthenticator {
         return authenticator
     }

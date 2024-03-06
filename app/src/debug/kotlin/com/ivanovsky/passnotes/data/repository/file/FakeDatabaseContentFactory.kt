@@ -90,12 +90,12 @@ object FakeDatabaseContentFactory {
     private val TOTP_URL = """
             otpauth://totp/Example:john.doe?secret=AAAABBBBCCCCDDDD&period=30
             &digits=6&issuer=Example&algorithm=SHA1
-        """.trimIndent()
+    """.trimIndent()
 
     private val HOTP_URL = """
             otpauth://hotp/Example:john.doe?secret=AAAABBBBCCCCDDDD&digits=6
             &issuer=Example&algorithm=SHA1&counter=1
-        """.trimIndent()
+    """.trimIndent()
 
     private val ENTRY_NAS_LOGIN = EntryEntity(
         title = "NAS Login",

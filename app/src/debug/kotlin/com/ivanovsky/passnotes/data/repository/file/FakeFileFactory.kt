@@ -76,7 +76,7 @@ class FakeFileFactory(
                 localFile = newFile(Path.OTP, Time.NO_CHANGES),
                 syncStatus = SyncStatus.NO_CHANGES,
                 localContentFactory = { createDatabaseWithOtpData() },
-                remoteContentFactory = { createDatabaseWithOtpData() },
+                remoteContentFactory = { createDatabaseWithOtpData() }
             ),
 
             // conflicts

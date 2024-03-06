@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.settings
 
 import com.ivanovsky.passnotes.data.entity.PasswordGeneratorSettings
-import com.ivanovsky.passnotes.data.entity.TestData
+import com.ivanovsky.passnotes.data.entity.TestAutofillData
 import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref
 import com.ivanovsky.passnotes.domain.entity.SearchType
@@ -23,7 +23,7 @@ interface Settings {
     var isGroupsAtStartEnabled: Boolean
     var isBiometricUnlockEnabled: Boolean
     var passwordGeneratorSettings: PasswordGeneratorSettings
-    var testData: TestData?
+    var testAutofillData: TestAutofillData?
     var testToggles: TestToggles?
     fun initDefaultIfNeed(pref: Pref)
     fun register(listener: OnSettingsChangeListener)

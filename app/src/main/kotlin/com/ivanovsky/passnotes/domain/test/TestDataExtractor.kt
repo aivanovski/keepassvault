@@ -1,12 +1,13 @@
 package com.ivanovsky.passnotes.domain.test
 
 import android.os.Bundle
-import com.ivanovsky.passnotes.data.entity.TestData
+import com.ivanovsky.passnotes.data.entity.TestAutofillData
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 class TestDataExtractor {
 
-    fun extractFromBundle(data: Bundle): TestData? {
+    // TODO: remove
+    fun extractFromBundle(data: Bundle): TestAutofillData? {
         val filenamePatterns = data.getStringArray(KEY_FILENAME_PATTERNS)
             ?.toList()
             ?: emptyList()
@@ -29,7 +30,7 @@ class TestDataExtractor {
             gitUrl.isNotEmpty() ||
             (filenamePatterns.isNotEmpty() && passwords.isNotEmpty())
         ) {
-            TestData(
+            TestAutofillData(
                 filenamePatterns = filenamePatterns,
                 passwords = passwords,
                 webdavUrl = webdavUrl,

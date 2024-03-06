@@ -397,7 +397,7 @@ class DebugMenuViewModel(
     }
 
     fun onResetTestDataButtonClicked() {
-        settings.testData = null
+        settings.testAutofillData = null
         settings.testToggles = null
         showSnackbarEvent.call(resourceProvider.getString(R.string.test_data_removed))
     }

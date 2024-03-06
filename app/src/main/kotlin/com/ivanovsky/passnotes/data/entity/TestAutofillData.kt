@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class TestData(
+data class TestAutofillData(
     val filenamePatterns: List<String>,
     val passwords: List<String>,
     val webdavUrl: String,

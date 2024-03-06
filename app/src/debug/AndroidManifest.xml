@@ -5,7 +5,7 @@
     <application>
 
         <receiver
-            android:name=".domain.test.TestDataBroadcastReceiver"
+            android:name=".domain.test.TestCommandBroadcastReceiver"
             android:enabled="true"
             android:exported="true" />
 

@@ -18,7 +18,7 @@
     <string name="pref_is_groups_at_start_enabled" translatable="false">isGroupsAtStartEnabled</string>
     <string name="pref_is_biometric_unlock_enabled" translatable="false">isBiometricUnlockEnabled</string>
     <string name="pref_password_generator_settings" translatable="false">passwordGeneratorSettings</string>
-    <string name="pref_test_data" translatable="false">testData</string>
+    <string name="pref_test_autofill_data" translatable="false">testAutofillData</string>
     <string name="pref_test_toggles" translatable="false">testToggles</string>
 
     <string name="pref_database_settings_fragment" translatable="false">databaseSettingsFragment</string>
@@ -36,6 +36,8 @@
 
     <string name="failed_to_parse_test_data" translatable="false">Failed to parse test data</string>
     <string name="test_data_successfully_imported" translatable="false">Test data successfully imported</string>
+    <string name="file_created_successfully" translatable="false">File created successfully</string>
+    <string name="file_already_exists" translatable="false">File already exists</string>
     <string name="test_data_removed" translatable="false">Test data removed</string>
 
     <string-array name="pref_auto_lock_entries">

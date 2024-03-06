@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes.domain.usecases.test
 
 import com.ivanovsky.passnotes.BuildConfig
-import com.ivanovsky.passnotes.data.entity.TestData
+import com.ivanovsky.passnotes.data.entity.TestAutofillData
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.util.FileUtils
@@ -19,7 +19,7 @@ class GetTestPasswordUseCase(
                 return@withContext null
             }
 
-            val data = settings.testData ?: return@withContext null
+            val data = settings.testAutofillData ?: return@withContext null
 
             val rules = createPasswordRules(data)
             val fileNameWithoutExtension = FileUtils.removeFileExtensionsIfNeed(filename)
@@ -33,7 +33,7 @@ class GetTestPasswordUseCase(
             null
         }
 
-    private fun createPasswordRules(data: TestData): List<PasswordRule> {
+    private fun createPasswordRules(data: TestAutofillData): List<PasswordRule> {
         val rules = mutableListOf<PasswordRule>()
 
         for (idx in data.filenamePatterns.indices) {

@@ -29,9 +29,9 @@ import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.removeSpaces
 import com.ivanovsky.passnotes.util.toIntSafely
 import com.ivanovsky.passnotes.util.toLongSafely
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -45,7 +45,6 @@ class SetupOneTimePasswordViewModel(
     private val args: SetupOneTimePasswordArgs
 ) : ViewModel() {
 
-    private var token: OtpToken? = null
     private var generator: OtpGenerator? = null
     private var selectedTab = SetupOneTimePasswordTab.CUSTOM
     private var url: String = EMPTY
@@ -65,19 +64,9 @@ class SetupOneTimePasswordViewModel(
 
     val theme = themeFlow(themeProvider)
 
-    private val stateFlow = MutableStateFlow(buildState())
-    private val tokenFlow = MutableStateFlow<OtpToken?>(null)
-
-    val state = combineTransform(
-        stateFlow,
-        buildPeriodProgressFlow()
-    ) { state, progress ->
-        val newState = state.copy(
-            periodProgress = progress
-        )
-
-        emit(newState)
-    }
+    private val token = MutableStateFlow<OtpToken?>(null)
+    val state = MutableStateFlow(buildState())
+    val periodProgress = buildTokenLifespanFlow()
 
     fun onSecretChanged(newSecret: String) {
         secret = newSecret
@@ -194,11 +183,12 @@ class SetupOneTimePasswordViewModel(
         router.exit()
     }
 
-    private fun buildPeriodProgressFlow(): Flow<Float> {
-        return tokenFlow
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun buildTokenLifespanFlow(): Flow<Float> {
+        return token
             .flatMapLatest { token ->
                 if (token != null && token.type == OtpTokenType.TOTP) {
-                    OtpFlowFactory.createProgressFlow(TotpGenerator(token))
+                    OtpFlowFactory.createLifespanFlow(TotpGenerator(token))
                         .map { progress -> progress / 100f }
                 } else {
                     flowOf(0f)
@@ -330,17 +320,15 @@ class SetupOneTimePasswordViewModel(
     }
 
     private fun updateToken() {
-        this.token = buildToken()
-
-        tokenFlow.value = token
+        token.value = buildToken()
     }
 
     private fun updateCode() {
-        val token = this.token
+        val currentToken = token.value
 
-        generator = when (token?.type) {
-            OtpTokenType.TOTP -> TotpGenerator(token)
-            OtpTokenType.HOTP -> HotpGenerator(token)
+        generator = when (currentToken?.type) {
+            OtpTokenType.TOTP -> TotpGenerator(currentToken)
+            OtpTokenType.HOTP -> HotpGenerator(currentToken)
             else -> null
         }
 
@@ -356,17 +344,19 @@ class SetupOneTimePasswordViewModel(
     }
 
     private fun updateState() {
-        stateFlow.value = buildState()
+        state.value = buildState()
     }
 
     private fun buildState(): SetupOneTimePasswordState {
-        val token = this.token
+        val currentToken = token.value
 
         return SetupOneTimePasswordState(
             selectedTab = selectedTab,
             code = code,
-            periodProgress = 0f,
-            isPeriodProgressVisible = (token != null && token.type == OtpTokenType.TOTP),
+            isPeriodProgressVisible = (
+                currentToken != null &&
+                    currentToken.type == OtpTokenType.TOTP
+                ),
             customTabState = CustomTabState(
                 secret = secret,
                 secretError = secretError,

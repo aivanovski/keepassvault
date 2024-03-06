@@ -44,9 +44,11 @@ fun SetupOneTimePasswordScreen(
     viewModel: SetupOneTimePasswordViewModel
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle(SetupOneTimePasswordState.DEFAULT)
+    val progress by viewModel.periodProgress.collectAsStateWithLifecycle(0f)
 
     SetupOneTimePasswordScreen(
         state = state,
+        periodProgressProvider = { progress },
         onTabSelected = viewModel::onTabChanged,
         onTypeChanged = viewModel::onTypeChanged,
         onAlgorithmChanged = viewModel::onAlgorithmChanged,
@@ -62,6 +64,7 @@ fun SetupOneTimePasswordScreen(
 @Composable
 private fun SetupOneTimePasswordScreen(
     state: SetupOneTimePasswordState,
+    periodProgressProvider: () -> Float,
     onTabSelected: (tab: SetupOneTimePasswordTab) -> Unit,
     onTypeChanged: (type: String) -> Unit,
     onAlgorithmChanged: (algorithm: String) -> Unit,
@@ -79,27 +82,15 @@ private fun SetupOneTimePasswordScreen(
     ) {
         CodeContent(
             code = state.code,
-            periodProgress = state.periodProgress,
+            periodProgressProvider = periodProgressProvider,
             isPeriodProgressVisible = state.isPeriodProgressVisible
         )
 
-        val allTabs = SetupOneTimePasswordTab.entries
-        val selectedTabIndex = allTabs.indexOf(state.selectedTab)
-
-        TabRow(
-            selectedTabIndex = selectedTabIndex,
-            containerColor = AppTheme.theme.colors.background,
-            modifier = Modifier
-                .padding(
-                    top = dimensionResource(R.dimen.half_margin)
-                )
-        ) {
-            TabPanel(
-                selectedTab = state.selectedTab,
-                tabs = allTabs,
-                onTabSelected = onTabSelected
-            )
-        }
+        TabsContent(
+            tabs = SetupOneTimePasswordTab.entries,
+            selectedTab = state.selectedTab,
+            onTabSelected = onTabSelected
+        )
 
         when (state.selectedTab) {
             SetupOneTimePasswordTab.CUSTOM -> {
@@ -128,7 +119,7 @@ private fun SetupOneTimePasswordScreen(
 @Composable
 private fun CodeContent(
     code: String,
-    periodProgress: Float,
+    periodProgressProvider: () -> Float,
     isPeriodProgressVisible: Boolean
 ) {
     Card(
@@ -176,7 +167,7 @@ private fun CodeContent(
 
                 if (isPeriodProgressVisible) {
                     CircularProgressIndicator(
-                        progress = { periodProgress },
+                        progress = periodProgressProvider,
                         color = AppTheme.theme.colors.progressSecondary,
                         modifier = Modifier
                             .padding(
@@ -191,27 +182,38 @@ private fun CodeContent(
 }
 
 @Composable
-private fun TabPanel(
-    selectedTab: SetupOneTimePasswordTab,
+private fun TabsContent(
     tabs: List<SetupOneTimePasswordTab>,
+    selectedTab: SetupOneTimePasswordTab,
     onTabSelected: (tab: SetupOneTimePasswordTab) -> Unit
 ) {
-    for (tab in tabs) {
-        Tab(
-            selected = (tab == selectedTab),
-            modifier = Modifier
-                .height(dimensionResource(R.dimen.tab_panel_height)),
-            onClick = { onTabSelected.invoke(tab) }
-        ) {
-            val title = when (tab) {
-                SetupOneTimePasswordTab.CUSTOM -> stringResource(R.string.custom)
-                SetupOneTimePasswordTab.URL -> stringResource(R.string.url_cap)
-            }
+    val selectedTabIndex = tabs.indexOf(selectedTab)
 
-            Text(
-                style = PrimaryTextStyle(),
-                text = title
+    TabRow(
+        selectedTabIndex = selectedTabIndex,
+        containerColor = AppTheme.theme.colors.background,
+        modifier = Modifier
+            .padding(
+                top = dimensionResource(R.dimen.half_margin)
             )
+    ) {
+        for (tab in tabs) {
+            Tab(
+                selected = (tab == selectedTab),
+                modifier = Modifier
+                    .height(dimensionResource(R.dimen.tab_panel_height)),
+                onClick = { onTabSelected.invoke(tab) }
+            ) {
+                val title = when (tab) {
+                    SetupOneTimePasswordTab.CUSTOM -> stringResource(R.string.custom)
+                    SetupOneTimePasswordTab.URL -> stringResource(R.string.url_cap)
+                }
+
+                Text(
+                    style = PrimaryTextStyle(),
+                    text = title
+                )
+            }
         }
     }
 }
@@ -363,6 +365,7 @@ fun LightTotpPreview() {
     ThemedScreenPreview(theme = LightTheme) {
         SetupOneTimePasswordScreen(
             state = newCustomTotpState(),
+            periodProgressProvider = { 0.75f },
             onTabSelected = {},
             onTypeChanged = {},
             onSecretChanged = {},
@@ -382,6 +385,7 @@ fun LightHotpPreview() {
     ThemedScreenPreview(theme = LightTheme) {
         SetupOneTimePasswordScreen(
             state = newCustomHotpState(),
+            periodProgressProvider = { 0.75f },
             onTabSelected = {},
             onTypeChanged = {},
             onSecretChanged = {},
@@ -401,6 +405,7 @@ fun LightUrlPreview() {
     ThemedScreenPreview(theme = LightTheme) {
         SetupOneTimePasswordScreen(
             state = newUrlTotpState(),
+            periodProgressProvider = { 0.75f },
             onTabSelected = {},
             onTypeChanged = {},
             onSecretChanged = {},
@@ -420,6 +425,7 @@ fun DarkPreview() {
     ThemedScreenPreview(theme = DarkTheme) {
         SetupOneTimePasswordScreen(
             state = newCustomTotpState(),
+            periodProgressProvider = { 0.75f },
             onTabSelected = {},
             onTypeChanged = {},
             onSecretChanged = {},
@@ -436,7 +442,6 @@ fun DarkPreview() {
 private fun newCustomTotpState() = SetupOneTimePasswordState(
     selectedTab = SetupOneTimePasswordTab.CUSTOM,
     code = "--- ---",
-    periodProgress = 0.75f,
     isPeriodProgressVisible = true,
     customTabState = newTotpState(),
     urlTabState = UrlTabState(
@@ -448,7 +453,6 @@ private fun newCustomTotpState() = SetupOneTimePasswordState(
 private fun newCustomHotpState() = SetupOneTimePasswordState(
     selectedTab = SetupOneTimePasswordTab.CUSTOM,
     code = "--- ---",
-    periodProgress = 0.75f,
     isPeriodProgressVisible = false,
     customTabState = newHotpState(),
     urlTabState = UrlTabState(
@@ -460,7 +464,6 @@ private fun newCustomHotpState() = SetupOneTimePasswordState(
 private fun newUrlTotpState() = SetupOneTimePasswordState(
     selectedTab = SetupOneTimePasswordTab.URL,
     code = "--- ---",
-    periodProgress = 0.75f,
     isPeriodProgressVisible = true,
     customTabState = newHotpState(),
     urlTabState = UrlTabState(

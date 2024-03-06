@@ -5,14 +5,11 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ACCESS_TO_FILE
-import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
-import com.ivanovsky.passnotes.data.entity.OperationError.newFileNotFoundError
+import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_FILE
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.entity.SyncStatus
-import com.ivanovsky.passnotes.data.repository.file.FakeFileFactory.FileUid
 import com.ivanovsky.passnotes.data.repository.file.delay.ThreadThrottler
 import com.ivanovsky.passnotes.data.repository.file.entity.StorageDestinationType
+import com.ivanovsky.passnotes.util.FileUtils
 import java.io.ByteArrayInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -26,17 +23,12 @@ class FakeFileSystemProvider(
     fsAuthority: FSAuthority
 ) : FileSystemProvider {
 
+    private val authenticator = FakeFileSystemAuthenticator(fsAuthority)
+
     private val storage = FakeFileStorage(
-        fsAuthority = fsAuthority,
-        defaultStatuses = mapOf(
-            FileUid.CONFLICT to SyncStatus.CONFLICT,
-            FileUid.REMOTE_CHANGES to SyncStatus.REMOTE_CHANGES,
-            FileUid.LOCAL_CHANGES to SyncStatus.LOCAL_CHANGES,
-            FileUid.LOCAL_CHANGES_TIMEOUT to SyncStatus.LOCAL_CHANGES,
-            FileUid.ERROR to SyncStatus.ERROR,
-            FileUid.AUTH_ERROR to SyncStatus.AUTH_ERROR,
-            FileUid.NOT_FOUND to SyncStatus.FILE_NOT_FOUND
-        )
+        authenticator = authenticator,
+        newDatabaseFactory = { byteArrayOf() },
+        initialEntries = FakeFileFactory(fsAuthority).createDefaultFiles()
     )
 
     private val syncProcessor = FakeFileSystemSyncProcessor(
@@ -45,9 +37,6 @@ class FakeFileSystemProvider(
         throttler = throttler,
         fsAuthority = fsAuthority
     )
-
-    private val authenticator = FakeFileSystemAuthenticator(fsAuthority)
-    private val fileFactory = FakeFileFactory(fsAuthority)
 
     override fun getAuthenticator(): FileSystemAuthenticator {
         return authenticator
@@ -59,33 +48,34 @@ class FakeFileSystemProvider(
 
     override fun listFiles(dir: FileDescriptor): OperationResult<List<FileDescriptor>> {
         if (!isAuthenticated()) {
-            return newAuthError()
+            return OperationResult.error(newAuthError())
         }
 
-        if (!dir.isRoot) {
-            return OperationResult.error(newFileAccessError(MESSAGE_FAILED_TO_ACCESS_TO_FILE))
-        }
-
-        val files = storage.getFiles()
-            .map { file -> file.substituteFsAuthority() }
-
-        return OperationResult.success(files)
+        return OperationResult.success(storage.listFiles(dir.path))
     }
 
     override fun getParent(file: FileDescriptor): OperationResult<FileDescriptor> {
         if (!isAuthenticated()) {
-            return newAuthError()
+            return OperationResult.error(newAuthError())
         }
 
-        return rootFile
+        val parentPath = FileUtils.getParentPath(file.path)
+            ?: return OperationResult.error(newFileNotFoundError(file.path))
+
+        val parent = storage.getFileByPath(parentPath)
+            ?: return OperationResult.error(newFileNotFoundError(parentPath))
+
+        return OperationResult.success(parent)
     }
 
     override fun getRootFile(): OperationResult<FileDescriptor> {
         if (!isAuthenticated()) {
-            return newAuthError()
+            return OperationResult.error(newAuthError())
         }
 
-        val root = fileFactory.createRootFile().substituteFsAuthority()
+        val root = storage.getFileByPath(ROOT)
+            ?: return OperationResult.error(newFileNotFoundError(ROOT))
+
         return OperationResult.success(root)
     }
 
@@ -102,17 +92,17 @@ class FakeFileSystemProvider(
         )
 
         if (!isAuthenticated()) {
-            return newAuthError()
+            return OperationResult.error(newAuthError())
         }
 
         val content = storage.get(file.uid, options)
-            ?: return OperationResult.error(newFileNotFoundError())
+            ?: return OperationResult.error(newFileNotFoundError(file.uid))
 
         return try {
             OperationResult.success(ByteArrayInputStream(content))
         } catch (exception: FileNotFoundException) {
             Timber.w(exception)
-            OperationResult.error(newFileNotFoundError())
+            OperationResult.error(newFileNotFoundError(file.uid))
         } catch (exception: IOException) {
             Timber.w(exception)
             OperationResult.error(OperationError.newGenericIOError(exception))
@@ -132,7 +122,7 @@ class FakeFileSystemProvider(
         )
 
         if (!isAuthenticated()) {
-            return newAuthError()
+            return OperationResult.error(newAuthError())
         }
 
         val stream = FakeFileOutputStream(
@@ -146,7 +136,7 @@ class FakeFileSystemProvider(
 
     override fun exists(file: FileDescriptor): OperationResult<Boolean> {
         if (!isAuthenticated()) {
-            return newAuthError()
+            return OperationResult.error(newAuthError())
         }
 
         val isExist = (storage.getFileByPath(file.path) != null)
@@ -155,21 +145,16 @@ class FakeFileSystemProvider(
 
     override fun getFile(path: String, options: FSOptions): OperationResult<FileDescriptor> {
         if (!isAuthenticated()) {
-            return newAuthError()
+            return OperationResult.error(newAuthError())
         }
 
         val file = storage.getFileByPath(path)
-            ?.substituteFsAuthority()
 
         return if (file != null) {
             OperationResult.success(file)
         } else {
-            OperationResult.error(newFileNotFoundError())
+            OperationResult.error(newFileNotFoundError(path))
         }
-    }
-
-    private fun FileDescriptor.substituteFsAuthority(): FileDescriptor {
-        return copy(fsAuthority = authenticator.getFsAuthority())
     }
 
     private fun isAuthenticated(): Boolean {
@@ -180,11 +165,21 @@ class FakeFileSystemProvider(
             creds.password == PASSWORD
     }
 
-    private fun <T> newAuthError(): OperationResult<T> {
-        return OperationResult.error(OperationError.newAuthError())
+    private fun newAuthError(): OperationError {
+        return OperationError.newAuthError()
+    }
+
+    private fun newFileNotFoundError(pathOrUid: String): OperationError {
+        return OperationError.newFileNotFoundError(
+            String.format(
+                GENERIC_MESSAGE_FAILED_TO_FIND_FILE,
+                pathOrUid
+            )
+        )
     }
 
     companion object {
+        private const val ROOT = "/"
         const val SERVER_URL = "content://fakefs.com"
         const val USERNAME = "user"
         const val PASSWORD = "abc123"

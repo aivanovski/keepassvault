@@ -1,40 +1,41 @@
 package com.ivanovsky.passnotes.data.repository.file
 
-import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncStatus
-import com.ivanovsky.passnotes.data.repository.file.FakeFileFactory.FileUid
+import com.ivanovsky.passnotes.data.repository.file.entity.FakeStorageEntry
 import com.ivanovsky.passnotes.data.repository.file.entity.StorageDestinationType
 import com.ivanovsky.passnotes.data.repository.file.entity.StorageDestinationType.LOCAL
 import com.ivanovsky.passnotes.data.repository.file.entity.StorageDestinationType.REMOTE
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
+import com.ivanovsky.passnotes.util.FileUtils.getParentPath
 import timber.log.Timber
 
 class FakeFileStorage(
-    fsAuthority: FSAuthority,
-    private val defaultStatuses: Map<String, SyncStatus>
+    private val authenticator: FileSystemAuthenticator,
+    private val newDatabaseFactory: DatabaseContentFactory,
+    initialEntries: List<FakeStorageEntry>
 ) {
 
-    private val fileContentFactory = FakeFileContentFactory()
-    private val fileFactory = FakeFileFactory(fsAuthority)
-    private val localContent = ConcurrentHashMap<String, ByteArray>()
-    private val remoteContent = ConcurrentHashMap<String, ByteArray>()
-    private val statuses = ConcurrentHashMap<String, SyncStatus>()
-        .apply {
-            putAll(defaultStatuses)
-        }
-    private val files = CopyOnWriteArrayList<FileDescriptor>()
-        .apply {
-            addAll(createDefaultFiles())
-        }
+    private val cache = initialEntries
+        .map { entry -> entry.toCacheEntry() }
+        .associateBy { entry -> entry.localFile.uid }
+        .toMutableMap()
+
+    fun getLocalFile(uid: String): FileDescriptor? {
+        return getCacheEntryOrNull(uid)?.localFile
+            ?.substituteFsAuthority()
+    }
+
+    fun getRemoteFile(uid: String): FileDescriptor? {
+        return getCacheEntryOrNull(uid)?.remoteFile
+            ?.substituteFsAuthority()
+    }
 
     fun getSyncStatus(uid: String): SyncStatus {
-        return statuses[uid] ?: SyncStatus.NO_CHANGES
+        return getCacheEntry(uid).syncStatus
     }
 
     fun putSyncStatus(uid: String, status: SyncStatus) {
-        statuses[uid] = status
+        getCacheEntry(uid).syncStatus = status
     }
 
     fun put(
@@ -42,9 +43,11 @@ class FakeFileStorage(
         destination: StorageDestinationType,
         content: ByteArray
     ) {
+        val entry = getCacheEntry(uid)
+
         when (destination) {
-            LOCAL -> localContent[uid] = content
-            REMOTE -> remoteContent[uid] = content
+            LOCAL -> entry.localContent = content
+            REMOTE -> entry.remoteContent = content
         }
     }
 
@@ -55,8 +58,8 @@ class FakeFileStorage(
         generateAndStoreContentIfNeed(uid)
 
         return when (destination) {
-            LOCAL -> localContent[uid]
-            REMOTE -> remoteContent[uid]
+            LOCAL -> getCacheEntryOrNull(uid)?.localContent
+            REMOTE -> getCacheEntryOrNull(uid)?.remoteContent
         }
     }
 
@@ -64,35 +67,33 @@ class FakeFileStorage(
         uid: String,
         fsOptions: FSOptions
     ): ByteArray? {
-        val destination = determineDestination(uid, fsOptions)
-        Timber.d("Get content: uid=$uid, fsOptions=$fsOptions, destination=$destination")
+        val destination = determineDestination(fsOptions)
+        Timber.d(
+            "Get content: uid=%s, fsOptions=%s, destination=%s",
+            uid,
+            fsOptions,
+            destination
+        )
 
-        generateAndStoreContentIfNeed(uid)
-
-        val contentMap = when (destination) {
-            LOCAL -> localContent
-            REMOTE -> remoteContent
-        }
-
-        return contentMap[uid]
-    }
-
-    fun getFileByUid(uid: String): FileDescriptor? {
-        return files.firstOrNull { file -> file.uid == uid }
+        return get(uid, destination)
     }
 
     fun getFileByPath(path: String): FileDescriptor? {
-        return files.firstOrNull { file -> file.path == path }
+        return cache.values
+            .firstOrNull { entry -> entry.localFile.path == path }
+            ?.localFile
+            ?.substituteFsAuthority()
     }
 
-    fun getFiles(): List<FileDescriptor> {
-        return files
+    fun listFiles(dirPath: String): List<FileDescriptor> {
+        val allFiles = cache.values.map { entry -> entry.localFile }
+
+        return allFiles
+            .filter { file -> !file.isRoot && getParentPath(file.path) == dirPath }
+            .map { file -> file.substituteFsAuthority() }
     }
 
-    private fun determineDestination(
-        uid: String,
-        fsOptions: FSOptions
-    ): StorageDestinationType {
+    private fun determineDestination(fsOptions: FSOptions): StorageDestinationType {
         return if (!fsOptions.isCacheEnabled) {
             REMOTE
         } else {
@@ -100,78 +101,62 @@ class FakeFileStorage(
         }
     }
 
-    private fun generateAndStoreContentIfNeed(
-        uid: String
-    ) {
-        if (localContent.containsKey(uid) && remoteContent.containsKey(uid)) {
+    private fun generateAndStoreContentIfNeed(uid: String) {
+        val entry = getCacheEntry(uid)
+
+        if (entry.localContent != null && entry.remoteContent != null) {
             return
         }
 
-        when (uid) {
-            FileUid.CONFLICT -> {
-                val local = fileContentFactory.createDefaultLocalDatabase()
-                val remote = fileContentFactory.createDefaultRemoteDatabase()
-
-                Timber.d(
-                    "Generate content: uid=%s, local.size=%s, remote=%s",
-                    uid,
-                    local.size,
-                    remote.size
-                )
-
-                localContent[uid] = local
-                remoteContent[uid] = remote
-            }
-
-            else -> {
-                val content = when (uid) {
-                    FileUid.DEMO -> fileContentFactory.createDefaultLocalDatabase()
-                    FileUid.DEMO_MODIFIED -> fileContentFactory.createDefaultRemoteDatabase()
-                    FileUid.OTP -> fileContentFactory.createDatabaseWithOtpData()
-                    else -> fileContentFactory.createDefaultLocalDatabase()
-                }
-
-                Timber.d("Generate content: uid=$uid, size=${content.size}")
-
-                localContent[uid] = content
-                remoteContent[uid] = content
-
-                createFileIfNeed(uid)
-            }
-        }
-    }
-
-    private fun createFileIfNeed(uid: String) {
-        val isExist = files.any { file -> file.uid == uid }
+        val localContent = entry.localContentFactory.create()
+        val remoteContent = entry.remoteContentFactory.create()
 
         Timber.d(
-            "createFileIfNeed: isExist=%s, uid=%s",
-            isExist,
-            uid
+            "Generate content: uid=%s, local.size=%s, remote.size=%s",
+            uid,
+            localContent.size,
+            remoteContent.size
         )
 
-        if (isExist) {
-            return
-        }
-
-        val file = fileFactory.createNewFromUid(uid)
-        files.add(file)
+        entry.localContent = localContent
+        entry.remoteContent = remoteContent
     }
 
-    private fun createDefaultFiles(): List<FileDescriptor> {
-        return listOf(
-            fileFactory.createNoChangesFile(),
-            fileFactory.createRemoteChangesFile(),
-            fileFactory.createLocalChangesFile(),
-            fileFactory.createLocalChangesTimeoutFile(),
-            fileFactory.createConflictLocalFile(),
-            fileFactory.createAuthErrorFile(),
-            fileFactory.createNotFoundFile(),
-            fileFactory.createErrorFile(),
-            fileFactory.createAutoTestsFile(),
-            fileFactory.createDemoFile(),
-            fileFactory.createDemoModifiedFile(),
-            fileFactory.createOtpFile()
+    private fun FileDescriptor.substituteFsAuthority(): FileDescriptor {
+        return copy(fsAuthority = authenticator.getFsAuthority())
+    }
+
+    private fun getCacheEntry(uid: String): CacheEntry {
+        return cache[uid] ?: throwEntryNotFound(uid)
+    }
+
+    private fun getCacheEntryOrNull(uid: String): CacheEntry? {
+        return cache[uid]
+    }
+
+    private fun throwEntryNotFound(uid: String): Nothing {
+        throw IllegalStateException("Unable to find data for file: uid=$uid")
+    }
+
+    private fun FakeStorageEntry.toCacheEntry(): CacheEntry {
+        return CacheEntry(
+            localFile = localFile,
+            remoteFile = remoteFile,
+            syncStatus = syncStatus,
+            localContentFactory = localContentFactory ?: newDatabaseFactory,
+            remoteContentFactory = remoteContentFactory ?: newDatabaseFactory,
+            localContent = null,
+            remoteContent = null
         )
     }
+
+    private class CacheEntry(
+        var localFile: FileDescriptor,
+        var remoteFile: FileDescriptor,
+        var syncStatus: SyncStatus,
+        val localContentFactory: DatabaseContentFactory,
+        val remoteContentFactory: DatabaseContentFactory,
+        var localContent: ByteArray?,
+        var remoteContent: ByteArray?
+    )
 }

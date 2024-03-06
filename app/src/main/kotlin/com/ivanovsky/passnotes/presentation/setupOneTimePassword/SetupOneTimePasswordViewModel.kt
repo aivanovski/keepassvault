@@ -353,8 +353,10 @@ class SetupOneTimePasswordViewModel(
         return SetupOneTimePasswordState(
             selectedTab = selectedTab,
             code = code,
-            isPeriodProgressVisible = (currentToken != null &&
-                currentToken.type == OtpTokenType.TOTP),
+            isPeriodProgressVisible = (
+                currentToken != null &&
+                    currentToken.type == OtpTokenType.TOTP
+                ),
             customTabState = CustomTabState(
                 secret = secret,
                 secretError = secretError,

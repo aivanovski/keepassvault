@@ -1,0 +1,4 @@
+- Rename app to KeePassVault
+- Add TOTP/HOTP codes support
+- Fix recycle bin support
+- Bugfix

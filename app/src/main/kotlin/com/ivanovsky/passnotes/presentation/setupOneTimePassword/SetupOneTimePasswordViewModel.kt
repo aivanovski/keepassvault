@@ -74,6 +74,10 @@ class SetupOneTimePasswordViewModel(
 
     val state = buildStateFlow()
 
+    init {
+        updateState()
+    }
+
     fun onSecretChanged(newSecret: String) {
         secret = newSecret
         secretError = null

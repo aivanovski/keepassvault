@@ -19,7 +19,11 @@ class TotpGenerator(
     val periodInMillis = (token.periodInSeconds ?: 0) * 1000L
 
     override fun generateCode(): String {
-        return generator.generateCode(token.secret.toByteArray())
+        return try {
+            generator.generateCode(token.secret.toByteArray())
+        } catch (exception: Exception) {
+            token.createCodePlaceholder()
+        }
     }
 
     fun getNextTimeslotStart(): Long {

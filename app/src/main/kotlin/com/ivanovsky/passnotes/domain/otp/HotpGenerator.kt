@@ -13,6 +13,10 @@ class HotpGenerator(
     )
 
     override fun generateCode(): String {
-        return generator.generateCode(token.secret.toByteArray(), token.counter ?: 0)
+        return try {
+            generator.generateCode(token.secret.toByteArray(), token.counter ?: 0)
+        } catch (exception: Exception) {
+            token.createCodePlaceholder()
+        }
     }
 }

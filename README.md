@@ -22,6 +22,7 @@ Android client app for KeePass databases.
 - Fuzzy search
 - Dark theme (controlled by system settings)
 - Built-in diff viewer for .kdbx files
+- TOTP/HOTP support
 
 # License
 ```

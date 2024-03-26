@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.lifecycle.ViewModelProvider
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.CoreComposeFragmentBinding
+import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.compose.AppTheme
 import com.ivanovsky.passnotes.presentation.core.compose.getComposeTheme
@@ -66,6 +67,7 @@ class SetupOneTimePasswordFragment : FragmentWithDoneButton() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewLifecycleOwner.lifecycle.addObserver(DatabaseInteractionWatcher(this))
 
         setupActionBar {
             title = getString(R.string.add_one_time_password)

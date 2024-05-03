@@ -259,7 +259,8 @@ public class OperationError {
         CACHE_ERROR, // inconsistent cached data,
         REMOTE_API_ERROR,
         ERROR_MESSAGE, // not important error that can be ignored
-        BIOMETRIC_DATA_INVALIDATED_ERROR // if user modified biometric data on phone (e.g. add new finger)
+        BIOMETRIC_DATA_INVALIDATED_ERROR // if user modified biometric data on phone (e.g. add new
+        // finger)
     }
 
     // TODO: remove unnecessary constructors and refactor

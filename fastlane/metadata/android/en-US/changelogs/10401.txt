@@ -1,0 +1,1 @@
+- Fix crash after biometric data update

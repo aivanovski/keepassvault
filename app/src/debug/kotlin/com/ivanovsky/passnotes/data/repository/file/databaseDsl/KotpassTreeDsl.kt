@@ -17,9 +17,8 @@ import java.util.UUID
 
 object KotpassTreeDsl {
 
-    private const val DEFAULT_PASSWORD = "abc123"
-
-    fun tree(
+    fun newDatabase(
+        credentials: Credentials,
         root: GroupEntity,
         content: (DatabaseElementBuilder.() -> Unit)? = null
     ): KeePassDatabase {
@@ -35,7 +34,7 @@ object KotpassTreeDsl {
         val db = KeePassDatabase.Ver4x.create(
             rootName = root.title,
             meta = Meta(recycleBinEnabled = true),
-            credentials = Credentials.from(DEFAULT_PASSWORD.toByteArray())
+            credentials = credentials
         )
 
         val realRootUuid = db.content.group.uuid

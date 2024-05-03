@@ -51,6 +51,7 @@
             app:onAddClicked="@{() -> viewModel.onAddKeyFileButtonClicked()}"
             app:onRemoveClicked="@{() -> viewModel.onRemoveKeyFileButtonClicked()}"
             app:onUnlockClicked="@{() -> viewModel.onUnlockButtonClicked()}"
+            app:onUnlockLongClicked="@{() -> viewModel.onUnlockButtonLongClicked()}"
             app:onEditorAction="@{(actionId) -> viewModel.onEditorAction(actionId)}"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />

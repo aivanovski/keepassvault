@@ -1,7 +1,10 @@
 package com.ivanovsky.passnotes.data.crypto.biometric
 
 import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
+import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationResult
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -10,28 +13,63 @@ import javax.crypto.spec.GCMParameterSpec
 
 class BiometricCipherProvider {
 
-    fun getCipherForEncryption(): BiometricEncoder {
-        val cipher = newCipher()
-            .apply {
-                init(
-                    Cipher.ENCRYPT_MODE,
-                    getOrCreateKey()
-                )
-            }
-        return BiometricEncoderImpl(cipher)
+    fun getCipherForEncryption(): OperationResult<BiometricEncoder> {
+        return try {
+            val cipher = newCipher()
+                .apply {
+                    init(
+                        Cipher.ENCRYPT_MODE,
+                        getOrCreateKey()
+                    )
+                }
+
+            OperationResult.success(BiometricEncoderImpl(cipher))
+        } catch (exception: KeyPermanentlyInvalidatedException) {
+            val error = OperationError(
+                OperationError.Type.BIOMETRIC_DATA_INVALIDATED_ERROR,
+                exception
+            )
+
+            OperationResult.error(error)
+        }
     }
 
-    fun getCipherForDecryption(initVector: ByteArray): BiometricDecoder {
-        val cipher = newCipher()
+    fun getCipherForDecryption(initVector: ByteArray): OperationResult<BiometricDecoder> {
+        return try {
+            val cipher = newCipher()
+                .apply {
+                    init(
+                        Cipher.DECRYPT_MODE,
+                        getOrCreateKey(),
+                        GCMParameterSpec(128, initVector)
+                    )
+                }
+
+            OperationResult.success(BiometricDecoderImpl(cipher))
+        } catch (exception: KeyPermanentlyInvalidatedException) {
+            val error = OperationError(
+                OperationError.Type.BIOMETRIC_DATA_INVALIDATED_ERROR,
+                exception
+            )
+
+            OperationResult.error(error)
+        }
+    }
+
+    fun clear(): OperationResult<Boolean> {
+        val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
             .apply {
-                init(
-                    Cipher.DECRYPT_MODE,
-                    getOrCreateKey(),
-                    GCMParameterSpec(128, initVector)
-                )
+                load(null)
             }
 
-        return BiometricDecoderImpl(cipher)
+        val isCleared = if (keyStore.getKey(KEY_NAME, null) != null) {
+            keyStore.deleteEntry(KEY_NAME)
+            true
+        } else {
+            false
+        }
+
+        return OperationResult.success(isCleared)
     }
 
     private fun newCipher(): Cipher {

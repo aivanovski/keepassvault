@@ -33,6 +33,7 @@ import com.ivanovsky.passnotes.domain.usecases.DecodePasswordWithBiometricUseCas
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetUsedFileUseCase
+import com.ivanovsky.passnotes.domain.usecases.RemoveBiometricDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.domain.usecases.test.GetTestPasswordUseCase
@@ -54,6 +55,7 @@ class UnlockInteractor(
     private val syncUseCases: SyncUseCases,
     private val getUsedFileUseCase: GetUsedFileUseCase,
     private val decodePasswordUseCase: DecodePasswordWithBiometricUseCase,
+    private val removeBiometricDataUseCase: RemoveBiometricDataUseCase,
     private val dispatchers: DispatcherProvider,
     private val settings: Settings
 ) {
@@ -287,6 +289,16 @@ class UnlockInteractor(
         biometricData: BiometricData
     ): OperationResult<String> =
         decodePasswordUseCase.decodePassword(decoder, biometricData)
+
+    suspend fun removeBiometricData(
+        usedFileId: Int
+    ): OperationResult<Unit> =
+        removeBiometricDataUseCase.removeBiometricData(usedFileId)
+
+    suspend fun getUsedFile(
+        usedFileId: Int
+    ): OperationResult<UsedFile> =
+        getUsedFileUseCase.getUsedFile(usedFileId)
 
     suspend fun getFile(
         path: String,

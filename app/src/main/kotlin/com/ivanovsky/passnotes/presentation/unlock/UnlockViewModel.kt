@@ -15,6 +15,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.Type.BIOMETRIC_DATA_INVALIDATED_ERROR
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
@@ -83,6 +84,7 @@ class UnlockViewModel(
     val unlockButtonColor = MutableLiveData(getUnlockButtonColorInternal())
     val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
     val showSnackbarMessage = SingleLiveEvent<String>()
+    val showMessageDialog = SingleLiveEvent<String>()
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
     val fileCellViewModels = MutableLiveData<List<BaseCellViewModel>>()
     val isFabButtonVisible = MutableLiveData(false)
@@ -196,8 +198,12 @@ class UnlockViewModel(
             biometricData != null &&
             selectedKeyFile == null
         ) {
-            val decoder = biometricInteractor.getCipherForDecryption(biometricData)
-            showBiometricUnlockDialog.call(decoder)
+            val getDecoderResult = biometricInteractor.getCipherForDecryption(biometricData)
+            if (getDecoderResult.isSucceeded) {
+                showBiometricUnlockDialog.call(getDecoderResult.obj)
+            } else {
+                removeBiometricData()
+            }
             return
         }
 
@@ -222,6 +228,51 @@ class UnlockViewModel(
                 onDatabaseUnlocked()
             } else {
                 setErrorPanelState(open.error)
+            }
+        }
+    }
+
+    private fun removeBiometricData() {
+        val biometricData = selectedUsedFile?.biometricData ?: return
+        val getDecoderResult = biometricInteractor.getCipherForDecryption(biometricData)
+
+        val isBiometricDataInvalidated =
+            (getDecoderResult.error.type == BIOMETRIC_DATA_INVALIDATED_ERROR)
+
+        setScreenState(ScreenState.loading())
+
+        viewModelScope.launch {
+            val fileId = selectedUsedFile?.id
+            if (fileId == null) {
+                loadData(
+                    isResetSelection = false,
+                    isShowKeyboard = false
+                )
+                return@launch
+            }
+
+            val removeDataResult = interactor.removeBiometricData(fileId)
+            if (removeDataResult.isFailed) {
+                setErrorState(removeDataResult.error)
+                return@launch
+            }
+
+            val getFileResult = interactor.getUsedFile(fileId)
+            if (getFileResult.isFailed) {
+                setErrorState(getFileResult.error)
+                return@launch
+            }
+
+            selectedUsedFile = getFileResult.obj
+            unlockIconResId.value = getUnlockIconResIdInternal()
+            setScreenState(ScreenState.data())
+
+            if (isBiometricDataInvalidated) {
+                showMessageDialog.call(
+                    resourceProvider.getString(
+                        R.string.biometric_data_is_invalidated
+                    )
+                )
             }
         }
     }

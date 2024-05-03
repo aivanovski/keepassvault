@@ -258,7 +258,8 @@ public class OperationError {
         FILE_IS_ALREADY_EXISTS,
         CACHE_ERROR, // inconsistent cached data,
         REMOTE_API_ERROR,
-        ERROR_MESSAGE // not important error that can be ignored
+        ERROR_MESSAGE, // not important error that can be ignored
+        BIOMETRIC_DATA_INVALIDATED_ERROR // if user modified biometric data on phone (e.g. add new finger)
     }
 
     // TODO: remove unnecessary constructors and refactor

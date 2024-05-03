@@ -152,6 +152,9 @@ class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
         viewModel.showToastEvent.observe(viewLifecycleOwner) { message ->
             showToastMessage(message)
         }
+        viewModel.showErrorDialog.observe(viewLifecycleOwner) { message ->
+            showErrorDialog(message)
+        }
         viewModel.screenTitle.observe(viewLifecycleOwner) {
             setupActionBar {
                 title = it

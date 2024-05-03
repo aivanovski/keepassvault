@@ -24,6 +24,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.showMessageDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
+import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel.UnlockOption
 
 class UnlockFragment : BaseFragment() {
 
@@ -125,6 +126,9 @@ class UnlockFragment : BaseFragment() {
         viewModel.showAddMenuDialog.observe(viewLifecycleOwner) {
             showAddMenuDialog()
         }
+        viewModel.showUnlockOptionsDialog.observe(viewLifecycleOwner) { options ->
+            showUnlockOptionsDialog(options)
+        }
     }
 
     private fun showResolveConflictDialog(file: FileDescriptor) {
@@ -159,6 +163,18 @@ class UnlockFragment : BaseFragment() {
                         0 -> viewModel.onNewFileClicked()
                         1 -> viewModel.onOpenFileClicked()
                     }
+                }
+            }
+        dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
+    }
+
+    private fun showUnlockOptionsDialog(options: List<UnlockOption>) {
+        val entries = options.map { option -> getString(option.nameResId) }
+
+        val dialog = ChooseOptionDialog.newInstance(getString(R.string.unlock_with), entries)
+            .apply {
+                onItemClickListener = { itemIndex ->
+                    viewModel.onUnlockOptionSelected(options[itemIndex])
                 }
             }
         dialog.show(childFragmentManager, ChooseOptionDialog.TAG)

@@ -17,6 +17,7 @@ import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.binding.setMaterialBackgroundColor
 import com.ivanovsky.passnotes.presentation.core.widget.entity.ImeOptions
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnButtonClickListener
+import com.ivanovsky.passnotes.presentation.core.widget.entity.OnButtonLongClickListener
 import com.ivanovsky.passnotes.presentation.core.widget.entity.OnEditorActionListener
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
@@ -62,6 +63,7 @@ class UnlockView(
         }
 
     var onUnlockButtonClicked: OnButtonClickListener? = null
+    var onUnlockButtonLongClicked: OnButtonLongClickListener? = null
     var onAddButtonClicked: OnButtonClickListener? = null
     var onRemoveButtonClicked: OnButtonClickListener? = null
     var onEditorAction: OnEditorActionListener? = null
@@ -95,6 +97,14 @@ class UnlockView(
 
         binding.unlockButton.setOnClickListener {
             onUnlockButtonClicked?.onButtonClicked()
+        }
+        binding.unlockButton.setOnLongClickListener {
+            if (onUnlockButtonLongClicked != null) {
+                onUnlockButtonLongClicked?.onButtonLongClicked()
+                true
+            } else {
+                false
+            }
         }
         binding.addKeyButton.setOnClickListener {
             onAddButtonClicked?.onButtonClicked()
@@ -210,6 +220,15 @@ class UnlockView(
             listener: OnButtonClickListener?
         ) {
             view.onUnlockButtonClicked = listener
+        }
+
+        @JvmStatic
+        @BindingAdapter("onUnlockLongClicked")
+        fun setOnUnlockButtonLongClickListener(
+            view: UnlockView,
+            listener: OnButtonLongClickListener?
+        ) {
+            view.onUnlockButtonLongClicked = listener
         }
 
         @JvmStatic

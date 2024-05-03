@@ -1,18 +1,20 @@
 package com.ivanovsky.passnotes.data.repository.file
 
+import app.keemobile.kotpass.cryptography.EncryptedValue
+import app.keemobile.kotpass.database.Credentials
 import app.keemobile.kotpass.database.KeePassDatabase
 import app.keemobile.kotpass.database.encode
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.data.repository.file.databaseDsl.EntryEntity
 import com.ivanovsky.passnotes.data.repository.file.databaseDsl.GroupEntity
-import com.ivanovsky.passnotes.data.repository.file.databaseDsl.KotpassTreeDsl.tree
+import com.ivanovsky.passnotes.data.repository.file.databaseDsl.KotpassTreeDsl.newDatabase
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
 object FakeDatabaseContentFactory {
 
     fun createDefaultLocalDatabase(): ByteArray {
-        return tree(ROOT) {
+        return newDatabase(PASSWORD_CREDENTIALS, ROOT) {
             group(GROUP_EMAIL)
             group(GROUP_INTERNET) {
                 group(GROUP_CODING) {
@@ -33,11 +35,11 @@ object FakeDatabaseContentFactory {
             entry(ENTRY_NAS_LOGIN)
             entry(ENTRY_LAPTOP_LOGIN)
         }
-            .toByteArray()
+            .encodeToByteArray()
     }
 
     fun createDefaultRemoteDatabase(): ByteArray {
-        return tree(ROOT) {
+        return newDatabase(PASSWORD_CREDENTIALS, ROOT) {
             group(GROUP_EMAIL)
             group(GROUP_INTERNET) {
                 group(GROUP_CODING) {
@@ -61,23 +63,61 @@ object FakeDatabaseContentFactory {
             entry(ENTRY_LAPTOP_LOGIN)
             entry(ENTRY_MAC_BOOK_LOGIN)
         }
-            .toByteArray()
+            .encodeToByteArray()
     }
 
     fun createDatabaseWithOtpData(): ByteArray {
-        return tree(ROOT) {
+        return newDatabase(PASSWORD_CREDENTIALS, ROOT) {
             entry(ENTRY_TOTP)
             entry(ENTRY_HOTP)
         }
-            .toByteArray()
+            .encodeToByteArray()
     }
 
-    private fun KeePassDatabase.toByteArray(): ByteArray {
+    fun createDatabaseWithKeyFile(): ByteArray {
+        return newDatabase(KEY_FILE_CREDENTIALS, ROOT) {
+            entry(ENTRY_NAS_LOGIN)
+            entry(ENTRY_LAPTOP_LOGIN)
+            entry(ENTRY_MAC_BOOK_LOGIN)
+        }
+            .encodeToByteArray()
+    }
+
+    fun createDatabaseWithCombinedKey(): ByteArray {
+        return newDatabase(COMBINED_CREDENTIALS, ROOT) {
+            entry(ENTRY_NAS_LOGIN)
+            entry(ENTRY_LAPTOP_LOGIN)
+            entry(ENTRY_MAC_BOOK_LOGIN)
+        }
+            .encodeToByteArray()
+    }
+
+    fun createKeyFileData(): ByteArray {
+        return DEFAULT_KEY_FILE.toByteArray()
+    }
+
+    private fun KeePassDatabase.encodeToByteArray(): ByteArray {
         return ByteArrayOutputStream().use { out ->
             this.encode(out)
             out.toByteArray()
         }
     }
+
+    private const val DEFAULT_PASSWORD = "abc123"
+    private const val DEFAULT_KEY_FILE = "abcdefg1235678"
+
+    private val PASSWORD_CREDENTIALS = Credentials.from(
+        passphrase = EncryptedValue.fromString(DEFAULT_PASSWORD)
+    )
+
+    private val KEY_FILE_CREDENTIALS = Credentials.from(
+        keyData = DEFAULT_KEY_FILE.toByteArray()
+    )
+
+    private val COMBINED_CREDENTIALS = Credentials.from(
+        passphrase = EncryptedValue.fromString(DEFAULT_PASSWORD),
+        keyData = DEFAULT_KEY_FILE.toByteArray()
+    )
 
     private val ROOT = GroupEntity(title = "Database")
     private val GROUP_EMAIL = GroupEntity(title = "Email", uuid = UUID(100L, 1L))

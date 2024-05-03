@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.unlock
 
 import android.view.inputmethod.EditorInfo
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -20,6 +21,7 @@ import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.entity.UsedFile
+import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.Settings
@@ -93,6 +95,7 @@ class UnlockViewModel(
     val showBiometricUnlockDialog = SingleLiveEvent<BiometricDecoder>()
     val showFileActionsDialog = SingleLiveEvent<UsedFile>()
     val showAddMenuDialog = SingleLiveEvent<Unit>()
+    val showUnlockOptionsDialog = SingleLiveEvent<List<UnlockOption>>()
 
     val fileCellTypes = ViewModelTypes()
         .add(DatabaseFileCellViewModel::class, R.layout.cell_database_file)
@@ -189,7 +192,6 @@ class UnlockViewModel(
     }
 
     fun onUnlockButtonClicked() {
-        val selectedFile = selectedUsedFile?.getFileDescriptor() ?: return
         val biometricData = selectedUsedFile?.biometricData
         val selectedKeyFile = selectedKeyFile
         val password = password.value ?: EMPTY
@@ -217,6 +219,61 @@ class UnlockViewModel(
 
             else -> PasswordKeepassKey(password)
         }
+
+        unlock(key)
+    }
+
+    fun onUnlockButtonLongClicked() {
+        val options = mutableListOf(UnlockOption.PASSWORD)
+
+        if (selectedKeyFile != null) {
+            options.add(UnlockOption.KEY_FILE)
+            options.add(UnlockOption.PASSWORD_AND_KEY_FILE)
+        }
+
+        if (isBiometricAuthenticationAvailable() && selectedUsedFile?.biometricData != null) {
+            options.add(UnlockOption.BIOMETRIC)
+        }
+
+        showUnlockOptionsDialog.call(options)
+    }
+
+    fun onUnlockOptionSelected(option: UnlockOption) {
+        when (option) {
+            UnlockOption.BIOMETRIC -> {
+                onUnlockButtonClicked()
+            }
+
+            UnlockOption.PASSWORD -> {
+                val key = PasswordKeepassKey(password.value ?: EMPTY)
+                unlock(key)
+            }
+
+            UnlockOption.KEY_FILE -> {
+                val key = selectedKeyFile?.let { keyFile ->
+                    FileKeepassKey(
+                        file = keyFile
+                    )
+                } ?: return
+
+                unlock(key)
+            }
+
+            UnlockOption.PASSWORD_AND_KEY_FILE -> {
+                val key = selectedKeyFile?.let { keyFile ->
+                    FileKeepassKey(
+                        file = keyFile,
+                        password = password.value ?: EMPTY
+                    )
+                } ?: return
+
+                unlock(key)
+            }
+        }
+    }
+
+    private fun unlock(key: EncryptedDatabaseKey) {
+        val selectedFile = selectedUsedFile?.getFileDescriptor() ?: return
 
         isKeyboardVisibleEvent.call(false)
         setScreenState(ScreenState.loading())
@@ -391,6 +448,8 @@ class UnlockViewModel(
     private fun onDatabaseFileClicked(usedFileId: Int) {
         val selectedFile = recentlyUsedFiles?.firstOrNull { it.id == usedFileId } ?: return
 
+        selectedKeyFile = null
+
         setSelectedFile(selectedFile)
         setScreenState(ScreenState.data())
     }
@@ -420,9 +479,8 @@ class UnlockViewModel(
 
     private fun clearKeyInputIfNeed() {
         password.value = EMPTY
-        selectedKeyFile = null
-        isAddKeyButtonVisible.value = true
-        keyFilename.value = EMPTY
+        isAddKeyButtonVisible.value = isAddKeyFileButtonVisibleInternal()
+        keyFilename.value = selectedKeyFile?.name ?: EMPTY
     }
 
     private fun fillKeyInputIfNeed() {
@@ -498,7 +556,7 @@ class UnlockViewModel(
     }
 
     private fun onDatabaseFilePicked(file: FileDescriptor) {
-        // userSelectedKeyType = null
+        selectedKeyFile = null
 
         setScreenState(ScreenState.loading())
 
@@ -569,7 +627,7 @@ class UnlockViewModel(
         this.selectedKeyFile = if (usedFile?.keyType == KeyType.KEY_FILE) {
             usedFile.getKeyFileDescriptor()
         } else {
-            null
+            selectedKeyFile
         }
 
         val selectedKeyFile = selectedKeyFile
@@ -825,6 +883,13 @@ class UnlockViewModel(
         RESOLVE_CONFLICT,
         REMOVE_FILE,
         AUTHORISATION
+    }
+
+    enum class UnlockOption(@StringRes val nameResId: Int) {
+        PASSWORD(R.string.password),
+        KEY_FILE(R.string.key_file),
+        PASSWORD_AND_KEY_FILE(R.string.password_and_key_file),
+        BIOMETRIC(R.string.biometrics)
     }
 
     class Factory(

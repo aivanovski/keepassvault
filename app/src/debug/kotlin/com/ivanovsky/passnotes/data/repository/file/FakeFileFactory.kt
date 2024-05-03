@@ -3,7 +3,10 @@ package com.ivanovsky.passnotes.data.repository.file
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncStatus
+import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithCombinedKey
+import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithKeyFile
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithOtpData
+import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createKeyFileData
 import com.ivanovsky.passnotes.data.repository.file.entity.FakeStorageEntry
 import com.ivanovsky.passnotes.util.FileUtils
 
@@ -18,6 +21,7 @@ class FakeFileFactory(
             newEntry(newDirectory("/conflicts", Time.ROOT)),
             newEntry(newDirectory("/errors", Time.ROOT)),
             newEntry(newDirectory("/examples", Time.ROOT)),
+            newEntry(newDirectory("/keys", Time.ROOT)),
 
             newEntry(
                 localFile = newFile(Path.NO_CHANGES, Time.NO_CHANGES),
@@ -79,6 +83,20 @@ class FakeFileFactory(
                 remoteContentFactory = { createDatabaseWithOtpData() }
             ),
 
+            newEntry(
+                localFile = newFile(Path.KEY_UNLOCK, Time.NO_CHANGES),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createDatabaseWithKeyFile() },
+                remoteContentFactory = { createDatabaseWithKeyFile() }
+            ),
+
+            newEntry(
+                localFile = newFile(Path.KEY_PASSWORD_UNLOCK, Time.NO_CHANGES),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createDatabaseWithCombinedKey() },
+                remoteContentFactory = { createDatabaseWithCombinedKey() }
+            ),
+
             // conflicts
             newEntry(
                 localFile = newFile(Path.CONFLICT, Time.REMOTE),
@@ -86,6 +104,14 @@ class FakeFileFactory(
                 syncStatus = SyncStatus.CONFLICT,
                 localContentFactory = LOCAL_CONTENT_FACTORY,
                 remoteContentFactory = REMOTE_CONTENT_FACTORY
+            ),
+
+            // keys
+            newEntry(
+                localFile = newFile(Path.KEY, Time.NO_CHANGES),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createKeyFileData() },
+                remoteContentFactory = { createKeyFileData() }
             )
         )
     }
@@ -228,9 +254,14 @@ class FakeFileFactory(
         // examples
         val DEMO = "/examples/demo.kdbx"
         val OTP = "/examples/test-otp.kdbx"
+        val KEY_UNLOCK = "/examples/key-unlock.kdbx"
+        val KEY_PASSWORD_UNLOCK = "/examples/key-and-password-unlock.kdbx"
 
         // conflicts
         val CONFLICT = "/conflicts/test-conflict.kdbx"
+
+        // keys
+        val KEY = "/keys/key"
     }
 
     private object Time {

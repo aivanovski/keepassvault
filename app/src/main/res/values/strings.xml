@@ -122,6 +122,8 @@
     <string name="permit">Permit</string>
     <string name="later">Later</string>
     <string name="biometric_data_is_invalidated">Biometric data was invalidated (i.e. new fingerprint enrolled). Please setup biometric unlock again.</string>
+    <string name="password_and_key_file">Password and key file</string>
+    <string name="unlock_with">Unlock with</string>
 
     <!-- New database screen -->
     <string name="new_database">New database</string>

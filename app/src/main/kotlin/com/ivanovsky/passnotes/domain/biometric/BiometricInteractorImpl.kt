@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.data.crypto.biometric.BiometricCipherProvider
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.crypto.entity.BiometricData
+import com.ivanovsky.passnotes.data.entity.OperationResult
 
 class BiometricInteractorImpl(
     context: Context
@@ -23,13 +24,19 @@ class BiometricInteractorImpl(
         return biometricManager.canAuthenticate(type) == BiometricManager.BIOMETRIC_SUCCESS
     }
 
-    override fun getCipherForEncryption(): BiometricEncoder {
+    override fun getCipherForEncryption(): OperationResult<BiometricEncoder> {
         return cipherProvider.getCipherForEncryption()
     }
 
-    override fun getCipherForDecryption(biometricData: BiometricData): BiometricDecoder {
+    override fun getCipherForDecryption(
+        biometricData: BiometricData
+    ): OperationResult<BiometricDecoder> {
         return cipherProvider.getCipherForDecryption(
             initVector = biometricData.initVector
         )
+    }
+
+    override fun clearStoredData(): OperationResult<Boolean> {
+        return cipherProvider.clear()
     }
 }

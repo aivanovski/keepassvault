@@ -17,6 +17,7 @@ import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL
+import com.ivanovsky.passnotes.data.entity.OperationError.Type.BIOMETRIC_DATA_INVALIDATED_ERROR
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
@@ -164,6 +165,7 @@ class GroupsViewModel(
     val isSearchQueryVisible = MutableLiveData(false)
     val isNavigationPanelVisible = MutableLiveData(false)
     val showToastEvent = SingleLiveEvent<String>()
+    val showErrorDialog = SingleLiveEvent<String>()
     val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
     val showGroupActionsDialogEvent = SingleLiveEvent<Group>()
     val showNoteActionsDialogEvent = SingleLiveEvent<Note>()
@@ -561,9 +563,26 @@ class GroupsViewModel(
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
 
     fun onEnableBiometricUnlockButtonClicked() {
-        if (isBiometricUnlockAllowedForDatabase()) {
-            showBiometricSetupDialog.call(biometricInteractor.getCipherForEncryption())
+        if (!isBiometricUnlockAllowedForDatabase()) {
+            return
         }
+
+        var getCipherResult = biometricInteractor.getCipherForEncryption()
+        if (getCipherResult.isFailed &&
+            getCipherResult.error.type == BIOMETRIC_DATA_INVALIDATED_ERROR
+        ) {
+            biometricInteractor.clearStoredData()
+            getCipherResult = biometricInteractor.getCipherForEncryption()
+        }
+
+        if (getCipherResult.isFailed) {
+            val message = errorInteractor.processAndGetMessage(getCipherResult.error)
+            showErrorDialog.call(message)
+            return
+        }
+
+        val cipher = getCipherResult.getOrThrow()
+        showBiometricSetupDialog.call(cipher)
     }
 
     fun onBiometricSetupSuccess(encoder: BiometricEncoder) {

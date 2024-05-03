@@ -20,7 +20,7 @@ import com.ivanovsky.passnotes.extensions.setItemVisibility
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
-import com.ivanovsky.passnotes.presentation.core.dialog.ErrorDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.MessageDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialogArgs
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
@@ -104,8 +104,13 @@ fun Fragment.sendAutofillResult(note: Note?, structure: AutofillStructure) {
 }
 
 fun Fragment.showErrorDialog(message: String) {
-    val dialog = ErrorDialog.newInstance(message)
-    dialog.show(childFragmentManager, ErrorDialog.TAG)
+    val dialog = MessageDialog.newErrorDialogInstance(message)
+    dialog.show(childFragmentManager, MessageDialog.TAG)
+}
+
+fun Fragment.showMessageDialog(message: String) {
+    val dialog = MessageDialog.newMessageDialogInstance(message)
+    dialog.show(childFragmentManager, MessageDialog.TAG)
 }
 
 fun Fragment.showHelpDialog(arguments: HelpDialogArgs) {

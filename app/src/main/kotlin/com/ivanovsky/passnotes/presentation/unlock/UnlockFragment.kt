@@ -20,6 +20,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.sendAutofillResult
 import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.showMessageDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
@@ -100,6 +101,9 @@ class UnlockFragment : BaseFragment() {
         }
         viewModel.showSnackbarMessage.observe(viewLifecycleOwner) { message ->
             showSnackbarMessage(message)
+        }
+        viewModel.showMessageDialog.observe(viewLifecycleOwner) { message ->
+            showMessageDialog(message)
         }
         viewModel.showResolveConflictDialog.observe(viewLifecycleOwner) { file ->
             showResolveConflictDialog(file)

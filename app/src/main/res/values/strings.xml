@@ -121,6 +121,7 @@
     <string name="lock_notification_message">Would you like to enable system notification for opened database?\n\nThis notification requires permission, it allows to display database status and lock database more easily.</string>
     <string name="permit">Permit</string>
     <string name="later">Later</string>
+    <string name="biometric_data_is_invalidated">Biometric data was invalidated (i.e. new fingerprint enrolled). Please setup biometric unlock again.</string>
 
     <!-- New database screen -->
     <string name="new_database">New database</string>

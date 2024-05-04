@@ -48,7 +48,7 @@ class ServerLoginViewModel(
     val showHelpDialogEvent = SingleLiveEvent<HelpDialogArgs>()
 
     init {
-        loadTestCredentials()
+        fillCredentials()
     }
 
     fun authenticate() {
@@ -117,11 +117,20 @@ class ServerLoginViewModel(
         return url.isNotBlank()
     }
 
-    private fun loadTestCredentials() {
-        val credentials = when (args.fsAuthority.type) {
-            FSType.WEBDAV -> interactor.getTestWebDavCredentials()
-            FSType.GIT -> interactor.getTestGitCredentials()
-            FSType.FAKE -> interactor.getTestFakeCredentials()
+    private fun fillCredentials() {
+        val credentialsType = args.fsAuthority.type
+        val oldCredentials = args.fsAuthority.credentials
+
+        val credentials = when {
+            oldCredentials is FSCredentials.BasicCredentials -> {
+                oldCredentials.copy(
+                    password = EMPTY
+                )
+            }
+            oldCredentials is FSCredentials.GitCredentials -> oldCredentials
+            credentialsType == FSType.WEBDAV -> interactor.getTestWebDavCredentials()
+            credentialsType == FSType.GIT -> interactor.getTestGitCredentials()
+            credentialsType == FSType.FAKE -> interactor.getTestFakeCredentials()
             else -> null
         } ?: return
 

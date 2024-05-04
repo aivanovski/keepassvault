@@ -4,6 +4,8 @@
 /.idea
 /keys/debug.keystore
 /keys/release.keystore
+/keys/google-cloud-key.json
+ci.properties
 .DS_Store
 /build
 /captures

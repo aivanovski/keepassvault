@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-parcelize'
+apply plugin: 'com.github.triplet.play'
 
 def versionMajor = 1
 def versionMinor = 4
@@ -20,6 +21,7 @@ def PROPERTY_KEYSTORE_ALIAS = 'KEYSTORE_ALIAS'
 def DEBUG_KEY_PATH = '../keys/debug.keystore'
 def RELEASE_KEY_PATH = '../keys/release.keystore'
 def PUBLIC_KEY_PATH = '../keys/public.keystore'
+def GOOGLE_CLOUD_KEY_PATH = '../keys/google-cloud-key.json'
 
 def PUBLIC_KEY_PASSWORD = 'abc123'
 def PUBLIC_KEY_ALIAS = 'testalias'
@@ -170,6 +172,13 @@ android {
     }
 
     preBuild.dependsOn(generateVersionPropertiesFile)
+}
+
+play {
+    serviceAccountCredentials.set(file(GOOGLE_CLOUD_KEY_PATH))
+    track = "internal"
+    defaultToAppBundles = true
+    enabled = true
 }
 
 def koinVersion = '3.5.0'

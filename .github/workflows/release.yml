@@ -1,4 +1,4 @@
-name: Publish release
+name: Publish to Github and Google Play
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
       - '*.*.*'
 
 jobs:
-  release_build:
-    name: Publish release
+  publish-github-release:
+    name: Publish Github release
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -51,3 +51,25 @@ jobs:
           files: |
             ./app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
             ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+
+  upload-to-google-play:
+    name: Upload App Bundle to Google Play
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Decrypt and validate decrypted data
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: ./.github/workflows/decrypt-and-validate-data.sh
+
+      - name: Upload to Google Play
+        run: |
+          ./gradlew publishGplayReleaseBundle

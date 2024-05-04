@@ -1,4 +1,4 @@
-name: Publish release
+name: Publish to Github and Google Play
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
       - '*.*.*'
 
 jobs:
-  release_build:
-    name: Publish release
+  publish-github-release:
+    name: Publish Github release
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -20,21 +20,10 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Decrypt and validate encrypted data
+      - name: Decrypt and validate decrypted data
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: |
-          if [ -z "GPG_PASSPHRASE" ]; then
-            ## Decrypt
-            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/debug.keystore -d ./keys/debug.keystore.gpg
-            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./keys/release.keystore -d ./keys/release.keystore.gpg
-            gpg --passphrase $GPG_PASSPHRASE --pinentry-mode loopback -o ./ci.properties -d ./ci.properties.gpg
-
-            ## Validate
-            echo "3a15a7065ed4a62a747af2e3477b0a3e1940a7bc2946df638b902bcb186998e7 *keys/debug.keystore" | sha256sum --check
-            echo "36a3bb8b7bda141b414c2df7fac7dcd09a2775769c561e562d2b43f7b246bfa5 *keys/release.keystore" | sha256sum --check
-            echo "b009011968e80d5b99eaa181141e6c94178a538c3dac0e413c43d5f95f50f557 *ci.properties" | sha256sum --check
-          fi
+        run: ./.github/workflows/decrypt-and-validate-data.sh
 
       - name: Build debug and release apk's
         run: |
@@ -62,3 +51,25 @@ jobs:
           files: |
             ./app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
             ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+
+  upload-to-google-play:
+    name: Upload App Bundle to Google Play
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Decrypt and validate decrypted data
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: ./.github/workflows/decrypt-and-validate-data.sh
+
+      - name: Upload to Google Play
+        run: |
+          ./gradlew publishGplayReleaseBundle

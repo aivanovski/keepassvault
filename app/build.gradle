@@ -7,7 +7,7 @@ apply plugin: 'com.github.triplet.play'
 
 def versionMajor = 1
 def versionMinor = 4
-def versionPatch = 2
+def versionPatch = 4
 
 def formattedVersionCode = (versionMajor * 10000 + versionMinor * 100 + versionPatch).toString()
 def formattedVersionName = "${versionMajor}.${versionMinor}.${versionPatch}"

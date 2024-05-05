@@ -43,6 +43,8 @@ object FakeFileSystemProvidersModule {
                 get(),
                 get(),
                 get(),
+                get(),
+                get(),
                 fsTypes,
                 fsFactories
             )

@@ -26,6 +26,7 @@ import org.eclipse.jgit.api.ResetCommand
 import org.eclipse.jgit.api.errors.TransportException
 import org.eclipse.jgit.lib.BranchConfig
 import org.eclipse.jgit.lib.ObjectId
+import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.transport.PushResult
 import org.eclipse.jgit.transport.RemoteRefUpdate
@@ -180,10 +181,17 @@ class GitRepository(
         return addResult.mapWithObject(Unit)
     }
 
-    fun commit(file: VersionedFile): OperationResult<Unit> {
+    fun commit(
+        message: String,
+        userName: String,
+        userEmail: String
+    ): OperationResult<Unit> {
+        val author = PersonIdent(userName, userEmail)
         return execute {
             git.commit()
-                .setMessage("Update ${file.name}")
+                .setMessage(message)
+                .setAuthor(author)
+                .setCommitter(author)
                 .call()
         }
     }

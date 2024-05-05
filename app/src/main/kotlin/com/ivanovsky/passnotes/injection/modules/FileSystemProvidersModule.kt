@@ -20,6 +20,19 @@ object FileSystemProvidersModule {
                 add(FSType.GIT)
             }
 
-        single { FileSystemResolver(get(), get(), get(), get(), get(), get(), get(), fsTypes) }
+        single {
+            FileSystemResolver(
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                fsTypes
+            )
+        }
     }
 }

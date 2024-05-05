@@ -12,6 +12,8 @@ import com.ivanovsky.passnotes.data.entity.TestData
 import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.GIT_USER_EMAIL
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.GIT_USER_NAME
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIOMETRIC_UNLOCK_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXTERNAL_STORAGE_CACHE_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
@@ -150,6 +152,18 @@ class SettingsImpl(private val context: Context) : Settings {
         set(value) {
             val strValue = value.let { PasswordGeneratorSettingsConverter.toString(it) }
             putString(PASSWORD_GENERATOR_SETTINGS, strValue)
+        }
+
+    override var gitUserName: String?
+        get() = getString(GIT_USER_NAME)
+        set(value) {
+            putString(GIT_USER_NAME, value?.ifEmpty { null })
+        }
+
+    override var gitUserEmail: String?
+        get() = getString(GIT_USER_EMAIL)
+        set(value) {
+            putString(GIT_USER_EMAIL, value?.ifEmpty { null })
         }
 
     override var testData: TestData?
@@ -340,6 +354,16 @@ class SettingsImpl(private val context: Context) : Settings {
         ),
         TEST_TOGGLES(
             keyId = R.string.pref_test_toggles,
+            type = STRING,
+            defaultValue = null
+        ),
+        GIT_USER_NAME(
+            keyId = R.string.pref_git_user_name,
+            type = STRING,
+            defaultValue = null
+        ),
+        GIT_USER_EMAIL(
+            keyId = R.string.pref_git_user_email,
             type = STRING,
             defaultValue = null
         )

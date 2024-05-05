@@ -23,6 +23,8 @@ interface Settings {
     var isGroupsAtStartEnabled: Boolean
     var isBiometricUnlockEnabled: Boolean
     var passwordGeneratorSettings: PasswordGeneratorSettings
+    var gitUserName: String?
+    var gitUserEmail: String?
     var testData: TestData?
     var testToggles: TestToggles?
     fun initDefaultIfNeed(pref: Pref)

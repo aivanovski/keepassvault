@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.file.git
 
+import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.GitRoot
 import com.ivanovsky.passnotes.data.entity.OperationError
@@ -12,7 +13,9 @@ import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata
 import com.ivanovsky.passnotes.data.repository.db.dao.GitRootDao
 import com.ivanovsky.passnotes.data.repository.file.git.model.VersionedFile
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientV2
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.FileHelper
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.util.FileUtils
@@ -25,7 +28,9 @@ import timber.log.Timber
 class GitClient(
     private val authenticator: GitFileSystemAuthenticator,
     private val fileHelper: FileHelper,
-    private val gitRootDao: GitRootDao
+    private val gitRootDao: GitRootDao,
+    private val settings: Settings,
+    private val resourceProvider: ResourceProvider
 ) : RemoteApiClientV2 {
 
     private val lock = ReentrantLock()
@@ -204,7 +209,11 @@ class GitClient(
                 return@withLock addResult.mapError()
             }
 
-            val commitResult = repository.commit(versionedFile)
+            val commitResult = repository.commit(
+                message = formatCommitMessage(versionedFile),
+                userName = settings.gitUserName ?: getDefaultUserName(),
+                userEmail = settings.gitUserEmail ?: getDefaultUserEmail()
+            )
             if (commitResult.isFailed) {
                 return@withLock commitResult.mapError()
             }
@@ -293,6 +302,22 @@ class GitClient(
             isRoot = isRoot,
             modified = lastModified()
         )
+    }
+
+    private fun formatCommitMessage(
+        file: VersionedFile
+    ): String {
+        val appName = resourceProvider.getString(R.string.app_name)
+        return "Update ${file.name}. Committed with $appName"
+    }
+
+    private fun getDefaultUserName(): String {
+        return resourceProvider.getString(R.string.app_name)
+    }
+
+    private fun getDefaultUserEmail(): String {
+        val appName = resourceProvider.getString(R.string.app_name)
+        return "${appName.lowercase()}@localhost"
     }
 
     private fun failedToFindFile(path: String): OperationError {

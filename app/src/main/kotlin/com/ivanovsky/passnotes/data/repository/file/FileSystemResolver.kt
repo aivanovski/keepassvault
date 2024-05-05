@@ -15,7 +15,9 @@ import com.ivanovsky.passnotes.data.repository.file.saf.SAFFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.saf.SAFHelper
 import com.ivanovsky.passnotes.data.repository.file.webdav.WebDavClientV2
 import com.ivanovsky.passnotes.data.repository.file.webdav.WebdavAuthenticator
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.FileHelper
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import okhttp3.OkHttpClient
@@ -28,6 +30,8 @@ class FileSystemResolver(
     private val fileHelper: FileHelper,
     private val observerBus: ObserverBus,
     private val httpClient: OkHttpClient,
+    private val settings: Settings,
+    private val resourceProvider: ResourceProvider,
     private val fsTypes: Set<FSType>,
     private val factories: Map<FSType, Factory> = emptyMap()
 ) {
@@ -92,7 +96,7 @@ class FileSystemResolver(
             FSType.GIT -> {
                 val authenticator = GitFileSystemAuthenticator(fsAuthority)
                 val client = RemoteApiClientAdapter(
-                    GitClient(authenticator, fileHelper, gitRootDao)
+                    GitClient(authenticator, fileHelper, gitRootDao, settings, resourceProvider)
                 )
 
                 RemoteFileSystemProvider(

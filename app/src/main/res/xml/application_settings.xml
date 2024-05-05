@@ -6,11 +6,6 @@
         app:key="@string/pref_category_general"
         app:title="@string/general">
 
-        <SwitchPreferenceCompat
-            app:key="@string/pref_is_postponed_sync_enabled"
-            app:title="@string/pref_is_postponed_sync_enabled_title"
-            app:summary="@string/pref_is_postponed_sync_enabled_summary"/>
-
         <ListPreference
             app:entries="@array/pref_auto_lock_entries"
             app:entryValues="@array/pref_auto_lock_values"
@@ -24,6 +19,27 @@
             app:key="@string/pref_auto_clear_clipboard_delay_in_ms"
             app:summary="@string/pref_auto_clear_clipboard_delay_in_ms_summary"
             app:title="@string/pref_auto_clear_clipboard_delay_in_ms_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="@string/pref_category_synchronization"
+        app:title="@string/synchronization_with_server">
+
+        <SwitchPreferenceCompat
+            app:key="@string/pref_is_postponed_sync_enabled"
+            app:summary="@string/pref_is_postponed_sync_enabled_summary"
+            app:title="@string/pref_is_postponed_sync_enabled_title" />
+
+        <EditTextPreference
+            app:key="@string/pref_git_user_name"
+            app:summary="@string/pref_git_user_name_summary"
+            app:title="@string/pref_git_user_name_title" />
+
+        <EditTextPreference
+            app:key="@string/pref_git_user_email"
+            app:summary="@string/pref_git_user_email_summary"
+            app:title="@string/pref_git_user_email_title" />
 
     </PreferenceCategory>
 

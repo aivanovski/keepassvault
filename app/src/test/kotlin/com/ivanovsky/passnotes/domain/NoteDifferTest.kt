@@ -98,6 +98,7 @@ class NoteDifferTest {
             groupUid = UUID(2, 2),
             created = "2020-01-10".asDate(),
             modified = "2020-01-11".asDate(),
+            expiration = null,
             title = "note",
             properties = emptyList(),
             attachments = attachments

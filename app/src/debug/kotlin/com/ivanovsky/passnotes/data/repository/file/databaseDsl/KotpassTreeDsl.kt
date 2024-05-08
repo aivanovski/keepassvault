@@ -91,6 +91,12 @@ object KotpassTreeDsl {
                 fields[customField.key] = EntryValue.Plain(customField.value)
             }
 
+            val expiryTime = if (entity.expires != null) {
+                Instant.ofEpochMilli(entity.expires)
+            } else {
+                null
+            }
+
             entries.add(
                 Entry(
                     uuid = entity.uuid,
@@ -100,7 +106,8 @@ object KotpassTreeDsl {
                         lastModificationTime = Instant.ofEpochMilli(entity.modified),
                         lastAccessTime = null,
                         locationChanged = null,
-                        expiryTime = null
+                        expiryTime = expiryTime,
+                        expires = (expiryTime != null)
                     )
                 )
             )

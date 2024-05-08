@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.data.entity.TemplateFieldType
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.entity.PropertyMap
+import com.ivanovsky.passnotes.domain.entity.Timestamp
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.HeaderCellModel
 import com.ivanovsky.passnotes.presentation.core.model.SpaceCellModel
@@ -19,6 +20,7 @@ import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputLines.SI
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextInputType
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorViewModel.CellId
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.AttachmentCellModel
+import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.ExpirationCellModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.ExtendedTextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.SecretPropertyCellModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.TextPropertyCellModel
@@ -31,11 +33,14 @@ class NoteEditorCellModelFactory(
     private val resourceProvider: ResourceProvider
 ) {
 
-    fun createDefaultModels(): List<BaseCellModel> {
+    fun createDefaultModels(
+        expiration: ExpirationData
+    ): List<BaseCellModel> {
         return listOf(
             createTitleCell(EMPTY),
             createUserNameCell(EMPTY),
             createPasswordCell(EMPTY),
+            createExpirationCell(expiration),
             createUrlCell(EMPTY),
             createNotesCell(EMPTY),
             createSpaceCell()
@@ -67,27 +72,45 @@ class NoteEditorCellModelFactory(
         return models
     }
 
-    fun createModelsFromProperties(properties: List<Property>): List<BaseCellModel> {
+    fun createModelsFromProperties(
+        properties: List<Property>,
+        expiration: ExpirationData
+    ): List<BaseCellModel> {
         return createModels(
             uid = null,
             title = EMPTY,
+            expiration = expiration,
             properties = properties,
             attachments = emptyList()
         )
     }
 
-    fun createModelsForNote(note: Note, template: Template?): List<BaseCellModel> {
+    fun createModelsForNote(
+        note: Note,
+        template: Template?,
+        expiration: ExpirationData
+    ): List<BaseCellModel> {
         return when {
             isTemplateNote(note) -> {
                 createModelsForTemplateNote(note)
             }
 
             template != null -> {
-                createModelsForNoteWithTemplate(note, template)
+                createModelsForNoteWithTemplate(
+                    note = note,
+                    template = template,
+                    expiration = expiration
+                )
             }
 
             else -> {
-                createModels(note.uid, note.title, note.properties, note.attachments)
+                createModels(
+                    uid = note.uid,
+                    title = note.title,
+                    expiration = expiration,
+                    properties = note.properties,
+                    attachments = note.attachments
+                )
             }
         }
     }
@@ -164,7 +187,8 @@ class NoteEditorCellModelFactory(
 
     private fun createModelsForNoteWithTemplate(
         note: Note,
-        template: Template
+        template: Template,
+        expiration: ExpirationData
     ): List<BaseCellModel> {
         val models = mutableListOf<BaseCellModel>()
 
@@ -201,6 +225,10 @@ class NoteEditorCellModelFactory(
                     )
                 }
             }
+        }
+
+        if (expiration.isEnabled) {
+            models.add(createExpirationCell(expiration))
         }
 
         val excludedNames = template.fields.map { it.title }
@@ -246,6 +274,7 @@ class NoteEditorCellModelFactory(
     private fun createModels(
         uid: UUID?,
         title: String,
+        expiration: ExpirationData,
         properties: List<Property>,
         attachments: List<Attachment>
     ): List<BaseCellModel> {
@@ -278,6 +307,7 @@ class NoteEditorCellModelFactory(
         if (otpUrl.isNotEmpty()) {
             models.add(createOtpCell(otpUrl))
         }
+        models.add(createExpirationCell(expiration))
         models.add(createUrlCell(url))
         models.add(createNotesCell(notes))
 
@@ -395,6 +425,14 @@ class NoteEditorCellModelFactory(
         )
     }
 
+    fun createExpirationCell(expiration: ExpirationData): ExpirationCellModel {
+        return ExpirationCellModel(
+            id = CellId.EXPIRATION,
+            isEnabled = expiration.isEnabled,
+            timestamp = expiration.timestamp
+        )
+    }
+
     private fun createUrlCell(url: String): TextPropertyCellModel {
         return TextPropertyCellModel(
             id = CellId.URL,
@@ -432,4 +470,9 @@ class NoteEditorCellModelFactory(
             propertyName = PropertyType.PASSWORD.propertyName
         )
     }
+
+    class ExpirationData(
+        val isEnabled: Boolean,
+        val timestamp: Timestamp
+    )
 }

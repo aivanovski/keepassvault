@@ -4,8 +4,12 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
+import com.ivanovsky.passnotes.domain.DateFormatter
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.PropertyFilter
+import com.ivanovsky.passnotes.domain.entity.Timestamp
 import com.ivanovsky.passnotes.domain.otp.OtpUriFactory
+import com.ivanovsky.passnotes.presentation.core.CellId
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.DividerCellModel
 import com.ivanovsky.passnotes.presentation.core.model.HeaderCellModel
@@ -15,73 +19,165 @@ import com.ivanovsky.passnotes.presentation.note.cells.model.AttachmentCellModel
 import com.ivanovsky.passnotes.presentation.note.cells.model.NotePropertyCellModel
 import com.ivanovsky.passnotes.presentation.note.cells.model.OtpPropertyCellModel
 import com.ivanovsky.passnotes.util.StringUtils
+import com.ivanovsky.passnotes.util.TimeUtils.toJavaDate
+import com.ivanovsky.passnotes.util.splitAt
 
 class NoteCellModelFactory(
+    private val dateFormatter: DateFormatter,
     private val resourceProvider: ResourceProvider
 ) {
 
+    private val visiblePropertiesFilter = PropertyFilter.Builder()
+        .visible()
+        .notEmpty()
+        .sortedByType()
+        .build()
+
     fun createCellModels(
-        visibleIdsAndProperties: List<Pair<String, Property>>,
-        idsAndAttachments: List<Pair<String, Attachment>>,
-        hiddenIdsAndProperties: List<Pair<String, Property>>
+        propertiesWithIds: List<Pair<Property, CellId>>,
+        attachmentsWithIds: List<Pair<Attachment, CellId>>,
+        expiration: Timestamp?,
+        isShowHiddenProperties: Boolean
+    ): List<BaseCellModel> {
+        val allProperties = propertiesWithIds
+            .map { (property, _) -> property }
+
+        val propertyToIdMap = propertiesWithIds
+            .associate { (property, id) ->
+                property to id
+            }
+
+        val visibleProperties = visiblePropertiesFilter.apply(allProperties)
+
+        val otherProperties = allProperties
+            .subtract(visibleProperties.toSet())
+            .toList()
+
+        val hiddenProperties = if (isShowHiddenProperties) {
+            otherProperties
+        } else {
+            emptyList()
+        }
+
+        val models = mutableListOf<BaseCellModel>()
+
+        if (visibleProperties.isNotEmpty()) {
+            models.add(SpaceCellModel(R.dimen.half_margin))
+        }
+
+        if (expiration != null) {
+            val (beforeExpiration, afterExpiration) = splitPropertiesForExpiration(
+                properties = visibleProperties
+            )
+
+            val propertyCount = beforeExpiration.size + afterExpiration.size + 1
+
+            if (beforeExpiration.isNotEmpty()) {
+                models.addAll(
+                    createPropertiesCells(
+                        propertiesWithIds = beforeExpiration.pairWithIds(propertyToIdMap),
+                        header = null,
+                        startPropertyIndex = 0,
+                        propertiesInGroup = propertyCount
+                    )
+                )
+            }
+
+            models.add(
+                createExpirationCell(
+                    expiration = expiration,
+                    propertyIndex = beforeExpiration.size,
+                    propertiesInGroup = propertyCount
+                )
+            )
+
+            if (afterExpiration.isNotEmpty()) {
+                models.add(createDividerCell())
+
+                models.addAll(
+                    createPropertiesCells(
+                        propertiesWithIds = afterExpiration.pairWithIds(propertyToIdMap),
+                        header = null,
+                        startPropertyIndex = beforeExpiration.size + 1,
+                        propertiesInGroup = propertyCount
+                    )
+                )
+            }
+        } else {
+            models.addAll(
+                createPropertiesCells(
+                    propertiesWithIds = visibleProperties.pairWithIds(propertyToIdMap),
+                    header = null
+                )
+            )
+        }
+
+        models.addAll(createAttachmentCells(attachmentsWithIds))
+
+        models.addAll(
+            createPropertiesCells(
+                propertiesWithIds = hiddenProperties.pairWithIds(propertyToIdMap),
+                header = resourceProvider.getString(R.string.hidden)
+            )
+        )
+
+        models.add(SpaceCellModel(R.dimen.huge_margin))
+
+        return models
+    }
+
+    private fun List<Property>.pairWithIds(
+        propertyToIdMap: Map<Property, CellId>
+    ): List<Pair<Property, CellId>> {
+        return this.mapNotNull { property ->
+            val id = propertyToIdMap[property] ?: return@mapNotNull null
+
+            property to id
+        }
+    }
+
+    private fun createPropertiesCells(
+        propertiesWithIds: List<Pair<Property, CellId>>,
+        header: String?,
+        startPropertyIndex: Int = 0,
+        propertiesInGroup: Int = propertiesWithIds.size
     ): List<BaseCellModel> {
         val models = mutableListOf<BaseCellModel>()
 
-        for ((idx, cellIdAndProperty) in visibleIdsAndProperties.withIndex()) {
-            val (cellId, property) = cellIdAndProperty
+        if (header != null && propertiesWithIds.isNotEmpty()) {
+            models.add(
+                createHeaderCell(
+                    title = resourceProvider.getString(R.string.hidden)
+                )
+            )
+        }
 
-            if (idx == 0) {
-                models.add(SpaceCellModel(R.dimen.half_margin))
-            }
+        for ((index, propertyWithId) in propertiesWithIds.withIndex()) {
+            val (property, id) = propertyWithId
 
-            val shape = when {
-                visibleIdsAndProperties.size == 1 -> RoundedShape.ALL
-                idx == 0 -> RoundedShape.TOP
-                idx == visibleIdsAndProperties.lastIndex -> RoundedShape.BOTTOM
-                else -> RoundedShape.NONE
-            }
+            models.add(
+                createPropertyCell(
+                    id = id,
+                    property = property,
+                    propertyIndex = index + startPropertyIndex,
+                    propertyCount = propertiesInGroup
+                )
+            )
 
-            val otpToken = if (property.type == PropertyType.OTP && property.value != null) {
-                OtpUriFactory.parseUri(property.value)
-            } else {
-                null
-            }
-
-            val model = when {
-                otpToken != null -> {
-                    OtpPropertyCellModel(
-                        id = cellId,
-                        title = resourceProvider.getString(R.string.one_time_password),
-                        token = otpToken,
-                        backgroundShape = shape,
-                        backgroundColor = resourceProvider.getAttributeColor(
-                            R.attr.kpSecondaryBackgroundColor
-                        )
-                    )
-                }
-
-                else -> {
-                    NotePropertyCellModel(
-                        id = cellId,
-                        name = property.name ?: StringUtils.EMPTY,
-                        value = property.value ?: StringUtils.EMPTY,
-                        backgroundShape = shape,
-                        backgroundColor = resourceProvider.getAttributeColor(
-                            R.attr.kpSecondaryBackgroundColor
-                        ),
-                        isVisibilityButtonVisible = property.isProtected,
-                        isValueProtected = property.isProtected
-                    )
-                }
-            }
-            models.add(model)
-
-            if (idx < visibleIdsAndProperties.lastIndex) {
+            if ((index + startPropertyIndex) < propertiesInGroup) {
                 models.add(createDividerCell())
             }
         }
 
-        if (idsAndAttachments.isNotEmpty()) {
+        return models
+    }
+
+    private fun createAttachmentCells(
+        attachmentsWithIds: List<Pair<Attachment, CellId>>
+    ): List<BaseCellModel> {
+        val models = mutableListOf<BaseCellModel>()
+
+        if (attachmentsWithIds.isNotEmpty()) {
             models.add(
                 createHeaderCell(
                     title = resourceProvider.getString(R.string.attachments)
@@ -89,19 +185,19 @@ class NoteCellModelFactory(
             )
         }
 
-        for ((idx, cellIdAndAttachment) in idsAndAttachments.withIndex()) {
-            val (cellId, attachment) = cellIdAndAttachment
+        for ((idx, attachmentWithId) in attachmentsWithIds.withIndex()) {
+            val (attachment, id) = attachmentWithId
 
             val shape = when {
-                idsAndAttachments.size == 1 -> RoundedShape.ALL
+                attachmentsWithIds.size == 1 -> RoundedShape.ALL
                 idx == 0 -> RoundedShape.TOP
-                idx == idsAndAttachments.lastIndex -> RoundedShape.BOTTOM
+                idx == attachmentsWithIds.lastIndex -> RoundedShape.BOTTOM
                 else -> RoundedShape.NONE
             }
 
             models.add(
                 AttachmentCellModel(
-                    id = cellId,
+                    id = id.value,
                     name = attachment.name,
                     size = StringUtils.formatFileSize(attachment.data.size.toLong()),
                     backgroundShape = shape,
@@ -111,32 +207,49 @@ class NoteCellModelFactory(
                 )
             )
 
-            if (idx < idsAndAttachments.lastIndex) {
+            if (idx < attachmentsWithIds.lastIndex) {
                 models.add(createDividerCell())
             }
         }
 
-        if (hiddenIdsAndProperties.isNotEmpty()) {
-            models.add(
-                createHeaderCell(
-                    title = resourceProvider.getString(R.string.hidden)
-                )
-            )
+        return models
+    }
+
+    private fun createPropertyCell(
+        id: CellId,
+        property: Property,
+        propertyIndex: Int,
+        propertyCount: Int
+    ): BaseCellModel {
+        val shape = when {
+            propertyCount == 1 -> RoundedShape.ALL
+            propertyIndex == 0 -> RoundedShape.TOP
+            propertyIndex == propertyCount - 1 -> RoundedShape.BOTTOM
+            else -> RoundedShape.NONE
         }
 
-        for ((idx, cellIdAndProperty) in hiddenIdsAndProperties.withIndex()) {
-            val (cellId, property) = cellIdAndProperty
+        val otpToken = if (property.type == PropertyType.OTP && property.value != null) {
+            OtpUriFactory.parseUri(property.value)
+        } else {
+            null
+        }
 
-            val shape = when {
-                hiddenIdsAndProperties.size == 1 -> RoundedShape.ALL
-                idx == 0 -> RoundedShape.TOP
-                idx == hiddenIdsAndProperties.lastIndex -> RoundedShape.BOTTOM
-                else -> RoundedShape.NONE
+        return when {
+            otpToken != null -> {
+                OtpPropertyCellModel(
+                    id = id.value,
+                    title = resourceProvider.getString(R.string.one_time_password),
+                    token = otpToken,
+                    backgroundShape = shape,
+                    backgroundColor = resourceProvider.getAttributeColor(
+                        R.attr.kpSecondaryBackgroundColor
+                    )
+                )
             }
 
-            models.add(
+            else -> {
                 NotePropertyCellModel(
-                    id = cellId,
+                    id = id.value,
                     name = property.name ?: StringUtils.EMPTY,
                     value = property.value ?: StringUtils.EMPTY,
                     backgroundShape = shape,
@@ -144,18 +257,82 @@ class NoteCellModelFactory(
                         R.attr.kpSecondaryBackgroundColor
                     ),
                     isVisibilityButtonVisible = property.isProtected,
-                    isValueProtected = property.isProtected
+                    isValueProtected = property.isProtected,
+                    iconResId = null
                 )
-            )
-
-            if (idx < hiddenIdsAndProperties.lastIndex) {
-                models.add(createDividerCell())
             }
         }
+    }
 
-        models.add(SpaceCellModel(R.dimen.huge_margin))
+    private fun createExpirationCell(
+        expiration: Timestamp,
+        propertyIndex: Int,
+        propertiesInGroup: Int
+    ): BaseCellModel {
+        val shape = when {
+            propertiesInGroup == 1 -> RoundedShape.ALL
+            propertyIndex == 0 -> RoundedShape.TOP
+            propertyIndex == propertiesInGroup - 1 -> RoundedShape.BOTTOM
+            else -> RoundedShape.NONE
+        }
 
-        return models
+        val isExpired = (expiration.timeInMillis <= System.currentTimeMillis())
+
+        return NotePropertyCellModel(
+            id = CellIds.EXPIRATION,
+            name = resourceProvider.getString(R.string.expires),
+            value = dateFormatter.formatDateAndTime(expiration.toJavaDate()),
+            backgroundShape = shape,
+            backgroundColor = resourceProvider.getAttributeColor(
+                R.attr.kpSecondaryBackgroundColor
+            ),
+            isVisibilityButtonVisible = false,
+            isValueProtected = false,
+            iconResId = if (isExpired) {
+                R.drawable.ic_error_24dp
+            } else {
+                null
+            }
+        )
+    }
+
+    private fun splitPropertiesForExpiration(
+        properties: List<Property>
+    ): Pair<List<Property>, List<Property>> {
+        val expirationIndex = determineExpirationIndex(properties)
+        return if (expirationIndex != -1) {
+            properties.splitAt(expirationIndex)
+        } else {
+            properties to emptyList()
+        }
+    }
+
+    private fun determineExpirationIndex(
+        properties: List<Property>
+    ): Int {
+        val types = properties.map { property -> property.type }
+        if (PropertyType.URL in types) {
+            return types.indexOf(PropertyType.URL)
+        }
+        if (PropertyType.NOTES in types) {
+            return types.indexOf(PropertyType.NOTES)
+        }
+
+        val defaultTypeProperties = PropertyFilter.Builder()
+            .filterDefaultTypes()
+            .excludeByType(PropertyType.NOTES)
+            .build()
+            .apply(properties)
+
+        return when {
+            defaultTypeProperties.isEmpty() -> {
+                0
+            }
+
+            else -> {
+                defaultTypeProperties.lastIndex + 1
+            }
+        }
     }
 
     private fun createDividerCell(): DividerCellModel =
@@ -175,4 +352,8 @@ class NoteCellModelFactory(
             isBold = false,
             paddingHorizontal = R.dimen.double_element_margin
         )
+
+    object CellIds {
+        val EXPIRATION = "expiration"
+    }
 }

@@ -33,7 +33,7 @@
             android:layout_marginEnd="@dimen/element_margin"
             android:text="@{viewModel.name}"
             app:layout_constraintBottom_toTopOf="@id/value"
-            app:layout_constraintEnd_toStartOf="@id/visibilityButton"
+            app:layout_constraintEnd_toStartOf="@id/icon"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
@@ -49,11 +49,24 @@
             android:layout_marginBottom="@dimen/element_margin"
             android:text="@{viewModel.value}"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/visibilityButton"
+            app:layout_constraintEnd_toStartOf="@id/icon"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/name"
             app:textTransformationMethod="@{viewModel.valueTransformationMethod}"
             tools:text="default@gmail.com" />
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="@dimen/medium_borderless_icon_button_size"
+            android:layout_height="@dimen/medium_borderless_icon_button_size"
+            android:layout_marginEnd="@dimen/half_margin"
+            app:imageResourceId="@{viewModel.icon}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/visibilityButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/kpIconPrimaryColor"
+            app:visible="@{viewModel.isIconVisible}"
+            tools:src="@drawable/ic_error_24dp" />
 
         <ImageButton
             android:id="@+id/visibilityButton"
@@ -64,11 +77,11 @@
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:onClick="@{() -> viewModel.onVisibilityButtonClicked()}"
-            android:tint="?attr/kpIconPrimaryColor"
             app:imageResourceId="@{viewModel.visibilityIconResId}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/kpIconPrimaryColor"
             app:visible="@{viewModel.isVisibilityButtonVisible}"
             tools:src="@drawable/ic_visibility_off_24dp" />
 

@@ -8,6 +8,7 @@ data class Note(
     val groupUid: UUID,
     val created: Date,
     val modified: Date,
+    val expiration: Date?,
     val title: String,
     val properties: List<Property> = emptyList(),
     val attachments: List<Attachment> = emptyList()

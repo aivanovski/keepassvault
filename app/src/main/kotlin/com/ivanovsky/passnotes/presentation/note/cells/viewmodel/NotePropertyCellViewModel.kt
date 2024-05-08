@@ -22,6 +22,8 @@ class NotePropertyCellViewModel(
 
     val name = MutableLiveData(initModel.name)
     val value = MutableLiveData(initModel.value)
+    val icon = MutableLiveData(initModel.iconResId)
+    val isIconVisible = MutableLiveData(initModel.iconResId != null)
     val isVisibilityButtonVisible = MutableLiveData(initModel.isVisibilityButtonVisible)
     val valueTransformationMethod = MutableLiveData(
         getTextTransformationMethod(initModel.isValueProtected)
@@ -47,6 +49,8 @@ class NotePropertyCellViewModel(
     private fun applyModel(model: NotePropertyCellModel) {
         name.value = model.name
         value.value = model.value
+        icon.value = model.iconResId
+        isIconVisible.value = (model.iconResId != null)
         isVisibilityButtonVisible.value = model.isVisibilityButtonVisible
         valueTransformationMethod.value = getTextTransformationMethod(model.isValueProtected)
         visibilityIconResId.value = getVisibilityIconResIdInternal(model.isValueProtected)

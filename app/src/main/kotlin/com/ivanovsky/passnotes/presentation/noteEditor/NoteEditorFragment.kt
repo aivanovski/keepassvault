@@ -8,8 +8,14 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import com.github.terrakok.cicerone.Router
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.NoteEditorFragmentBinding
+import com.ivanovsky.passnotes.domain.DateFormatProvider
+import com.ivanovsky.passnotes.domain.entity.DateData
+import com.ivanovsky.passnotes.domain.entity.TimeData
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens
@@ -19,14 +25,15 @@ import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.hideKeyboard
-import com.ivanovsky.passnotes.presentation.core.extensions.requireArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
-import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorViewModel.AddDialogItem
+import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorViewModel.CellType
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
+import com.ivanovsky.passnotes.util.TimeUtils.toDate
+import com.ivanovsky.passnotes.util.TimeUtils.toTimestamp
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -39,6 +46,7 @@ class NoteEditorFragment : FragmentWithDoneButton() {
         parameters = { parametersOf(args) }
     )
     private val router: Router by inject()
+    private val dateFormatProvider: DateFormatProvider by inject()
     private var backCallback: OnBackPressedCallback? = null
     private lateinit var binding: NoteEditorFragmentBinding
 
@@ -71,6 +79,7 @@ class NoteEditorFragment : FragmentWithDoneButton() {
                 viewModel.onBackClicked()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -92,9 +101,6 @@ class NoteEditorFragment : FragmentWithDoneButton() {
         super.onViewCreated(view, savedInstanceState)
 
         viewLifecycleOwner.lifecycle.addObserver(DatabaseInteractionWatcher(this))
-
-        val args = (arguments?.getParcelable(ARGUMENTS) as? NoteEditorArgs)
-            ?: requireArgument(ARGUMENTS)
 
         setupActionBar {
             args.title?.let {
@@ -139,6 +145,12 @@ class NoteEditorFragment : FragmentWithDoneButton() {
                 )
             )
         }
+        viewModel.showDatePickerEvent.observe(viewLifecycleOwner) { date ->
+            showDatePicker(date)
+        }
+        viewModel.showTimePickerEvent.observe(viewLifecycleOwner) { time ->
+            showTimePicker(time)
+        }
     }
 
     private fun showDiscardDialog(message: String) {
@@ -155,7 +167,7 @@ class NoteEditorFragment : FragmentWithDoneButton() {
         dialog.show(childFragmentManager, ConfirmationDialog.TAG)
     }
 
-    private fun showAddItemDialog(items: List<Pair<AddDialogItem, String>>) {
+    private fun showAddItemDialog(items: List<Pair<CellType, String>>) {
         val entries = items.map { it.second }
 
         val dialog = ChooseOptionDialog.newInstance(
@@ -169,6 +181,45 @@ class NoteEditorFragment : FragmentWithDoneButton() {
             viewModel.onAddDialogItemSelected(items[itemIdx].first)
         }
         dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
+    }
+
+    private fun showDatePicker(date: DateData) {
+        val picker = MaterialDatePicker.Builder.datePicker()
+            .setSelection(date.toTimestamp().timeInMillis)
+            .build()
+
+        picker.addOnPositiveButtonClickListener { timestamp ->
+            viewModel.onExpirationDateChanged(timestamp.toTimestamp().toDate())
+        }
+
+        picker.show(childFragmentManager, MaterialDatePicker::class.simpleName)
+    }
+
+    private fun showTimePicker(time: TimeData) {
+        val timeFormat = if (dateFormatProvider.is24HourFormat()) {
+            TimeFormat.CLOCK_24H
+        } else {
+            TimeFormat.CLOCK_12H
+        }
+
+        val picker = MaterialTimePicker.Builder()
+            .setHour(time.hour)
+            .setMinute(time.minute)
+            .setTimeFormat(timeFormat)
+            .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
+            .build()
+
+        picker.addOnPositiveButtonClickListener {
+            val newTime = TimeData(
+                hour = picker.hour,
+                minute = picker.minute,
+                second = 0
+            )
+
+            viewModel.onExpirationTimeChanged(newTime)
+        }
+
+        picker.show(childFragmentManager, MaterialTimePicker::class.simpleName)
     }
 
     companion object {

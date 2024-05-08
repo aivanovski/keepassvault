@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.noteEditor.factory
 
+import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
@@ -12,16 +13,19 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.AttachmentCellModel
+import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.ExpirationCellModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.ExtendedTextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.SecretPropertyCellModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.model.TextPropertyCellModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.AttachmentCellViewModel
+import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.ExpirationCellViewModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.ExtendedTextPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.SecretPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.TextPropertyCellViewModel
 
 class NoteEditorCellViewModelFactory(
-    private val resourceProvider: ResourceProvider
+    private val resourceProvider: ResourceProvider,
+    private val dateFormatProvider: DateFormatProvider
 ) : CellViewModelFactory {
 
     override fun createCellViewModel(
@@ -59,6 +63,11 @@ class NoteEditorCellViewModelFactory(
             is HeaderCellModel -> HeaderCellViewModel(
                 model,
                 resourceProvider
+            )
+            is ExpirationCellModel -> ExpirationCellViewModel(
+                model,
+                eventProvider,
+                dateFormatProvider
             )
             else -> throwUnsupportedModelException(model)
         }

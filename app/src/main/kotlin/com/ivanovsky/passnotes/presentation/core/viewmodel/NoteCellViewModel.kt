@@ -4,6 +4,7 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.LocaleProvider
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
+import com.ivanovsky.passnotes.extensions.isExpired
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
@@ -27,6 +28,7 @@ class NoteCellViewModel(
     } else {
         TITLE_MAX_LINES_WITHOUT_DESCRIPTION
     }
+    val isExpired = model.note.isExpired()
 
     private fun formatDescription(note: Note): String {
         val filteredProperties = PROPERTY_FILTER.apply(note.properties)

@@ -15,8 +15,13 @@ import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.NoteDiffer
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.DateData
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.entity.PropertyMap
+import com.ivanovsky.passnotes.domain.entity.TimeData
+import com.ivanovsky.passnotes.domain.entity.Timestamp
+import com.ivanovsky.passnotes.domain.entity.Timestamp.Companion.currentTimestamp
+import com.ivanovsky.passnotes.domain.entity.TimestampBuilder
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.noteEditor.NoteEditorInteractor
 import com.ivanovsky.passnotes.domain.otp.OtpUriFactory
@@ -37,16 +42,23 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.AttachmentCellViewModel
+import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.ExpirationCellViewModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.ExtendedTextPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.PropertyViewModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.SecretPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.TextPropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.noteEditor.factory.NoteEditorCellModelFactory
+import com.ivanovsky.passnotes.presentation.noteEditor.factory.NoteEditorCellModelFactory.ExpirationData
 import com.ivanovsky.passnotes.presentation.noteEditor.factory.NoteEditorCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.setupOneTimePassword.SetupOneTimePasswordArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
+import com.ivanovsky.passnotes.util.TimeUtils.combine
+import com.ivanovsky.passnotes.util.TimeUtils.toDate
+import com.ivanovsky.passnotes.util.TimeUtils.toJavaDate
+import com.ivanovsky.passnotes.util.TimeUtils.toTime
+import com.ivanovsky.passnotes.util.TimeUtils.toTimestamp
 import com.ivanovsky.passnotes.util.toCleanString
 import com.ivanovsky.passnotes.util.toUUID
 import java.util.Date
@@ -76,19 +88,23 @@ class NoteEditorViewModel(
         .add(SpaceCellViewModel::class, R.layout.cell_space)
         .add(AttachmentCellViewModel::class, R.layout.cell_editable_attachment)
         .add(HeaderCellViewModel::class, R.layout.cell_header)
+        .add(ExpirationCellViewModel::class, R.layout.cell_expiration_property)
 
     val screenStateHandler = DefaultScreenStateHandler()
     val screenState = MutableLiveData(ScreenState.notInitialized())
 
     val isDoneButtonVisible = MutableLiveData<Boolean>()
     val showDiscardDialogEvent = SingleLiveEvent<String>()
-    val showAddDialogEvent = SingleLiveEvent<List<Pair<AddDialogItem, String>>>()
+    val showAddDialogEvent = SingleLiveEvent<List<Pair<CellType, String>>>()
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val showToastEvent = SingleLiveEvent<String>()
     val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
+    val showDatePickerEvent = SingleLiveEvent<DateData>()
+    val showTimePickerEvent = SingleLiveEvent<TimeData>()
 
     private var note: Note? = null
     private var template: Template? = args.template
+
     private val attachmentMap = mutableMapOf<String, Attachment>()
 
     init {
@@ -102,10 +118,23 @@ class NoteEditorViewModel(
         }
 
         if (args.mode == NoteEditorMode.NEW) {
+            val expirationData = ExpirationData(
+                isEnabled = false,
+                timestamp = createDefaultExpiration()
+            )
+
             val models = when {
                 args.template != null -> modelFactory.createModelsFromTemplate(args.template)
-                args.properties != null -> modelFactory.createModelsFromProperties(args.properties)
-                else -> modelFactory.createDefaultModels()
+                args.properties != null -> {
+                    modelFactory.createModelsFromProperties(
+                        properties = args.properties,
+                        expiration = expirationData
+                    )
+                }
+
+                else -> modelFactory.createDefaultModels(
+                    expiration = expirationData
+                )
             }
             val viewModels = viewModelFactory.createCellViewModels(models, eventProvider)
             setCellElements(viewModels)
@@ -208,75 +237,28 @@ class NoteEditorViewModel(
     fun onFabButtonClicked() {
         val typesToAdd = determineCellTypesToAdd()
 
-        val dialogItems = mutableListOf<Pair<AddDialogItem, String>>()
-
-        for (propertyType in typesToAdd) {
-            val item = when (propertyType) {
-                PropertyType.TITLE -> {
-                    Pair(
-                        AddDialogItem.TITLE,
-                        resources.getString(R.string.title)
-                    )
-                }
-
-                PropertyType.PASSWORD -> {
-                    Pair(
-                        AddDialogItem.PASSWORD,
-                        resources.getString(R.string.password)
-                    )
-                }
-
-                PropertyType.USER_NAME -> {
-                    Pair(
-                        AddDialogItem.USER_NAME,
-                        resources.getString(R.string.username)
-                    )
-                }
-
-                PropertyType.URL -> {
-                    Pair(
-                        AddDialogItem.URL,
-                        resources.getString(R.string.url_cap)
-                    )
-                }
-
-                PropertyType.NOTES -> {
-                    Pair(
-                        AddDialogItem.NOTES,
-                        resources.getString(R.string.notes)
-                    )
-                }
-
-                PropertyType.OTP -> {
-                    Pair(
-                        AddDialogItem.OTP,
-                        resources.getString(R.string.one_time_password)
-                    )
-                }
+        val dialogItems = typesToAdd.map { cellType ->
+            val name = when (cellType) {
+                is CellType.Title -> resources.getString(R.string.title)
+                is CellType.Password -> resources.getString(R.string.password)
+                is CellType.UserName -> resources.getString(R.string.username)
+                is CellType.Expiration -> resources.getString(R.string.expiration)
+                is CellType.Url -> resources.getString(R.string.url_cap)
+                is CellType.Notes -> resources.getString(R.string.notes)
+                is CellType.OTP -> resources.getString(R.string.one_time_password)
+                is CellType.Custom -> resources.getString(R.string.custom_property)
+                is CellType.Attachment -> resources.getString(R.string.attachment)
             }
 
-            dialogItems.add(item)
+            cellType to name
         }
-
-        dialogItems.add(
-            Pair(
-                AddDialogItem.CUSTOM_PROPERTY,
-                resources.getString(R.string.custom_property)
-            )
-        )
-        dialogItems.add(
-            Pair(
-                AddDialogItem.ATTACHMENT,
-                resources.getString(R.string.attachment)
-            )
-        )
 
         showAddDialogEvent.call(dialogItems)
     }
 
-    fun onAddDialogItemSelected(item: AddDialogItem) {
-        when (item) {
-            AddDialogItem.OTP -> {
+    fun onAddDialogItemSelected(cellType: CellType) {
+        when (cellType) {
+            is CellType.OTP -> {
                 router.setResultListener(SetupOneTimePasswordScreen.RESULT_KEY) { token ->
                     if (token is OtpToken) {
                         onOtpTokenCreated(token)
@@ -291,7 +273,7 @@ class NoteEditorViewModel(
                 )
             }
 
-            AddDialogItem.ATTACHMENT -> {
+            is CellType.Attachment -> {
                 router.setResultListener(StorageListScreen.RESULT_KEY) { file ->
                     if (file is FileDescriptor) {
                         onFileAttached(file)
@@ -306,13 +288,51 @@ class NoteEditorViewModel(
                 )
             }
 
+            is CellType.Expiration -> {
+                val newModel = modelFactory.createExpirationCell(
+                    expiration = ExpirationData(
+                        isEnabled = true,
+                        timestamp = createDefaultExpiration()
+                    )
+                )
+                val newViewModel = viewModelFactory.createCellViewModel(newModel, eventProvider)
+
+                val urlCellIndex = getViewModels().indexOfFirst { viewModel ->
+                    viewModel.model.id == CellId.URL
+                }
+
+                val viewModels = if (urlCellIndex > 0) {
+                    insertPropertyCell(getViewModels(), newViewModel, urlCellIndex - 1)
+                } else {
+                    insertPropertyCell(getViewModels(), newViewModel)
+                }
+
+                setCellElements(viewModels)
+            }
+
             else -> {
-                val newModel = modelFactory.createCustomPropertyModel(item.propertyType)
+                val newModel = modelFactory.createCustomPropertyModel(cellType.getPropertyType())
                 val newViewModel = viewModelFactory.createCellViewModel(newModel, eventProvider)
 
                 setCellElements(insertPropertyCell(getViewModels(), newViewModel))
             }
         }
+    }
+
+    fun onExpirationDateChanged(date: DateData) {
+        val currentExpiration = getExpirationFromCell() ?: return
+
+        val newExpiration = combine(date, currentExpiration.toTime())
+
+        setExpirationToCell(newExpiration)
+    }
+
+    fun onExpirationTimeChanged(time: TimeData) {
+        val currentExpiration = getExpirationFromCell() ?: return
+
+        val newExpiration = combine(currentExpiration.toDate(), time)
+
+        setExpirationToCell(newExpiration)
     }
 
     private fun onOtpTokenCreated(token: OtpToken) {
@@ -392,12 +412,20 @@ class NoteEditorViewModel(
         this.note = note
         this.template = template
 
+        val isExpirationEnabled = (note.expiration != null)
+        val expiration = note.expiration?.time?.toTimestamp()
+            ?: createDefaultExpiration()
+
         attachmentMap.clear()
         for (attachment in note.attachments) {
             attachmentMap[attachment.uid] = attachment
         }
 
-        val models = modelFactory.createModelsForNote(note, template)
+        val models = modelFactory.createModelsForNote(
+            note,
+            template,
+            ExpirationData(isExpirationEnabled, expiration)
+        )
         val viewModels = viewModelFactory.createCellViewModels(models, eventProvider)
         setCellElements(viewModels)
     }
@@ -450,6 +478,14 @@ class NoteEditorViewModel(
                         onRemoveAttachmentButtonClicked(attachmentUid)
                     }
                 }
+
+                event.containsKey(ExpirationCellViewModel.DATE_CLICK_EVENT) -> {
+                    onExpirationDateClicked()
+                }
+
+                event.containsKey(ExpirationCellViewModel.TIME_CLICK_EVENT) -> {
+                    onExpirationTimeClicked()
+                }
             }
         }
     }
@@ -458,6 +494,18 @@ class NoteEditorViewModel(
         attachmentMap.remove(uid)
 
         setCellElements(removeAttachmentCell(getViewModels(), cellId = uid))
+    }
+
+    private fun onExpirationDateClicked() {
+        val date = getExpirationFromCell()?.toDate() ?: return
+
+        showDatePickerEvent.call(date)
+    }
+
+    private fun onExpirationTimeClicked() {
+        val time = getExpirationFromCell()?.toTime() ?: return
+
+        showTimePickerEvent.call(time)
     }
 
     private fun setPasswordToCell(cellId: String, password: String) {
@@ -573,6 +621,29 @@ class NoteEditorViewModel(
         return viewModels.mapNotNull { viewModel -> attachmentMap[viewModel.model.id] }
     }
 
+    private fun getExpirationCellViewModel(): ExpirationCellViewModel? {
+        return findViewModelByCellId(CellId.EXPIRATION) as? ExpirationCellViewModel
+    }
+
+    private fun getExpirationFromCell(): Timestamp? {
+        val model = getExpirationCellViewModel()?.model ?: return null
+
+        return if (model.isEnabled) {
+            model.timestamp
+        } else {
+            null
+        }
+    }
+
+    private fun setExpirationToCell(expiration: Timestamp) {
+        val viewModel = getExpirationCellViewModel() ?: return
+
+        val newModel = viewModel.model.copy(
+            timestamp = expiration
+        )
+        viewModel.setModel(newModel)
+    }
+
     private fun isAllDataValid(): Boolean {
         return getPropertyViewModels()
             .all { it.isDataValid() }
@@ -598,6 +669,15 @@ class NoteEditorViewModel(
             viewModels.add(newViewModel)
         }
 
+        return viewModels
+    }
+
+    private fun insertPropertyCell(
+        viewModels: MutableList<BaseCellViewModel>,
+        newViewModel: BaseCellViewModel,
+        index: Int
+    ): MutableList<BaseCellViewModel> {
+        viewModels.add(index, newViewModel)
         return viewModels
     }
 
@@ -679,6 +759,7 @@ class NoteEditorViewModel(
     ): Note {
         val properties = createPropertiesFromCells().toMutableList()
         val attachments = createAttachmentsFromCells()
+        val expiration = getExpirationFromCell()?.toJavaDate()
 
         val title = PropertyFilter.filterTitle(properties)
             ?.value
@@ -696,7 +777,16 @@ class NoteEditorViewModel(
             )
         }
 
-        return Note(null, groupUid, created, created, title, properties, attachments)
+        return Note(
+            uid = null,
+            groupUid = groupUid,
+            created = created,
+            modified = created,
+            expiration = expiration,
+            title = title,
+            properties = properties,
+            attachments = attachments
+        )
     }
 
     private fun createModifiedNoteFromCells(
@@ -707,6 +797,7 @@ class NoteEditorViewModel(
         val attachments = createAttachmentsFromCells()
         val title = PropertyFilter.filterTitle(modifiedProperties)
         val modified = Date(System.currentTimeMillis())
+        val expiration = getExpirationFromCell()?.toJavaDate()
 
         val hiddenProperties = PropertyFilter.filterHidden(sourceNote.properties)
         val newProperties = (hiddenProperties + modifiedProperties).toMutableList()
@@ -726,6 +817,7 @@ class NoteEditorViewModel(
             groupUid = sourceNote.groupUid,
             created = sourceNote.created,
             modified = modified,
+            expiration = expiration,
             title = title?.value ?: EMPTY,
             properties = newProperties,
             attachments = attachments
@@ -744,37 +836,50 @@ class NoteEditorViewModel(
         return properties.all { property -> property.value.isNullOrEmpty() }
     }
 
-    private fun determineCellTypesToAdd(): List<PropertyType> {
+    private fun determineCellTypesToAdd(): List<CellType> {
         val titleCell = findViewModelByCellId(CellId.TITLE)
         val passwordCell = findViewModelByCellId(CellId.PASSWORD)
         val userNameCell = findViewModelByCellId(CellId.USER_NAME)
+        val expirationCell = findViewModelByCellId(CellId.EXPIRATION)
         val urlCell = findViewModelByCellId(CellId.URL)
         val notesCell = findViewModelByCellId(CellId.NOTES)
         val otpCell = findViewModelByCellId(CellId.OTP)
             ?: findViewModelByPropertyName(PropertyType.OTP.propertyName)
 
-        val cells = mutableListOf<PropertyType>()
+        val cells = mutableListOf<CellType>()
 
-        if (titleCell == null) {
-            cells.add(PropertyType.TITLE)
-        }
-        if (passwordCell == null) {
-            cells.add(PropertyType.PASSWORD)
-        }
-        if (userNameCell == null) {
-            cells.add(PropertyType.USER_NAME)
-        }
-        if (urlCell == null) {
-            cells.add(PropertyType.URL)
-        }
-        if (notesCell == null) {
-            cells.add(PropertyType.NOTES)
-        }
-        if (otpCell == null) {
-            cells.add(PropertyType.OTP)
-        }
+        if (titleCell == null) cells.add(CellType.Title)
+        if (passwordCell == null) cells.add(CellType.Password)
+        if (userNameCell == null) cells.add(CellType.UserName)
+        if (urlCell == null) cells.add(CellType.Url)
+        if (expirationCell == null) cells.add(CellType.Expiration)
+        if (notesCell == null) cells.add(CellType.Notes)
+        if (otpCell == null) cells.add(CellType.OTP)
+
+        cells.add(CellType.Custom)
+        cells.add(CellType.Attachment)
 
         return cells
+    }
+
+    private fun CellType.getPropertyType(): PropertyType? {
+        return when (this) {
+            is CellType.Title -> PropertyType.TITLE
+            is CellType.Password -> PropertyType.PASSWORD
+            is CellType.UserName -> PropertyType.USER_NAME
+            is CellType.Url -> PropertyType.URL
+            is CellType.Notes -> PropertyType.NOTES
+            is CellType.OTP -> PropertyType.OTP
+            else -> null
+        }
+    }
+
+    private fun createDefaultExpiration(): Timestamp {
+        return TimestampBuilder(currentTimestamp())
+            .shiftMonth(1)
+            .setMinute(0)
+            .setSecond(0)
+            .build()
     }
 
     object CellId {
@@ -785,16 +890,18 @@ class NoteEditorViewModel(
         const val PASSWORD = "password"
         const val ATTACHMENT_HEADER = "attachment_header"
         const val OTP = "otp"
+        const val EXPIRATION = "expiration"
     }
 
-    enum class AddDialogItem(val propertyType: PropertyType?) {
-        TITLE(PropertyType.TITLE),
-        PASSWORD(PropertyType.PASSWORD),
-        USER_NAME(PropertyType.USER_NAME),
-        URL(PropertyType.URL),
-        NOTES(PropertyType.NOTES),
-        OTP(PropertyType.OTP),
-        CUSTOM_PROPERTY(null),
-        ATTACHMENT(null)
+    sealed interface CellType {
+        data object Title : CellType
+        data object Password : CellType
+        data object UserName : CellType
+        data object Url : CellType
+        data object Notes : CellType
+        data object OTP : CellType
+        data object Expiration : CellType
+        data object Attachment : CellType
+        data object Custom : CellType
     }
 }

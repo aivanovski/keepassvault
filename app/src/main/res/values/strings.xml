@@ -205,6 +205,11 @@
     <string name="view_as_text">View as text</string>
     <string name="share">Share</string>
     <string name="one_time_password">One-time password</string>
+    <string name="modified_with_str">Modified %s</string>
+    <string name="modified">Modified</string>
+    <string name="created">Created</string>
+    <string name="expires">Expires</string>
+    <string name="expiration">Expiration</string>
 
     <!-- Note editor screen -->
     <string name="new_note">New note</string>
@@ -228,6 +233,7 @@
     <string name="select_item_to_add">Select item to add</string>
     <string name="custom_property">Custom property</string>
     <string name="file_is_already_added_with_value">File \'%s\' is already added</string>
+    <string name="never">Never</string>
 
     <!-- Password generator screen -->
     <string name="generate_password">Generate password</string>

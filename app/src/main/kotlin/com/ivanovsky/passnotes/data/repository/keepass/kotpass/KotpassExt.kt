@@ -116,12 +116,14 @@ fun RawEntry.convertToNote(
     }
 
     val title = PropertyFilter.filterTitle(properties)?.value ?: EMPTY
+    val expirationTime = getExpirationTime()
 
     return Note(
         uid = uuid,
         groupUid = groupUid,
         created = Date(getCreationTime()),
         modified = Date(getModificationTime()),
+        expiration = if (expirationTime != null) Date(expirationTime) else null,
         title = title,
         properties = properties,
         attachments = attachments
@@ -162,6 +164,14 @@ private fun RawEntry.getModificationTime(): Long {
     }
 }
 
+private fun RawEntry.getExpirationTime(): Long? {
+    return if (times?.expires == true) {
+        times?.expiryTime?.toEpochMilli()
+    } else {
+        null
+    }
+}
+
 fun List<RawEntry>.convertToNotes(
     groupUid: UUID,
     allBinaries: Map<ByteString, BinaryData>
@@ -198,6 +208,11 @@ fun Note.convertToEntry(): RawEntry {
     }
 
     val binaries = attachments.map { attachment -> attachment.convertToBinaryReference() }
+    val expiryTime = if (expiration != null) {
+        Instant.ofEpochMilli(expiration.time)
+    } else {
+        null
+    }
 
     return RawEntry(
         uuid = uid ?: throw IllegalStateException(),
@@ -207,7 +222,8 @@ fun Note.convertToEntry(): RawEntry {
             lastModificationTime = Instant.ofEpochMilli(modified.time),
             lastAccessTime = null,
             locationChanged = null,
-            expiryTime = null
+            expiryTime = expiryTime,
+            expires = (expiryTime != null)
         ),
         binaries = binaries
     )

@@ -126,7 +126,7 @@ fun RawEntry.convertToNote(
         expiration = if (expirationTime != null) Date(expirationTime) else null,
         title = title,
         properties = properties,
-        attachments = attachments,
+        attachments = attachments
     )
 }
 

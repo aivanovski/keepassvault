@@ -4,8 +4,8 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithCombinedKey
-import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithKeyFile
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithExpiredData
+import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithKeyFile
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithOtpData
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createKeyFileData
 import com.ivanovsky.passnotes.data.repository.file.entity.FakeStorageEntry

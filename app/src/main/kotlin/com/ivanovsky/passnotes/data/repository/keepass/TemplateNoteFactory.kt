@@ -55,6 +55,7 @@ object TemplateNoteFactory {
             groupUid = templateGroupUid,
             created = Date(),
             modified = Date(),
+            expiration = null,
             title = template.title,
             properties = properties
         )

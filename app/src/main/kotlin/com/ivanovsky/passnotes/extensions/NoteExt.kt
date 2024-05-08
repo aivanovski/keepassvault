@@ -38,3 +38,7 @@ fun Note.matches(query: String): Boolean {
 
     return isTitleMatches || isPropertyMatches
 }
+
+fun Note.isExpired(): Boolean {
+    return expiration != null && expiration.time < System.currentTimeMillis()
+}

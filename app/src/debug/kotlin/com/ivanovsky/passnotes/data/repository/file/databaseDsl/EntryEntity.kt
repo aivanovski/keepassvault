@@ -12,5 +12,6 @@ data class EntryEntity(
     val notes: String = EMPTY,
     val created: Long = System.currentTimeMillis(),
     val modified: Long = System.currentTimeMillis(),
+    val expires: Long? = null,
     val custom: Map<String, String> = emptyMap()
 )

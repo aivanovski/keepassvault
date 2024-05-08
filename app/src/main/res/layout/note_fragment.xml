@@ -64,24 +64,84 @@
             android:id="@+id/bottomPanelLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:cardBackgroundColor="?attr/kpSecondaryBackgroundColor"
             app:cardCornerRadius="0dp"
             app:cardElevation="@dimen/card_elevation"
-            app:cardBackgroundColor="?attr/kpSecondaryBackgroundColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/recyclerView"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}">
 
-            <TextView
-                android:id="@+id/modified_date"
-                style="@style/Material.SecondaryText.SingleLine"
-                android:layout_width="wrap_content"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                style="@style/Material.Layout.Selectable"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/element_margin"
-                android:layout_marginBottom="@dimen/element_margin"
-                android:text="@{viewModel.modifiedText}"
-                tools:text="Edited Jan 28" />
+                android:onClick="@{() -> viewModel.onToggleTimeCard()}"
+                app:visible="@{viewModel.isTimeCardExpanded}">
+
+                <TextView
+                    android:id="@+id/createdLabel"
+                    style="@style/Material.SecondaryText.SingleLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/element_margin"
+                    android:layout_marginTop="@dimen/element_margin"
+                    android:text="@string/created"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/createdText"
+                    style="@style/Material.PrimaryText.SingleLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{viewModel.createdText}"
+                    app:layout_constraintStart_toStartOf="@id/createdLabel"
+                    app:layout_constraintTop_toBottomOf="@id/createdLabel"
+                    tools:text="Jan 28 12:00" />
+
+                <TextView
+                    android:id="@+id/modifiedLabel"
+                    style="@style/Material.SecondaryText.SingleLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/element_margin"
+                    android:text="@string/modified"
+                    app:layout_constraintStart_toStartOf="@id/createdLabel"
+                    app:layout_constraintTop_toBottomOf="@id/createdText" />
+
+                <TextView
+                    android:id="@+id/modified"
+                    style="@style/Material.PrimaryText.SingleLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/element_margin"
+                    android:text="@{viewModel.modifiedText}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/modifiedLabel"
+                    app:layout_constraintTop_toBottomOf="@id/modifiedLabel"
+                    tools:text="Jan 28 12:00" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <FrameLayout
+                style="@style/Material.Layout.Selectable"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="@{() -> viewModel.onToggleTimeCard()}"
+                app:visible="@{!viewModel.isTimeCardExpanded}">
+
+                <TextView
+                    android:id="@+id/shortModifiedText"
+                    style="@style/Material.SecondaryText.SingleLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginVertical="@dimen/element_margin"
+                    android:text="@{viewModel.shortModifiedText}"
+                    tools:text="Modified Jan 28" />
+
+            </FrameLayout>
 
         </androidx.cardview.widget.CardView>
 

@@ -15,7 +15,7 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
-import com.ivanovsky.passnotes.domain.LocaleProvider
+import com.ivanovsky.passnotes.domain.DateFormatter
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
@@ -29,6 +29,7 @@ import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
+import com.ivanovsky.passnotes.presentation.core.CellId
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
@@ -50,8 +51,8 @@ import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.STAR
+import com.ivanovsky.passnotes.util.TimeUtils.toTimestamp
 import com.ivanovsky.passnotes.util.UrlUtils
-import com.ivanovsky.passnotes.util.formatAccordingLocale
 import com.ivanovsky.passnotes.util.substituteAll
 import java.io.File
 import java.util.UUID
@@ -63,7 +64,7 @@ class NoteViewModel(
     private val errorInteractor: ErrorInteractor,
     lockInteractor: DatabaseLockInteractor,
     private val resourceProvider: ResourceProvider,
-    private val localeProvider: LocaleProvider,
+    private val dateFormatter: DateFormatter,
     private val observerBus: ObserverBus,
     private val cellModelFactory: NoteCellModelFactory,
     private val cellViewModelFactory: NoteCellViewModelFactory,
@@ -91,7 +92,10 @@ class NoteViewModel(
     )
 
     val actionBarTitle = MutableLiveData<String>()
+    val shortModifiedText = MutableLiveData<String>()
     val modifiedText = MutableLiveData<String>()
+    val createdText = MutableLiveData<String>()
+    val isTimeCardExpanded = MutableLiveData(false)
     val visibleMenuItems = MutableLiveData<List<NoteMenuItem>>(emptyList())
     val isFabButtonVisible = MutableLiveData(false)
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
@@ -116,11 +120,6 @@ class NoteViewModel(
         .visible()
         .notEmpty()
         .sortedByType()
-        .build()
-
-    private val hiddenPropertiesFilter = PropertyFilter.Builder()
-        .hidden()
-        .notEmpty()
         .build()
 
     init {
@@ -313,38 +312,45 @@ class NoteViewModel(
         onNoteLoaded(note)
     }
 
+    fun onToggleTimeCard() {
+        isTimeCardExpanded.value = !(isTimeCardExpanded.value ?: false)
+    }
+
     private fun onNoteLoaded(note: Note) {
         this.note = note
 
         actionBarTitle.value = note.title
-        modifiedText.value =
-            note.modified.formatAccordingLocale(localeProvider.getSystemLocale())
+        shortModifiedText.value = resourceProvider.getString(
+            R.string.modified_with_str,
+            dateFormatter.formatShortDate(note.modified)
+        )
+        modifiedText.value = dateFormatter.formatDateAndTime(note.modified)
+        createdText.value = dateFormatter.formatDateAndTime(note.modified)
 
-        val visibleProperties = visiblePropertiesFilter.apply(note.properties)
-        val hiddenProperties = if (isShowHiddenProperties) {
-            hiddenPropertiesFilter.apply(note.properties)
-        } else {
-            emptyList()
-        }
-
-        val visibleIdsAndProperties = pairCellIdAndProperties(
-            visibleProperties,
+        val propertiesWithIds = pairPropertiesWithIds(
+            note.properties,
             VISIBLE_PROPERTY_CELL_ID_PREFIX
         )
 
-        val hiddenIdsAndProperties = pairCellIdAndProperties(
-            hiddenProperties,
-            HIDDEN_PROPERTY_CELL_ID_PREFIX
+        val attachmentsWithIds = pairAttachmentsWithIds(
+            note.attachments
         )
-        cellIdToPropertyMap = visibleIdsAndProperties.toMap() + hiddenIdsAndProperties.toMap()
 
-        val idsAndAttachments = pairCellIdAndAttachments(note.attachments)
-        cellIdToAttachmentMap = idsAndAttachments.toMap()
+        cellIdToPropertyMap = propertiesWithIds.associate { (property, id) ->
+            id.value to property
+        }
+
+        cellIdToAttachmentMap = attachmentsWithIds.associate { (attachment, id) ->
+            id.value to attachment
+        }
+
+        val expiration = note.expiration?.time?.toTimestamp()
 
         val models = cellModelFactory.createCellModels(
-            visibleIdsAndProperties = visibleIdsAndProperties,
-            idsAndAttachments = idsAndAttachments,
-            hiddenIdsAndProperties = hiddenIdsAndProperties
+            propertiesWithIds = propertiesWithIds,
+            attachmentsWithIds = attachmentsWithIds,
+            expiration = expiration,
+            isShowHiddenProperties = isShowHiddenProperties
         )
 
         setCellElements(cellViewModelFactory.createCellViewModels(models, eventProvider))
@@ -604,7 +610,9 @@ class NoteViewModel(
     }
 
     private fun hasHiddenProperties(note: Note): Boolean {
-        return hiddenPropertiesFilter.apply(note.properties).isNotEmpty()
+        val visibleProperties = visiblePropertiesFilter.apply(note.properties)
+        val otherProperties = note.properties.subtract(visibleProperties.toSet())
+        return otherProperties.isNotEmpty()
     }
 
     private fun getFabButtonVisibility(): Boolean {
@@ -614,18 +622,20 @@ class NoteViewModel(
             args.appMode == ApplicationLaunchMode.NORMAL
     }
 
-    private fun pairCellIdAndProperties(
+    private fun pairPropertiesWithIds(
         properties: List<Property>,
         idPrefix: String
-    ): List<Pair<String, Property>> {
-        return properties.mapIndexed { idx, property -> Pair("$idPrefix-$idx", property) }
+    ): List<Pair<Property, CellId>> {
+        return properties.mapIndexed { idx, property ->
+            property to CellId("$idPrefix-$idx")
+        }
     }
 
-    private fun pairCellIdAndAttachments(
+    private fun pairAttachmentsWithIds(
         attachments: List<Attachment>
-    ): List<Pair<String, Attachment>> {
+    ): List<Pair<Attachment, CellId>> {
         return attachments.mapIndexed { idx, attachment ->
-            Pair("$ATTACHMENT_CELL_ID_PREFIX-$idx", attachment)
+            attachment to CellId("$ATTACHMENT_CELL_ID_PREFIX-$idx")
         }
     }
 
@@ -684,6 +694,5 @@ class NoteViewModel(
     companion object {
         private const val ATTACHMENT_CELL_ID_PREFIX = "attachment"
         private const val VISIBLE_PROPERTY_CELL_ID_PREFIX = "visible"
-        private const val HIDDEN_PROPERTY_CELL_ID_PREFIX = "hidden"
     }
 }

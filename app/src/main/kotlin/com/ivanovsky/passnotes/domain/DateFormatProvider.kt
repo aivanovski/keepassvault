@@ -1,8 +1,10 @@
 package com.ivanovsky.passnotes.domain
 
+import android.content.Context
 import java.text.DateFormat
 
 class DateFormatProvider(
+    private val content: Context,
     private val localeProvider: LocaleProvider
 ) {
 
@@ -16,5 +18,9 @@ class DateFormatProvider(
 
     fun getTimeFormat(): DateFormat {
         return DateFormat.getTimeInstance()
+    }
+
+    fun is24HourFormat(): Boolean {
+        return android.text.format.DateFormat.is24HourFormat(content)
     }
 }

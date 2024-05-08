@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.presentation.core.binding
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.Typeface
 import android.text.Editable
 import android.text.InputType
@@ -112,8 +113,12 @@ fun setOnTextChangedListener(
 }
 
 @BindingAdapter("imageResourceId")
-fun setImageResource(imageView: ImageView, @DrawableRes imageResourceId: Int) {
-    imageView.setImageResource(imageResourceId)
+fun setImageResource(imageView: ImageView, @DrawableRes imageResourceId: Int?) {
+    if (imageResourceId != null) {
+        imageView.setImageResource(imageResourceId)
+    } else {
+        imageView.setImageDrawable(null)
+    }
 }
 
 @BindingAdapter("isTextHidden")
@@ -148,6 +153,7 @@ fun setInputLines(editText: EditText, inputLines: TextInputLines?) {
             editText.minLines = 1
             editText.maxLines = 1
         }
+
         TextInputLines.MULTIPLE_LINES -> {
             editText.minLines = 1
             editText.maxLines = 5
@@ -168,6 +174,7 @@ fun setInputType(editText: EditText, textInputType: TextInputType?) {
         TextInputType.EMAIL -> {
             InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
         }
+
         TextInputType.TEXT_CAP_SENTENCES -> {
             InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
         }
@@ -314,6 +321,7 @@ private fun buildShapeAppearanceModel(context: Context, shape: RoundedShape): Sh
                 context.resources.getDimension(R.dimen.card_corner_radius)
             )
         }
+
         RoundedShape.BOTTOM -> {
             builder.setBottomLeftCorner(
                 CornerFamily.ROUNDED,
@@ -324,6 +332,7 @@ private fun buildShapeAppearanceModel(context: Context, shape: RoundedShape): Sh
                 context.resources.getDimension(R.dimen.card_corner_radius)
             )
         }
+
         RoundedShape.TOP -> {
             builder.setTopLeftCorner(
                 CornerFamily.ROUNDED,
@@ -334,6 +343,7 @@ private fun buildShapeAppearanceModel(context: Context, shape: RoundedShape): Sh
                 context.resources.getDimension(R.dimen.card_corner_radius)
             )
         }
+
         RoundedShape.NONE -> {
         }
     }
@@ -380,5 +390,17 @@ fun setBoldStyle(
         textView.setTypeface(null, Typeface.BOLD)
     } else {
         textView.setTypeface(null, Typeface.NORMAL)
+    }
+}
+
+@BindingAdapter("isStrikeThrough")
+fun setStrikeThrough(
+    textView: TextView,
+    isStrikeThrough: Boolean?
+) {
+    if (isStrikeThrough == true) {
+        textView.paintFlags = textView.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+    } else if (textView.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG != 0) {
+        textView.paintFlags = textView.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
     }
 }

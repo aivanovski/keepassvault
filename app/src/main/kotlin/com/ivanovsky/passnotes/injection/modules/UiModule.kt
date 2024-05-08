@@ -173,12 +173,12 @@ object UiModule {
             single { GroupsCellViewModelFactory(get(), get()) }
 
             single { NoteEditorCellModelFactory(get()) }
-            single { NoteEditorCellViewModelFactory(get()) }
+            single { NoteEditorCellViewModelFactory(get(), get()) }
 
             single { UnlockCellModelFactory(get()) }
             single { UnlockCellViewModelFactory() }
 
-            single { NoteCellModelFactory(get()) }
+            single { NoteCellModelFactory(get(), get()) }
             single { NoteCellViewModelFactory(get()) }
 
             single { FilePickerCellModelFactory() }

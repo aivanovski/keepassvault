@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.ivanovsky.passnotes.presentation.noteEditor.cells.viewmodel.ExpirationCellViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/group_margin">
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/enabledSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/element_margin"
+            android:checked="@={viewModel.isEnabled}"
+            android:onCheckedChanged="@{(button, isChecked) -> viewModel.onEnabledStateChanged(isChecked)}"
+            android:text="@string/expires"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/date"
+            style="@style/Material.PrimaryText.SingleLine"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center_vertical|start"
+            android:onClick="@{() -> viewModel.onDateClicked()}"
+            android:paddingStart="@dimen/element_margin"
+            android:text="@{viewModel.date}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/time"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@id/enabledSwitch"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.isEnabled}"
+            tools:text="10.02.2024" />
+
+        <TextView
+            android:id="@+id/time"
+            style="@style/Material.PrimaryText.SingleLine"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center_vertical|end"
+            android:onClick="@{() -> viewModel.onTimeClicked()}"
+            android:paddingEnd="@dimen/element_margin"
+            android:text="@{viewModel.time}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/date"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.isEnabled}"
+            tools:text="10:24 AM" />
+
+        <TextView
+            android:id="@+id/never"
+            style="@style/Material.PrimaryText.SingleLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/element_margin"
+            android:text="@string/never"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1"
+            app:layout_constraintStart_toEndOf="@id/enabledSwitch"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{!viewModel.isEnabled}" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

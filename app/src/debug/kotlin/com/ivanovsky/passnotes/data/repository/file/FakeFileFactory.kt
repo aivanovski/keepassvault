@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithCombinedKey
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithKeyFile
+import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithExpiredData
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithOtpData
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createKeyFileData
 import com.ivanovsky.passnotes.data.repository.file.entity.FakeStorageEntry
@@ -95,6 +96,13 @@ class FakeFileFactory(
                 syncStatus = SyncStatus.NO_CHANGES,
                 localContentFactory = { createDatabaseWithCombinedKey() },
                 remoteContentFactory = { createDatabaseWithCombinedKey() }
+            ),
+
+            newEntry(
+                localFile = newFile(Path.EXPIRATIONS, Time.NO_CHANGES),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createDatabaseWithExpiredData() },
+                remoteContentFactory = { createDatabaseWithExpiredData() }
             ),
 
             // conflicts
@@ -256,6 +264,7 @@ class FakeFileFactory(
         val OTP = "/examples/test-otp.kdbx"
         val KEY_UNLOCK = "/examples/key-unlock.kdbx"
         val KEY_PASSWORD_UNLOCK = "/examples/key-and-password-unlock.kdbx"
+        val EXPIRATIONS = "/examples/test-expirations.kdbx"
 
         // conflicts
         val CONFLICT = "/conflicts/test-conflict.kdbx"

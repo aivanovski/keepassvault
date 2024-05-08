@@ -79,6 +79,7 @@ fun DiffEntryEntity.toNote(groupUid: UUID): Note {
         groupUid = groupUid,
         created = Date(),
         modified = Date(),
+        expiration = null,
         properties = properties
     )
 }

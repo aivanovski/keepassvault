@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.ATTACHMENTS
 import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.CREATED
 import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.GROUP_UID
 import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.MODIFIED
+import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.EXPIRATION
 import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.PROPERTIES
 import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.TITLE
 import com.ivanovsky.passnotes.domain.NoteDiffer.NoteField.UID
@@ -21,6 +22,7 @@ class NoteDiffer {
                 GROUP_UID -> isGroupUidEquals(lhs, rhs)
                 CREATED -> isCreatedEquals(lhs, rhs)
                 MODIFIED -> isModifiedEquals(lhs, rhs)
+                EXPIRATION -> isExpirationEquals(lhs, rhs)
                 TITLE -> isTitleEquals(lhs, rhs)
                 PROPERTIES -> isPropertiesEquals(lhs, rhs)
                 ATTACHMENTS -> isAttachmentsEqual(lhs, rhs)
@@ -97,6 +99,10 @@ class NoteDiffer {
         return lhs.modified == rhs.modified
     }
 
+    private fun isExpirationEquals(lhs: Note, rhs: Note): Boolean {
+        return lhs.expiration == rhs.expiration
+    }
+
     private fun isTitleEquals(lhs: Note, rhs: Note): Boolean {
         return lhs.title == rhs.title
     }
@@ -151,6 +157,7 @@ class NoteDiffer {
         GROUP_UID,
         CREATED,
         MODIFIED,
+        EXPIRATION,
         TITLE,
         PROPERTIES,
         ATTACHMENTS
@@ -162,7 +169,8 @@ class NoteDiffer {
     }
 
     companion object {
-        val ALL_FIELDS_WITHOUT_MODIFIED =
-            listOf(UID, GROUP_UID, CREATED, TITLE, PROPERTIES, ATTACHMENTS)
+        val ALL_FIELDS_WITHOUT_MODIFIED = NoteField.entries.filter { field ->
+            field != MODIFIED
+        }
     }
 }

@@ -205,7 +205,7 @@ def sardineAndroidVersion = '0.8'
 def ciceroneVersion = '7.1'
 def timberVersion = '5.0.1'
 def treessenceVersion = '1.0.5'
-def kotpassVersion = '0.6.1'
+def kotpassVersion = '0.7.0'
 def treeDiffVersion = '0.3.0'
 def fzf4jVersion = '0.2.1'
 // More latest version of jgit produce crash on Samsung

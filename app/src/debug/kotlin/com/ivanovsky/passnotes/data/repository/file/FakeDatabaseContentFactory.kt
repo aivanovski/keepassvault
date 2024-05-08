@@ -96,6 +96,14 @@ object FakeDatabaseContentFactory {
         return DEFAULT_KEY_FILE.toByteArray()
     }
 
+    fun createDatabaseWithExpiredData(): ByteArray {
+        return newDatabase(PASSWORD_CREDENTIALS, ROOT) {
+            entry(ENTRY_APPLE_EXPIRED)
+            entry(ENTRY_AMAZON)
+        }
+            .encodeToByteArray()
+    }
+
     private fun KeePassDatabase.encodeToByteArray(): ByteArray {
         return ByteArrayOutputStream().use { out ->
             this.encode(out)
@@ -246,6 +254,7 @@ object FakeDatabaseContentFactory {
         password = "abc123",
         created = parseDate("2020-01-09"),
         modified = parseDate("2020-01-09"),
+        expires = parseDate("2030-01-10"),
         custom = mapOf(
             PropertyType.URL.propertyName to "https://amazon.com"
         )
@@ -271,5 +280,15 @@ object FakeDatabaseContentFactory {
         custom = mapOf(
             "otp" to HOTP_URL
         )
+    )
+
+    private val ENTRY_APPLE_EXPIRED = EntryEntity(
+        title = "Apple(expired)",
+        username = "john.doe@example.com",
+        password = "abc123",
+        url = "https://apple.com",
+        created = parseDate("2020-01-04"),
+        modified = parseDate("2020-01-04"),
+        expires = parseDate("2020-01-05")
     )
 }

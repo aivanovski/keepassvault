@@ -30,8 +30,8 @@ class FakeFileStorage(
             ?.substituteFsAuthority()
     }
 
-    fun getSyncStatus(uid: String): SyncStatus {
-        return getCacheEntry(uid).syncStatus
+    fun getSyncStatus(uid: String): SyncStatus? {
+        return getCacheEntryOrNull(uid)?.syncStatus
     }
 
     fun putSyncStatus(uid: String, status: SyncStatus) {

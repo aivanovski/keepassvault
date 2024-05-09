@@ -122,9 +122,19 @@
                     app:layout_constraintTop_toBottomOf="@id/modifiedLabel"
                     tools:text="Jan 28 12:00" />
 
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/element_margin"
+                    android:src="@drawable/ic_arrow_down_24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="?attr/kpIconPrimaryColor" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <FrameLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 style="@style/Material.Layout.Selectable"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -136,12 +146,25 @@
                     style="@style/Material.SecondaryText.SingleLine"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
                     android:layout_marginVertical="@dimen/element_margin"
                     android:text="@{viewModel.shortModifiedText}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
                     tools:text="Modified Jan 28" />
 
-            </FrameLayout>
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/element_margin"
+                    android:src="@drawable/ic_arrow_up_24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="?attr/kpIconPrimaryColor" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.cardview.widget.CardView>
 

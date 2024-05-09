@@ -194,9 +194,9 @@ class DiffViewerCellModelFactory(
                         eventId = eventId,
                         backgroundColor = type.getBackgroundColor(resourceProvider),
                         iconResId = if (isExpanded) {
-                            R.drawable.ic_expand_less_24dp
+                            R.drawable.ic_arrow_up_24dp
                         } else {
-                            R.drawable.ic_expand_more_24dp
+                            R.drawable.ic_arrow_down_24dp
                         },
                         text = StringBuilder()
                             .apply {

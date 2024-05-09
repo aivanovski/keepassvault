@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/element_margin"
             android:onClick="@{() -> viewModel.onExpandButtonClicked()}"
-            android:src="@{viewModel.isCollapsed ? @drawable/ic_expand_more_24dp : @drawable/ic_expand_less_24dp}"
+            android:src="@{viewModel.isCollapsed ? @drawable/ic_arrow_down_24dp : @drawable/ic_arrow_up_24dp}"
             android:tint="?attr/kpIconPrimaryColor"
             app:layout_constraintBottom_toBottomOf="@id/primary_text_layout"
             app:layout_constraintEnd_toEndOf="parent"

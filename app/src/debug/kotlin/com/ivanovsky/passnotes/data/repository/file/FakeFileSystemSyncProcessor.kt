@@ -49,7 +49,7 @@ class FakeFileSystemSyncProcessor(
     override fun getSyncStatusForFile(uid: String): SyncStatus {
         throttler.delay(SHORT_DELAY)
 
-        return storage.getSyncStatus(uid)
+        return storage.getSyncStatus(uid) ?: SyncStatus.FILE_NOT_FOUND
     }
 
     override fun getSyncConflictForFile(uid: String): OperationResult<SyncConflictInfo> {

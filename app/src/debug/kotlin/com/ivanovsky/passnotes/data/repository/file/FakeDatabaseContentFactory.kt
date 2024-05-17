@@ -1,139 +1,191 @@
 package com.ivanovsky.passnotes.data.repository.file
 
-import app.keemobile.kotpass.cryptography.EncryptedValue
-import app.keemobile.kotpass.database.Credentials
-import app.keemobile.kotpass.database.KeePassDatabase
-import app.keemobile.kotpass.database.encode
+import com.github.aivanovski.keepasstreebuilder.DatabaseBuilderDsl
+import com.github.aivanovski.keepasstreebuilder.Fields
+import com.github.aivanovski.keepasstreebuilder.converter.kotpass.KotpassDatabaseConverter
+import com.github.aivanovski.keepasstreebuilder.extensions.toByteArray
+import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
+import com.github.aivanovski.keepasstreebuilder.model.EntryEntity
+import com.github.aivanovski.keepasstreebuilder.model.GroupEntity
 import com.ivanovsky.passnotes.data.entity.PropertyType
-import com.ivanovsky.passnotes.data.repository.file.databaseDsl.EntryEntity
-import com.ivanovsky.passnotes.data.repository.file.databaseDsl.GroupEntity
-import com.ivanovsky.passnotes.data.repository.file.databaseDsl.KotpassTreeDsl.newDatabase
-import java.io.ByteArrayOutputStream
+import com.ivanovsky.passnotes.util.StringUtils
+import java.time.Instant
 import java.util.UUID
 
 object FakeDatabaseContentFactory {
 
     fun createDefaultLocalDatabase(): ByteArray {
-        return newDatabase(PASSWORD_CREDENTIALS, ROOT) {
-            group(GROUP_EMAIL)
-            group(GROUP_INTERNET) {
-                group(GROUP_CODING) {
-                    entry(ENTRY_LEETCODE)
-                    entry(ENTRY_NEETCODE)
-                    entry(ENTRY_GITHUB)
-                }
-                group(GROUP_GAMING) {
-                    entry(ENTRY_STADIA)
-                }
-                group(GROUP_SHOPPING)
-                group(GROUP_SOCIAL)
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                group(GROUP_EMAIL)
+                group(GROUP_INTERNET) {
+                    group(GROUP_CODING) {
+                        entry(ENTRY_LEETCODE)
+                        entry(ENTRY_NEETCODE)
+                        entry(ENTRY_GITHUB)
+                    }
+                    group(GROUP_GAMING) {
+                        entry(ENTRY_STADIA)
+                    }
+                    group(GROUP_SHOPPING)
+                    group(GROUP_SOCIAL)
 
-                entry(ENTRY_GOOGLE)
-                entry(ENTRY_APPLE)
-                entry(ENTRY_MICROSOFT)
+                    entry(ENTRY_GOOGLE)
+                    entry(ENTRY_APPLE)
+                    entry(ENTRY_MICROSOFT)
+                }
+                entry(ENTRY_NAS_LOGIN)
+                entry(ENTRY_LAPTOP_LOGIN)
             }
-            entry(ENTRY_NAS_LOGIN)
-            entry(ENTRY_LAPTOP_LOGIN)
-        }
-            .encodeToByteArray()
+            .build()
+            .toByteArray()
     }
 
     fun createDefaultRemoteDatabase(): ByteArray {
-        return newDatabase(PASSWORD_CREDENTIALS, ROOT) {
-            group(GROUP_EMAIL)
-            group(GROUP_INTERNET) {
-                group(GROUP_CODING) {
-                    entry(ENTRY_LEETCODE)
-                    entry(ENTRY_NEETCODE)
-                    entry(ENTRY_GITLAB)
-                }
-                group(GROUP_GAMING) {
-                    entry(ENTRY_STADIA)
-                }
-                group(GROUP_SHOPPING) {
-                    entry(ENTRY_AMAZON)
-                }
-                group(GROUP_SOCIAL)
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                group(GROUP_EMAIL)
+                group(GROUP_INTERNET) {
+                    group(GROUP_CODING) {
+                        entry(ENTRY_LEETCODE)
+                        entry(ENTRY_NEETCODE)
+                        entry(ENTRY_GITLAB)
+                    }
+                    group(GROUP_GAMING) {
+                        entry(ENTRY_STADIA)
+                    }
+                    group(GROUP_SHOPPING) {
+                        entry(ENTRY_AMAZON)
+                    }
+                    group(GROUP_SOCIAL)
 
-                entry(ENTRY_GOOGLE)
-                entry(ENTRY_APPLE)
-                entry(ENTRY_MICROSOFT_MODIFIED)
+                    entry(ENTRY_GOOGLE)
+                    entry(ENTRY_APPLE)
+                    entry(ENTRY_MICROSOFT_MODIFIED)
+                }
+                entry(ENTRY_NAS_LOGIN)
+                entry(ENTRY_LAPTOP_LOGIN)
+                entry(ENTRY_MAC_BOOK_LOGIN)
             }
-            entry(ENTRY_NAS_LOGIN)
-            entry(ENTRY_LAPTOP_LOGIN)
-            entry(ENTRY_MAC_BOOK_LOGIN)
-        }
-            .encodeToByteArray()
+            .build()
+            .toByteArray()
     }
 
     fun createDatabaseWithOtpData(): ByteArray {
-        return newDatabase(PASSWORD_CREDENTIALS, ROOT) {
-            entry(ENTRY_TOTP)
-            entry(ENTRY_HOTP)
-        }
-            .encodeToByteArray()
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                entry(ENTRY_TOTP)
+                entry(ENTRY_HOTP)
+            }
+            .build()
+            .toByteArray()
     }
 
     fun createDatabaseWithKeyFile(): ByteArray {
-        return newDatabase(KEY_FILE_CREDENTIALS, ROOT) {
-            entry(ENTRY_NAS_LOGIN)
-            entry(ENTRY_LAPTOP_LOGIN)
-            entry(ENTRY_MAC_BOOK_LOGIN)
-        }
-            .encodeToByteArray()
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(FILE_KEY)
+            .content(ROOT) {
+                entry(ENTRY_NAS_LOGIN)
+                entry(ENTRY_LAPTOP_LOGIN)
+                entry(ENTRY_MAC_BOOK_LOGIN)
+            }
+            .build()
+            .toByteArray()
     }
 
     fun createDatabaseWithCombinedKey(): ByteArray {
-        return newDatabase(COMBINED_CREDENTIALS, ROOT) {
-            entry(ENTRY_NAS_LOGIN)
-            entry(ENTRY_LAPTOP_LOGIN)
-            entry(ENTRY_MAC_BOOK_LOGIN)
-        }
-            .encodeToByteArray()
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(COMBINED_KEY)
+            .content(ROOT) {
+                entry(ENTRY_NAS_LOGIN)
+                entry(ENTRY_LAPTOP_LOGIN)
+                entry(ENTRY_MAC_BOOK_LOGIN)
+            }
+            .build()
+            .toByteArray()
     }
 
     fun createKeyFileData(): ByteArray {
-        return DEFAULT_KEY_FILE.toByteArray()
+        return DEFAULT_KEY_FILE_CONTENT.toByteArray()
     }
 
     fun createDatabaseWithExpiredData(): ByteArray {
-        return newDatabase(PASSWORD_CREDENTIALS, ROOT) {
-            entry(ENTRY_APPLE_EXPIRED)
-            entry(ENTRY_AMAZON)
-        }
-            .encodeToByteArray()
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                entry(ENTRY_APPLE_EXPIRED)
+                entry(ENTRY_AMAZON)
+            }
+            .build()
+            .toByteArray()
     }
 
-    private fun KeePassDatabase.encodeToByteArray(): ByteArray {
-        return ByteArrayOutputStream().use { out ->
-            this.encode(out)
-            out.toByteArray()
-        }
+    private fun newEntry(
+        created: Long,
+        modified: Long,
+        expires: Long? = null,
+        title: String = StringUtils.EMPTY,
+        username: String = StringUtils.EMPTY,
+        password: String = StringUtils.EMPTY,
+        url: String = StringUtils.EMPTY,
+        notes: String = StringUtils.EMPTY,
+        custom: Map<String, String> = emptyMap(),
+        history: List<EntryEntity> = emptyList()
+    ): EntryEntity {
+        val defaultFields = mapOf(
+            PropertyType.TITLE.propertyName to title,
+            PropertyType.USER_NAME.propertyName to username,
+            PropertyType.PASSWORD.propertyName to password,
+            PropertyType.URL.propertyName to url,
+            PropertyType.NOTES.propertyName to notes
+        )
+
+        return EntryEntity(
+            uuid = UUID(1L, title.hashCode().toLong()),
+            created = Instant.ofEpochMilli(created),
+            modified = Instant.ofEpochMilli(modified),
+            expires = if (expires != null) {
+                Instant.ofEpochMilli(expires)
+            } else {
+                null
+            },
+            fields = defaultFields.plus(custom),
+            history = history
+        )
+    }
+
+    private fun newGroup(
+        title: String,
+        uuid: UUID = UUID(0xFFL, title.hashCode().toLong())
+    ): GroupEntity {
+        return GroupEntity(
+            uuid = uuid,
+            fields = mapOf(
+                Fields.TITLE to title
+            )
+        )
     }
 
     private const val DEFAULT_PASSWORD = "abc123"
-    private const val DEFAULT_KEY_FILE = "abcdefg1235678"
+    private const val DEFAULT_KEY_FILE_CONTENT = "abcdefg1235678"
 
-    private val PASSWORD_CREDENTIALS = Credentials.from(
-        passphrase = EncryptedValue.fromString(DEFAULT_PASSWORD)
+    private val PASSWORD_KEY = DatabaseKey.PasswordKey(DEFAULT_PASSWORD)
+    private val FILE_KEY = DatabaseKey.BinaryKey(DEFAULT_KEY_FILE_CONTENT.toByteArray())
+    private val COMBINED_KEY = DatabaseKey.CompositeKey(
+        password = DEFAULT_PASSWORD,
+        binaryData = DEFAULT_KEY_FILE_CONTENT.toByteArray()
     )
 
-    private val KEY_FILE_CREDENTIALS = Credentials.from(
-        keyData = DEFAULT_KEY_FILE.toByteArray()
-    )
-
-    private val COMBINED_CREDENTIALS = Credentials.from(
-        passphrase = EncryptedValue.fromString(DEFAULT_PASSWORD),
-        keyData = DEFAULT_KEY_FILE.toByteArray()
-    )
-
-    private val ROOT = GroupEntity(title = "Database")
-    private val GROUP_EMAIL = GroupEntity(title = "Email", uuid = UUID(100L, 1L))
-    private val GROUP_INTERNET = GroupEntity(title = "Internet", uuid = UUID(100L, 2L))
-    private val GROUP_CODING = GroupEntity(title = "Coding", uuid = UUID(100L, 3L))
-    private val GROUP_GAMING = GroupEntity(title = "Gaming", uuid = UUID(100L, 4L))
-    private val GROUP_SHOPPING = GroupEntity(title = "Shopping", uuid = UUID(100L, 5L))
-    private val GROUP_SOCIAL = GroupEntity(title = "Social", uuid = UUID(100L, 7L))
+    private val ROOT = newGroup(title = "Database")
+    private val GROUP_EMAIL = newGroup(title = "Email")
+    private val GROUP_INTERNET = newGroup(title = "Internet")
+    private val GROUP_CODING = newGroup(title = "Coding")
+    private val GROUP_GAMING = newGroup(title = "Gaming")
+    private val GROUP_SHOPPING = newGroup(title = "Shopping")
+    private val GROUP_SOCIAL = newGroup(title = "Social")
 
     private val TOTP_URL = """
             otpauth://totp/Example:john.doe?secret=AAAABBBBCCCCDDDD&period=30
@@ -145,7 +197,7 @@ object FakeDatabaseContentFactory {
             &issuer=Example&algorithm=SHA1&counter=1
     """.trimIndent()
 
-    private val ENTRY_NAS_LOGIN = EntryEntity(
+    private val ENTRY_NAS_LOGIN = newEntry(
         title = "NAS Login",
         username = "john.doe",
         password = "abc123",
@@ -153,7 +205,7 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-01-01")
     )
 
-    private val ENTRY_LAPTOP_LOGIN = EntryEntity(
+    private val ENTRY_LAPTOP_LOGIN = newEntry(
         title = "Laptop login",
         username = "john.doe",
         password = "abc123",
@@ -161,7 +213,7 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-01-02")
     )
 
-    private val ENTRY_MAC_BOOK_LOGIN = EntryEntity(
+    private val ENTRY_MAC_BOOK_LOGIN = newEntry(
         title = "MacBook Login",
         username = "john.doe",
         password = "abc123",
@@ -169,7 +221,7 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-02-01")
     )
 
-    private val ENTRY_GOOGLE = EntryEntity(
+    private val ENTRY_GOOGLE = newEntry(
         title = "Google",
         username = "john.doe@example.com",
         password = "abc123",
@@ -178,7 +230,7 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-01-03")
     )
 
-    private val ENTRY_APPLE = EntryEntity(
+    private val ENTRY_APPLE = newEntry(
         title = "Apple",
         username = "john.doe@example.com",
         password = "abc123",
@@ -187,7 +239,7 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-01-04")
     )
 
-    private val ENTRY_MICROSOFT = EntryEntity(
+    private val ENTRY_MICROSOFT = newEntry(
         title = "Microsoft",
         username = "john.doe@example.com",
         password = "abc123",
@@ -196,7 +248,7 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-01-05")
     )
 
-    private val ENTRY_MICROSOFT_MODIFIED = EntryEntity(
+    private val ENTRY_MICROSOFT_MODIFIED = newEntry(
         title = "Microsoft",
         username = "john.galt@example.com",
         password = "qwerty",
@@ -205,7 +257,7 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-01-05")
     )
 
-    private val ENTRY_LEETCODE = EntryEntity(
+    private val ENTRY_LEETCODE = newEntry(
         title = "Leetcode.com",
         username = "john.doe@example.com",
         password = "abc123",
@@ -214,7 +266,7 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-01-06")
     )
 
-    private val ENTRY_NEETCODE = EntryEntity(
+    private val ENTRY_NEETCODE = newEntry(
         title = "Neetcode.com",
         username = "john.doe@example.com",
         url = "https://neetcode.io/practice",
@@ -222,7 +274,7 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-01-07")
     )
 
-    private val ENTRY_GITHUB = EntryEntity(
+    private val ENTRY_GITHUB = newEntry(
         title = "Github.com",
         username = "john.doe@example.com",
         password = "abc123",
@@ -231,7 +283,7 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-01-08")
     )
 
-    private val ENTRY_GITLAB = EntryEntity(
+    private val ENTRY_GITLAB = newEntry(
         title = "Gitlab.com",
         username = "john.doe@example.com",
         password = "abc123",
@@ -240,7 +292,7 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-01-08")
     )
 
-    private val ENTRY_STADIA = EntryEntity(
+    private val ENTRY_STADIA = newEntry(
         title = "Stadia.com",
         username = "john.doe@example.com",
         password = "abc123",
@@ -248,7 +300,7 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-01-09")
     )
 
-    private val ENTRY_AMAZON = EntryEntity(
+    private val ENTRY_AMAZON = newEntry(
         title = "Amazon.com",
         username = "john.doe@example.com",
         password = "abc123",
@@ -260,7 +312,7 @@ object FakeDatabaseContentFactory {
         )
     )
 
-    private val ENTRY_TOTP = EntryEntity(
+    private val ENTRY_TOTP = newEntry(
         title = "TOTP Entry",
         username = "john.doe@example.com",
         password = "",
@@ -271,7 +323,7 @@ object FakeDatabaseContentFactory {
         )
     )
 
-    private val ENTRY_HOTP = EntryEntity(
+    private val ENTRY_HOTP = newEntry(
         title = "HOTP Entry",
         username = "john.doe@example.com",
         password = "",
@@ -282,7 +334,7 @@ object FakeDatabaseContentFactory {
         )
     )
 
-    private val ENTRY_APPLE_EXPIRED = EntryEntity(
+    private val ENTRY_APPLE_EXPIRED = newEntry(
         title = "Apple(expired)",
         username = "john.doe@example.com",
         password = "abc123",

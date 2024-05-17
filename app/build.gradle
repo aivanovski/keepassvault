@@ -207,6 +207,7 @@ def timberVersion = '5.0.1'
 def treessenceVersion = '1.0.5'
 def kotpassVersion = '0.7.0'
 def treeDiffVersion = '0.3.0'
+def treeBuilderVersion = '0.2.0'
 def fzf4jVersion = '0.2.1'
 // More latest version of jgit produce crash on Samsung
 def jgitVersion = '6.2.0.202206071550-r'
@@ -304,6 +305,7 @@ dependencies {
     // KeePass
     implementation "com.github.anvell:kotpass:$kotpassVersion"
     implementation "com.github.aivanovski:keepass-tree-diff:$treeDiffVersion"
+    debugImplementation "com.github.aivanovski:keepass-tree-builder:$treeBuilderVersion"
 
     // Fuzzy search
     implementation "com.github.aivanovski:fzf4j:$fzf4jVersion"

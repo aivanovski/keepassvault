@@ -1,9 +1,13 @@
 package com.ivanovsky.passnotes.data.entity
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Hash(
     val data: ByteArray,
     val type: HashType
-) {
+) : Parcelable {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

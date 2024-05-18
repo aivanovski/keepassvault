@@ -45,6 +45,7 @@ class NoteCellViewModelFactory(
             )
             is HeaderCellModel -> HeaderCellViewModel(
                 model,
+                eventProvider,
                 resourceProvider
             )
             is AttachmentCellModel -> AttachmentCellViewModel(

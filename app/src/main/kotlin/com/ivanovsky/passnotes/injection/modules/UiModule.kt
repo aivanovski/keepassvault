@@ -25,6 +25,8 @@ import com.ivanovsky.passnotes.domain.interactor.syncState.SyncStateInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.presentation.about.AboutViewModel
 import com.ivanovsky.passnotes.presentation.autofill.AutofillViewFactory
+import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialogArgs
+import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialogViewModel
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogInteractor
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogViewModel
@@ -49,6 +51,11 @@ import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.history.HistoryInteractor
+import com.ivanovsky.passnotes.presentation.history.HistoryScreenArgs
+import com.ivanovsky.passnotes.presentation.history.HistoryViewModel
+import com.ivanovsky.passnotes.presentation.history.factory.HistoryCellModelFactory
+import com.ivanovsky.passnotes.presentation.history.factory.HistoryCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.main.MainScreenArgs
 import com.ivanovsky.passnotes.presentation.main.MainViewModel
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
@@ -164,6 +171,7 @@ object UiModule {
             single { EnterDbCredentialsInteractor(get(), get(), get()) }
             single { DiffViewerInteractor(get(), get(), get(), get(), get()) }
             single { SetupOneTimePasswordInteractor() }
+            single { HistoryInteractor(get(), get(), get()) }
 
             // Autofill
             single { AutofillViewFactory(get(), get()) }
@@ -194,6 +202,9 @@ object UiModule {
 
             single { DiffViewerCellModelFactory(get(), get()) }
             single { DiffViewerCellViewModelFactory(get()) }
+
+            single { HistoryCellModelFactory(get(), get()) }
+            single { HistoryCellViewModelFactory(get()) }
 
             // Cicerone
             single { Cicerone.create() }
@@ -354,6 +365,21 @@ object UiModule {
             }
             factory { (args: SetupOneTimePasswordArgs) ->
                 SetupOneTimePasswordViewModel(get(), get(), get(), get(), args)
+            }
+            factory { (args: HistoryScreenArgs) ->
+                HistoryViewModel(
+                    get(),
+                    get(),
+                    get(),
+                    get(),
+                    get(),
+                    get(),
+                    get(),
+                    args
+                )
+            }
+            factory { (args: PropertyActionDialogArgs) ->
+                PropertyActionDialogViewModel(get(), args)
             }
         }
 

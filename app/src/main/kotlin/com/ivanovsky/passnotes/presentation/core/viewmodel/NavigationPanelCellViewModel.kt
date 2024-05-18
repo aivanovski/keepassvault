@@ -12,10 +12,12 @@ class NavigationPanelCellViewModel(
 ) : BaseMutableCellViewModel<NavigationPanelCellModel>(initModel) {
 
     val items = MutableLiveData(initModel.items)
+    val isVisible = MutableLiveData(initModel.isVisible)
 
     override fun setModel(newModel: NavigationPanelCellModel) {
         super.setModel(newModel)
         items.value = newModel.items
+        isVisible.value = newModel.isVisible
     }
 
     fun onItemClicked(index: Int) {

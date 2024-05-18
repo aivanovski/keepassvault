@@ -393,8 +393,12 @@ class NoteEditorCellModelFactory(
         return HeaderCellModel(
             id = id,
             title = title,
+            description = EMPTY,
+            isDescriptionVisible = false,
+            descriptionIconResId = null,
             color = resourceProvider.getAttributeColor(R.attr.kpSecondaryTextColor),
             isBold = false,
+            isClickable = true,
             paddingHorizontal = R.dimen.element_margin
         )
     }

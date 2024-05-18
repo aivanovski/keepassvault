@@ -37,7 +37,8 @@ class NoteCellModelFactory(
         propertiesWithIds: List<Pair<Property, CellId>>,
         attachmentsWithIds: List<Pair<Attachment, CellId>>,
         expiration: Timestamp?,
-        isShowHiddenProperties: Boolean
+        isShowHiddenProperties: Boolean,
+        isShowHistoryButton: Boolean
     ): List<BaseCellModel> {
         val allProperties = propertiesWithIds
             .map { (property, _) -> property }
@@ -120,6 +121,10 @@ class NoteCellModelFactory(
                 header = resourceProvider.getString(R.string.hidden)
             )
         )
+
+        if (isShowHistoryButton) {
+            models.add(createHistoryHeaderCell())
+        }
 
         models.add(SpaceCellModel(R.dimen.huge_margin))
 
@@ -348,8 +353,25 @@ class NoteCellModelFactory(
         HeaderCellModel(
             id = null,
             title = title,
+            description = StringUtils.EMPTY,
+            isDescriptionVisible = false,
+            descriptionIconResId = null,
             color = resourceProvider.getAttributeColor(R.attr.kpSecondaryTextColor),
             isBold = false,
+            paddingHorizontal = R.dimen.double_element_margin,
+            isClickable = false
+        )
+
+    private fun createHistoryHeaderCell(): HeaderCellModel =
+        HeaderCellModel(
+            id = null,
+            title = StringUtils.EMPTY,
+            description = resourceProvider.getString(R.string.history),
+            isDescriptionVisible = true,
+            descriptionIconResId = R.drawable.ic_chevron_right_24dp,
+            color = resourceProvider.getAttributeColor(R.attr.kpSecondaryTextColor),
+            isBold = false,
+            isClickable = true,
             paddingHorizontal = R.dimen.double_element_margin
         )
 

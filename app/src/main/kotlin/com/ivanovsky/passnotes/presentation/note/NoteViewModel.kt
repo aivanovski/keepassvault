@@ -23,6 +23,7 @@ import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
@@ -33,6 +34,7 @@ import com.ivanovsky.passnotes.presentation.core.CellId
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
+import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyAction
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
@@ -42,6 +44,7 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NavigationPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
+import com.ivanovsky.passnotes.presentation.history.HistoryScreenArgs
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.AttachmentCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.NotePropertyCellViewModel
 import com.ivanovsky.passnotes.presentation.note.cells.viewmodel.OtpPropertyCellViewModel
@@ -50,10 +53,8 @@ import com.ivanovsky.passnotes.presentation.note.factory.NoteCellViewModelFactor
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
-import com.ivanovsky.passnotes.util.StringUtils.STAR
 import com.ivanovsky.passnotes.util.TimeUtils.toTimestamp
 import com.ivanovsky.passnotes.util.UrlUtils
-import com.ivanovsky.passnotes.util.substituteAll
 import java.io.File
 import java.util.UUID
 import kotlinx.coroutines.launch
@@ -86,7 +87,8 @@ class NoteViewModel(
 
     val navigationPanelViewModel = NavigationPanelCellViewModel(
         initModel = NavigationPanelCellModel(
-            items = emptyList()
+            items = emptyList(),
+            isVisible = false
         ),
         eventProvider = eventProvider
     )
@@ -97,12 +99,12 @@ class NoteViewModel(
     val createdText = MutableLiveData<String>()
     val isTimeCardExpanded = MutableLiveData(false)
     val visibleMenuItems = MutableLiveData<List<NoteMenuItem>>(emptyList())
-    val isFabButtonVisible = MutableLiveData(false)
+    val isFabButtonVisible = MutableLiveData(getFabButtonVisibility())
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
     val sendAutofillResponseEvent = SingleLiveEvent<Pair<Note?, AutofillStructure>>()
     val showAddAutofillDataDialog = SingleLiveEvent<Note>()
-    val showPropertyActionDialog = SingleLiveEvent<List<PropertyAction>>()
+    val showPropertyActionDialog = SingleLiveEvent<Property>()
     val showAttachmentActionDialog = SingleLiveEvent<List<AttachmentAction>>()
     val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
     val openUrlEvent = SingleLiveEvent<String>()
@@ -112,7 +114,8 @@ class NoteViewModel(
     private var cellIdToPropertyMap: Map<String, Property>? = null
     private var cellIdToAttachmentMap: Map<String, Attachment>? = null
     private var note: Note? = null
-    private var noteUid: UUID = args.noteUid
+    private var history: List<Note>? = null
+    private var noteUid: UUID? = args.noteSource.getNoteUid()
     private var navigationPanelGroups: List<Group> = emptyList()
     private var isShowHiddenProperties = false
 
@@ -241,20 +244,33 @@ class NoteViewModel(
     }
 
     fun loadData() {
+        val noteUid = this.noteUid
+
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val getNoteResult = interactor.getNoteByUid(noteUid)
-            if (getNoteResult.isFailed) {
-                setScreenState(
-                    ScreenState.error(
-                        errorText = errorInteractor.processAndGetMessage(getNoteResult.error)
-                    )
-                )
-                return@launch
+            val note = when (args.noteSource) {
+                is NoteSource.ByUid -> {
+                    val getNoteResult = interactor.getNoteByUid(noteUid ?: args.noteSource.uid)
+                    if (getNoteResult.isFailed) {
+                        setScreenState(
+                            ScreenState.error(
+                                errorText = errorInteractor.processAndGetMessage(
+                                    getNoteResult.error
+                                )
+                            )
+                        )
+                        return@launch
+                    }
+
+                    getNoteResult.getOrThrow()
+                }
+
+                is NoteSource.ByNote -> {
+                    args.noteSource.note
+                }
             }
 
-            val note = getNoteResult.getOrThrow()
             val getGroupResult = interactor.getGroup(note.groupUid)
             if (getGroupResult.isFailed) {
                 setScreenState(
@@ -276,48 +292,67 @@ class NoteViewModel(
                 return@launch
             }
 
+            val history = if (!args.isViewOnly && noteUid != null) {
+                val getHistoryResult = interactor.getHistory(noteUid)
+                if (getHistoryResult.isFailed) {
+                    setScreenState(
+                        ScreenState.error(
+                            errorText = errorInteractor.processAndGetMessage(getHistoryResult.error)
+                        )
+                    )
+                    return@launch
+                }
+                getHistoryResult.getOrThrow()
+            } else {
+                emptyList()
+            }
+
             navigationPanelGroups = getParentsResult.getOrThrow()
             val parentItems = navigationPanelGroups.map { parent -> parent.title }
             navigationPanelViewModel.setModel(
                 NavigationPanelCellModel(
-                    items = parentItems
+                    items = parentItems,
+                    isVisible = !args.isViewOnly
                 )
             )
 
-            onNoteLoaded(note)
+            onDataLoaded(note, history)
         }
     }
 
     fun onPropertyActionClicked(action: PropertyAction) {
         when (action) {
             is PropertyAction.CopyText -> {
-                if (action.isResetClipboard) {
+                if (action.isProtected) {
                     copyProtectedText(action.text)
                 } else {
                     copyText(action.text)
                 }
             }
 
-            is PropertyAction.OpenUrl -> {
-                openUrlEvent.call(action.url)
-            }
+            else -> throw IllegalArgumentException()
         }
     }
 
     fun onToggleHiddenClicked() {
         val note = note ?: return
+        val history = history ?: emptyList()
 
         isShowHiddenProperties = !isShowHiddenProperties
 
-        onNoteLoaded(note)
+        onDataLoaded(note, history)
     }
 
     fun onToggleTimeCard() {
         isTimeCardExpanded.value = !(isTimeCardExpanded.value ?: false)
     }
 
-    private fun onNoteLoaded(note: Note) {
+    private fun onDataLoaded(
+        note: Note,
+        history: List<Note>
+    ) {
         this.note = note
+        this.history = history
 
         actionBarTitle.value = note.title
         shortModifiedText.value = resourceProvider.getString(
@@ -350,7 +385,8 @@ class NoteViewModel(
             propertiesWithIds = propertiesWithIds,
             attachmentsWithIds = attachmentsWithIds,
             expiration = expiration,
-            isShowHiddenProperties = isShowHiddenProperties
+            isShowHiddenProperties = isShowHiddenProperties,
+            isShowHistoryButton = history.isNotEmpty()
         )
 
         setCellElements(cellViewModelFactory.createCellViewModels(models, eventProvider))
@@ -409,6 +445,10 @@ class NoteViewModel(
 
                     onOtpCodeClicked(otpCode)
                 }
+
+                event.containsKey(HeaderCellViewModel.ITEM_CLICK_EVENT) -> {
+                    onHistoryClicked()
+                }
             }
         }
     }
@@ -461,42 +501,11 @@ class NoteViewModel(
 
         val isValueProtected = viewModel.model.isValueProtected
 
-        val options = mutableListOf<PropertyAction>()
+        val currentProperty = property.copy(
+            isProtected = isValueProtected
+        )
 
-        if (!property.name.isNullOrBlank()) {
-            options.add(
-                PropertyAction.CopyText(
-                    title = property.name,
-                    text = property.name,
-                    isResetClipboard = false
-                )
-            )
-        }
-
-        if (!property.value.isNullOrBlank()) {
-            val title = if (isValueProtected) {
-                property.value.substituteAll(STAR)
-            } else {
-                property.value
-            }
-
-            options.add(
-                PropertyAction.CopyText(
-                    title = title,
-                    text = property.value,
-                    isResetClipboard = property.isProtected
-                )
-            )
-
-            if (property.type == PropertyType.URL) {
-                val url = UrlUtils.parseUrl(property.value)
-                if (url?.isValid() == true) {
-                    options.add(PropertyAction.OpenUrl(url.formatToString()))
-                }
-            }
-        }
-
-        showPropertyActionDialog.call(options)
+        showPropertyActionDialog.call(currentProperty)
     }
 
     fun onOpenAttachmentClicked(cellId: String) {
@@ -575,6 +584,20 @@ class NoteViewModel(
         copyProtectedText(otpCode)
     }
 
+    private fun onHistoryClicked() {
+        val noteUid = this.noteUid ?: return
+
+        router.navigateTo(
+            Screens.HistoryScreen(
+                HistoryScreenArgs(
+                    appMode = args.appMode,
+                    noteUid = noteUid,
+                    autofillStructure = args.autofillStructure
+                )
+            )
+        )
+    }
+
     private fun getVisibleMenuItems(): List<NoteMenuItem> {
         val screenState = this.screenState.value ?: return emptyList()
         val note = this.note
@@ -585,27 +608,29 @@ class NoteViewModel(
             false
         }
 
-        return when {
-            screenState.isDisplayingData && args.appMode == ApplicationLaunchMode.NORMAL -> {
-                listOfNotNull(
-                    NoteMenuItem.LOCK,
-                    NoteMenuItem.SEARCH,
-                    NoteMenuItem.SETTINGS,
-                    if (hasHiddenProperties) NoteMenuItem.TOGGLE_HIDDEN else null
-                )
-            }
+        return if (screenState.isDisplayingData) {
+            mutableListOf<NoteMenuItem>()
+                .apply {
+                    if (args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION) {
+                        add(NoteMenuItem.SELECT)
+                    }
 
-            screenState.isDisplayingData &&
-                args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
-                listOfNotNull(
-                    NoteMenuItem.SELECT,
-                    NoteMenuItem.LOCK,
-                    NoteMenuItem.SEARCH,
-                    if (hasHiddenProperties) NoteMenuItem.TOGGLE_HIDDEN else null
-                )
-            }
+                    add(NoteMenuItem.LOCK)
 
-            else -> emptyList()
+                    if (!args.isViewOnly) {
+                        add(NoteMenuItem.SEARCH)
+                    }
+
+                    if (args.appMode == ApplicationLaunchMode.NORMAL) {
+                        add(NoteMenuItem.SETTINGS)
+                    }
+
+                    if (hasHiddenProperties) {
+                        add(NoteMenuItem.TOGGLE_HIDDEN)
+                    }
+                }
+        } else {
+            emptyList()
         }
     }
 
@@ -619,7 +644,8 @@ class NoteViewModel(
         val screenState = this.screenState.value ?: return false
 
         return screenState.isDisplayingData &&
-            args.appMode == ApplicationLaunchMode.NORMAL
+            args.appMode == ApplicationLaunchMode.NORMAL &&
+            !args.isViewOnly
     }
 
     private fun pairPropertiesWithIds(
@@ -661,19 +687,6 @@ class NoteViewModel(
         SEARCH(R.id.menu_search),
         SETTINGS(R.id.menu_settings),
         TOGGLE_HIDDEN(R.id.menu_toggle_hidden)
-    }
-
-    sealed class PropertyAction {
-
-        data class CopyText(
-            val title: String,
-            val text: String,
-            val isResetClipboard: Boolean
-        ) : PropertyAction()
-
-        data class OpenUrl(
-            val url: String
-        ) : PropertyAction()
     }
 
     sealed class AttachmentAction {

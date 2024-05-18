@@ -416,7 +416,7 @@ class DebugMenuViewModel(
 
         val leftFile = FileDescriptor(
             fsAuthority = fsAuthority,
-            path = "/demo.kdbx",
+            path = "/examples/demo.kdbx",
             uid = "demo",
             name = "demo.kdbx",
             isDirectory = false,
@@ -425,9 +425,9 @@ class DebugMenuViewModel(
 
         val rightFile = FileDescriptor(
             fsAuthority = fsAuthority,
-            path = "/demo-modified.kdbx",
-            uid = "demo-modified",
-            name = "demo.kdbx",
+            path = "/examples/test-history.kdbx",
+            uid = "test-history",
+            name = "test-history.kdbx",
             isDirectory = false,
             isRoot = false
         )

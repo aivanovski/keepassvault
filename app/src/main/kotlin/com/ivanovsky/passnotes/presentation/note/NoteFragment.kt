@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
@@ -21,6 +22,8 @@ import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialogArgs
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.openUrl
@@ -33,7 +36,6 @@ import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel.AttachmentAction
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel.NoteMenuItem
-import com.ivanovsky.passnotes.presentation.note.NoteViewModel.PropertyAction
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.IntentUtils
@@ -89,26 +91,32 @@ class NoteFragment : BaseFragment() {
                 viewModel.navigateBack()
                 true
             }
+
             R.id.menu_lock -> {
                 viewModel.onLockButtonClicked()
                 true
             }
+
             R.id.menu_search -> {
                 viewModel.onSearchButtonClicked()
                 true
             }
+
             R.id.menu_settings -> {
                 viewModel.onSettingsButtonClicked()
                 true
             }
+
             R.id.menu_select -> {
                 viewModel.onSelectButtonClicked()
                 true
             }
+
             R.id.menu_toggle_hidden -> {
                 viewModel.onToggleHiddenClicked()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -188,8 +196,8 @@ class NoteFragment : BaseFragment() {
                 )
             )
         }
-        viewModel.showPropertyActionDialog.observe(viewLifecycleOwner) { actions ->
-            showPropertyActionDialog(actions)
+        viewModel.showPropertyActionDialog.observe(viewLifecycleOwner) { property ->
+            showPropertyActionDialog(property)
         }
         viewModel.openUrlEvent.observe(viewLifecycleOwner) { url ->
             openUrl(url)
@@ -213,26 +221,17 @@ class NoteFragment : BaseFragment() {
         dialog.show(childFragmentManager, ConfirmationDialog.TAG)
     }
 
-    private fun showPropertyActionDialog(actions: List<PropertyAction>) {
-        val entries = actions.map { action ->
-            when (action) {
-                is PropertyAction.CopyText -> {
-                    getString(R.string.copy_with_str, "'${action.title}'")
-                }
-                is PropertyAction.OpenUrl -> {
-                    getString(R.string.open_with_str, action.url)
+    private fun showPropertyActionDialog(property: Property) {
+        val dialog = PropertyActionDialog.newInstance(
+            args = PropertyActionDialogArgs(property)
+        )
+            .apply {
+                onActionClicked = { action ->
+                    viewModel.onPropertyActionClicked(action)
                 }
             }
-        }
 
-        val dialog = ChooseOptionDialog.newInstance(
-            title = null,
-            entries = entries
-        ).apply {
-            onItemClickListener = { idx -> viewModel.onPropertyActionClicked(actions[idx]) }
-        }
-
-        dialog.show(childFragmentManager, ChooseOptionDialog.TAG)
+        dialog.show(childFragmentManager, PropertyActionDialog.TAG)
     }
 
     private fun shareFile(file: File) {
@@ -272,9 +271,11 @@ class NoteFragment : BaseFragment() {
                     is AttachmentAction.OpenFile -> {
                         openFile(action.file)
                     }
+
                     is AttachmentAction.OpenAsText -> {
                         openAsText(action.file)
                     }
+
                     is AttachmentAction.ShareFile -> {
                         shareFile(action.file)
                     }

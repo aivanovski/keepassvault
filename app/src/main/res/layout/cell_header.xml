@@ -11,17 +11,86 @@
             type="com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel" />
     </data>
 
-    <TextView
-        style="@style/Material.ListItem.PrimaryText.SingleLine"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:paddingVertical="@dimen/half_group_margin"
-        android:paddingStart="@{viewModel.paddingHorizontal}"
-        android:paddingEnd="@{viewModel.paddingHorizontal}"
-        android:text="@{viewModel.model.title}"
-        android:textColor="@{viewModel.model.color}"
-        app:isBold="@{viewModel.model.bold}"
-        tools:text="Header" />
+        android:layout_height="wrap_content">
+
+        <com.ivanovsky.passnotes.presentation.core.widget.SpaceView
+            android:id="@+id/spaceStart"
+            widthInPixels="@{viewModel.paddingHorizontal}"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_width="@dimen/element_margin" />
+
+        <com.ivanovsky.passnotes.presentation.core.widget.SpaceView
+            android:id="@+id/spaceEnd"
+            widthInPixels="@{viewModel.paddingHorizontal}"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_width="@dimen/element_margin" />
+
+        <View
+            android:id="@+id/clickableArea"
+            style="@style/Material.Layout.Selectable"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clickable="@{viewModel.model.isClickable}"
+            android:onClick="@{() -> viewModel.onClicked()}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/decription"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/title"
+            style="@style/Material.ListItem.PrimaryText.SingleLine"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingVertical="@dimen/half_group_margin"
+            android:text="@{viewModel.model.title}"
+            android:textColor="@{viewModel.model.color}"
+            app:isBold="@{viewModel.model.isBold}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/decription"
+            app:layout_constraintStart_toEndOf="@id/spaceStart"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Header" />
+
+        <TextView
+            android:id="@+id/decription"
+            style="@style/Material.ListItem.PrimaryText.SingleLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/element_margin"
+            android:text="@{viewModel.model.description}"
+            android:textColor="@{viewModel.model.color}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/decriptionIcon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:visible="@{viewModel.model.isDescriptionVisible}"
+            tools:text="Previous versions"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/decriptionIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:imageResourceId="@{viewModel.model.descriptionIconResId}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/spaceEnd"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?attr/kpIconPrimaryColor"
+            app:visible="@{viewModel.model.isDescriptionVisible}"
+            tools:src="@drawable/ic_chevron_right_24dp"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

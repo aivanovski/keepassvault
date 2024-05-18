@@ -9,16 +9,34 @@ class SpaceView(
     attrs: AttributeSet
 ) : View(context, attrs) {
 
-    var heightInPixels: Int = 0
+    var heightInPixels: Int? = null
+        set(value) {
+            field = value
+            requestLayout()
+        }
+
+    var widthInPixels: Int? = null
         set(value) {
             field = value
             requestLayout()
         }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(
-            widthMeasureSpec,
+        val widthInPixels = widthInPixels
+        val heightInPixels = heightInPixels
+
+        val widthSpec = if (widthInPixels != null) {
+            MeasureSpec.makeMeasureSpec(widthInPixels, MeasureSpec.EXACTLY)
+        } else {
+            widthMeasureSpec
+        }
+
+        val heightSpec = if (heightInPixels != null) {
             MeasureSpec.makeMeasureSpec(heightInPixels, MeasureSpec.EXACTLY)
-        )
+        } else {
+            heightMeasureSpec
+        }
+
+        super.onMeasure(widthSpec, heightSpec)
     }
 }

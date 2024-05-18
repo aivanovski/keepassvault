@@ -10,7 +10,9 @@ import app.keemobile.kotpass.models.Group as RawGroup
 import app.keemobile.kotpass.models.Meta
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INVALID_KEY_FILE
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INVALID_PASSWORD
@@ -84,7 +86,8 @@ class KotpassDatabase(
             val rawDatabase = getRawDatabase()
 
             val config = MutableEncryptedDatabaseConfig(
-                isRecycleBinEnabled = rawDatabase.content.meta.recycleBinEnabled
+                isRecycleBinEnabled = rawDatabase.content.meta.recycleBinEnabled,
+                maxHistoryItems = rawDatabase.content.meta.historyMaxItems
             )
 
             OperationResult.success(config)
@@ -219,6 +222,23 @@ class KotpassDatabase(
             ?: return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP))
 
         return OperationResult.success(parentGroup)
+    }
+
+    fun getRawEntryAndGroupByUid(noteUid: UUID): OperationResult<Pair<RawGroup, Entry>> {
+        val result = database.get().content.group.findChildEntry { entry ->
+            entry.uuid == noteUid
+        }
+            ?: return OperationResult.error(
+                newDbError(
+                    String.format(
+                        GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
+                        Note::class.simpleName,
+                        noteUid
+                    )
+                )
+            )
+
+        return OperationResult.success(result)
     }
 
     fun getRawChildGroups(root: RawGroup): List<RawGroup> {

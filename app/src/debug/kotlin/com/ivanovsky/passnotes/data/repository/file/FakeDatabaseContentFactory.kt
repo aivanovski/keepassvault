@@ -123,6 +123,18 @@ object FakeDatabaseContentFactory {
             .toByteArray()
     }
 
+    fun createDatabaseWithHistoryData(): ByteArray {
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                entry(ENTRY_APPLE.copy(history = APPLE_HISTORY))
+                entry(ENTRY_READ_LIST.copy(history = READ_LIST_HISTORY))
+                entry(ENTRY_MICROSOFT.copy(history = MICROSOFT_HISTORY))
+            }
+            .build()
+            .toByteArray()
+    }
+
     private fun newEntry(
         created: Long,
         modified: Long,
@@ -235,8 +247,9 @@ object FakeDatabaseContentFactory {
         username = "john.doe@example.com",
         password = "abc123",
         url = "https://apple.com",
-        created = parseDate("2020-01-04"),
-        modified = parseDate("2020-01-04")
+        notes = "My personal Apple account",
+        created = parseDateAndTime("2020-01-01 12:55:00"),
+        modified = parseDateAndTime("2020-01-10 11:08:00")
     )
 
     private val ENTRY_MICROSOFT = newEntry(
@@ -244,8 +257,8 @@ object FakeDatabaseContentFactory {
         username = "john.doe@example.com",
         password = "abc123",
         url = "https://microsoft.com",
-        created = parseDate("2020-01-05"),
-        modified = parseDate("2020-01-05")
+        created = parseDate("2020-01-01"),
+        modified = parseDate("2020-01-10")
     )
 
     private val ENTRY_MICROSOFT_MODIFIED = newEntry(
@@ -342,5 +355,107 @@ object FakeDatabaseContentFactory {
         created = parseDate("2020-01-04"),
         modified = parseDate("2020-01-04"),
         expires = parseDate("2020-01-05")
+    )
+
+    private val MICROSOFT_HISTORY = listOf(
+        ENTRY_MICROSOFT.copy(
+            fields = ENTRY_MICROSOFT.fields.plus(
+                PropertyType.PASSWORD.propertyName to "123"
+            ),
+            modified = parseDateAndTime("2020-01-01 10:04:00").toInstant()
+        ),
+        ENTRY_MICROSOFT.copy(
+            fields = ENTRY_MICROSOFT.fields.plus(
+                PropertyType.PASSWORD.propertyName to "123456"
+            ),
+            modified = parseDateAndTime("2020-01-02 11:12:00").toInstant()
+        ),
+        ENTRY_MICROSOFT.copy(
+            fields = ENTRY_MICROSOFT.fields.plus(
+                PropertyType.PASSWORD.propertyName to "qwerty"
+            ),
+            modified = parseDateAndTime("2020-01-03 12:56:00").toInstant()
+        ),
+        ENTRY_MICROSOFT.copy(
+            fields = ENTRY_MICROSOFT.fields.plus(
+                PropertyType.PASSWORD.propertyName to "abc111"
+            ),
+            modified = parseDateAndTime("2020-01-04 9:44:00").toInstant()
+        ),
+        ENTRY_MICROSOFT.copy(
+            modified = parseDateAndTime("2020-01-05 17:26:00").toInstant()
+        )
+    )
+
+    private val APPLE_HISTORY = listOf(
+        ENTRY_APPLE.copy(
+            fields = ENTRY_APPLE.fields.plus(
+                PropertyType.PASSWORD.propertyName to "abc",
+                PropertyType.URL.propertyName to "apple.com",
+                PropertyType.NOTES.propertyName to "My personal Apple account",
+                "AppleID" to "john.doe"
+            ),
+            modified = parseDateAndTime("2020-01-01 10:09:00").toInstant()
+        ),
+        ENTRY_APPLE.copy(
+            fields = ENTRY_APPLE.fields.plus(
+                PropertyType.PASSWORD.propertyName to "abc",
+                PropertyType.URL.propertyName to "https://apple.com",
+                PropertyType.NOTES.propertyName to "My personal Apple account",
+                PropertyType.OTP.propertyName to TOTP_URL
+            ),
+            modified = parseDateAndTime("2020-01-02 14:35:00").toInstant()
+        ),
+        ENTRY_APPLE.copy(
+            fields = ENTRY_APPLE.fields.plus(
+                PropertyType.PASSWORD.propertyName to "abc",
+                PropertyType.URL.propertyName to "https://apple.com",
+                PropertyType.NOTES.propertyName to "My personal Apple account"
+            ),
+            modified = parseDateAndTime("2020-01-03 18:44:00").toInstant()
+        )
+    )
+
+    private val ENTRY_READ_LIST = newEntry(
+        title = "My reading list",
+        notes = "The list of I've read and books I want to read",
+        created = parseDate("2020-01-01"),
+        modified = parseDate("2020-01-30"),
+        custom = mapOf(
+            "J.K. Rowling" to "Harry Potter and the Sorcerers Stone",
+            "Orwell" to "1984",
+            "J.R.R. Tolkien" to "The Lord of the Rings",
+            "F. Scott Fitzgerald" to "The Great Gatsby; The Side of Paradise",
+            "Aldous Huxley" to "Brave New World"
+        )
+    )
+
+    private val READ_LIST_HISTORY = listOf(
+        ENTRY_READ_LIST.copy(
+            fields = ENTRY_READ_LIST.fields.plus(
+                "J.K. Rowling" to "Harry Potter and the Sorcer Stone",
+                "George Orwell" to "1984",
+                "Harper Lee" to "To Kill a Mockingbird"
+            ),
+            modified = parseDate("2020-01-01").toInstant()
+        ),
+        ENTRY_READ_LIST.copy(
+            fields = ENTRY_READ_LIST.fields.plus(
+                "J.K. Rowling" to "Harry Potter and the Sorcerers Stone",
+                "George Orwell" to "1984",
+                "J.R.R. Tolkien" to "The Lord of the Rings",
+                "F. Scott Fitzgerald" to "The Great Gatsby"
+            ),
+            modified = parseDate("2020-01-02").toInstant()
+        ),
+        ENTRY_READ_LIST.copy(
+            fields = ENTRY_READ_LIST.fields.plus(
+                "J.K. Rowling" to "Harry Potter and the Sorcerers Stone",
+                "George Orwell" to "1984",
+                "J.R.R. Tolkien" to "The Lord of the Rings",
+                "F. Scott Fitzgerald" to "The Great Gatsby; The Side of Paradise"
+            ),
+            modified = parseDate("2020-01-03").toInstant()
+        )
     )
 }

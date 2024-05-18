@@ -210,6 +210,13 @@
     <string name="created">Created</string>
     <string name="expires">Expires</string>
     <string name="expiration">Expiration</string>
+    <string name="history">History</string>
+
+    <!-- History screen -->
+    <string name="added">Added</string>
+    <string name="deleted">Deleted</string>
+    <string name="changed">Changed</string>
+    <string name="history_event_property_updated">\'%s\' changed to \'%s\'</string>
 
     <!-- Note editor screen -->
     <string name="new_note">New note</string>

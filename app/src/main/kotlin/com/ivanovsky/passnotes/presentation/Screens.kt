@@ -15,6 +15,8 @@ import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorFragment
 import com.ivanovsky.passnotes.presentation.groups.GroupsFragment
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
+import com.ivanovsky.passnotes.presentation.history.HistoryFragment
+import com.ivanovsky.passnotes.presentation.history.HistoryScreenArgs
 import com.ivanovsky.passnotes.presentation.newdb.NewDatabaseFragment
 import com.ivanovsky.passnotes.presentation.note.NoteFragment
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
@@ -133,6 +135,13 @@ object Screens {
         companion object {
             val RESULT_KEY = EnterDbCredentialsScreen::class.simpleName + "_result"
         }
+    }
+
+    class HistoryScreen(
+        private val args: HistoryScreenArgs
+    ) : FragmentScreen {
+        override fun createFragment(factory: FragmentFactory) =
+            HistoryFragment.newInstance(args)
     }
 
     // Settings

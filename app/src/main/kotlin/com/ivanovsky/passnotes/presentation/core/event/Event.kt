@@ -12,6 +12,10 @@ class Event : LinkedHashMap<String, Any>() {
         return this[key] as? Int
     }
 
+    fun key(): String? {
+        return this.keys.firstOrNull()
+    }
+
     companion object {
 
         fun Pair<String, Any?>.toEvent(): Event {

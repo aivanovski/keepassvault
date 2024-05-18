@@ -62,6 +62,7 @@ class NoteEditorCellViewModelFactory(
             )
             is HeaderCellModel -> HeaderCellViewModel(
                 model,
+                eventProvider,
                 resourceProvider
             )
             is ExpirationCellModel -> ExpirationCellViewModel(

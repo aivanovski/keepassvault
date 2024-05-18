@@ -16,6 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="@dimen/element_margin"
-        app:onItemClick="@{(index) -> viewModel.onItemClicked(index)}" />
+        app:onItemClick="@{(index) -> viewModel.onItemClicked(index)}"
+        app:visible="@{viewModel.isVisible}" />
 
 </layout>

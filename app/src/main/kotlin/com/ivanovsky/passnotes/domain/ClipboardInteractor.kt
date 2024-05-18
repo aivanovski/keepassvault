@@ -10,6 +10,7 @@ import android.os.Looper
 import android.os.Message
 import android.os.PersistableBundle
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
+import java.time.Duration
 import java.util.concurrent.atomic.AtomicBoolean
 
 class ClipboardInteractor(context: Context) {
@@ -22,6 +23,14 @@ class ClipboardInteractor(context: Context) {
         clearHandler.removeMessages(ClipboardClearHandler.MESSAGE_CLEAR)
         clipboard.setPrimaryClip(createClipData(text, isProtected))
         isDirty.set(true)
+    }
+
+    fun copyWithTimeout(text: String, isProtected: Boolean, timeout: Duration) {
+        copyWithTimeout(
+            text = text,
+            isProtected = isProtected,
+            timeoutInMillis = timeout.toMillis()
+        )
     }
 
     fun copyWithTimeout(text: String, isProtected: Boolean, timeoutInMillis: Long) {

@@ -28,6 +28,7 @@ import com.ivanovsky.passnotes.extensions.matches
 import com.ivanovsky.passnotes.extensions.toByteString
 import java.util.UUID
 import kotlin.concurrent.withLock
+import kotlin.math.max
 
 class KotpassNoteDao(
     private val db: KotpassDatabase
@@ -136,7 +137,7 @@ class KotpassNoteDao(
                 note.copy(uid = uid)
             }
 
-            contentWatcher.notifyEntriesInserted(newNotes)
+            watcher.notifyEntriesInserted(newNotes)
 
             commitResult ?: OperationResult.success(true)
         } else {
@@ -163,27 +164,45 @@ class KotpassNoteDao(
         val oldNote = getOldNoteResult.obj
 
         val result = db.lock.withLock {
-            val isInTheSameGroup = (newNote.groupUid == oldNote.groupUid)
-
-            val getOldGroupResult = db.getRawGroupByUid(oldNote.groupUid)
-            if (getOldGroupResult.isFailed) {
-                return@withLock getOldGroupResult.mapError()
+            val getOldEntryAndGroupResult = db.getRawEntryAndGroupByUid(noteUid)
+            if (getOldEntryAndGroupResult.isFailed) {
+                return@withLock getOldEntryAndGroupResult.takeError()
             }
 
-            val oldGroup = getOldGroupResult.obj
-            val newEntry = newNote.convertToEntry()
+            val (oldRawGroup, oldRawEntry) = getOldEntryAndGroupResult.getOrThrow()
 
-            val oldEntryIdx = oldGroup.entries.indexOfFirst { it.uuid == noteUid }
+            val isInTheSameGroup = (newNote.groupUid == oldNote.groupUid)
+
+            val getConfigResult = db.config
+            if (getConfigResult.isFailed) {
+                return@withLock getConfigResult.mapError()
+            }
+
+            val config = getConfigResult.getOrThrow()
+            val newHistory = if (config.maxHistoryItems > 0) {
+                val excessiveHistoryItems = max(
+                    0,
+                    oldRawEntry.history.size + 1 - config.maxHistoryItems
+                )
+
+                oldRawEntry.history
+                    .drop(excessiveHistoryItems)
+                    .toMutableList()
+                    .apply {
+                        add(oldRawEntry)
+                    }
+            } else {
+                emptyList()
+            }
+
+            val newEntry = newNote.convertToEntry(history = newHistory)
+
+            val oldEntryIdx = oldRawGroup.entries.indexOfFirst { it.uuid == noteUid }
             if (oldEntryIdx == -1) {
                 return@withLock OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE))
             }
 
             var newDb = db.getRawDatabase()
-
-            val getAllNotes = all
-            if (getAllNotes.isFailed) {
-                return@withLock getAllNotes.mapError()
-            }
 
             val attachmentsDiff = differ.getAttachmentsDiff(oldNote, newNote)
             if (attachmentsDiff.isNotEmpty()) {
@@ -252,7 +271,7 @@ class KotpassNoteDao(
         }
 
         if (result.isSucceededOrDeferred) {
-            contentWatcher.notifyEntryChanged(oldNote, newNote)
+            watcher.notifyEntryChanged(oldNote, newNote)
         }
 
         return result
@@ -310,7 +329,7 @@ class KotpassNoteDao(
 
         if (result.isSucceededOrDeferred) {
             val note = result.obj
-            contentWatcher.notifyEntryRemoved(note)
+            watcher.notifyEntryRemoved(note)
         }
 
         return result.mapWithObject(true)
@@ -318,7 +337,7 @@ class KotpassNoteDao(
 
     override fun find(query: String): OperationResult<List<Note>> {
         return db.lock.withLock {
-            val allNotesResult = all
+            val allNotesResult = getAll()
             if (allNotesResult.isFailed) {
                 return@withLock allNotesResult.mapError()
             }
@@ -375,7 +394,7 @@ class KotpassNoteDao(
         }
 
         if (notifyWatcher && result.isSucceededOrDeferred) {
-            contentWatcher.notifyEntryInserted(newNote)
+            watcher.notifyEntryInserted(newNote)
         }
 
         return result
@@ -425,6 +444,27 @@ class KotpassNoteDao(
             }
 
             binaryMap
+        }
+    }
+
+    override fun getHistory(uid: UUID): OperationResult<List<Note>> {
+        return db.lock.withLock {
+            val getEntryAndGroupResult = db.getRawEntryAndGroupByUid(uid)
+            if (getEntryAndGroupResult.isFailed) {
+                return@withLock getEntryAndGroupResult.mapError()
+            }
+
+            val (group, entry) = getEntryAndGroupResult.getOrThrow()
+
+            val history = entry.history
+                .map { historyEntry ->
+                    historyEntry.convertToNote(
+                        groupUid = group.uuid,
+                        allBinaries = db.getRawDatabase().binaries
+                    )
+                }
+
+            OperationResult.success(history)
         }
     }
 }

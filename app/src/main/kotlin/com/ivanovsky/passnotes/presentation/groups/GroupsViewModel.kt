@@ -82,6 +82,7 @@ import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFa
 import com.ivanovsky.passnotes.presentation.groups.model.CellsData
 import com.ivanovsky.passnotes.presentation.groups.model.NavigationStackItem
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
+import com.ivanovsky.passnotes.presentation.note.NoteSource
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorMode
 import com.ivanovsky.passnotes.presentation.storagelist.Action
@@ -136,7 +137,8 @@ class GroupsViewModel(
 
     val navigationPanelViewModel = NavigationPanelCellViewModel(
         initModel = NavigationPanelCellModel(
-            items = emptyList()
+            items = emptyList(),
+            isVisible = false
         ),
         eventProvider = eventProvider
     )
@@ -840,8 +842,9 @@ class GroupsViewModel(
             NoteScreen(
                 NoteScreenArgs(
                     appMode = args.appMode,
-                    noteUid = noteUid,
-                    autofillStructure = args.autofillStructure
+                    noteSource = NoteSource.ByUid(noteUid),
+                    autofillStructure = args.autofillStructure,
+                    isViewOnly = false
                 )
             )
         )
@@ -1143,7 +1146,8 @@ class GroupsViewModel(
 
         navigationPanelViewModel.setModel(
             NavigationPanelCellModel(
-                items = items
+                items = items,
+                isVisible = true
             )
         )
 

@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.core.compose
 
+import android.graphics.Typeface.MONOSPACE
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.padding
@@ -17,11 +18,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.Typeface
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.sp
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.compose.model.InputType
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -136,26 +138,59 @@ fun PrimaryTextStyle(
     color: Color = AppTheme.theme.colors.primaryText
 ): TextStyle {
     return TextStyle(
-        fontSize = dimensionResource(id = R.dimen.material_primary_text_size).value.sp,
+        fontSize = AppTheme.theme.textMetrics.primary,
         fontWeight = FontWeight.Normal,
         color = color
     )
 }
 
 @Composable
-fun SecondaryTextStyle(): TextStyle {
+fun SecondaryTextStyle(
+    color: Color = AppTheme.theme.colors.secondaryText
+): TextStyle {
     return TextStyle(
-        fontSize = dimensionResource(id = R.dimen.material_secondary_text_size).value.sp,
+        fontSize = AppTheme.theme.textMetrics.primary,
         fontWeight = FontWeight.Normal,
-        color = AppTheme.theme.colors.secondaryText
+        color = color
+    )
+}
+
+@Composable
+fun PrimaryMonospaceTextStyle(
+    color: Color = AppTheme.theme.colors.primaryText
+): TextStyle {
+    return TextStyle(
+        fontSize = AppTheme.theme.textMetrics.primary,
+        color = color,
+        fontFamily = FontFamily(Typeface(MONOSPACE))
+    )
+}
+
+@Composable
+fun SecondaryMonospaceTextStyle(
+    color: Color = AppTheme.theme.colors.secondaryText
+): TextStyle {
+    return TextStyle(
+        fontSize = AppTheme.theme.textMetrics.secondary,
+        color = color,
+        fontFamily = FontFamily(Typeface(MONOSPACE))
     )
 }
 
 @Composable
 fun HeaderTextStyle(): TextStyle {
     return TextStyle(
-        fontSize = dimensionResource(id = R.dimen.material_header_text_size).value.sp,
+        fontSize = AppTheme.theme.textMetrics.header,
         fontWeight = FontWeight.Bold,
         color = AppTheme.theme.colors.primaryText
+    )
+}
+
+@Composable
+fun ErrorTextStyle(): TextStyle {
+    return TextStyle(
+        fontSize = AppTheme.theme.textMetrics.header,
+        fontWeight = FontWeight.Bold,
+        color = AppTheme.theme.colors.errorText
     )
 }

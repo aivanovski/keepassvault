@@ -39,4 +39,7 @@ public interface NoteDao {
 
     @NonNull
     ContentWatcher<Note> getContentWatcher();
+
+    @NonNull
+    OperationResult<List<Note>> getHistory(@NonNull UUID noteUid);
 }

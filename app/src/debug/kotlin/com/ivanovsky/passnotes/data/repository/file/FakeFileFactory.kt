@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithCombinedKey
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithExpiredData
+import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithHistoryData
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithKeyFile
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithOtpData
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createKeyFileData
@@ -105,6 +106,13 @@ class FakeFileFactory(
                 remoteContentFactory = { createDatabaseWithExpiredData() }
             ),
 
+            newEntry(
+                localFile = newFile(Path.HISTORY, Time.NO_CHANGES),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createDatabaseWithHistoryData() },
+                remoteContentFactory = { createDatabaseWithHistoryData() }
+            ),
+
             // conflicts
             newEntry(
                 localFile = newFile(Path.CONFLICT, Time.REMOTE),
@@ -180,43 +188,6 @@ class FakeFileFactory(
         )
     }
 
-    fun createConflictLocalFile(): FileDescriptor {
-        return create(fsAuthority, FileUid.CONFLICT, Time.LOCAL)
-    }
-
-    fun createConflictRemoteFile(): FileDescriptor {
-        return create(fsAuthority, FileUid.CONFLICT, Time.REMOTE)
-    }
-
-    private fun create(
-        fsAuthority: FSAuthority,
-        uid: String,
-        modified: Long
-    ): FileDescriptor {
-        val path = pathFromUid(uid)
-
-        return FileDescriptor(
-            fsAuthority = fsAuthority,
-            path = path,
-            uid = uid,
-            name = FileUtils.getFileNameFromPath(path),
-            isDirectory = (uid == FileUid.ROOT),
-            isRoot = (uid == FileUid.ROOT),
-            modified = modified
-        )
-    }
-
-    private fun pathFromUid(uid: String): String {
-        return when {
-            uid == FileUid.ROOT -> "/"
-            uid == FileUid.AUTO_TESTS -> "/automation.kdbx"
-            uid == FileUid.DEMO -> "/demo.kdbx"
-            uid == FileUid.DEMO_MODIFIED -> "/demo-modified.kdbx"
-            uid in FileUid.DEFAULT_UIDS -> "/test-$uid.kdbx"
-            else -> uid
-        }
-    }
-
     object FileUid {
         const val NO_CHANGES = "no-changes"
         const val ROOT = "/"
@@ -231,22 +202,6 @@ class FakeFileFactory(
         const val DEMO = "demo"
         const val DEMO_MODIFIED = "demo-modified"
         const val OTP = "otp"
-
-        val DEFAULT_UIDS = listOf(
-            NO_CHANGES,
-            ROOT,
-            REMOTE_CHANGES,
-            LOCAL_CHANGES,
-            LOCAL_CHANGES_TIMEOUT,
-            CONFLICT,
-            AUTH_ERROR,
-            NOT_FOUND,
-            ERROR,
-            AUTO_TESTS,
-            DEMO,
-            DEMO_MODIFIED,
-            OTP
-        )
     }
 
     object Path {
@@ -265,6 +220,7 @@ class FakeFileFactory(
         val KEY_UNLOCK = "/examples/key-unlock.kdbx"
         val KEY_PASSWORD_UNLOCK = "/examples/key-and-password-unlock.kdbx"
         val EXPIRATIONS = "/examples/test-expirations.kdbx"
+        val HISTORY = "/examples/test-history.kdbx"
 
         // conflicts
         val CONFLICT = "/conflicts/test-conflict.kdbx"

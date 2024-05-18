@@ -25,6 +25,7 @@ import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.diff.GetDiffUseCase
+import com.ivanovsky.passnotes.domain.usecases.history.GetHistoryUseCase
 import com.ivanovsky.passnotes.domain.usecases.test.GetTestCredentialsUseCase
 import com.ivanovsky.passnotes.domain.usecases.test.GetTestPasswordUseCase
 import org.koin.dsl.module
@@ -60,5 +61,6 @@ object UseCaseModule {
             single { SearchUseCases(get(), get(), get(), get()) }
             single { FindParentGroupsUseCase(get(), get()) }
             single { GetDiffUseCase(get()) }
+            single { GetHistoryUseCase(get(), get()) }
         }
 }

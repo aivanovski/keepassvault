@@ -195,7 +195,9 @@ fun Property.convertToEntryValue(): EntryValue {
     }
 }
 
-fun Note.convertToEntry(): RawEntry {
+fun Note.convertToEntry(
+    history: List<RawEntry> = emptyList()
+): RawEntry {
     val fields = properties.associate { property ->
         val name = if (property.type != null) {
             property.type.propertyName
@@ -225,7 +227,8 @@ fun Note.convertToEntry(): RawEntry {
             expiryTime = expiryTime,
             expires = (expiryTime != null)
         ),
-        binaries = binaries
+        binaries = binaries,
+        history = history
     )
 }
 

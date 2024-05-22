@@ -144,7 +144,7 @@ class FakeFileFactory(
                 syncStatus = SyncStatus.NO_CHANGES,
                 localContentFactory = REMOTE_CONTENT_FACTORY,
                 remoteContentFactory = REMOTE_CONTENT_FACTORY
-            ),
+            )
         )
     }
 

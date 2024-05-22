@@ -28,7 +28,9 @@ object FakeDatabaseContentFactory {
                     group(GROUP_GAMING) {
                         entry(ENTRY_STADIA)
                     }
-                    group(GROUP_SHOPPING)
+                    group(GROUP_SHOPPING) {
+                        entry(ENTRY_AMAZON)
+                    }
                     group(GROUP_SOCIAL)
 
                     entry(ENTRY_GOOGLE)
@@ -67,7 +69,6 @@ object FakeDatabaseContentFactory {
                 }
                 entry(ENTRY_NAS_LOGIN)
                 entry(ENTRY_LAPTOP_LOGIN)
-                entry(ENTRY_MAC_BOOK_LOGIN)
             }
             .build()
             .toByteArray()
@@ -321,7 +322,8 @@ object FakeDatabaseContentFactory {
         modified = parseDate("2020-01-09"),
         expires = parseDate("2030-01-10"),
         custom = mapOf(
-            PropertyType.URL.propertyName to "https://amazon.com"
+            PropertyType.URL.propertyName to "https://amazon.com",
+            PropertyType.OTP.propertyName to TOTP_URL
         )
     )
 

@@ -24,6 +24,7 @@ class FakeFileFactory(
             newEntry(newDirectory("/errors", Time.ROOT)),
             newEntry(newDirectory("/examples", Time.ROOT)),
             newEntry(newDirectory("/keys", Time.ROOT)),
+            newEntry(newDirectory("/demo", Time.ROOT)),
 
             newEntry(
                 localFile = newFile(Path.NO_CHANGES, Time.NO_CHANGES),
@@ -128,7 +129,22 @@ class FakeFileFactory(
                 syncStatus = SyncStatus.NO_CHANGES,
                 localContentFactory = { createKeyFileData() },
                 remoteContentFactory = { createKeyFileData() }
-            )
+            ),
+
+            // demo
+            newEntry(
+                localFile = newFile(Path.PASSWORDS, Time.LOCAL),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = LOCAL_CONTENT_FACTORY,
+                remoteContentFactory = LOCAL_CONTENT_FACTORY
+            ),
+
+            newEntry(
+                localFile = newFile(Path.PASSWORDS_MODIFID, Time.REMOTE),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = REMOTE_CONTENT_FACTORY,
+                remoteContentFactory = REMOTE_CONTENT_FACTORY
+            ),
         )
     }
 
@@ -189,19 +205,7 @@ class FakeFileFactory(
     }
 
     object FileUid {
-        const val NO_CHANGES = "no-changes"
-        const val ROOT = "/"
-        const val REMOTE_CHANGES = "remote-changes"
-        const val LOCAL_CHANGES = "local-changes"
-        const val LOCAL_CHANGES_TIMEOUT = "local-changes-timeout"
         const val CONFLICT = "conflict"
-        const val AUTH_ERROR = "auth-error"
-        const val NOT_FOUND = "not-found"
-        const val ERROR = "error"
-        const val AUTO_TESTS = "auto-tests"
-        const val DEMO = "demo"
-        const val DEMO_MODIFIED = "demo-modified"
-        const val OTP = "otp"
     }
 
     object Path {
@@ -227,6 +231,10 @@ class FakeFileFactory(
 
         // keys
         val KEY = "/keys/key"
+
+        // demo
+        val PASSWORDS = "/demo/passwords.kdbx"
+        val PASSWORDS_MODIFID = "/demo/passwords-modified.kdbx"
     }
 
     private object Time {

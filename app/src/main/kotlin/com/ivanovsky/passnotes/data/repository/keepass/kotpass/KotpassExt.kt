@@ -87,7 +87,6 @@ fun RawEntry.convertToNote(
     allBinaries: Map<ByteString, BinaryData>
 ): Note {
     val properties = mutableListOf<Property>()
-    val attachments = mutableListOf<Attachment>()
 
     for (field in fields.entries) {
         val type = determinePropertyType(field.key, field.value.content)
@@ -102,17 +101,8 @@ fun RawEntry.convertToNote(
         )
     }
 
-    for (binary in binaries) {
-        val data = allBinaries[binary.hash] ?: continue
-
-        attachments.add(
-            Attachment(
-                uid = binary.hash.base64(),
-                name = binary.name,
-                hash = Hash(binary.hash.toByteArray(), HashType.SHA_256),
-                data = data.getContent()
-            )
-        )
+    val attachments = binaries.mapNotNull { binary ->
+        binary.toAttachment(allBinaries = allBinaries)
     }
 
     val title = PropertyFilter.filterTitle(properties)?.value ?: EMPTY
@@ -127,6 +117,19 @@ fun RawEntry.convertToNote(
         title = title,
         properties = properties,
         attachments = attachments
+    )
+}
+
+fun BinaryReference.toAttachment(
+    allBinaries: Map<ByteString, BinaryData>
+): Attachment? {
+    val data = allBinaries[hash] ?: return null
+
+    return Attachment(
+        uid = hash.base64(),
+        name = name,
+        hash = Hash(hash.toByteArray(), HashType.SHA_256),
+        data = data.getContent()
     )
 }
 

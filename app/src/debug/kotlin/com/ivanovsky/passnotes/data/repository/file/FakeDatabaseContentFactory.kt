@@ -1,9 +1,12 @@
 package com.ivanovsky.passnotes.data.repository.file
 
+import android.util.Base64
 import com.github.aivanovski.keepasstreebuilder.DatabaseBuilderDsl
 import com.github.aivanovski.keepasstreebuilder.Fields
 import com.github.aivanovski.keepasstreebuilder.converter.kotpass.KotpassDatabaseConverter
 import com.github.aivanovski.keepasstreebuilder.extensions.toByteArray
+import com.github.aivanovski.keepasstreebuilder.generator.EntityFactory.newBinaryFrom
+import com.github.aivanovski.keepasstreebuilder.model.Binary
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
 import com.github.aivanovski.keepasstreebuilder.model.EntryEntity
 import com.github.aivanovski.keepasstreebuilder.model.GroupEntity
@@ -136,6 +139,16 @@ object FakeDatabaseContentFactory {
             .toByteArray()
     }
 
+    fun createDatabaseWithAttachmentsData(): ByteArray {
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                entry(newEntryWithAttachments())
+            }
+            .build()
+            .toByteArray()
+    }
+
     private fun newEntry(
         created: Long,
         modified: Long,
@@ -146,7 +159,8 @@ object FakeDatabaseContentFactory {
         url: String = StringUtils.EMPTY,
         notes: String = StringUtils.EMPTY,
         custom: Map<String, String> = emptyMap(),
-        history: List<EntryEntity> = emptyList()
+        history: List<EntryEntity> = emptyList(),
+        attachments: List<Binary> = emptyList()
     ): EntryEntity {
         val defaultFields = mapOf(
             PropertyType.TITLE.propertyName to title,
@@ -166,7 +180,8 @@ object FakeDatabaseContentFactory {
                 null
             },
             fields = defaultFields.plus(custom),
-            history = history
+            history = history,
+            binaries = attachments
         )
     }
 
@@ -181,6 +196,24 @@ object FakeDatabaseContentFactory {
             )
         )
     }
+
+    private fun newEntryWithAttachments(): EntryEntity =
+        newEntry(
+            title = "Entry with Attachments",
+            notes = "There are some files attached",
+            created = parseDate("2020-01-01"),
+            modified = parseDate("2020-01-30"),
+            attachments = listOf(
+                newBinaryFrom(
+                    name = "text.txt",
+                    content = "Some dummy text content".toByteArray()
+                ),
+                newBinaryFrom(
+                    name = "image.png",
+                    content = Base64.decode(ENCODED_IMAGE, Base64.NO_WRAP)
+                )
+            )
+        )
 
     private const val DEFAULT_PASSWORD = "abc123"
     private const val DEFAULT_KEY_FILE_CONTENT = "abcdefg1235678"
@@ -203,12 +236,17 @@ object FakeDatabaseContentFactory {
     private val TOTP_URL = """
             otpauth://totp/Example:john.doe?secret=AAAABBBBCCCCDDDD&period=30
             &digits=6&issuer=Example&algorithm=SHA1
-    """.trimIndent()
+    """.trimIndent().replace("\n", "")
 
     private val HOTP_URL = """
             otpauth://hotp/Example:john.doe?secret=AAAABBBBCCCCDDDD&digits=6
             &issuer=Example&algorithm=SHA1&counter=1
-    """.trimIndent()
+    """.trimIndent().replace("\n", "")
+
+    private val ENCODED_IMAGE = """
+        iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAIAAAC0tAIdAAAAGElEQV
+        R4AWMgGax5dYcYRJTqUdWjqkkFAPGInVINlnHhAAAAAElFTkSuQmCC
+    """.trimIndent().replace("\n", "")
 
     private val ENTRY_NAS_LOGIN = newEntry(
         title = "NAS Login",

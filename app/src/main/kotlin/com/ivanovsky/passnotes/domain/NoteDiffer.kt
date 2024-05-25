@@ -37,18 +37,25 @@ class NoteDiffer {
     }
 
     fun getAttachmentsDiff(lhs: Note, rhs: Note): List<Pair<DiffAction, Attachment>> {
-        val lhsUids = lhs.attachments
+        return getAttachmentsDiff(lhs.attachments, rhs.attachments)
+    }
+
+    fun getAttachmentsDiff(
+        lhs: List<Attachment>,
+        rhs: List<Attachment>
+    ): List<Pair<DiffAction, Attachment>> {
+        val lhsUids = lhs
             .map { attachment -> attachment.uid }
             .let { uids -> LinkedList(uids) }
 
-        val lhsUidToAttachmentMap = lhs.attachments
+        val lhsUidToAttachmentMap = lhs
             .associateBy { attachment -> attachment.uid }
 
-        val rhsUids = rhs.attachments
+        val rhsUids = rhs
             .map { attachment -> attachment.uid }
             .toMutableList()
 
-        val rhsUidToAttachmentMap = rhs.attachments
+        val rhsUidToAttachmentMap = rhs
             .associateBy { attachment -> attachment.uid }
 
         val diff = mutableListOf<Pair<DiffAction, Attachment>>()

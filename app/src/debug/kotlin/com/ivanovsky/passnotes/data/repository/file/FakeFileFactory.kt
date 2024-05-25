@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.data.repository.file
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncStatus
+import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithAttachmentsData
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithCombinedKey
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithExpiredData
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithHistoryData
@@ -112,6 +113,13 @@ class FakeFileFactory(
                 syncStatus = SyncStatus.NO_CHANGES,
                 localContentFactory = { createDatabaseWithHistoryData() },
                 remoteContentFactory = { createDatabaseWithHistoryData() }
+            ),
+
+            newEntry(
+                localFile = newFile(Path.ATTACHMENTS, Time.NO_CHANGES),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createDatabaseWithAttachmentsData() },
+                remoteContentFactory = { createDatabaseWithAttachmentsData() }
             ),
 
             // conflicts
@@ -225,6 +233,7 @@ class FakeFileFactory(
         val KEY_PASSWORD_UNLOCK = "/examples/key-and-password-unlock.kdbx"
         val EXPIRATIONS = "/examples/test-expirations.kdbx"
         val HISTORY = "/examples/test-history.kdbx"
+        val ATTACHMENTS = "/examples/test-attachments.kdbx"
 
         // conflicts
         val CONFLICT = "/conflicts/test-conflict.kdbx"

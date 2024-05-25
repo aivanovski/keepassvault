@@ -6,6 +6,8 @@ import app.keemobile.kotpass.database.modifiers.binaries
 import app.keemobile.kotpass.database.modifiers.modifyBinaries
 import app.keemobile.kotpass.database.modifiers.modifyGroup
 import app.keemobile.kotpass.database.modifiers.removeEntry
+import app.keemobile.kotpass.models.BinaryData
+import app.keemobile.kotpass.models.Entry
 import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Hash
 import com.ivanovsky.passnotes.data.entity.HashType
@@ -29,6 +31,7 @@ import com.ivanovsky.passnotes.extensions.toByteString
 import java.util.UUID
 import kotlin.concurrent.withLock
 import kotlin.math.max
+import okio.ByteString
 
 class KotpassNoteDao(
     private val db: KotpassDatabase
@@ -173,28 +176,12 @@ class KotpassNoteDao(
 
             val isInTheSameGroup = (newNote.groupUid == oldNote.groupUid)
 
-            val getConfigResult = db.config
-            if (getConfigResult.isFailed) {
-                return@withLock getConfigResult.mapError()
+            val prepareHistoryResult = prepareEntryHistory(oldRawEntry)
+            if (prepareHistoryResult.isFailed) {
+                return@withLock prepareHistoryResult.mapError()
             }
 
-            val config = getConfigResult.getOrThrow()
-            val newHistory = if (config.maxHistoryItems > 0) {
-                val excessiveHistoryItems = max(
-                    0,
-                    oldRawEntry.history.size + 1 - config.maxHistoryItems
-                )
-
-                oldRawEntry.history
-                    .drop(excessiveHistoryItems)
-                    .toMutableList()
-                    .apply {
-                        add(oldRawEntry)
-                    }
-            } else {
-                emptyList()
-            }
-
+            val newHistory = prepareHistoryResult.getOrThrow()
             val newEntry = newNote.convertToEntry(history = newHistory)
 
             val oldEntryIdx = oldRawGroup.entries.indexOfFirst { it.uuid == noteUid }
@@ -204,26 +191,13 @@ class KotpassNoteDao(
 
             var newDb = db.getRawDatabase()
 
-            val attachmentsDiff = differ.getAttachmentsDiff(oldNote, newNote)
-            if (attachmentsDiff.isNotEmpty()) {
-                val toInsert = attachmentsDiff
-                    .mapNotNull { (action, attachment) ->
-                        if (action == DiffAction.INSERT) {
-                            attachment
-                        } else {
-                            null
-                        }
-                    }
+            val (toInsert, toRemove) = prepareAttachmentsDiff(
+                oldEntry = oldRawEntry,
+                newEntry = newEntry,
+                allBinaries = db.getRawDatabase().binaries
+            )
 
-                val toRemove = attachmentsDiff
-                    .mapNotNull { (action, attachment) ->
-                        if (action == DiffAction.REMOVE) {
-                            attachment
-                        } else {
-                            null
-                        }
-                    }
-
+            if (toInsert.isNotEmpty() || toRemove.isNotEmpty()) {
                 newDb = modifyBinaries(
                     noteUid = oldNote.uid,
                     toInsert = toInsert,
@@ -275,6 +249,83 @@ class KotpassNoteDao(
         }
 
         return result
+    }
+
+    private fun prepareEntryHistory(oldEntry: Entry): OperationResult<List<Entry>> {
+        val getConfigResult = db.config
+        if (getConfigResult.isFailed) {
+            return getConfigResult.mapError()
+        }
+
+        val config = getConfigResult.getOrThrow()
+        val history = if (config.maxHistoryItems > 0) {
+            val excessiveHistoryItems = max(
+                0,
+                oldEntry.history.size + 1 - config.maxHistoryItems
+            )
+
+            oldEntry.history
+                .drop(excessiveHistoryItems)
+                .toMutableList()
+                .apply {
+                    add(oldEntry)
+                }
+        } else {
+            emptyList()
+        }
+
+        return OperationResult.success(history)
+    }
+
+    private fun prepareAttachmentsDiff(
+        oldEntry: Entry,
+        newEntry: Entry,
+        allBinaries: Map<ByteString, BinaryData>
+    ): Pair<List<Attachment>, List<Attachment>> {
+        val allOldEntries = mutableListOf<Entry>()
+            .apply {
+                add(oldEntry)
+                addAll(oldEntry.history)
+            }
+
+        val allNewEntries = mutableListOf<Entry>()
+            .apply {
+                add(newEntry)
+                addAll(newEntry.history)
+            }
+
+        val allOldAttachments = allOldEntries
+            .flatMap { entry -> entry.binaries }
+            .mapNotNull { binary -> binary.toAttachment(allBinaries) }
+
+        val allNewAttachments = allNewEntries
+            .flatMap { entry -> entry.binaries }
+            .mapNotNull { binary -> binary.toAttachment(allBinaries) }
+
+        val attachmentsDiff = differ.getAttachmentsDiff(allOldAttachments, allNewAttachments)
+        return if (attachmentsDiff.isNotEmpty()) {
+            val toInsert = attachmentsDiff
+                .mapNotNull { (action, attachment) ->
+                    if (action == DiffAction.INSERT) {
+                        attachment
+                    } else {
+                        null
+                    }
+                }
+
+            val toRemove = attachmentsDiff
+                .mapNotNull { (action, attachment) ->
+                    if (action == DiffAction.REMOVE) {
+                        attachment
+                    } else {
+                        null
+                    }
+                }
+
+            toInsert to toRemove
+        } else {
+            emptyList<Attachment>() to emptyList()
+        }
     }
 
     override fun remove(noteUid: UUID): OperationResult<Boolean> {

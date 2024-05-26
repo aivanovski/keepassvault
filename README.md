@@ -38,6 +38,11 @@ Android client app for KeePass databases.
     - Dark theme (controlled by system settings)
     - Fuzzy search for easy finding of entries
 
+# Screenshots
+<img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="220"><img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="220"><img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="220">
+
+<img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width="220"><img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="220"><img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" width="220">
+
 # License
 ```
 Copyright (c) 2021 Aleksey Ivanovsky

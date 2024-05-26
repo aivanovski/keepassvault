@@ -12,6 +12,8 @@ import com.github.aivanovski.keepasstreebuilder.model.EntryEntity
 import com.github.aivanovski.keepasstreebuilder.model.GroupEntity
 import com.ivanovsky.passnotes.data.entity.PropertyType
 import com.ivanovsky.passnotes.util.StringUtils
+import com.ivanovsky.passnotes.util.StringUtils.SPACE
+import java.lang.StringBuilder
 import java.time.Instant
 import java.util.UUID
 
@@ -149,6 +151,36 @@ object FakeDatabaseContentFactory {
             .toByteArray()
     }
 
+    fun createDemoDatabase(): ByteArray {
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                group(GROUP_EMAIL)
+                group(GROUP_INTERNET) {
+                    group(GROUP_CODING) {
+                        entry(ENTRY_LEETCODE)
+                        entry(ENTRY_NEETCODE)
+                        entry(ENTRY_GITHUB)
+                    }
+                    group(GROUP_GAMING) {
+                        entry(ENTRY_STADIA)
+                    }
+                    group(GROUP_SHOPPING) {
+                        entry(newDemoAmazonEntry())
+                    }
+                    group(GROUP_SOCIAL)
+
+                    entry(ENTRY_GOOGLE)
+                    entry(ENTRY_APPLE)
+                    entry(ENTRY_MICROSOFT)
+                }
+                entry(ENTRY_NAS_LOGIN)
+                entry(ENTRY_LAPTOP_LOGIN)
+            }
+            .build()
+            .toByteArray()
+    }
+
     private fun newEntry(
         created: Long,
         modified: Long,
@@ -206,7 +238,7 @@ object FakeDatabaseContentFactory {
             attachments = listOf(
                 newBinaryFrom(
                     name = "text.txt",
-                    content = "Some dummy text content".toByteArray()
+                    content = DUMMY_TEXT.toByteArray()
                 ),
                 newBinaryFrom(
                     name = "image.png",
@@ -214,6 +246,45 @@ object FakeDatabaseContentFactory {
                 )
             )
         )
+
+    private fun newDemoAmazonEntry(): EntryEntity {
+        return ENTRY_AMAZON.copy(
+            history = listOf(),
+            binaries = listOf(
+                newBinaryFrom(
+                    name = "aws-id-rsa",
+                    content = generateDummyText(1600).toByteArray()
+                ),
+                newBinaryFrom(
+                    name = "aws-id-rsa.pub",
+                    content = generateDummyText(400).toByteArray()
+                )
+            )
+        )
+    }
+
+    private fun generateDummyText(length: Int): String {
+        val sb = StringBuilder()
+
+        while (sb.length < length) {
+            val dummyLength = DUMMY_TEXT.length
+
+            val text = if (sb.length + dummyLength < length) {
+                DUMMY_TEXT
+            } else {
+                val delta = length - sb.length
+                DUMMY_TEXT.substring(0, delta)
+            }
+
+            if (sb.isNotEmpty()) {
+                sb.append(SPACE)
+            }
+
+            sb.append(text)
+        }
+
+        return sb.toString()
+    }
 
     private const val DEFAULT_PASSWORD = "abc123"
     private const val DEFAULT_KEY_FILE_CONTENT = "abcdefg1235678"
@@ -247,6 +318,10 @@ object FakeDatabaseContentFactory {
         iVBORw0KGgoAAAANSUhEUgAAAA8AAAAPCAIAAAC0tAIdAAAAGElEQV
         R4AWMgGax5dYcYRJTqUdWjqkkFAPGInVINlnHhAAAAAElFTkSuQmCC
     """.trimIndent().replace("\n", "")
+
+    private val DUMMY_TEXT = """
+        Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+    """.trim()
 
     private val ENTRY_NAS_LOGIN = newEntry(
         title = "NAS Login",

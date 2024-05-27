@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.c
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithHistoryData
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithKeyFile
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDatabaseWithOtpData
+import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createDemoDatabase
 import com.ivanovsky.passnotes.data.repository.file.FakeDatabaseContentFactory.createKeyFileData
 import com.ivanovsky.passnotes.data.repository.file.entity.FakeStorageEntry
 import com.ivanovsky.passnotes.util.FileUtils
@@ -143,8 +144,8 @@ class FakeFileFactory(
             newEntry(
                 localFile = newFile(Path.PASSWORDS, Time.LOCAL),
                 syncStatus = SyncStatus.NO_CHANGES,
-                localContentFactory = LOCAL_CONTENT_FACTORY,
-                remoteContentFactory = LOCAL_CONTENT_FACTORY
+                localContentFactory = { createDemoDatabase() },
+                remoteContentFactory = { createDemoDatabase() }
             ),
 
             newEntry(

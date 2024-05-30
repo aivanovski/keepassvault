@@ -173,6 +173,10 @@ android {
         abortOnError false
     }
 
+    packagingOptions {
+        exclude "plugin.properties"
+    }
+
     preBuild.dependsOn(generateVersionPropertiesFile)
 }
 
@@ -305,6 +309,7 @@ dependencies {
 
     // JGit
     implementation "org.eclipse.jgit:org.eclipse.jgit:$jgitVersion"
+    implementation "org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:$jgitVersion"
 
     // KeePass
     implementation "com.github.anvell:kotpass:$kotpassVersion"

@@ -538,21 +538,41 @@ class UnlockViewModel(
     }
 
     private fun navigateToFilePickerToSelectDatabase() {
-        router.setResultListener(StorageListScreen.RESULT_KEY) { file ->
+        val resultKey = StorageListScreen.newResultKey()
+
+        router.setResultListener(resultKey) { file ->
             if (file is FileDescriptor) {
                 onDatabaseFilePicked(file)
             }
         }
-        router.navigateTo(StorageListScreen(StorageListArgs(Action.PICK_FILE)))
+
+        router.navigateTo(
+            StorageListScreen(
+                StorageListArgs(
+                    action = Action.PICK_FILE,
+                    resultKey = resultKey
+                )
+            )
+        )
     }
 
     private fun navigateToFilePickerToSelectKey() {
-        router.setResultListener(StorageListScreen.RESULT_KEY) { keyFile ->
+        val resultKey = StorageListScreen.newResultKey()
+
+        router.setResultListener(resultKey) { keyFile ->
             if (keyFile is FileDescriptor) {
                 checkAndSetSelectedKeyFile(keyFile)
             }
         }
-        router.navigateTo(StorageListScreen(StorageListArgs(Action.PICK_FILE)))
+
+        router.navigateTo(
+            StorageListScreen(
+                StorageListArgs(
+                    action = Action.PICK_FILE,
+                    resultKey = resultKey
+                )
+            )
+        )
     }
 
     private fun onDatabaseFilePicked(file: FileDescriptor) {

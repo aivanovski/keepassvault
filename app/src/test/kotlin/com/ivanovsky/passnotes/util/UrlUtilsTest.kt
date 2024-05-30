@@ -59,6 +59,30 @@ class UrlUtilsTest {
 
         assertThat(parseUrl("https://domain.com:8080/path?argument=value#STATUS"))
             .isEqualTo(ParsedUrl("https", "domain.com:8080", "/path?argument=value#STATUS"))
+
+        assertThat(parseUrl("git@example.com:user/repo.git"))
+            .isEqualTo(ParsedUrl("ssh", "git@example.com:user", "/repo.git"))
+    }
+
+    @Test
+    fun `parseUrl should parse SSH url`() {
+        listOf(
+            "ssh://git@example.com:path/repo.git" to
+                ParsedUrl("ssh", "git@example.com:path", "/repo.git"),
+
+            "git@example.com:path/repo.git" to
+                ParsedUrl("ssh", "git@example.com:path", "/repo.git"),
+
+            "user@host:path/repo.git" to
+                ParsedUrl("ssh", "user@host:path", "/repo.git"),
+
+            "ssh://host/path" to ParsedUrl("ssh", "host", "/path"),
+
+            "ssh://host" to ParsedUrl("ssh", "host", null)
+        ).forEach { (url, expectedResult) ->
+            val result = parseUrl(url)
+            assertThat(result).isEqualTo(expectedResult)
+        }
     }
 
     @Test
@@ -67,6 +91,9 @@ class UrlUtilsTest {
             .isEqualTo(null)
 
         assertThat(parseUrl("www."))
+            .isEqualTo(null)
+
+        assertThat(parseUrl("git@"))
             .isEqualTo(null)
     }
 

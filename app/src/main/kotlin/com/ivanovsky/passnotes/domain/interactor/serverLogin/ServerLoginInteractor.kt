@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.domain.interactor.serverLogin
 
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSCredentials
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
@@ -27,15 +28,19 @@ class ServerLoginInteractor(
         fsAuthority: FSAuthority
     ): OperationResult<FileDescriptor> =
         withContext(dispatchers.IO) {
-            val getRootResult = tryAuthenticate(credentials, fsAuthority)
-            if (getRootResult.isSucceeded) {
-                return@withContext getRootResult
-            }
+            val authenticationResult = tryAuthenticate(credentials, fsAuthority)
+            val fsType = fsAuthority.type
 
-            val notBrowsableFSAuthority = fsAuthority.copy(
-                isBrowsable = false
-            )
-            tryAuthenticate(credentials, notBrowsableFSAuthority)
+            when {
+                authenticationResult.isFailed && fsType == FSType.WEBDAV -> {
+                    val notBrowsableFSAuthority = fsAuthority.copy(
+                        isBrowsable = false
+                    )
+                    tryAuthenticate(credentials, notBrowsableFSAuthority)
+                }
+
+                else -> authenticationResult
+            }
         }
 
     private suspend fun tryAuthenticate(

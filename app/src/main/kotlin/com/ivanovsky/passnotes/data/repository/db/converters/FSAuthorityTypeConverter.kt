@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
+import com.ivanovsky.passnotes.data.entity.FileId
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
@@ -75,6 +76,7 @@ class FSAuthorityTypeConverter(
                         password = credsObj.optString(PASSWORD)
                     )
                 }
+
                 TYPE_GIT_CREDENTIALS -> {
                     FSCredentials.GitCredentials(
                         url = credsObj.optString(URL),
@@ -82,6 +84,26 @@ class FSAuthorityTypeConverter(
                         salt = credsObj.optString(SALT)
                     )
                 }
+
+                TYPE_SSH_CREDENTIALS -> {
+                    val keyFsAuthority = fromDatabaseValue(
+                        credsObj.optString(KEY_FILE_FS_AUTHORITY)
+                    ) ?: return null
+
+                    FSCredentials.SshCredentials(
+                        url = credsObj.optString(URL),
+                        isSecretUrl = credsObj.optBoolean(IS_SECRET_URL),
+                        salt = credsObj.optString(SALT),
+                        password = credsObj.optString(PASSWORD),
+                        keyFile = FileId(
+                            fsAuthority = keyFsAuthority,
+                            path = credsObj.optString(KEY_FILE_PATH),
+                            uid = credsObj.optString(KEY_FILE_UID),
+                            name = credsObj.optString(KEY_FILE_NAME)
+                        )
+                    )
+                }
+
                 else -> {
                     null
                 }
@@ -104,11 +126,24 @@ class FSAuthorityTypeConverter(
                 creds.put(USERNAME, credentials.username)
                 creds.put(PASSWORD, credentials.password)
             }
+
             is FSCredentials.GitCredentials -> {
                 creds.put(TYPE, TYPE_GIT_CREDENTIALS)
                 creds.put(URL, credentials.url)
                 creds.put(IS_SECRET_URL, credentials.isSecretUrl)
                 creds.put(SALT, credentials.salt)
+            }
+
+            is FSCredentials.SshCredentials -> {
+                creds.put(TYPE, TYPE_SSH_CREDENTIALS)
+                creds.put(URL, credentials.url)
+                creds.put(IS_SECRET_URL, credentials.isSecretUrl)
+                creds.put(SALT, credentials.salt)
+                creds.put(PASSWORD, credentials.password)
+                creds.put(KEY_FILE_FS_AUTHORITY, toDatabaseValue(credentials.keyFile.fsAuthority))
+                creds.put(KEY_FILE_PATH, credentials.keyFile.path)
+                creds.put(KEY_FILE_UID, credentials.keyFile.uid)
+                creds.put(KEY_FILE_NAME, credentials.keyFile.name)
             }
         }
 
@@ -131,7 +166,13 @@ class FSAuthorityTypeConverter(
         private const val IS_SECRET_URL = "isSecretUrl"
         private const val SALT = "salt"
 
+        private const val KEY_FILE_FS_AUTHORITY = "keyFileFsAuthority"
+        private const val KEY_FILE_PATH = "keyFilePath"
+        private const val KEY_FILE_UID = "keyFileUid"
+        private const val KEY_FILE_NAME = "keyFileName"
+
         private const val TYPE_BASIC_CREDENTIALS = "BasicCredentials"
         private const val TYPE_GIT_CREDENTIALS = "GitCredentials"
+        private const val TYPE_SSH_CREDENTIALS = "SshCredentials"
     }
 }

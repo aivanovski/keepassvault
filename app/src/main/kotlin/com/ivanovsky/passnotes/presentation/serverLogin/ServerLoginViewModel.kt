@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.serverLogin
 
+import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,80 +8,172 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
+import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.serverLogin.ServerLoginInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
-import com.ivanovsky.passnotes.extensions.getUrl
+import com.ivanovsky.passnotes.extensions.toFileId
 import com.ivanovsky.passnotes.presentation.Screens.ServerLoginScreen
-import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
-import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialogArgs
+import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
+import com.ivanovsky.passnotes.presentation.core.ThemeProvider
+import com.ivanovsky.passnotes.presentation.core.compose.themeFlow
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
+import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent
+import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.NavigateBack
+import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnDoneButtonClicked
+import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnPasswordChanged
+import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnPasswordVisibilityChanged
+import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnSecretUrlStateChanged
+import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnSshOptionSelected
+import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginState
+import com.ivanovsky.passnotes.presentation.serverLogin.model.SshOption
+import com.ivanovsky.passnotes.presentation.storagelist.Action
+import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import java.util.UUID
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class ServerLoginViewModel(
     private val interactor: ServerLoginInteractor,
     private val errorInteractor: ErrorInteractor,
+    themeProvider: ThemeProvider,
     private val resourceProvider: ResourceProvider,
     private val router: Router,
     private val args: ServerLoginArgs
 ) : ViewModel() {
 
-    val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.data())
+    val theme = themeFlow(themeProvider)
+    private val intents = Channel<ServerLoginIntent>()
 
-    val url = MutableLiveData(EMPTY)
-    val urlHint = MutableLiveData(getUrlHint(args.loginType))
-    val isUrlIconVisible = MutableLiveData(args.loginType == LoginType.USERNAME_PASSWORD)
-    val username = MutableLiveData(EMPTY)
-    val password = MutableLiveData(EMPTY)
-    val urlError = MutableLiveData<String?>()
-    val isSecretUrlChecked = MutableLiveData(true)
-    val isDoneButtonVisible = MutableLiveData(true)
-    val isUsernameVisible = MutableLiveData(args.loginType == LoginType.USERNAME_PASSWORD)
-    val isPasswordVisible = MutableLiveData(args.loginType == LoginType.USERNAME_PASSWORD)
-    val isSecretUrlCheckboxVisible = MutableLiveData(args.loginType == LoginType.GIT)
+    val state = MutableStateFlow<ServerLoginState>(ServerLoginState.NotInitialised)
+    private var sshKeyFile: FileDescriptor? = null
+
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
-    val showHelpDialogEvent = SingleLiveEvent<HelpDialogArgs>()
+    val visibleMenuItems = MutableLiveData(getVisibleMenuItems())
 
-    init {
-        fillCredentials()
-    }
-
-    fun authenticate() {
-        val url = url.value ?: return
-        val username = username.value ?: return
-        val password = password.value ?: return
-
-        if (!isFieldsValid(url)) {
+    fun start() {
+        if (state.value != ServerLoginState.NotInitialised) {
             return
         }
 
-        val credentials = when (args.loginType) {
-            LoginType.USERNAME_PASSWORD -> FSCredentials.BasicCredentials(
-                url = url,
-                username = username,
-                password = password
+        viewModelScope.launch {
+            intents.receiveAsFlow()
+                .onStart { emit(ServerLoginIntent.Init) }
+                .collect { intent ->
+                    handleIntent(intent)
+                }
+        }
+    }
+
+    fun sendIntent(intent: ServerLoginIntent) {
+        if (intent.isImmediate) {
+            handleIntent(intent)
+        } else {
+            viewModelScope.launch {
+                intents.send(intent)
+            }
+        }
+    }
+
+    private fun handleIntent(intent: ServerLoginIntent) {
+        when (intent) {
+            is ServerLoginIntent.Init -> onInit()
+            is ServerLoginIntent.OnUrlChanged -> onUrlChanged(intent)
+            is ServerLoginIntent.OnUsernameChanged -> onUsernameChanged(intent)
+            is OnPasswordChanged -> onPasswordChanged(intent)
+            is OnPasswordVisibilityChanged -> onPasswordVisibilityChanged(intent)
+            is OnSecretUrlStateChanged -> onSecretUrlStateChanged(intent)
+            is OnSshOptionSelected -> onSshOptionSelected(intent)
+            is NavigateBack -> navigateBack()
+            is OnDoneButtonClicked -> onDoneButtonClicked()
+        }
+    }
+
+    private fun onInit() {
+        state.value = buildNewDataState()
+        visibleMenuItems.value = getVisibleMenuItems()
+    }
+
+    private fun onUrlChanged(intent: ServerLoginIntent.OnUrlChanged) {
+        val currentState = getDataState() ?: return
+
+        state.value = currentState.copy(
+            url = intent.url,
+            urlError = null
+        )
+    }
+
+    private fun onUsernameChanged(intent: ServerLoginIntent.OnUsernameChanged) {
+        val currentState = getDataState() ?: return
+
+        state.value = currentState.copy(
+            username = intent.username
+        )
+    }
+
+    private fun onPasswordChanged(intent: OnPasswordChanged) {
+        val currentState = getDataState() ?: return
+
+        setScreenState(
+            currentState.copy(
+                password = intent.password
             )
-            LoginType.GIT -> FSCredentials.GitCredentials(
-                url = url,
-                isSecretUrl = isSecretUrlChecked.value ?: false,
-                salt = UUID.randomUUID().toString()
+        )
+    }
+
+    private fun onPasswordVisibilityChanged(intent: OnPasswordVisibilityChanged) {
+        val currentState = getDataState() ?: return
+
+        setScreenState(
+            currentState.copy(
+                isPasswordVisible = intent.isVisible
             )
+        )
+    }
+
+    private fun onSecretUrlStateChanged(intent: OnSecretUrlStateChanged) {
+        val currentState = getDataState() ?: return
+
+        state.value = currentState.copy(
+            isSecretUrlChecked = intent.isChecked
+        )
+    }
+
+    private fun navigateBack() {
+        router.exit()
+    }
+
+    private fun onDoneButtonClicked() {
+        val state = getDataState() ?: return
+
+        clearErrors()
+
+        if (!validateFields()) {
+            return
         }
 
-        setScreenState(ScreenState.loading())
+        val credentials = getFsCredentials() ?: return
+
+        setScreenState(ServerLoginState.Loading)
         hideKeyboardEvent.call(Unit)
 
         viewModelScope.launch {
             val authentication = interactor.authenticate(credentials, args.fsAuthority)
             if (authentication.isFailed) {
                 val message = errorInteractor.processAndGetMessage(authentication.error)
-                setScreenState(ScreenState.dataWithError(message))
+                setScreenState(
+                    state.copy(
+                        errorMessage = message
+                    )
+                )
                 return@launch
             }
 
@@ -89,7 +182,11 @@ class ServerLoginViewModel(
             val save = interactor.saveCredentials(credentials, file.fsAuthority)
             if (save.isFailed) {
                 val message = errorInteractor.processAndGetMessage(save.error)
-                setScreenState(ScreenState.dataWithError(message))
+                setScreenState(
+                    state.copy(
+                        errorMessage = message
+                    )
+                )
                 return@launch
             }
 
@@ -98,64 +195,212 @@ class ServerLoginViewModel(
         }
     }
 
-    fun navigateBack() = router.exit()
+    private fun getFsCredentials(): FSCredentials? {
+        val state = getDataState() ?: return null
+        val sshKeyFile = this.sshKeyFile
 
-    fun onUrlInfoIconClicked() {
-        showHelpDialogEvent.value = HelpDialogArgs(
-            title = resourceProvider.getString(R.string.help_webdav_url_title),
-            layoutId = R.layout.help_webdav_url
+        val isSshFileSpecified = (state.selectedSshOption is SshOption.File)
+        val loginType = args.loginType
+
+        return when {
+            loginType == LoginType.GIT && isSshFileSpecified && sshKeyFile != null -> {
+                FSCredentials.SshCredentials(
+                    url = state.url.trim(),
+                    isSecretUrl = state.isSecretUrlChecked,
+                    salt = UUID.randomUUID().toString(),
+                    keyFile = sshKeyFile.toFileId(),
+                    password = state.password.trim()
+                )
+            }
+
+            loginType == LoginType.GIT -> {
+                FSCredentials.GitCredentials(
+                    url = state.url.trim(),
+                    isSecretUrl = state.isSecretUrlChecked,
+                    salt = UUID.randomUUID().toString()
+                )
+            }
+
+            else -> {
+                FSCredentials.BasicCredentials(
+                    url = state.url.trim(),
+                    username = state.username.trim(),
+                    password = state.password.trim()
+                )
+            }
+        }
+    }
+
+    private fun onSshOptionSelected(intent: OnSshOptionSelected) {
+        if (intent.option is SshOption.Select) {
+            viewModelScope.launch {
+                // The delay is necessary for ExposedDropdownMenu,
+                // otherwise it produces crash
+                delay(500L)
+
+                val resultKey = StorageListScreen.newResultKey()
+
+                router.setResultListener(resultKey) { file ->
+                    if (file is FileDescriptor) {
+                        onSshKeyFileSelected(file)
+                    }
+                }
+
+                router.navigateTo(
+                    StorageListScreen(
+                        StorageListArgs(
+                            action = Action.PICK_FILE,
+                            resultKey = resultKey
+                        )
+                    )
+                )
+            }
+        } else {
+            val currentState = getDataState() ?: return
+
+            setScreenState(
+                currentState.copy(
+                    isPasswordVisible = (intent.option is SshOption.File),
+                    selectedSshOption = intent.option
+                )
+            )
+        }
+    }
+
+    private fun onSshKeyFileSelected(file: FileDescriptor) {
+        val currentState = getDataState() ?: return
+
+        sshKeyFile = file
+
+        setScreenState(
+            currentState.copy(
+                isPasswordEnabled = true,
+                selectedSshOption = SshOption.File(file.name),
+                sshOptions = listOf(
+                    SshOption.File(file.name),
+                    SshOption.NotConfigured,
+                    SshOption.Select
+                )
+            )
         )
     }
 
-    private fun isFieldsValid(url: String): Boolean {
-        urlError.value = if (url.isBlank()) {
-            resourceProvider.getString(R.string.empty_field)
-        } else {
-            null
-        }
+    private fun clearErrors() {
+        val currentState = getDataState() ?: return
 
-        return url.isNotBlank()
+        setScreenState(
+            currentState.copy(
+                errorMessage = null,
+                urlError = null
+            )
+        )
     }
 
-    private fun fillCredentials() {
+    private fun validateFields(): Boolean {
+        val currentState = getDataState() ?: return false
+
+        if (currentState.url.isBlank()) {
+            setScreenState(
+                currentState.copy(
+                    urlError = resourceProvider.getString(R.string.empty_field)
+                )
+            )
+        }
+
+        return currentState.url.isNotBlank()
+    }
+
+    private fun getCredentialsToFill(): FSCredentials? {
         val credentialsType = args.fsAuthority.type
         val oldCredentials = args.fsAuthority.credentials
 
-        val credentials = when {
+        return when {
             oldCredentials is FSCredentials.BasicCredentials -> {
                 oldCredentials.copy(
                     password = EMPTY
                 )
             }
+
             oldCredentials is FSCredentials.GitCredentials -> oldCredentials
             credentialsType == FSType.WEBDAV -> interactor.getTestWebDavCredentials()
             credentialsType == FSType.GIT -> interactor.getTestGitCredentials()
             credentialsType == FSType.FAKE -> interactor.getTestFakeCredentials()
             else -> null
-        } ?: return
-
-        when (credentials) {
-            is FSCredentials.BasicCredentials -> {
-                url.value = credentials.getUrl()
-                username.value = credentials.username
-                password.value = credentials.password
-            }
-            is FSCredentials.GitCredentials -> {
-                url.value = credentials.url
-                isSecretUrlChecked.value = credentials.isSecretUrl
-            }
         }
     }
 
-    private fun setScreenState(state: ScreenState) {
-        screenState.value = state
-        isDoneButtonVisible.value = !state.isDisplayingLoading
+    private fun getDataState(): ServerLoginState.Data? {
+        return state.value as? ServerLoginState.Data
     }
 
-    private fun getUrlHint(loginType: LoginType): String {
-        return when (loginType) {
-            LoginType.USERNAME_PASSWORD -> resourceProvider.getString(R.string.server_url_hint)
-            LoginType.GIT -> resourceProvider.getString(R.string.git_repository_url_hint)
+    private fun buildNewDataState(): ServerLoginState.Data {
+        val creds = getCredentialsToFill()
+
+        val url = when (creds) {
+            is FSCredentials.BasicCredentials -> creds.url
+            is FSCredentials.GitCredentials -> creds.url
+            is FSCredentials.SshCredentials -> creds.url
+            else -> ""
         }
+
+        val username = when (creds) {
+            is FSCredentials.BasicCredentials -> creds.username
+            else -> ""
+        }
+
+        val password = when (creds) {
+            is FSCredentials.BasicCredentials -> creds.password
+            else -> ""
+        }
+
+        return ServerLoginState.Data(
+            loginType = args.loginType,
+            errorMessage = null,
+            url = url,
+            urlError = null,
+            username = username,
+            password = password,
+            isUsernameEnabled = isUsernameVisible(),
+            isPasswordEnabled = isPasswordVisible(),
+            isSecretUrlCheckboxEnabled = isSecretUrlCheckboxEnabled(),
+            isPasswordVisible = false,
+            isSshConfigurationEnabled = isSshConfigurationEnabled(),
+            isSecretUrlChecked = false,
+            selectedSshOption = SshOption.NotConfigured,
+            sshOptions = listOf(SshOption.NotConfigured, SshOption.Select)
+        )
+    }
+
+    private fun isUsernameVisible(): Boolean {
+        return args.loginType == LoginType.USERNAME_PASSWORD
+    }
+
+    private fun isPasswordVisible(): Boolean {
+        return args.loginType == LoginType.USERNAME_PASSWORD
+    }
+
+    private fun isSshConfigurationEnabled(): Boolean {
+        return args.loginType == LoginType.GIT
+    }
+
+    private fun isSecretUrlCheckboxEnabled(): Boolean {
+        return args.loginType == LoginType.GIT
+    }
+
+    private fun getVisibleMenuItems(): List<ServerLoginMenuItem> {
+        return if (state.value is ServerLoginState.Data) {
+            ServerLoginMenuItem.entries
+        } else {
+            emptyList()
+        }
+    }
+
+    private fun setScreenState(state: ServerLoginState) {
+        this.state.value = state
+        visibleMenuItems.value = getVisibleMenuItems()
+    }
+
+    enum class ServerLoginMenuItem(@IdRes override val menuId: Int) : ScreenMenuItem {
+        DONE(R.id.menu_done)
     }
 }

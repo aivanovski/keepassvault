@@ -50,7 +50,7 @@ object UseCaseModule {
             single { UpdateNoteWithAutofillDataUseCase(get(), get(), get()) }
             single { CheckNoteAutofillDataUseCase(get()) }
             single { UpdateNoteUseCase(get(), get(), get()) }
-            single { RemoveUsedFileUseCase(get(), get()) }
+            single { RemoveUsedFileUseCase(get(), get(), get()) }
             single { GetUsedFileUseCase(get(), get()) }
             single { UpdateUsedFileUseCase(get(), get()) }
             single { SortGroupsAndNotesUseCase(get(), get()) }

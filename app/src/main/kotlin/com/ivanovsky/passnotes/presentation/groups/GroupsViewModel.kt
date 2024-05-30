@@ -640,14 +640,20 @@ class GroupsViewModel(
     }
 
     fun onDiffWithButtonClicked() {
-        router.setResultListener(StorageListScreen.RESULT_KEY) { file ->
+        val resultKey = StorageListScreen.newResultKey()
+
+        router.setResultListener(resultKey) { file ->
             if (file is FileDescriptor) {
                 onDiffFileSelected(file)
             }
         }
+
         router.navigateTo(
             StorageListScreen(
-                args = StorageListArgs(Action.PICK_FILE)
+                StorageListArgs(
+                    action = Action.PICK_FILE,
+                    resultKey = resultKey
+                )
             )
         )
     }

@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.data.entity
 
 import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -14,5 +15,11 @@ data class GitRoot(
     val fsAuthority: FSAuthority,
 
     @ColumnInfo(name = "path")
-    val path: String
+    val path: String,
+
+    @ColumnInfo(name = "ssh_key_path")
+    val sshKeyPath: String?,
+
+    @Embedded(prefix = "ssh_key_file_")
+    val sshKeyFile: FileId?
 )

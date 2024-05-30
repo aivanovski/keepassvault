@@ -151,12 +151,21 @@ class NewDatabaseViewModel(
     }
 
     fun onSelectStorageClicked() {
-        router.setResultListener(StorageListScreen.RESULT_KEY) { file ->
+        val resultKey = StorageListScreen.newResultKey()
+
+        router.setResultListener(resultKey) { file ->
             if (file is FileDescriptor) {
                 onStorageSelected(file)
             }
         }
-        router.navigateTo(StorageListScreen(StorageListArgs(Action.PICK_STORAGE)))
+        router.navigateTo(
+            StorageListScreen(
+                StorageListArgs(
+                    action = Action.PICK_STORAGE,
+                    resultKey = resultKey
+                )
+            )
+        )
     }
 
     fun onTemplatesInfoButtonClicked() {
@@ -178,19 +187,23 @@ class NewDatabaseViewModel(
                     storageType.value = resourceProvider.getString(R.string.public_storage)
                 }
             }
+
             FSType.WEBDAV -> {
                 selectedStorage = SelectedStorage.ParentDir(selectedFile)
                 storageType.value = resourceProvider.getString(R.string.webdav)
             }
+
             FSType.SAF -> {
                 selectedStorage = SelectedStorage.File(selectedFile)
                 storageType.value = resourceProvider.getString(R.string.public_storage)
                 filename.value = removeFileExtensionsIfNeed(selectedFile.name)
             }
+
             FSType.FAKE -> {
                 selectedStorage = SelectedStorage.ParentDir(selectedFile)
                 storageType.value = resourceProvider.getString(R.string.fake_file_system)
             }
+
             FSType.UNDEFINED, FSType.GIT -> {} // TODO: Implement file creation for GIT
         }
 
@@ -219,6 +232,7 @@ class NewDatabaseViewModel(
                     modified = null
                 )
             }
+
             is SelectedStorage.File -> {
                 selectedStorage.file
             }

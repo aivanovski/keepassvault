@@ -75,9 +75,11 @@ class FileSystemResolver(
             FSType.INTERNAL_STORAGE -> {
                 RegularFileSystemProvider(context, FSAuthority.INTERNAL_FS_AUTHORITY)
             }
+
             FSType.EXTERNAL_STORAGE -> {
                 RegularFileSystemProvider(context, FSAuthority.EXTERNAL_FS_AUTHORITY)
             }
+
             FSType.WEBDAV -> {
                 val authenticator = WebdavAuthenticator(fsAuthority)
                 val client = RemoteApiClientAdapter(WebDavClientV2(authenticator, httpClient))
@@ -90,13 +92,22 @@ class FileSystemResolver(
                     fsAuthority
                 )
             }
+
             FSType.SAF -> {
                 SAFFileSystemProvider(context, safHelper)
             }
+
             FSType.GIT -> {
                 val authenticator = GitFileSystemAuthenticator(fsAuthority)
                 val client = RemoteApiClientAdapter(
-                    GitClient(authenticator, fileHelper, gitRootDao, settings, resourceProvider)
+                    GitClient(
+                        this,
+                        authenticator,
+                        fileHelper,
+                        gitRootDao,
+                        settings,
+                        resourceProvider
+                    )
                 )
 
                 RemoteFileSystemProvider(
@@ -108,6 +119,7 @@ class FileSystemResolver(
                     fsAuthority
                 )
             }
+
             else -> throw IllegalStateException("Invalid file system type: ${fsAuthority.type}")
         }
     }

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppDropdownMenu(
+    isEnabled: Boolean = true,
     label: String,
     options: List<String>,
     selectedOption: String,
@@ -27,13 +28,16 @@ fun AppDropdownMenu(
     ExposedDropdownMenuBox(
         expanded = isExpanded,
         onExpandedChange = {
-            isExpanded = !isExpanded
+            if (isEnabled) {
+                isExpanded = !isExpanded
+            }
         },
         modifier = modifier
     ) {
         OutlinedTextField(
             textStyle = PrimaryTextStyle(),
             readOnly = true,
+            enabled = isEnabled,
             modifier = Modifier.menuAnchor(),
             value = selectedOption,
             label = {

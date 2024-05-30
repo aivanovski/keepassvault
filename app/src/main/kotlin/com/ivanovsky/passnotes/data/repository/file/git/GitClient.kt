@@ -1,31 +1,44 @@
 package com.ivanovsky.passnotes.data.repository.file.git
 
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.GitRoot
 import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_INVALID_DATABASE_ENTRY
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_FILE
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_GET_PARENT_FOR
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FILE_IS_NOT_A_DIRECTORY
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS
+import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata
 import com.ivanovsky.passnotes.data.repository.db.dao.GitRootDao
+import com.ivanovsky.passnotes.data.repository.file.FSOptions
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
+import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
+import com.ivanovsky.passnotes.data.repository.file.git.model.SshKey
 import com.ivanovsky.passnotes.data.repository.file.git.model.VersionedFile
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientV2
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.extensions.getOrThrow
+import com.ivanovsky.passnotes.extensions.getUrl
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
+import com.ivanovsky.passnotes.extensions.toFileDescriptor
 import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.InputOutputUtils
+import com.ivanovsky.passnotes.util.UrlUtils.SCHEME_SSH
 import java.io.File
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import timber.log.Timber
 
 class GitClient(
+    private val fileSystemResolver: FileSystemResolver,
     private val authenticator: GitFileSystemAuthenticator,
     private val fileHelper: FileHelper,
     private val gitRootDao: GitRootDao,
@@ -230,12 +243,35 @@ class GitClient(
     private fun openAndUpdateGitRepository(): OperationResult<GitRepository> {
         val fsAuthority = authenticator.getFsAuthority()
 
-        val gitRoot = gitRootDao.getAll()
+        val credentials = fsAuthority.credentials
+            ?: return OperationResult.error(invalidCredentials())
+
+        val url = credentials.getUrl()
+
+        val gitEntry = gitRootDao.getAll()
             .firstOrNull { it.fsAuthority == fsAuthority }
 
-        if (gitRoot != null) {
-            val root = File(gitRoot.path)
-            val repositoryResult = GitRepository.open(root)
+        val sshCredentials = (fsAuthority.credentials as? FSCredentials.SshCredentials)
+        val isSsh = (sshCredentials != null)
+
+        if (gitEntry != null) {
+            val root = File(gitEntry.path)
+
+            val sshKey = if (isSsh && sshCredentials != null) {
+                val readSshKeyResult = readSshKey(gitEntry, sshCredentials)
+                if (readSshKeyResult.isFailed) {
+                    return readSshKeyResult.mapError()
+                }
+
+                readSshKeyResult.getOrThrow()
+            } else {
+                null
+            }
+
+            val repositoryResult = GitRepository.open(
+                dir = root,
+                sshKey = sshKey
+            )
             if (repositoryResult.isFailed) {
                 return repositoryResult.mapError()
             }
@@ -267,20 +303,100 @@ class GitClient(
             return newRootPathResult.mapError()
         }
 
+        val sshKey = if (isSsh && sshCredentials != null) {
+            val sshKeyFile = sshCredentials.keyFile
+            val copyKeyResult = copyKeyToLocalStorage(sshKeyFile.toFileDescriptor())
+            if (copyKeyResult.isFailed) {
+                return copyKeyResult.mapError()
+            }
+
+            SshKey(
+                keyPath = copyKeyResult.getOrThrow().path,
+                password = sshCredentials.password
+            )
+        } else {
+            null
+        }
+
         val root = newRootPathResult.obj
-        val cloneResult = GitRepository.clone(root, authenticator.getFsAuthority())
+        val cloneResult = GitRepository.clone(
+            url = fixUrlIfNeed(url),
+            dir = root,
+            sshKey = sshKey
+        )
         if (cloneResult.isFailed) {
             return cloneResult.mapError()
         }
 
         gitRootDao.insert(
             GitRoot(
-                fsAuthority = authenticator.getFsAuthority(),
-                path = root.path
+                fsAuthority = fsAuthority,
+                path = root.path,
+                sshKeyPath = sshKey?.keyPath,
+                sshKeyFile = sshCredentials?.keyFile
             )
         )
 
         return cloneResult
+    }
+
+    private fun fixUrlIfNeed(url: String): String {
+        return if (url.startsWith(SCHEME_SSH)) {
+            url.removePrefix(SCHEME_SSH)
+        } else {
+            url
+        }
+    }
+
+    private fun readSshKey(
+        entry: GitRoot,
+        credentials: FSCredentials.SshCredentials
+    ): OperationResult<SshKey> {
+        val sshKeyPath = entry.sshKeyPath
+            ?: return OperationResult.error(invalidGitEntry(entry.toString()))
+
+        if (!File(sshKeyPath).exists()) {
+            return OperationResult.error(failedToFindFile(sshKeyPath))
+        }
+
+        return OperationResult.success(
+            SshKey(
+                keyPath = sshKeyPath,
+                password = credentials.password
+            )
+        )
+    }
+
+    private fun copyKeyToLocalStorage(
+        keyFile: FileDescriptor
+    ): OperationResult<File> {
+        val fsProvider = fileSystemResolver.resolveProvider(keyFile.fsAuthority)
+
+        val getKeyContent = fsProvider.openFileForRead(
+            keyFile,
+            OnConflictStrategy.CANCEL,
+            FSOptions.READ_ONLY
+        )
+        if (getKeyContent.isFailed) {
+            return getKeyContent.mapError()
+        }
+
+        val content = getKeyContent.getOrThrow()
+
+        val generateDestinationResult = fileHelper.generateDestinationForPrivateFile(
+            name = keyFile.name
+        )
+        if (generateDestinationResult.isFailed) {
+            return generateDestinationResult.mapError()
+        }
+
+        val localKeyFile = generateDestinationResult.getOrThrow()
+        val copyResult = InputOutputUtils.copy(
+            source = content,
+            destinationFile = localKeyFile
+        )
+
+        return copyResult.mapWithObject(localKeyFile)
     }
 
     private fun File.toFileDescriptor(repository: GitRepository): FileDescriptor {
@@ -291,6 +407,7 @@ class GitClient(
             path.startsWith(localRootPath) && path.length > localRootPath.length -> {
                 path.removePrefix(localRootPath)
             }
+
             else -> throw IllegalArgumentException()
         }
         return FileDescriptor(
@@ -318,6 +435,19 @@ class GitClient(
     private fun getDefaultUserEmail(): String {
         val appName = resourceProvider.getString(R.string.app_name)
         return "${appName.lowercase()}@localhost"
+    }
+
+    private fun invalidCredentials(): OperationError {
+        return newGenericError(MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS)
+    }
+
+    private fun invalidGitEntry(entry: String): OperationError {
+        return newGenericError(
+            String.format(
+                GENERIC_INVALID_DATABASE_ENTRY,
+                entry
+            )
+        )
     }
 
     private fun failedToFindFile(path: String): OperationError {

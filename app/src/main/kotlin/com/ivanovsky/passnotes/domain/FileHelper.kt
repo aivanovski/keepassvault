@@ -27,13 +27,14 @@ class FileHelper(
         }
 
     fun generateDestinationFileOrNull(): File? {
-        return generateDestinationForRemoteFile()?.let { path ->
-            File(path)
-        }
+        val path = generateDestinationForFile(Location.REMOTE_FILES) ?: return null
+
+        return File(path)
     }
 
     fun generateDestinationFile(): OperationResult<File> {
         val file = generateDestinationFileOrNull()
+
         return if (file != null) {
             OperationResult.success(file)
         } else {
@@ -46,14 +47,14 @@ class FileHelper(
     }
 
     fun generateDestinationDirectoryForSharedFile(): OperationResult<File> {
-        val dir = generateDestinationForSharedFile()?.let { path ->
-            File(path)
-        }
+        val path = generateDestinationForFile(Location.SHARED_FILES)
             ?: return OperationResult.error(
                 newGenericIOError(
                     MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE
                 )
             )
+
+        val dir = File(path)
 
         if (!dir.mkdirs()) {
             return OperationResult.error(
@@ -66,19 +67,42 @@ class FileHelper(
         return OperationResult.success(dir)
     }
 
+    fun generateDestinationForPrivateFile(name: String?): OperationResult<File> {
+        val path = generateDestinationForFile(
+            location = Location.PRIVATE_FILES,
+            baseName = name
+        ) ?: return OperationResult.error(
+            newGenericIOError(
+                MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE
+            )
+        )
+
+        return OperationResult.success(File(path))
+    }
+
     fun isLocatedInInternalStorage(file: File): Boolean {
         val dataDirPath = context.filesDir?.parentFile?.path
         return dataDirPath != null && file.path.startsWith(dataDirPath)
     }
 
-    private fun generateDestinationForRemoteFile(): String? {
-        return remoteFilesDir?.let {
-            it.path + "/" + UUID.randomUUID().toString()
-        }
-    }
+    private fun generateDestinationForFile(
+        location: Location,
+        baseName: String? = null
+    ): String? {
+        val dir = when (location) {
+            Location.REMOTE_FILES -> remoteFilesDir
+            Location.SHARED_FILES -> context.cacheDir
+            Location.PRIVATE_FILES -> filesDir
+        } ?: return null
 
-    private fun generateDestinationForSharedFile(): String? {
-        return context.cacheDir?.let { dir ->
+        return if (baseName != null) {
+            val file = File(dir.path, baseName)
+            if (file.exists()) {
+                "${dir.path}/$baseName-${UUID.randomUUID()}"
+            } else {
+                file.path
+            }
+        } else {
             dir.path + "/" + UUID.randomUUID().toString()
         }
     }
@@ -104,6 +128,12 @@ class FileHelper(
         } else {
             null
         }
+    }
+
+    enum class Location {
+        REMOTE_FILES,
+        SHARED_FILES,
+        PRIVATE_FILES
     }
 
     companion object {

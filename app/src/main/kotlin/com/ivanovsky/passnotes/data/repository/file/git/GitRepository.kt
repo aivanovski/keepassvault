@@ -1,28 +1,28 @@
 package com.ivanovsky.passnotes.data.repository.file.git
 
-import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_GET_REFERENCE_TO
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError
 import com.ivanovsky.passnotes.data.entity.OperationError.newRemoteApiError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata
+import com.ivanovsky.passnotes.data.repository.file.git.model.SshKey
 import com.ivanovsky.passnotes.data.repository.file.git.model.VersionedFile
-import com.ivanovsky.passnotes.extensions.getUrl
 import com.ivanovsky.passnotes.extensions.map
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.util.InputOutputUtils
+import com.jcraft.jsch.JSch
+import com.jcraft.jsch.Session
 import java.io.File
 import java.io.IOException
 import java.util.Date
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.api.RebaseResult
 import org.eclipse.jgit.api.ResetCommand
+import org.eclipse.jgit.api.TransportConfigCallback
 import org.eclipse.jgit.api.errors.TransportException
 import org.eclipse.jgit.lib.BranchConfig
 import org.eclipse.jgit.lib.ObjectId
@@ -30,9 +30,14 @@ import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.lib.Ref
 import org.eclipse.jgit.transport.PushResult
 import org.eclipse.jgit.transport.RemoteRefUpdate
+import org.eclipse.jgit.transport.SshTransport
+import org.eclipse.jgit.transport.ssh.jsch.JschConfigSessionFactory
+import org.eclipse.jgit.transport.ssh.jsch.OpenSshConfig
+import org.eclipse.jgit.util.FS
 import timber.log.Timber
 
 class GitRepository(
+    private val sshKey: SshKey?,
     private val git: Git,
     val root: File
 ) {
@@ -120,8 +125,13 @@ class GitRepository(
         for (pullIdx in 0..1) {
             val pullResult = execute {
                 git.pull()
-                    .setRebase(true)
-                    .setRebase(BranchConfig.BranchRebaseMode.REBASE)
+                    .apply {
+                        setRebase(true)
+                        setRebase(BranchConfig.BranchRebaseMode.REBASE)
+                        if (sshKey != null) {
+                            setTransportConfigCallback(createSshTransportCallback(sshKey))
+                        }
+                    }
                     .call()
             }
             if (pullResult.isFailed) {
@@ -198,7 +208,13 @@ class GitRepository(
 
     fun push(): OperationResult<Unit> {
         val pushResult = execute {
-            git.push().call()
+            git.push()
+                .apply {
+                    if (sshKey != null) {
+                        setTransportConfigCallback(createSshTransportCallback(sshKey))
+                    }
+                }
+                .call()
         }
         if (pushResult.isFailed) {
             return pushResult.mapError()
@@ -265,7 +281,15 @@ class GitRepository(
     }
 
     fun fetch(): OperationResult<Unit> {
-        return execute { git.fetch().call() }
+        return execute {
+            git.fetch()
+                .apply {
+                    if (sshKey != null) {
+                        setTransportConfigCallback(createSshTransportCallback(sshKey))
+                    }
+                }
+                .call()
+        }
             .mapWithObject(Unit)
     }
 
@@ -300,32 +324,81 @@ class GitRepository(
         private const val ERROR_FAILED_TO_PUSH = "Failed to push"
         private const val ERROR_FAILED_TO_PULL = "Failed to pull"
 
-        fun open(dir: File): OperationResult<GitRepository> {
+        fun open(
+            dir: File,
+            sshKey: SshKey?
+        ): OperationResult<GitRepository> {
             return execute {
                 Git.init()
                     .setDirectory(dir)
                     .call()
             }
-                .map { git -> GitRepository(git, dir) }
+                .map { git ->
+                    GitRepository(
+                        sshKey = sshKey,
+                        git = git,
+                        root = dir
+                    )
+                }
         }
 
-        fun clone(dir: File, fsAuthority: FSAuthority): OperationResult<GitRepository> {
-            val url = fsAuthority.credentials?.getUrl()
-                ?: return OperationResult.error(
-                    newGenericError(MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS)
-                )
-
+        fun clone(
+            url: String,
+            dir: File,
+            sshKey: SshKey?
+        ): OperationResult<GitRepository> {
             val result = execute {
-                Git.cloneRepository()
-                    .setURI(url)
-                    .setDirectory(dir)
-                    .call()
+                val clone = if (sshKey == null) {
+                    Git.cloneRepository()
+                        .setURI(url)
+                        .setDirectory(dir)
+                } else {
+                    Git.cloneRepository()
+                        .setURI(url)
+                        .setTransportConfigCallback(createSshTransportCallback(sshKey))
+                        .setDirectory(dir)
+                }
+
+                clone.call()
             }
             if (result.isFailed) {
                 return result.mapError()
             }
 
-            return open(dir)
+            return open(dir, sshKey)
+        }
+
+        private fun createSshTransportCallback(
+            sshKey: SshKey
+        ): TransportConfigCallback {
+            val sessionFactory = createSshSessionFactory(sshKey)
+
+            return TransportConfigCallback { transport ->
+                (transport as SshTransport).sshSessionFactory = sessionFactory
+            }
+        }
+
+        private fun createSshSessionFactory(
+            sshKey: SshKey
+        ): JschConfigSessionFactory {
+            return object : JschConfigSessionFactory() {
+
+                override fun configure(hc: OpenSshConfig.Host, session: Session) {
+                    session.setConfig("StrictHostKeyChecking", "no")
+                }
+
+                override fun createDefaultJSch(fs: FS): JSch {
+                    val jsch = super.createDefaultJSch(fs)
+
+                    if (sshKey.password != null) {
+                        jsch.addIdentity(sshKey.keyPath, sshKey.password)
+                    } else {
+                        jsch.addIdentity(sshKey.keyPath)
+                    }
+
+                    return jsch
+                }
+            }
         }
 
         private fun <T> execute(block: () -> T): OperationResult<T> {
@@ -335,10 +408,11 @@ class GitRepository(
                 Timber.d(exception)
                 when (exception) {
                     is TransportException, is IOException -> {
-                        OperationResult.error(newNetworkIOError())
+                        OperationResult.error(newNetworkIOError(exception))
                     }
+
                     else -> {
-                        OperationResult.error(newRemoteApiError(exception.message))
+                        OperationResult.error(newRemoteApiError(exception.message, exception))
                     }
                 }
             }

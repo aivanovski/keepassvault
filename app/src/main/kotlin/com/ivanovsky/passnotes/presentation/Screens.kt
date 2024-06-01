@@ -34,8 +34,13 @@ import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListFragment
 import com.ivanovsky.passnotes.presentation.unlock.UnlockFragment
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
+import java.util.UUID
 
 object Screens {
+
+    // TODO(refactor): all result keys should be unique as static values
+    //  could be overriden by other instance of the save screen
+
     class UnlockScreen(private val args: UnlockScreenArgs) : FragmentScreen {
         override fun createFragment(factory: FragmentFactory) =
             UnlockFragment.newInstance(args)
@@ -48,7 +53,9 @@ object Screens {
             StorageListFragment.newInstance(args)
 
         companion object {
-            val RESULT_KEY = StorageListScreen::class.simpleName + "_result"
+            fun newResultKey(): String {
+                return StorageListScreen::class.simpleName + "_result_" + UUID.randomUUID()
+            }
         }
     }
 

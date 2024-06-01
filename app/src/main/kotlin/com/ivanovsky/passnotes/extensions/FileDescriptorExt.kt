@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.extensions
 
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.FileId
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.domain.ResourceProvider
@@ -9,6 +10,15 @@ import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 
 fun FileDescriptor.isSameFile(other: FileDescriptor): Boolean {
     return fsAuthority == other.fsAuthority && uid == other.uid
+}
+
+fun FileDescriptor.toFileId(): FileId {
+    return FileId(
+        fsAuthority = fsAuthority,
+        path = path,
+        uid = uid,
+        name = name
+    )
 }
 
 fun FileDescriptor.toUsedFile(
@@ -32,9 +42,11 @@ fun FileDescriptor.formatReadablePath(resourceProvider: ResourceProvider): Strin
         FSType.UNDEFINED -> {
             path
         }
+
         FSType.INTERNAL_STORAGE, FSType.EXTERNAL_STORAGE -> {
             path
         }
+
         FSType.WEBDAV -> {
             val url = fsAuthority.credentials?.formatReadableUrl() ?: EMPTY
             if (!isRoot) {
@@ -43,13 +55,16 @@ fun FileDescriptor.formatReadablePath(resourceProvider: ResourceProvider): Strin
                 url
             }
         }
+
         FSType.SAF -> {
             path
         }
+
         FSType.GIT -> {
             val url = fsAuthority.credentials?.formatReadableUrl() ?: EMPTY
             url + path
         }
+
         FSType.FAKE -> {
             val url = fsAuthority.credentials?.formatReadableUrl() ?: EMPTY
             url + path

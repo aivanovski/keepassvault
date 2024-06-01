@@ -13,8 +13,8 @@ import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.EnterDbCredentialsScreen.Companion.RESULT_KEY
+import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
@@ -74,12 +74,22 @@ class EnterDbCredentialsViewModel(
     }
 
     fun onAddKeyFileButtonClicked() {
-        router.setResultListener(Screens.StorageListScreen.RESULT_KEY) { keyFile ->
+        val resultKey = StorageListScreen.newResultKey()
+
+        router.setResultListener(resultKey) { keyFile ->
             if (keyFile is FileDescriptor) {
                 checkAndSetSelectedKeyFile(keyFile)
             }
         }
-        router.navigateTo(Screens.StorageListScreen(StorageListArgs(Action.PICK_FILE)))
+
+        router.navigateTo(
+            StorageListScreen(
+                StorageListArgs(
+                    action = Action.PICK_FILE,
+                    resultKey = resultKey
+                )
+            )
+        )
     }
 
     fun onRemoveKeyFileButtonClicked() {

@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.Typeface
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.TextUnit
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.compose.model.InputType
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -129,7 +130,10 @@ fun AppTextFieldColors(): TextFieldColors {
         focusedContainerColor = Color.Transparent,
         unfocusedContainerColor = Color.Transparent,
         errorContainerColor = Color.Transparent,
-        unfocusedLabelColor = AppTheme.theme.colors.hint
+        unfocusedLabelColor = AppTheme.theme.colors.hint,
+        disabledContainerColor = Color.Transparent,
+        disabledTextColor = AppTheme.theme.colors.unfocusedColor,
+        disabledLabelColor = AppTheme.theme.colors.unfocusedColor
     )
 }
 
@@ -181,16 +185,19 @@ fun SecondaryMonospaceTextStyle(
 fun HeaderTextStyle(): TextStyle {
     return TextStyle(
         fontSize = AppTheme.theme.textMetrics.header,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Normal,
         color = AppTheme.theme.colors.primaryText
     )
 }
 
 @Composable
-fun ErrorTextStyle(): TextStyle {
+fun ErrorTextStyle(
+    isBold: Boolean = true,
+    fontSize: TextUnit = AppTheme.theme.textMetrics.header
+): TextStyle {
     return TextStyle(
-        fontSize = AppTheme.theme.textMetrics.header,
-        fontWeight = FontWeight.Bold,
+        fontSize = fontSize,
+        fontWeight = if (isBold) FontWeight.Bold else FontWeight.Normal,
         color = AppTheme.theme.colors.errorText
     )
 }

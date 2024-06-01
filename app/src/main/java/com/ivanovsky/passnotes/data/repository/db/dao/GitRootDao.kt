@@ -13,4 +13,7 @@ interface GitRootDao {
 
     @Insert
     fun insert(repo: GitRoot): Long
+
+    @Query("DELETE FROM git_root WHERE id = :id")
+    fun remove(id: Int)
 }

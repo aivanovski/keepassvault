@@ -123,7 +123,9 @@ class DiffViewerViewModel(
     private fun navigateToFilePicker(
         onFileSelected: (key: EncryptedDatabaseKey, file: FileDescriptor) -> Unit
     ) {
-        router.setResultListener(StorageListScreen.RESULT_KEY) { file ->
+        val resultKey = StorageListScreen.newResultKey()
+
+        router.setResultListener(resultKey) { file ->
             if (file !is FileDescriptor) {
                 return@setResultListener
             }
@@ -145,7 +147,10 @@ class DiffViewerViewModel(
 
         router.navigateTo(
             StorageListScreen(
-                args = StorageListArgs(Action.PICK_FILE)
+                args = StorageListArgs(
+                    action = Action.PICK_FILE,
+                    resultKey = resultKey
+                )
             )
         )
     }

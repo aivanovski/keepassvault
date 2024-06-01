@@ -39,6 +39,7 @@ data class UsedFile(
     @ColumnInfo(name = "key_type")
     val keyType: KeyType,
 
+    // TODO: aggregate key attributes to FileId
     @ColumnInfo(name = "key_file_fs_authority")
     val keyFileFsAuthority: FSAuthority? = null,
 

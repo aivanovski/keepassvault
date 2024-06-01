@@ -6,7 +6,16 @@ import com.ivanovsky.passnotes.util.UrlUtils
 fun FSCredentials.formatReadableUrl(): String {
     return when (this) {
         is FSCredentials.BasicCredentials -> url
+
         is FSCredentials.GitCredentials -> {
+            if (isSecretUrl) {
+                UrlUtils.formatSecretUrl(url)
+            } else {
+                url
+            }
+        }
+
+        is FSCredentials.SshCredentials -> {
             if (isSecretUrl) {
                 UrlUtils.formatSecretUrl(url)
             } else {
@@ -20,5 +29,6 @@ fun FSCredentials.getUrl(): String {
     return when (this) {
         is FSCredentials.BasicCredentials -> url
         is FSCredentials.GitCredentials -> url
+        is FSCredentials.SshCredentials -> url
     }
 }

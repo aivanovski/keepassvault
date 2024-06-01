@@ -94,6 +94,7 @@ public class OperationError {
             "Failed to get parent for: %s";
     public static final String GENERIC_MESSAGE_FILE_IS_NOT_A_DIRECTORY =
             "File is not a directory: %s";
+    public static final String GENERIC_INVALID_DATABASE_ENTRY = "Invalid db entry: %s";
 
     private Type type;
     private String message;
@@ -229,6 +230,13 @@ public class OperationError {
     public static OperationError newRemoteApiError(String message) {
         OperationError error = new OperationError(Type.REMOTE_API_ERROR);
         error.message = message;
+        return error;
+    }
+
+    public static OperationError newRemoteApiError(String message, Throwable throwable) {
+        OperationError error = new OperationError(Type.REMOTE_API_ERROR);
+        error.message = message;
+        error.throwable = throwable;
         return error;
     }
 

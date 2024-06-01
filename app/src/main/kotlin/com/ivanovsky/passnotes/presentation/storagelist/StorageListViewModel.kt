@@ -26,7 +26,6 @@ import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteract
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.Screens.FilePickerScreen
 import com.ivanovsky.passnotes.presentation.Screens.ServerLoginScreen
-import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -117,8 +116,9 @@ class StorageListViewModel(
 
             if (getFileResult.isSucceededOrDeferred) {
                 val file = getFileResult.obj
+
                 router.exit()
-                router.sendResult(StorageListScreen.RESULT_KEY, file)
+                router.sendResult(args.resultKey, file)
             } else {
                 val message = errorInteractor.processAndGetMessage(getFileResult.error)
                 screenState.value = ScreenState.dataWithError(message)
@@ -181,18 +181,21 @@ class StorageListViewModel(
                     fsAuthority = fsAuthority
                 )
             }
+
             GIT -> {
                 ServerLoginArgs(
                     loginType = LoginType.GIT,
                     fsAuthority = fsAuthority
                 )
             }
+
             FAKE -> {
                 ServerLoginArgs(
                     loginType = LoginType.USERNAME_PASSWORD,
                     fsAuthority = fsAuthority
                 )
             }
+
             else -> throw IllegalArgumentException()
         }
 
@@ -222,7 +225,7 @@ class StorageListViewModel(
 
     private fun onFilePickedByPicker(file: FileDescriptor) {
         router.exit()
-        router.sendResult(StorageListScreen.RESULT_KEY, file)
+        router.sendResult(args.resultKey, file)
     }
 
     private fun subscribeToEvents() {
@@ -233,6 +236,7 @@ class StorageListViewModel(
                     val fsType = FSType.findByValue(id) ?: throw IllegalArgumentException()
                     onStorageOptionClicked(fsType)
                 }
+
                 event.containsKey(TwoTextWithIconCellViewModel.CLICK_EVENT) -> {
                     val id = event.getString(TwoTextWithIconCellViewModel.CLICK_EVENT) ?: EMPTY
                     val fsType = FSType.findByValue(id) ?: throw IllegalArgumentException()
@@ -250,6 +254,7 @@ class StorageListViewModel(
             INTERNAL_STORAGE, EXTERNAL_STORAGE -> {
                 onDeviceStorageSelected(selectedOption.root, selectedOption.root.fsAuthority.type)
             }
+
             SAF -> onSafStorageSelected()
             WEBDAV, GIT, FAKE -> onRemoteFileStorageSelected(selectedOption.root)
             UNDEFINED -> {}
@@ -270,10 +275,12 @@ class StorageListViewModel(
                 EXTERNAL_STORAGE -> {
                     loadRootAndNavigateToPicker(root.fsAuthority)
                 }
+
                 INTERNAL_STORAGE -> {
                     router.exit()
-                    router.sendResult(StorageListScreen.RESULT_KEY, root)
+                    router.sendResult(args.resultKey, root)
                 }
+
                 else -> throw IllegalArgumentException()
             }
         }
@@ -286,6 +293,7 @@ class StorageListViewModel(
             Action.PICK_FILE -> {
                 showSystemFilePickerEvent.call(Unit)
             }
+
             Action.PICK_STORAGE -> {
                 showSystemFileCreatorEvent.call(Unit)
             }

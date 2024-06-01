@@ -1,0 +1,1 @@
+- Add synchronization with Git via SSH protocol

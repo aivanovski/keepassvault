@@ -1,13 +1,13 @@
 package com.ivanovsky.passnotes.data.serialization
 
-import com.ivanovsky.passnotes.data.entity.TestData
+import com.ivanovsky.passnotes.data.entity.TestAutofillData
 import com.ivanovsky.passnotes.extensions.optStringArray
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import timber.log.Timber
 
-object TestDataConverter {
+object TestAutofillDataConverter {
 
     const val KEY_FILENAME_PATTERNS = "filenamePatterns"
     const val KEY_PASSWORDS = "passwords"
@@ -19,7 +19,7 @@ object TestDataConverter {
     const val KEY_FAKE_FS_USERNAME = "fakeFsUsername"
     const val KEY_FAKE_FS_PASSWORD = "fakeFsPassword"
 
-    fun toString(data: TestData): String? {
+    fun toString(data: TestAutofillData): String? {
         return try {
             val obj = JSONObject()
 
@@ -54,7 +54,7 @@ object TestDataConverter {
         }
     }
 
-    fun fromString(data: String): TestData? {
+    fun fromString(data: String): TestAutofillData? {
         return try {
             val obj = JSONObject(data)
 
@@ -77,7 +77,7 @@ object TestDataConverter {
                 fakeFsUsername.isNotEmpty() ||
                 fakeFsPassword.isNotEmpty()
             ) {
-                TestData(
+                TestAutofillData(
                     filenamePatterns = filenamePatterns,
                     passwords = passwords,
                     webdavUrl = webdavUrl,

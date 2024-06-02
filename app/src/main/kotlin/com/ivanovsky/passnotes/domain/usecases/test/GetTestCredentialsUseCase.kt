@@ -12,7 +12,7 @@ class GetTestCredentialsUseCase(
     fun getDebugWebDavCredentials(): FSCredentials.BasicCredentials? {
         if (!BuildConfig.DEBUG) return null
 
-        val data = settings.testData ?: return null
+        val data = settings.testAutofillData ?: return null
 
         return if (data.webdavUrl.isNotEmpty() ||
             data.webdavUsername.isNotEmpty() ||
@@ -31,7 +31,7 @@ class GetTestCredentialsUseCase(
     fun getDebugGitCredentials(): FSCredentials.GitCredentials? {
         if (!BuildConfig.DEBUG) return null
 
-        val data = settings.testData ?: return null
+        val data = settings.testAutofillData ?: return null
 
         return if (data.gitUrl.isNotEmpty()) {
             FSCredentials.GitCredentials(
@@ -47,7 +47,7 @@ class GetTestCredentialsUseCase(
     fun getDebugFakeCredentials(): FSCredentials.BasicCredentials? {
         if (!BuildConfig.DEBUG) return null
 
-        val data = settings.testData ?: return null
+        val data = settings.testAutofillData ?: return null
 
         return if (data.fakeFsUrl.isNotEmpty() ||
             data.fakeFsUsername.isNotEmpty() ||

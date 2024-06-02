@@ -8,7 +8,7 @@ import androidx.annotation.StringRes
 import androidx.preference.PreferenceManager
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.PasswordGeneratorSettings
-import com.ivanovsky.passnotes.data.entity.TestData
+import com.ivanovsky.passnotes.data.entity.TestAutofillData
 import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
@@ -26,13 +26,13 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.PASSWO
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SEARCH_TYPE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_DIRECTION
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_TYPE
-import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.TEST_DATA
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.TEST_AUTOFILL_DATA
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.TEST_TOGGLES
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.BOOLEAN
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.INT
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.STRING
 import com.ivanovsky.passnotes.data.serialization.PasswordGeneratorSettingsConverter
-import com.ivanovsky.passnotes.data.serialization.TestDataConverter
+import com.ivanovsky.passnotes.data.serialization.TestAutofillDataConverter
 import com.ivanovsky.passnotes.data.serialization.TestTogglesConverter
 import com.ivanovsky.passnotes.domain.entity.SearchType
 import com.ivanovsky.passnotes.domain.entity.SortDirection
@@ -166,10 +166,10 @@ class SettingsImpl(private val context: Context) : Settings {
             putString(GIT_USER_EMAIL, value?.ifEmpty { null })
         }
 
-    override var testData: TestData?
-        get() = getString(TEST_DATA)?.let { TestDataConverter.fromString(it) }
+    override var testAutofillData: TestAutofillData?
+        get() = getString(TEST_AUTOFILL_DATA)?.let { TestAutofillDataConverter.fromString(it) }
         set(value) {
-            putString(TEST_DATA, value?.let { TestDataConverter.toString(it) })
+            putString(TEST_AUTOFILL_DATA, value?.let { TestAutofillDataConverter.toString(it) })
         }
 
     override var testToggles: TestToggles?
@@ -347,8 +347,8 @@ class SettingsImpl(private val context: Context) : Settings {
             type = STRING,
             defaultValue = null
         ),
-        TEST_DATA(
-            keyId = R.string.pref_test_data,
+        TEST_AUTOFILL_DATA(
+            keyId = R.string.pref_test_autofill_data,
             type = STRING,
             defaultValue = null
         ),

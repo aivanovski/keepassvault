@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.data.repository.file
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSCredentials
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_FILE
@@ -159,10 +160,7 @@ class FakeFileSystemProvider(
 
     private fun isAuthenticated(): Boolean {
         val creds = authenticator.getFsAuthority().credentials ?: return false
-        return creds is FSCredentials.BasicCredentials &&
-            creds.url == SERVER_URL &&
-            creds.username == USERNAME &&
-            creds.password == PASSWORD
+        return creds == FS_AUTHORITY.credentials
     }
 
     private fun newAuthError(): OperationError {
@@ -180,8 +178,15 @@ class FakeFileSystemProvider(
 
     companion object {
         private const val ROOT = "/"
-        const val SERVER_URL = "content://fakefs.com"
-        const val USERNAME = "user"
-        const val PASSWORD = "abc123"
+
+        val FS_AUTHORITY = FSAuthority(
+            credentials = FSCredentials.BasicCredentials(
+                url = "content://fakefs.com",
+                username = "user",
+                password = "abc123"
+            ),
+            type = FSType.FAKE,
+            isBrowsable = true
+        )
     }
 }

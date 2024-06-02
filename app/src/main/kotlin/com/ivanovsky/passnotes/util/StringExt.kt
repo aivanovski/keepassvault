@@ -21,6 +21,14 @@ fun String.toIntSafely(): Int? {
     }
 }
 
+fun String.toBooleanSafely(): Boolean? {
+    return when {
+        this.equals("true", ignoreCase = true) -> true
+        this.equals("false", ignoreCase = true) -> false
+        else -> null
+    }
+}
+
 fun String.toLongSafely(): Long? {
     return try {
         java.lang.Long.parseLong(this)

@@ -36,6 +36,7 @@
         android:layout_marginTop="@dimen/small_margin"
         android:foreground="?attr/selectableItemBackground"
         android:minWidth="@dimen/unlock_button_size"
+        android:contentDescription="unlockButton"
         app:layout_constraintBottom_toBottomOf="@id/password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/password" />

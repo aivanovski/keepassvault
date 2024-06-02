@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.domain.test
 
+import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -18,6 +19,13 @@ class TestDataBroadcastReceiver : BroadcastReceiver() {
         val settings: Settings = get()
 
         val extras = intent.extras ?: Bundle.EMPTY
+
+        if (extras.containsKey(KEY_IS_RESET_APP_DATA)) {
+            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+            Timber.e("Remove all data")
+            am.clearApplicationUserData()
+            return
+        }
 
         if (extras.containsKey(KEY_IS_INVALIDATE_FAKE_BIOMETRIC_DATA)) {
             val interactor: BiometricInteractor = get()
@@ -75,5 +83,6 @@ class TestDataBroadcastReceiver : BroadcastReceiver() {
     companion object {
         private const val KEY_IS_RESET_STORED_TEST_DATA = "isResetStoredTestData"
         private const val KEY_IS_INVALIDATE_FAKE_BIOMETRIC_DATA = "isInvalidateFakeBiometricData"
+        private const val KEY_IS_RESET_APP_DATA = "isResetAppData"
     }
 }

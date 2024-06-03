@@ -5,9 +5,9 @@ import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.LoggerInteractor
 import com.ivanovsky.passnotes.injection.modules.BiometricModule
 import com.ivanovsky.passnotes.injection.modules.CoreModule
+import com.ivanovsky.passnotes.injection.modules.DebugFileSystemProvidersModule
+import com.ivanovsky.passnotes.injection.modules.DebugModule
 import com.ivanovsky.passnotes.injection.modules.FakeBiometricModule
-import com.ivanovsky.passnotes.injection.modules.FakeFileSystemProvidersModule
-import com.ivanovsky.passnotes.injection.modules.FileSystemProvidersModule
 import com.ivanovsky.passnotes.injection.modules.UiModule
 import com.ivanovsky.passnotes.injection.modules.UseCaseModule
 import org.koin.core.module.Module
@@ -27,15 +27,11 @@ class DebugModuleBuilder(
 
         return listOf(
             CoreModule.build(loggerInteractor),
-            if (isFakeFileSystemEnabled) {
-                FakeFileSystemProvidersModule.build(
-                    isExternalStorageAccessEnabled = isExternalStorageAccessEnabled
-                )
-            } else {
-                FileSystemProvidersModule.build(
-                    isExternalStorageAccessEnabled = isExternalStorageAccessEnabled
-                )
-            },
+            DebugModule.build(),
+            DebugFileSystemProvidersModule.build(
+                isExternalStorageAccessEnabled = isExternalStorageAccessEnabled,
+                isFakeFileSystemEnabled = isFakeFileSystemEnabled
+            ),
             if (isLoadFakeBiometricModule) {
                 FakeBiometricModule.build()
             } else {

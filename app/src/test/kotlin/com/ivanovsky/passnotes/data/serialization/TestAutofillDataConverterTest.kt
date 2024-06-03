@@ -22,7 +22,7 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(application = RobolectricApp::class, sdk = [29])
-class TestDataConverterTestAutofill {
+class TestAutofillDataConverterTest {
 
     @Test
     fun `toString should convert data to json string`() {

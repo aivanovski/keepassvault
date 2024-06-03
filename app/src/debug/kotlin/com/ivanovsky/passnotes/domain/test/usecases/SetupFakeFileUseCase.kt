@@ -81,7 +81,7 @@ class SetupFakeFileUseCase(
                             fileName = file.name,
                             isRoot = file.isRoot,
                             addedTime = System.currentTimeMillis(),
-                            keyType = KeyType.PASSWORD,
+                            keyType = KeyType.PASSWORD
                         )
                     )
                 }

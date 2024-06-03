@@ -12,7 +12,7 @@ class TestDataInteractor(
     private val resetAppDataUseCase: ResetAppDataUseCase,
     private val resetTestDataUseCase: ResetTestDataUseCase,
     private val setupFakeFileUseCase: SetupFakeFileUseCase,
-    private val setupAutofillDataUseCase: SetupTestAutofillDataUseCase,
+    private val setupAutofillDataUseCase: SetupTestAutofillDataUseCase
 ) {
 
     fun process(arguments: TestArguments): OperationResult<Unit> {

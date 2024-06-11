@@ -180,6 +180,7 @@
     <string name="sync_error">Sync error</string>
     <string name="no_search_results">No search results</string>
     <string name="compare_with">Compare with</string>
+    <string name="add_entry">Add entry</string>
 
     <!-- Group editor screen -->
     <string name="new_group">New group</string>

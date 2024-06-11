@@ -49,10 +49,10 @@
             android:layout_marginTop="@dimen/element_margin"
             app:layout_constraintTop_toBottomOf="@id/errorPanelView"
             app:onAddClicked="@{() -> viewModel.onAddKeyFileButtonClicked()}"
+            app:onEditorAction="@{(actionId) -> viewModel.onEditorAction(actionId)}"
             app:onRemoveClicked="@{() -> viewModel.onRemoveKeyFileButtonClicked()}"
             app:onUnlockClicked="@{() -> viewModel.onUnlockButtonClicked()}"
             app:onUnlockLongClicked="@{() -> viewModel.onUnlockButtonLongClicked()}"
-            app:onEditorAction="@{(actionId) -> viewModel.onEditorAction(actionId)}"
             app:screenState="@{viewModel.screenState}"
             app:screenStateHandler="@{viewModel.screenStateHandler}" />
 
@@ -90,6 +90,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/element_margin"
             android:layout_marginBottom="@dimen/element_margin"
+            android:contentDescription="@string/add_entry"
             android:onClick="@{() -> viewModel.onAddButtonClicked()}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

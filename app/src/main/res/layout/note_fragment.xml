@@ -175,6 +175,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/element_margin"
             android:layout_marginBottom="@dimen/element_margin"
+            android:contentDescription="@string/add_entry"
             android:onClick="@{() -> viewModel.onFabButtonClicked()}"
             app:layout_constraintBottom_toTopOf="@id/bottomPanelLayout"
             app:layout_constraintEnd_toEndOf="parent"

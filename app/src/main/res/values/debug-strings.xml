@@ -13,7 +13,6 @@
     <string name="database_with_dots" translatable="false">Database:</string>
     <string name="password_with_default" translatable="false">Password (default: abc123)</string>
     <string name="close" translatable="false">Close</string>
-    <string name="add_entry" translatable="false">Add entry</string>
     <string name="scenarios_with_dots" translatable="false">Scenarios:</string>
     <string name="view_test_diff" translatable="false">View test diff</string>
     <string name="hooks_with_dots" translatable="false">Hooks:</string>

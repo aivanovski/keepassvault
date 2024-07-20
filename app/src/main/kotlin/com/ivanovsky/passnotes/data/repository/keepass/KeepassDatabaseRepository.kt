@@ -166,7 +166,7 @@ class KeepassDatabaseRepository(
         type: KeepassImplementation,
         key: EncryptedDatabaseKey,
         file: FileDescriptor,
-        addTemplates: Boolean
+        isAddTemplates: Boolean
     ): OperationResult<Boolean> {
         return lock.withLock {
             val dbResult = KotpassDatabase.new(
@@ -174,7 +174,7 @@ class KeepassDatabaseRepository(
                 fsOptions = defaultOptions(),
                 file = file,
                 key = key,
-                isAddTemplates = true
+                isAddTemplates = isAddTemplates
             )
             if (dbResult.isFailed) {
                 return@withLock dbResult.takeError()

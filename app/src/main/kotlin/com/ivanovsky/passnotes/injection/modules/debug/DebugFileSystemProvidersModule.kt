@@ -2,9 +2,9 @@ package com.ivanovsky.passnotes.injection.modules.debug
 
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FSType
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.fake.DebugFileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeFileSystemProvider
-import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.fake.delay.ThreadThrottlerImpl
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import org.koin.dsl.module

@@ -5,11 +5,11 @@ import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.LoggerInteractor
 import com.ivanovsky.passnotes.injection.modules.BiometricModule
 import com.ivanovsky.passnotes.injection.modules.CoreModule
+import com.ivanovsky.passnotes.injection.modules.UiModule
+import com.ivanovsky.passnotes.injection.modules.UseCaseModule
 import com.ivanovsky.passnotes.injection.modules.debug.DebugFileSystemProvidersModule
 import com.ivanovsky.passnotes.injection.modules.debug.DebugModule
 import com.ivanovsky.passnotes.injection.modules.debug.FakeBiometricModule
-import com.ivanovsky.passnotes.injection.modules.UiModule
-import com.ivanovsky.passnotes.injection.modules.UseCaseModule
 import org.koin.core.module.Module
 
 // Is loaded via reflection in App.kt

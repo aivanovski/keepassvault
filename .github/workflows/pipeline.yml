@@ -49,21 +49,6 @@ jobs:
       - name: Run tests
         run: ./gradlew app:test
 
-
-  print-matrix-data:
-    name: Print matrix data
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - command: assembleGplayDebug
-            filePath: ./app/build/outputs/apk/gplay/debug/app-gplay-debug.apk
-    steps:
-      - name: Print
-        run: |
-          echo "command=${{ matrix.command }}"
-          echo "filePath=${{ matrix.filePath }}"
-
   build-apks:
     name: Build and store apk files
     needs: [ check-code-style, run-tests ]
@@ -72,13 +57,19 @@ jobs:
       matrix:
         include:
           - command: assembleGplayDebug
+            fileName: app-gplay-debug.apk
             filePath: ./app/build/outputs/apk/gplay/debug/app-gplay-debug.apk
+
           - command: assembleGplayRelease
+            fileName: app-gplay-release.apk
             filePath: ./app/build/outputs/apk/gplay/release/app-gplay-release.apk
 
           - command: assembleFdroidDebug
+            fileName: app-fdroid-debug.apk
             filePath: ./app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
+
           - command: assembleFdroidRelease
+            fileName: app-fdroid-release.apk
             filePath: ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
     steps:
       - name: Checkout
@@ -96,11 +87,10 @@ jobs:
 
       - name: Build
         run: |
-          ./gradlew app:assemble${{ matrix.command }}
+          ./gradlew app:${{ matrix.command }}
 
       - name: Store APK file
         uses: actions/upload-artifact@v3
         with:
-          name: app-gplay-debug.apk
-          path: |
-            ${{ matrix.filePath }}
+          name: ${{ matrix.fileName }}
+          path: ${{ matrix.filePath }}

@@ -49,8 +49,25 @@ jobs:
       - name: Run tests
         run: ./gradlew app:test
 
+
+  print-matrix-data:
+    name: Print matrix data
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - command: assembleGplayDebug
+            filePath: ./app/build/outputs/apk/gplay/debug/app-gplay-debug.apk
+    steps:
+      - name: Print
+        run: |
+          echo "command=${{ matrix.command }}"
+          echo "filePath=${{ matrix.filePath }}"
+
+
+
   build-apks:
-    name: Build apks
+    name: Build apk files
     needs: [ check-code-style, run-tests ]
     runs-on: ubuntu-latest
     strategy:
@@ -73,6 +90,15 @@ jobs:
       - name: Build
         run: |
           ./gradlew app:assemble${{ matrix.buildType }}
+
+      - name: Store APK file
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-gplay-debug.apk
+          path: |
+
+            ./app/build/outputs/apk/gplay/debug/app-gplay-debug.apk
+
 
 
 #

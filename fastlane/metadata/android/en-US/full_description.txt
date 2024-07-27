@@ -1,16 +1,32 @@
 Client app for KeePass databases.
 
-This app is orientated for my personal use. It may have some bugs, so please make a backup before use it.
+This app is orientated for my personal use. It may have some bugs, so please make a backup before using it.
 
-<b>Features</b>
+Application Features:
 
- * Synchronization with WebDav server or Git repository
- * Create databases, entries and groups
- * Password or key file unlock
- * Supports .kdbx files up to version 4.1 (application uses Kotpass library to manipulate the KeePass database)
- * Dynamic templates (compatible with other android applications: KeePassDX, keepass2android)
- * Biometric unlock
- * Autofill for Android >= 8.0
- * Fuzzy search
- * Dark theme
- * Built-in diff viewer for .kdbx files
+Synchronization:
+ - Sync with WebDav server
+ - Sync with Git repository (only via HTTPS, SSH protocol is not available)
+
+Database Management:
+ - Create new databases
+ - Edit existing databases
+ - Manage entry history
+ - Manage attachments
+ - Dynamic templates (compatible with other android applications: KeePassDX, keepass2android)
+
+Advanced Database Tools:
+ - Built-in diff viewer for database changes
+ - TOTP (Time-based One-Time Password) and HOTP (HMAC-based One-Time Password) support for Two-Factor Authentication (2FA)
+
+Security Features:
+ - Unlock using password or key file
+ - Supports biometric unlock (fingerprint)
+
+File Compatibility:
+ - Supports .kdbx files up to version 4.1
+
+User Convenience:
+ - Autofill for Android >= 8.0
+ - Dark theme (controlled by system settings)
+ - Fuzzy search for easy finding of entries

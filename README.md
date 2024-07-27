@@ -8,7 +8,7 @@ Android client app for KeePass databases.
       alt="Get it on Google Play"
 	height="80">](https://play.google.com/store/apps/details?id=com.ivanovsky.passnotes)
 
-**This app is orientated for my personal use. It may have some bugs, so please make a backups before use it.**
+**This app is orientated for my personal use. It may have some bugs, so please make a backups before using it.**
 
 # Features
 - Synchronization:

@@ -71,6 +71,10 @@ jobs:
           - command: assembleFdroidRelease
             fileName: app-fdroid-release.apk
             filePath: ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+
+          - command: assembleFdroidAutomation
+            fileName: app-fdroid-automation.apk
+            filePath: ./app/build/outputs/apk/fdroid/automation/app-fdroid-automation.apk
     steps:
       - name: Checkout
         uses: actions/checkout@v3

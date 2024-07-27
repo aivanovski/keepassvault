@@ -49,10 +49,32 @@ jobs:
       - name: Run tests
         run: ./gradlew app:test
 
-  build-gplay-debug:
-    name: Build Google Play debug
+  build-apks:
+    name: Build and store apk files
     needs: [ check-code-style, run-tests ]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - command: assembleGplayDebug
+            fileName: app-gplay-debug.apk
+            filePath: ./app/build/outputs/apk/gplay/debug/app-gplay-debug.apk
+
+          - command: assembleGplayRelease
+            fileName: app-gplay-release.apk
+            filePath: ./app/build/outputs/apk/gplay/release/app-gplay-release.apk
+
+          - command: assembleFdroidDebug
+            fileName: app-fdroid-debug.apk
+            filePath: ./app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
+
+          - command: assembleFdroidRelease
+            fileName: app-fdroid-release.apk
+            filePath: ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+
+          - command: assembleFdroidAutomation
+            fileName: app-fdroid-automation.apk
+            filePath: ./app/build/outputs/apk/fdroid/automation/app-fdroid-automation.apk
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -69,98 +91,10 @@ jobs:
 
       - name: Build
         run: |
-          ./gradlew app:assembleGplayDebug
+          ./gradlew app:${{ matrix.command }}
 
       - name: Store APK file
         uses: actions/upload-artifact@v3
         with:
-          name: app-gplay-debug.apk
-          path: |
-            ./app/build/outputs/apk/gplay/debug/app-gplay-debug.apk
-
-  build-gplay-release:
-    name: Build Google Play release
-    needs: [ check-code-style, run-tests ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Decrypt and validate decrypted data
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: ./.github/workflows/decrypt-and-validate-data.sh
-
-      - name: Build
-        run: |
-          ./gradlew app:assembleGplayRelease
-
-      - name: Store APK file
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-gplay-release.apk
-          path: |
-            ./app/build/outputs/apk/gplay/release/app-gplay-release.apk
-
-  build-fdroid-debug:
-    name: Build FDroid debug
-    needs: [ check-code-style, run-tests ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Decrypt and validate decrypted data
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: ./.github/workflows/decrypt-and-validate-data.sh
-
-      - name: Build
-        run: |
-          ./gradlew app:assembleFdroidDebug
-
-      - name: Store APK file
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-fdroid-debug.apk
-          path: |
-            ./app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
-
-  build-fdroid-release:
-    name: Build FDroid release
-    needs: [ check-code-style, run-tests ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Decrypt and validate decrypted data
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: ./.github/workflows/decrypt-and-validate-data.sh
-
-      - name: Build
-        run: |
-          ./gradlew app:assembleFdroidRelease
-
-      - name: Store APK file
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-fdroid-release.apk
-          path: |
-            ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+          name: ${{ matrix.fileName }}
+          path: ${{ matrix.filePath }}

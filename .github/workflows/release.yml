@@ -12,8 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - uses: actions/setup-java@v3
         with:
@@ -25,23 +24,15 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: ./.github/workflows/decrypt-and-validate-data.sh
 
-      - name: Build debug and release apk's
+      - name: Build apk's
         run: |
-          ./gradlew app:assembleFdroidDebug app:assembleFdroidRelease
+          ./gradlew app:assembleFdroidDebug app:assembleFdroidRelease app:assembleFdroidAutomation
 
-      - name: Store debug apk
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-fdroid-debug.apk
-          path: |
-            ./app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
-
-      - name: Store release apk
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-fdroid-release.apk
-          path: |
-            ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+      - name: Rename files
+        run: |
+          cp ./app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk ./keepassvault-debug.apk
+          cp ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk ./keepassvault-release.apk
+          cp ./app/build/outputs/apk/fdroid/automation/app-fdroid-automation.apk ./keepassvault-test.apk
 
       - name: Publish Github Release
         uses: softprops/action-gh-release@v2
@@ -49,8 +40,9 @@ jobs:
           generate_release_notes: true
           prerelease: true
           files: |
-            ./app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
-            ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+            ./keepassvault-debug.apk
+            ./keepassvault-release.apk
+            ./keepassvault-test.apk
 
   upload-to-google-play:
     name: Upload App Bundle to Google Play

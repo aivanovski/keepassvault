@@ -107,7 +107,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "1.5.4"
+        kotlinCompilerExtensionVersion "1.5.14"
     }
 
     kotlinOptions {
@@ -154,9 +154,15 @@ android {
             versionNameSuffix 'd'
             signingConfig signingConfigs.debug
         }
-        release {
+        automation {
+            debuggable true
             minifyEnabled false
+            signingConfig signingConfigs.debug
+            applicationIdSuffix '.automation'
+        }
+        release {
             debuggable false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
@@ -314,7 +320,7 @@ dependencies {
     // KeePass
     implementation "com.github.anvell:kotpass:$kotpassVersion"
     implementation "com.github.aivanovski:keepass-tree-diff:$treeDiffVersion"
-    debugImplementation "com.github.aivanovski:keepass-tree-builder:$treeBuilderVersion"
+    implementation "com.github.aivanovski:keepass-tree-builder:$treeBuilderVersion"
 
     // Fuzzy search
     implementation "com.github.aivanovski:fzf4j:$fzf4jVersion"

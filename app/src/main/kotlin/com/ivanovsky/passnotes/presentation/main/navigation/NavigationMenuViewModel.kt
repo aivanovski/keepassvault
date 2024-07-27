@@ -134,7 +134,7 @@ class NavigationMenuViewModel(
         val header = modelFactory.creteHeaderModel()
         val items = modelFactory.createMenuItemModels(
             isDatabaseOpened = isDbOpened,
-            isDebugMenuVisible = BuildConfig.DEBUG
+            isDebugMenuVisible = (BuildConfig.BUILD_TYPE == "debug")
         )
 
         return viewModelFactory.createCellViewModels(header + items, eventProvider)

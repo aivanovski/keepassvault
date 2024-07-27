@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">KeePassVault</string>
+    <string name="app_name_automation">KeePassVault Test</string>
 
     <!-- Common for all screens -->
     <string name="webdav">WebDAV</string>

@@ -75,7 +75,6 @@ android {
         versionName formattedVersionName
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         vectorDrawables.useSupportLibrary true
-        multiDexEnabled true
 
         project.logger.lifecycle("VersionName: $versionName")
         project.logger.lifecycle("VersionCode: $versionCode")
@@ -200,7 +199,6 @@ def lifecycleExtensionVersion = '2.2.0'
 def lifecycleVersion = '2.7.0'
 def appCompatVersion = '1.6.1'
 def androidAnnotationVersion = '1.7.0'
-def multidexVersion = '2.0.1'
 def coroutinesVersion = '1.7.3'
 def recyclerViewVersion = '1.3.2'
 def materialVersion = '1.9.0'
@@ -244,7 +242,6 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:$androidXArchVersion"
     testImplementation "androidx.test:core:$androidXCoreVersion"
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
-    testImplementation "org.robolectric:shadows-multidex:$robolectricVersion"
 
     // Android test dependencies
     androidTestImplementation "androidx.test.ext:junit:$androidXJunitVersion"
@@ -252,9 +249,6 @@ dependencies {
     androidTestImplementation "androidx.room:room-testing:$roomVersion"
     androidTestImplementation "com.google.truth:truth:$truthVersion"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-
-    // MultiDex
-    implementation "androidx.multidex:multidex:$multidexVersion"
 
     // DI
     implementation "io.insert-koin:koin-android:$koinVersion"

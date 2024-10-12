@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes
 
+import android.app.Application
 import android.content.Context
-import androidx.multidex.MultiDexApplication
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.LoggerInteractor
@@ -11,7 +11,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
 
-open class App : MultiDexApplication() {
+open class App : Application() {
 
     open fun configureModuleBuilder(builder: DIModuleBuilder) {
         // implementation should be flavor specific

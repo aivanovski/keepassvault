@@ -216,9 +216,9 @@ def sardineAndroidVersion = '0.8'
 def ciceroneVersion = '7.1'
 def timberVersion = '5.0.1'
 def treessenceVersion = '1.0.5'
-def kotpassVersion = '0.7.0'
-def treeDiffVersion = '0.3.0'
-def treeBuilderVersion = '0.3.0'
+def kotpassVersion = '0.10.0'
+def treeDiffVersion = '0.4.0'
+def treeBuilderVersion = '0.4.0'
 def fzf4jVersion = '0.2.1'
 // More latest version of jgit produce crash on Samsung
 def jgitVersion = '6.2.0.202206071550-r'
@@ -312,7 +312,7 @@ dependencies {
     implementation "org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:$jgitVersion"
 
     // KeePass
-    implementation "com.github.anvell:kotpass:$kotpassVersion"
+    implementation "app.keemobile:kotpass:$kotpassVersion"
     implementation "com.github.aivanovski:keepass-tree-diff:$treeDiffVersion"
     implementation "com.github.aivanovski:keepass-tree-builder:$treeBuilderVersion"
 

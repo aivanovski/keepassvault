@@ -16,11 +16,14 @@ import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.usecases.test.GetTestCredentialsUseCase
+import com.ivanovsky.passnotes.extensions.getOrThrow
+import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.toFileDescriptor
 import com.ivanovsky.passnotes.util.InputOutputUtils
 import com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOrNull
@@ -344,6 +347,23 @@ class DebugMenuInteractor(
             fileSystemResolver
                 .resolveProvider(fsAuthority)
                 .rootFile
+        }
+
+    suspend fun getFakeFileSystemFiles(
+        paths: List<String>
+    ): OperationResult<List<FileDescriptor>> =
+        withContext(dispatchers.IO) {
+            val provider = fileSystemResolver.resolveProvider(FakeFileSystemProvider.FS_AUTHORITY)
+
+            val results = paths.map { path ->
+                provider.getFile(path, FSOptions.DEFAULT)
+            }
+            val firstFailed = results.firstOrNull { result -> result.isFailed }
+            if (firstFailed != null) {
+                return@withContext firstFailed.mapError()
+            }
+
+            OperationResult.success(results.map { result -> result.getOrThrow() })
         }
 
     private fun generateNewGroupTitle(groupDao: GroupDao): String? {

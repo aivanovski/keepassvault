@@ -359,15 +359,24 @@
                     app:layout_constraintTop_toBottomOf="@id/scenariosText" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/viewDiffButton"
+                    android:id="@+id/viewSimpleDiffButton"
                     style="@style/Material.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/group_margin"
-                    android:layout_marginEnd="@dimen/element_margin"
-                    android:onClick="@{() -> viewModel.onViewTestDiffButtonClicked()}"
-                    android:text="@string/view_test_diff"
+                    android:onClick="@{() -> viewModel.onViewSimpleDiffButtonClicked()}"
+                    android:text="@string/view_simple_diff"
                     app:layout_constraintTop_toBottomOf="@id/scenariosDivider" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/viewDetailedDiffButton"
+                    style="@style/Material.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/group_margin"
+                    android:onClick="@{() -> viewModel.onViewDetailedDiffButtonClicked()}"
+                    android:text="@string/view_detailed_diff"
+                    app:layout_constraintTop_toBottomOf="@id/viewSimpleDiffButton" />
 
                 <TextView
                     android:id="@+id/hooksText"
@@ -378,7 +387,7 @@
                     android:layout_marginTop="@dimen/group_margin"
                     android:text="@string/hooks_with_dots"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/viewDiffButton" />
+                    app:layout_constraintTop_toBottomOf="@+id/viewDetailedDiffButton" />
 
                 <View
                     android:id="@+id/hooksDivider"

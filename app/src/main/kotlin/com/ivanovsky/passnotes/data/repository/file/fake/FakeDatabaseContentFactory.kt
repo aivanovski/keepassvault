@@ -181,6 +181,27 @@ object FakeDatabaseContentFactory {
             .toByteArray()
     }
 
+    fun createDiffDatabase(): ByteArray {
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                // TODO: add more fields
+                entry(ENTRY_APPLE)
+            }
+            .build()
+            .toByteArray()
+    }
+
+    fun createDiffModifiedDatabase(): ByteArray {
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                entry(ENTRY_APPLE_MODIFIED_UUID)
+            }
+            .build()
+            .toByteArray()
+    }
+
     private fun newEntry(
         created: Long,
         modified: Long,
@@ -364,6 +385,10 @@ object FakeDatabaseContentFactory {
         notes = "My personal Apple account",
         created = parseDateAndTime("2020-01-01 12:55:00"),
         modified = parseDateAndTime("2020-01-10 11:08:00")
+    )
+
+    private val ENTRY_APPLE_MODIFIED_UUID = ENTRY_APPLE.copy(
+        uuid = UUID(1L, 123L)
     )
 
     private val ENTRY_MICROSOFT = newEntry(

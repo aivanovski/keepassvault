@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.TestToggles
+import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
@@ -402,51 +403,55 @@ class DebugMenuViewModel(
         showSnackbarEvent.call(resourceProvider.getString(R.string.test_data_removed))
     }
 
-    fun onViewTestDiffButtonClicked() {
-        val fsAuthority = FSAuthority(
-            credentials = FSCredentials.BasicCredentials(
-                url = "content://fakefs.com",
-                username = "user",
-                password = "abc123"
+    fun onViewSimpleDiffButtonClicked() {
+        showExampleDiff(
+            paths = listOf(
+                "/demo/passwords.kdbx",
+                "/demo/passwords-modified.kdbx"
             ),
-            type = FSType.FAKE,
-            isBrowsable = true
+            key = PasswordKeepassKey("abc123")
         )
-        val key = PasswordKeepassKey("abc123")
+    }
 
-        val leftFile = FileDescriptor(
-            fsAuthority = fsAuthority,
-            path = "/demo/passwords.kdbx",
-            uid = "passwords",
-            name = "passwords.kdbx",
-            isDirectory = false,
-            isRoot = false
+    fun onViewDetailedDiffButtonClicked() {
+        showExampleDiff(
+            paths = listOf(
+                "/examples/detailed-diff.kdbx",
+                "/examples/detailed-diff-modified.kdbx"
+            ),
+            key = PasswordKeepassKey("abc123")
         )
+    }
 
-        val rightFile = FileDescriptor(
-            fsAuthority = fsAuthority,
-            path = "/demo/passwords-modified.kdbx",
-            uid = "passwords-modified",
-            name = "passwords-modified.kdbx",
-            isDirectory = false,
-            isRoot = false
-        )
+    private fun showExampleDiff(
+        paths: List<String>,
+        key: EncryptedDatabaseKey
+    ) {
+        screenState.value = ScreenState.loading()
 
-        router.navigateTo(
-            DiffViewerScreen(
-                DiffViewerScreenArgs(
-                    left = DiffEntity.File(
-                        file = leftFile,
-                        key = key
-                    ),
-                    right = DiffEntity.File(
-                        file = rightFile,
-                        key = key
-                    ),
-                    isHoldDatabaseInteraction = false
+        viewModelScope.launch {
+            val getFileResult = interactor.getFakeFileSystemFiles(paths)
+            if (getFileResult.isSucceededOrDeferred) {
+                val files = getFileResult.obj
+
+                val leftFile = files[0]
+                val rightFile = files[1]
+
+                router.navigateTo(
+                    DiffViewerScreen(
+                        DiffViewerScreenArgs(
+                            left = DiffEntity.File(key, leftFile),
+                            right = DiffEntity.File(key, rightFile),
+                            isHoldDatabaseInteraction = false
+                        )
+                    )
                 )
-            )
-        )
+                screenState.value = ScreenState.data()
+            } else {
+                val message = errorInteractor.processAndGetMessage(getFileResult.error)
+                screenState.value = ScreenState.dataWithError(message)
+            }
+        }
     }
 
     private fun getSelectedFile(): FileDescriptor? {

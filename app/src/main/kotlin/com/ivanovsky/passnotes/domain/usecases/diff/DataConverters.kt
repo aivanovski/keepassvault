@@ -6,11 +6,12 @@ import com.github.aivanovski.keepasstreediff.entity.DiffEvent as ExternalDiffEve
 import com.github.aivanovski.keepasstreediff.entity.Entity as DiffEntity
 import com.github.aivanovski.keepasstreediff.entity.EntryEntity
 import com.github.aivanovski.keepasstreediff.entity.EntryEntity as DiffEntryEntity
-import com.github.aivanovski.keepasstreediff.entity.FieldEntity
-import com.github.aivanovski.keepasstreediff.entity.FieldEntity as DiffFieldEntity
+import com.github.aivanovski.keepasstreediff.entity.Field
 import com.github.aivanovski.keepasstreediff.entity.GroupEntity as DiffGroupEntity
 import com.github.aivanovski.keepasstreediff.entity.MutableNode
+import com.github.aivanovski.keepasstreediff.entity.StringField
 import com.github.aivanovski.keepasstreediff.entity.TreeNode
+import com.github.aivanovski.keepasstreediff.entity.UUIDField
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseElement
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
@@ -55,27 +56,21 @@ fun DiffEntity.toInternalEntity(parentUid: UUID?): EncryptedDatabaseElement {
     return when (this) {
         is DiffGroupEntity -> this.toGroup(parentUid)
         is DiffEntryEntity -> this.toNote(parentUid!!)
-        is DiffFieldEntity -> this.toProperty()
-        else -> throw IllegalStateException()
+        is Field<*> -> this.toProperty()
+        else -> throw IllegalStateException("Unknown entity type")
     }
 }
 
 fun DiffEntryEntity.toNote(groupUid: UUID): Note {
-    val title = fields[PropertyType.TITLE.propertyName]?.value ?: EMPTY
+    val title = fields[PropertyType.TITLE.propertyName] as? StringField
 
     val properties = fields.values.map { field ->
-        val type = PropertyType.getByName(field.name)
-
-        Property(
-            type = type,
-            name = field.name,
-            value = field.value
-        )
+        field.toProperty()
     }
 
     return Note(
         uid = uuid,
-        title = title,
+        title = title?.value ?: EMPTY,
         groupUid = groupUid,
         created = Date(),
         modified = Date(),
@@ -85,11 +80,11 @@ fun DiffEntryEntity.toNote(groupUid: UUID): Note {
 }
 
 fun DiffGroupEntity.toGroup(parentUid: UUID?): Group {
-    val title = fields[PropertyType.TITLE.propertyName]?.value ?: EMPTY
+    val title = fields[PropertyType.TITLE.propertyName] as? StringField
 
     return Group(
         uid = uuid,
-        title = title,
+        title = title?.value ?: EMPTY,
         parentUid = parentUid,
         groupCount = 0,
         noteCount = 0,
@@ -98,21 +93,35 @@ fun DiffGroupEntity.toGroup(parentUid: UUID?): Group {
     )
 }
 
-fun DiffFieldEntity.toProperty(): Property {
-    val type = PropertyType.getByName(name)
+fun Field<*>.toProperty(): Property {
+    return when (this) {
+        is StringField -> {
+            val type = PropertyType.getByName(name)
 
-    return Property(
-        type = type,
-        name = name,
-        value = value
-    )
+            Property(
+                type = type,
+                name = name,
+                value = value
+            )
+        }
+
+        is UUIDField -> {
+            return Property(
+                type = null,
+                name = "UUID",
+                value = value.toString()
+            )
+        }
+
+        else -> throw IllegalStateException("Unknown field type: $this")
+    }
 }
 
 fun KotpassGroup.toDiffGroupEntity(): DiffGroupEntity {
     return DiffGroupEntity(
         uuid = uuid,
         fields = mapOf(
-            PropertyType.TITLE.propertyName to DiffFieldEntity(
+            PropertyType.TITLE.propertyName to StringField(
                 PropertyType.TITLE.propertyName,
                 name
             )
@@ -121,10 +130,10 @@ fun KotpassGroup.toDiffGroupEntity(): DiffGroupEntity {
 }
 
 fun Entry.toDiffEntryEntity(): DiffEntryEntity {
-    val fieldsMap = mutableMapOf<String, FieldEntity>()
+    val fieldsMap = mutableMapOf<String, StringField>()
 
     for (field in this.fields) {
-        fieldsMap[field.key] = FieldEntity(field.key, field.value.content)
+        fieldsMap[field.key] = StringField(field.key, field.value.content)
     }
 
     return EntryEntity(
@@ -134,11 +143,11 @@ fun Entry.toDiffEntryEntity(): DiffEntryEntity {
 }
 
 fun Note.toDiffEntryEntity(): DiffEntryEntity {
-    val fieldsMap = mutableMapOf<String, FieldEntity>()
+    val fieldsMap = mutableMapOf<String, StringField>()
 
     for (property in properties) {
         val name = property.name ?: EMPTY
-        fieldsMap[name] = FieldEntity(name, property.value ?: EMPTY)
+        fieldsMap[name] = StringField(name, property.value ?: EMPTY)
     }
 
     return EntryEntity(

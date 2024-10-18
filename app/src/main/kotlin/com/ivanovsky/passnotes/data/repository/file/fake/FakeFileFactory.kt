@@ -10,6 +10,8 @@ import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFact
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDatabaseWithKeyFile
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDatabaseWithOtpData
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDemoDatabase
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDiffDatabase
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDiffModifiedDatabase
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createKeyFileData
 import com.ivanovsky.passnotes.data.repository.file.fake.entity.FakeStorageEntry
 import com.ivanovsky.passnotes.util.FileUtils
@@ -153,6 +155,20 @@ class FakeFileFactory(
                 syncStatus = SyncStatus.NO_CHANGES,
                 localContentFactory = REMOTE_CONTENT_FACTORY,
                 remoteContentFactory = REMOTE_CONTENT_FACTORY
+            ),
+
+            // diff
+            newEntry(
+                localFile = newFile(Path.DETAILED_DIFF, Time.LOCAL),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createDiffDatabase() },
+                remoteContentFactory = { createDiffDatabase() }
+            ),
+            newEntry(
+                localFile = newFile(Path.DETAILED_DIFF_MODIFIED, Time.LOCAL),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createDiffModifiedDatabase() },
+                remoteContentFactory = { createDiffModifiedDatabase() }
             )
         )
     }
@@ -245,6 +261,10 @@ class FakeFileFactory(
         // demo
         val PASSWORDS = "/demo/passwords.kdbx"
         val PASSWORDS_MODIFID = "/demo/passwords-modified.kdbx"
+
+        // diff
+        val DETAILED_DIFF = "/examples/detailed-diff.kdbx"
+        val DETAILED_DIFF_MODIFIED = "/examples/detailed-diff-modified.kdbx"
     }
 
     private object Time {

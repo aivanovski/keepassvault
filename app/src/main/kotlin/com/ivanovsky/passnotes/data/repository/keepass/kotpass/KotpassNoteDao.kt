@@ -7,6 +7,7 @@ import app.keemobile.kotpass.database.modifiers.modifyBinaries
 import app.keemobile.kotpass.database.modifiers.modifyGroup
 import app.keemobile.kotpass.database.modifiers.removeEntry
 import app.keemobile.kotpass.models.BinaryData
+import app.keemobile.kotpass.models.BinaryReference
 import app.keemobile.kotpass.models.Entry
 import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Hash
@@ -193,8 +194,9 @@ class KotpassNoteDao(
 
             val (toInsert, toRemove) = prepareAttachmentsDiff(
                 oldEntry = oldRawEntry,
-                newEntry = newEntry,
-                allBinaries = db.getRawDatabase().binaries
+                oldBinariesMap = db.getRawDatabase().binaries,
+                newNote = newNote,
+                newHistory = newHistory
             )
 
             if (toInsert.isNotEmpty() || toRemove.isNotEmpty()) {
@@ -277,32 +279,55 @@ class KotpassNoteDao(
         return OperationResult.success(history)
     }
 
+    private fun List<BinaryReference>.toAttachments(
+        allBinaries: Map<ByteString, BinaryData>
+    ): List<Attachment> {
+        val attachments = mutableMapOf<ByteString, Attachment>()
+
+        for (binary in this) {
+            val key = binary.hash
+            if (attachments.containsKey(key)) {
+                continue
+            }
+
+            val attachment = binary.toAttachment(allBinaries)
+            if (attachment != null) {
+                attachments[key] = attachment
+            }
+        }
+
+        return attachments.values.toList()
+    }
+
     private fun prepareAttachmentsDiff(
         oldEntry: Entry,
-        newEntry: Entry,
-        allBinaries: Map<ByteString, BinaryData>
+        oldBinariesMap: Map<ByteString, BinaryData>,
+        newNote: Note,
+        newHistory: List<Entry>
     ): Pair<List<Attachment>, List<Attachment>> {
-        val allOldEntries = mutableListOf<Entry>()
+        val oldAttachments = mutableListOf<BinaryReference>()
             .apply {
-                add(oldEntry)
-                addAll(oldEntry.history)
+                addAll(oldEntry.binaries)
+
+                for (historyEntry in oldEntry.history) {
+                    addAll(historyEntry.binaries)
+                }
+            }
+            .toAttachments(
+                allBinaries = oldBinariesMap
+            )
+
+        val newAttachments = mutableListOf<Attachment>()
+            .apply {
+                addAll(
+                    newHistory
+                        .flatMap { entry -> entry.binaries }
+                        .toAttachments(allBinaries = oldBinariesMap)
+                )
+                addAll(newNote.attachments)
             }
 
-        val allNewEntries = mutableListOf<Entry>()
-            .apply {
-                add(newEntry)
-                addAll(newEntry.history)
-            }
-
-        val allOldAttachments = allOldEntries
-            .flatMap { entry -> entry.binaries }
-            .mapNotNull { binary -> binary.toAttachment(allBinaries) }
-
-        val allNewAttachments = allNewEntries
-            .flatMap { entry -> entry.binaries }
-            .mapNotNull { binary -> binary.toAttachment(allBinaries) }
-
-        val attachmentsDiff = differ.getAttachmentsDiff(allOldAttachments, allNewAttachments)
+        val attachmentsDiff = differ.getAttachmentsDiff(oldAttachments, newAttachments)
         return if (attachmentsDiff.isNotEmpty()) {
             val toInsert = attachmentsDiff
                 .mapNotNull { (action, attachment) ->

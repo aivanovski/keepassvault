@@ -270,7 +270,7 @@ class KotpassNoteDao(
                 .drop(excessiveHistoryItems)
                 .toMutableList()
                 .apply {
-                    add(oldEntry)
+                    add(oldEntry.copy(history = emptyList()))
                 }
         } else {
             emptyList()
@@ -313,19 +313,17 @@ class KotpassNoteDao(
                     addAll(historyEntry.binaries)
                 }
             }
+            .distinctBy { reference -> reference.hash }
             .toAttachments(
                 allBinaries = oldBinariesMap
             )
 
-        val newAttachments = mutableListOf<Attachment>()
-            .apply {
-                addAll(
-                    newHistory
-                        .flatMap { entry -> entry.binaries }
-                        .toAttachments(allBinaries = oldBinariesMap)
-                )
-                addAll(newNote.attachments)
-            }
+        val newHistoryAttachments = newHistory
+            .flatMap { entry -> entry.binaries }
+            .toAttachments(allBinaries = oldBinariesMap)
+
+        val newAttachments = (newHistoryAttachments + newNote.attachments)
+            .distinctBy { attachment -> attachment.hash }
 
         val attachmentsDiff = differ.getAttachmentsDiff(oldAttachments, newAttachments)
         return if (attachmentsDiff.isNotEmpty()) {

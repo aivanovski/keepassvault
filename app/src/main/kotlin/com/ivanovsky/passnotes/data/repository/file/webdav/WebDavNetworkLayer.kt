@@ -13,6 +13,8 @@ import timber.log.Timber
 class WebDavNetworkLayer {
 
     private val clients: MutableMap<HttpClientType, OkHttpSardine> = ConcurrentHashMap()
+
+    @Volatile
     private var webDavClient: OkHttpSardine? = null
 
     fun setCredentials(credentials: FSCredentials.BasicCredentials) {

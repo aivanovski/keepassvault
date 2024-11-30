@@ -73,7 +73,8 @@ class FSAuthorityTypeConverter(
                     FSCredentials.BasicCredentials(
                         url = credsObj.optString(URL),
                         username = credsObj.optString(USERNAME),
-                        password = credsObj.optString(PASSWORD)
+                        password = credsObj.optString(PASSWORD),
+                        isIgnoreSslValidation = credsObj.optBoolean(IS_IGNORE_SSL_VALIDATION)
                     )
                 }
 
@@ -125,6 +126,7 @@ class FSAuthorityTypeConverter(
                 creds.put(URL, credentials.url)
                 creds.put(USERNAME, credentials.username)
                 creds.put(PASSWORD, credentials.password)
+                creds.put(IS_IGNORE_SSL_VALIDATION, credentials.isIgnoreSslValidation)
             }
 
             is FSCredentials.GitCredentials -> {
@@ -162,6 +164,7 @@ class FSAuthorityTypeConverter(
 
         private const val USERNAME = "username"
         private const val PASSWORD = "password"
+        private const val IS_IGNORE_SSL_VALIDATION = "isIgnoreSslValidation"
 
         private const val IS_SECRET_URL = "isSecretUrl"
         private const val SALT = "salt"

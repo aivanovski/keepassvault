@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
+import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
@@ -24,6 +25,7 @@ import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.NavigateBack
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnDoneButtonClicked
+import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnIgnoreSslValidationStateChanged
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnPasswordChanged
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnPasswordVisibilityChanged
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnSecretUrlStateChanged
@@ -94,6 +96,7 @@ class ServerLoginViewModel(
             is OnSshOptionSelected -> onSshOptionSelected(intent)
             is NavigateBack -> navigateBack()
             is OnDoneButtonClicked -> onDoneButtonClicked()
+            is OnIgnoreSslValidationStateChanged -> onIgnoreSslValidationStateChanged(intent)
         }
     }
 
@@ -144,6 +147,14 @@ class ServerLoginViewModel(
 
         state.value = currentState.copy(
             isSecretUrlChecked = intent.isChecked
+        )
+    }
+
+    private fun onIgnoreSslValidationStateChanged(intent: OnIgnoreSslValidationStateChanged) {
+        val currentState = getDataState() ?: return
+
+        state.value = currentState.copy(
+            isIgnoreSslValidationChecked = intent.isChecked
         )
     }
 
@@ -201,6 +212,10 @@ class ServerLoginViewModel(
 
         val isSshFileSpecified = (state.selectedSshOption is SshOption.File)
         val loginType = args.loginType
+        val isIgnoreSslValidation = (
+            state.isIgnoreSslValidationCheckboxEnabled &&
+                state.isIgnoreSslValidationChecked
+            )
 
         return when {
             loginType == LoginType.GIT && isSshFileSpecified && sshKeyFile != null -> {
@@ -225,7 +240,8 @@ class ServerLoginViewModel(
                 FSCredentials.BasicCredentials(
                     url = state.url.trim(),
                     username = state.username.trim(),
-                    password = state.password.trim()
+                    password = state.password.trim(),
+                    isIgnoreSslValidation = isIgnoreSslValidation
                 )
             }
         }
@@ -363,9 +379,11 @@ class ServerLoginViewModel(
             isUsernameEnabled = isUsernameVisible(),
             isPasswordEnabled = isPasswordVisible(),
             isSecretUrlCheckboxEnabled = isSecretUrlCheckboxEnabled(),
+            isIgnoreSslValidationCheckboxEnabled = isIgnoreSslValidationCheckboxEnabled(),
             isPasswordVisible = false,
             isSshConfigurationEnabled = isSshConfigurationEnabled(),
             isSecretUrlChecked = false,
+            isIgnoreSslValidationChecked = false,
             selectedSshOption = SshOption.NotConfigured,
             sshOptions = listOf(SshOption.NotConfigured, SshOption.Select)
         )
@@ -385,6 +403,10 @@ class ServerLoginViewModel(
 
     private fun isSecretUrlCheckboxEnabled(): Boolean {
         return args.loginType == LoginType.GIT
+    }
+
+    private fun isIgnoreSslValidationCheckboxEnabled(): Boolean {
+        return args.loginType == LoginType.USERNAME_PASSWORD && BuildConfig.DEBUG
     }
 
     private fun getVisibleMenuItems(): List<ServerLoginMenuItem> {

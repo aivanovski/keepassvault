@@ -24,15 +24,13 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
-import okhttp3.OkHttpClient
 import timber.log.Timber
 
 class WebDavClientV2(
-    private val authenticator: WebdavAuthenticator,
-    httpClient: OkHttpClient
+    private val authenticator: WebdavAuthenticator
 ) : RemoteApiClientV2 {
 
-    private val webDavClient = WebDavNetworkLayer(httpClient).apply {
+    private val webDavClient = WebDavNetworkLayer().apply {
         val creds = authenticator.getFsAuthority().credentials
         if (creds != null) {
             setCredentials(creds as FSCredentials.BasicCredentials)
@@ -330,7 +328,11 @@ class WebDavClientV2(
             path = path,
             serverModified = this.modified,
             clientModified = this.modified,
-            revision = this.etag
+            revision = if (this.etag != null) {
+                this.etag
+            } else {
+                this.modified.time.toString()
+            }
         )
     }
 

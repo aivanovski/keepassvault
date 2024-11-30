@@ -1,27 +1,31 @@
 package com.ivanovsky.passnotes.data.repository.file.webdav
 
+import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import com.thegrizzlylabs.sardineandroid.impl.SardineException
 import java.io.IOException
-import okhttp3.OkHttpClient
+import java.util.concurrent.ConcurrentHashMap
 import timber.log.Timber
 
-class WebDavNetworkLayer(
-    httpClient: OkHttpClient
-) {
+class WebDavNetworkLayer {
 
-    private val webDavClient = OkHttpSardine(httpClient)
+    private val clients: MutableMap<HttpClientType, OkHttpSardine> = ConcurrentHashMap()
+    private var webDavClient: OkHttpSardine? = null
 
     fun setCredentials(credentials: FSCredentials.BasicCredentials) {
-        webDavClient.setCredentials(credentials.username, credentials.password)
+        setupClient(isIgnoreSslValidation = credentials.isIgnoreSslValidation)
+        webDavClient?.setCredentials(credentials.username, credentials.password)
     }
 
     fun <T> execute(call: (webDavClient: OkHttpSardine) -> T): OperationResult<T> {
+        val client = webDavClient
+        requireNotNull(client)
+
         try {
-            return OperationResult.success(call.invoke(webDavClient))
+            return OperationResult.success(call.invoke(client))
         } catch (exception: SardineException) {
             Timber.d(exception)
             return when (exception.statusCode) {
@@ -36,6 +40,22 @@ class WebDavNetworkLayer(
             Timber.d(exception)
             return OperationResult.error(OperationError.newGenericError(exception))
         }
+    }
+
+    private fun setupClient(
+        isIgnoreSslValidation: Boolean
+    ) {
+        val clientType = if (isIgnoreSslValidation && BuildConfig.DEBUG) {
+            HttpClientType.UNSECURE
+        } else {
+            HttpClientType.SECURE
+        }
+
+        webDavClient = clients[clientType]
+            ?: OkHttpSardine(HttpClientFactory.createHttpClient(clientType))
+                .apply {
+                    clients[clientType] = this
+                }
     }
 
     companion object {

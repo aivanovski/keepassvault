@@ -33,4 +33,8 @@ sealed class ServerLoginIntent(
     data class OnSecretUrlStateChanged(
         val isChecked: Boolean
     ) : ServerLoginIntent(isImmediate = true)
+
+    data class OnIgnoreSslValidationStateChanged(
+        val isChecked: Boolean
+    ) : ServerLoginIntent(isImmediate = true)
 }

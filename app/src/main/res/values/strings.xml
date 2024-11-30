@@ -297,6 +297,7 @@
     <string name="ssh_key_password">SSH key password</string>
     <string name="none">None</string>
     <string name="ssh_key">SSH key</string>
+    <string name="ignore_ssl_certificate_validation">Ignore SSL certificate validation</string>
 
     <!-- Debug menu screen -->
     <string name="debug_menu">Debug menu</string>

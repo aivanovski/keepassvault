@@ -27,9 +27,11 @@ sealed interface ServerLoginState {
         val isUsernameEnabled: Boolean,
         val isPasswordEnabled: Boolean,
         val isSecretUrlCheckboxEnabled: Boolean,
+        val isIgnoreSslValidationCheckboxEnabled: Boolean,
         val isPasswordVisible: Boolean,
         val isSshConfigurationEnabled: Boolean,
         val isSecretUrlChecked: Boolean,
+        val isIgnoreSslValidationChecked: Boolean,
         val selectedSshOption: SshOption,
         val sshOptions: List<SshOption>
     ) : ServerLoginState

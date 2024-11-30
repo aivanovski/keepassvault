@@ -29,6 +29,7 @@ import com.ivanovsky.passnotes.presentation.core.compose.ThemedScreenPreview
 import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.InfoCell
 import com.ivanovsky.passnotes.presentation.core.compose.model.InputType
 import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
+import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnIgnoreSslValidationStateChanged
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnPasswordChanged
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnPasswordVisibilityChanged
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnSecretUrlStateChanged
@@ -60,6 +61,9 @@ fun ServerLoginScreen(viewModel: ServerLoginViewModel) {
     val onSecretUrlStateChanged = rememberCallback { isChecked: Boolean ->
         viewModel.sendIntent(OnSecretUrlStateChanged(isChecked))
     }
+    val onIgnoreSslValidationStateChanged = rememberCallback { isChecked: Boolean ->
+        viewModel.sendIntent(OnIgnoreSslValidationStateChanged(isChecked))
+    }
 
     ServerLoginScreen(
         state = state,
@@ -68,7 +72,8 @@ fun ServerLoginScreen(viewModel: ServerLoginViewModel) {
         onPasswordChanged = onPasswordChanged,
         onPasswordVisibilityChanged = onPasswordVisibilityChanged,
         onSshOptionSelected = onSshOptionSelected,
-        onSecretUrlStateChanged = onSecretUrlStateChanged
+        onSecretUrlStateChanged = onSecretUrlStateChanged,
+        onIgnoreSslValidationStateChanged = onIgnoreSslValidationStateChanged
     )
 }
 
@@ -94,7 +99,8 @@ private fun ServerLoginScreen(
     onPasswordChanged: (password: String) -> Unit,
     onPasswordVisibilityChanged: (isVisible: Boolean) -> Unit,
     onSshOptionSelected: (option: SshOption) -> Unit,
-    onSecretUrlStateChanged: (isChecked: Boolean) -> Unit
+    onSecretUrlStateChanged: (isChecked: Boolean) -> Unit,
+    onIgnoreSslValidationStateChanged: (isChecked: Boolean) -> Unit
 ) {
     when (state) {
         ServerLoginState.NotInitialised, ServerLoginState.Loading -> {
@@ -113,7 +119,8 @@ private fun ServerLoginScreen(
                 onPasswordChanged = onPasswordChanged,
                 onPasswordVisibilityChanged = onPasswordVisibilityChanged,
                 onSshOptionSelected = onSshOptionSelected,
-                onSecretUrlStateChanged = onSecretUrlStateChanged
+                onSecretUrlStateChanged = onSecretUrlStateChanged,
+                onIgnoreSslValidationStateChanged = onIgnoreSslValidationStateChanged
             )
         }
     }
@@ -127,7 +134,8 @@ private fun DataContent(
     onPasswordChanged: (password: String) -> Unit,
     onPasswordVisibilityChanged: (isVisible: Boolean) -> Unit,
     onSshOptionSelected: (option: SshOption) -> Unit,
-    onSecretUrlStateChanged: (isChecked: Boolean) -> Unit
+    onSecretUrlStateChanged: (isChecked: Boolean) -> Unit,
+    onIgnoreSslValidationStateChanged: (isChecked: Boolean) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -149,9 +157,18 @@ private fun DataContent(
         )
 
         if (state.isSecretUrlCheckboxEnabled) {
-            SecretUrlCheckbox(
-                isSecretUrlChecked = state.isSecretUrlChecked,
-                onSecretUrlStateChanged = onSecretUrlStateChanged
+            CheckboxItem(
+                title = stringResource(R.string.url_contains_secret_message),
+                isChecked = state.isSecretUrlChecked,
+                onStateChanged = onSecretUrlStateChanged
+            )
+        }
+
+        if (state.isIgnoreSslValidationCheckboxEnabled) {
+            CheckboxItem(
+                title = stringResource(R.string.ignore_ssl_certificate_validation),
+                isChecked = state.isIgnoreSslValidationChecked,
+                onStateChanged = onIgnoreSslValidationStateChanged
             )
         }
 
@@ -212,24 +229,25 @@ private fun UrlTextField(
 }
 
 @Composable
-private fun SecretUrlCheckbox(
-    isSecretUrlChecked: Boolean,
-    onSecretUrlStateChanged: (isChecked: Boolean) -> Unit
+private fun CheckboxItem(
+    title: String,
+    isChecked: Boolean,
+    onStateChanged: (isChecked: Boolean) -> Unit
 ) {
     Row(
         modifier = Modifier
             .padding(top = dimensionResource(R.dimen.half_margin))
     ) {
         Checkbox(
-            checked = isSecretUrlChecked,
-            onCheckedChange = onSecretUrlStateChanged,
+            checked = isChecked,
+            onCheckedChange = onStateChanged,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(start = dimensionResource(R.dimen.quarter_margin))
         )
 
         Text(
-            text = stringResource(R.string.url_contains_secret_message),
+            text = title,
             style = PrimaryTextStyle(),
             modifier = Modifier
                 .align(Alignment.CenterVertically)
@@ -361,7 +379,8 @@ fun LightWebDavPreview() {
             onPasswordChanged = {},
             onPasswordVisibilityChanged = {},
             onSshOptionSelected = {},
-            onSecretUrlStateChanged = {}
+            onSecretUrlStateChanged = {},
+            onIgnoreSslValidationStateChanged = {}
         )
     }
 }
@@ -377,7 +396,8 @@ fun LightGitPreview() {
             onPasswordChanged = {},
             onPasswordVisibilityChanged = {},
             onSshOptionSelected = {},
-            onSecretUrlStateChanged = {}
+            onSecretUrlStateChanged = {},
+            onIgnoreSslValidationStateChanged = {}
         )
     }
 }
@@ -393,7 +413,8 @@ fun DarkGitPreview() {
             onPasswordChanged = {},
             onPasswordVisibilityChanged = {},
             onSshOptionSelected = {},
-            onSecretUrlStateChanged = {}
+            onSecretUrlStateChanged = {},
+            onIgnoreSslValidationStateChanged = {}
         )
     }
 }
@@ -411,7 +432,9 @@ private fun newGitState(): ServerLoginState {
         isPasswordVisible = false,
         isSshConfigurationEnabled = true,
         isSecretUrlCheckboxEnabled = true,
+        isIgnoreSslValidationCheckboxEnabled = false,
         isSecretUrlChecked = false,
+        isIgnoreSslValidationChecked = false,
         selectedSshOption = SshOption.File("id-rsa"),
         sshOptions = emptyList()
     )
@@ -430,7 +453,9 @@ private fun newWebDavState(): ServerLoginState {
         isPasswordVisible = false,
         isSshConfigurationEnabled = false,
         isSecretUrlCheckboxEnabled = true,
+        isIgnoreSslValidationCheckboxEnabled = true,
         isSecretUrlChecked = false,
+        isIgnoreSslValidationChecked = false,
         selectedSshOption = SshOption.NotConfigured,
         sshOptions = emptyList()
     )

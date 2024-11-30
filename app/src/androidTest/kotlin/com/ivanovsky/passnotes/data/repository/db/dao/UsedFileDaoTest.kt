@@ -110,7 +110,8 @@ class UsedFileDaoTest {
                 credentials = FSCredentials.BasicCredentials(
                     url = "firstServerUrl",
                     username = "firstUsername",
-                    password = "firstPassword"
+                    password = "firstPassword",
+                    isIgnoreSslValidation = false
                 ),
                 type = FSType.INTERNAL_STORAGE,
                 isBrowsable = true
@@ -125,7 +126,8 @@ class UsedFileDaoTest {
                 credentials = FSCredentials.BasicCredentials(
                     url = "keyFileServerUrl",
                     username = "keyFilUsername",
-                    password = "keyFilePassword"
+                    password = "keyFilePassword",
+                    isIgnoreSslValidation = true
                 ),
                 type = FSType.INTERNAL_STORAGE,
                 isBrowsable = true

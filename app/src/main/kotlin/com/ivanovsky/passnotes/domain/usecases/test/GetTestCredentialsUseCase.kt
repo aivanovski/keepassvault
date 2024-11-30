@@ -21,7 +21,8 @@ class GetTestCredentialsUseCase(
             FSCredentials.BasicCredentials(
                 url = data.webdavUrl,
                 username = data.webdavUsername,
-                password = data.webdavPassword
+                password = data.webdavPassword,
+                isIgnoreSslValidation = false
             )
         } else {
             null
@@ -56,7 +57,8 @@ class GetTestCredentialsUseCase(
             FSCredentials.BasicCredentials(
                 url = data.fakeFsUrl,
                 username = data.fakeFsUsername,
-                password = data.fakeFsPassword
+                password = data.fakeFsPassword,
+                isIgnoreSslValidation = false
             )
         } else {
             null

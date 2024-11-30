@@ -188,7 +188,8 @@ class FakeFileSystemProvider(
             credentials = FSCredentials.BasicCredentials(
                 url = "content://fakefs.com",
                 username = "user",
-                password = "abc123"
+                password = "abc123",
+                isIgnoreSslValidation = false
             ),
             type = FSType.FAKE,
             isBrowsable = true

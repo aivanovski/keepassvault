@@ -13,7 +13,8 @@ sealed class FSCredentials : Parcelable {
     data class BasicCredentials(
         val url: String,
         val username: String,
-        val password: String
+        val password: String,
+        val isIgnoreSslValidation: Boolean
     ) : FSCredentials()
 
     /**

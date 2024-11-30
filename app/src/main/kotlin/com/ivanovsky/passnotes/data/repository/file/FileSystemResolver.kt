@@ -98,7 +98,7 @@ open class FileSystemResolver(
     class WebdavFileSystemFactory : Factory {
         override fun createProvider(fsAuthority: FSAuthority): FileSystemProvider {
             val authenticator = WebdavAuthenticator(fsAuthority)
-            val client = RemoteApiClientAdapter(WebDavClientV2(authenticator, get()))
+            val client = RemoteApiClientAdapter(WebDavClientV2(authenticator))
 
             return RemoteFileSystemProvider(
                 authenticator,

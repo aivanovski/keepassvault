@@ -23,6 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/half_margin"
         android:layout_marginEnd="@dimen/half_margin"
+        app:description="@string/password"
         app:hint="@string/password"
         app:isEyeButtonEnabled="true"
         app:layout_constraintEnd_toStartOf="@id/unlockButton"
@@ -34,9 +35,9 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/small_margin"
+        android:contentDescription="@string/unlock_button"
         android:foreground="?attr/selectableItemBackground"
         android:minWidth="@dimen/unlock_button_size"
-        android:contentDescription="unlockButton"
         app:layout_constraintBottom_toBottomOf="@id/password"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/password" />

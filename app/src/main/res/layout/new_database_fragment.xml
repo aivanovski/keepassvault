@@ -130,7 +130,7 @@
                     app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
                     app:layout_constraintTop_toTopOf="@id/addTemplatesCheckBox"
                     app:srcCompat="@drawable/ic_info_24dp"
-                    app:tint="?attr/kpIconPrimaryColor"/>
+                    app:tint="?attr/kpIconPrimaryColor" />
 
                 <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
                     android:id="@+id/fileExtension"
@@ -151,6 +151,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/element_margin"
+                    app:description="@string/file_name"
                     app:hint="@string/file_name"
                     app:isEnabled="@{viewModel.isFilenameEnabled}"
                     app:layout_constraintEnd_toStartOf="@id/fileExtension"
@@ -165,6 +166,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/element_margin"
+                    app:description="@string/password"
                     app:hint="@string/password"
                     app:isEyeButtonEnabled="true"
                     app:layout_constraintEnd_toStartOf="@id/guidelineEnd"
@@ -179,6 +181,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/element_margin"
+                    app:description="@string/confirm_password"
                     app:hint="@string/confirm"
                     app:isEyeButtonEnabled="true"
                     app:layout_constraintEnd_toStartOf="@id/guidelineEnd"

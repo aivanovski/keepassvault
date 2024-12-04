@@ -44,6 +44,11 @@
     <string name="synchronize_with_source">Synchronize with source</string>
     <string name="details">Details</string>
 
+    <!-- Accessibility descriptions -->
+    <string name="url">URL</string>
+    <string name="unlock_button">Unlock button</string>
+    <string name="eye_icon">Eye icon</string>
+
     <!-- Lock notification -->
     <string name="lock_notification_channel">Quick Lock</string>
     <string name="lock_notification_channel_description">Button to lock opened database</string>

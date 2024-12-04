@@ -28,7 +28,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
             android:id="@+id/title"
@@ -39,6 +41,7 @@
             android:layout_marginLeft="@dimen/element_margin"
             android:layout_marginTop="@dimen/group_margin"
             android:layout_marginRight="@dimen/element_margin"
+            app:description="@string/title"
             app:hint="@string/title"
             app:layout_constraintTop_toBottomOf="@id/errorPanelView"
             app:screenState="@{viewModel.screenState}"

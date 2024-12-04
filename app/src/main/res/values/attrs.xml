@@ -8,5 +8,6 @@
         <attr name="hint" format="string" />
         <attr name="isEyeButtonEnabled" format="boolean" />
         <attr name="isClearButtonEnabled" format="boolean" />
+        <attr name="description" format="string" />
     </declare-styleable>
 </resources>

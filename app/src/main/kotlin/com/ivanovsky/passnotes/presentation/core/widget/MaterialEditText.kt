@@ -143,6 +143,11 @@ class MaterialEditText(
             this.hint = hint
         }
 
+        val description = params.getString(R.styleable.MaterialEditText_description)
+        if (description != null) {
+            binding.textInput.contentDescription = description
+        }
+
         val isEyeButtonEnabled = params.getBoolean(
             R.styleable.MaterialEditText_isEyeButtonEnabled,
             false
@@ -157,10 +162,12 @@ class MaterialEditText(
             isEyeButtonEnabled && isClearButtonEnabled -> {
                 throw IllegalStateException()
             }
+
             isEyeButtonEnabled -> {
                 actionButton = ActionButton.EYE
                 isTextVisible = false
             }
+
             isClearButtonEnabled -> {
                 actionButton = ActionButton.CLEAR
             }
@@ -272,6 +279,7 @@ class MaterialEditText(
                     InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_PASSWORD
                 }
             }
+
             TextInputType.DIGITS -> {
                 if (isTextVisible) {
                     InputType.TYPE_CLASS_NUMBER
@@ -279,12 +287,15 @@ class MaterialEditText(
                     InputType.TYPE_CLASS_NUMBER + InputType.TYPE_NUMBER_VARIATION_PASSWORD
                 }
             }
+
             TextInputType.TEXT_CAP_SENTENCES -> {
                 InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
             }
+
             TextInputType.URL -> {
                 InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_URI
             }
+
             TextInputType.EMAIL -> {
                 InputType.TYPE_CLASS_TEXT + InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS
             }
@@ -300,11 +311,13 @@ class MaterialEditText(
                 binding.textInput.maxLines = 1
                 binding.textInput.isSingleLine = true
             }
+
             TextInputLines.MULTIPLE_LINES -> {
                 binding.textInput.isSingleLine = false
                 binding.textInput.minLines = 1
                 binding.textInput.maxLines = 25
             }
+
             else -> {}
         }
         setTextVisibleInternal(isTextVisible)
@@ -316,9 +329,11 @@ class MaterialEditText(
             ImeOptions.ACTION_DONE -> {
                 binding.textInput.imeOptions = EditorInfo.IME_ACTION_DONE
             }
+
             ImeOptions.ACTION_NEXT -> {
                 binding.textInput.imeOptions = EditorInfo.IME_ACTION_NEXT
             }
+
             else -> {}
         }
     }
@@ -353,6 +368,7 @@ class MaterialEditText(
                 }
                 binding.editTextActionButton.setImageResource(getEyeIcon(isTextVisible))
             }
+
             ActionButton.CLEAR -> {
                 binding.editTextActionButton.setImageResource(R.drawable.ic_close_24dp)
             }

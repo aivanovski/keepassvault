@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ivanovsky.passnotes.R
@@ -27,6 +28,7 @@ import com.ivanovsky.passnotes.presentation.core.compose.PrimaryTextStyle
 import com.ivanovsky.passnotes.presentation.core.compose.ProgressIndicator
 import com.ivanovsky.passnotes.presentation.core.compose.ThemedScreenPreview
 import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.InfoCell
+import com.ivanovsky.passnotes.presentation.core.compose.contentDescription
 import com.ivanovsky.passnotes.presentation.core.compose.model.InputType
 import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnIgnoreSslValidationStateChanged
@@ -225,6 +227,7 @@ private fun UrlTextField(
                 end = dimensionResource(R.dimen.element_margin),
                 top = dimensionResource(R.dimen.element_margin)
             )
+            .then(contentDescription(stringResource(R.string.url)))
     )
 }
 
@@ -302,6 +305,7 @@ private fun UsernameTextField(
                 end = dimensionResource(R.dimen.element_margin),
                 top = dimensionResource(R.dimen.element_margin)
             )
+            .then(contentDescription(stringResource(R.string.username)))
     )
 }
 
@@ -332,6 +336,7 @@ private fun PasswordTextField(
                 end = dimensionResource(R.dimen.element_margin),
                 top = dimensionResource(R.dimen.element_margin)
             )
+            .then(contentDescription(stringResource(R.string.password)))
     )
 }
 

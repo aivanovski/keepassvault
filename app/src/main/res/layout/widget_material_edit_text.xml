@@ -16,9 +16,9 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/textInput"
-            android:saveEnabled="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:saveEnabled="false"
             android:textColor="?attr/kpPrimaryTextColor"
             android:textSize="@dimen/material_edit_text_primary_text_size" />
 
@@ -30,6 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/small_margin"
+        android:contentDescription="@string/eye_icon"
         android:focusable="false"
         android:focusableInTouchMode="false"
         android:visibility="gone"

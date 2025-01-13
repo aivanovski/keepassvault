@@ -4,9 +4,9 @@ import android.util.Base64
 import com.github.aivanovski.keepasstreebuilder.DatabaseBuilderDsl
 import com.github.aivanovski.keepasstreebuilder.Fields
 import com.github.aivanovski.keepasstreebuilder.converter.kotpass.KotpassDatabaseConverter
-import com.github.aivanovski.keepasstreebuilder.extensions.toByteArray
 import com.github.aivanovski.keepasstreebuilder.generator.EntityFactory.newBinaryFrom
 import com.github.aivanovski.keepasstreebuilder.model.Binary
+import com.github.aivanovski.keepasstreebuilder.model.Database
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
 import com.github.aivanovski.keepasstreebuilder.model.EntryEntity
 import com.github.aivanovski.keepasstreebuilder.model.GroupEntity
@@ -202,6 +202,22 @@ object FakeDatabaseContentFactory {
             .toByteArray()
     }
 
+    fun createAutomationDatabase(key: DatabaseKey): ByteArray {
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(key)
+            .content(ROOT) {
+                entry(ENTRY_BASIC)
+            }
+            .build()
+            .toByteArray()
+    }
+
+    private fun Database<*, *>.toByteArray(): ByteArray {
+        return contentFactory.invoke().use { input ->
+            input.readBytes()
+        }
+    }
+
     private fun newEntry(
         created: Long,
         modified: Long,
@@ -310,9 +326,9 @@ object FakeDatabaseContentFactory {
     private const val DEFAULT_PASSWORD = "abc123"
     private const val DEFAULT_KEY_FILE_CONTENT = "abcdefg1235678"
 
-    private val PASSWORD_KEY = DatabaseKey.PasswordKey(DEFAULT_PASSWORD)
-    private val FILE_KEY = DatabaseKey.BinaryKey(DEFAULT_KEY_FILE_CONTENT.toByteArray())
-    private val COMBINED_KEY = DatabaseKey.CompositeKey(
+    val PASSWORD_KEY = DatabaseKey.PasswordKey(DEFAULT_PASSWORD)
+    val FILE_KEY = DatabaseKey.BinaryKey(DEFAULT_KEY_FILE_CONTENT.toByteArray())
+    val COMBINED_KEY = DatabaseKey.CompositeKey(
         password = DEFAULT_PASSWORD,
         binaryData = DEFAULT_KEY_FILE_CONTENT.toByteArray()
     )
@@ -597,5 +613,14 @@ object FakeDatabaseContentFactory {
             ),
             modified = parseDate("2020-01-03").toInstant()
         )
+    )
+
+    private val ENTRY_BASIC = newEntry(
+        title = "Basic entry",
+        username = "john.doe@example.com",
+        password = "abc123",
+        url = "https://url.com",
+        created = parseDate("2020-01-01"),
+        modified = parseDate("2020-01-10")
     )
 }

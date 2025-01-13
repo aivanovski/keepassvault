@@ -4,9 +4,9 @@ import android.util.Base64
 import com.github.aivanovski.keepasstreebuilder.DatabaseBuilderDsl
 import com.github.aivanovski.keepasstreebuilder.Fields
 import com.github.aivanovski.keepasstreebuilder.converter.kotpass.KotpassDatabaseConverter
-import com.github.aivanovski.keepasstreebuilder.extensions.toByteArray
 import com.github.aivanovski.keepasstreebuilder.generator.EntityFactory.newBinaryFrom
 import com.github.aivanovski.keepasstreebuilder.model.Binary
+import com.github.aivanovski.keepasstreebuilder.model.Database
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
 import com.github.aivanovski.keepasstreebuilder.model.EntryEntity
 import com.github.aivanovski.keepasstreebuilder.model.GroupEntity
@@ -200,6 +200,12 @@ object FakeDatabaseContentFactory {
             }
             .build()
             .toByteArray()
+    }
+
+    private fun Database<*, *>.toByteArray(): ByteArray {
+        return contentFactory.invoke().use { input ->
+            input.readBytes()
+        }
     }
 
     private fun newEntry(

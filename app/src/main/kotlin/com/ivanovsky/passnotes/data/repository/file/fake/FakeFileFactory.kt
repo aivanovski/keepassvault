@@ -3,6 +3,10 @@ package com.ivanovsky.passnotes.data.repository.file.fake
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncStatus
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.COMBINED_KEY
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.FILE_KEY
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.PASSWORD_KEY
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createAutomationDatabase
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDatabaseWithAttachmentsData
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDatabaseWithCombinedKey
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDatabaseWithExpiredData
@@ -24,6 +28,7 @@ class FakeFileFactory(
         return listOf(
             // directories
             newEntry(newDirectory("/", Time.ROOT)),
+            newEntry(newDirectory("/automation", Time.ROOT)),
             newEntry(newDirectory("/conflicts", Time.ROOT)),
             newEntry(newDirectory("/errors", Time.ROOT)),
             newEntry(newDirectory("/examples", Time.ROOT)),
@@ -169,6 +174,26 @@ class FakeFileFactory(
                 syncStatus = SyncStatus.NO_CHANGES,
                 localContentFactory = { createDiffModifiedDatabase() },
                 remoteContentFactory = { createDiffModifiedDatabase() }
+            ),
+
+            // automation
+            newEntry(
+                localFile = newFile(Path.AUTOMATION_PASSWORD_UNLOCK, Time.LOCAL),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createAutomationDatabase(PASSWORD_KEY) },
+                remoteContentFactory = { createAutomationDatabase(PASSWORD_KEY) }
+            ),
+            newEntry(
+                localFile = newFile(Path.AUTOMATION_KEY_FILE_UNLOCK, Time.LOCAL),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createAutomationDatabase(FILE_KEY) },
+                remoteContentFactory = { createAutomationDatabase(FILE_KEY) }
+            ),
+            newEntry(
+                localFile = newFile(Path.AUTOMATION_COMBINE_UNLOCK, Time.LOCAL),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createAutomationDatabase(COMBINED_KEY) },
+                remoteContentFactory = { createAutomationDatabase(COMBINED_KEY) }
             )
         )
     }
@@ -265,6 +290,11 @@ class FakeFileFactory(
         // diff
         val DETAILED_DIFF = "/examples/detailed-diff.kdbx"
         val DETAILED_DIFF_MODIFIED = "/examples/detailed-diff-modified.kdbx"
+
+        // automation
+        val AUTOMATION_PASSWORD_UNLOCK = "/automation/basic.kdbx"
+        val AUTOMATION_KEY_FILE_UNLOCK = "/automation/basic-key-file.kdbx"
+        val AUTOMATION_COMBINE_UNLOCK = "/automation/basic-key-file-and-password.kdbx"
     }
 
     private object Time {

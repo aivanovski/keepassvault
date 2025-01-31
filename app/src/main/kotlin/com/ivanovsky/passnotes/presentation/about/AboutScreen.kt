@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,29 +33,34 @@ fun AboutScreen(
     version: String,
     buildType: String
 ) {
-    Column(
+    SelectionContainer(
         modifier = Modifier
             .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
     ) {
-        val appName = stringResource(R.string.app_name)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+        ) {
+            val appName = stringResource(R.string.app_name)
 
-        HeaderItem(appName)
-        TextItem(stringResource(R.string.version_with_str, version))
-        TextItem(stringResource(R.string.build_with_str, buildType))
-        TextWithUrlItem(buildIntroText())
+            HeaderItem(appName)
+            TextItem(stringResource(R.string.version_with_str, version))
+            TextItem(stringResource(R.string.build_with_str, buildType))
+            TextWithUrlItem(buildIntroText())
 
-        HeaderItem(stringResource(R.string.about))
-        TextItem(stringResource(R.string.about_licence_intro, appName))
+            HeaderItem(stringResource(R.string.about))
+            TextItem(stringResource(R.string.about_licence_intro, appName))
 
-        HeaderItem(stringResource(R.string.feedback))
-        TextWithUrlItem(buildClickableUrl(stringResource(R.string.feedback_url)))
+            HeaderItem(stringResource(R.string.feedback))
+            TextWithUrlItem(buildClickableUrl(stringResource(R.string.feedback_url)))
 
-        HeaderItem(stringResource(R.string.homepage))
-        TextWithUrlItem(
-            text = buildClickableUrl(stringResource(R.string.homepage_url)),
-            modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.group_margin))
-        )
+            HeaderItem(stringResource(R.string.homepage))
+            TextWithUrlItem(
+                text = buildClickableUrl(stringResource(R.string.homepage_url)),
+                modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.group_margin))
+            )
+        }
     }
 }
 

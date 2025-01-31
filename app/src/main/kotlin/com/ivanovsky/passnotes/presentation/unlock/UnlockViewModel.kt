@@ -911,8 +911,8 @@ class UnlockViewModel(
     }
 
     private fun isBiometricAuthenticationAvailable(): Boolean {
-        return biometricResolver.getInteractor().isBiometricUnlockAvailable()
-            && settings.isBiometricUnlockEnabled
+        return biometricResolver.getInteractor().isBiometricUnlockAvailable() &&
+            settings.isBiometricUnlockEnabled
     }
 
     private enum class ErrorPanelButtonAction {

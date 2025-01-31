@@ -8,7 +8,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
+import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 
 class AppSettingsViewModel(
     private val interactor: AppSettingsInteractor,
-    private val biometricInteractor: BiometricInteractor,
+    private val biometricResolver: BiometricResolver,
     private val errorInteractor: ErrorInteractor,
     private val permissionHelper: PermissionHelper,
     private val resourceProvider: ResourceProvider,
@@ -41,7 +41,8 @@ class AppSettingsViewModel(
     fun navigateBack() = router.exit()
 
     fun isBiometricUnlockAvailable(): Boolean {
-        return biometricInteractor.isBiometricUnlockAvailable()
+        return biometricResolver.getInteractor()
+            .isBiometricUnlockAvailable()
     }
 
     fun start() {

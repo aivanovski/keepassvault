@@ -15,10 +15,10 @@ class BiometricInteractorImpl(
 
     private val biometricManager = BiometricManager.from(context)
     private val cipherProvider = BiometricCipherProvider()
+    private val authenticator = BiometricAuthenticatorImpl()
 
-    /**
-     * Returns true if device support biometric authentication
-     */
+    override fun getAuthenticator(): BiometricAuthenticator = authenticator
+
     override fun isBiometricUnlockAvailable(): Boolean {
         val type = BIOMETRIC_STRONG
         return biometricManager.canAuthenticate(type) == BiometricManager.BIOMETRIC_SUCCESS

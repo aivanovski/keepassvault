@@ -10,7 +10,8 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.databinding.UnlockFragmentBinding
 import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
-import com.ivanovsky.passnotes.injection.GlobalInjector.inject
+import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
+import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialog
@@ -29,15 +30,20 @@ import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel.UnlockOption
 class UnlockFragment : BaseFragment() {
 
     private lateinit var binding: UnlockFragmentBinding
-    private val biometricAuthenticator: BiometricAuthenticator by inject()
+
+    private val biometricAuthenticator: BiometricAuthenticator by lazy {
+        GlobalInjector.get<BiometricResolver>()
+            .getInteractor()
+            .getAuthenticator()
+    }
+
     private val viewModel: UnlockViewModel by lazy {
         ViewModelProvider(
             this,
             UnlockViewModel.Factory(
                 args = getMandatoryArgument(ARGUMENTS)
             )
-        )
-            .get(UnlockViewModel::class.java)
+        )[UnlockViewModel::class.java]
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

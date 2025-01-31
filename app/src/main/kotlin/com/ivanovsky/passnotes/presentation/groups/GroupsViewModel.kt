@@ -13,7 +13,6 @@ import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Group
-import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL
@@ -23,6 +22,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
+import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
 import com.ivanovsky.passnotes.data.repository.settings.Settings
@@ -599,7 +599,11 @@ class GroupsViewModel(
                 return@launch
             }
 
-            val password = (getKeyResult.obj as PasswordKeepassKey).password
+            val password = when (val key = getKeyResult.getOrThrow()) {
+                is PasswordKeepassKey -> key.password
+                is FileKeepassKey -> key.password
+                else -> throw IllegalStateException()
+            } ?: EMPTY
 
             val encryptPasswordResult = interactor.encodePasswordAndStoreData(
                 encoder,
@@ -1315,8 +1319,7 @@ class GroupsViewModel(
 
     private fun isBiometricUnlockAllowedForDatabase(): Boolean {
         return biometricInteractor.isBiometricUnlockAvailable() &&
-            settings.isBiometricUnlockEnabled &&
-            dbUsedFile?.keyType == KeyType.PASSWORD
+            settings.isBiometricUnlockEnabled
     }
 
     enum class OptionPanelState {

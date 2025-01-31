@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.ivanovsky.passnotes.R
 
+@Deprecated("Use OptionDialog instead")
 class ChooseOptionDialog : DialogFragment(), DialogInterface.OnClickListener {
 
     lateinit var onItemClickListener: (itemIndex: Int) -> Unit

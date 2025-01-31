@@ -12,6 +12,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_ACCESS_IS
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_IS_NOT_A_DIRECTORY
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED
 import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
+import com.ivanovsky.passnotes.data.entity.OperationError.newFileIsAlreadyExistsError
 import com.ivanovsky.passnotes.data.entity.OperationError.newFileNotFoundError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationError.newPermissionError
@@ -23,6 +24,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
@@ -32,6 +34,7 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.concurrent.locks.ReentrantLock
+import okio.withLock
 import timber.log.Timber
 
 class RegularFileSystemProvider(
@@ -105,9 +108,11 @@ class RegularFileSystemProvider(
             FSType.INTERNAL_STORAGE -> {
                 getInternalRoot()
             }
+
             FSType.EXTERNAL_STORAGE -> {
                 getExternalRoots().firstOrNull()
             }
+
             else -> {
                 throw IllegalStateException()
             }
@@ -162,18 +167,24 @@ class RegularFileSystemProvider(
             return check.takeError()
         }
 
-        lock.lock()
-        return try {
-            val out = BufferedOutputStream(FileOutputStream(file.path))
-            OperationResult.success(out)
-        } catch (e: FileNotFoundException) {
-            Timber.d(e)
-            OperationResult.error(newGenericIOError(e.message, e))
-        } catch (e: Exception) {
-            Timber.d(e)
-            OperationResult.error(newGenericIOError(e.message, e))
-        } finally {
-            lock.unlock()
+        return lock.withLock {
+            val isExistResult = exists(file)
+            if (isExistResult.isFailed) {
+                return@withLock isExistResult.takeError()
+            }
+
+            val isExist = isExistResult.getOrThrow()
+            if (isExist && onConflictStrategy == OnConflictStrategy.CANCEL) {
+                return@withLock OperationResult.error(newFileIsAlreadyExistsError())
+            }
+
+            try {
+                val out = BufferedOutputStream(FileOutputStream(file.path))
+                OperationResult.success(out)
+            } catch (e: Exception) {
+                Timber.d(e)
+                OperationResult.error(newGenericIOError(e.message, e))
+            }
         }
     }
 

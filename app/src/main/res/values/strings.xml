@@ -290,6 +290,8 @@
     <string name="all_files_permission_dialog_title">Grant permission</string>
     <string name="all_files_permission_dialog_message">To complete this action application needs the permission to manage all files. After pressing "Grant" button, please select <b>Allow access to manage all files</b> option on the next screen</string>
     <string name="unable_to_authenticate">Unable to authenticate</string>
+    <string name="make_a_copy_and_select">Make a copy and Select</string>
+    <string name="copy_and_select_description">Copy will be created inside application private directory</string>
 
     <!-- Server login screen -->
     <string name="login_to_server">Login to server</string>

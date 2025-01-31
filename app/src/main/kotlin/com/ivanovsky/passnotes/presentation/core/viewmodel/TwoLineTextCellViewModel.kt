@@ -3,10 +3,10 @@ package com.ivanovsky.passnotes.presentation.core.viewmodel
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
-import com.ivanovsky.passnotes.presentation.core.model.SingleTextCellModel
+import com.ivanovsky.passnotes.presentation.core.model.TwoLineTextCellModel
 
-class SingleTextCellViewModel(
-    override val model: SingleTextCellModel,
+class TwoLineTextCellViewModel(
+    override val model: TwoLineTextCellModel,
     private val eventProvider: EventProvider
 ) : BaseCellViewModel(model) {
 
@@ -16,6 +16,6 @@ class SingleTextCellViewModel(
 
     companion object {
 
-        val CLICK_EVENT = SingleTextCellModel::class.qualifiedName + "_clickEvent"
+        val CLICK_EVENT = TwoLineTextCellViewModel::class.qualifiedName + "_clickEvent"
     }
 }

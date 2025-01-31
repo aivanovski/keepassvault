@@ -5,7 +5,7 @@ import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
-import com.ivanovsky.passnotes.presentation.core.model.SingleTextCellModel
+import com.ivanovsky.passnotes.presentation.core.model.OneLineTextCellModel
 import com.ivanovsky.passnotes.presentation.core.model.TwoTextWithIconCellModel
 
 class StorageListCellModelFactory(
@@ -31,7 +31,7 @@ class StorageListCellModelFactory(
                 }
 
                 else -> {
-                    SingleTextCellModel(
+                    OneLineTextCellModel(
                         id = fsType.value,
                         text = fsType.getTitle(isExternalStorageEnabled)
                     )

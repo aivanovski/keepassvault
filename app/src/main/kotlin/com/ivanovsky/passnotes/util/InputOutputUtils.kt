@@ -39,6 +39,25 @@ object InputOutputUtils {
         }
     }
 
+    fun copy(
+        from: InputStream,
+        to: OutputStream,
+        isClose: Boolean
+    ): OperationResult<Unit> {
+        return try {
+            copyOrThrow(
+                from = from,
+                to = to,
+                isCloseOnFinish = isClose,
+                cancellation = UNCANCELABLE
+            )
+            OperationResult.success(Unit)
+        } catch (exception: IOException) {
+            Timber.d(exception)
+            OperationResult.error(newGenericIOError(exception))
+        }
+    }
+
     @JvmStatic
     fun copy(
         sourceFile: File,
@@ -62,7 +81,7 @@ object InputOutputUtils {
             copyOrThrow(
                 source,
                 destination,
-                isCloneOnFinish = true,
+                isCloseOnFinish = true,
                 cancellation = UNCANCELABLE
             )
             OperationResult.success(Unit)
@@ -88,7 +107,7 @@ object InputOutputUtils {
             copyOrThrow(
                 source,
                 destination,
-                isCloneOnFinish = true,
+                isCloseOnFinish = true,
                 cancellation = UNCANCELABLE
             )
             OperationResult.success(Unit)
@@ -111,22 +130,22 @@ object InputOutputUtils {
     @JvmStatic
     @Throws(IOException::class)
     fun copyOrThrow(
-        source: InputStream,
-        destination: OutputStream,
-        isCloneOnFinish: Boolean,
+        from: InputStream,
+        to: OutputStream,
+        isCloseOnFinish: Boolean,
         cancellation: AtomicBoolean
     ) {
         try {
             val buf = ByteArray(BUFFER_SIZE)
             var len: Int
-            while (source.read(buf).also { len = it } > 0 && !cancellation.get()) {
-                destination.write(buf, 0, len)
+            while (from.read(buf).also { len = it } > 0 && !cancellation.get()) {
+                to.write(buf, 0, len)
             }
-            destination.flush()
+            to.flush()
         } finally {
-            if (isCloneOnFinish) {
-                closeOrThrow(source)
-                closeOrThrow(destination)
+            if (isCloseOnFinish) {
+                closeOrThrow(from)
+                closeOrThrow(to)
             }
         }
     }

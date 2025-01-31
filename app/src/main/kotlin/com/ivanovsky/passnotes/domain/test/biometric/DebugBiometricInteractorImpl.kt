@@ -5,15 +5,21 @@ import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.crypto.entity.BiometricData
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
 import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
 import java.util.concurrent.atomic.AtomicBoolean
 
-class FakeBiometricInteractorImpl : BiometricInteractor {
+class DebugBiometricInteractorImpl(
+    resourceProvider: ResourceProvider
+) : BiometricInteractor {
 
     private val encoder = ClearTextBiometricEncoder()
     private val decoder = ClearTextBiometricDecoder()
-
+    private val authenticator = DebugBiometricAuthenticatorImpl(resourceProvider)
     private val isBiometricDataInvalidated = AtomicBoolean(false)
+
+    override fun getAuthenticator(): BiometricAuthenticator = authenticator
 
     override fun isBiometricUnlockAvailable(): Boolean = true
 
@@ -38,10 +44,6 @@ class FakeBiometricInteractorImpl : BiometricInteractor {
     override fun clearStoredData(): OperationResult<Boolean> {
         val result = isBiometricDataInvalidated.compareAndSet(true, false)
         return OperationResult.success(result)
-    }
-
-    fun triggerBiometricDataInvalidated() {
-        isBiometricDataInvalidated.set(true)
     }
 
     private fun newBiometricDataInvalidatedError(): OperationError {

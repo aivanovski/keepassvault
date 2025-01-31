@@ -30,7 +30,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
+import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
@@ -105,7 +105,7 @@ import org.koin.core.parameter.parametersOf
 class GroupsViewModel(
     private val interactor: GroupsInteractor,
     syncStateInteractor: SyncStateInteractor,
-    private val biometricInteractor: BiometricInteractor,
+    biometricResolver: BiometricResolver,
     private val errorInteractor: ErrorInteractor,
     lockInteractor: DatabaseLockInteractor,
     private val observerBus: ObserverBus,
@@ -182,6 +182,7 @@ class GroupsViewModel(
     val backIcon = MutableLiveData<BackNavigationIcon>(BackNavigationIcon.Arrow)
     val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
 
+    private val biometricInteractor = biometricResolver.getInteractor()
     private var rootGroup: Group? = null
     private var currentGroup: Group? = null
     private var currentGroupUid: UUID? = null

@@ -27,7 +27,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
+import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.extensions.getFileDescriptor
@@ -63,7 +63,7 @@ import org.koin.core.parameter.parametersOf
 
 class UnlockViewModel(
     private val interactor: UnlockInteractor,
-    private val biometricInteractor: BiometricInteractor,
+    private val biometricResolver: BiometricResolver,
     private val errorInteractor: ErrorInteractor,
     private val observerBus: ObserverBus,
     private val resourceProvider: ResourceProvider,
@@ -198,7 +198,8 @@ class UnlockViewModel(
         val password = password.value ?: EMPTY
 
         if (isBiometricAuthenticationAvailable() && biometricData != null) {
-            val getDecoderResult = biometricInteractor.getCipherForDecryption(biometricData)
+            val getDecoderResult = biometricResolver.getInteractor()
+                .getCipherForDecryption(biometricData)
             if (getDecoderResult.isSucceeded) {
                 showBiometricUnlockDialog.call(getDecoderResult.obj)
             } else {
@@ -289,7 +290,8 @@ class UnlockViewModel(
 
     private fun removeBiometricData() {
         val biometricData = selectedUsedFile?.biometricData ?: return
-        val getDecoderResult = biometricInteractor.getCipherForDecryption(biometricData)
+        val getDecoderResult = biometricResolver.getInteractor()
+            .getCipherForDecryption(biometricData)
 
         val isBiometricDataInvalidated =
             (getDecoderResult.error.type == BIOMETRIC_DATA_INVALIDATED_ERROR)
@@ -909,7 +911,8 @@ class UnlockViewModel(
     }
 
     private fun isBiometricAuthenticationAvailable(): Boolean {
-        return biometricInteractor.isBiometricUnlockAvailable() && settings.isBiometricUnlockEnabled
+        return biometricResolver.getInteractor().isBiometricUnlockAvailable() &&
+            settings.isBiometricUnlockEnabled
     }
 
     private enum class ErrorPanelButtonAction {

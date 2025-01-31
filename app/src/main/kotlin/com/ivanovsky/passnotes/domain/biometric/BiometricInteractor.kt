@@ -6,9 +6,7 @@ import com.ivanovsky.passnotes.data.crypto.entity.BiometricData
 import com.ivanovsky.passnotes.data.entity.OperationResult
 
 interface BiometricInteractor {
-    /**
-     * Returns true if device support biometric authentication
-     */
+    fun getAuthenticator(): BiometricAuthenticator
     fun isBiometricUnlockAvailable(): Boolean
     fun getCipherForEncryption(): OperationResult<BiometricEncoder>
     fun getCipherForDecryption(biometricData: BiometricData): OperationResult<BiometricDecoder>

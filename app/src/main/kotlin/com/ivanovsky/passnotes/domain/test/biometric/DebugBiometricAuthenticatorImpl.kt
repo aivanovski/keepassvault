@@ -10,7 +10,7 @@ import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import timber.log.Timber
 
-class FakeBiometricAuthenticatorImpl(
+class DebugBiometricAuthenticatorImpl(
     private val resourceProvider: ResourceProvider
 ) : BiometricAuthenticator {
 

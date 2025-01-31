@@ -17,7 +17,9 @@ import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.databinding.GroupsFragmentBinding
 import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
+import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
+import com.ivanovsky.passnotes.injection.GlobalInjector.get
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens
@@ -48,22 +50,26 @@ import timber.log.Timber
 
 class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
 
+    private val router: Router by inject()
+    private lateinit var binding: GroupsFragmentBinding
+    private lateinit var adapter: ViewModelsAdapter
+    private var syncIconAnimation: Animator? = null
+    private var menu: Menu? = null
+
     private val viewModel: GroupsViewModel by lazy {
         ViewModelProvider(
             this,
             GroupsViewModel.Factory(
                 args = getMandatoryArgument(ARGUMENTS)
             )
-        )
-            .get(GroupsViewModel::class.java)
+        )[GroupsViewModel::class.java]
     }
-    private val router: Router by inject()
-    private val biometricAuthenticator: BiometricAuthenticator by inject()
 
-    private lateinit var binding: GroupsFragmentBinding
-    private lateinit var adapter: ViewModelsAdapter
-    private var syncIconAnimation: Animator? = null
-    private var menu: Menu? = null
+    private val biometricAuthenticator: BiometricAuthenticator by lazy {
+        get<BiometricResolver>()
+            .getInteractor()
+            .getAuthenticator()
+    }
 
     override fun onPermissionRequestResult(permission: SystemPermission, isGranted: Boolean) {
         when (permission) {

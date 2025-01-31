@@ -94,7 +94,7 @@ jobs:
           ./gradlew app:${{ matrix.command }}
 
       - name: Store APK file
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4.6
         with:
           name: ${{ matrix.fileName }}
           path: ${{ matrix.filePath }}

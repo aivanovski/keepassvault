@@ -31,7 +31,7 @@ import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.core.viewmodel.SingleTextCellViewModel
+import com.ivanovsky.passnotes.presentation.core.viewmodel.OneLineTextCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.TwoTextWithIconCellViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
 import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
@@ -54,7 +54,7 @@ class StorageListViewModel(
 ) : BaseScreenViewModel() {
 
     val viewTypes = ViewModelTypes()
-        .add(SingleTextCellViewModel::class, R.layout.cell_single_text)
+        .add(OneLineTextCellViewModel::class, R.layout.cell_single_text)
         .add(TwoTextWithIconCellViewModel::class, R.layout.cell_two_text_with_icon)
 
     val screenStateHandler = DefaultScreenStateHandler()
@@ -231,8 +231,8 @@ class StorageListViewModel(
     private fun subscribeToEvents() {
         eventProvider.subscribe(this) { event ->
             when {
-                event.containsKey(SingleTextCellViewModel.CLICK_EVENT) -> {
-                    val id = event.getString(SingleTextCellViewModel.CLICK_EVENT) ?: EMPTY
+                event.containsKey(OneLineTextCellViewModel.CLICK_EVENT) -> {
+                    val id = event.getString(OneLineTextCellViewModel.CLICK_EVENT) ?: EMPTY
                     val fsType = FSType.findByValue(id) ?: throw IllegalArgumentException()
                     onStorageOptionClicked(fsType)
                 }

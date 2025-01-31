@@ -18,7 +18,8 @@
         android:background="?android:attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
-        android:onClick="@{() -> viewModel.onClicked()}">
+        android:onClick="@{() -> viewModel.onClicked()}"
+        app:onLongClick="@{() -> viewModel.onLongClicked()}">
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guidelineStart"

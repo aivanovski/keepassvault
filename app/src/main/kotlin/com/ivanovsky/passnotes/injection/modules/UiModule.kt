@@ -25,6 +25,10 @@ import com.ivanovsky.passnotes.domain.interactor.syncState.SyncStateInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.presentation.about.AboutViewModel
 import com.ivanovsky.passnotes.presentation.autofill.AutofillViewFactory
+import com.ivanovsky.passnotes.presentation.core.dialog.optionDialog.OptionDialogArgs
+import com.ivanovsky.passnotes.presentation.core.dialog.optionDialog.OptionDialogViewModel
+import com.ivanovsky.passnotes.presentation.core.dialog.optionDialog.factory.OptionDialogCellModelFactory
+import com.ivanovsky.passnotes.presentation.core.dialog.optionDialog.factory.OptionDialogCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialogViewModel
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
@@ -206,6 +210,9 @@ object UiModule {
             single { HistoryCellModelFactory(get(), get()) }
             single { HistoryCellViewModelFactory(get()) }
 
+            single { OptionDialogCellModelFactory(get()) }
+            single { OptionDialogCellViewModelFactory(get()) }
+
             // Cicerone
             single { Cicerone.create() }
             single { provideCiceroneRouter(get()) }
@@ -381,6 +388,13 @@ object UiModule {
             }
             factory { (args: PropertyActionDialogArgs) ->
                 PropertyActionDialogViewModel(get(), args)
+            }
+            factory { (args: OptionDialogArgs) ->
+                OptionDialogViewModel(
+                    get(),
+                    get(),
+                    args
+                )
             }
         }
 

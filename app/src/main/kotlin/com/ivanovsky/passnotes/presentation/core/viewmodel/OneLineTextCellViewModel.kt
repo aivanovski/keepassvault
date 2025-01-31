@@ -3,10 +3,10 @@ package com.ivanovsky.passnotes.presentation.core.viewmodel
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
-import com.ivanovsky.passnotes.presentation.core.model.FileCellModel
+import com.ivanovsky.passnotes.presentation.core.model.OneLineTextCellModel
 
-class FileCellViewModel(
-    override val model: FileCellModel,
+class OneLineTextCellViewModel(
+    override val model: OneLineTextCellModel,
     private val eventProvider: EventProvider
 ) : BaseCellViewModel(model) {
 
@@ -14,12 +14,8 @@ class FileCellViewModel(
         eventProvider.send((CLICK_EVENT to model.id).toEvent())
     }
 
-    fun onLongClicked() {
-        eventProvider.send((LONG_CLICK_EVENT to model.id).toEvent())
-    }
-
     companion object {
-        val CLICK_EVENT = FileCellViewModel::class.qualifiedName + "_clickEvent"
-        val LONG_CLICK_EVENT = FileCellViewModel::class.qualifiedName + "_longClickEvent"
+
+        val CLICK_EVENT = OneLineTextCellViewModel::class.qualifiedName + "_clickEvent"
     }
 }

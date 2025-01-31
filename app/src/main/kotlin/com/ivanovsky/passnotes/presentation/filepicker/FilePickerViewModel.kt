@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.AuthType
@@ -16,6 +17,7 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.Screens.FilePickerScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
@@ -56,6 +58,7 @@ class FilePickerViewModel(
     val showAllFilePermissionDialogEvent = SingleLiveEvent<Unit>()
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
     val currentPath = MutableLiveData(EMPTY)
+    val showFileMenuDialog = SingleLiveEvent<List<FileMenuItem>>()
 
     private var isPermissionRejected = false
     private var filePathToFileMap: Map<String, FileDescriptor> = emptyMap()
@@ -65,10 +68,13 @@ class FilePickerViewModel(
 
     init {
         eventProvider.subscribe(this) { event ->
-            if (event.containsKey(FileCellViewModel.CLICK_EVENT)) {
-                val filePath = event.getString(FileCellViewModel.CLICK_EVENT)
-                if (filePath != null) {
-                    onItemClicked(filePath)
+            when {
+                event.containsKey(FileCellViewModel.CLICK_EVENT) -> {
+                    onItemClicked(event.getString(FileCellViewModel.CLICK_EVENT))
+                }
+
+                event.containsKey(FileCellViewModel.LONG_CLICK_EVENT) -> {
+                    onItemLongClicked(event.getString(FileCellViewModel.LONG_CLICK_EVENT))
                 }
             }
         }
@@ -123,23 +129,52 @@ class FilePickerViewModel(
         }
     }
 
-    fun onDoneButtonClicked() {
+    fun onFileMenuClicked(item: FileMenuItem) {
+        val file = selectedFile ?: return
+
+        when (item) {
+            FileMenuItem.SELECT -> selectFile(file)
+            FileMenuItem.COPY_AND_SELECT -> copyAndSelectFile(file)
+        }
+    }
+
+    private fun selectFile(file: FileDescriptor) {
         if (args.action == Action.PICK_DIRECTORY) {
             val currentDir = currentDir ?: return
 
             router.exit()
             router.sendResult(FilePickerScreen.RESULT_KEY, currentDir)
         } else if (args.action == Action.PICK_FILE) {
-            if (isAnyFileSelected()) {
-                val selectedFile = selectedFile ?: return
+            router.exit()
+            router.sendResult(FilePickerScreen.RESULT_KEY, file)
+        }
+    }
 
-                router.exit()
-                router.sendResult(FilePickerScreen.RESULT_KEY, selectedFile)
-            } else {
-                showSnackbarMessageEvent.call(
-                    resourceProvider.getString(R.string.please_select_any_file)
-                )
+    private fun copyAndSelectFile(file: FileDescriptor) {
+        setScreenState(ScreenState.loading())
+
+        viewModelScope.launch {
+            val copyResult = interactor.copyToPrivateStorage(file)
+            if (copyResult.isFailed) {
+                val message = errorInteractor.processAndGetMessage(copyResult.error)
+                setScreenState(ScreenState.dataWithError(message))
+                return@launch
             }
+
+            val copiedFile = copyResult.getOrThrow()
+            selectFile(copiedFile)
+        }
+    }
+
+    fun onDoneButtonClicked() {
+        val file = selectedFile
+
+        if (file != null) {
+            selectFile(file)
+        } else {
+            showSnackbarMessageEvent.call(
+                resourceProvider.getString(R.string.please_select_any_file)
+            )
         }
     }
 
@@ -274,7 +309,9 @@ class FilePickerViewModel(
         }
     }
 
-    private fun onItemClicked(filePath: String) {
+    private fun onItemClicked(filePath: String?) {
+        if (filePath == null) return
+
         val selectedFile = filePathToFileMap[filePath] ?: return
 
         if (selectedFile.isDirectory) {
@@ -307,6 +344,28 @@ class FilePickerViewModel(
             setCellElements(viewModelFactory.createCellViewModels(newModels, eventProvider))
             currentModels = newModels
             this.selectedFile = selectedFile
+        }
+    }
+
+    private fun onItemLongClicked(filePath: String?) {
+        val file = filePathToFileMap[filePath] ?: return
+
+        selectedFile = file
+
+        val menuItems = mutableListOf<FileMenuItem>()
+
+        if ((args.action == Action.PICK_FILE && !file.isDirectory) ||
+            (args.action == Action.PICK_DIRECTORY && file.isDirectory)
+        ) {
+            menuItems.add(FileMenuItem.SELECT)
+        }
+
+        if (!file.isDirectory && file.fsAuthority.type != FSType.INTERNAL_STORAGE) {
+            menuItems.add(FileMenuItem.COPY_AND_SELECT)
+        }
+
+        if (menuItems.isNotEmpty()) {
+            showFileMenuDialog.call(menuItems)
         }
     }
 
@@ -350,6 +409,11 @@ class FilePickerViewModel(
 
         return !permissionHelper.hasFileAccessPermission() &&
             (currentScreenState.isDisplayingData || currentScreenState.isDisplayingEmptyState)
+    }
+
+    enum class FileMenuItem {
+        SELECT,
+        COPY_AND_SELECT
     }
 
     class Factory(private val args: FilePickerArgs) : ViewModelProvider.Factory {

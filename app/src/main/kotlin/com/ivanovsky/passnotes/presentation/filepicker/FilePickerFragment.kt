@@ -15,6 +15,9 @@ import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.dialog.AllFilesPermissionDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.optionDialog.OptionDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.optionDialog.OptionDialogArgs
+import com.ivanovsky.passnotes.presentation.core.dialog.optionDialog.model.OptionItem
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.requestSystemPermission
 import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
@@ -24,6 +27,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestResultReceiver
 import com.ivanovsky.passnotes.presentation.filepicker.Action.PICK_DIRECTORY
 import com.ivanovsky.passnotes.presentation.filepicker.Action.PICK_FILE
+import com.ivanovsky.passnotes.presentation.filepicker.FilePickerViewModel.FileMenuItem
 import timber.log.Timber
 
 class FilePickerFragment :
@@ -144,6 +148,9 @@ class FilePickerFragment :
         viewModel.showAllFilePermissionDialogEvent.observe(viewLifecycleOwner) {
             showAllFilePermissionDialog()
         }
+        viewModel.showFileMenuDialog.observe(viewLifecycleOwner) { items ->
+            showFileMenuDialog(items)
+        }
     }
 
     private fun showAllFilePermissionDialog() {
@@ -157,6 +164,30 @@ class FilePickerFragment :
                 }
             }
         dialog.show(childFragmentManager, AllFilesPermissionDialog.TAG)
+    }
+
+    private fun showFileMenuDialog(items: List<FileMenuItem>) {
+        val options = items.map { item ->
+            when (item) {
+                FileMenuItem.SELECT -> OptionItem(
+                    title = resources.getString(R.string.select),
+                    description = null
+                )
+
+                FileMenuItem.COPY_AND_SELECT -> OptionItem(
+                    title = resources.getString(R.string.make_a_copy_and_select),
+                    description = resources.getString(R.string.copy_and_select_description)
+                )
+            }
+        }
+
+        val dialog = OptionDialog.newInstance(
+            args = OptionDialogArgs(options),
+            onItemClick = { index ->
+                viewModel.onFileMenuClicked(items[index])
+            }
+        )
+        dialog.show(childFragmentManager, OptionDialog.TAG)
     }
 
     companion object {

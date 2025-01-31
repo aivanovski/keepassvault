@@ -33,6 +33,7 @@ import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
 import com.ivanovsky.passnotes.extensions.getFileDescriptor
 import com.ivanovsky.passnotes.extensions.getKeyFileDescriptor
 import com.ivanovsky.passnotes.extensions.getLoginType
+import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
@@ -196,10 +197,7 @@ class UnlockViewModel(
         val selectedKeyFile = selectedKeyFile
         val password = password.value ?: EMPTY
 
-        if (isBiometricAuthenticationAvailable() &&
-            biometricData != null &&
-            selectedKeyFile == null
-        ) {
+        if (isBiometricAuthenticationAvailable() && biometricData != null) {
             val getDecoderResult = biometricInteractor.getCipherForDecryption(biometricData)
             if (getDecoderResult.isSucceeded) {
                 showBiometricUnlockDialog.call(getDecoderResult.obj)
@@ -383,17 +381,33 @@ class UnlockViewModel(
         val selectedUsedFile = selectedUsedFile ?: return
         val biometricData = selectedUsedFile.biometricData ?: return
         val selectedFile = selectedUsedFile.getFileDescriptor()
+        val keyFile = selectedKeyFile
+
+        if (selectedUsedFile.keyType == KeyType.KEY_FILE && keyFile == null) return
 
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val passwordResult = interactor.decodePassword(decoder, biometricData)
-            if (passwordResult.isFailed) {
-                setErrorPanelState(passwordResult.error)
+            val decodePasswordResult = interactor.decodePassword(decoder, biometricData)
+            if (decodePasswordResult.isFailed) {
+                setErrorPanelState(decodePasswordResult.error)
                 return@launch
             }
 
-            val key = PasswordKeepassKey(passwordResult.obj)
+            val password = decodePasswordResult.getOrThrow()
+            val keyType = selectedUsedFile.keyType
+
+            val key = when {
+                keyType == KeyType.PASSWORD -> PasswordKeepassKey(password)
+
+                keyType == KeyType.KEY_FILE && keyFile != null -> FileKeepassKey(
+                    file = keyFile,
+                    password = password
+                )
+
+                else -> throw IllegalStateException()
+            }
+
             val openResult = interactor.openDatabase(key, selectedFile)
             if (openResult.isFailed) {
                 setErrorPanelState(openResult.error)
@@ -882,8 +896,7 @@ class UnlockViewModel(
     @DrawableRes
     private fun getUnlockIconResIdInternal(): Int {
         return if (isBiometricAuthenticationAvailable() &&
-            selectedUsedFile?.biometricData != null &&
-            selectedKeyFile == null
+            selectedUsedFile?.biometricData != null
         ) {
             R.drawable.ic_fingerprint_24dp
         } else {

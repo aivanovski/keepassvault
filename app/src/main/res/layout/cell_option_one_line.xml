@@ -13,7 +13,7 @@
     <TextView
         style="@style/Material.ListItem.PrimaryText.SingleLine"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/material_list_item_height_single_line"
+        android:layout_height="@dimen/material_list_item_height_single_line_with_icon"
         android:background="?android:attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
@@ -22,6 +22,7 @@
         android:paddingLeft="@dimen/material_list_item_horizontal_padding"
         android:paddingRight="@dimen/material_list_item_horizontal_padding"
         android:text="@{viewModel.model.text}"
+        android:textStyle="bold"
         tools:text="Primary text" />
 
 </layout>

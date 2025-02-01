@@ -13,7 +13,7 @@ Android client app for KeePass databases.
 # Features
 - Synchronization:
     - Sync with WebDav server
-    - Sync with Git repository (only via HTTPS, SSH protocol is not available)
+    - Sync with Git repository (via HTTPS and SSH)
 
 - Database Management:
     - Create new databases

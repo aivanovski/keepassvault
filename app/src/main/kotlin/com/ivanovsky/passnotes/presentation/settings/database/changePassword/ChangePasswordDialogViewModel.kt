@@ -1,12 +1,12 @@
 package com.ivanovsky.passnotes.presentation.settings.database.changePassword
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
+import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -16,11 +16,11 @@ class ChangePasswordDialogViewModel(
     private val interactor: DatabaseSettingsInteractor,
     private val errorInteractor: ErrorInteractor,
     private val resourceProvider: ResourceProvider
-) : ViewModel() {
+) : BaseScreenViewModel(
+    initialState = ScreenState.data()
+) {
 
-    val screenStateHandler = ChangePasswordScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.data())
-
+    val visibilityHandler = ChangePasswordScreenVisibilityHandler()
     val password = MutableLiveData(EMPTY)
     val newPassword = MutableLiveData(EMPTY)
     val confirmation = MutableLiveData(EMPTY)
@@ -38,7 +38,7 @@ class ChangePasswordDialogViewModel(
             return
         }
 
-        screenState.value = ScreenState.loading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val changeResult = interactor.changePassword(password, newPassword)
@@ -46,8 +46,7 @@ class ChangePasswordDialogViewModel(
             if (changeResult.isSucceededOrDeferred) {
                 finishScreenEvent.call(Unit)
             } else {
-                val message = errorInteractor.processAndGetMessage(changeResult.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setErrorPanelState(changeResult.error)
             }
         }
     }

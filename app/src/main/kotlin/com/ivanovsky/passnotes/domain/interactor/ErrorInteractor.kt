@@ -4,8 +4,10 @@ import android.content.Context
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.util.StringUtils
 import java.lang.StringBuilder
 
+@Deprecated("Could be removed")
 class ErrorInteractor(private val context: Context) {
 
     fun processAndGetMessage(error: OperationError): String {
@@ -26,7 +28,7 @@ class ErrorInteractor(private val context: Context) {
             }
             else -> {
                 if (!error.message.isNullOrEmpty()) {
-                    error.message
+                    error.message ?: StringUtils.EMPTY
                 } else {
                     context.getString(R.string.error_has_been_occurred)
                 }

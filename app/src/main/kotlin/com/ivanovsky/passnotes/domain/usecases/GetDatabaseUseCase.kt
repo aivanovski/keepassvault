@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import kotlinx.coroutines.withContext
 
 class GetDatabaseUseCase(
@@ -24,7 +25,9 @@ class GetDatabaseUseCase(
         return if (db != null) {
             OperationResult.success(db)
         } else {
-            OperationResult.error(newDbError(MESSAGE_FAILED_TO_GET_DATABASE))
+            OperationResult.error(
+                newDbError(MESSAGE_FAILED_TO_GET_DATABASE, Stacktrace())
+            )
         }
     }
 }

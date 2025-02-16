@@ -15,6 +15,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
@@ -119,7 +120,12 @@ class KeepassDatabaseRepository(
     override fun reload(): OperationResult<Boolean> {
         val result = lock.withLock {
             if (!isOpened) {
-                return@withLock OperationResult.error(newDbError(MESSAGE_FAILED_TO_GET_DATABASE))
+                return@withLock OperationResult.error(
+                    newDbError(
+                        MESSAGE_FAILED_TO_GET_DATABASE,
+                        Stacktrace()
+                    )
+                )
             }
 
             val oldDb = database.get().database

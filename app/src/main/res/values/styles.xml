@@ -4,6 +4,7 @@
     <!-- Application attributes -->
     <attr name="kpBackgroundColor" format="reference|color" />
     <attr name="kpActionBarBackgroundColor" format="reference|color" />
+    <attr name="kpActionBarTextColor" format="reference|color" />
     <attr name="kpDialogBackgroundColor" format="reference|color" />
     <attr name="kpSecondaryBackgroundColor" format="reference|color" />
     <attr name="kpErrorBackgroundColor" format="reference|color" />
@@ -48,6 +49,7 @@
         <item name="kpBackgroundColor">@color/background</item>
         <item name="kpDialogBackgroundColor">@color/dialog_background</item>
         <item name="kpActionBarBackgroundColor">@color/action_bar_background</item>
+        <item name="kpActionBarTextColor">@color/action_bar_text</item>
         <item name="kpSecondaryBackgroundColor">@color/surface</item>
         <item name="kpErrorBackgroundColor">@color/error_background</item>
         <item name="kpSelectedBackgroundColor">@color/selected_background</item>
@@ -120,6 +122,10 @@
     </style>
 
     <style name="Material.OutlinedButton" parent="@style/Widget.Material3.Button.OutlinedButton"></style>
+
+    <style name="Material.FilledErrorButton" parent="@style/Widget.Material3.Button">
+        <item name="android:backgroundTint">?kpIconImportantColor</item>
+    </style>
 
     <style name="Material.BorderlessButton">
         <item name="android:minWidth">@dimen/borderless_icon_button_size</item>

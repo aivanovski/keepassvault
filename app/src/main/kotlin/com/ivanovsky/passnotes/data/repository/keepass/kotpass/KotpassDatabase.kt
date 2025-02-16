@@ -34,6 +34,7 @@ import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateDaoImpl
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateFactory
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrNull
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.util.InputOutputUtils
@@ -130,7 +131,8 @@ class KotpassDatabase(
                             MESSAGE_INVALID_PASSWORD
                         } else {
                             MESSAGE_INVALID_KEY_FILE
-                        }
+                        },
+                        Stacktrace()
                     )
                 )
             }
@@ -207,7 +209,11 @@ class KotpassDatabase(
 
     fun getRawParentGroup(childUid: UUID): OperationResult<RawGroup> {
         val parentGroup = groupUidToParentMap.get()[childUid]
-            ?: return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP))
+            ?: return OperationResult.error(
+                newDbError(
+                    MESSAGE_FAILED_TO_FIND_GROUP, Stacktrace()
+                )
+            )
 
         return OperationResult.success(parentGroup)
     }
@@ -219,7 +225,12 @@ class KotpassDatabase(
         }
 
         val (_, parentGroup) = rootGroup.findChildGroup { it.uuid == uid }
-            ?: return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP))
+            ?: return OperationResult.error(
+                newDbError(
+                    MESSAGE_FAILED_TO_FIND_GROUP,
+                    Stacktrace()
+                )
+            )
 
         return OperationResult.success(parentGroup)
     }
@@ -234,7 +245,8 @@ class KotpassDatabase(
                         GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
                         Note::class.simpleName,
                         noteUid
-                    )
+                    ),
+                    Stacktrace()
                 )
             )
 
@@ -301,7 +313,12 @@ class KotpassDatabase(
     fun getInheritableOptions(groupUid: UUID): OperationResult<InheritableOptions> {
         val options = autotypeOptionMap.get()[groupUid]
         return options?.let { OperationResult.success(it) }
-            ?: OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP))
+            ?: OperationResult.error(
+                newDbError(
+                    MESSAGE_FAILED_TO_FIND_GROUP,
+                    Stacktrace()
+                )
+            )
     }
 
     private fun createInheritableOptionsMap(): Map<UUID, InheritableOptions> {
@@ -385,7 +402,12 @@ class KotpassDatabase(
         }
 
         val templateGroupUid = getTemplateUidResult.getOrNull()
-            ?: return OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_GROUP))
+            ?: return OperationResult.error(
+                newDbError(
+                    MESSAGE_FAILED_TO_FIND_GROUP,
+                    Stacktrace()
+                )
+            )
 
         swapDatabase(
             getRawDatabase().modifyMeta {

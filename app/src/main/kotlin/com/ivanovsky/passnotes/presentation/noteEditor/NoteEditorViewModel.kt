@@ -33,7 +33,7 @@ import com.ivanovsky.passnotes.presentation.Screens.SetupOneTimePasswordScreen
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
-import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
@@ -90,9 +90,7 @@ class NoteEditorViewModel(
         .add(HeaderCellViewModel::class, R.layout.cell_header)
         .add(ExpirationCellViewModel::class, R.layout.cell_expiration_property)
 
-    val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.notInitialized())
-
+    val screenStateHandler = DefaultScreenVisibilityHandler()
     val isDoneButtonVisible = MutableLiveData<Boolean>()
     val showDiscardDialogEvent = SingleLiveEvent<String>()
     val showAddDialogEvent = SingleLiveEvent<List<Pair<CellType, String>>>()
@@ -137,14 +135,10 @@ class NoteEditorViewModel(
                 )
             }
             val viewModels = viewModelFactory.createCellViewModels(models, eventProvider)
-            setCellElements(viewModels)
+            setCellViewModels(viewModels)
 
-            isDoneButtonVisible.value = true
-            screenState.value = ScreenState.data()
+            setScreenState(ScreenState.data())
         } else if (args.mode == NoteEditorMode.EDIT) {
-            isDoneButtonVisible.value = false
-            screenState.value = ScreenState.loading()
-
             loadData()
         }
     }
@@ -159,9 +153,8 @@ class NoteEditorViewModel(
             val groupUid = args.groupUid ?: return
 
             val note = createNewNoteFromCells(groupUid, template)
-            isDoneButtonVisible.value = false
             hideKeyboardEvent.call(Unit)
-            screenState.value = ScreenState.loading()
+            setScreenState(ScreenState.loading())
 
             viewModelScope.launch {
                 val createNoteResult = withContext(Dispatchers.Default) {
@@ -171,18 +164,15 @@ class NoteEditorViewModel(
                 if (createNoteResult.isSucceededOrDeferred) {
                     finishScreen()
                 } else {
-                    val message = errorInteractor.processAndGetMessage(createNoteResult.error)
-                    isDoneButtonVisible.value = true
-                    screenState.value = ScreenState.dataWithError(message)
+                    setErrorPanelState(createNoteResult.error)
                 }
             }
         } else if (args.mode == NoteEditorMode.EDIT) {
             val sourceNote = note ?: return
             val sourceTemplate = template
 
-            isDoneButtonVisible.value = false
             hideKeyboardEvent.call(Unit)
-            screenState.value = ScreenState.loading()
+            setScreenState(ScreenState.loading())
 
             val newNote = createModifiedNoteFromCells(sourceNote, sourceTemplate)
             if (isNoteChanged(sourceNote, newNote)) {
@@ -192,9 +182,7 @@ class NoteEditorViewModel(
                     if (updateNoteResult.isSucceededOrDeferred) {
                         finishScreen()
                     } else {
-                        val message = errorInteractor.processAndGetMessage(updateNoteResult.error)
-                        isDoneButtonVisible.value = true
-                        screenState.value = ScreenState.dataWithError(message)
+                        setErrorPanelState(updateNoteResult.error)
                     }
                 }
             } else {
@@ -311,14 +299,14 @@ class NoteEditorViewModel(
                     insertPropertyCell(getViewModels(), newViewModel)
                 }
 
-                setCellElements(viewModels)
+                setCellViewModels(viewModels)
             }
 
             else -> {
                 val newModel = modelFactory.createCustomPropertyModel(cellType.getPropertyType())
                 val newViewModel = viewModelFactory.createCellViewModel(newModel, eventProvider)
 
-                setCellElements(insertPropertyCell(getViewModels(), newViewModel))
+                setCellViewModels(insertPropertyCell(getViewModels(), newViewModel))
             }
         }
     }
@@ -345,11 +333,11 @@ class NoteEditorViewModel(
         val otpModel = modelFactory.createOtpCell(url)
         val otpViewModel = viewModelFactory.createCellViewModel(otpModel, eventProvider)
 
-        setCellElements(insertPropertyCell(getViewModels(), otpViewModel))
+        setCellViewModels(insertPropertyCell(getViewModels(), otpViewModel))
     }
 
     private fun onFileAttached(file: FileDescriptor) {
-        screenState.value = ScreenState.loading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val createAttachmentResult = interactor.createAttachment(
@@ -365,11 +353,10 @@ class NoteEditorViewModel(
                 val model = modelFactory.createAttachmentCell(attachment)
                 val viewModel = viewModelFactory.createCellViewModel(model, eventProvider)
 
-                screenState.value = ScreenState.data()
-                setCellElements(insertAttachmentCell(getViewModels(), viewModel))
+                setScreenState(ScreenState.data())
+                setCellViewModels(insertAttachmentCell(getViewModels(), viewModel))
             } else {
-                val message = errorInteractor.processAndGetMessage(createAttachmentResult.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setErrorPanelState(createAttachmentResult.error)
             }
         }
     }
@@ -390,7 +377,7 @@ class NoteEditorViewModel(
     private fun loadData() {
         val uid = args.noteUid ?: return
 
-        screenState.value = ScreenState.loading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val noteResult = withContext(dispatchers.IO) {
@@ -403,11 +390,9 @@ class NoteEditorViewModel(
 
                 onDataLoaded(note, template)
 
-                isDoneButtonVisible.value = true
-                screenState.value = ScreenState.data()
+                setScreenState(ScreenState.data())
             } else {
-                val message = errorInteractor.processAndGetMessage(noteResult.error)
-                screenState.value = ScreenState.error(message)
+                setErrorPanelState(noteResult.error)
             }
         }
     }
@@ -431,7 +416,7 @@ class NoteEditorViewModel(
             ExpirationData(isExpirationEnabled, expiration)
         )
         val viewModels = viewModelFactory.createCellViewModels(models, eventProvider)
-        setCellElements(viewModels)
+        setCellViewModels(viewModels)
     }
 
     private suspend fun loadTemplate(note: Note): Template? =
@@ -459,7 +444,7 @@ class NoteEditorViewModel(
                 event.containsKey(ExtendedTextPropertyCellViewModel.REMOVE_EVENT) -> {
                     val cellId = event.getString(ExtendedTextPropertyCellViewModel.REMOVE_EVENT)
                     if (cellId != null) {
-                        setCellElements(removeCellById(getViewModels(), cellId))
+                        setCellViewModels(removeCellById(getViewModels(), cellId))
                     }
                 }
 
@@ -497,7 +482,7 @@ class NoteEditorViewModel(
     private fun onRemoveAttachmentButtonClicked(uid: String) {
         attachmentMap.remove(uid)
 
-        setCellElements(removeAttachmentCell(getViewModels(), cellId = uid))
+        setCellViewModels(removeAttachmentCell(getViewModels(), cellId = uid))
     }
 
     private fun onExpirationDateClicked() {
@@ -530,7 +515,7 @@ class NoteEditorViewModel(
 
         viewModels[idx] = viewModel
 
-        setCellElements(viewModels)
+        setCellViewModels(viewModels)
     }
 
     private fun createPropertiesFromCells(): List<Property> {
@@ -834,6 +819,11 @@ class NoteEditorViewModel(
             modifiedNote,
             NoteDiffer.ALL_FIELDS_WITHOUT_MODIFIED
         )
+    }
+
+    override fun setScreenState(state: ScreenState) {
+        super.setScreenState(state)
+        isDoneButtonVisible.value = state.isDisplayingData
     }
 
     private fun isAllEmpty(properties: List<Property>): Boolean {

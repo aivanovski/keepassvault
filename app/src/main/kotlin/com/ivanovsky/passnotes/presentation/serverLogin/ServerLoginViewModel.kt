@@ -17,30 +17,20 @@ import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.toFileId
 import com.ivanovsky.passnotes.presentation.Screens.ServerLoginScreen
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
+import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 import com.ivanovsky.passnotes.presentation.core.compose.themeFlow
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.NavigateBack
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnDoneButtonClicked
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnIgnoreSslValidationStateChanged
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnPasswordChanged
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnPasswordVisibilityChanged
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnSecretUrlStateChanged
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnSshOptionSelected
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginState
 import com.ivanovsky.passnotes.presentation.serverLogin.model.SshOption
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import java.util.UUID
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class ServerLoginViewModel(
@@ -53,117 +43,60 @@ class ServerLoginViewModel(
 ) : ViewModel() {
 
     val theme = themeFlow(themeProvider)
-    private val intents = Channel<ServerLoginIntent>()
 
-    val state = MutableStateFlow<ServerLoginState>(ServerLoginState.NotInitialised)
+    val state = MutableStateFlow(createInitialState())
     private var sshKeyFile: FileDescriptor? = null
 
     val hideKeyboardEvent = SingleLiveEvent<Unit>()
     val visibleMenuItems = MutableLiveData(getVisibleMenuItems())
 
-    fun start() {
-        if (state.value != ServerLoginState.NotInitialised) {
-            return
-        }
-
-        viewModelScope.launch {
-            intents.receiveAsFlow()
-                .onStart { emit(ServerLoginIntent.Init) }
-                .collect { intent ->
-                    handleIntent(intent)
-                }
-        }
-    }
-
-    fun sendIntent(intent: ServerLoginIntent) {
-        if (intent.isImmediate) {
-            handleIntent(intent)
-        } else {
-            viewModelScope.launch {
-                intents.send(intent)
-            }
-        }
-    }
-
-    private fun handleIntent(intent: ServerLoginIntent) {
-        when (intent) {
-            is ServerLoginIntent.Init -> onInit()
-            is ServerLoginIntent.OnUrlChanged -> onUrlChanged(intent)
-            is ServerLoginIntent.OnUsernameChanged -> onUsernameChanged(intent)
-            is OnPasswordChanged -> onPasswordChanged(intent)
-            is OnPasswordVisibilityChanged -> onPasswordVisibilityChanged(intent)
-            is OnSecretUrlStateChanged -> onSecretUrlStateChanged(intent)
-            is OnSshOptionSelected -> onSshOptionSelected(intent)
-            is NavigateBack -> navigateBack()
-            is OnDoneButtonClicked -> onDoneButtonClicked()
-            is OnIgnoreSslValidationStateChanged -> onIgnoreSslValidationStateChanged(intent)
-        }
-    }
-
-    private fun onInit() {
-        state.value = buildNewDataState()
-        visibleMenuItems.value = getVisibleMenuItems()
-    }
-
-    private fun onUrlChanged(intent: ServerLoginIntent.OnUrlChanged) {
-        val currentState = getDataState() ?: return
-
-        state.value = currentState.copy(
-            url = intent.url,
+    fun onUrlChanged(url: String) {
+        state.value = state.value.copy(
+            url = url,
             urlError = null
         )
     }
 
-    private fun onUsernameChanged(intent: ServerLoginIntent.OnUsernameChanged) {
-        val currentState = getDataState() ?: return
-
-        state.value = currentState.copy(
-            username = intent.username
+    fun onUsernameChanged(username: String) {
+        state.value = state.value.copy(
+            username = username
         )
     }
 
-    private fun onPasswordChanged(intent: OnPasswordChanged) {
-        val currentState = getDataState() ?: return
-
+    fun onPasswordChanged(password: String) {
         setScreenState(
-            currentState.copy(
-                password = intent.password
+            state.value.copy(
+                password = password
             )
         )
     }
 
-    private fun onPasswordVisibilityChanged(intent: OnPasswordVisibilityChanged) {
-        val currentState = getDataState() ?: return
-
+    fun onPasswordVisibilityChanged(isVisible: Boolean) {
         setScreenState(
-            currentState.copy(
-                isPasswordVisible = intent.isVisible
+            state.value.copy(
+                isPasswordVisible = isVisible
             )
         )
     }
 
-    private fun onSecretUrlStateChanged(intent: OnSecretUrlStateChanged) {
-        val currentState = getDataState() ?: return
-
-        state.value = currentState.copy(
-            isSecretUrlChecked = intent.isChecked
+    fun onSecretUrlStateChanged(isChecked: Boolean) {
+        state.value = state.value.copy(
+            isSecretUrlChecked = isChecked
         )
     }
 
-    private fun onIgnoreSslValidationStateChanged(intent: OnIgnoreSslValidationStateChanged) {
-        val currentState = getDataState() ?: return
-
-        state.value = currentState.copy(
-            isIgnoreSslValidationChecked = intent.isChecked
+    fun onIgnoreSslValidationStateChanged(isChecked: Boolean) {
+        state.value = state.value.copy(
+            isIgnoreSslValidationChecked = isChecked
         )
     }
 
-    private fun navigateBack() {
+    fun navigateBack() {
         router.exit()
     }
 
-    private fun onDoneButtonClicked() {
-        val state = getDataState() ?: return
+    fun onDoneButtonClicked() {
+        val state = state.value
 
         clearErrors()
 
@@ -173,16 +106,19 @@ class ServerLoginViewModel(
 
         val credentials = getFsCredentials() ?: return
 
-        setScreenState(ServerLoginState.Loading)
+        setScreenState(
+            state.copy(
+                screenState = ScreenState.loading()
+            )
+        )
         hideKeyboardEvent.call(Unit)
 
         viewModelScope.launch {
             val authentication = interactor.authenticate(credentials, args.fsAuthority)
             if (authentication.isFailed) {
-                val message = errorInteractor.processAndGetMessage(authentication.error)
                 setScreenState(
                     state.copy(
-                        errorMessage = message
+                        screenState = ScreenState.dataWithError(authentication.error),
                     )
                 )
                 return@launch
@@ -192,10 +128,9 @@ class ServerLoginViewModel(
 
             val save = interactor.saveCredentials(credentials, file.fsAuthority)
             if (save.isFailed) {
-                val message = errorInteractor.processAndGetMessage(save.error)
                 setScreenState(
                     state.copy(
-                        errorMessage = message
+                        screenState = ScreenState.dataWithError(save.error),
                     )
                 )
                 return@launch
@@ -206,8 +141,8 @@ class ServerLoginViewModel(
         }
     }
 
-    private fun getFsCredentials(): FSCredentials? {
-        val state = getDataState() ?: return null
+    private fun getFsCredentials(): FSCredentials {
+        val state = state.value
         val sshKeyFile = this.sshKeyFile
 
         val isSshFileSpecified = (state.selectedSshOption is SshOption.File)
@@ -247,8 +182,8 @@ class ServerLoginViewModel(
         }
     }
 
-    private fun onSshOptionSelected(intent: OnSshOptionSelected) {
-        if (intent.option is SshOption.Select) {
+    fun onSshOptionSelected(option: SshOption) {
+        if (option is SshOption.Select) {
             viewModelScope.launch {
                 // The delay is necessary for ExposedDropdownMenu,
                 // otherwise it produces crash
@@ -272,24 +207,20 @@ class ServerLoginViewModel(
                 )
             }
         } else {
-            val currentState = getDataState() ?: return
-
             setScreenState(
-                currentState.copy(
-                    isPasswordVisible = (intent.option is SshOption.File),
-                    selectedSshOption = intent.option
+                state.value.copy(
+                    isPasswordVisible = (option is SshOption.File),
+                    selectedSshOption = option
                 )
             )
         }
     }
 
     private fun onSshKeyFileSelected(file: FileDescriptor) {
-        val currentState = getDataState() ?: return
-
         sshKeyFile = file
 
         setScreenState(
-            currentState.copy(
+            state.value.copy(
                 isPasswordEnabled = true,
                 selectedSshOption = SshOption.File(file.name),
                 sshOptions = listOf(
@@ -302,28 +233,24 @@ class ServerLoginViewModel(
     }
 
     private fun clearErrors() {
-        val currentState = getDataState() ?: return
-
         setScreenState(
-            currentState.copy(
-                errorMessage = null,
+            state.value.copy(
+                screenState = ScreenState.data(),
                 urlError = null
             )
         )
     }
 
     private fun validateFields(): Boolean {
-        val currentState = getDataState() ?: return false
-
-        if (currentState.url.isBlank()) {
+        if (state.value.url.isBlank()) {
             setScreenState(
-                currentState.copy(
+                state.value.copy(
                     urlError = resourceProvider.getString(R.string.empty_field)
                 )
             )
         }
 
-        return currentState.url.isNotBlank()
+        return state.value.url.isNotBlank()
     }
 
     private fun getCredentialsToFill(): FSCredentials? {
@@ -345,11 +272,7 @@ class ServerLoginViewModel(
         }
     }
 
-    private fun getDataState(): ServerLoginState.Data? {
-        return state.value as? ServerLoginState.Data
-    }
-
-    private fun buildNewDataState(): ServerLoginState.Data {
+    private fun createInitialState(): ServerLoginState {
         val creds = getCredentialsToFill()
 
         val url = when (creds) {
@@ -369,9 +292,9 @@ class ServerLoginViewModel(
             else -> ""
         }
 
-        return ServerLoginState.Data(
+        return ServerLoginState(
+            screenState = ScreenState.data(),
             loginType = args.loginType,
-            errorMessage = null,
             url = url,
             urlError = null,
             username = username,
@@ -410,7 +333,7 @@ class ServerLoginViewModel(
     }
 
     private fun getVisibleMenuItems(): List<ServerLoginMenuItem> {
-        return if (state.value is ServerLoginState.Data) {
+        return if (state.value.screenState.isDisplayingData) {
             ServerLoginMenuItem.entries
         } else {
             emptyList()

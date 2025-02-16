@@ -15,7 +15,8 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groupEditor.GroupEditorInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
@@ -31,10 +32,11 @@ class GroupEditorViewModel(
     observerBus: ObserverBus,
     private val router: Router,
     private val args: GroupEditorArgs
-) : ViewModel() {
+) : BaseScreenViewModel(
+    initialState = ScreenState.loading()
+) {
 
-    val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.loading())
+    val screenStateHandler = DefaultScreenVisibilityHandler()
     val screenTitle = determineScreenTitle()
     val autotypeValues = MutableLiveData(emptyList<String>())
     val selectedAutotypeValue = MutableLiveData(EMPTY)
@@ -64,11 +66,7 @@ class GroupEditorViewModel(
                 parentGroupUid = args.parentGroupUid
             )
             if (loadDataResult.isFailed) {
-                setScreenState(
-                    ScreenState.error(
-                        errorText = errorInteractor.processAndGetMessage(loadDataResult.error)
-                    )
-                )
+                setErrorState(loadDataResult.error)
                 return@launch
             }
 
@@ -138,11 +136,7 @@ class GroupEditorViewModel(
             } else {
                 doneButtonVisibility.value = true
 
-                setScreenState(
-                    ScreenState.dataWithError(
-                        errorText = errorInteractor.processAndGetMessage(createResult.error)
-                    )
-                )
+                setErrorPanelState(createResult.error)
             }
         }
     }
@@ -176,11 +170,7 @@ class GroupEditorViewModel(
             } else {
                 doneButtonVisibility.value = true
 
-                setScreenState(
-                    ScreenState.dataWithError(
-                        errorText = errorInteractor.processAndGetMessage(updateResult.error)
-                    )
-                )
+                setErrorPanelState(updateResult.error)
             }
         }
     }
@@ -261,10 +251,6 @@ class GroupEditorViewModel(
             InheritableBooleanOption.ENABLED,
             InheritableBooleanOption.DISABLED
         )
-    }
-
-    private fun setScreenState(state: ScreenState) {
-        screenState.value = state
     }
 
     class Factory(private val args: GroupEditorArgs) : ViewModelProvider.Factory {

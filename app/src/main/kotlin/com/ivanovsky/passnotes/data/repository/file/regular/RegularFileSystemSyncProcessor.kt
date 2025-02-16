@@ -12,6 +12,7 @@ import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 
 class RegularFileSystemSyncProcessor(
     private val provider: RegularFileSystemProvider
@@ -35,12 +36,18 @@ class RegularFileSystemSyncProcessor(
                 getFileResult.error.type == OperationError.Type.FILE_NOT_FOUND_ERROR -> {
                 SyncStatus.FILE_NOT_FOUND
             }
+
             else -> SyncStatus.ERROR
         }
     }
 
     override fun getSyncConflictForFile(uid: String): OperationResult<SyncConflictInfo> {
-        return OperationResult.error(newGenericError(MESSAGE_INCORRECT_USE_CASE))
+        return OperationResult.error(
+            newGenericError(
+                MESSAGE_INCORRECT_USE_CASE,
+                Stacktrace()
+            )
+        )
     }
 
     override fun process(
@@ -48,6 +55,11 @@ class RegularFileSystemSyncProcessor(
         syncStrategy: SyncStrategy,
         resolutionStrategy: ConflictResolutionStrategy?
     ): OperationResult<FileDescriptor> {
-        return OperationResult.error(newGenericError(MESSAGE_INCORRECT_USE_CASE))
+        return OperationResult.error(
+            newGenericError(
+                MESSAGE_INCORRECT_USE_CASE,
+                Stacktrace()
+            )
+        )
     }
 }

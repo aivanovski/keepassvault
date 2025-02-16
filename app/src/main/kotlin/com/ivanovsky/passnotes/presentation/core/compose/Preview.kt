@@ -2,11 +2,15 @@ package com.ivanovsky.passnotes.presentation.core.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.presentation.core.event.Event
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
@@ -50,6 +54,23 @@ fun ThemedPreview(
         }
     }
 }
+
+@Composable
+fun ElementSpace() {
+    Spacer(modifier = Modifier.height(height = ElementMargin))
+}
+
+@Composable
+fun shortDummyText(): String =
+    stringResource(R.string.short_dummy_text)
+
+@Composable
+fun mediumDummyText(): String =
+    stringResource(R.string.medium_dummy_text)
+
+@Composable
+fun veryLongDummyText(): String =
+    stringResource(R.string.long_dummy_text)
 
 fun newEventProvider(): EventProvider {
     return object : EventProvider {

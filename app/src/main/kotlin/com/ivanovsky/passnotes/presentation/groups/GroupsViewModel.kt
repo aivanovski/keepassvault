@@ -14,7 +14,6 @@ import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL
 import com.ivanovsky.passnotes.data.entity.OperationError.Type.BIOMETRIC_DATA_INVALIDATED_ERROR
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
@@ -34,6 +33,7 @@ import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
@@ -56,13 +56,13 @@ import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.BackNavigationIcon
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
-import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ScreenStateType
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.ScreenType
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
-import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
@@ -118,7 +118,7 @@ class GroupsViewModel(
     private val selectionHolder: SelectionHolder,
     private val router: Router,
     private val args: GroupsScreenArgs
-) : ViewModel(),
+) : BaseScreenViewModel(),
     ObserverBus.GroupDataSetObserver,
     ObserverBus.NoteDataSetChanged,
     ObserverBus.NoteContentObserver,
@@ -131,9 +131,7 @@ class GroupsViewModel(
         .add(SpaceCellViewModel::class, R.layout.cell_space)
         .add(DividerCellViewModel::class, R.layout.cell_divider)
 
-    val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.notInitialized())
-    val eventProvider = EventProviderImpl()
+    val screenStateHandler = DefaultScreenVisibilityHandler()
 
     val navigationPanelViewModel = NavigationPanelCellViewModel(
         initModel = NavigationPanelCellModel(
@@ -159,7 +157,7 @@ class GroupsViewModel(
         eventProvider = eventProvider
     ) as OptionPanelCellViewModel
 
-    val cellViewModels = MutableLiveData<CellsData>()
+    val cells = MutableLiveData<CellsData>()
     val searchQuery = MutableLiveData(EMPTY)
     val screenTitle = MutableLiveData(EMPTY)
     val visibleMenuItems = MutableLiveData<List<GroupsMenuItem>>(emptyList())
@@ -315,7 +313,7 @@ class GroupsViewModel(
                 }
 
                 if (currentEntries.isNotEmpty()) {
-                    cellViewModels.value = CellsData(
+                    cells.value = CellsData(
                         isResetScroll = isResetScroll,
                         viewModels = createCellViewModels(currentEntries)
                     )
@@ -542,8 +540,7 @@ class GroupsViewModel(
 
                 visibleMenuItems.value = getVisibleMenuItems()
             } else {
-                val message = errorInteractor.processAndGetMessage(isAdded.error)
-                setScreenState(ScreenState.error(message))
+                setErrorState(isAdded.error)
             }
         }
     }
@@ -897,8 +894,7 @@ class GroupsViewModel(
 
                 visibleMenuItems.value = getVisibleMenuItems()
             } else {
-                val message = errorInteractor.processAndGetMessage(removeResult.error)
-                setScreenState(ScreenState.error(message))
+                setErrorState(removeResult.error)
             }
         }
     }
@@ -916,8 +912,7 @@ class GroupsViewModel(
 
                 visibleMenuItems.value = getVisibleMenuItems()
             } else {
-                val message = errorInteractor.processAndGetMessage(removeResult.error)
-                setScreenState(ScreenState.error(message))
+                setErrorState(removeResult.error)
             }
         }
     }
@@ -984,8 +979,7 @@ class GroupsViewModel(
                 setScreenState(ScreenState.data())
                 visibleMenuItems.value = getVisibleMenuItems()
             } else {
-                val message = errorInteractor.processAndGetMessage(actionResult.error)
-                setScreenState(ScreenState.error(message))
+                setErrorState(actionResult.error)
             }
         }
     }
@@ -1052,11 +1046,7 @@ class GroupsViewModel(
                 isRespectAutotypeProperty = (args.appMode == AUTOFILL_SELECTION)
             )
             if (getAllEntries.isFailed) {
-                setScreenState(
-                    ScreenState.error(
-                        errorText = errorInteractor.processAndGetMessage(getAllEntries.error)
-                    )
-                )
+                setErrorState(getAllEntries.error)
                 return@launch
             }
 
@@ -1140,7 +1130,7 @@ class GroupsViewModel(
     private suspend fun loadNavigationPanelData(): OperationResult<Unit> {
         val groupUid = currentGroupUid
         if (groupUid == null) {
-            val error = newGenericError(MESSAGE_UID_IS_NULL)
+            val error = newGenericError(MESSAGE_UID_IS_NULL, Stacktrace())
             setErrorState(error)
             return OperationResult.error(error)
         }
@@ -1173,7 +1163,7 @@ class GroupsViewModel(
 
         val groupUid = currentGroupUid
         if (groupUid == null) {
-            val error = newGenericError(MESSAGE_UID_IS_NULL)
+            val error = newGenericError(MESSAGE_UID_IS_NULL, Stacktrace())
             setErrorState(error)
             return OperationResult.error(error)
         }
@@ -1203,24 +1193,8 @@ class GroupsViewModel(
         return cellViewModelFactory.createCellViewModels(models, eventProvider)
     }
 
-    private fun setErrorState(error: OperationError) {
-        setScreenState(
-            ScreenState.error(
-                errorText = errorInteractor.processAndGetMessage(error)
-            )
-        )
-    }
-
-    private fun setErrorPanelState(error: OperationError) {
-        setScreenState(
-            ScreenState.dataWithError(
-                errorText = errorInteractor.processAndGetMessage(error)
-            )
-        )
-    }
-
-    private fun setScreenState(state: ScreenState) {
-        screenState.value = state
+    override fun setScreenState(state: ScreenState) {
+        super.setScreenState(state)
         isFabButtonVisible.value = getFabButtonVisibility()
         isNavigationPanelVisible.value = getNavigationPanelVisibility()
         screenTitle.value = getScreenTitleInternal()

@@ -4,6 +4,7 @@ import android.os.Bundle
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.TestAutofillData
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.test.entity.TestArguments
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toBooleanSafely
@@ -22,7 +23,12 @@ class TestDataParser {
             (isResetAppData && autofillData != null) ||
             (!fakeFileName.isNullOrEmpty() && autofillData != null)
         ) {
-            return OperationResult.error(newGenericError(ERROR_INVALID_ARGUMENTS_SPECIFIED))
+            return OperationResult.error(
+                newGenericError(
+                    ERROR_INVALID_ARGUMENTS_SPECIFIED,
+                    Stacktrace()
+                )
+            )
         }
 
         return if (isResetAppData ||
@@ -39,7 +45,7 @@ class TestDataParser {
                 )
             )
         } else {
-            OperationResult.error(newGenericError(ERROR_NO_ARGUMENTS_SPECIFIED))
+            OperationResult.error(newGenericError(ERROR_NO_ARGUMENTS_SPECIFIED, Stacktrace()))
         }
     }
 

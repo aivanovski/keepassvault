@@ -53,7 +53,7 @@ fun AboutScreen(
             TextItem(stringResource(R.string.about_licence_intro, appName))
 
             HeaderItem(stringResource(R.string.feedback))
-            TextWithUrlItem(buildClickableUrl(stringResource(R.string.feedback_url)))
+            TextWithUrlItem(buildClickableUrl(stringResource(R.string.issues_url)))
 
             HeaderItem(stringResource(R.string.homepage))
             TextWithUrlItem(

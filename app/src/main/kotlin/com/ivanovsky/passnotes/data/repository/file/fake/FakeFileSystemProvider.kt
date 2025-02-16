@@ -15,6 +15,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.file.fake.delay.ThreadThrottler
 import com.ivanovsky.passnotes.data.repository.file.fake.entity.StorageDestinationType
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.util.FileUtils
 import java.io.ByteArrayInputStream
 import java.io.FileNotFoundException
@@ -169,7 +170,7 @@ class FakeFileSystemProvider(
     }
 
     private fun newAuthError(): OperationError {
-        return OperationError.newAuthError()
+        return OperationError.newAuthError(Stacktrace())
     }
 
     private fun newFileNotFoundError(pathOrUid: String): OperationError {
@@ -177,7 +178,8 @@ class FakeFileSystemProvider(
             String.format(
                 GENERIC_MESSAGE_FAILED_TO_FIND_FILE,
                 pathOrUid
-            )
+            ),
+            Stacktrace()
         )
     }
 

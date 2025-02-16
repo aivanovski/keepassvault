@@ -76,7 +76,7 @@ fun LightErrorPanelState() {
 @Composable
 fun DarkErrorPanelState() {
     ThemedScreenPreview(theme = DarkTheme) {
-        ErrorPanel(stringResource(R.string.long_dummy_text))
+        ErrorPanel(stringResource(R.string.medium_dummy_text))
     }
 }
 
@@ -92,6 +92,6 @@ fun LightErrorState() {
 @Composable
 fun DakrErrorState() {
     ThemedScreenPreview(theme = DarkTheme) {
-        ErrorState(stringResource(R.string.long_dummy_text))
+        ErrorState(stringResource(R.string.medium_dummy_text))
     }
 }

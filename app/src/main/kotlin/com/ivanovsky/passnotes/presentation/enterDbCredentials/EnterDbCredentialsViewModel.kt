@@ -15,7 +15,8 @@ import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.Screens.EnterDbCredentialsScreen.Companion.RESULT_KEY
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
-import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.storagelist.Action
@@ -29,10 +30,11 @@ class EnterDbCredentialsViewModel(
     private val errorInteractor: ErrorInteractor,
     private val router: Router,
     private val args: EnterDbCredentialsScreenArgs
-) : ViewModel() {
+) : BaseScreenViewModel(
+    initialState = ScreenState.data()
+) {
 
-    val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.data())
+    val screenVisibilityHandler = DefaultScreenVisibilityHandler()
     val filename = MutableLiveData(args.file.name)
     val keyFilename = MutableLiveData(EMPTY)
     val isAddKeyButtonVisible = MutableLiveData(true)
@@ -63,11 +65,7 @@ class EnterDbCredentialsViewModel(
                 router.exit()
                 router.sendResult(RESULT_KEY, key)
             } else {
-                setScreenState(
-                    ScreenState.dataWithError(
-                        errorText = errorInteractor.processAndGetMessage(isValidKey.error)
-                    )
-                )
+                setErrorPanelState(isValidKey.error)
                 isKeyboardVisibleEvent.call(true)
             }
         }
@@ -119,11 +117,7 @@ class EnterDbCredentialsViewModel(
                 selectedKeyFile = null
                 keyFilename.value = EMPTY
 
-                setScreenState(
-                    ScreenState.dataWithError(
-                        errorText = errorInteractor.processAndGetMessage(getFileResult.error)
-                    )
-                )
+                setErrorPanelState(getFileResult.error)
             }
         }
     }
@@ -144,8 +138,8 @@ class EnterDbCredentialsViewModel(
         }
     }
 
-    private fun setScreenState(state: ScreenState) {
-        screenState.value = state
+    override fun setScreenState(state: ScreenState) {
+        super.setScreenState(state)
         isAddKeyButtonVisible.value = (selectedKeyFile == null)
     }
 

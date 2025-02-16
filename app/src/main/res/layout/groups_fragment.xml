@@ -50,17 +50,20 @@
 
         <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
             android:id="@+id/errorPanelView"
+            state="@{viewModel.screenState}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="?kpErrorBackgroundColor"
             app:layout_constraintTop_toBottomOf="@id/searchText"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
+            state="@{viewModel.screenState}"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}" />
 
         <include
             android:id="@+id/optionPanelView"
@@ -81,7 +84,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/optionPanelView"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
@@ -104,7 +107,7 @@
             app:layout_constraintEnd_toStartOf="@id/fab"
             app:layout_constraintStart_toStartOf="parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}">
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}">
 
             <include
                 android:id="@+id/syncStateView"

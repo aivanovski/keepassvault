@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetGroupUseCase
 import com.ivanovsky.passnotes.extensions.mapError
@@ -45,7 +46,10 @@ class GroupEditorInteractor(
                 parentGroupUid != null -> parentGroupUid
                 else -> {
                     return@withContext OperationResult.error(
-                        newGenericError(MESSAGE_PARENT_UID_IS_NULL)
+                        newGenericError(
+                            MESSAGE_PARENT_UID_IS_NULL,
+                            Stacktrace()
+                        )
                     )
                 }
             }
@@ -71,7 +75,8 @@ class GroupEditorInteractor(
             if (!isTitleAvailable(entity.title)) {
                 return@withContext OperationResult.error(
                     newGenericError(
-                        resourceProvider.getString(R.string.group_with_this_name_is_already_exist)
+                        resourceProvider.getString(R.string.group_with_this_name_is_already_exist),
+                        Stacktrace()
                     )
                 )
             }

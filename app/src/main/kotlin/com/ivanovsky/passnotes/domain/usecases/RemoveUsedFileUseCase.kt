@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.db.dao.GitRootDao
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import java.io.File
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -28,7 +29,8 @@ class RemoveUsedFileUseCase(
                             GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
                             UsedFile::class.simpleName,
                             uid
-                        )
+                        ),
+                        Stacktrace()
                     )
                 )
 

@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import kotlinx.coroutines.withContext
 
 class GetUsedFileUseCase(
@@ -29,7 +30,8 @@ class GetUsedFileUseCase(
                             OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
                             UsedFile::class.simpleName,
                             fileUid
-                        )
+                        ),
+                        Stacktrace()
                     )
                 )
             }
@@ -49,7 +51,8 @@ class GetUsedFileUseCase(
                             OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_ID,
                             UsedFile::class.simpleName,
                             id
-                        )
+                        ),
+                        Stacktrace()
                     )
                 )
             }

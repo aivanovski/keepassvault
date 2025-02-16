@@ -184,7 +184,7 @@ class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
                 setDisplayHomeAsUpEnabled(true)
             }
         }
-        viewModel.cellViewModels.observe(viewLifecycleOwner) { data ->
+        viewModel.cells.observe(viewLifecycleOwner) { data ->
             setCellViewModels(
                 isResetScroll = data.isResetScroll,
                 viewModels = data.viewModels

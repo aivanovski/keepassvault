@@ -2,11 +2,14 @@ package com.ivanovsky.passnotes.domain.interactor.filepicker
 
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_FILE_ALREADY_EXISTS
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.util.InputOutputUtils
@@ -56,6 +59,20 @@ class FilePickerInteractor(
                 isDirectory = false,
                 isRoot = false
             )
+
+            val isExistResult = fsProvider.exists(dstFile)
+            if (isExistResult.isFailed) {
+                return@withContext isExistResult.mapError()
+            }
+
+            if (isExistResult.getOrThrow()) {
+                return@withContext OperationResult.error(
+                    OperationError.newFileAlreadyExistsError(
+                        GENERIC_FILE_ALREADY_EXISTS.format(dstFile.path),
+                        Stacktrace()
+                    )
+                )
+            }
 
             val outputResult = fsProvider.openFileForWrite(
                 dstFile,

@@ -39,7 +39,7 @@
             app:layout_constraintBottom_toTopOf="@id/remoteButton"
             app:layout_constraintTop_toTopOf="parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}"
             tools:text="@string/resolve_conflict_dialog_message" />
 
         <Button
@@ -54,7 +54,7 @@
             app:layout_constraintBottom_toTopOf="@id/localButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}" />
 
         <Button
             android:id="@+id/localButton"
@@ -68,7 +68,7 @@
             app:layout_constraintBottom_toTopOf="@id/cancelButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}" />
 
         <Button
             android:id="@+id/cancelButton"
@@ -82,9 +82,10 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
+            state="@{viewModel.screenState}"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -92,7 +93,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -18,7 +18,6 @@ import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.DateFormatter
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
@@ -31,7 +30,7 @@ import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.CellId
-import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyAction
@@ -62,7 +61,6 @@ import org.koin.core.parameter.parametersOf
 
 class NoteViewModel(
     private val interactor: NoteInteractor,
-    private val errorInteractor: ErrorInteractor,
     lockInteractor: DatabaseLockInteractor,
     private val resourceProvider: ResourceProvider,
     private val dateFormatter: DateFormatter,
@@ -82,9 +80,7 @@ class NoteViewModel(
         .add(HeaderCellViewModel::class, R.layout.cell_header)
         .add(AttachmentCellViewModel::class, R.layout.cell_attachment)
 
-    val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.notInitialized())
-
+    val screenStateHandler = DefaultScreenVisibilityHandler()
     val navigationPanelViewModel = NavigationPanelCellViewModel(
         initModel = NavigationPanelCellModel(
             items = emptyList(),
@@ -225,11 +221,7 @@ class NoteViewModel(
         viewModelScope.launch {
             val updateNoteResult = interactor.updateNoteWithAutofillData(note, structure)
             if (updateNoteResult.isFailed) {
-                setScreenState(
-                    ScreenState.dataWithError(
-                        errorText = errorInteractor.processAndGetMessage(updateNoteResult.error)
-                    )
-                )
+                setErrorPanelState(updateNoteResult.error)
                 return@launch
             }
 
@@ -253,13 +245,7 @@ class NoteViewModel(
                 is NoteSource.ByUid -> {
                     val getNoteResult = interactor.getNoteByUid(noteUid ?: args.noteSource.uid)
                     if (getNoteResult.isFailed) {
-                        setScreenState(
-                            ScreenState.error(
-                                errorText = errorInteractor.processAndGetMessage(
-                                    getNoteResult.error
-                                )
-                            )
-                        )
+                        setErrorPanelState(getNoteResult.error)
                         return@launch
                     }
 
@@ -273,33 +259,21 @@ class NoteViewModel(
 
             val getGroupResult = interactor.getGroup(note.groupUid)
             if (getGroupResult.isFailed) {
-                setScreenState(
-                    ScreenState.error(
-                        errorText = errorInteractor.processAndGetMessage(getGroupResult.error)
-                    )
-                )
+                setErrorState(getGroupResult.error)
                 return@launch
             }
 
             val group = getGroupResult.getOrThrow()
             val getParentsResult = interactor.getAllParents(group.uid)
             if (getParentsResult.isFailed) {
-                setScreenState(
-                    ScreenState.error(
-                        errorText = errorInteractor.processAndGetMessage(getParentsResult.error)
-                    )
-                )
+                setErrorState(getParentsResult.error)
                 return@launch
             }
 
             val history = if (!args.isViewOnly && noteUid != null) {
                 val getHistoryResult = interactor.getHistory(noteUid)
                 if (getHistoryResult.isFailed) {
-                    setScreenState(
-                        ScreenState.error(
-                            errorText = errorInteractor.processAndGetMessage(getHistoryResult.error)
-                        )
-                    )
+                    setErrorState(getHistoryResult.error)
                     return@launch
                 }
                 getHistoryResult.getOrThrow()
@@ -389,7 +363,7 @@ class NoteViewModel(
             isShowHistoryButton = history.isNotEmpty()
         )
 
-        setCellElements(cellViewModelFactory.createCellViewModels(models, eventProvider))
+        setCellViewModels(cellViewModelFactory.createCellViewModels(models, eventProvider))
 
         setScreenState(ScreenState.data())
     }
@@ -552,11 +526,7 @@ class NoteViewModel(
 
         val saveResult = interactor.saveAttachmentToStorage(attachment)
         if (saveResult.isFailed) {
-            setScreenState(
-                ScreenState.dataWithError(
-                    errorText = errorInteractor.processAndGetMessage(saveResult.error)
-                )
-            )
+            setErrorPanelState(saveResult.error)
             return null
         }
 
@@ -665,8 +635,8 @@ class NoteViewModel(
         }
     }
 
-    private fun setScreenState(state: ScreenState) {
-        screenState.value = state
+    override fun setScreenState(state: ScreenState) {
+        super.setScreenState(state)
         isFabButtonVisible.value = getFabButtonVisibility()
         visibleMenuItems.value = getVisibleMenuItems()
     }

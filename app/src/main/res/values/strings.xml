@@ -43,6 +43,8 @@
     <string name="dismiss">Dismiss</string>
     <string name="synchronize_with_source">Synchronize with source</string>
     <string name="details">Details</string>
+    <string name="report">Report</string>
+    <string name="copy">Copy</string>
 
     <!-- Accessibility descriptions -->
     <string name="url">URL</string>
@@ -74,7 +76,8 @@
     <string name="sync_file_not_found_message">Unable to find database file on remote server. Please try to remove this file and add it again.</string>
     <string name="sync_auth_error_login_message">Application is unable to authenticate on remote server.</string>
     <string name="sync_auth_error_remove_message">Application is unable to authenticate on remote server. Please try to remove this file and add it again.</string>
-    <string name="sync_error_message">File unable to synchronize database with remote server. Please try to remove this file and add it again.</string>
+    <string name="sync_error_message">Failed to synchronize database with remote server. Please try to remove this file and add it again.</string>
+    <string name="file_not_found">File not found</string>
 
     <!-- Resolve Conflict Dialog -->
     <string name="resolve_conflict_dialog_message">There is a conflict between version of local and remote databases. Please resolve this conflict before accessing database.\n\nTHIS ACTION MAY LEAD TO DATA LOSS!\n\nLocal file was modified at:\n%1$s\nRemote file was modified at:\n%2$s\n\nPlease specify which version you want to use?</string>
@@ -392,5 +395,9 @@
     <string name="custom">Custom</string>
     <string name="invalid_value">Invalid value</string>
     <string name="your_code_is">Your code is</string>
+
+    <!-- Report dialog -->
+    <string name="go_to_issues">Go to issues</string>
+    <string name="show_stacktrace">...Show stacktrace...</string>
 
 </resources>

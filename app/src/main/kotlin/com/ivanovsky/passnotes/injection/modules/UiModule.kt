@@ -31,6 +31,8 @@ import com.ivanovsky.passnotes.presentation.core.dialog.optionDialog.factory.Opt
 import com.ivanovsky.passnotes.presentation.core.dialog.optionDialog.factory.OptionDialogCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialogViewModel
+import com.ivanovsky.passnotes.presentation.core.dialog.reportErrorDialog.ReportErrorDialogArgs
+import com.ivanovsky.passnotes.presentation.core.dialog.reportErrorDialog.ReportErrorDialogViewModel
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogInteractor
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogViewModel
@@ -267,7 +269,6 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
@@ -391,6 +392,13 @@ object UiModule {
             }
             factory { (args: OptionDialogArgs) ->
                 OptionDialogViewModel(
+                    get(),
+                    get(),
+                    args
+                )
+            }
+            factory { (args: ReportErrorDialogArgs) ->
+                ReportErrorDialogViewModel(
                     get(),
                     get(),
                     args

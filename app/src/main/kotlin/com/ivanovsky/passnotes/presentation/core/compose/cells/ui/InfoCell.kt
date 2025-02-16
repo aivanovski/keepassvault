@@ -59,7 +59,7 @@ fun InfoCell(
 fun InfoCellLightPreview() {
     ThemedPreview(theme = LightTheme) {
         InfoCell(
-            text = stringResource(R.string.long_dummy_text)
+            text = stringResource(R.string.medium_dummy_text)
         )
     }
 }
@@ -69,7 +69,7 @@ fun InfoCellLightPreview() {
 fun InfoCellDarkPreview() {
     ThemedPreview(theme = DarkTheme) {
         InfoCell(
-            text = stringResource(R.string.long_dummy_text)
+            text = stringResource(R.string.medium_dummy_text)
         )
     }
 }

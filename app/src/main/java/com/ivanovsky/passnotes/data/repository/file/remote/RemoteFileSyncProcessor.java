@@ -16,6 +16,7 @@ import static com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOr
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy;
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
@@ -36,16 +37,19 @@ import com.ivanovsky.passnotes.data.repository.file.RemoteFileInputStream;
 import com.ivanovsky.passnotes.data.repository.file.SyncStrategy;
 import com.ivanovsky.passnotes.domain.FileHelper;
 import com.ivanovsky.passnotes.domain.SyncStrategyResolver;
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace;
 import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
 import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
 import com.ivanovsky.passnotes.util.LongExtKt;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import timber.log.Timber;
 
 public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
@@ -179,7 +183,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
     public OperationResult<SyncConflictInfo> getSyncConflictForFile(@NonNull String uid) {
         RemoteFile cachedFile = cache.getByUid(uid);
         if (cachedFile == null) {
-            return OperationResult.error(newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE));
+            return OperationResult.error(
+                    newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE, new Stacktrace()));
         }
 
         OperationResult<FileDescriptor> getFile =
@@ -192,7 +197,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
         Long remoteModified = getFile.getObj().getModified();
 
         if (!cachedFile.isLocallyModified()) {
-            return OperationResult.error(newGenericError(MESSAGE_FILE_IS_NOT_MODIFIED));
+            return OperationResult.error(
+                    newGenericError(MESSAGE_FILE_IS_NOT_MODIFIED, new Stacktrace()));
         }
 
         SyncResolution resolution =
@@ -202,7 +208,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
                         remoteModified,
                         SyncStrategy.LAST_REMOTE_MODIFICATION_WINS);
         if (resolution != SyncResolution.ERROR) {
-            return OperationResult.error(newGenericError(MESSAGE_INCORRECT_SYNC_STATUS));
+            return OperationResult.error(
+                    newGenericError(MESSAGE_INCORRECT_SYNC_STATUS, new Stacktrace()));
         }
 
         SyncConflictInfo info =
@@ -229,7 +236,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
             Timber.d("Unable to process file, no cached file");
 
             updateProgressStatusForFile(file.getUid(), SyncProgressStatus.IDLE);
-            return OperationResult.error(newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE));
+            return OperationResult.error(
+                    newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE, new Stacktrace()));
         }
 
         FileDescriptor localFile = RemoteFileExtKt.toFileDescriptor(cachedFile);
@@ -279,12 +287,14 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
                 } else {
                     return OperationResult.error(
-                            newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
+                            newDbVersionConflictError(
+                                    MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE, new Stacktrace()));
                 }
 
             default:
                 return OperationResult.error(
-                        newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
+                        newDbVersionConflictError(
+                                MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE, new Stacktrace()));
         }
     }
 
@@ -304,7 +314,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         if (!(outResult.getObj() instanceof BaseRemoteFileOutputStream)) {
             Timber.d("Incorrect result");
-            return OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+            return OperationResult.error(
+                    newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE, new Stacktrace()));
         }
         BaseRemoteFileOutputStream out = (BaseRemoteFileOutputStream) outResult.getObj();
 
@@ -323,13 +334,14 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
         } catch (IOException e) {
             Timber.d("Failed to copy file, uid=%s, error=%s", cachedFile.getUid(), e.toString());
             Timber.d(e);
-            return OperationResult.error(newNetworkIOError());
+            return OperationResult.error(newNetworkIOError(new Stacktrace()));
         }
 
         RemoteFile updatedCachedFile = cache.getByUid(cachedFile.getUid());
         if (updatedCachedFile == null) {
             Timber.d("Failed to find file in cache, uid=%s", cachedFile.getUid());
-            return OperationResult.error(newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE));
+            return OperationResult.error(
+                    newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE, new Stacktrace()));
         }
 
         OperationResult<RemoteFileMetadata> metadataResult =
@@ -372,15 +384,18 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
                 if (in != null) {
                     result.setObj(in);
                 } else {
-                    result.setError(newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_FILE));
+                    result.setError(
+                            newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_FILE, new Stacktrace()));
                 }
             } catch (IOException e) {
                 Timber.d(e);
 
-                result.setError(newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_FILE));
+                result.setError(
+                        newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_FILE, new Stacktrace()));
             }
         } else {
-            result.setError(newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_FILE));
+            result.setError(
+                    newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_FILE, new Stacktrace()));
         }
 
         return result;
@@ -404,7 +419,8 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         if (!(inResult.getObj() instanceof RemoteFileInputStream)) {
             Timber.d("Failed to open file");
-            return OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+            return OperationResult.error(
+                    newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE, new Stacktrace()));
         }
 
         RemoteFileInputStream input = (RemoteFileInputStream) inResult.getObj();
@@ -412,13 +428,15 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
             input.close();
         } catch (IOException e) {
             Timber.d(e);
-            return OperationResult.error(newFileAccessError(MESSAGE_FAILED_TO_ACCESS_TO_FILE));
+            return OperationResult.error(
+                    newFileAccessError(MESSAGE_FAILED_TO_ACCESS_TO_FILE, new Stacktrace()));
         }
 
         RemoteFile updatedCachedFile = cache.getByUid(cachedFile.getUid());
         if (updatedCachedFile == null) {
             Timber.d("Failed to find file in cache, uid=%s", cachedFile.getUid());
-            return OperationResult.error(newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE));
+            return OperationResult.error(
+                    newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE, new Stacktrace()));
         }
 
         OperationResult<RemoteFileMetadata> metadataResult =

@@ -10,6 +10,8 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.newErrorMessage
 import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
@@ -18,12 +20,14 @@ import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.DiffViewerScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
-import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
@@ -42,12 +46,12 @@ class DebugMenuViewModel(
     private val resourceProvider: ResourceProvider,
     private val settings: Settings,
     private val router: Router
-) : ViewModel(),
+) : BaseScreenViewModel(
+    initialState = ScreenState.data()
+),
     OnSettingsChangeListener {
 
-    val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.data())
-
+    val screenVisibilityHandler = DefaultScreenVisibilityHandler()
     val filePath = MutableLiveData(EMPTY)
     val password = MutableLiveData(EMPTY)
     val debugServerUrlText = MutableLiveData(EMPTY)
@@ -103,7 +107,7 @@ class DebugMenuViewModel(
     fun onReadButtonClicked() {
         val inFile = getSelectedFile() ?: return
 
-        screenState.value = ScreenState.data()
+        setScreenState(ScreenState.data())
 
         viewModelScope.launch {
             val result = withContext(Dispatchers.Default) {
@@ -115,8 +119,7 @@ class DebugMenuViewModel(
 
                 showSnackbarEvent.call(resourceProvider.getString(R.string.file_read))
             } else {
-                val message = errorInteractor.processAndGetMessage(result.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setErrorPanelState(result.error)
             }
         }
     }
@@ -133,7 +136,7 @@ class DebugMenuViewModel(
         val file = lastReadFile ?: return
         val descriptor = lastReadDescriptor ?: return
 
-        screenState.value = ScreenState.data()
+        setScreenState(ScreenState.data())
 
         if (isFileSelected()) {
             viewModelScope.launch {
@@ -153,13 +156,16 @@ class DebugMenuViewModel(
 
                     showSnackbarEvent.call(resourceProvider.getString(R.string.file_wrote))
                 } else {
-                    val message = errorInteractor.processAndGetMessage(result.error)
-                    screenState.value = ScreenState.dataWithError(message)
+                    setErrorPanelState(result.error)
                 }
             }
         } else {
-            screenState.value =
-                ScreenState.dataWithError(resourceProvider.getString(R.string.file_is_not_loaded))
+            setErrorPanelState(
+                newErrorMessage(
+                    resourceProvider.getString(R.string.file_is_not_loaded),
+                    Stacktrace()
+                )
+            )
         }
     }
 
@@ -167,7 +173,7 @@ class DebugMenuViewModel(
         val outFile = getSelectedFile() ?: return
         val password = this.password.value ?: return
 
-        screenState.value = ScreenState.data()
+        setScreenState(ScreenState.data())
 
         viewModelScope.launch {
             val result = withContext(Dispatchers.Default) {
@@ -183,8 +189,7 @@ class DebugMenuViewModel(
 
                 showSnackbarEvent.call(resourceProvider.getString(R.string.new_file_created))
             } else {
-                val message = errorInteractor.processAndGetMessage(result.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setErrorPanelState(result.error)
             }
         }
     }
@@ -196,7 +201,7 @@ class DebugMenuViewModel(
     fun onCheckExistsButtonClicked() {
         val file = getSelectedFile() ?: return
 
-        screenState.value = ScreenState.data()
+        setScreenState(ScreenState.data())
 
         viewModelScope.launch {
             val result = interactor.isFileExists(file)
@@ -208,8 +213,7 @@ class DebugMenuViewModel(
                     resourceProvider.getString(R.string.file_exits_with_str, isFileExist.toString())
                 )
             } else {
-                val message = errorInteractor.processAndGetMessage(result.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setErrorPanelState(result.error)
             }
         }
     }
@@ -217,7 +221,7 @@ class DebugMenuViewModel(
     fun onOpenDbButtonClicked() {
         val password = this.password.value ?: return
 
-        screenState.value = ScreenState.data()
+        setScreenState(ScreenState.data())
 
         if (isFileSelected()) {
             viewModelScope.launch {
@@ -234,13 +238,16 @@ class DebugMenuViewModel(
 
                     showSnackbarEvent.call(resourceProvider.getString(R.string.db_opened))
                 } else {
-                    val message = errorInteractor.processAndGetMessage(result.error)
-                    screenState.value = ScreenState.dataWithError(message)
+                    setErrorPanelState(result.error)
                 }
             }
         } else {
-            screenState.value =
-                ScreenState.dataWithError(resourceProvider.getString(R.string.file_is_not_loaded))
+            setErrorPanelState(
+                newErrorMessage(
+                    resourceProvider.getString(R.string.file_is_not_loaded),
+                    Stacktrace()
+                )
+            )
         }
     }
 
@@ -256,7 +263,7 @@ class DebugMenuViewModel(
     }
 
     fun onEditDbButtonClicked() {
-        screenState.value = ScreenState.data()
+        setScreenState(ScreenState.data())
 
         router.navigateTo(
             GroupsScreen(
@@ -271,7 +278,7 @@ class DebugMenuViewModel(
     }
 
     fun onCloseDbButtonClicked() {
-        screenState.value = ScreenState.data()
+        setScreenState(ScreenState.data())
 
         viewModelScope.launch {
             val result = withContext(Dispatchers.Default) {
@@ -283,8 +290,7 @@ class DebugMenuViewModel(
 
                 showSnackbarEvent.call(resourceProvider.getString(R.string.db_closed))
             } else {
-                val message = errorInteractor.processAndGetMessage(result.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setErrorPanelState(result.error)
             }
         }
     }
@@ -297,7 +303,7 @@ class DebugMenuViewModel(
     }
 
     fun onAddEntryButtonClicked() {
-        screenState.value = ScreenState.data()
+        setScreenState(ScreenState.data())
 
         viewModelScope.launch {
             val result = withContext(Dispatchers.Default) {
@@ -307,8 +313,7 @@ class DebugMenuViewModel(
             if (result.isSucceededOrDeferred) {
                 showSnackbarEvent.call(resourceProvider.getString(R.string.entry_added))
             } else {
-                val message = errorInteractor.processAndGetMessage(result.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setErrorPanelState(result.error)
             }
         }
     }
@@ -372,8 +377,7 @@ class DebugMenuViewModel(
                     resourceProvider.getString(R.string.successfully)
                 )
             } else {
-                val message = errorInteractor.processAndGetMessage(getFileResult.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setErrorPanelState(getFileResult.error)
             }
         }
     }
@@ -387,8 +391,7 @@ class DebugMenuViewModel(
                     resourceProvider.getString(R.string.successfully)
                 )
             } else {
-                val message = errorInteractor.processAndGetMessage(getRootResult.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setErrorPanelState(getRootResult.error)
             }
         }
     }
@@ -427,7 +430,7 @@ class DebugMenuViewModel(
         paths: List<String>,
         key: EncryptedDatabaseKey
     ) {
-        screenState.value = ScreenState.loading()
+        setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
             val getFileResult = interactor.getFakeFileSystemFiles(paths)
@@ -446,10 +449,9 @@ class DebugMenuViewModel(
                         )
                     )
                 )
-                screenState.value = ScreenState.data()
+                setScreenState(ScreenState.data())
             } else {
-                val message = errorInteractor.processAndGetMessage(getFileResult.error)
-                screenState.value = ScreenState.dataWithError(message)
+                setErrorPanelState(getFileResult.error)
             }
         }
     }

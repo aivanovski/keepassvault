@@ -8,7 +8,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ACCE
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_GET_DATABASE
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNKNOWN_ERROR
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
-import com.ivanovsky.passnotes.data.entity.OperationError.newFileIsAlreadyExistsError
+import com.ivanovsky.passnotes.data.entity.OperationError.newFileAlreadyExistsError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
@@ -21,6 +21,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.usecases.test.GetTestCredentialsUseCase
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
@@ -70,7 +71,7 @@ class DebugMenuInteractor(
                         result.obj = Pair(descriptor, destinationFile)
                     } catch (e: Exception) {
                         Timber.d(e)
-                        result.error = newGenericIOError(e.toString())
+                        result.error = newGenericIOError(e)
                     }
                 } else {
                     result.error = destinationResult.error
@@ -94,10 +95,12 @@ class DebugMenuInteractor(
             if (outStream != null) {
                 result.obj = Pair(outFile, outStream)
             } else {
-                result.error = newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE)
+                result.error =
+                    newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE, Stacktrace())
             }
         } else {
-            result.error = newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE)
+            result.error =
+                newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE, Stacktrace())
         }
 
         return result
@@ -151,7 +154,7 @@ class DebugMenuInteractor(
                     result.error = creationResult.error
                 }
             } else {
-                result.error = newFileIsAlreadyExistsError()
+                result.error = newFileAlreadyExistsError(Stacktrace())
             }
         } else {
             result.error = existsResult.error
@@ -184,13 +187,15 @@ class DebugMenuInteractor(
                 if (dbStream != null) {
                     result.obj = Pair(dbFile, dbStream)
                 } else {
-                    result.error = newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE)
+                    result.error =
+                        newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE, Stacktrace())
                 }
             } else {
                 result.error = creationResult.error
             }
         } else {
-            result.error = newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE)
+            result.error =
+                newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE, Stacktrace())
         }
 
         return result
@@ -207,7 +212,7 @@ class DebugMenuInteractor(
             result.obj = true
         } catch (e: Exception) {
             Timber.d(e)
-            result.error = newGenericIOError(e.toString())
+            result.error = newGenericIOError(e)
         }
 
         return result
@@ -237,10 +242,11 @@ class DebugMenuInteractor(
                     result.obj = Pair(outFile, inFile)
                 } catch (e: Exception) {
                     Timber.d(e)
-                    result.error = newGenericIOError(e.toString())
+                    result.error = newGenericIOError(e)
                 }
             } else {
-                result.error = newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE)
+                result.error =
+                    newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE, Stacktrace())
             }
         } else {
             result.error = openResult.error
@@ -265,7 +271,7 @@ class DebugMenuInteractor(
             type,
             key,
             descriptor,
-            FSOptions.DEFAULT
+            FSOptions.CACHE_ONLY
         )
         if (openResult.isSucceededOrDeferred) {
             result.obj = true
@@ -294,12 +300,22 @@ class DebugMenuInteractor(
     fun addEntryToDb(): OperationResult<Boolean> {
         val db = dbRepository.database
         if (db == null) {
-            return OperationResult.error(newDbError(MESSAGE_FAILED_TO_GET_DATABASE))
+            return OperationResult.error(
+                newDbError(
+                    MESSAGE_FAILED_TO_GET_DATABASE,
+                    Stacktrace()
+                )
+            )
         }
 
         val newGroupTitle = generateNewGroupTitle(db.groupDao)
         if (newGroupTitle == null) {
-            return OperationResult.error(newDbError(MESSAGE_UNKNOWN_ERROR))
+            return OperationResult.error(
+                newDbError(
+                    MESSAGE_UNKNOWN_ERROR,
+                    Stacktrace()
+                )
+            )
         }
 
         val rootGroupResult = db.groupDao.rootGroup

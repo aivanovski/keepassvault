@@ -15,6 +15,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.map
 import com.ivanovsky.passnotes.extensions.mapError
@@ -105,7 +106,12 @@ class KotpassGroupDao(
     override fun insert(entity: GroupEntity, doCommit: Boolean): OperationResult<UUID> {
         val result = db.lock.withLock {
             if (entity.parentUid == null) {
-                return@withLock OperationResult.error(newDbError(MESSAGE_PARENT_UID_IS_NULL))
+                return@withLock OperationResult.error(
+                    newDbError(
+                        MESSAGE_PARENT_UID_IS_NULL,
+                        Stacktrace()
+                    )
+                )
             }
 
             val getParentGroupResult = db.getRawGroupByUid(entity.parentUid)
@@ -259,7 +265,12 @@ class KotpassGroupDao(
 
     override fun update(entity: GroupEntity, doCommit: Boolean): OperationResult<Boolean> {
         if (entity.uid == null) {
-            return OperationResult.error(newDbError(MESSAGE_UID_IS_NULL))
+            return OperationResult.error(
+                newDbError(
+                    MESSAGE_UID_IS_NULL,
+                    Stacktrace()
+                )
+            )
         }
 
         val getGroupResult = db.lock.withLock { getGroupByUid(entity.uid) }
@@ -296,7 +307,8 @@ class KotpassGroupDao(
             if (isInsideItself.obj) {
                 return@withLock OperationResult.error(
                     newDbError(
-                        MESSAGE_FAILED_TO_MOVE_GROUP_INSIDE_ITS_OWN_TREE
+                        MESSAGE_FAILED_TO_MOVE_GROUP_INSIDE_ITS_OWN_TREE,
+                        Stacktrace()
                     )
                 )
             }

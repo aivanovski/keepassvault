@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.LoggerInteractor
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveBiometricDataUseCase
 import java.io.File
@@ -33,7 +34,7 @@ class AppSettingsInteractor(
             if (file != null) {
                 OperationResult.success(file)
             } else {
-                OperationResult.error(newFileNotFoundError())
+                OperationResult.error(newFileNotFoundError(Stacktrace()))
             }
         }
 
@@ -44,7 +45,7 @@ class AppSettingsInteractor(
             if (removed) {
                 OperationResult.success(true)
             } else {
-                OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_REMOVE_FILE))
+                OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_REMOVE_FILE, Stacktrace()))
             }
         }
 

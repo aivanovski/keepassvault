@@ -22,8 +22,6 @@ import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibi
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginViewModel.ServerLoginMenuItem
 import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.NavigateBack
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnDoneButtonClicked
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -97,8 +95,6 @@ class ServerLoginFragment : Fragment() {
 
         subscribeToLiveData()
         subscribeToLiveEvents()
-
-        viewModel.start()
     }
 
     private fun subscribeToLiveData() {
@@ -129,9 +125,9 @@ class ServerLoginFragment : Fragment() {
 
         private const val ARGUMENTS = "arguments"
 
-        private val MENU_ACTIONS = mapOf<Int, (vm: ServerLoginViewModel) -> Unit>(
-            android.R.id.home to { vm -> vm.sendIntent(NavigateBack) },
-            R.id.menu_done to { vm -> vm.sendIntent(OnDoneButtonClicked) }
+        private val MENU_ACTIONS = mapOf<Int, (viewModel: ServerLoginViewModel) -> Unit>(
+            android.R.id.home to { viewModel -> viewModel.navigateBack() },
+            R.id.menu_done to { viewModel -> viewModel.onDoneButtonClicked() }
         )
 
         fun newInstance(args: ServerLoginArgs) = ServerLoginFragment().withArguments {

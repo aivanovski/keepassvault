@@ -24,6 +24,7 @@ import com.ivanovsky.passnotes.data.repository.file.fake.delay.ThreadThrottler.T
 import com.ivanovsky.passnotes.data.repository.file.fake.entity.StorageDestinationType.LOCAL
 import com.ivanovsky.passnotes.data.repository.file.fake.entity.StorageDestinationType.REMOTE
 import com.ivanovsky.passnotes.domain.SyncStrategyResolver
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import timber.log.Timber
 
 class FakeFileSystemSyncProcessor(
@@ -56,7 +57,12 @@ class FakeFileSystemSyncProcessor(
 
     override fun getSyncConflictForFile(uid: String): OperationResult<SyncConflictInfo> {
         if (uid != FileUid.CONFLICT) {
-            return OperationResult.error(newGenericError(MESSAGE_INCORRECT_SYNC_STATUS))
+            return OperationResult.error(
+                newGenericError(
+                    MESSAGE_INCORRECT_SYNC_STATUS,
+                    Stacktrace()
+                )
+            )
         }
 
         val localFile = storage.getLocalFile(uid)
@@ -121,7 +127,12 @@ class FakeFileSystemSyncProcessor(
             }
 
             else -> {
-                OperationResult.error(newGenericError(MESSAGE_INCORRECT_SYNC_STATUS))
+                OperationResult.error(
+                    newGenericError(
+                        MESSAGE_INCORRECT_SYNC_STATUS,
+                        Stacktrace()
+                    )
+                )
             }
         }
     }
@@ -137,7 +148,12 @@ class FakeFileSystemSyncProcessor(
         throttler.delay(LONG_DELAY)
 
         val bytes = storage.get(file.uid, destination = LOCAL)
-            ?: return OperationResult.error(newGenericIOError("File content not found"))
+            ?: return OperationResult.error(
+                newGenericIOError(
+                    "File content not found",
+                    Stacktrace()
+                )
+            )
 
         storage.put(file.uid, destination = LOCAL, bytes)
 
@@ -158,7 +174,9 @@ class FakeFileSystemSyncProcessor(
         throttler.delay(LONG_DELAY)
 
         val bytes = storage.get(file.uid, destination = REMOTE)
-            ?: return OperationResult.error(newGenericIOError("File content not found"))
+            ?: return OperationResult.error(
+                newGenericIOError("File content not found", Stacktrace())
+            )
 
         storage.put(file.uid, destination = LOCAL, bytes)
 
@@ -178,7 +196,8 @@ class FakeFileSystemSyncProcessor(
             String.format(
                 GENERIC_MESSAGE_FAILED_TO_FIND_FILE,
                 pathOrUid
-            )
+            ),
+            Stacktrace()
         )
     }
 }

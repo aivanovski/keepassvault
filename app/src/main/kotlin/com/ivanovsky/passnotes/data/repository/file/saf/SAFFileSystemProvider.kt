@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.util.FileUtils.ROOT_PATH
 import java.io.FileNotFoundException
@@ -37,12 +38,12 @@ class SAFFileSystemProvider(
         return if (dir.isRoot) {
             OperationResult.success(emptyList())
         } else {
-            OperationResult.error(newGenericIOError(MESSAGE_INCORRECT_USE_CASE))
+            OperationResult.error(newGenericIOError(MESSAGE_INCORRECT_USE_CASE, Stacktrace()))
         }
     }
 
     override fun getParent(file: FileDescriptor): OperationResult<FileDescriptor> {
-        return OperationResult.error(newGenericIOError(MESSAGE_INCORRECT_USE_CASE))
+        return OperationResult.error(newGenericIOError(MESSAGE_INCORRECT_USE_CASE, Stacktrace()))
     }
 
     override fun getRootFile(): OperationResult<FileDescriptor> {
@@ -190,7 +191,8 @@ class SAFFileSystemProvider(
             String.format(
                 OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_COLUMN,
                 columnName
-            )
+            ),
+            Stacktrace()
         )
     }
 
@@ -199,7 +201,8 @@ class SAFFileSystemProvider(
             String.format(
                 OperationError.GENERIC_MESSAGE_FAILED_TO_RETRIEVE_DATA_BY_URI,
                 uri.toString()
-            )
+            ),
+            Stacktrace()
         )
     }
 
@@ -208,7 +211,8 @@ class SAFFileSystemProvider(
             String.format(
                 OperationError.GENERIC_MESSAGE_FAILED_TO_GET_ACCESS_RIGHT_TO_URI,
                 uri.toString()
-            )
+            ),
+            Stacktrace()
         )
     }
 
@@ -217,7 +221,8 @@ class SAFFileSystemProvider(
             String.format(
                 OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_FILE,
                 uri.toString()
-            )
+            ),
+            Stacktrace()
         )
     }
 

@@ -29,6 +29,7 @@ import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.usecases.DecodePasswordWithBiometricUseCase
 import com.ivanovsky.passnotes.domain.usecases.FindNoteForAutofillUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetRecentlyOpenedFilesUseCase
@@ -141,7 +142,10 @@ class UnlockInteractor(
 
                     if (totalAwaitTime >= SYNC_AWAIT_TIMEOUT) {
                         return@withContext OperationResult.error(
-                            newGenericError(MESSAGE_SYNCHRONIZATION_TAKES_TOO_LONG)
+                            newGenericError(
+                                MESSAGE_SYNCHRONIZATION_TAKES_TOO_LONG,
+                                Stacktrace()
+                            )
                         )
                     }
                 }
@@ -242,7 +246,8 @@ class UnlockInteractor(
                             GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
                             UsedFile::class.simpleName,
                             file.fileUid
-                        )
+                        ),
+                        Stacktrace()
                     )
                 )
 
@@ -264,7 +269,10 @@ class UnlockInteractor(
             val existingFile = fileRepository.findByUid(file.fileUid, file.fsAuthority)
             if (existingFile != null) {
                 return@withContext OperationResult.error(
-                    newDbError(MESSAGE_RECORD_IS_ALREADY_EXISTS)
+                    newDbError(
+                        MESSAGE_RECORD_IS_ALREADY_EXISTS,
+                        Stacktrace()
+                    )
                 )
             }
 
@@ -277,7 +285,8 @@ class UnlockInteractor(
                             GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
                             UsedFile::class.simpleName,
                             file.fileUid
-                        )
+                        ),
+                        Stacktrace()
                     )
                 )
 

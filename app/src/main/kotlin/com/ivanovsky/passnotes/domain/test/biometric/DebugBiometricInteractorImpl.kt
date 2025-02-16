@@ -3,11 +3,12 @@ package com.ivanovsky.passnotes.domain.test.biometric
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.crypto.entity.BiometricData
-import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.newBiometricDataError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
 import com.ivanovsky.passnotes.domain.biometric.BiometricInteractor
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import java.util.concurrent.atomic.AtomicBoolean
 
 class DebugBiometricInteractorImpl(
@@ -25,7 +26,7 @@ class DebugBiometricInteractorImpl(
 
     override fun getCipherForEncryption(): OperationResult<BiometricEncoder> {
         return if (isBiometricDataInvalidated.get()) {
-            OperationResult.error(newBiometricDataInvalidatedError())
+            OperationResult.error(newBiometricDataError(Stacktrace()))
         } else {
             OperationResult.success(encoder)
         }
@@ -35,7 +36,7 @@ class DebugBiometricInteractorImpl(
         biometricData: BiometricData
     ): OperationResult<BiometricDecoder> {
         return if (isBiometricDataInvalidated.get()) {
-            OperationResult.error(newBiometricDataInvalidatedError())
+            OperationResult.error(newBiometricDataError(Stacktrace()))
         } else {
             OperationResult.success(decoder)
         }
@@ -44,9 +45,5 @@ class DebugBiometricInteractorImpl(
     override fun clearStoredData(): OperationResult<Boolean> {
         val result = isBiometricDataInvalidated.compareAndSet(true, false)
         return OperationResult.success(result)
-    }
-
-    private fun newBiometricDataInvalidatedError(): OperationError {
-        return OperationError(OperationError.Type.BIOMETRIC_DATA_INVALIDATED_ERROR)
     }
 }

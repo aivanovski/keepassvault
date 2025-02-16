@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.diff.GetDiffUseCase
 import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffListItem
@@ -47,7 +48,12 @@ class DiffViewerInteractor(
             if (db is KotpassDatabase) {
                 OperationResult.success(Pair(db, file))
             } else {
-                OperationResult.error(newGenericError(MESSAGE_UNSUPPORTED_DATABASE_TYPE))
+                OperationResult.error(
+                    newGenericError(
+                        MESSAGE_UNSUPPORTED_DATABASE_TYPE,
+                        Stacktrace()
+                    )
+                )
             }
         }
 
@@ -70,7 +76,12 @@ class DiffViewerInteractor(
             if (db is KotpassDatabase) {
                 OperationResult.success(db)
             } else {
-                OperationResult.error(newGenericError(MESSAGE_UNSUPPORTED_DATABASE_TYPE))
+                OperationResult.error(
+                    newGenericError(
+                        MESSAGE_UNSUPPORTED_DATABASE_TYPE,
+                        Stacktrace()
+                    )
+                )
             }
         }
 

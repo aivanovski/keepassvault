@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.data.repository.file.fake.FakeFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.listAllFiles
 import com.ivanovsky.passnotes.extensions.mapError
@@ -100,7 +101,8 @@ class SetupFakeFileUseCase(
             String.format(
                 OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_FILE,
                 fileName
-            )
+            ),
+            Stacktrace()
         )
     }
 }

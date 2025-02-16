@@ -2,8 +2,11 @@ package com.ivanovsky.passnotes.domain.usecases
 
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP
+import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
 import java.util.UUID
@@ -32,7 +35,10 @@ class FindParentGroupsUseCase(
             val allGroups = getAllGroupsResult.getOrThrow()
             val rootGroup = allGroups.firstOrNull { group -> group.parentUid == null }
                 ?: return@withContext OperationResult.error(
-                    OperationError.newDbError(OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP)
+                    newDbError(
+                        MESSAGE_FAILED_TO_FIND_ROOT_GROUP,
+                        Stacktrace()
+                    )
                 )
 
             if (groupUid == rootGroup.uid) {
@@ -41,11 +47,12 @@ class FindParentGroupsUseCase(
 
             val selectedGroup = allGroups.firstOrNull { group -> group.uid == groupUid }
                 ?: return@withContext OperationResult.error(
-                    OperationError.newDbError(
+                    newDbError(
                         String.format(
                             OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
                             groupUid
-                        )
+                        ),
+                        Stacktrace()
                     )
                 )
 

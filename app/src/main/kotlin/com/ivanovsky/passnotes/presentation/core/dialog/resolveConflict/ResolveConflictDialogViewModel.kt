@@ -11,7 +11,6 @@ import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WI
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
@@ -25,7 +24,6 @@ import org.koin.core.parameter.parametersOf
 
 class ResolveConflictDialogViewModel(
     private val interactor: ResolveConflictDialogInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val dateFormatProvider: DateFormatProvider,
     private val resourceProvider: ResourceProvider,
     private val args: ResolveConflictDialogArgs

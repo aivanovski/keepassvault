@@ -11,7 +11,6 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.Screens.EnterDbCredentialsScreen.Companion.RESULT_KEY
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
@@ -27,7 +26,6 @@ import org.koin.core.parameter.parametersOf
 
 class EnterDbCredentialsViewModel(
     private val interactor: EnterDbCredentialsInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val router: Router,
     private val args: EnterDbCredentialsScreenArgs
 ) : BaseScreenViewModel(

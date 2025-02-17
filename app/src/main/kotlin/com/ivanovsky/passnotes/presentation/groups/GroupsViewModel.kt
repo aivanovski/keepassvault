@@ -34,7 +34,6 @@ import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder.ActionType
 import com.ivanovsky.passnotes.domain.interactor.groups.GroupsInteractor
@@ -106,7 +105,6 @@ class GroupsViewModel(
     private val interactor: GroupsInteractor,
     syncStateInteractor: SyncStateInteractor,
     biometricResolver: BiometricResolver,
-    private val errorInteractor: ErrorInteractor,
     lockInteractor: DatabaseLockInteractor,
     private val observerBus: ObserverBus,
     private val settings: Settings,
@@ -165,7 +163,6 @@ class GroupsViewModel(
     val isSearchQueryVisible = MutableLiveData(false)
     val isNavigationPanelVisible = MutableLiveData(false)
     val showToastEvent = SingleLiveEvent<String>()
-    val showErrorDialog = SingleLiveEvent<String>()
     val showNewEntryDialogEvent = SingleLiveEvent<List<Template>>()
     val showGroupActionsDialogEvent = SingleLiveEvent<Group>()
     val showNoteActionsDialogEvent = SingleLiveEvent<Note>()
@@ -576,8 +573,7 @@ class GroupsViewModel(
         }
 
         if (getCipherResult.isFailed) {
-            val message = errorInteractor.processAndGetMessage(getCipherResult.error)
-            showErrorDialog.call(message)
+            setErrorPanelState(getCipherResult.error)
             return
         }
 

@@ -11,7 +11,6 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffListItem
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
@@ -40,7 +39,6 @@ import org.koin.core.parameter.parametersOf
 
 class DiffViewerViewModel(
     private val interactor: DiffViewerInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val viewModelFactory: DiffViewerCellViewModelFactory,
     private val modelFactory: DiffViewerCellModelFactory,
     private val router: Router,

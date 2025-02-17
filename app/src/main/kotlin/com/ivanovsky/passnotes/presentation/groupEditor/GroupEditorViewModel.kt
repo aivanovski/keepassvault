@@ -12,7 +12,6 @@ import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.groupEditor.GroupEditorInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
@@ -26,7 +25,6 @@ import org.koin.core.parameter.parametersOf
 
 class GroupEditorViewModel(
     private val interactor: GroupEditorInteractor,
-    private val errorInteractor: ErrorInteractor,
     lockInteractor: DatabaseLockInteractor,
     private val resourceProvider: ResourceProvider,
     observerBus: ObserverBus,

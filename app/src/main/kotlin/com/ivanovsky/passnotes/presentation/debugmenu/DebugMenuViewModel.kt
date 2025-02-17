@@ -21,7 +21,6 @@ import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.DiffViewerScreen
@@ -42,7 +41,6 @@ import kotlinx.coroutines.withContext
 
 class DebugMenuViewModel(
     private val interactor: DebugMenuInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val resourceProvider: ResourceProvider,
     private val settings: Settings,
     private val router: Router

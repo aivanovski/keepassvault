@@ -230,7 +230,6 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
@@ -244,13 +243,11 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
             factory { (args: GroupEditorArgs) ->
                 GroupEditorViewModel(
-                    get(),
                     get(),
                     get(),
                     get(),
@@ -287,13 +284,11 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
             viewModel { (args: NoteEditorArgs) ->
                 NoteEditorViewModel(
-                    get(),
                     get(),
                     get(),
                     get(),
@@ -312,7 +307,6 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
@@ -327,15 +321,14 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
             viewModel { AboutViewModel(get(), get()) }
             viewModel { MainSettingsViewModel(get(), get()) }
-            viewModel { AppSettingsViewModel(get(), get(), get(), get(), get(), get(), get()) }
+            viewModel { AppSettingsViewModel(get(), get(), get(), get(), get(), get()) }
             viewModel { DatabaseSettingsViewModel(get(), get(), get(), get()) }
-            viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
+            viewModel { ChangePasswordDialogViewModel(get(), get()) }
             viewModel {
                 PasswordGeneratorViewModel(
                     get(),
@@ -347,12 +340,11 @@ object UiModule {
                     get()
                 )
             }
-            viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
-            viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
+            viewModel { DebugMenuViewModel(get(), get(), get(), get()) }
+            viewModel { NewDatabaseViewModel(get(), get(), get(), get()) }
             factory { (args: SortAndViewDialogArgs) -> SortAndViewDialogViewModel(get(), args) }
             factory { (args: ResolveConflictDialogArgs) ->
                 ResolveConflictDialogViewModel(
-                    get(),
                     get(),
                     get(),
                     get(),
@@ -365,19 +357,17 @@ object UiModule {
                 EnterDbCredentialsViewModel(
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
             factory { (args: DiffViewerScreenArgs) ->
-                DiffViewerViewModel(get(), get(), get(), get(), get(), get(), args)
+                DiffViewerViewModel(get(), get(), get(), get(), get(), args)
             }
             factory { (args: SetupOneTimePasswordArgs) ->
                 SetupOneTimePasswordViewModel(get(), get(), get(), get(), args)
             }
             factory { (args: HistoryScreenArgs) ->
                 HistoryViewModel(
-                    get(),
                     get(),
                     get(),
                     get(),

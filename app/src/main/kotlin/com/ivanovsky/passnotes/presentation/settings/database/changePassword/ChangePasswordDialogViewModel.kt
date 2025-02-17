@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.ScreenState
@@ -14,7 +13,6 @@ import kotlinx.coroutines.launch
 
 class ChangePasswordDialogViewModel(
     private val interactor: DatabaseSettingsInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val resourceProvider: ResourceProvider
 ) : BaseScreenViewModel(
     initialState = ScreenState.data()

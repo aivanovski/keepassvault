@@ -18,7 +18,6 @@ import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
@@ -40,7 +39,6 @@ import org.koin.core.parameter.parametersOf
 
 class FilePickerViewModel(
     private val interactor: FilePickerInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val fileSystemResolver: FileSystemResolver,
     private val modelFactory: FilePickerCellModelFactory,
     private val viewModelFactory: FilePickerCellViewModelFactory,

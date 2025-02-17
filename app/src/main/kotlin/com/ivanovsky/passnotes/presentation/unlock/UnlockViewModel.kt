@@ -29,8 +29,8 @@ import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
+import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.extensions.getFileDescriptor
 import com.ivanovsky.passnotes.extensions.getKeyFileDescriptor
 import com.ivanovsky.passnotes.extensions.getLoginType
@@ -65,7 +65,6 @@ import org.koin.core.parameter.parametersOf
 class UnlockViewModel(
     private val interactor: UnlockInteractor,
     private val biometricResolver: BiometricResolver,
-    private val errorInteractor: ErrorInteractor,
     private val observerBus: ObserverBus,
     private val resourceProvider: ResourceProvider,
     private val dispatchers: DispatcherProvider,
@@ -615,7 +614,7 @@ class UnlockViewModel(
             } else {
                 setScreenState(ScreenState.data())
 
-                val message = errorInteractor.processAndGetMessage(saveResult.error)
+                val message = saveResult.error.formatReadableMessage(resourceProvider)
                 showSnackbarMessage.call(message)
             }
         }

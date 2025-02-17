@@ -11,7 +11,6 @@ import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.serverLogin.ServerLoginInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.toFileId
@@ -35,7 +34,6 @@ import kotlinx.coroutines.launch
 
 class ServerLoginViewModel(
     private val interactor: ServerLoginInteractor,
-    private val errorInteractor: ErrorInteractor,
     themeProvider: ThemeProvider,
     private val resourceProvider: ResourceProvider,
     private val router: Router,

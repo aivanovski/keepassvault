@@ -22,7 +22,6 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.Screens.FilePickerScreen
@@ -45,7 +44,6 @@ import org.koin.core.parameter.parametersOf
 
 class StorageListViewModel(
     private val interactor: StorageListInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val modelFactory: StorageListCellModelFactory,
     private val viewModelFactory: StorageListCellViewModelFactory,
     private val fileSystemResolver: FileSystemResolver,

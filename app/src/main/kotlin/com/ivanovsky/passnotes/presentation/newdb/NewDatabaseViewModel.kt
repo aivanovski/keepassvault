@@ -11,7 +11,6 @@ import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
@@ -32,7 +31,6 @@ import kotlinx.coroutines.launch
 
 class NewDatabaseViewModel(
     private val interactor: NewDatabaseInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val fileHelper: FileHelper,
     private val resourceProvider: ResourceProvider,
     private val router: Router

@@ -22,7 +22,6 @@ import com.ivanovsky.passnotes.domain.entity.TimeData
 import com.ivanovsky.passnotes.domain.entity.Timestamp
 import com.ivanovsky.passnotes.domain.entity.Timestamp.Companion.currentTimestamp
 import com.ivanovsky.passnotes.domain.entity.TimestampBuilder
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.noteEditor.NoteEditorInteractor
 import com.ivanovsky.passnotes.domain.otp.OtpUriFactory
 import com.ivanovsky.passnotes.domain.otp.model.OtpToken
@@ -71,7 +70,6 @@ class NoteEditorViewModel(
     private val interactor: NoteEditorInteractor,
     private val resources: ResourceProvider,
     lockInteractor: DatabaseLockInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val noteDiffer: NoteDiffer,
     private val dispatchers: DispatcherProvider,
     private val modelFactory: NoteEditorCellModelFactory,

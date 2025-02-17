@@ -6,15 +6,16 @@ import androidx.lifecycle.viewModelScope
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseConfig
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.settings.database.DatabaseSettingsInteractor
+import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import kotlinx.coroutines.launch
 
 class DatabaseSettingsViewModel(
     private val interactor: DatabaseSettingsInteractor,
-    private val errorInteractor: ErrorInteractor,
+    private val resourceProvider: ResourceProvider,
     lockInteractor: DatabaseLockInteractor,
     observerBus: ObserverBus
 ) : ViewModel() {
@@ -37,7 +38,7 @@ class DatabaseSettingsViewModel(
                 isRecycleBinEnabled.value = config?.isRecycleBinEnabled ?: false
                 isLoading.value = false
             } else {
-                val message = errorInteractor.processAndGetMessage(getConfig.error)
+                val message = getConfig.error.formatReadableMessage(resourceProvider)
                 showErrorDialogEvent.call(message)
             }
         }
@@ -60,7 +61,7 @@ class DatabaseSettingsViewModel(
                 isLoading.value = false
             } else {
                 isRecycleBinEnabled.value = isRecycleBinEnabled.value
-                val message = errorInteractor.processAndGetMessage(applyConfig.error)
+                val message = applyConfig.error.formatReadableMessage(resourceProvider)
                 showErrorDialogEvent.call(message)
             }
         }

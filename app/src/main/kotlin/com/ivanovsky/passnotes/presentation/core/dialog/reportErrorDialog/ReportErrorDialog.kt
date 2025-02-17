@@ -22,7 +22,7 @@ class ReportErrorDialog : BaseComposeDialog<ReportErrorDialogViewModel>() {
         ViewModelProvider(
             owner = this,
             factory = ViewModelFactory(args)
-        )[ReportErrorDialogViewModel::class]
+        )[ReportErrorDialogViewModel::class.java]
     }
 
     @Composable

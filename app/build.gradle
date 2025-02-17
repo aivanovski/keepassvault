@@ -223,7 +223,6 @@ def fzf4jVersion = '0.2.1'
 // More latest version of jgit produce crash on Samsung
 def jgitVersion = '6.2.0.202206071550-r'
 def totpKtVersion = 'v1.0.0'
-def constraintLayoutCompose = '1.1.0'
 def composeIcons = '1.6.8'
 
 // Test
@@ -282,7 +281,6 @@ dependencies {
     implementation "androidx.activity:activity-compose"
     implementation "androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion"
     implementation "androidx.compose.runtime:runtime-livedata"
-    implementation "androidx.constraintlayout:constraintlayout-compose:$constraintLayoutCompose"
     implementation "androidx.compose.material:material-icons-extended:$composeIcons"
 
     // Compose preview
@@ -325,6 +323,4 @@ dependencies {
 
     // TOTP + HOTP
     implementation "com.github.robinohs:totp-kt:$totpKtVersion"
-
-    // Arrow
 }

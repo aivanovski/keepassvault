@@ -10,8 +10,8 @@ import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
+import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.util.StringUtils
 import java.io.File
@@ -20,7 +20,6 @@ import kotlinx.coroutines.launch
 class AppSettingsViewModel(
     private val interactor: AppSettingsInteractor,
     private val biometricResolver: BiometricResolver,
-    private val errorInteractor: ErrorInteractor,
     private val permissionHelper: PermissionHelper,
     private val resourceProvider: ResourceProvider,
     private val settings: Settings,
@@ -97,7 +96,7 @@ class AppSettingsViewModel(
             if (getFileResult.isSucceeded) {
                 shareFileEvent.call(getFileResult.obj)
             } else {
-                val message = errorInteractor.processAndGetMessage(getFileResult.error)
+                val message = getFileResult.error.formatReadableMessage(resourceProvider)
                 showErrorDialogEvent.call(message)
             }
         }
@@ -113,7 +112,7 @@ class AppSettingsViewModel(
             if (removeResult.isSucceeded) {
                 showToastEvent.call(resourceProvider.getString(R.string.successfully))
             } else {
-                val message = errorInteractor.processAndGetMessage(removeResult.error)
+                val message = removeResult.error.formatReadableMessage(resourceProvider)
                 showErrorDialogEvent.call(message)
             }
         }

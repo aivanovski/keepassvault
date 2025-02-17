@@ -23,6 +23,7 @@ import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao
 import com.ivanovsky.passnotes.domain.NoteDiffer
 import com.ivanovsky.passnotes.domain.NoteDiffer.DiffAction
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrNull
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
@@ -84,7 +85,8 @@ class KotpassNoteDao(
                             GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
                             Note::class.simpleName,
                             noteUid
-                        )
+                        ),
+                        Stacktrace()
                     )
                 )
 
@@ -151,7 +153,8 @@ class KotpassNoteDao(
             } else {
                 OperationResult.error(
                     newDbError(
-                        String.format(GENERIC_MESSAGE_NOT_FOUND, "Operation")
+                        String.format(GENERIC_MESSAGE_NOT_FOUND, "Operation"),
+                        Stacktrace()
                     )
                 )
             }
@@ -159,7 +162,13 @@ class KotpassNoteDao(
     }
 
     override fun update(newNote: Note, doCommit: Boolean): OperationResult<UUID> {
-        val noteUid = newNote.uid ?: return OperationResult.error(newDbError(MESSAGE_UID_IS_NULL))
+        val noteUid = newNote.uid
+            ?: return OperationResult.error(
+                newDbError(
+                    MESSAGE_UID_IS_NULL,
+                    Stacktrace()
+                )
+            )
 
         val getOldNoteResult = db.lock.withLock { getNoteByUid(noteUid) }
         if (getOldNoteResult.isFailed) {
@@ -187,7 +196,12 @@ class KotpassNoteDao(
 
             val oldEntryIdx = oldRawGroup.entries.indexOfFirst { it.uuid == noteUid }
             if (oldEntryIdx == -1) {
-                return@withLock OperationResult.error(newDbError(MESSAGE_FAILED_TO_FIND_NOTE))
+                return@withLock OperationResult.error(
+                    newDbError(
+                        MESSAGE_FAILED_TO_FIND_NOTE,
+                        Stacktrace()
+                    )
+                )
             }
 
             var newDb = db.getRawDatabase()

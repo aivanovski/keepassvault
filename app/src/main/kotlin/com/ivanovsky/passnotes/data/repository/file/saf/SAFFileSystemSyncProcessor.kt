@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 
 class SAFFileSystemSyncProcessor : FileSystemSyncProcessor {
 
@@ -26,7 +27,12 @@ class SAFFileSystemSyncProcessor : FileSystemSyncProcessor {
     override fun getRevision(uid: String): String? = null
 
     override fun getSyncConflictForFile(uid: String): OperationResult<SyncConflictInfo> {
-        return OperationResult.error(newGenericError(MESSAGE_INCORRECT_USE_CASE))
+        return OperationResult.error(
+            newGenericError(
+                MESSAGE_INCORRECT_USE_CASE,
+                Stacktrace()
+            )
+        )
     }
 
     override fun process(
@@ -34,6 +40,11 @@ class SAFFileSystemSyncProcessor : FileSystemSyncProcessor {
         syncStrategy: SyncStrategy,
         resolutionStrategy: ConflictResolutionStrategy?
     ): OperationResult<FileDescriptor> {
-        return OperationResult.error(newGenericError(MESSAGE_INCORRECT_USE_CASE))
+        return OperationResult.error(
+            newGenericError(
+                MESSAGE_INCORRECT_USE_CASE,
+                Stacktrace()
+            )
+        )
     }
 }

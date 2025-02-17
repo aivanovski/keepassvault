@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import timber.log.Timber
 
 /**
@@ -60,7 +61,8 @@ class SAFHelper(context: Context) {
             String.format(
                 OperationError.GENERIC_MESSAGE_FAILED_TO_GET_ACCESS_RIGHT_TO_URI,
                 uri.toString()
-            )
+            ),
+            Stacktrace()
         )
     }
 

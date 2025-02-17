@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="homepage_url" translatable="false">https://github.com/aivanovski/keepassvault</string>
-    <string name="feedback_url" translatable="false">https://github.com/aivanovski/keepassvault/issues</string>
+    <string name="issues_url" translatable="false">https://github.com/aivanovski/keepassvault/issues</string>
     <string name="kotpass_url" translatable="false">https://github.com/keemobile/kotpass</string>
 
     <string name="pref_auto_lock_delay_in_ms" translatable="false">autoLockDelayInMs</string>
@@ -44,7 +44,10 @@
     <string name="file_already_exists" translatable="false">File already exists</string>
     <string name="test_data_removed" translatable="false">Test data removed</string>
     <string name="biometric_data_invalidated" translatable="false">Biometric data is invalidated</string>
-    <string name="long_dummy_text" translatable="false">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</string>
+    <string name="short_dummy_text" translatable="false">Lorem Ipsum is simply dummy.</string>
+    <string name="medium_dummy_text" translatable="false">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</string>
+    <string name="long_dummy_text" translatable="false">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</string>
+    <string name="dummy_stacktrace" translatable="false">Exception in thread "main" java.lang.IllegalStateException: A book has a null property\n at com.example.myproject.Author.getBookIds(Author.java:38)\n at com.example.myproject.Bootstrap.main(Bootstrap.java:14)\n Caused by: java.lang.NullPointerException\n at com.example.myproject.Book.getId(Book.java:22)\n at com.example.myproject.Author.getBookIds(Author.java:36)\n...</string>
 
     <string-array name="pref_auto_lock_entries">
         <item>30 seconds</item>

@@ -32,6 +32,7 @@ import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSExc
 import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSFileNotFoundException;
 import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSNetworkException;
 import com.ivanovsky.passnotes.domain.FileHelper;
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace;
 import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
 import com.ivanovsky.passnotes.extensions.RemoteFileMetadataExtKt;
 import com.ivanovsky.passnotes.util.DateUtils;
@@ -125,13 +126,13 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         OperationError result;
 
         if (exception instanceof RemoteFSAuthException) {
-            result = newAuthError(exception.getMessage());
+            result = newAuthError(exception.getMessage(), exception);
         } else if (exception instanceof RemoteFSNetworkException) {
-            result = newNetworkIOError();
+            result = newNetworkIOError(exception);
         } else if (exception instanceof RemoteFSFileNotFoundException) {
-            result = newGenericIOError(exception.getMessage());
+            result = newGenericIOError(exception);
         } else if (exception instanceof RemoteFSApiException) {
-            result = newGenericIOError(exception.getMessage());
+            result = newGenericIOError(exception);
         } else {
             throw new IllegalArgumentException(
                     "Exception handling is not implemented: exception=" + exception);
@@ -188,7 +189,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         if (cachedFile != null) {
             return OperationResult.deferred(newDescriptorFromRemoteFile(cachedFile), error);
         } else {
-            return OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+            return OperationResult.error(
+                    newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE, new Stacktrace()));
         }
     }
 
@@ -255,7 +257,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         RemoteFile cachedFile = cache.getByUid(file.getUid());
         if (cachedFile == null) {
             String message = String.format(ERROR_FAILED_TO_FIND_FILE_IN_CACHE, file.getPath());
-            return OperationResult.error(newGenericIOError(message));
+            return OperationResult.error(newGenericIOError(message, new Stacktrace()));
         }
 
         OperationResult<FileInputStream> streamResult =
@@ -283,7 +285,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
         File destinationDir = fileHelper.getRemoteFilesDir();
         if (destinationDir == null) {
-            return OperationResult.error(newGenericIOError(ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR));
+            return OperationResult.error(
+                    newGenericIOError(ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR, new Stacktrace()));
         }
 
         if (options.isCacheOnly()) {
@@ -337,7 +340,9 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
                     result.from(openFile(destinationPath));
                 } else {
-                    result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
+                    result.setError(
+                            newGenericIOError(
+                                    ERROR_FAILED_TO_START_PROCESSING_UNIT, new Stacktrace()));
                 }
 
             } else if (isNotEquals(remoteRevision, cachedFile.getRevision())) {
@@ -377,12 +382,15 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
                         result.from(openFile(cachedFile.getLocalPath()));
                     } else {
-                        result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
+                        result.setError(
+                                newGenericIOError(
+                                        ERROR_FAILED_TO_START_PROCESSING_UNIT, new Stacktrace()));
                     }
                 } else {
                     // user modified db
                     result.setError(
-                            newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
+                            newDbVersionConflictError(
+                                    MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE, new Stacktrace()));
                 }
             } else {
                 // local revision is the same as in the server
@@ -420,11 +428,13 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                 if (startProcessingUnit(unit)) {
                     result.from(openFile(cachedFile.getLocalPath()));
                 } else {
-                    result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
+                    result.setError(
+                            newGenericIOError(
+                                    ERROR_FAILED_TO_START_PROCESSING_UNIT, new Stacktrace()));
                 }
 
             } else {
-                result.setError(newNetworkIOError());
+                result.setError(newNetworkIOError(new Stacktrace()));
             }
 
         } catch (RemoteFSException e) {
@@ -461,7 +471,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         RemoteFile cachedFile = cache.getByUid(file.getUid());
         if (cachedFile == null) {
             String message = String.format(ERROR_FAILED_TO_FIND_FILE_IN_CACHE, file.getPath());
-            return OperationResult.error(newGenericIOError(message));
+            return OperationResult.error(newGenericIOError(message, new Stacktrace()));
         }
 
         cachedFile.setLastModificationTimestamp(file.getModified());
@@ -488,11 +498,12 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
                 return OperationResult.error(
                         newGenericIOError(
-                                String.format(
-                                        ERROR_FAILED_TO_FIND_FILE, cachedFile.getLocalPath())));
+                                String.format(ERROR_FAILED_TO_FIND_FILE, cachedFile.getLocalPath()),
+                                new Stacktrace()));
             }
         } else {
-            return OperationResult.error(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
+            return OperationResult.error(
+                    newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT, new Stacktrace()));
         }
     }
 
@@ -509,14 +520,15 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
         if (!options.isWriteEnabled()) {
             return OperationResult.error(
-                    newGenericIOError(MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED));
+                    newGenericIOError(MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED, new Stacktrace()));
         }
 
         OperationResult<OutputStream> result = new OperationResult<>();
 
         File destinationDir = fileHelper.getRemoteFilesDir();
         if (destinationDir == null) {
-            return OperationResult.error(newGenericIOError(ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR));
+            return OperationResult.error(
+                    newGenericIOError(ERROR_FAILED_TO_FIND_APP_PRIVATE_DIR, new Stacktrace()));
         }
 
         if (options.isCacheOnly()) {
@@ -578,7 +590,9 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         onFinishProcessingUnit(unit.getProcessingUid());
                     }
                 } else {
-                    result.setError(newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
+                    result.setError(
+                            newGenericIOError(
+                                    ERROR_FAILED_TO_START_PROCESSING_UNIT, new Stacktrace()));
                 }
 
             } else {
@@ -634,7 +648,9 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                             }
                         } else {
                             result.setError(
-                                    newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
+                                    newGenericIOError(
+                                            ERROR_FAILED_TO_START_PROCESSING_UNIT,
+                                            new Stacktrace()));
                         }
 
                     } else {
@@ -660,12 +676,15 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                             }
                         } else {
                             result.setError(
-                                    newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT));
+                                    newGenericIOError(
+                                            ERROR_FAILED_TO_START_PROCESSING_UNIT,
+                                            new Stacktrace()));
                         }
                     }
                 } else {
                     result.setError(
-                            newDbVersionConflictError(MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE));
+                            newDbVersionConflictError(
+                                    MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE, new Stacktrace()));
                 }
             }
         } catch (RemoteFSNetworkException e) {
@@ -744,7 +763,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         } catch (FileNotFoundException e) {
             result.setError(
                     newGenericIOError(
-                            String.format(ERROR_FAILED_TO_FIND_FILE, file.getLocalPath())));
+                            String.format(ERROR_FAILED_TO_FIND_FILE, file.getLocalPath()),
+                            new Stacktrace()));
         }
 
         return result;
@@ -925,14 +945,16 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         File file = new File(path);
 
         if (!file.exists()) {
-            return OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+            return OperationResult.error(
+                    newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE, new Stacktrace()));
         }
 
         FileInputStream stream;
         try {
             stream = new FileInputStream(file);
         } catch (FileNotFoundException e) {
-            return OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE));
+            return OperationResult.error(
+                    newGenericIOError(MESSAGE_FAILED_TO_FIND_FILE, new Stacktrace()));
         }
 
         return OperationResult.success(stream);

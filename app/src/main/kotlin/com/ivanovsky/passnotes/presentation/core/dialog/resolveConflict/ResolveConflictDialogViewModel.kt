@@ -11,10 +11,10 @@ import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WI
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -24,14 +24,14 @@ import org.koin.core.parameter.parametersOf
 
 class ResolveConflictDialogViewModel(
     private val interactor: ResolveConflictDialogInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val dateFormatProvider: DateFormatProvider,
     private val resourceProvider: ResourceProvider,
     private val args: ResolveConflictDialogArgs
-) : ViewModel() {
+) : BaseScreenViewModel(
+    initialState = ScreenState.loading()
+) {
 
-    val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.loading())
+    val screenVisibilityHandler = DefaultScreenVisibilityHandler()
     val message = MutableLiveData(EMPTY)
     val dismissEvent = SingleLiveEvent<Unit>()
 
@@ -43,11 +43,7 @@ class ResolveConflictDialogViewModel(
             if (getConflictResult.isSucceededOrDeferred) {
                 onSyncConflictInfoLoaded(getConflictResult.getOrThrow())
             } else {
-                setScreenState(
-                    ScreenState.error(
-                        errorText = errorInteractor.processAndGetMessage(getConflictResult.error)
-                    )
-                )
+                setErrorState(getConflictResult.error)
             }
         }
     }
@@ -72,11 +68,7 @@ class ResolveConflictDialogViewModel(
             if (resolvedConflict.isSucceededOrDeferred) {
                 dismissEvent.call(Unit)
             } else {
-                setScreenState(
-                    ScreenState.error(
-                        errorText = errorInteractor.processAndGetMessage(resolvedConflict.error)
-                    )
-                )
+                setErrorState(resolvedConflict.error)
             }
         }
     }
@@ -97,10 +89,6 @@ class ResolveConflictDialogViewModel(
         val timeFormat = dateFormatProvider.getTimeFormat()
 
         return dateFormat.format(date) + " " + timeFormat.format(date)
-    }
-
-    private fun setScreenState(state: ScreenState) {
-        screenState.value = state
     }
 
     class Factory(private val args: ResolveConflictDialogArgs) : ViewModelProvider.Factory {

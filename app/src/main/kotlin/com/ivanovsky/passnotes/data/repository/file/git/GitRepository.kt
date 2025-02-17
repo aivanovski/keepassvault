@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata
 import com.ivanovsky.passnotes.data.repository.file.git.model.SshKey
 import com.ivanovsky.passnotes.data.repository.file.git.model.VersionedFile
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.map
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
@@ -164,7 +165,7 @@ class GitRepository(
             }
         }
 
-        return OperationResult.error(newRemoteApiError(ERROR_FAILED_TO_PULL))
+        return OperationResult.error(newRemoteApiError(ERROR_FAILED_TO_PULL, Stacktrace()))
     }
 
     fun addToIndex(file: VersionedFile): OperationResult<Unit> {
@@ -179,7 +180,7 @@ class GitRepository(
         if (!status.uncommittedChanges.contains(file.localPath) &&
             !status.added.contains(file.localPath)
         ) {
-            return OperationResult.error(newRemoteApiError(ERROR_NOTHING_TO_COMMIT))
+            return OperationResult.error(newRemoteApiError(ERROR_NOTHING_TO_COMMIT, Stacktrace()))
         }
 
         val addResult = execute {
@@ -222,7 +223,7 @@ class GitRepository(
 
         val push = pushResult.obj
         if (push.any { !it.isSuccessful() }) {
-            return OperationResult.error(newRemoteApiError(ERROR_FAILED_TO_PUSH))
+            return OperationResult.error(newRemoteApiError(ERROR_FAILED_TO_PUSH, Stacktrace()))
         }
 
         return OperationResult.success(Unit)
@@ -245,11 +246,21 @@ class GitRepository(
 
     private fun getRemoteHeadId(): OperationResult<ObjectId> {
         if (git.repository.remoteNames.size > 1) {
-            return OperationResult.error(newRemoteApiError(ERROR_MORE_THAN_ONE_REMOTE))
+            return OperationResult.error(
+                newRemoteApiError(
+                    ERROR_MORE_THAN_ONE_REMOTE,
+                    Stacktrace()
+                )
+            )
         }
 
         val remoteName = git.repository.remoteNames.firstOrNull()
-            ?: return OperationResult.error(newRemoteApiError(ERROR_FAILED_TO_GET_ORIGIN))
+            ?: return OperationResult.error(
+                newRemoteApiError(
+                    ERROR_FAILED_TO_GET_ORIGIN,
+                    Stacktrace()
+                )
+            )
 
         val getLocalHeadResult = getLocalHead()
         if (getLocalHeadResult.isFailed) {
@@ -302,7 +313,8 @@ class GitRepository(
             String.format(
                 OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_FILE,
                 path
-            )
+            ),
+            Stacktrace()
         )
     }
 
@@ -311,7 +323,8 @@ class GitRepository(
             String.format(
                 GENERIC_MESSAGE_FAILED_TO_GET_REFERENCE_TO,
                 referenceName
-            )
+            ),
+            Stacktrace()
         )
     }
 

@@ -18,17 +18,20 @@
 
         <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
             android:id="@+id/errorPanelView"
+            state="@{viewModel.screenState}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="?kpErrorBackgroundColor"
             app:layout_constraintTop_toTopOf="parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
+            state="@{viewModel.screenState}"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="0dp" />
 
@@ -45,7 +48,7 @@
             app:hint="@string/title"
             app:layout_constraintTop_toBottomOf="@id/errorPanelView"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.MaterialSpinner
             android:id="@+id/autotypeSpinner"
@@ -61,7 +64,7 @@
             app:layout_constraintTop_toBottomOf="@id/title"
             app:layout_constraintWidth_percent="0.65"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.MaterialSpinner
             android:id="@+id/searchSpinner"
@@ -77,7 +80,7 @@
             app:layout_constraintTop_toBottomOf="@id/autotypeSpinner"
             app:layout_constraintWidth_percent="0.65"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

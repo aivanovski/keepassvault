@@ -11,7 +11,6 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffListItem
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
@@ -19,7 +18,7 @@ import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.Screens.EnterDbCredentialsScreen
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
-import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
@@ -40,13 +39,14 @@ import org.koin.core.parameter.parametersOf
 
 class DiffViewerViewModel(
     private val interactor: DiffViewerInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val viewModelFactory: DiffViewerCellViewModelFactory,
     private val modelFactory: DiffViewerCellModelFactory,
     private val router: Router,
     private val resourceProvider: ResourceProvider,
     private val args: DiffViewerScreenArgs
-) : BaseScreenViewModel() {
+) : BaseScreenViewModel(
+    initialState = ScreenState.loading()
+) {
 
     val viewTypes = ViewModelTypes()
         .add(SpaceCellViewModel::class, R.layout.cell_space)
@@ -54,8 +54,7 @@ class DiffViewerViewModel(
         .add(DiffHeaderCellViewModel::class, R.layout.cell_diff_header)
         .add(DiffCellViewModel::class, R.layout.cell_diff)
 
-    val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.loading())
+    val screenStateHandler = DefaultScreenVisibilityHandler()
     val leftFilename = MutableLiveData(EMPTY)
     val rightFilename = MutableLiveData(EMPTY)
     val isButtonsVisible = MutableLiveData(false)
@@ -254,21 +253,13 @@ class DiffViewerViewModel(
         viewModelScope.launch {
             val leftDataResult = loadDatabaseAndFile(leftEntity)
             if (leftDataResult.isFailed) {
-                setScreenState(
-                    ScreenState.error(
-                        errorText = errorInteractor.processAndGetMessage(leftDataResult.error)
-                    )
-                )
+                setErrorState(leftDataResult.error)
                 return@launch
             }
 
             val rightDataResult = loadDatabaseAndFile(rightEntity)
             if (rightDataResult.isFailed) {
-                setScreenState(
-                    ScreenState.error(
-                        errorText = errorInteractor.processAndGetMessage(rightDataResult.error)
-                    )
-                )
+                setErrorState(rightDataResult.error)
                 return@launch
             }
 
@@ -308,11 +299,7 @@ class DiffViewerViewModel(
         viewModelScope.launch {
             val getDiffResult = interactor.getDiff(leftDb, rightDb)
             if (getDiffResult.isFailed) {
-                setScreenState(
-                    ScreenState.error(
-                        errorText = errorInteractor.processAndGetMessage(getDiffResult.error)
-                    )
-                )
+                setErrorState(getDiffResult.error)
                 return@launch
             }
 
@@ -348,7 +335,7 @@ class DiffViewerViewModel(
                 eventProvider = eventProvider
             )
 
-            setCellElements(viewModels)
+            setCellViewModels(viewModels)
             setScreenState(ScreenState.data())
         } else {
             setScreenState(
@@ -357,10 +344,6 @@ class DiffViewerViewModel(
                 )
             )
         }
-    }
-
-    private fun setScreenState(state: ScreenState) {
-        screenState.value = state
     }
 
     private fun isArgumentsRequireSelection(): Boolean {

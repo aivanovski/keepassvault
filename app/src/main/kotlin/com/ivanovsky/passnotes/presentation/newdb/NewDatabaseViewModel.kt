@@ -1,21 +1,22 @@
 package com.ivanovsky.passnotes.presentation.newdb
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
-import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
@@ -30,15 +31,14 @@ import kotlinx.coroutines.launch
 
 class NewDatabaseViewModel(
     private val interactor: NewDatabaseInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val fileHelper: FileHelper,
     private val resourceProvider: ResourceProvider,
     private val router: Router
-) : ViewModel() {
+) : BaseScreenViewModel(
+    initialState = ScreenState.data()
+) {
 
-    val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.data())
-
+    val screenStateHandler = DefaultScreenVisibilityHandler()
     val filename = MutableLiveData(EMPTY)
     val password = MutableLiveData(EMPTY)
     val confirmation = MutableLiveData(EMPTY)
@@ -67,13 +67,12 @@ class NewDatabaseViewModel(
 
         if (selectedStorage == null) {
             val errorText = resourceProvider.getString(R.string.storage_is_not_selected)
-            screenState.value = ScreenState.dataWithError(errorText)
+            setErrorPanelState(OperationError.newErrorMessage(errorText, Stacktrace()))
             return
         }
 
         hideKeyboardEvent.call(Unit)
-        doneButtonVisibility.value = false
-        screenState.value = ScreenState.loading()
+        setScreenState(ScreenState.loading())
 
         val dbKey = PasswordKeepassKey(password)
         val dbFile = createDbFile()
@@ -97,13 +96,10 @@ class NewDatabaseViewModel(
                     )
                 } else {
                     val errorText = resourceProvider.getString(R.string.error_has_been_occurred)
-                    screenState.value = ScreenState.dataWithError(errorText)
-                    doneButtonVisibility.value = true
+                    setErrorPanelState(OperationError.newErrorMessage(errorText, Stacktrace()))
                 }
             } else {
-                val message = errorInteractor.processAndGetMessage(result.error)
-                screenState.value = ScreenState.dataWithError(message)
-                doneButtonVisibility.value = true
+                setErrorPanelState(result.error)
             }
         }
     }
@@ -237,6 +233,11 @@ class NewDatabaseViewModel(
                 selectedStorage.file
             }
         }
+    }
+
+    override fun setScreenState(state: ScreenState) {
+        super.setScreenState(state)
+        doneButtonVisibility.value = state.isDisplayingData
     }
 
     private sealed interface SelectedStorage {

@@ -8,9 +8,9 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.usecases.diff.getEntity
 import com.ivanovsky.passnotes.domain.usecases.history.entity.HistoryDiffItem
+import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
@@ -33,7 +33,6 @@ import org.koin.core.parameter.parametersOf
 
 class HistoryViewModel(
     private val interactor: HistoryInteractor,
-    private val errorInteractor: ErrorInteractor,
     private val resourceProvider: ResourceProvider,
     private val themeProvider: ThemeProvider,
     private val modelFactory: HistoryCellModelFactory,
@@ -142,7 +141,7 @@ class HistoryViewModel(
             val getHistoryDiff = interactor.getHistoryDiff(args.noteUid)
             if (getHistoryDiff.isFailed) {
                 state.value = HistoryState.Error(
-                    message = errorInteractor.processAndGetMessage(getHistoryDiff.error)
+                    message = getHistoryDiff.error.formatReadableMessage(resourceProvider)
                 )
                 return@launch
             }

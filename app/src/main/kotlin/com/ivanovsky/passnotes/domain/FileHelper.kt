@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_CREA
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.settings.Settings
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import java.io.File
 import java.util.UUID
 
@@ -40,7 +41,8 @@ class FileHelper(
         } else {
             OperationResult.error(
                 newGenericIOError(
-                    MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE
+                    MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE,
+                    Stacktrace()
                 )
             )
         }
@@ -50,7 +52,8 @@ class FileHelper(
         val path = generateDestinationForFile(Location.SHARED_FILES)
             ?: return OperationResult.error(
                 newGenericIOError(
-                    MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE
+                    MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE,
+                    Stacktrace()
                 )
             )
 
@@ -59,7 +62,8 @@ class FileHelper(
         if (!dir.mkdirs()) {
             return OperationResult.error(
                 newGenericIOError(
-                    MESSAGE_FAILED_TO_CREATE_A_DIRECTORY
+                    MESSAGE_FAILED_TO_CREATE_A_DIRECTORY,
+                    Stacktrace()
                 )
             )
         }
@@ -73,7 +77,8 @@ class FileHelper(
             baseName = name
         ) ?: return OperationResult.error(
             newGenericIOError(
-                MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE
+                MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE,
+                Stacktrace()
             )
         )
 

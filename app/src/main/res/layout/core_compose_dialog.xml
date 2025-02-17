@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.compose.ui.platform.ComposeView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/composeView"
+    android:layout_width="match_parent"
+    android:minWidth="@dimen/min_dialog_width"
+    android:layout_height="match_parent" />

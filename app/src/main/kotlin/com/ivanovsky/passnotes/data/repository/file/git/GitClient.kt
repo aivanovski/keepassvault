@@ -24,6 +24,7 @@ import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientV2
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.getUrl
 import com.ivanovsky.passnotes.extensions.mapError
@@ -438,7 +439,7 @@ class GitClient(
     }
 
     private fun invalidCredentials(): OperationError {
-        return newGenericError(MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS)
+        return newGenericError(MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS, Stacktrace())
     }
 
     private fun invalidGitEntry(entry: String): OperationError {
@@ -446,7 +447,8 @@ class GitClient(
             String.format(
                 GENERIC_INVALID_DATABASE_ENTRY,
                 entry
-            )
+            ),
+            Stacktrace()
         )
     }
 
@@ -455,7 +457,8 @@ class GitClient(
             String.format(
                 GENERIC_MESSAGE_FAILED_TO_FIND_FILE,
                 path
-            )
+            ),
+            Stacktrace()
         )
     }
 
@@ -464,7 +467,8 @@ class GitClient(
             String.format(
                 GENERIC_MESSAGE_FAILED_TO_GET_PARENT_FOR,
                 path
-            )
+            ),
+            Stacktrace()
         )
     }
 
@@ -473,7 +477,8 @@ class GitClient(
             String.format(
                 GENERIC_MESSAGE_FILE_IS_NOT_A_DIRECTORY,
                 path
-            )
+            ),
+            Stacktrace()
         )
     }
 

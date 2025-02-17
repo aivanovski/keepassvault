@@ -6,7 +6,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
+import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector.get
 import timber.log.Timber
@@ -14,7 +15,7 @@ import timber.log.Timber
 class TestDataBroadcastReceiver : BroadcastReceiver() {
 
     private val parser = TestDataParser()
-    private val errorInteractor: ErrorInteractor by lazy { get() }
+    private val resourceProvider: ResourceProvider by lazy { get() }
     private val interactor: TestDataInteractor by lazy { get() }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -22,7 +23,7 @@ class TestDataBroadcastReceiver : BroadcastReceiver() {
 
         val parseCommandResult = parser.parse(extras)
         if (parseCommandResult.isFailed) {
-            val message = errorInteractor.processAndGetMessage(parseCommandResult.error)
+            val message = parseCommandResult.error.formatReadableMessage(resourceProvider)
             Timber.e(message)
             showToast(context, message)
             return
@@ -31,7 +32,7 @@ class TestDataBroadcastReceiver : BroadcastReceiver() {
         val command = parseCommandResult.getOrThrow()
         val processCommandResult = interactor.process(command)
         if (processCommandResult.isFailed) {
-            val message = errorInteractor.processAndGetMessage(processCommandResult.error)
+            val message = processCommandResult.error.formatReadableMessage(resourceProvider)
             Timber.e(message)
             showToast(context, message)
             return

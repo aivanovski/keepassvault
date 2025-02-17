@@ -22,7 +22,7 @@ class OptionDialogViewModel(
     val selectItemEvent = SingleLiveEvent<Int>()
 
     init {
-        setCellElements(createCellViewModels())
+        setCellViewModels(createCellViewModels())
         subscribeToEvents()
     }
 

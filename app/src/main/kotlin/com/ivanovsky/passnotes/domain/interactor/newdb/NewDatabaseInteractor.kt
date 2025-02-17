@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.domain.interactor.newdb
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED
 import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
-import com.ivanovsky.passnotes.data.entity.OperationError.newFileIsAlreadyExistsError
+import com.ivanovsky.passnotes.data.entity.OperationError.newFileAlreadyExistsError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
@@ -12,6 +12,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import kotlinx.coroutines.withContext
 
@@ -37,7 +38,7 @@ class NewDatabaseInteractor(
 
             val isExists = existsResult.obj
             if (isExists) {
-                return@withContext OperationResult.error(newFileIsAlreadyExistsError())
+                return@withContext OperationResult.error(newFileAlreadyExistsError(Stacktrace()))
             }
 
             val creationResult = dbRepo.createNew(
@@ -50,7 +51,10 @@ class NewDatabaseInteractor(
                 return@withContext creationResult.takeError()
             } else if (creationResult.isDeferred) {
                 return@withContext OperationResult.error(
-                    newFileAccessError(MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED)
+                    newFileAccessError(
+                        MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED,
+                        Stacktrace()
+                    )
                 )
             }
 
@@ -89,8 +93,12 @@ class NewDatabaseInteractor(
         return when {
             getFileResult.isSucceeded -> getFileResult
             getFileResult.isDeferred -> OperationResult.error(
-                newFileAccessError(MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED)
+                newFileAccessError(
+                    MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED,
+                    Stacktrace()
+                )
             )
+
             else -> getFileResult.takeError()
         }
     }

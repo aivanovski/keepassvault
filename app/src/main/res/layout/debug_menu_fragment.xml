@@ -23,19 +23,22 @@
 
             <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
                 android:id="@+id/errorPanelView"
+                state="@{viewModel.screenState}"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="?kpErrorBackgroundColor"
                 app:layout_constraintTop_toTopOf="parent"
                 app:screenState="@{viewModel.screenState}"
-                app:screenStateHandler="@{viewModel.screenStateHandler}" />
+                app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}" />
 
             <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
+                state="@{viewModel.screenState}"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:screenState="@{viewModel.screenState}"
-                app:screenStateHandler="@{viewModel.screenStateHandler}" />
+                app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -44,7 +47,7 @@
                 android:paddingBottom="@dimen/group_margin"
                 app:layout_constraintTop_toBottomOf="@id/errorPanelView"
                 app:screenState="@{viewModel.screenState}"
-                app:screenStateHandler="@{viewModel.screenStateHandler}">
+                app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}">
 
                 <TextView
                     android:id="@+id/fileSystemText"

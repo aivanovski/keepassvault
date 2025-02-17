@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.presentation.core
 
 import android.view.View
 
-interface ScreenStateHandler {
+interface ScreenVisibilityHandler {
 
     fun applyScreenState(view: View, screenState: ScreenState)
 }

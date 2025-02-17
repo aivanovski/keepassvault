@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.serverLogin
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,15 +15,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.ScreenStateType
 import com.ivanovsky.passnotes.presentation.core.compose.AppDropdownMenu
 import com.ivanovsky.passnotes.presentation.core.compose.AppTextField
+import com.ivanovsky.passnotes.presentation.core.compose.AppTheme
 import com.ivanovsky.passnotes.presentation.core.compose.DarkTheme
-import com.ivanovsky.passnotes.presentation.core.compose.ErrorPanel
-import com.ivanovsky.passnotes.presentation.core.compose.ErrorState
 import com.ivanovsky.passnotes.presentation.core.compose.LightTheme
 import com.ivanovsky.passnotes.presentation.core.compose.PrimaryTextStyle
 import com.ivanovsky.passnotes.presentation.core.compose.ProgressIndicator
@@ -30,14 +32,8 @@ import com.ivanovsky.passnotes.presentation.core.compose.ThemedScreenPreview
 import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.InfoCell
 import com.ivanovsky.passnotes.presentation.core.compose.contentDescription
 import com.ivanovsky.passnotes.presentation.core.compose.model.InputType
+import com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
 import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnIgnoreSslValidationStateChanged
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnPasswordChanged
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnPasswordVisibilityChanged
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnSecretUrlStateChanged
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnSshOptionSelected
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnUrlChanged
-import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginIntent.OnUsernameChanged
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginState
 import com.ivanovsky.passnotes.presentation.serverLogin.model.SshOption
 
@@ -45,37 +41,15 @@ import com.ivanovsky.passnotes.presentation.serverLogin.model.SshOption
 fun ServerLoginScreen(viewModel: ServerLoginViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val onUrlChanged = rememberCallback { url: String ->
-        viewModel.sendIntent(OnUrlChanged(url))
-    }
-    val onUsernameChanged = rememberCallback { username: String ->
-        viewModel.sendIntent(OnUsernameChanged(username))
-    }
-    val onPasswordChanged = rememberCallback { password: String ->
-        viewModel.sendIntent(OnPasswordChanged(password))
-    }
-    val onPasswordVisibilityChanged = rememberCallback<Boolean> { isVisible ->
-        viewModel.sendIntent(OnPasswordVisibilityChanged(isVisible))
-    }
-    val onSshOptionSelected = rememberCallback { option: SshOption ->
-        viewModel.sendIntent(OnSshOptionSelected(option))
-    }
-    val onSecretUrlStateChanged = rememberCallback { isChecked: Boolean ->
-        viewModel.sendIntent(OnSecretUrlStateChanged(isChecked))
-    }
-    val onIgnoreSslValidationStateChanged = rememberCallback { isChecked: Boolean ->
-        viewModel.sendIntent(OnIgnoreSslValidationStateChanged(isChecked))
-    }
-
     ServerLoginScreen(
         state = state,
-        onUrlChanged = onUrlChanged,
-        onUsernameChanged = onUsernameChanged,
-        onPasswordChanged = onPasswordChanged,
-        onPasswordVisibilityChanged = onPasswordVisibilityChanged,
-        onSshOptionSelected = onSshOptionSelected,
-        onSecretUrlStateChanged = onSecretUrlStateChanged,
-        onIgnoreSslValidationStateChanged = onIgnoreSslValidationStateChanged
+        onUrlChanged = viewModel::onUrlChanged,
+        onUsernameChanged = viewModel::onUsernameChanged,
+        onPasswordChanged = viewModel::onPasswordChanged,
+        onPasswordVisibilityChanged = viewModel::onPasswordVisibilityChanged,
+        onSshOptionSelected = viewModel::onSshOptionSelected,
+        onSecretUrlStateChanged = viewModel::onSecretUrlStateChanged,
+        onIgnoreSslValidationStateChanged = viewModel::onIgnoreSslValidationStateChanged
     )
 }
 
@@ -104,16 +78,29 @@ private fun ServerLoginScreen(
     onSecretUrlStateChanged: (isChecked: Boolean) -> Unit,
     onIgnoreSslValidationStateChanged: (isChecked: Boolean) -> Unit
 ) {
-    when (state) {
-        ServerLoginState.NotInitialised, ServerLoginState.Loading -> {
+    when (state.screenState.type) {
+        ScreenStateType.NOT_INITIALIZED, ScreenStateType.LOADING -> {
             ProgressIndicator()
         }
 
-        is ServerLoginState.Error -> {
-            ErrorState(message = state.message)
+        ScreenStateType.ERROR -> {
+            AndroidView(
+                factory = { context ->
+                    ErrorPanelView(context)
+                },
+                update = { view ->
+                    view.state = state.screenState
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
         }
 
-        is ServerLoginState.Data -> {
+        ScreenStateType.EMPTY -> {
+            // TODO:
+        }
+
+        ScreenStateType.DATA, ScreenStateType.DATA_WITH_ERROR -> {
             DataContent(
                 state = state,
                 onUrlChanged = onUrlChanged,
@@ -130,7 +117,7 @@ private fun ServerLoginScreen(
 
 @Composable
 private fun DataContent(
-    state: ServerLoginState.Data,
+    state: ServerLoginState,
     onUrlChanged: (url: String) -> Unit,
     onUsernameChanged: (username: String) -> Unit,
     onPasswordChanged: (password: String) -> Unit,
@@ -143,9 +130,17 @@ private fun DataContent(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if (state.errorMessage != null) {
-            ErrorPanel(message = state.errorMessage)
-        }
+        AndroidView(
+            factory = { context ->
+                ErrorPanelView(context)
+            },
+            update = { view ->
+                view.state = state.screenState
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = AppTheme.theme.colors.errorBackground)
+        )
 
         UrlTextField(
             url = state.url,
@@ -425,9 +420,9 @@ fun DarkGitPreview() {
 }
 
 private fun newGitState(): ServerLoginState {
-    return ServerLoginState.Data(
+    return ServerLoginState(
+        screenState = ScreenState.data(),
         loginType = LoginType.GIT,
-        errorMessage = null,
         url = "git@example/user/repo.git",
         urlError = "Url error text",
         username = "john.doe",
@@ -446,9 +441,9 @@ private fun newGitState(): ServerLoginState {
 }
 
 private fun newWebDavState(): ServerLoginState {
-    return ServerLoginState.Data(
+    return ServerLoginState(
+        screenState = ScreenState.data(),
         loginType = LoginType.USERNAME_PASSWORD,
-        errorMessage = null,
         url = "https://example.webdav.com",
         urlError = "Url error text",
         username = "john.doe",

@@ -32,7 +32,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.ScreenState
-import com.ivanovsky.passnotes.presentation.core.ScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.ScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.adapter.StringArraySpinnerAdapter
 import com.ivanovsky.passnotes.presentation.core.widget.CellLinearLayout
@@ -52,15 +52,15 @@ import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformatio
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PASSWORD
 import com.ivanovsky.passnotes.presentation.core.widget.entity.TextTransformationMethod.PLANE_TEXT
 
-@BindingAdapter("screenState", "screenStateHandler")
-fun setScreenState(
+@BindingAdapter("screenState", "screenVisibilityHandler")
+fun setScreenVisibilityHandler(
     view: View,
     screenStateData: LiveData<ScreenState>,
-    screenStateHandler: ScreenStateHandler
+    screenVisibilityHandler: ScreenVisibilityHandler
 ) {
     val screenState = screenStateData.value ?: return
 
-    screenStateHandler.applyScreenState(view, screenState)
+    screenVisibilityHandler.applyScreenState(view, screenState)
 }
 
 @BindingAdapter("viewModels", "viewTypes")
@@ -232,7 +232,7 @@ fun setOnButtonClickListener(
     errorPanelView: ErrorPanelView,
     listener: OnButtonClickListener?
 ) {
-    errorPanelView.buttonClickListener = listener
+    errorPanelView.actionButtonClickListener = listener
 }
 
 @BindingAdapter("onItemSelected")

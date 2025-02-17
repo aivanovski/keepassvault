@@ -22,18 +22,21 @@
 
         <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
             android:id="@+id/errorPanelView"
+            state="@{viewModel.screenState}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="?kpErrorBackgroundColor"
             app:layout_constraintTop_toTopOf="parent"
-            app:onButtonClicked="@{() -> viewModel.onErrorPanelButtonClicked()}"
+            app:onButtonClicked="@{() -> viewModel.onErrorPanelActionButtonClicked()}"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
+            state="@{viewModel.screenState}"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.UnlockView
             android:id="@+id/unlockView"
@@ -54,7 +57,7 @@
             app:onUnlockClicked="@{() -> viewModel.onUnlockButtonClicked()}"
             app:onUnlockLongClicked="@{() -> viewModel.onUnlockButtonLongClicked()}"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}" />
 
         <TextView
             android:id="@+id/recentFilesText"
@@ -67,7 +70,7 @@
             app:layout_constraintBottom_toBottomOf="@id/unlockView"
             app:layout_constraintStart_toStartOf="parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
@@ -79,7 +82,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/recentFilesText"
             app:screenState="@{viewModel.screenState}"
-            app:screenStateHandler="@{viewModel.screenStateHandler}"
+            app:screenVisibilityHandler="@{viewModel.screenStateHandler}"
             tools:itemCount="5"
             tools:listitem="@layout/cell_database_file" />
 

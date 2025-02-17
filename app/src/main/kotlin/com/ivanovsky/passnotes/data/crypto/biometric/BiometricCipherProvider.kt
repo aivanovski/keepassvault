@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.data.crypto.biometric
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
-import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.newBiometricDataError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -25,12 +25,7 @@ class BiometricCipherProvider {
 
             OperationResult.success(BiometricEncoderImpl(cipher))
         } catch (exception: KeyPermanentlyInvalidatedException) {
-            val error = OperationError(
-                OperationError.Type.BIOMETRIC_DATA_INVALIDATED_ERROR,
-                exception
-            )
-
-            OperationResult.error(error)
+            OperationResult.error(newBiometricDataError(exception))
         }
     }
 
@@ -47,12 +42,7 @@ class BiometricCipherProvider {
 
             OperationResult.success(BiometricDecoderImpl(cipher))
         } catch (exception: KeyPermanentlyInvalidatedException) {
-            val error = OperationError(
-                OperationError.Type.BIOMETRIC_DATA_INVALIDATED_ERROR,
-                exception
-            )
-
-            OperationResult.error(error)
+            OperationResult.error(newBiometricDataError(exception))
         }
     }
 

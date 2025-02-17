@@ -21,7 +21,6 @@ import com.ivanovsky.passnotes.domain.LoggerInteractor
 import com.ivanovsky.passnotes.domain.NoteDiffer
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 import org.koin.dsl.module
@@ -34,7 +33,6 @@ object CoreModule {
             single { ThemeProvider(get()) }
             single { ResourceProvider(get(), get()) }
             single { PermissionHelper(get()) }
-            single { ErrorInteractor(get()) }
             single { LocaleProvider(get()) }
             single { DispatcherProvider() }
             single { ObserverBus() }

@@ -12,7 +12,6 @@ import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_ACCESS_IS
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_IS_NOT_A_DIRECTORY
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED
 import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
-import com.ivanovsky.passnotes.data.entity.OperationError.newFileIsAlreadyExistsError
 import com.ivanovsky.passnotes.data.entity.OperationError.newFileNotFoundError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationError.newPermissionError
@@ -24,7 +23,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
-import com.ivanovsky.passnotes.extensions.getOrThrow
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
@@ -57,7 +56,12 @@ class RegularFileSystemProvider(
 
     override fun listFiles(dir: FileDescriptor): OperationResult<List<FileDescriptor>> {
         if (!dir.isDirectory) {
-            return OperationResult.error(newGenericIOError(MESSAGE_FILE_IS_NOT_A_DIRECTORY))
+            return OperationResult.error(
+                newGenericIOError(
+                    MESSAGE_FILE_IS_NOT_A_DIRECTORY,
+                    Stacktrace()
+                )
+            )
         }
 
         val check = checkPermissionForPath(dir.path)
@@ -67,7 +71,7 @@ class RegularFileSystemProvider(
 
         val file = File(dir.path)
         if (!file.exists()) {
-            return OperationResult.error(newFileNotFoundError())
+            return OperationResult.error(newFileNotFoundError(Stacktrace()))
         }
 
         try {
@@ -92,12 +96,17 @@ class RegularFileSystemProvider(
 
         val file = File(descriptor.path)
         if (!file.exists()) {
-            return OperationResult.error(newFileNotFoundError())
+            return OperationResult.error(newFileNotFoundError(Stacktrace()))
         }
 
         val parentFile = file.parentFile
         if (parentFile == null || !parentFile.exists()) {
-            return OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_GET_PARENT_PATH))
+            return OperationResult.error(
+                newGenericIOError(
+                    MESSAGE_FAILED_TO_GET_PARENT_PATH,
+                    Stacktrace()
+                )
+            )
         }
 
         return OperationResult.success(parentFile.toFileDescriptor())
@@ -116,13 +125,13 @@ class RegularFileSystemProvider(
             else -> {
                 throw IllegalStateException()
             }
-        } ?: return OperationResult.error(newFileNotFoundError())
+        } ?: return OperationResult.error(newFileNotFoundError(Stacktrace()))
 
         val root = File(path)
         return if (root.exists()) {
             OperationResult.success(root.toFileDescriptor())
         } else {
-            OperationResult.error(newFileNotFoundError())
+            OperationResult.error(newFileNotFoundError(Stacktrace()))
         }
     }
 
@@ -158,7 +167,10 @@ class RegularFileSystemProvider(
     ): OperationResult<OutputStream> {
         if (!options.isWriteEnabled) {
             return OperationResult.error(
-                newGenericIOError(MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED)
+                newGenericIOError(
+                    MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED,
+                    Stacktrace()
+                )
             )
         }
 
@@ -168,16 +180,6 @@ class RegularFileSystemProvider(
         }
 
         return lock.withLock {
-            val isExistResult = exists(file)
-            if (isExistResult.isFailed) {
-                return@withLock isExistResult.takeError()
-            }
-
-            val isExist = isExistResult.getOrThrow()
-            if (isExist && onConflictStrategy == OnConflictStrategy.CANCEL) {
-                return@withLock OperationResult.error(newFileIsAlreadyExistsError())
-            }
-
             try {
                 val out = BufferedOutputStream(FileOutputStream(file.path))
                 OperationResult.success(out)
@@ -210,7 +212,7 @@ class RegularFileSystemProvider(
         return if (file.exists()) {
             OperationResult.success(file.toFileDescriptor())
         } else {
-            OperationResult.error(newFileNotFoundError())
+            OperationResult.error(newFileNotFoundError(Stacktrace()))
         }
     }
 
@@ -224,13 +226,23 @@ class RegularFileSystemProvider(
                 if (Environment.isExternalStorageManager()) {
                     OperationResult.success(Unit)
                 } else {
-                    OperationResult.error(newPermissionError(MESSAGE_FAILED_TO_ACCESS_TO_FILE))
+                    OperationResult.error(
+                        newPermissionError(
+                            MESSAGE_FAILED_TO_ACCESS_TO_FILE,
+                            Stacktrace()
+                        )
+                    )
                 }
             } else {
                 if (permissionHelper.isPermissionGranted(SystemPermission.SDCARD_PERMISSION)) {
                     OperationResult.success(Unit)
                 } else {
-                    OperationResult.error(newPermissionError(MESSAGE_FAILED_TO_ACCESS_TO_FILE))
+                    OperationResult.error(
+                        newPermissionError(
+                            MESSAGE_FAILED_TO_ACCESS_TO_FILE,
+                            Stacktrace()
+                        )
+                    )
                 }
             }
         }
@@ -238,7 +250,12 @@ class RegularFileSystemProvider(
         return if (File(path).exists()) {
             OperationResult.success(Unit)
         } else {
-            OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_FILE))
+            OperationResult.error(
+                newGenericIOError(
+                    MESSAGE_FAILED_TO_ACCESS_TO_FILE,
+                    Stacktrace()
+                )
+            )
         }
     }
 

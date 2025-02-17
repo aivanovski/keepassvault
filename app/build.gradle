@@ -8,7 +8,7 @@ apply plugin: 'kotlin-parcelize'
 apply plugin: 'com.github.triplet.play'
 
 def versionMajor = 1
-def versionMinor = 12
+def versionMinor = 13
 def versionPatch = 0
 
 def formattedVersionCode = (versionMajor * 10000 + versionMinor * 100 + versionPatch).toString()
@@ -223,6 +223,7 @@ def fzf4jVersion = '0.2.1'
 // More latest version of jgit produce crash on Samsung
 def jgitVersion = '6.2.0.202206071550-r'
 def totpKtVersion = 'v1.0.0'
+def composeIcons = '1.6.8'
 
 // Test
 def jUnitVersion = '4.13.2'
@@ -280,6 +281,7 @@ dependencies {
     implementation "androidx.activity:activity-compose"
     implementation "androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion"
     implementation "androidx.compose.runtime:runtime-livedata"
+    implementation "androidx.compose.material:material-icons-extended:$composeIcons"
 
     // Compose preview
     implementation "androidx.compose.ui:ui-tooling-preview"

@@ -15,8 +15,8 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.Type.BIOMETRIC_DATA_INVALIDATED_ERROR
+import com.ivanovsky.passnotes.data.entity.OperationError.newErrorMessage
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
@@ -28,8 +28,9 @@ import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
-import com.ivanovsky.passnotes.domain.interactor.ErrorInteractor
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
+import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.extensions.getFileDescriptor
 import com.ivanovsky.passnotes.extensions.getKeyFileDescriptor
 import com.ivanovsky.passnotes.extensions.getLoginType
@@ -44,10 +45,10 @@ import com.ivanovsky.passnotes.presentation.Screens.NewDatabaseScreen
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
-import com.ivanovsky.passnotes.presentation.core.DefaultScreenStateHandler
+import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
+import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
-import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
@@ -64,7 +65,6 @@ import org.koin.core.parameter.parametersOf
 class UnlockViewModel(
     private val interactor: UnlockInteractor,
     private val biometricResolver: BiometricResolver,
-    private val errorInteractor: ErrorInteractor,
     private val observerBus: ObserverBus,
     private val resourceProvider: ResourceProvider,
     private val dispatchers: DispatcherProvider,
@@ -73,13 +73,14 @@ class UnlockViewModel(
     private val settings: Settings,
     private val router: Router,
     private val args: UnlockScreenArgs
-) : ViewModel(),
+) : BaseScreenViewModel(
+    initialState = ScreenState.loading()
+),
     ObserverBus.UsedFileDataSetObserver,
     ObserverBus.UsedFileContentObserver,
     ObserverBus.SyncProgressStatusObserver {
 
-    val screenStateHandler = DefaultScreenStateHandler()
-    val screenState = MutableLiveData(ScreenState.loading())
+    val screenStateHandler = DefaultScreenVisibilityHandler()
     val filename = MutableLiveData(EMPTY)
     val keyFilename = MutableLiveData(EMPTY)
     val password = MutableLiveData(EMPTY)
@@ -101,7 +102,7 @@ class UnlockViewModel(
     val fileCellTypes = ViewModelTypes()
         .add(DatabaseFileCellViewModel::class, R.layout.cell_database_file)
 
-    private val eventProvider = EventProviderImpl()
+    // private val eventProvider = EventProviderImpl()
     private var selectedUsedFile: UsedFile? = null
     private var selectedKeyFile: FileDescriptor? = null
     private var recentlyUsedDescriptors: List<FileDescriptor>? = null
@@ -174,7 +175,7 @@ class UnlockViewModel(
         }
     }
 
-    fun onErrorPanelButtonClicked() {
+    fun onErrorPanelActionButtonClicked() {
         val action = errorPanelButtonAction ?: return
 
         when (action) {
@@ -613,7 +614,7 @@ class UnlockViewModel(
             } else {
                 setScreenState(ScreenState.data())
 
-                val message = errorInteractor.processAndGetMessage(saveResult.error)
+                val message = saveResult.error.formatReadableMessage(resourceProvider)
                 showSnackbarMessage.call(message)
             }
         }
@@ -735,8 +736,9 @@ class UnlockViewModel(
             SyncStatus.FILE_NOT_FOUND -> {
                 setScreenState(
                     ScreenState.dataWithError(
-                        errorText = resourceProvider.getString(
-                            R.string.sync_file_not_found_message
+                        error = newErrorMessage(
+                            resourceProvider.getString(R.string.sync_file_not_found_message),
+                            Stacktrace()
                         ),
                         errorButtonText = resourceProvider.getString(R.string.remove)
                     )
@@ -747,7 +749,10 @@ class UnlockViewModel(
             SyncStatus.CONFLICT -> {
                 setScreenState(
                     ScreenState.dataWithError(
-                        errorText = resourceProvider.getString(R.string.sync_conflict_message),
+                        error = newErrorMessage(
+                            resourceProvider.getString(R.string.sync_conflict_message),
+                            Stacktrace()
+                        ),
                         errorButtonText = resourceProvider.getString(R.string.resolve)
                     )
                 )
@@ -757,7 +762,10 @@ class UnlockViewModel(
             SyncStatus.ERROR -> {
                 setScreenState(
                     ScreenState.dataWithError(
-                        errorText = resourceProvider.getString(R.string.sync_error_message),
+                        error = newErrorMessage(
+                            resourceProvider.getString(R.string.sync_error_message),
+                            Stacktrace()
+                        ),
                         errorButtonText = resourceProvider.getString(R.string.remove)
                     )
                 )
@@ -767,8 +775,9 @@ class UnlockViewModel(
             SyncStatus.AUTH_ERROR -> {
                 setScreenState(
                     ScreenState.dataWithError(
-                        errorText = resourceProvider.getString(
-                            R.string.sync_auth_error_login_message
+                        error = newErrorMessage(
+                            resourceProvider.getString(R.string.sync_auth_error_login_message),
+                            Stacktrace()
                         ),
                         errorButtonText = resourceProvider.getString(R.string.login)
                     )
@@ -863,24 +872,8 @@ class UnlockViewModel(
         password.value = EMPTY
     }
 
-    private fun setErrorState(error: OperationError) {
-        setScreenState(
-            ScreenState.error(
-                errorText = errorInteractor.processAndGetMessage(error)
-            )
-        )
-    }
-
-    private fun setErrorPanelState(error: OperationError) {
-        setScreenState(
-            ScreenState.dataWithError(
-                errorText = errorInteractor.processAndGetMessage(error)
-            )
-        )
-    }
-
-    private fun setScreenState(state: ScreenState) {
-        screenState.value = state
+    override fun setScreenState(state: ScreenState) {
+        super.setScreenState(state)
         isFabButtonVisible.value = getFabButtonVisibility()
     }
 

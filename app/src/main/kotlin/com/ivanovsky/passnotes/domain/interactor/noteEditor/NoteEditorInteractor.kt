@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
 import com.ivanovsky.passnotes.extensions.mapError
@@ -115,7 +116,8 @@ class NoteEditorInteractor(
                             resourceProvider.getString(
                                 R.string.file_is_already_added_with_value,
                                 file.name
-                            )
+                            ),
+                            Stacktrace()
                         )
                     )
                 }

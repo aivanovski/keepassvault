@@ -150,10 +150,11 @@ fun PrimaryTextStyle(
 
 @Composable
 fun SecondaryTextStyle(
+    fontSize: TextUnit = AppTheme.theme.textMetrics.primary,
     color: Color = AppTheme.theme.colors.secondaryText
 ): TextStyle {
     return TextStyle(
-        fontSize = AppTheme.theme.textMetrics.primary,
+        fontSize = fontSize,
         fontWeight = FontWeight.Normal,
         color = color
     )

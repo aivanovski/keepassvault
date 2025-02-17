@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ENCO
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import kotlinx.coroutines.withContext
 
 class EncodePasswordWithBiometricUseCase(private val dispatchers: DispatcherProvider) {
@@ -18,7 +19,10 @@ class EncodePasswordWithBiometricUseCase(private val dispatchers: DispatcherProv
         withContext(dispatchers.IO) {
             val encryptedData = encoder.encode(password)
                 ?: return@withContext OperationResult.error(
-                    newGenericError(MESSAGE_FAILED_TO_ENCODE_DATA)
+                    newGenericError(
+                        MESSAGE_FAILED_TO_ENCODE_DATA,
+                        Stacktrace()
+                    )
                 )
 
             OperationResult.success(encryptedData.toBiometricData())

@@ -31,6 +31,8 @@ import com.ivanovsky.passnotes.presentation.core.dialog.optionDialog.factory.Opt
 import com.ivanovsky.passnotes.presentation.core.dialog.optionDialog.factory.OptionDialogCellViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialogViewModel
+import com.ivanovsky.passnotes.presentation.core.dialog.reportErrorDialog.ReportErrorDialogArgs
+import com.ivanovsky.passnotes.presentation.core.dialog.reportErrorDialog.ReportErrorDialogViewModel
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogInteractor
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogViewModel
@@ -228,13 +230,11 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
             factory { (args: FilePickerArgs) ->
                 FilePickerViewModel(
-                    get(),
                     get(),
                     get(),
                     get(),
@@ -253,7 +253,6 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
@@ -267,13 +266,11 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
             factory { (args: GroupsScreenArgs) ->
                 GroupsViewModel(
-                    get(),
                     get(),
                     get(),
                     get(),
@@ -301,13 +298,11 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
             viewModel { (args: ServerLoginArgs) ->
                 ServerLoginViewModel(
-                    get(),
                     get(),
                     get(),
                     get(),
@@ -326,15 +321,14 @@ object UiModule {
                     get(),
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
             viewModel { AboutViewModel(get(), get()) }
             viewModel { MainSettingsViewModel(get(), get()) }
-            viewModel { AppSettingsViewModel(get(), get(), get(), get(), get(), get(), get()) }
+            viewModel { AppSettingsViewModel(get(), get(), get(), get(), get(), get()) }
             viewModel { DatabaseSettingsViewModel(get(), get(), get(), get()) }
-            viewModel { ChangePasswordDialogViewModel(get(), get(), get()) }
+            viewModel { ChangePasswordDialogViewModel(get(), get()) }
             viewModel {
                 PasswordGeneratorViewModel(
                     get(),
@@ -346,12 +340,11 @@ object UiModule {
                     get()
                 )
             }
-            viewModel { DebugMenuViewModel(get(), get(), get(), get(), get()) }
-            viewModel { NewDatabaseViewModel(get(), get(), get(), get(), get()) }
+            viewModel { DebugMenuViewModel(get(), get(), get(), get()) }
+            viewModel { NewDatabaseViewModel(get(), get(), get(), get()) }
             factory { (args: SortAndViewDialogArgs) -> SortAndViewDialogViewModel(get(), args) }
             factory { (args: ResolveConflictDialogArgs) ->
                 ResolveConflictDialogViewModel(
-                    get(),
                     get(),
                     get(),
                     get(),
@@ -364,19 +357,17 @@ object UiModule {
                 EnterDbCredentialsViewModel(
                     get(),
                     get(),
-                    get(),
                     args
                 )
             }
             factory { (args: DiffViewerScreenArgs) ->
-                DiffViewerViewModel(get(), get(), get(), get(), get(), get(), args)
+                DiffViewerViewModel(get(), get(), get(), get(), get(), args)
             }
             factory { (args: SetupOneTimePasswordArgs) ->
                 SetupOneTimePasswordViewModel(get(), get(), get(), get(), args)
             }
             factory { (args: HistoryScreenArgs) ->
                 HistoryViewModel(
-                    get(),
                     get(),
                     get(),
                     get(),
@@ -391,6 +382,13 @@ object UiModule {
             }
             factory { (args: OptionDialogArgs) ->
                 OptionDialogViewModel(
+                    get(),
+                    get(),
+                    args
+                )
+            }
+            factory { (args: ReportErrorDialogArgs) ->
+                ReportErrorDialogViewModel(
                     get(),
                     get(),
                     args

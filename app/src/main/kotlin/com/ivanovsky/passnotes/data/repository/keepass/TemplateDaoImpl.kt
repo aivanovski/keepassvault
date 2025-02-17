@@ -13,6 +13,7 @@ import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateConst.TEMPLATE_GROUP_NAME
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 
@@ -84,7 +85,8 @@ class TemplateDaoImpl(
         if (groups.any { it.title == TEMPLATE_GROUP_NAME }) {
             return OperationResult.error(
                 newDbError(
-                    String.format(GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST, TEMPLATE_GROUP_NAME)
+                    String.format(GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST, TEMPLATE_GROUP_NAME),
+                    Stacktrace()
                 )
             )
         }

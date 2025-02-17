@@ -13,6 +13,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientV2
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.getUrl
 import com.ivanovsky.passnotes.util.FileUtils
@@ -42,7 +43,12 @@ class WebDavClientV2(
         Timber.d("listFiles: dir=$dir")
 
         if (!dir.isDirectory) {
-            return OperationResult.error(newFileAccessError(MESSAGE_FILE_IS_NOT_A_DIRECTORY))
+            return OperationResult.error(
+                newFileAccessError(
+                    MESSAGE_FILE_IS_NOT_A_DIRECTORY,
+                    Stacktrace()
+                )
+            )
         }
 
         val path = if (!dir.isRoot) {
@@ -78,7 +84,12 @@ class WebDavClientV2(
         }
 
         val parentPath = FileUtils.getParentPath(file.path)
-            ?: return OperationResult.error(newFileAccessError(MESSAGE_FAILED_TO_GET_PARENT_PATH))
+            ?: return OperationResult.error(
+                newFileAccessError(
+                    MESSAGE_FAILED_TO_GET_PARENT_PATH,
+                    Stacktrace()
+                )
+            )
 
         val files = fetchFileList(parentPath)
         if (files.isFailed) {
@@ -86,7 +97,7 @@ class WebDavClientV2(
         }
 
         val parentFile = files.obj.firstOrNull { it.path == parentPath }
-            ?: return OperationResult.error(newFileNotFoundError())
+            ?: return OperationResult.error(newFileNotFoundError(Stacktrace()))
 
         return OperationResult.success(parentFile)
     }
@@ -117,7 +128,7 @@ class WebDavClientV2(
         return if (root != null) {
             OperationResult.success(root)
         } else {
-            OperationResult.error(newFileNotFoundError())
+            OperationResult.error(newFileNotFoundError(Stacktrace()))
         }
     }
 
@@ -177,7 +188,12 @@ class WebDavClientV2(
         } catch (e: IOException) {
             Timber.d(e)
             cancellation.set(true)
-            return OperationResult.error(newGenericError(MESSAGE_IO_ERROR))
+            return OperationResult.error(
+                newGenericError(
+                    MESSAGE_IO_ERROR,
+                    Stacktrace()
+                )
+            )
         }
 
         return getFileMetadata(remotePath)
@@ -207,7 +223,7 @@ class WebDavClientV2(
         }
 
         if (fsAuthority.credentials == null) {
-            return OperationResult.error(newAuthError())
+            return OperationResult.error(newAuthError(Stacktrace()))
         }
 
         return OperationResult.success(Unit)
@@ -215,7 +231,12 @@ class WebDavClientV2(
 
     private fun checkFsAuthority(file: FileDescriptor): OperationResult<Unit> {
         if (file.fsAuthority != fsAuthority) {
-            return OperationResult.error(newAuthError(MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS))
+            return OperationResult.error(
+                newAuthError(
+                    MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS,
+                    Stacktrace()
+                )
+            )
         }
 
         return OperationResult.success(Unit)
@@ -259,7 +280,7 @@ class WebDavClientV2(
         }
 
         if (data.obj == null) {
-            return OperationResult.error(newFileNotFoundError())
+            return OperationResult.error(newFileNotFoundError(Stacktrace()))
         }
 
         return OperationResult.success(data.obj)

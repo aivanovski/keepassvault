@@ -3,7 +3,9 @@ package com.ivanovsky.passnotes.data.repository.file.webdav
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.newRemoteApiError
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine
 import com.thegrizzlylabs.sardineandroid.impl.SardineException
 import java.io.IOException
@@ -31,9 +33,11 @@ class WebDavNetworkLayer {
         } catch (exception: SardineException) {
             Timber.d(exception)
             return when (exception.statusCode) {
-                HTTP_UNAUTHORIZED -> OperationResult.error(OperationError.newAuthError())
-                HTTP_NOT_FOUND -> OperationResult.error(OperationError.newFileNotFoundError())
-                else -> OperationResult.error(OperationError.newRemoteApiError(exception.message))
+                HTTP_UNAUTHORIZED -> OperationResult.error(OperationError.newAuthError(exception))
+                HTTP_NOT_FOUND -> OperationResult.error(
+                    OperationError.newFileNotFoundError(exception)
+                )
+                else -> OperationResult.error(newRemoteApiError(exception.message, Stacktrace()))
             }
         } catch (exception: IOException) {
             Timber.d(exception)

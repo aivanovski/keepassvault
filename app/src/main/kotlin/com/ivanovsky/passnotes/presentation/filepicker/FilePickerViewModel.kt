@@ -8,7 +8,6 @@ import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.newErrorMessage
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.AuthType

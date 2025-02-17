@@ -25,8 +25,6 @@ import com.ivanovsky.passnotes.presentation.core.compose.AppDropdownMenu
 import com.ivanovsky.passnotes.presentation.core.compose.AppTextField
 import com.ivanovsky.passnotes.presentation.core.compose.AppTheme
 import com.ivanovsky.passnotes.presentation.core.compose.DarkTheme
-import com.ivanovsky.passnotes.presentation.core.compose.ErrorPanel
-import com.ivanovsky.passnotes.presentation.core.compose.ErrorState
 import com.ivanovsky.passnotes.presentation.core.compose.LightTheme
 import com.ivanovsky.passnotes.presentation.core.compose.PrimaryTextStyle
 import com.ivanovsky.passnotes.presentation.core.compose.ProgressIndicator

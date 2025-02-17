@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -32,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.compose.AppTheme
 import com.ivanovsky.passnotes.presentation.core.compose.ElementMargin
-import com.ivanovsky.passnotes.presentation.core.compose.ElementSpace
 import com.ivanovsky.passnotes.presentation.core.compose.GroupMargin
 import com.ivanovsky.passnotes.presentation.core.compose.LightTheme
 import com.ivanovsky.passnotes.presentation.core.compose.PrimaryTextStyle
@@ -42,7 +40,6 @@ import com.ivanovsky.passnotes.presentation.core.compose.SmallMargin
 import com.ivanovsky.passnotes.presentation.core.compose.ThemedPreview
 import com.ivanovsky.passnotes.presentation.core.compose.shortDummyText
 import com.ivanovsky.passnotes.presentation.core.dialog.reportErrorDialog.model.ReportErrorState
-import com.ivanovsky.passnotes.util.StringUtils
 
 @Composable
 fun ReportErrorDialogScreen(viewModel: ReportErrorDialogViewModel) {

@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 
 abstract class BaseScreenViewModel(
     initialState: ScreenState = ScreenState.notInitialized(),
-    protected val eventProvider: EventProvider = EventProviderImpl(),
+    protected val eventProvider: EventProvider = EventProviderImpl()
 ) : ViewModel() {
 
     // TODO: refactor, create BaseCellScreenViewModel class and move cellViewModel into it

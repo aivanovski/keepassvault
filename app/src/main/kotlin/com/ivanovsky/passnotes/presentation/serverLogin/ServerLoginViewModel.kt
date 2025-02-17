@@ -116,7 +116,7 @@ class ServerLoginViewModel(
             if (authentication.isFailed) {
                 setScreenState(
                     state.copy(
-                        screenState = ScreenState.dataWithError(authentication.error),
+                        screenState = ScreenState.dataWithError(authentication.error)
                     )
                 )
                 return@launch
@@ -128,7 +128,7 @@ class ServerLoginViewModel(
             if (save.isFailed) {
                 setScreenState(
                     state.copy(
-                        screenState = ScreenState.dataWithError(save.error),
+                        screenState = ScreenState.dataWithError(save.error)
                     )
                 )
                 return@launch

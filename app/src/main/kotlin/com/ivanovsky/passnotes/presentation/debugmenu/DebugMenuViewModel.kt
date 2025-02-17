@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.presentation.debugmenu
 
 import android.net.Uri
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
@@ -10,7 +9,6 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.newErrorMessage
 import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey

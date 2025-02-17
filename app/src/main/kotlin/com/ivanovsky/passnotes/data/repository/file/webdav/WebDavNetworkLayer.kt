@@ -34,7 +34,9 @@ class WebDavNetworkLayer {
             Timber.d(exception)
             return when (exception.statusCode) {
                 HTTP_UNAUTHORIZED -> OperationResult.error(OperationError.newAuthError(exception))
-                HTTP_NOT_FOUND -> OperationResult.error(OperationError.newFileNotFoundError(exception))
+                HTTP_NOT_FOUND -> OperationResult.error(
+                    OperationError.newFileNotFoundError(exception)
+                )
                 else -> OperationResult.error(newRemoteApiError(exception.message, Stacktrace()))
             }
         } catch (exception: IOException) {

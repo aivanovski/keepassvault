@@ -12,7 +12,6 @@ import static com.ivanovsky.passnotes.util.ObjectUtils.isNotEquals;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
@@ -38,7 +37,6 @@ import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
 import com.ivanovsky.passnotes.extensions.RemoteFileMetadataExtKt;
 import com.ivanovsky.passnotes.util.DateUtils;
 import com.ivanovsky.passnotes.util.FileUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -53,7 +51,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import timber.log.Timber;
 
 public class RemoteFileSystemProvider implements FileSystemProvider {
@@ -260,8 +257,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         RemoteFile cachedFile = cache.getByUid(file.getUid());
         if (cachedFile == null) {
             String message = String.format(ERROR_FAILED_TO_FIND_FILE_IN_CACHE, file.getPath());
-            return OperationResult.error(
-                    newGenericIOError(message, new Stacktrace()));
+            return OperationResult.error(newGenericIOError(message, new Stacktrace()));
         }
 
         OperationResult<FileInputStream> streamResult =
@@ -345,7 +341,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                     result.from(openFile(destinationPath));
                 } else {
                     result.setError(
-                            newGenericIOError(ERROR_FAILED_TO_START_PROCESSING_UNIT, new Stacktrace()));
+                            newGenericIOError(
+                                    ERROR_FAILED_TO_START_PROCESSING_UNIT, new Stacktrace()));
                 }
 
             } else if (isNotEquals(remoteRevision, cachedFile.getRevision())) {
@@ -652,7 +649,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         } else {
                             result.setError(
                                     newGenericIOError(
-                                            ERROR_FAILED_TO_START_PROCESSING_UNIT, new Stacktrace()));
+                                            ERROR_FAILED_TO_START_PROCESSING_UNIT,
+                                            new Stacktrace()));
                         }
 
                     } else {
@@ -679,7 +677,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         } else {
                             result.setError(
                                     newGenericIOError(
-                                            ERROR_FAILED_TO_START_PROCESSING_UNIT, new Stacktrace()));
+                                            ERROR_FAILED_TO_START_PROCESSING_UNIT,
+                                            new Stacktrace()));
                         }
                     }
                 } else {

@@ -16,7 +16,6 @@ import static com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOr
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy;
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
@@ -42,14 +41,12 @@ import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
 import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
 import com.ivanovsky.passnotes.util.LongExtKt;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import timber.log.Timber;
 
 public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
@@ -394,8 +391,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
                         newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_FILE, new Stacktrace()));
             }
         } else {
-            result.setError(
-                    newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_FILE, new Stacktrace()));
+            result.setError(newGenericIOError(MESSAGE_FAILED_TO_ACCESS_TO_FILE, new Stacktrace()));
         }
 
         return result;

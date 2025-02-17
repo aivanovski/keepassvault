@@ -45,7 +45,9 @@ class AppSettingsInteractor(
             if (removed) {
                 OperationResult.success(true)
             } else {
-                OperationResult.error(newGenericIOError(MESSAGE_FAILED_TO_REMOVE_FILE, Stacktrace()))
+                OperationResult.error(
+                    newGenericIOError(MESSAGE_FAILED_TO_REMOVE_FILE, Stacktrace())
+                )
             }
         }
 

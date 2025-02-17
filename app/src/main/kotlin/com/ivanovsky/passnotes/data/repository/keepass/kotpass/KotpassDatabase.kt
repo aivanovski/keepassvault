@@ -211,7 +211,8 @@ class KotpassDatabase(
         val parentGroup = groupUidToParentMap.get()[childUid]
             ?: return OperationResult.error(
                 newDbError(
-                    MESSAGE_FAILED_TO_FIND_GROUP, Stacktrace()
+                    MESSAGE_FAILED_TO_FIND_GROUP,
+                    Stacktrace()
                 )
             )
 

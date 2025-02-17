@@ -2,13 +2,10 @@ package com.ivanovsky.passnotes.data.entity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace;
-
+import java.io.Serializable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import java.io.Serializable;
 
 public class OperationError implements Serializable {
 
@@ -77,14 +74,11 @@ public class OperationError implements Serializable {
     public static final String GENERIC_FILE_ALREADY_EXISTS =
             "File with identical name already exists: %s";
 
-    @NonNull
-    private final Type type;
+    @NonNull private final Type type;
 
-    @Nullable
-    private final String message;
+    @Nullable private final String message;
 
-    @Nullable
-    private final Throwable throwable;
+    @Nullable private final Throwable throwable;
 
     public static OperationError newDbError(String message, Stacktrace stacktrace) {
         return new OperationError(Type.DB_ERROR, message, stacktrace);
@@ -219,9 +213,8 @@ public class OperationError implements Serializable {
         BIOMETRIC_DATA_INVALIDATED_ERROR
     }
 
-    private OperationError(@NonNull Type type,
-                           @Nullable String message,
-                           @Nullable Throwable throwable) {
+    private OperationError(
+            @NonNull Type type, @Nullable String message, @Nullable Throwable throwable) {
         this.type = type;
         this.message = message;
         this.throwable = throwable;

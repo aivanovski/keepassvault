@@ -620,6 +620,7 @@ object FakeDatabaseContentFactory {
         username = "john.doe@example.com",
         password = "abc123",
         url = "https://url.com",
+        notes = "Basic notes",
         created = parseDate("2020-01-01"),
         modified = parseDate("2020-01-10")
     )

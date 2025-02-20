@@ -27,6 +27,7 @@
             android:id="@+id/edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:contentDescription="@{viewModel.model.name}"
             android:text="@={viewModel.text}"
             android:textColor="?attr/kpPrimaryTextColor"
             android:textSize="@dimen/material_edit_text_primary_text_size"

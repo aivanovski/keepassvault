@@ -51,6 +51,7 @@
     <string name="unlock_button">Unlock button</string>
     <string name="eye_icon">Eye icon</string>
     <string name="loading_indicator">Loading indicator</string>
+    <string name="generate_icon">Generate icon</string>
 
     <!-- Lock notification -->
     <string name="lock_notification_channel">Quick Lock</string>

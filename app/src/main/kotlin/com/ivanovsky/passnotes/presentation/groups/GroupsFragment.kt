@@ -260,7 +260,7 @@ class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
     private fun showNewEntryDialog(templates: List<Template>) {
         val templateEntries = templates.map { template -> template.title }
 
-        val entries = listOf(getString(R.string.new_item_entry_standard_note)) +
+        val entries = listOf(getString(R.string.new_item_entry_standard_entry)) +
             templateEntries +
             listOf(getString(R.string.new_item_entry_new_group))
 

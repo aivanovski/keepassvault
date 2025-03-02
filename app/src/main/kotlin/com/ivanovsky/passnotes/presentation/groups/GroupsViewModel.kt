@@ -361,7 +361,7 @@ class GroupsViewModel(
                     mode = NoteEditorMode.NEW,
                     groupUid = currentGroupUid,
                     template = null,
-                    title = resourceProvider.getString(R.string.new_note)
+                    title = resourceProvider.getString(R.string.new_entry)
                 )
             )
         )
@@ -376,7 +376,7 @@ class GroupsViewModel(
                     mode = NoteEditorMode.NEW,
                     groupUid = currentGroupUid,
                     template = template,
-                    title = resourceProvider.getString(R.string.new_note)
+                    title = resourceProvider.getString(R.string.new_entry)
                 )
             )
         )

@@ -29,12 +29,12 @@ class GroupCellViewModel(
         return if (noteCount == 0 && childGroupCount == 0) {
             ""
         } else if (noteCount > 0 && childGroupCount == 0) {
-            resourceProvider.getString(R.string.notes_with_count, noteCount)
+            resourceProvider.getString(R.string.entries_with_count, noteCount)
         } else if (noteCount == 0 && childGroupCount > 0) {
             resourceProvider.getString(R.string.groups_with_count, childGroupCount)
         } else {
             resourceProvider.getString(
-                R.string.groups_and_notes_with_count,
+                R.string.groups_and_entries_with_count,
                 childGroupCount,
                 noteCount
             )

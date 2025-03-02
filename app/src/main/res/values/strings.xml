@@ -30,7 +30,7 @@
     <string name="lock">Lock</string>
     <string name="resolve">Resolve</string>
     <string name="remove">Remove</string>
-    <string name="add_templates">Add note templates</string>
+    <string name="add_templates">Add entry templates</string>
     <string name="more_options">More options</string>
     <string name="paste">Paste</string>
     <string name="apply">Apply</string>
@@ -149,8 +149,8 @@
     <string name="private_storage">Private storage</string>
     <string name="public_storage">Public storage</string>
     <string name="storage_is_not_selected">Storage is not selected</string>
-    <string name="add_note_templates">Add note templates</string>
-    <string name="add_templates_info_message">Templates allows to display only important fields and create notes with pre-defined field names.</string>
+    <string name="add_note_templates">Add entry templates</string>
+    <string name="add_templates_info_message">Templates allows to display only important fields and create entries with pre-defined field names.</string>
 
     <!-- Open file screen -->
     <string name="file_path">File path</string>
@@ -158,14 +158,14 @@
     <!-- Groups screen -->
     <string name="groups">Groups</string>
     <string name="no_items_to_show">No items to show</string>
-    <string name="notes_with_count">Notes: %d</string>
+    <string name="entries_with_count">Entries: %d</string>
     <string name="groups_with_count">Groups: %d</string>
-    <string name="groups_and_notes_with_count">Groups: %1$d  Notes: %2$d</string>
-    <string name="new_item_entry_standard_note">Standard Note</string>
+    <string name="groups_and_entries_with_count">Groups: %1$d  Entries: %2$d</string>
+    <string name="new_item_entry_standard_entry">Standard Entry</string>
     <string name="new_item_entry_new_group">New Group</string>
-    <string name="note_remove_confirmation_message">Are you sure want to remove note "%s" ?</string>
+    <string name="note_remove_confirmation_message">Are you sure want to remove entry "%s" ?</string>
     <string name="group_remove_confirmation_message">Are you sure want to remove this group?</string>
-    <string name="add_templates_confirmation_message">Templates allows to display only important fields and create notes with pre-defined field names. Are you sure want to add templates to Database?</string>
+    <string name="add_templates_confirmation_message">Templates allows to display only important fields and create entries with pre-defined field names. Are you sure want to add templates to Database?</string>
     <string name="successfully_removed">Successfully removed</string>
     <string name="successfully_added">Successfully added</string>
     <string name="successfully">Successfully</string>
@@ -231,7 +231,7 @@
     <string name="history_event_property_updated">\'%s\' changed to \'%s\'</string>
 
     <!-- Note editor screen -->
-    <string name="new_note">New note</string>
+    <string name="new_entry">New entry</string>
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="no_changes">No changes</string>

@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.groups
 
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
@@ -176,6 +177,7 @@ class GroupsViewModel(
     val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
     val backIcon = MutableLiveData<BackNavigationIcon>(BackNavigationIcon.Arrow)
     val isKeyboardVisibleEvent = SingleLiveEvent<Boolean>()
+    val showExportPickerEvent = SingleLiveEvent<Unit>()
 
     private val biometricInteractor = biometricResolver.getInteractor()
     private var rootGroup: Group? = null
@@ -523,6 +525,25 @@ class GroupsViewModel(
 
     fun onAddTemplatesClicked() {
         showAddTemplatesDialogEvent.call(Unit)
+    }
+
+    fun onExportButtonClicked() {
+        showExportPickerEvent.call(Unit)
+    }
+
+    fun onExportFilePicked(destination: Uri) {
+        setScreenState(ScreenState.loading())
+
+        viewModelScope.launch {
+            val exportResult = interactor.exportDatabase(destination)
+
+            if (exportResult.isSucceededOrDeferred) {
+                setScreenState(ScreenState.data())
+                showToastEvent.call(resourceProvider.getString(R.string.exported_successfully))
+            } else {
+                setErrorPanelState(exportResult.error)
+            }
+        }
     }
 
     fun onAddTemplatesConfirmed() {
@@ -1194,10 +1215,10 @@ class GroupsViewModel(
         isFabButtonVisible.value = getFabButtonVisibility()
         isNavigationPanelVisible.value = getNavigationPanelVisibility()
         screenTitle.value = getScreenTitleInternal()
+        visibleMenuItems.value = getVisibleMenuItems()
 
         when (state.type) {
             ScreenStateType.LOADING -> {
-                visibleMenuItems.value = getVisibleMenuItems()
                 updateOptionPanelState()
             }
 
@@ -1257,6 +1278,7 @@ class GroupsViewModel(
                         add(GroupsMenuItem.VIEW_MODE)
                         add(GroupsMenuItem.SETTINGS)
                         add(GroupsMenuItem.DIFF_WITH)
+                        add(GroupsMenuItem.EXPORT)
 
                         if (templates.isNullOrEmpty()) {
                             add(GroupsMenuItem.ADD_TEMPLATES)
@@ -1318,7 +1340,8 @@ class GroupsViewModel(
         SYNCHRONIZE(R.id.menu_synchronize),
         ENABLE_BIOMETRIC_UNLOCK(R.id.menu_enable_biometric_unlock),
         DISABLE_BIOMETRIC_UNLOCK(R.id.menu_disable_biometric_unlock),
-        DIFF_WITH(R.id.menu_diff_with)
+        DIFF_WITH(R.id.menu_diff_with),
+        EXPORT(R.id.menu_export)
     }
 
     companion object {

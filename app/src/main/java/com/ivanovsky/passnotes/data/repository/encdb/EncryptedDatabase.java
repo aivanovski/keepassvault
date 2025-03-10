@@ -47,5 +47,8 @@ public interface EncryptedDatabase {
     OperationResult<Boolean> commit();
 
     @NonNull
+    OperationResult<Boolean> commitTo(@NonNull FileDescriptor output, @NonNull FSOptions fsOptions);
+
+    @NonNull
     DatabaseWatcher getWatcher();
 }

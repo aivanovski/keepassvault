@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.domain.interactor.groups
 
+import android.net.Uri
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
@@ -15,6 +16,7 @@ import com.ivanovsky.passnotes.domain.entity.SelectionItemType
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.EncodePasswordWithBiometricUseCase
+import com.ivanovsky.passnotes.domain.usecases.ExportDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.FindParentGroupsUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.GetGroupUseCase
@@ -48,7 +50,8 @@ class GroupsInteractor(
     private val encodePasswordUseCase: EncodePasswordWithBiometricUseCase,
     private val searchUseCases: SearchUseCases,
     private val findParentGroupsUseCase: FindParentGroupsUseCase,
-    private val getGroupUseCase: GetGroupUseCase
+    private val getGroupUseCase: GetGroupUseCase,
+    private val exportDbUseCae: ExportDatabaseUseCase
 ) {
 
     fun invalidateLockNotification() {
@@ -170,6 +173,9 @@ class GroupsInteractor(
     fun lockDatabase() {
         lockUseCase.lockIfNeed()
     }
+
+    suspend fun exportDatabase(destination: Uri): OperationResult<Boolean> =
+        exportDbUseCae.exportDatabase(destination)
 
     suspend fun addTemplates(): OperationResult<Boolean> =
         addTemplatesUseCase.addTemplates()

@@ -1,6 +1,8 @@
 package com.ivanovsky.passnotes.presentation.groups
 
 import android.animation.Animator
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -46,6 +48,8 @@ import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestRes
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.GroupsMenuItem
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
+import com.ivanovsky.passnotes.util.FileUtils.DEFAULT_DB_NAME
+import com.ivanovsky.passnotes.util.IntentUtils
 import timber.log.Timber
 
 class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
@@ -132,6 +136,13 @@ class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
         val action = MENU_ACTIONS[item.itemId] ?: throw IllegalArgumentException()
         action.invoke(viewModel)
         return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == REQUEST_CODE_SAVE_AS_PICKER && resultCode == Activity.RESULT_OK) {
+            val uri = data?.data ?: return
+            viewModel.onExportFilePicked(uri)
+        }
     }
 
     override fun onStart() {
@@ -243,6 +254,9 @@ class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
         }
         viewModel.requestPermissionEvent.observe(viewLifecycleOwner) { permission ->
             requestSystemPermission(permission)
+        }
+        viewModel.showExportPickerEvent.observe(viewLifecycleOwner) {
+            showExportSystemPicker()
         }
     }
 
@@ -365,9 +379,17 @@ class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
         dialog.show(childFragmentManager, ConfirmationDialog.TAG)
     }
 
+    private fun showExportSystemPicker() {
+        startActivityForResult(
+            IntentUtils.newCreateFileIntent(DEFAULT_DB_NAME),
+            REQUEST_CODE_SAVE_AS_PICKER
+        )
+    }
+
     companion object {
 
         private const val ARGUMENTS = "arguments"
+        private const val REQUEST_CODE_SAVE_AS_PICKER = 3
 
         private val MENU_ACTIONS = mapOf<Int, (vm: GroupsViewModel) -> Unit>(
             android.R.id.home to { vm -> vm.navigateBack() },
@@ -383,7 +405,8 @@ class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
             R.id.menu_disable_biometric_unlock to { vm ->
                 vm.onDisableBiometricUnlockButtonClicked()
             },
-            R.id.menu_diff_with to { vm -> vm.onDiffWithButtonClicked() }
+            R.id.menu_diff_with to { vm -> vm.onDiffWithButtonClicked() },
+            R.id.menu_export to { vm -> vm.onExportButtonClicked() }
         )
 
         fun newInstance(args: GroupsScreenArgs) = GroupsFragment()

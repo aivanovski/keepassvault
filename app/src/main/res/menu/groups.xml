@@ -46,6 +46,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_export"
+        android:title="@string/save_as"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_settings"
         android:title="@string/settings"
         app:showAsAction="never" />

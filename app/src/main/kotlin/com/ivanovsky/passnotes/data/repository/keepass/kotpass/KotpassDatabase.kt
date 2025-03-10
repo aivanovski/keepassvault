@@ -50,7 +50,7 @@ import timber.log.Timber
 class KotpassDatabase(
     private val fsResolver: FileSystemResolver,
     private val fsOptions: FSOptions,
-    private val file: FileDescriptor,
+    file: FileDescriptor,
     key: EncryptedDatabaseKey,
     db: KeePassDatabase
 ) : EncryptedDatabase {
@@ -58,19 +58,19 @@ class KotpassDatabase(
     private val lock = ReentrantLock()
     private val database = AtomicReference(db)
     private val key = AtomicReference(key)
+    private val file = AtomicReference(file)
     private val autotypeOptionMap = AtomicReference(createInheritableOptionsMap())
     private val groupUidToParentMap = AtomicReference(createGroupUidToParentMap())
     private val groupDao = KotpassGroupDao(this)
     private val noteDao = KotpassNoteDao(this)
     private val templateDao = TemplateDaoImpl(groupDao, noteDao)
     private val dbWatcher = DatabaseWatcher()
-    private val fsProvider = fsResolver.resolveProvider(file.fsAuthority)
 
     override fun getWatcher(): DatabaseWatcher = dbWatcher
 
     override fun getLock(): ReentrantLock = lock
 
-    override fun getFile(): FileDescriptor = file
+    override fun getFile(): FileDescriptor = file.get()
 
     override fun getFSOptions(): FSOptions = fsOptions
 
@@ -154,11 +154,28 @@ class KotpassDatabase(
     }
 
     override fun commit(): OperationResult<Boolean> {
-        val commitResult = lock.withLock {
-            val updatedFile = file.copy(modified = System.currentTimeMillis())
+        val updatedFile = file.get().copy(modified = System.currentTimeMillis())
 
-            val outResult =
-                fsProvider.openFileForWrite(updatedFile, OnConflictStrategy.CANCEL, fsOptions)
+        val result = commitTo(updatedFile, fsOptions)
+        if (result.isSucceededOrDeferred) {
+            file.set(updatedFile)
+        }
+
+        return result
+    }
+
+    override fun commitTo(
+        output: FileDescriptor,
+        fsOptions: FSOptions
+    ): OperationResult<Boolean> {
+        val fsProvider = fsResolver.resolveProvider(output.fsAuthority)
+
+        val commitResult = lock.withLock {
+            val outResult = fsProvider.openFileForWrite(
+                output,
+                OnConflictStrategy.CANCEL,
+                fsOptions
+            )
             if (outResult.isFailed) {
                 return outResult.mapError()
             }

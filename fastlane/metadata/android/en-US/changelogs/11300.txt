@@ -1,0 +1,2 @@
+- Add option to export database
+- Improve error reporting

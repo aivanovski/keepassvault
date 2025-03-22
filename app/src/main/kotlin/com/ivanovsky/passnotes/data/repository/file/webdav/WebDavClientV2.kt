@@ -331,7 +331,7 @@ class WebDavClientV2(
             name = FileUtils.getFileNameFromPath(path),
             isDirectory = isDirectory,
             isRoot = (path == ROOT_PATH),
-            modified = modified.time
+            modified = modified?.time
         )
     }
 

@@ -1,0 +1,2 @@
+- Fix NullPointerException for WebDav
+- Trust user installed CA certs

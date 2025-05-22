@@ -118,6 +118,10 @@ object FakeDatabaseContentFactory {
         return DEFAULT_KEY_FILE_CONTENT.toByteArray()
     }
 
+    fun createXmlKeyFileData(): ByteArray {
+        return DEFAULT_XML_KEY_FILE_CONTENT.toByteArray()
+    }
+
     fun createDatabaseWithExpiredData(): ByteArray {
         return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
             .key(PASSWORD_KEY)
@@ -325,9 +329,28 @@ object FakeDatabaseContentFactory {
 
     private const val DEFAULT_PASSWORD = "abc123"
     private const val DEFAULT_KEY_FILE_CONTENT = "abcdefg1235678"
+    private val DEFAULT_XML_KEY_FILE_CONTENT = """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <KeyFile>
+            <Meta>
+                <Version>2.0</Version>
+            </Meta>
+            <Key>
+                <Data Hash="CD964037">
+                    873979BF FEA90A3F 39AC8534 2A452105
+                    10361849 E2AFD695 E0C739B3 4256CAC3
+                </Data>
+            </Key>
+        </KeyFile>
+    """.trimIndent()
 
     val PASSWORD_KEY = DatabaseKey.PasswordKey(DEFAULT_PASSWORD)
     val FILE_KEY = DatabaseKey.BinaryKey(DEFAULT_KEY_FILE_CONTENT.toByteArray())
+    val XML_FILE_KEY = DatabaseKey.BinaryKey(DEFAULT_XML_KEY_FILE_CONTENT.toByteArray())
+    val COMBINED_XML_KEY = DatabaseKey.CompositeKey(
+        password = DEFAULT_PASSWORD,
+        binaryData = DEFAULT_XML_KEY_FILE_CONTENT.toByteArray()
+    )
     val COMBINED_KEY = DatabaseKey.CompositeKey(
         password = DEFAULT_PASSWORD,
         binaryData = DEFAULT_KEY_FILE_CONTENT.toByteArray()

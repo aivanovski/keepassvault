@@ -4,8 +4,10 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.COMBINED_KEY
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.COMBINED_XML_KEY
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.FILE_KEY
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.PASSWORD_KEY
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.XML_FILE_KEY
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createAutomationDatabase
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDatabaseWithAttachmentsData
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDatabaseWithCombinedKey
@@ -17,6 +19,7 @@ import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFact
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDiffDatabase
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDiffModifiedDatabase
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createKeyFileData
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createXmlKeyFileData
 import com.ivanovsky.passnotes.data.repository.file.fake.entity.FakeStorageEntry
 import com.ivanovsky.passnotes.util.FileUtils
 
@@ -146,6 +149,12 @@ class FakeFileFactory(
                 localContentFactory = { createKeyFileData() },
                 remoteContentFactory = { createKeyFileData() }
             ),
+            newEntry(
+                localFile = newFile(Path.XML_KEY, Time.NO_CHANGES),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createXmlKeyFileData() },
+                remoteContentFactory = { createXmlKeyFileData() }
+            ),
 
             // demo
             newEntry(
@@ -190,10 +199,22 @@ class FakeFileFactory(
                 remoteContentFactory = { createAutomationDatabase(FILE_KEY) }
             ),
             newEntry(
-                localFile = newFile(Path.AUTOMATION_COMBINE_UNLOCK, Time.LOCAL),
+                localFile = newFile(Path.AUTOMATION_COMBINED_UNLOCK, Time.LOCAL),
                 syncStatus = SyncStatus.NO_CHANGES,
                 localContentFactory = { createAutomationDatabase(COMBINED_KEY) },
                 remoteContentFactory = { createAutomationDatabase(COMBINED_KEY) }
+            ),
+            newEntry(
+                localFile = newFile(Path.AUTOMATION_XML_KEY_FILE_UNLOCK, Time.LOCAL),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createAutomationDatabase(XML_FILE_KEY) },
+                remoteContentFactory = { createAutomationDatabase(XML_FILE_KEY) }
+            ),
+            newEntry(
+                localFile = newFile(Path.AUTOMATION_COMBINED_XML_UNLOCK, Time.LOCAL),
+                syncStatus = SyncStatus.NO_CHANGES,
+                localContentFactory = { createAutomationDatabase(COMBINED_XML_KEY) },
+                remoteContentFactory = { createAutomationDatabase(COMBINED_XML_KEY) }
             )
         )
     }
@@ -282,6 +303,7 @@ class FakeFileFactory(
 
         // keys
         val KEY = "/keys/key"
+        val XML_KEY = "/keys/xml-key.keyx"
 
         // demo
         val PASSWORDS = "/demo/passwords.kdbx"
@@ -294,7 +316,9 @@ class FakeFileFactory(
         // automation
         val AUTOMATION_PASSWORD_UNLOCK = "/automation/basic.kdbx"
         val AUTOMATION_KEY_FILE_UNLOCK = "/automation/basic-key-file.kdbx"
-        val AUTOMATION_COMBINE_UNLOCK = "/automation/basic-key-file-and-password.kdbx"
+        val AUTOMATION_COMBINED_UNLOCK = "/automation/basic-key-file-and-password.kdbx"
+        val AUTOMATION_XML_KEY_FILE_UNLOCK = "/automation/basic-xml-key-file.kdbx"
+        val AUTOMATION_COMBINED_XML_UNLOCK = "/automation/basic-xml-key-file-and-password.kdbx"
     }
 
     private object Time {

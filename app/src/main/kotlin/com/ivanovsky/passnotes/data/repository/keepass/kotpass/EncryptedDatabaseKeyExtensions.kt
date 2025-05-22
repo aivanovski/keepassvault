@@ -11,7 +11,6 @@ import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import java.lang.Exception
-import java.security.SecureRandom
 import timber.log.Timber
 
 fun EncryptedDatabaseKey.toCredentials(
@@ -43,10 +42,7 @@ fun EncryptedDatabaseKey.toCredentials(
 
                 val credentials = if (password == null) {
                     Credentials.from(
-                        EncryptedValue.fromBinary(
-                            bytes = bytes,
-                            random = SecureRandom()
-                        )
+                        keyData = bytes
                     )
                 } else {
                     Credentials.from(

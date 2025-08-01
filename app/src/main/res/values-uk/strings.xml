@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">KeePassVault</string>
+    <string name="app_name_automation">KeePassVault Test</string>
+
+    <!-- Common for all screens -->
+    <string name="webdav">WebDAV</string>
+    <string name="git">Git</string>
+    <string name="device">Пристрій</string>
+    <string name="no_items">Немає елементів</string>
+    <string name="yes">Так</string>
+    <string name="no">Ні</string>
+    <string name="text_with_colon" translatable="false">%s:</string>
+    <string name="text_with_dots" translatable="false">%s...</string>
+    <string name="remove_confirmation_message">Ви впевнені що бажаєте видалити %1$s &quot;%2$s&quot;?</string>
+    <string name="status_offline_mode">Відображення даних в офлайн режимі</string>
+    <string name="status_read_only_mode">Відображення даних в режимі &quot;Тільки для читання&quot;</string>
+
+    <!-- Menu and buttons -->
+    <string name="retry">Спробувати знову</string>
+    <string name="create">Створити</string>
+    <string name="done">Готово</string>
+    <string name="open_file">Відкрити файл</string>
+    <string name="new_file">Новий файл</string>
+    <string name="settings">Налаштування</string>
+    <string name="about">Про додаток</string>
+    <string name="ok">Гаразд</string>
+    <string name="lock_database">Заблокувати базу</string>
+    <string name="lock">Заблокувати</string>
+    <string name="resolve">Resolve</string>
+    <string name="remove">Вилучити</string>
+    <string name="add_templates">Додати шаблони запису</string>
+    <string name="more_options">Більше параметрів</string>
+    <string name="paste">Вставити</string>
+    <string name="apply">Застосувати</string>
+    <string name="select">Вибрати</string>
+    <string name="sort_and_view">Сортування та перегляд</string>
+    <string name="login">Увійти</string>
+    <string name="refresh">Оновити</string>
+    <string name="grant">Дозволити</string>
+    <string name="toggle_hidden">Перемкнути видимість</string>
+    <string name="dismiss">Відхилити</string>
+    <string name="synchronize_with_source">Синхронізувати з джерелом</string>
+    <string name="details">Деталі</string>
+    <string name="report">Звіт</string>
+    <string name="copy">Копіювати</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="url">URL</string>
+    <string name="unlock_button">Кнопка розблокування</string>
+    <string name="eye_icon">Eye icon</string>
+    <string name="loading_indicator">Індикатор завантаження</string>
+    <string name="generate_icon">Generate icon</string>
+
+    <!-- Lock notification -->
+    <string name="lock_notification_channel">Швидке блокування</string>
+    <string name="lock_notification_channel_description">Кнопка блокування відкритих баз даних</string>
+    <string name="lock_notification_text_normal">Базу даних відкрито</string>
+    <string name="lock_notification_text_not_synchronized">Базу даних відкрито, але не синхронізовано</string>
+    <string name="lock_notification_text_synchronizing">Сихронізування</string>
+
+    <!-- Autofill -->
+    <string name="sign_in_with_app">Sign in with %s</string>
+    <string name="select_entry_with_dots">Виберіть запис ...</string>
+    <string name="autofill_service_name">Автозаповнення KeePassVaulr</string>
+    <string name="autofill_save_note_message">Зберегти раніше введені дані для пропозицій автозаповнення?</string>
+    <string name="add_autofill_data_message">Чи хочете ви пов\'язати вибраний запис з даними автозаповнення для використання в майбутньому?</string>
+
+    <!-- Common for error -->
+    <string name="error_has_been_occurred">Трапилась помилка</string>
+    <string name="network_error_message">—————————————————————
+Сталася помилка мережі, перевірте підключення до Інтернету</string>
+    <string name="file_permission_error_message">Неможливо отримати доступ до файлу, надайте дозвіл для програми</string>
+    <string name="file_is_already_exist">Файл вже існує</string>
+    <string name="empty_field">Порожнє поле</string>
+    <string name="sync_conflict_message">Локальна та віддалена бази даних кофліктують. Будь ласка, вирішіть цей конфлікт.</string>
+    <string name="sync_file_not_found_message">Не вдається знайти файл бази даних на віддаленому сервері. Спробуйте видалити цей файл і додати його знову.</string>
+    <string name="sync_auth_error_login_message">Додаток не може пройти аутентифікацію на віддаленому сервері.</string>
+    <string name="sync_auth_error_remove_message">Додаток не може пройти аутентифікацію на віддаленому сервері. Спробуйте видалити цей файл і додати його знову.</string>
+    <string name="sync_error_message">Не вдалося синхронізувати базу даних із віддаленим сервером. Спробуйте видалити цей файл і додати його знову.</string>
+    <string name="file_not_found">Файл не існує</string>
+
+    <!-- Resolve Conflict Dialog -->
+    <string name="resolve_conflict_dialog_message">Існує конфлікт між версіями локальної та віддаленої баз даних. Будь ласка, вирішіть цей конфлікт перед тим, як отримати доступ до бази даних.\n\nЦЯ ДІЯ МОЖЕ ПРИЗВЕСТИ ДО ВТРАТИ ДАНИХ!\n\nЛокальний файл було змінено в:\n%1$s\nВіддалений файл було змінено в:\n%2$s\n\nБудь ласка, вкажіть, яку версію ви хочете використовувати?</string>
+    <string name="local_database">Локальну базу даних</string>
+    <string name="remote_database">Віддалену базу даних</string>
+    <string name="view_diff">Переглянути відмінності</string>
+
+    <!-- Diff Viewer screen -->
+    <string name="diff_event_group">Група &quot;%s&quot;</string>
+    <string name="diff_event_note">Запис &quot;%%s&quot;</string>
+    <string name="diff_event_property">Поле &quot;%s&quot;: &quot;%s&quot;</string>
+    <string name="diff_event_property_update">Поле &quot;%s&quot;: &quot;%s&quot; змінено  на &quot;%s&quot;</string>
+    <string name="unknown_entity">Unknown entity</string>
+    <string name="compare_files">Порівняти файли</string>
+    <string name="pick_file">Обрати файл</string>
+    <string name="opened_database">Відкрита база даних</string>
+    <string name="compare">Порівняти</string>
+    <string name="files_are_identical">Файли одинакові</string>
+
+    <!-- Unlock screen -->
+    <string name="recently_used">Нещодавно використовувані</string>
+    <string name="no_databases">Немає баз даних</string>
+    <string name="unlock">Розблокувати</string>
+    <string name="empty_file_name">Немає назви файлу</string>
+    <string name="file_is_up_to_date">Файл актуальний</string>
+    <string name="new_version_of_file_is_available">Доступна нова версія файла</string>
+    <string name="not_synchronized_and_offline_mode">Не синхронізовано, офлайн-режим</string>
+    <string name="offline_mode">Офлайн режим</string>
+    <string name="checking">Перевіряємо</string>
+    <string name="checking_status">Перевірка статусу</string>
+    <string name="conflict">Конфлікт</string>
+    <string name="not_synchronized">Не синхронізовано</string>
+    <string name="synchronizing">Сихронізування</string>
+    <string name="downloading">Завантаження</string>
+    <string name="uploading">Вивантаження</string>
+    <string name="error">Помилка</string>
+    <string name="not_found">Не існує</string>
+    <string name="error_offline_mode">Помилка, офлайн режимі</string>
+    <string name="auth_error_offline_mode">Unauthorised, offline mode</string>
+    <string name="unauthorised">Unauthorised</string>
+    <string name="change">Змінити</string>
+    <string name="unlock_type">Тип розблокування</string>
+    <string name="key_file">Файл ключа</string>
+    <string name="key_file_is_not_selected">Файл ключа не обрано</string>
+    <string name="unlock_with_fingerprint">Розблокувати відбитком пальця</string>
+    <string name="setup_fingerprint_unlock">Налаштувати розблокування відбитком пальця</string>
+    <string name="setup_fingerprint_unlock_message">Будь ласка, пройдіть аутентифікацію, щоб продовжити</string>
+    <string name="add_key">Додати ключ</string>
+    <string name="add_biometrics">Додати біометрики</string>
+    <string name="recent_files">Нещодавні файли</string>
+    <string name="lock_notification_message">—————————————————————
+Чи хочете ви увімкнути системне сповіщення про відкриту базу даних?\n\nЦе сповіщення вимагає дозволу, воно дозволяє відображати стан бази даних і легше блокувати її.</string>
+    <string name="permit">Дозволити</string>
+    <string name="later">Пізніше</string>
+    <string name="biometric_data_is_invalidated">——————————————————
+Біометричні дані були визнані недійсними (тобто зареєстровано новий відбиток пальця). Будь ласка, налаштуйте біометричне розблокування знову.</string>
+    <string name="password_and_key_file">Пароль та файл ключа</string>
+    <string name="unlock_with">Розблокувати з</string>
+
+    <!-- New database screen -->
+    <string name="new_database">Нова база даних</string>
+    <string name="file_name">Назва файлу</string>
+    <string name="password">Пароль</string>
+    <string name="confirm">Підтвердження</string>
+    <string name="you_entered_two_different_passwords_please_try_again">Ви ввели два різних паролі. Спробуйте ще раз.</string>
+    <string name="this_field_should_match_password">Це поле повинно відповідати паролю</string>
+    <string name="storage_type">Тип сховища</string>
+    <string name="not_selected">Не вибрано</string>
+    <string name="dot_kdbx">.kdbx</string>
+    <string name="private_storage">Приватне сховище</string>
+    <string name="public_storage">Публічне сховище</string>
+    <string name="storage_is_not_selected">Сховище не обрано</string>
+    <string name="add_note_templates">Додати шаблони запису</string>
+    <string name="add_templates_info_message">Шаблони дозволяють відображати тільки важливі поля і створювати записи з попередньо визначеними полями.</string>
+
+    <!-- Open file screen -->
+    <string name="file_path">Шлях файлу</string>
+
+    <!-- Groups screen -->
+    <string name="groups">Групи</string>
+    <string name="no_items_to_show">Немає елементів для відображення</string>
+    <string name="entries_with_count">Записи: %d</string>
+    <string name="groups_with_count">Групи: %d</string>
+    <string name="groups_and_entries_with_count">Групи: %1$d Записи: %2$d</string>
+    <string name="new_item_entry_standard_entry">Стандартний запис</string>
+    <string name="new_item_entry_new_group">Нова група</string>
+    <string name="note_remove_confirmation_message">Ви впевнені, що хочете вилучити запис «%s»?</string>
+    <string name="group_remove_confirmation_message">Ви впевнені, що хочете вилучити групу «%s»?</string>
+    <string name="add_templates_confirmation_message">Шаблони дозволяють відображати тільки важливі поля і створювати записи з попередньо визначеними назвами полів. Ви впевнені, що хочете додати шаблони до бази даних?</string>
+    <string name="successfully_removed">Успішно вилучено</string>
+    <string name="successfully_added">Успішно відредаговано</string>
+    <string name="successfully">Успішно</string>
+    <string name="exported_successfully">Успішно експортовано</string>
+    <string name="selected_item_is_already_here">Вибраний елемент вже є тут</string>
+    <string-array name="item_actions_entries">
+        <item>Редагувати</item>
+        <item>Вилучити</item>
+        <item>Вирізати</item>
+    </string-array>
+    <string name="search_type">Тип пошуку</string>
+    <string name="fuzzy">Нечіткий</string>
+    <string name="strict">Строгий</string>
+    <string name="sort_by">Сортувати за</string>
+    <string name="sort_order">Сортування</string>
+    <string name="modification">Зміна</string>
+    <string name="creation">Створення</string>
+    <string name="ascending">Висхідний</string>
+    <string name="descending">Спадний</string>
+    <string name="default_">Природний порядок</string>
+    <string name="list_groups_first">Групи на початку списку</string>
+    <string name="enable_biometric_unlock">Увімкнути біометричне розблокування</string>
+    <string name="disable_biometric_unlock">Вимкнути біометричне розблокування</string>
+    <string name="sync_error">Помилка синхронізації</string>
+    <string name="no_search_results">Немає результатів пошуку</string>
+    <string name="compare_with">Порівняти з</string>
+    <string name="add_entry">Додати запис</string>
+    <string name="save_as">Зберегти як</string>
+
+    <!-- Group editor screen -->
+    <string name="new_group">Нова група</string>
+    <string name="edit_group">Редагувати групу</string>
+    <string name="group_with_this_name_is_already_exist">Група з такою назвою вже існує</string>
+    <string name="auto_dash_type">Auto-Type</string>
+    <string name="enable">Увімкнути</string>
+    <string name="disable">Вимкнути</string>
+    <string name="inherit_from_parent">Успадкувати від батьківського елемента</string>
+    <string name="inherit_from_parent_with_value">Успадкувати від батьківського елемента (%s)</string>
+
+    <!-- Note screen -->
+    <string name="copied_clipboard_will_be_cleared_in_seconds">Скопійовано! Буфер обміну буде очищено через %d секунд.</string>
+    <string name="edited_at">%s відредаговано</string>
+    <string name="copy_with_str">Копіювати %s</string>
+    <string name="open_with_str">Відкрити %s</string>
+    <string name="copied">Скопійовано!</string>
+    <string name="hidden">Прихований</string>
+    <string name="attachments">Вкладення</string>
+    <string name="attachment">Вкладення</string>
+    <string name="file_lower">файл</string>
+    <string name="view">Перегляд</string>
+    <string name="view_as_text">Переглянути як текст</string>
+    <string name="share">Поділитись</string>
+    <string name="one_time_password">Одноразовий пароль</string>
+    <string name="modified_with_str">Змінено %s</string>
+    <string name="modified">Змінено</string>
+    <string name="created">Створено</string>
+    <string name="expires">Термін дії закінчується</string>
+    <string name="expiration">Термін дії</string>
+    <string name="history">Історія</string>
+
+    <!-- History screen -->
+    <string name="added">Додано</string>
+    <string name="deleted">Вилучено</string>
+    <string name="changed">Змінено</string>
+    <string name="history_event_property_updated">&quot;%s&quot; змінено на &quot;%s&quot;</string>
+
+    <!-- Note editor screen -->
+    <string name="new_entry">Новий запис</string>
+    <string name="name">Назва</string>
+    <string name="username">І\'мя користувача</string>
+    <string name="no_changes">Немає змін</string>
+    <string name="url_cap">URL</string>
+    <string name="notes">Примітки</string>
+    <string name="confirm_password">Підтвердіть пароль</string>
+    <string name="does_not_match_with_password">Не збігається з паролем</string>
+    <string name="value">Значення</string>
+    <string name="protected_">Захищено</string>
+    <string name="field_name">Назва поля</string>
+    <string name="field_value">Значення поля</string>
+    <string name="empty_field_name_message">Назва поля не може бути порожньою</string>
+    <string name="title">Заголовок</string>
+    <string name="should_not_be_empty">Не може бути порожним</string>
+    <string name="discard_changes">Відкинути зміни?</string>
+    <string name="discard">Відкинути</string>
+    <string name="cancel">Скасувати</string>
+    <string name="select_item_to_add">Виберіть елемент, який потрібно додати</string>
+    <string name="custom_property">Власна властивість</string>
+    <string name="file_is_already_added_with_value">Файл &quot;%s&quot; вже додано</string>
+    <string name="never">Ніколи</string>
+
+    <!-- Password generator screen -->
+    <string name="generate_password">Згенерувати пароль</string>
+    <string name="generate">Згенерувати</string>
+    <string name="generated_password">Пароль згенеровано</string>
+    <string name="length">Довжина</string>
+    <string name="eight">8</string>
+    <string name="twelve">12</string>
+    <string name="sixteen">16</string>
+    <string name="thirty_two">32</string>
+    <string name="sixty_four">64</string>
+    <string name="upper_case">Верхній регістер: A...Z</string>
+    <string name="lower_case">Нижній регістер: a...z</string>
+    <string name="digits">Цифри: 0...9</string>
+    <string name="minus">Мінус: -</string>
+    <string name="underscore">Підкреслення: _</string>
+    <string name="space">Пробіл</string>
+    <string name="special">Спеціальні символи: &amp;\/,^@.#&quot;:%\\=\'$!*`;+</string>
+    <string name="brackets">Дужки: [](){}&lt;&gt;</string>
+    <string name="no_options_selected_message">Слід вибрати принаймні один варіант (не пробіл)</string>
+
+    <string name="brackets_symbols">[](){}&lt;&gt;</string>
+
+    <!-- Storage screen -->
+    <string name="select_storage">Виберіть сховище</string>
+    <string name="private_app_storage">Приватне сховище додатка</string>
+    <string name="external_storage">Зовнішнє сховище</string>
+    <string name="external_storage_system_picker">Зовнішнє сховище (Системний обирач файлів)</string>
+    <string name="external_storage_app_picker">Зовнішнє сховище (Вбудований обирач файлів)</string>
+    <string name="authentication_failed">Не вдалось авторизуватись</string>
+    <string name="saf_warning_message">Не рекомендується, доступ, наданий System File Picker, може бути тимчасовим.</string>
+    <string name="requires_permission">Потрібний дозвіл</string>
+
+    <!-- File picker screen -->
+    <string name="select_directory">Оберіть каталог</string>
+    <string name="select_file">Оберіть файл</string>
+    <string name="permission_is_required">Потрібний дозвіл</string>
+    <string name="please_select_any_file">Будь лакска, оберіть будь який файл</string>
+    <string name="all_files_permission_dialog_title">Надати дозвіл</string>
+    <string name="all_files_permission_dialog_message">Для виконання цієї дії програмі потрібно отримати дозвіл на управління всіма файлами. Після натискання кнопки «Надати» на наступному екрані виберіть опцію <b>Дозволити доступ для управління всіма файлами</b>.</string>
+    <string name="unable_to_authenticate">Неможливо виконати автентифікацію</string>
+    <string name="make_a_copy_and_select">Зробити копію та обрати</string>
+    <string name="copy_and_select_description">Копія буде створена всередині приватного каталогу програми</string>
+
+    <!-- Server login screen -->
+    <string name="login_to_server">Увійти на сервер</string>
+    <string name="login_to_git">Увійти в репозиторій Git</string>
+    <string name="webdav_url_hint">URL на WebDAV сервер, файл або папка</string>
+    <string name="webdav_url_help_message">Підтримуються тільки HTTPS посилання</string>
+    <string name="git_url_hint">Посилання Git репозиторія (напр. https://git.example.com)</string>
+    <string name="git_url_help_message">Підтримуються HTTPS та SSH протоколи</string>
+    <string name="url_contains_secret_message">Маскувати посилання на екрані розблокування</string>
+    <string name="ssh_key_copy_message">Ваш приватний ключ SSH буде збережений у приватному каталозі програми. Щоб видалити його, видаліть відповідний запис із бази даних на екрані розблокування.</string>
+    <string name="ssh_key_password">Пароль SSH ключа</string>
+    <string name="none">Немає</string>
+    <string name="ssh_key">Ключ SSH</string>
+    <string name="ignore_ssl_certificate_validation">Ігнорувати перевірку SSL сертифіката</string>
+
+    <!-- Debug menu screen -->
+    <string name="debug_menu">Меню налагодження</string>
+    <string name="clone_repository">Клонувати репозиторій</string>
+
+    <!-- Select database screen -->
+    <string name="select_database">Виберіть базу даних</string>
+    <string name="status">Статус</string>
+    <string name="database_lower">база даних</string>
+
+    <!-- Search screen -->
+    <string name="search">Пошук</string>
+    <string name="query">Запит</string>
+    <string name="input_text_to_start_search">Введіть текст для початку пошуку</string>
+    <string name="no_results">Немає результатів</string>
+
+    <!-- About screen -->
+    <string name="version_with_str">Версія: %s</string>
+    <string name="build_with_str">Збірка: %s</string>
+    <string name="about_intro">%s — це клієнт для баз даних менеджера паролів KeePass.\nВін використовує бібліотеку %s для доступу до файлів бази даних KeePass.</string>
+    <string name="about_licence_intro">%s є програмним забезпеченням з відкритим кодом, що надається на умовах ліцензії Apache версії 2.0. Ця програма надається «ЯК Є», БЕЗ ЖОДНИХ ГАРАНТІЙ АБО УМОВ.</string>
+    <string name="feedback">Зворотній зв\'язок</string>
+    <string name="homepage">Домашня сторінка</string>
+    <string name="kotpass">Kotpass</string>
+
+    <!-- Settings screens -->
+    <string name="database">База даних</string>
+    <string name="application">Застосунок</string>
+    <string name="database_settings">Налаштування бази даних</string>
+    <string name="application_settings">Налаштування застосунка</string>
+
+    <!-- AppSettings screen -->
+    <string name="pref_auto_lock_delay_in_ms_title">Час очікування перед блокуванням бази даних</string>
+    <string name="pref_auto_lock_delay_in_ms_summary">Інтервал, після якого база даних буде заблокована через відсутність активності</string>
+    <string name="pref_is_lock_notification_visible_title">Відображати сповіщення з кнопкою блокування</string>
+    <string name="pref_is_lock_notification_visible_summary">Дозвіл на надсилання повідомлень вимкнено, увімкніть його в налаштуваннях системи.</string>
+    <string name="pref_enable_notification_permission_title">Увімкнути дозвіл сповіщень</string>
+    <string name="pref_auto_clear_clipboard_delay_in_ms_title">Час очікування перед очищенням буфера обміну</string>
+    <string name="pref_auto_clear_clipboard_delay_in_ms_summary">Інтервал, після якого буфер обміну буде очищено</string>
+    <string name="pref_is_file_log_enabled_title">Записувати журнал у файл</string>
+    <string name="pref_is_file_log_enabled_summary">Додаток запише всі журнали у файл, який можна додати до проблеми на сторінці Github.</string>
+    <string name="pref_send_log_file_title">Надіслати файл журналу</string>
+    <string name="pref_remove_log_files_title">Очистити журнали</string>
+    <string name="pref_is_postponed_sync_enabled_title">Відкласти вивантаження</string>
+    <string name="pref_is_postponed_sync_enabled_summary">Вивантаження даних через мережу буде відкладено до блокування бази даних.</string>
+
+    <string name="pref_git_user_name_title">Ім\'я користувача Git</string>
+    <string name="pref_git_user_name_summary">Це ім\'я користувача буде використано в повідомленні про коміт.</string>
+    <string name="pref_git_user_email_title">Електронка користувача Git</string>
+    <string name="pref_git_user_email_summary">Цю електронку користувача буде використано в повідомленні про коміт.</string>
+
+    <string name="pref_is_biometric_unlock_enabled_title">Увімкнути біометричне розблокування</string>
+    <string name="pref_is_biometric_unlock_enabled_summary">Дозволити розблокування бази даних відбитком пальця</string>
+    <string name="pref_search_type_title">Алгоритм пошуку</string>
+    <string name="pref_search_type_summary">Алгоритм, що використовується в додатку для пошуку записів</string>
+    <string name="general">Загальні</string>
+    <string name="notifications">Сповіщення</string>
+    <string name="logging">Журналювання</string>
+    <string name="biometrics">Біометрика</string>
+    <string name="master_key">Майстер-ключ</string>
+    <string name="synchronization_with_server">Синхронізація з сервером</string>
+
+    <!-- DatabaseSettings screen -->
+    <string name="pref_is_recycle_bin_enabled_title">Використовувати корзину</string>
+    <string name="pref_is_recycle_bin_enabled_summary">Переміщувати групи та записи в категорію &quot;Корзина&quot; перед вилученням</string>
+    <string name="new_password">Новий пароль</string>
+    <string name="change_password">Змінити пароль</string>
+
+    <!-- Enter database credentials screen -->
+    <string name="type_a_password">Введіть пароль</string>
+
+    <!-- Setup one-time password screen -->
+    <string name="add_one_time_password">Додати одноразовий пароль</string>
+    <string name="secret">Секрет</string>
+    <string name="type">Тип</string>
+    <string name="algorithm">Алгоритм</string>
+    <string name="generation_interval">Інтервал генерації</string>
+    <string name="code_length">Довжина коду</string>
+    <string name="counter">Лічильник</string>
+    <string name="generation_interval_invalid_value_message">Значення повинне бути від 1 до 900</string>
+    <string name="counter_invalid_value_message">Повинний бути позитивий або 0</string>
+    <string name="code_length_invalid_value_message">Значення повинне бути між  4 та 18</string>
+    <string name="empty_value_message">Значення не повинне бути порожним</string>
+    <string name="custom">Custom</string>
+    <string name="invalid_value">Недійсне значення</string>
+    <string name="your_code_is">Ваш код</string>
+
+    <!-- Report dialog -->
+    <string name="go_to_issues">Перейти до проблем</string>
+    <string name="show_stacktrace">...Показати стек викликів...</string>
+
+</resources>

@@ -28,7 +28,7 @@
     <string name="ok">Гаразд</string>
     <string name="lock_database">Заблокувати базу</string>
     <string name="lock">Заблокувати</string>
-    <string name="resolve">Resolve</string>
+    <string name="resolve">Вирішити</string>
     <string name="remove">Вилучити</string>
     <string name="add_templates">Додати шаблони запису</string>
     <string name="more_options">Більше параметрів</string>
@@ -49,9 +49,9 @@
     <!-- Accessibility descriptions -->
     <string name="url">URL</string>
     <string name="unlock_button">Кнопка розблокування</string>
-    <string name="eye_icon">Eye icon</string>
+    <string name="eye_icon">Значок ока</string>
     <string name="loading_indicator">Індикатор завантаження</string>
-    <string name="generate_icon">Generate icon</string>
+    <string name="generate_icon">Згенерувати значок</string>
 
     <!-- Lock notification -->
     <string name="lock_notification_channel">Швидке блокування</string>
@@ -61,7 +61,7 @@
     <string name="lock_notification_text_synchronizing">Сихронізування</string>
 
     <!-- Autofill -->
-    <string name="sign_in_with_app">Sign in with %s</string>
+    <string name="sign_in_with_app">Увійти через %s</string>
     <string name="select_entry_with_dots">Виберіть запис ...</string>
     <string name="autofill_service_name">Автозаповнення KeePassVaulr</string>
     <string name="autofill_save_note_message">Зберегти раніше введені дані для пропозицій автозаповнення?</string>
@@ -92,7 +92,7 @@
     <string name="diff_event_note">Запис &quot;%%s&quot;</string>
     <string name="diff_event_property">Поле &quot;%s&quot;: &quot;%s&quot;</string>
     <string name="diff_event_property_update">Поле &quot;%s&quot;: &quot;%s&quot; змінено  на &quot;%s&quot;</string>
-    <string name="unknown_entity">Unknown entity</string>
+    <string name="unknown_entity">Невідомий запис</string>
     <string name="compare_files">Порівняти файли</string>
     <string name="pick_file">Обрати файл</string>
     <string name="opened_database">Відкрита база даних</string>
@@ -118,8 +118,8 @@
     <string name="error">Помилка</string>
     <string name="not_found">Не існує</string>
     <string name="error_offline_mode">Помилка, офлайн режимі</string>
-    <string name="auth_error_offline_mode">Unauthorised, offline mode</string>
-    <string name="unauthorised">Unauthorised</string>
+    <string name="auth_error_offline_mode">Неавторизовано, офлайн-режим</string>
+    <string name="unauthorised">Неавторизовано</string>
     <string name="change">Змінити</string>
     <string name="unlock_type">Тип розблокування</string>
     <string name="key_file">Файл ключа</string>
@@ -202,7 +202,7 @@
     <string name="new_group">Нова група</string>
     <string name="edit_group">Редагувати групу</string>
     <string name="group_with_this_name_is_already_exist">Група з такою назвою вже існує</string>
-    <string name="auto_dash_type">Auto-Type</string>
+    <string name="auto_dash_type">Автовведення</string>
     <string name="enable">Увімкнути</string>
     <string name="disable">Вимкнути</string>
     <string name="inherit_from_parent">Успадкувати від батьківського елемента</string>

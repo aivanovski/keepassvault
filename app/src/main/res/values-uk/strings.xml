@@ -69,8 +69,7 @@
 
     <!-- Common for error -->
     <string name="error_has_been_occurred">Трапилась помилка</string>
-    <string name="network_error_message">—————————————————————
-Сталася помилка мережі, перевірте підключення до Інтернету</string>
+    <string name="network_error_message">Сталася помилка мережі, перевірте підключення до Інтернету</string>
     <string name="file_permission_error_message">Неможливо отримати доступ до файлу, надайте дозвіл для програми</string>
     <string name="file_is_already_exist">Файл вже існує</string>
     <string name="empty_field">Порожнє поле</string>
@@ -130,12 +129,10 @@
     <string name="add_key">Додати ключ</string>
     <string name="add_biometrics">Додати біометрики</string>
     <string name="recent_files">Нещодавні файли</string>
-    <string name="lock_notification_message">—————————————————————
-Чи хочете ви увімкнути системне сповіщення про відкриту базу даних?\n\nЦе сповіщення вимагає дозволу, воно дозволяє відображати стан бази даних і легше блокувати її.</string>
+    <string name="lock_notification_message">Чи хочете ви увімкнути системне сповіщення про відкриту базу даних?\n\nЦе сповіщення вимагає дозволу, воно дозволяє відображати стан бази даних і легше блокувати її.</string>
     <string name="permit">Дозволити</string>
     <string name="later">Пізніше</string>
-    <string name="biometric_data_is_invalidated">——————————————————
-Біометричні дані були визнані недійсними (тобто зареєстровано новий відбиток пальця). Будь ласка, налаштуйте біометричне розблокування знову.</string>
+    <string name="biometric_data_is_invalidated">Біометричні дані були визнані недійсними (тобто зареєстровано новий відбиток пальця). Будь ласка, налаштуйте біометричне розблокування знову.</string>
     <string name="password_and_key_file">Пароль та файл ключа</string>
     <string name="unlock_with">Розблокувати з</string>
 

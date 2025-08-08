@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.UsedFile
@@ -270,4 +271,20 @@ class GroupsInteractor(
         query: String
     ): List<EncryptedDatabaseEntry> =
         searchUseCases.filterEntries(entries, query)
+
+    suspend fun filterEntriesByGroupUid(
+        entries: List<EncryptedDatabaseEntry>,
+        groupUid: UUID
+    ): List<EncryptedDatabaseEntry> =
+        withContext(dispatchers.IO) {
+            val filteredEntries = entries.filter { entry ->
+                when (entry) {
+                    is Group -> entry.parentUid == groupUid
+                    is Note -> entry.groupUid == groupUid
+                    else -> throw IllegalStateException()
+                }
+            }
+
+            filteredEntries
+        }
 }

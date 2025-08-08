@@ -189,8 +189,8 @@ class GroupsViewModel(
     private var isAutofillSavingCancelled = false
     private var isSearchModeEnabled = false
     private var isFillNavigationStack = false
-    private var currentEntries: List<EncryptedDatabaseEntry> = emptyList()
-    private var searchableEntries: List<EncryptedDatabaseEntry>? = null
+    private var currentEntries: List<EncryptedDatabaseEntry>? = null
+    private var allSearchableEntries: List<EncryptedDatabaseEntry>? = null
     private var navigationPanelGroups: List<Group> = emptyList()
     private var loadDataJob: Job? = null
 
@@ -208,9 +208,10 @@ class GroupsViewModel(
         }
         currentGroupUid = args.groupUid
 
-        if (args.isSearchModeEnabled) {
-            enableSearchMode()
-        }
+//        if (args.isSearchModeEnabled) {
+//            enableSearchMode()
+//        }
+        enableSearchMode(isShowCurrentGroup = true)
 
         if (args.groupUid == null) {
             syncStateInteractor.cache.setValue(null)
@@ -225,20 +226,23 @@ class GroupsViewModel(
     }
 
     override fun onGroupDataSetChanged() {
-        searchableEntries = null
+        allSearchableEntries = null
+        currentEntries = null
         loadData()
     }
 
     override fun onNoteDataSetChanged(groupUid: UUID) {
-        searchableEntries = null
+        allSearchableEntries = null
         if (groupUid == getCurrentGroupUid()) {
+            currentEntries = null
             loadData()
         }
     }
 
     override fun onNoteContentChanged(groupUid: UUID, oldNoteUid: UUID, newNoteUid: UUID) {
-        searchableEntries = null
+        allSearchableEntries = null
         if (groupUid == getCurrentGroupUid()) {
+            currentEntries = null
             loadData()
         }
     }
@@ -253,7 +257,8 @@ class GroupsViewModel(
     }
 
     override fun onDatabaseDataSetChanged() {
-        searchableEntries = null
+        allSearchableEntries = null
+        currentEntries = null
         templates = null
         loadData()
     }
@@ -262,7 +267,9 @@ class GroupsViewModel(
         showLockNotificationDialogIfNecessary()
 
         syncStateViewModel.start()
-        loadData()
+        if (currentEntries == null) {
+            loadData()
+        }
     }
 
     fun loadData(
@@ -305,16 +312,18 @@ class GroupsViewModel(
             }
 
             if (getEntriesResult.isSucceededOrDeferred) {
-                currentEntries = if (!isSearchModeEnabled) {
+                val entries = if (!isSearchModeEnabled) {
                     interactor.sortData(getEntriesResult.getOrThrow())
                 } else {
                     getEntriesResult.getOrThrow()
                 }
 
-                if (currentEntries.isNotEmpty()) {
+                currentEntries = entries
+
+                if (entries.isNotEmpty()) {
                     cells.value = CellsData(
                         isResetScroll = isResetScroll,
-                        viewModels = createCellViewModels(currentEntries)
+                        viewModels = createCellViewModels(entries)
                     )
                     setScreenState(ScreenState.data())
                 } else {
@@ -853,7 +862,7 @@ class GroupsViewModel(
     }
 
     private fun findGroupInItems(groupUid: UUID): Group? {
-        return currentEntries.firstOrNull { item ->
+        return currentEntries?.firstOrNull { item ->
             if (item is Group) {
                 item.uid == groupUid
             } else {
@@ -882,7 +891,7 @@ class GroupsViewModel(
     }
 
     private fun findNoteInItems(noteUid: UUID): Note? {
-        return currentEntries.firstOrNull { item ->
+        return currentEntries?.firstOrNull { item ->
             if (item is Note) {
                 item.uid == noteUid
             } else {
@@ -1030,21 +1039,17 @@ class GroupsViewModel(
         updateOptionPanelState()
     }
 
-    private fun enableSearchMode() {
+    private fun enableSearchMode(isShowCurrentGroup: Boolean = false) {
         isSearchModeEnabled = true
 
         isSearchQueryVisible.value = isSearchModeEnabled
         backIcon.value = getBackIconInternal()
         isKeyboardVisibleEvent.value = true
 
-        setScreenState(
-            ScreenState.empty(
-                emptyText = resourceProvider.getString(R.string.no_search_results)
-            )
-        )
+        setScreenState(ScreenState.loading())
 
-        if (searchableEntries == null) {
-            loadAllSearchableEntries()
+        if (allSearchableEntries == null) {
+            loadAllSearchableEntries(isShowCurrentGroup = isShowCurrentGroup)
         }
     }
 
@@ -1057,7 +1062,7 @@ class GroupsViewModel(
         visibleMenuItems.value = getVisibleMenuItems()
     }
 
-    private fun loadAllSearchableEntries() {
+    private fun loadAllSearchableEntries(isShowCurrentGroup: Boolean) {
         viewModelScope.launch {
             val getAllEntries = interactor.getAllSearchableEntries(
                 isRespectAutotypeProperty = (args.appMode == AUTOFILL_SELECTION)
@@ -1067,14 +1072,21 @@ class GroupsViewModel(
                 return@launch
             }
 
-            searchableEntries = getAllEntries.getOrThrow()
+            allSearchableEntries = getAllEntries.getOrThrow()
+
+            if (isShowCurrentGroup) {
+                loadData()
+            }
         }
     }
 
     private suspend fun loadSearchEntries(
         query: String
     ): OperationResult<List<EncryptedDatabaseEntry>> {
-        var allEntries = searchableEntries
+        val groupUid = currentGroupUid
+            ?: return OperationResult.error(newGenericError(MESSAGE_UID_IS_NULL, Stacktrace()))
+
+        var allEntries = allSearchableEntries
         if (allEntries == null) {
             val getAllEntriesResult = interactor.getAllSearchableEntries(
                 isRespectAutotypeProperty = (args.appMode == AUTOFILL_SELECTION)
@@ -1084,7 +1096,7 @@ class GroupsViewModel(
                 return getAllEntriesResult
             }
 
-            searchableEntries = getAllEntriesResult.getOrThrow()
+            allSearchableEntries = getAllEntriesResult.getOrThrow()
             allEntries = getAllEntriesResult.getOrThrow()
         }
 
@@ -1098,7 +1110,10 @@ class GroupsViewModel(
                 query = query
             )
         } else {
-            emptyList()
+            interactor.filterEntriesByGroupUid(
+                entries = allEntries,
+                groupUid = groupUid
+            )
         }
 
         return OperationResult.success(searchEntries)
@@ -1246,14 +1261,14 @@ class GroupsViewModel(
         val screenState = this.screenState.value ?: return false
 
         return (screenState.isDisplayingData || screenState.isDisplayingEmptyState) &&
-            args.appMode == ApplicationLaunchMode.NORMAL
+                args.appMode == ApplicationLaunchMode.NORMAL
     }
 
     private fun getNavigationPanelVisibility(): Boolean {
         val screenState = this.screenState.value ?: return false
 
         return (screenState.isDisplayingData || screenState.isDisplayingEmptyState) &&
-            !isSearchModeEnabled
+                !isSearchModeEnabled
     }
 
     private fun getVisibleMenuItems(): List<GroupsMenuItem> {
@@ -1312,7 +1327,7 @@ class GroupsViewModel(
 
     private fun isBiometricUnlockAllowedForDatabase(): Boolean {
         return biometricInteractor.isBiometricUnlockAvailable() &&
-            settings.isBiometricUnlockEnabled
+                settings.isBiometricUnlockEnabled
     }
 
     enum class OptionPanelState {
@@ -1345,6 +1360,7 @@ class GroupsViewModel(
     }
 
     companion object {
+
         private val EMPTY_UUID = UUID(0, 0)
         private const val SEARCH_DELAY = 300L
     }

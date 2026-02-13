@@ -1,6 +1,10 @@
 package com.ivanovsky.passnotes.data.entity
 
 import android.os.Parcelable
+import com.ivanovsky.passnotes.util.StringUtils.STAR
+import com.ivanovsky.passnotes.util.UrlUtils.formatSecretUrl
+import com.ivanovsky.passnotes.util.substituteAll
+import com.ivanovsky.passnotes.util.substituteAllExcept
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -15,7 +19,17 @@ sealed class FSCredentials : Parcelable {
         val username: String,
         val password: String,
         val isIgnoreSslValidation: Boolean
-    ) : FSCredentials()
+    ) : FSCredentials() {
+        override fun toString(): String {
+            return "BasicCredentials(url=%s, username=%s, password=%s, isIgnoreSslValidation=%s)"
+                .format(
+                    formatSecretUrl(url),
+                    username.substituteAllExcept(4, STAR),
+                    password.substituteAll(STAR),
+                    isIgnoreSslValidation
+                )
+        }
+    }
 
     /**
      * Represents credentials for Git repository via HTTPS protocol
@@ -29,7 +43,16 @@ sealed class FSCredentials : Parcelable {
         val url: String,
         val isSecretUrl: Boolean,
         val salt: String
-    ) : FSCredentials()
+    ) : FSCredentials() {
+        override fun toString(): String {
+            return "GitCredentials(url=%s, isSecretUrl=%s, salt=%s)"
+                .format(
+                    formatSecretUrl(url),
+                    isSecretUrl,
+                    salt.substituteAllExcept(4, STAR)
+                )
+        }
+    }
 
     /**
      * Represents credentials for Git repository via SSH protocol
@@ -46,5 +69,16 @@ sealed class FSCredentials : Parcelable {
         val keyFile: FileId,
         val salt: String,
         val password: String
-    ) : FSCredentials()
+    ) : FSCredentials() {
+        override fun toString(): String {
+            return "SshCredentials(url=%s, isSecretUrl=%s, keyFile=%s, salt=%s, password=%s)"
+                .format(
+                    formatSecretUrl(url),
+                    isSecretUrl,
+                    keyFile,
+                    salt.substituteAllExcept(4, STAR),
+                    password.substituteAll(STAR)
+                )
+        }
+    }
 }

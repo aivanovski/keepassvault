@@ -17,11 +17,11 @@ import com.ivanovsky.passnotes.domain.DateFormatter
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.LocaleProvider
-import com.ivanovsky.passnotes.domain.LoggerInteractor
 import com.ivanovsky.passnotes.domain.NoteDiffer
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
+import com.ivanovsky.passnotes.domain.logger.LoggerInteractor
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 import org.koin.dsl.module
 

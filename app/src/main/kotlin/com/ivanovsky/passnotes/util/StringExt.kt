@@ -45,6 +45,14 @@ fun String.substituteAll(substitution: Char): String {
     }
 }
 
+fun String.substituteAllExcept(visibleCount: Int, substitution: Char): String {
+    return if (length <= visibleCount) {
+        this.substituteAll(substitution)
+    } else {
+        substituteAt(visibleCount, length, substitution)
+    }
+}
+
 fun String.substituteAt(start: Int, end: Int, substitution: Char): String {
     val chars = toCharArray()
         .mapIndexed { index, char ->

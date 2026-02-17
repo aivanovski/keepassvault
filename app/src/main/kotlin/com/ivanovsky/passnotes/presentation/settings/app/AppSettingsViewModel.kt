@@ -70,6 +70,7 @@ class AppSettingsViewModel(
     fun onFileLogEnabledChanged(isEnabled: Boolean) {
         isSendLogFileEnabled.value = isEnabled
         isRemoveLogFilesEnabled.value = isEnabled
+        settings.isFileLogEnabled = isEnabled
         interactor.reInitializeLogging()
     }
 

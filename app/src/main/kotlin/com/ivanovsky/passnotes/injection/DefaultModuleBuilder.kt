@@ -1,6 +1,6 @@
 package com.ivanovsky.passnotes.injection
 
-import com.ivanovsky.passnotes.domain.LoggerInteractor
+import com.ivanovsky.passnotes.domain.logger.LoggerInteractor
 import com.ivanovsky.passnotes.injection.modules.BiometricModule
 import com.ivanovsky.passnotes.injection.modules.CoreModule
 import com.ivanovsky.passnotes.injection.modules.FileSystemProvidersModule

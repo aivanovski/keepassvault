@@ -63,20 +63,6 @@ class MockFileSystemFacade(
         }
     }
 
-    class AlwaysThrowWriter() : Writer() {
-        override fun close() {
-            throw IOException()
-        }
-
-        override fun flush() {
-            throw IOException()
-        }
-
-        override fun write(cbuf: CharArray?, off: Int, len: Int) {
-            throw IOException()
-        }
-    }
-
     class ThrowOnWriteWriter(
         private val file: File,
         private val failedWrites: Int = Int.MAX_VALUE

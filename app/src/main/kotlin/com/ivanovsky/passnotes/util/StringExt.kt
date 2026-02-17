@@ -49,7 +49,7 @@ fun String.substituteAllExcept(visibleCount: Int, substitution: Char): String {
     return if (length <= visibleCount) {
         this.substituteAll(substitution)
     } else {
-        substituteAt(visibleCount + 1, length, substitution)
+        substituteAt(visibleCount, length, substitution)
     }
 }
 

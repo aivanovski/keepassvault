@@ -2,7 +2,7 @@ package com.ivanovsky.passnotes.injection
 
 import android.content.Context
 import com.ivanovsky.passnotes.data.repository.settings.Settings
-import com.ivanovsky.passnotes.domain.LoggerInteractor
+import com.ivanovsky.passnotes.domain.logger.LoggerInteractor
 import com.ivanovsky.passnotes.injection.modules.CoreModule
 import com.ivanovsky.passnotes.injection.modules.UiModule
 import com.ivanovsky.passnotes.injection.modules.UseCaseModule

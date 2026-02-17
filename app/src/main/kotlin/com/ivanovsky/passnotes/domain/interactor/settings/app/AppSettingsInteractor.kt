@@ -5,8 +5,8 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newFileNotFoundError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
-import com.ivanovsky.passnotes.domain.LoggerInteractor
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
+import com.ivanovsky.passnotes.domain.logger.LoggerInteractor
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveBiometricDataUseCase
 import java.io.File

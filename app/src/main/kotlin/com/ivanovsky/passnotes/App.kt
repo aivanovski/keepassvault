@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
-import com.ivanovsky.passnotes.domain.LoggerInteractor
+import com.ivanovsky.passnotes.domain.logger.LoggerInteractor
 import com.ivanovsky.passnotes.injection.DIModuleBuilder
 import com.ivanovsky.passnotes.injection.DefaultModuleBuilder
 import org.koin.android.ext.koin.androidContext

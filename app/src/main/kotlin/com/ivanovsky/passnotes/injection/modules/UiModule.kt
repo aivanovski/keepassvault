@@ -39,6 +39,9 @@ import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveC
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogViewModel
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
+import com.ivanovsky.passnotes.presentation.debugmenu.dialog.SelectorDialogArgs
+import com.ivanovsky.passnotes.presentation.debugmenu.dialog.SelectorDialogViewModel
+import com.ivanovsky.passnotes.presentation.debugmenu.dialog.cells.SelectorDialogCellFactory
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerInteractor
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerViewModel
@@ -97,6 +100,7 @@ import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 object UiModule {
@@ -215,6 +219,8 @@ object UiModule {
 
             single { OptionDialogCellModelFactory(get()) }
             single { OptionDialogCellViewModelFactory(get()) }
+
+            singleOf(::SelectorDialogCellFactory)
 
             // Cicerone
             single { Cicerone.create() }
@@ -394,6 +400,9 @@ object UiModule {
                     get(),
                     args
                 )
+            }
+            factory { (args: SelectorDialogArgs) ->
+                SelectorDialogViewModel(get(), args)
             }
         }
 

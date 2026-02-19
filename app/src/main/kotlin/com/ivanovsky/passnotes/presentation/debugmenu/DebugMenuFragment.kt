@@ -13,6 +13,7 @@ import com.ivanovsky.passnotes.databinding.DebugMenuFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
+import com.ivanovsky.passnotes.presentation.debugmenu.dialog.SelectorDialog
 import com.ivanovsky.passnotes.util.FileUtils.DEFAULT_DB_NAME
 import com.ivanovsky.passnotes.util.IntentUtils.newCreateFileIntent
 import com.ivanovsky.passnotes.util.IntentUtils.newOpenFileIntent
@@ -57,6 +58,7 @@ class DebugMenuFragment : BaseFragment() {
                 viewModel.navigateBack()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -83,6 +85,15 @@ class DebugMenuFragment : BaseFragment() {
         }
         viewModel.showSystemFileCreatorEvent.observe(viewLifecycleOwner) {
             showSystemFileCreator()
+        }
+        viewModel.showSelectorDialog.observe(viewLifecycleOwner) { args ->
+            val dialog = SelectorDialog.newInstance(
+                args = args,
+                onItemsSelected = {
+
+                }
+            )
+            dialog.show(childFragmentManager, SelectorDialog.TAG)
         }
     }
 

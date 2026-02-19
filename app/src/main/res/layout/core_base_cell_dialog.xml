@@ -4,10 +4,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-
-        <variable
-            name="viewModel"
-            type="com.ivanovsky.passnotes.presentation.core.dialog.optionDialog.OptionDialogViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

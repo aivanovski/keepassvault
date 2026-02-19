@@ -27,6 +27,8 @@ import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.debugmenu.dialog.SelectorDialogArgs
+import com.ivanovsky.passnotes.presentation.debugmenu.dialog.model.SelectorOption
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
 import com.ivanovsky.passnotes.presentation.diffViewer.model.DiffEntity
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
@@ -73,6 +75,7 @@ class DebugMenuViewModel(
     val showSystemFileCreatorEvent = SingleLiveEvent<Unit>()
     val fileSystemNames = FILE_SYSTEM_TYPES.map { it.getTitle() }
     val keepassImplementationNames = KEEPASS_IMPLEMENTATION_TYPE.map { it.getTitle() }
+    val showSelectorDialog = SingleLiveEvent<SelectorDialogArgs>()
 
     private var lastReadDescriptor: FileDescriptor? = null
     private var lastReadFile: File? = null
@@ -403,13 +406,23 @@ class DebugMenuViewModel(
     }
 
     fun onViewSimpleDiffButtonClicked() {
-        showExampleDiff(
-            paths = listOf(
-                "/demo/passwords.kdbx",
-                "/demo/passwords-modified.kdbx"
-            ),
-            key = PasswordKeepassKey("abc123")
+        showSelectorDialog.value = SelectorDialogArgs(
+            options = FAKE_CLASSES.map { type ->
+                SelectorOption(
+                    title = type.split("\\.").last(),
+                    description = type
+                )
+            },
+            selectedIndices = listOf(0, 1, 2)
         )
+
+        // showExampleDiff(
+        //     paths = listOf(
+        //         "/demo/passwords.kdbx",
+        //         "/demo/passwords-modified.kdbx"
+        //     ),
+        //     key = PasswordKeepassKey("abc123")
+        // )
     }
 
     fun onViewDetailedDiffButtonClicked() {
@@ -570,5 +583,151 @@ class DebugMenuViewModel(
         private val KEEPASS_IMPLEMENTATION_TYPE = listOf(
             KeepassImplementation.KOTPASS
         )
+
+        val FAKE_CLASSES = listOf(
+            "com.abcd.auth.LoginRequest",
+            "com.abcd.auth.LoginResponse",
+            "com.abcd.auth.LogoutRequest",
+            "com.abcd.auth.LogoutResponse",
+            "com.abcd.auth.RefreshTokenRequest",
+            "com.abcd.auth.RefreshTokenResponse",
+            "com.abcd.auth.RegisterUserRequest",
+            "com.abcd.auth.RegisterUserResponse",
+            "com.abcd.auth.PasswordResetRequest",
+            "com.abcd.auth.PasswordResetResponse",
+
+            "com.abcd.user.GetUserRequest",
+            "com.abcd.user.GetUserResponse",
+            "com.abcd.user.UpdateUserRequest",
+            "com.abcd.user.UpdateUserResponse",
+            "com.abcd.user.DeleteUserRequest",
+            "com.abcd.user.DeleteUserResponse",
+            "com.abcd.user.UserProfileDto",
+            "com.abcd.user.UserSettingsDto",
+            "com.abcd.user.UserSummaryDto",
+            "com.abcd.user.UserDetailsDto",
+
+            "com.abcd.account.GetAccountsRequest",
+            "com.abcd.account.GetAccountsResponse",
+            "com.abcd.account.GetAccountDetailsRequest",
+            "com.abcd.account.GetAccountDetailsResponse",
+            "com.abcd.account.CreateAccountRequest",
+            "com.abcd.account.CreateAccountResponse",
+            "com.abcd.account.UpdateAccountRequest",
+            "com.abcd.account.UpdateAccountResponse",
+            "com.abcd.account.DeleteAccountRequest",
+            "com.abcd.account.DeleteAccountResponse",
+
+            "com.abcd.transaction.CreateTransactionRequest",
+            "com.abcd.transaction.CreateTransactionResponse",
+            "com.abcd.transaction.GetTransactionRequest",
+            "com.abcd.transaction.GetTransactionResponse",
+            "com.abcd.transaction.ListTransactionsRequest",
+            "com.abcd.transaction.ListTransactionsResponse",
+            "com.abcd.transaction.TransactionDto",
+            "com.abcd.transaction.TransactionSummaryDto",
+            "com.abcd.transaction.TransactionFilter",
+            "com.abcd.transaction.TransactionStatusUpdateRequest",
+
+            "com.abcd.payment.InitiatePaymentRequest",
+            "com.abcd.payment.InitiatePaymentResponse",
+            "com.abcd.payment.ConfirmPaymentRequest",
+            "com.abcd.payment.ConfirmPaymentResponse",
+            "com.abcd.payment.CancelPaymentRequest",
+            "com.abcd.payment.CancelPaymentResponse",
+            "com.abcd.payment.PaymentMethodDto",
+            "com.abcd.payment.PaymentStatusDto",
+            "com.abcd.payment.PaymentHistoryRequest",
+            "com.abcd.payment.PaymentHistoryResponse",
+
+            "com.abcd.notification.SendNotificationRequest",
+            "com.abcd.notification.SendNotificationResponse",
+            "com.abcd.notification.NotificationDto",
+            "com.abcd.notification.NotificationSettingsDto",
+            "com.abcd.notification.ListNotificationsRequest",
+            "com.abcd.notification.ListNotificationsResponse",
+            "com.abcd.notification.MarkNotificationReadRequest",
+            "com.abcd.notification.MarkNotificationReadResponse",
+            "com.abcd.notification.PushTokenUpdateRequest",
+            "com.abcd.notification.PushTokenUpdateResponse",
+
+            "com.abcd.order.CreateOrderRequest",
+            "com.abcd.order.CreateOrderResponse",
+            "com.abcd.order.GetOrderRequest",
+            "com.abcd.order.GetOrderResponse",
+            "com.abcd.order.ListOrdersRequest",
+            "com.abcd.order.ListOrdersResponse",
+            "com.abcd.order.UpdateOrderStatusRequest",
+            "com.abcd.order.UpdateOrderStatusResponse",
+            "com.abcd.order.OrderDto",
+            "com.abcd.order.OrderItemDto",
+
+            "com.abcd.product.GetProductRequest",
+            "com.abcd.product.GetProductResponse",
+            "com.abcd.product.ListProductsRequest",
+            "com.abcd.product.ListProductsResponse",
+            "com.abcd.product.CreateProductRequest",
+            "com.abcd.product.CreateProductResponse",
+            "com.abcd.product.UpdateProductRequest",
+            "com.abcd.product.UpdateProductResponse",
+            "com.abcd.product.ProductDto",
+            "com.abcd.product.ProductCategoryDto",
+
+            "com.abcd.inventory.GetInventoryRequest",
+            "com.abcd.inventory.GetInventoryResponse",
+            "com.abcd.inventory.UpdateInventoryRequest",
+            "com.abcd.inventory.UpdateInventoryResponse",
+            "com.abcd.inventory.InventoryItemDto",
+            "com.abcd.inventory.InventoryAdjustmentRequest",
+            "com.abcd.inventory.InventoryAdjustmentResponse",
+            "com.abcd.inventory.StockLevelDto",
+            "com.abcd.inventory.ReserveStockRequest",
+            "com.abcd.inventory.ReserveStockResponse",
+
+            "com.abcd.shipping.CreateShipmentRequest",
+            "com.abcd.shipping.CreateShipmentResponse",
+            "com.abcd.shipping.GetShipmentRequest",
+            "com.abcd.shipping.GetShipmentResponse",
+            "com.abcd.shipping.ListShipmentsRequest",
+            "com.abcd.shipping.ListShipmentsResponse",
+            "com.abcd.shipping.UpdateShipmentStatusRequest",
+            "com.abcd.shipping.UpdateShipmentStatusResponse",
+            "com.abcd.shipping.ShippingAddressDto",
+            "com.abcd.shipping.TrackingInfoDto",
+
+            "com.abcd.billing.GenerateInvoiceRequest",
+            "com.abcd.billing.GenerateInvoiceResponse",
+            "com.abcd.billing.GetInvoiceRequest",
+            "com.abcd.billing.GetInvoiceResponse",
+            "com.abcd.billing.ListInvoicesRequest",
+            "com.abcd.billing.ListInvoicesResponse",
+            "com.abcd.billing.InvoiceDto",
+            "com.abcd.billing.InvoiceItemDto",
+            "com.abcd.billing.ApplyDiscountRequest",
+            "com.abcd.billing.ApplyDiscountResponse",
+
+            "com.abcd.report.GenerateReportRequest",
+            "com.abcd.report.GenerateReportResponse",
+            "com.abcd.report.ReportFilterDto",
+            "com.abcd.report.ReportSummaryDto",
+            "com.abcd.report.ReportDetailsDto",
+            "com.abcd.report.ExportReportRequest",
+            "com.abcd.report.ExportReportResponse",
+            "com.abcd.report.ScheduledReportDto",
+            "com.abcd.report.CreateScheduledReportRequest",
+            "com.abcd.report.CreateScheduledReportResponse",
+
+            "com.abcd.audit.AuditLogDto",
+            "com.abcd.audit.ListAuditLogsRequest",
+            "com.abcd.audit.ListAuditLogsResponse",
+            "com.abcd.audit.AuditEventDto",
+            "com.abcd.audit.AuditFilterDto",
+            "com.abcd.audit.RecordAuditEventRequest",
+            "com.abcd.audit.RecordAuditEventResponse",
+            "com.abcd.audit.UserActivityDto",
+            "com.abcd.audit.SystemEventDto",
+            "com.abcd.audit.SecurityEventDto"
+        )
+
     }
 }

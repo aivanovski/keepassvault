@@ -39,7 +39,6 @@ import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_AUTHORIZATION
 import com.ivanovsky.passnotes.presentation.NewScreens
-import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
@@ -553,8 +552,6 @@ class UnlockViewModel(
     }
 
     private fun navigateToFilePickerToSelectDatabase() {
-        val resultKey = StorageListScreen.newResultKey()
-
         router.setResultListener(NewScreens.StorageListScreen::class) { file ->
             if (file is FileDescriptor) {
                 onDatabaseFilePicked(file)
@@ -564,16 +561,13 @@ class UnlockViewModel(
         router.navigateTo(
             NewScreens.StorageListScreen(
                 StorageListArgs(
-                    action = Action.PICK_FILE,
-                    resultKey = resultKey
+                    action = Action.PICK_FILE
                 )
             )
         )
     }
 
     private fun navigateToFilePickerToSelectKey() {
-        val resultKey = StorageListScreen.newResultKey()
-
         router.setResultListener(NewScreens.StorageListScreen::class) { keyFile ->
             if (keyFile is FileDescriptor) {
                 checkAndSetSelectedKeyFile(keyFile)
@@ -583,8 +577,7 @@ class UnlockViewModel(
         router.navigateTo(
             NewScreens.StorageListScreen(
                 StorageListArgs(
-                    action = Action.PICK_FILE,
-                    resultKey = resultKey
+                    action = Action.PICK_FILE
                 )
             )
         )

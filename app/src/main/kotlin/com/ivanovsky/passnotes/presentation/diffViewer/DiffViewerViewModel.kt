@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -15,12 +14,12 @@ import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffListItem
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.Screens.EnterDbCredentialsScreen
-import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.diffViewer.cells.viewmodel.DiffCellViewModel
 import com.ivanovsky.passnotes.presentation.diffViewer.cells.viewmodel.DiffFilesCellViewModel
@@ -92,7 +91,7 @@ class DiffViewerViewModel(
     }
 
     fun navigateBack() {
-        router.exit()
+        router.navigateBack()
     }
 
     fun onSelectLeftFileClicked() {
@@ -122,21 +121,19 @@ class DiffViewerViewModel(
     private fun navigateToFilePicker(
         onFileSelected: (key: EncryptedDatabaseKey, file: FileDescriptor) -> Unit
     ) {
-        val resultKey = StorageListScreen.newResultKey()
-
-        router.setResultListener(resultKey) { file ->
+        router.setResultListener(NewScreens.StorageListScreen::class) { file ->
             if (file !is FileDescriptor) {
                 return@setResultListener
             }
 
-            router.setResultListener(EnterDbCredentialsScreen.RESULT_KEY) { key ->
+            router.setResultListener(NewScreens.EnterDbCredentialsScreen::class) { key ->
                 if (key is EncryptedDatabaseKey) {
                     onFileSelected.invoke(key, file)
                 }
             }
 
             router.navigateTo(
-                EnterDbCredentialsScreen(
+                NewScreens.EnterDbCredentialsScreen(
                     EnterDbCredentialsScreenArgs(
                         file = file
                     )
@@ -145,10 +142,9 @@ class DiffViewerViewModel(
         }
 
         router.navigateTo(
-            StorageListScreen(
+            NewScreens.StorageListScreen(
                 args = StorageListArgs(
-                    action = Action.PICK_FILE,
-                    resultKey = resultKey
+                    action = Action.PICK_FILE
                 )
             )
         )

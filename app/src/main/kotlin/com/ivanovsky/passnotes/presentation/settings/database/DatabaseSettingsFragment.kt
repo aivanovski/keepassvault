@@ -6,16 +6,16 @@ import android.view.View
 import androidx.lifecycle.observe
 import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.Screens
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.BasePreferenceFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showErrorDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.throwPreferenceNotFound
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
 import com.ivanovsky.passnotes.presentation.settings.database.changePassword.ChangePasswordDialog
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
@@ -71,7 +71,7 @@ class DatabaseSettingsFragment : BasePreferenceFragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                router.exit()
+                router.navigateBack()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -108,7 +108,7 @@ class DatabaseSettingsFragment : BasePreferenceFragment() {
         }
         viewModel.lockScreenEvent.observe(viewLifecycleOwner) {
             router.backTo(
-                Screens.UnlockScreen(
+                NewScreens.UnlockScreen(
                     args = UnlockScreenArgs(ApplicationLaunchMode.NORMAL)
                 )
             )

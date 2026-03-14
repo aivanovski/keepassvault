@@ -5,19 +5,18 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.Screens.EnterDbCredentialsScreen.Companion.RESULT_KEY
-import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
@@ -60,8 +59,8 @@ class EnterDbCredentialsViewModel(
             )
 
             if (isValidKey.isSucceededOrDeferred) {
-                router.exit()
-                router.sendResult(RESULT_KEY, key)
+                router.navigateBack()
+                router.setResult(NewScreens.EnterDbCredentialsScreen::class, key)
             } else {
                 setErrorPanelState(isValidKey.error)
                 isKeyboardVisibleEvent.send(true)
@@ -70,19 +69,16 @@ class EnterDbCredentialsViewModel(
     }
 
     fun onAddKeyFileButtonClicked() {
-        val resultKey = StorageListScreen.newResultKey()
-
-        router.setResultListener(resultKey) { keyFile ->
+        router.setResultListener(NewScreens.StorageListScreen::class) { keyFile ->
             if (keyFile is FileDescriptor) {
                 checkAndSetSelectedKeyFile(keyFile)
             }
         }
 
         router.navigateTo(
-            StorageListScreen(
+            NewScreens.StorageListScreen(
                 StorageListArgs(
-                    action = Action.PICK_FILE,
-                    resultKey = resultKey
+                    action = Action.PICK_FILE
                 )
             )
         )

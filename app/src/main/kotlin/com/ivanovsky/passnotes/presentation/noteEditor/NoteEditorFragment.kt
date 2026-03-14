@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
-import com.github.terrakok.cicerone.Router
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
@@ -18,7 +17,7 @@ import com.ivanovsky.passnotes.domain.entity.DateData
 import com.ivanovsky.passnotes.domain.entity.TimeData
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.Screens
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
@@ -29,6 +28,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorViewModel.CellType
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
@@ -140,7 +140,7 @@ class NoteEditorFragment : FragmentWithDoneButton() {
         }
         viewModel.lockScreenEvent.observe(viewLifecycleOwner) {
             router.backTo(
-                Screens.UnlockScreen(
+                NewScreens.UnlockScreen(
                     args = UnlockScreenArgs(ApplicationLaunchMode.NORMAL)
                 )
             )

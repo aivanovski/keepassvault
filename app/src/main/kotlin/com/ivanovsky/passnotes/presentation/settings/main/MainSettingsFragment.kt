@@ -5,11 +5,11 @@ import android.view.MenuItem
 import android.view.View
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BasePreferenceFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainSettingsFragment :
@@ -55,7 +55,7 @@ class MainSettingsFragment :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                router.exit()
+                router.navigateBack()
                 true
             }
             else -> super.onOptionsItemSelected(item)

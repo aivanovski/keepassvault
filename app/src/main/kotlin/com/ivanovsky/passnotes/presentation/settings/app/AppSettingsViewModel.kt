@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.presentation.settings.app
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.PermissionHelper
@@ -13,6 +12,7 @@ import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
 import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.util.StringUtils
 import java.io.File
 import kotlinx.coroutines.launch
@@ -37,7 +37,7 @@ class AppSettingsViewModel(
     val shareFileEvent = SingleLiveEvent<File>()
     val requestPermissionEvent = SingleLiveEvent<SystemPermission>()
 
-    fun navigateBack() = router.exit()
+    fun navigateBack() = router.navigateBack()
 
     fun isBiometricUnlockAvailable(): Boolean {
         return biometricResolver.getInteractor()

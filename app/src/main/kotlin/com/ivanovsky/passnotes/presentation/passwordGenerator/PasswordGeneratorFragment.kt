@@ -6,14 +6,14 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.observe
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.PasswordGeneratorFragmentBinding
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.Screens
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.FragmentWithDoneButton
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -69,7 +69,7 @@ class PasswordGeneratorFragment : FragmentWithDoneButton() {
     private fun subscribeToEvents() {
         viewModel.lockScreenEvent.observe(viewLifecycleOwner) {
             router.backTo(
-                Screens.UnlockScreen(
+                NewScreens.UnlockScreen(
                     args = UnlockScreenArgs(ApplicationLaunchMode.NORMAL)
                 )
             )

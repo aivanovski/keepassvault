@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
@@ -20,12 +19,13 @@ import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.interactor.filepicker.FilePickerInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.Screens.FilePickerScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.core.model.BaseCellModel
 import com.ivanovsky.passnotes.presentation.core.model.FileCellModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.FileCellViewModel
@@ -140,8 +140,8 @@ class FilePickerViewModel(
     }
 
     private fun selectFileAndExit(file: FileDescriptor) {
-        router.exit()
-        router.sendResult(FilePickerScreen.RESULT_KEY, file)
+        router.navigateBack()
+        router.setResult(NewScreens.FilePickerScreen::class, file)
     }
 
     private fun copyAndSelectFile(file: FileDescriptor) {
@@ -210,7 +210,7 @@ class FilePickerViewModel(
         }
     }
 
-    fun navigateToPreviousScreen() = router.exit()
+    fun navigateToPreviousScreen() = router.navigateBack()
 
     private fun loadData() {
         setScreenState(ScreenState.loading())

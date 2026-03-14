@@ -1,7 +1,5 @@
 package com.ivanovsky.passnotes.injection.modules
 
-import com.github.terrakok.cicerone.Cicerone
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.domain.ClipboardInteractor
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.interactor.autofill.AutofillInteractor
@@ -38,7 +36,7 @@ import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveC
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogViewModel
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogViewModel
-import com.ivanovsky.passnotes.presentation.core.navigation.RouterImpl
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.core.navigation.RouterProvider
 import com.ivanovsky.passnotes.presentation.core.navigation.RouterProviderImpl
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
@@ -221,10 +219,6 @@ object UiModule {
             single { OptionDialogCellModelFactory(get()) }
             single { OptionDialogCellViewModelFactory(get()) }
 
-            // Cicerone
-            single { Cicerone.create() }
-            single { provideCiceroneRouter(get()) }
-            single { provideCiceroneNavigatorHolder(get()) }
             single { SettingsRouter(get()) }
 
             // Navigation
@@ -409,9 +403,4 @@ object UiModule {
     private fun provideRouter(routerProvider: RouterProvider) =
         routerProvider.getRouter()
 
-    private fun provideCiceroneRouter(cicerone: Cicerone<Router>) =
-        cicerone.router
-
-    private fun provideCiceroneNavigatorHolder(cicerone: Cicerone<Router>) =
-        cicerone.getNavigatorHolder()
 }

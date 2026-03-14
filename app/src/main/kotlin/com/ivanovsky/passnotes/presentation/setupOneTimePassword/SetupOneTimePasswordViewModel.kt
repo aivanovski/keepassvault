@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.presentation.setupOneTimePassword
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.otp.HotpGenerator
@@ -18,9 +17,10 @@ import com.ivanovsky.passnotes.domain.otp.model.OtpToken.Companion.DEFAULT_DIGIT
 import com.ivanovsky.passnotes.domain.otp.model.OtpToken.Companion.DEFAULT_PERIOD_IN_SECONDS
 import com.ivanovsky.passnotes.domain.otp.model.OtpTokenType
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.Screens.SetupOneTimePasswordScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 import com.ivanovsky.passnotes.presentation.core.compose.themeFlow
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.setupOneTimePassword.model.CustomTabState
 import com.ivanovsky.passnotes.presentation.setupOneTimePassword.model.SetupOneTimePasswordState
 import com.ivanovsky.passnotes.presentation.setupOneTimePassword.model.SetupOneTimePasswordTab
@@ -160,9 +160,9 @@ class SetupOneTimePasswordViewModel(
 
         val token = buildToken()
 
-        router.exit()
+        router.navigateBack()
         if (token != null) {
-            router.sendResult(SetupOneTimePasswordScreen.RESULT_KEY, token)
+            router.setResult(NewScreens.SetupOneTimePasswordScreen::class, token)
         }
     }
 
@@ -174,7 +174,7 @@ class SetupOneTimePasswordViewModel(
     }
 
     fun navigateBack() {
-        router.exit()
+        router.navigateBack()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

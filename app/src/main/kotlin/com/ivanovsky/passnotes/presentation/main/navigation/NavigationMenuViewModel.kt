@@ -10,11 +10,6 @@ import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.NewScreens
-import com.ivanovsky.passnotes.presentation.Screens.AboutScreen
-import com.ivanovsky.passnotes.presentation.Screens.DebugMenuScreen
-import com.ivanovsky.passnotes.presentation.Screens.DiffViewerScreen
-import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
-import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider

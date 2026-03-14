@@ -8,9 +8,6 @@ interface Router {
     fun backTo(screen: Screen)
     fun replaceCurrent(screen: Screen)
     fun navigateBack()
-    // fun showDialog(dialog: Dialog)
-    // fun startActivity(event: StartActivityEvent)
-
     fun setResultListener(
         screenType: KClass<out Screen>,
         onResult: ResultListener

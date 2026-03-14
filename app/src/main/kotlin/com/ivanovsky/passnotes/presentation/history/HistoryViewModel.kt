@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.domain.ResourceProvider
@@ -13,12 +12,13 @@ import com.ivanovsky.passnotes.domain.usecases.history.entity.HistoryDiffItem
 import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 import com.ivanovsky.passnotes.presentation.core.compose.themeFlow
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyAction
 import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryDiffCellViewModel
 import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryHeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.history.factory.HistoryCellModelFactory
@@ -63,7 +63,7 @@ class HistoryViewModel(
     }
 
     fun navigateBack() {
-        router.exit()
+        router.navigateBack()
     }
 
     fun onPropertyActionClicked(action: PropertyAction) {
@@ -111,7 +111,7 @@ class HistoryViewModel(
             ?: return
 
         router.navigateTo(
-            NoteScreen(
+            NewScreens.NoteScreen(
                 NoteScreenArgs(
                     appMode = args.appMode,
                     noteSource = NoteSource.ByNote(note),

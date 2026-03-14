@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
@@ -24,13 +23,13 @@ import com.ivanovsky.passnotes.domain.entity.StorageOption
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.interactor.storagelist.StorageListInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
-import com.ivanovsky.passnotes.presentation.Screens.FilePickerScreen
-import com.ivanovsky.passnotes.presentation.Screens.ServerLoginScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.core.viewmodel.OneLineTextCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.TwoTextWithIconCellViewModel
 import com.ivanovsky.passnotes.presentation.filepicker.FilePickerArgs
@@ -114,8 +113,8 @@ class StorageListViewModel(
             if (getFileResult.isSucceededOrDeferred) {
                 val file = getFileResult.obj
 
-                router.exit()
-                router.sendResult(args.resultKey, file)
+                router.navigateBack()
+                router.setResult(NewScreens.StorageListScreen::class, file)
             } else {
                 setErrorPanelState(getFileResult.error)
             }
@@ -126,7 +125,7 @@ class StorageListViewModel(
         setScreenState(ScreenState.data())
     }
 
-    fun navigateBack() = router.exit()
+    fun navigateBack() = router.navigateBack()
 
     private fun loadData() {
         setScreenState(ScreenState.loading())
@@ -154,13 +153,13 @@ class StorageListViewModel(
     private fun navigateToFilePicker(args: FilePickerArgs) {
         setScreenState(ScreenState.loading())
         isReloadOnStart = true
-        router.setResultListener(FilePickerScreen.RESULT_KEY) { file ->
+        router.setResultListener(NewScreens.FilePickerScreen::class) { file ->
             if (file is FileDescriptor) {
                 isReloadOnStart = false
                 onFilePickedByPicker(file)
             }
         }
-        router.navigateTo(FilePickerScreen(args))
+        router.navigateTo(NewScreens.FilePickerScreen(args))
     }
 
     private fun navigateToServerLogin(fsAuthority: FSAuthority) {
@@ -191,7 +190,7 @@ class StorageListViewModel(
 
         setScreenState(ScreenState.loading())
         isReloadOnStart = true
-        router.setResultListener(ServerLoginScreen.RESULT_KEY) { file ->
+        router.setResultListener(NewScreens.ServerLoginScreen::class) { file ->
             if (file is FileDescriptor) {
                 isReloadOnStart = false
                 setScreenState(ScreenState.loading())
@@ -210,12 +209,12 @@ class StorageListViewModel(
                 onInternalAuthFailed()
             }
         }
-        router.navigateTo(ServerLoginScreen(screenArgs))
+        router.navigateTo(NewScreens.ServerLoginScreen(screenArgs))
     }
 
     private fun onFilePickedByPicker(file: FileDescriptor) {
-        router.exit()
-        router.sendResult(args.resultKey, file)
+        router.navigateBack()
+        router.setResult(NewScreens.StorageListScreen::class, file)
     }
 
     private fun subscribeToEvents() {
@@ -267,8 +266,8 @@ class StorageListViewModel(
                 }
 
                 INTERNAL_STORAGE -> {
-                    router.exit()
-                    router.sendResult(args.resultKey, root)
+                    router.navigateBack()
+                    router.setResult(NewScreens.StorageListScreen::class, root)
                 }
 
                 else -> throw IllegalArgumentException()

@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.presentation.passwordGenerator
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.repository.settings.Settings
@@ -12,8 +11,9 @@ import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.PasswordResource
 import com.ivanovsky.passnotes.domain.interactor.passwordGenerator.PasswordGeneratorInteractor
-import com.ivanovsky.passnotes.presentation.Screens.PasswordGeneratorScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import com.ivanovsky.passnotes.util.toIntSafely
 import kotlinx.coroutines.launch
@@ -103,13 +103,13 @@ class PasswordGeneratorViewModel(
     fun onDoneButtonClicked() {
         val password = password.value?.toString() ?: return
 
-        router.exit()
+        router.navigateBack()
         if (password.isNotEmpty()) {
-            router.sendResult(PasswordGeneratorScreen.RESULT_KEY, password)
+            router.setResult(NewScreens.PasswordGeneratorScreen::class, password)
         }
     }
 
-    fun navigateBack() = router.exit()
+    fun navigateBack() = router.navigateBack()
 
     fun onLengthSliderPositionChanged(value: Int) {
         length.value = value.toString()

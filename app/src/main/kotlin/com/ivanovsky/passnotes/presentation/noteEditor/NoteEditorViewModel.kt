@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.presentation.noteEditor
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Attachment
@@ -26,10 +25,7 @@ import com.ivanovsky.passnotes.domain.interactor.noteEditor.NoteEditorInteractor
 import com.ivanovsky.passnotes.domain.otp.OtpUriFactory
 import com.ivanovsky.passnotes.domain.otp.model.OtpToken
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
-import com.ivanovsky.passnotes.presentation.Screens.PasswordGeneratorScreen
-import com.ivanovsky.passnotes.presentation.Screens.SetupOneTimePasswordScreen
-import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
@@ -37,6 +33,7 @@ import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
@@ -245,13 +242,13 @@ class NoteEditorViewModel(
     fun onAddDialogItemSelected(cellType: CellType) {
         when (cellType) {
             is CellType.OTP -> {
-                router.setResultListener(SetupOneTimePasswordScreen.RESULT_KEY) { token ->
+                router.setResultListener(NewScreens.SetupOneTimePasswordScreen::class) { token ->
                     if (token is OtpToken) {
                         onOtpTokenCreated(token)
                     }
                 }
                 router.navigateTo(
-                    SetupOneTimePasswordScreen(
+                    NewScreens.SetupOneTimePasswordScreen(
                         SetupOneTimePasswordArgs(
                             tokenIssuer = resources.getString(R.string.app_name).lowercase()
                         )
@@ -260,19 +257,16 @@ class NoteEditorViewModel(
             }
 
             is CellType.Attachment -> {
-                val resultKey = StorageListScreen.newResultKey()
-
-                router.setResultListener(resultKey) { file ->
+                router.setResultListener(NewScreens.StorageListScreen::class) { file ->
                     if (file is FileDescriptor) {
                         onFileAttached(file)
                     }
                 }
 
                 router.navigateTo(
-                    StorageListScreen(
+                    NewScreens.StorageListScreen(
                         StorageListArgs(
-                            action = Action.PICK_FILE,
-                            resultKey = resultKey
+                            action = Action.PICK_FILE
                         )
                     )
                 )
@@ -361,7 +355,7 @@ class NoteEditorViewModel(
 
     private fun finishScreen() {
         router.backTo(
-            GroupsScreen(
+            NewScreens.GroupsScreen(
                 GroupsScreenArgs(
                     appMode = ApplicationLaunchMode.NORMAL,
                     groupUid = args.groupUid,
@@ -449,12 +443,12 @@ class NoteEditorViewModel(
                 event.containsKey(SecretPropertyCellViewModel.GENERATE_CLICK_EVENT) -> {
                     val cellId = event.getString(SecretPropertyCellViewModel.GENERATE_CLICK_EVENT)
                     if (cellId != null) {
-                        router.setResultListener(PasswordGeneratorScreen.RESULT_KEY) { password ->
+                        router.setResultListener(NewScreens.PasswordGeneratorScreen::class) { password ->
                             if (password is String) {
                                 setPasswordToCell(cellId, password)
                             }
                         }
-                        router.navigateTo(PasswordGeneratorScreen())
+                        router.navigateTo(NewScreens.PasswordGeneratorScreen())
                     }
                 }
 

@@ -3,7 +3,6 @@ package com.ivanovsky.passnotes.presentation.debugmenu
 import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSCredentials
@@ -21,12 +20,12 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.interactor.debugmenu.DebugMenuInteractor
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.Screens.DiffViewerScreen
-import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
 import com.ivanovsky.passnotes.presentation.diffViewer.model.DiffEntity
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
@@ -262,7 +261,7 @@ class DebugMenuViewModel(
         setScreenState(ScreenState.data())
 
         router.navigateTo(
-            GroupsScreen(
+            NewScreens.GroupsScreen(
                 GroupsScreenArgs(
                     appMode = ApplicationLaunchMode.NORMAL,
                     groupUid = null,
@@ -437,7 +436,7 @@ class DebugMenuViewModel(
                 val rightFile = files[1]
 
                 router.navigateTo(
-                    DiffViewerScreen(
+                    NewScreens.DiffViewerScreen(
                         DiffViewerScreenArgs(
                             left = DiffEntity.File(key, leftFile),
                             right = DiffEntity.File(key, rightFile),
@@ -535,7 +534,7 @@ class DebugMenuViewModel(
         )
     }
 
-    fun navigateBack() = router.exit()
+    fun navigateBack() = router.navigateBack()
 
     private fun FSType.getTitle(): String {
         return when (this) {

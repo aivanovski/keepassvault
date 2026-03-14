@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
@@ -46,14 +45,7 @@ import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_SELECTION
-import com.ivanovsky.passnotes.presentation.Screens
-import com.ivanovsky.passnotes.presentation.Screens.EnterDbCredentialsScreen
-import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
-import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
-import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
-import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
-import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
-import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.BackNavigationIcon
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
@@ -67,6 +59,7 @@ import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.model.NavigationPanelCellModel
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.GroupCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NavigationPanelCellViewModel
@@ -346,7 +339,7 @@ class GroupsViewModel(
         val currentGroupUid = getCurrentGroupUid() ?: return
 
         router.navigateTo(
-            GroupEditorScreen(
+            NewScreens.GroupEditorScreen(
                 GroupEditorArgs.newGroupArgs(
                     parentGroupUid = currentGroupUid
                 )
@@ -358,7 +351,7 @@ class GroupsViewModel(
         val currentGroupUid = getCurrentGroupUid() ?: return
 
         router.navigateTo(
-            NoteEditorScreen(
+            NewScreens.NoteEditorScreen(
                 NoteEditorArgs(
                     mode = NoteEditorMode.NEW,
                     groupUid = currentGroupUid,
@@ -373,7 +366,7 @@ class GroupsViewModel(
         val currentGroupUid = getCurrentGroupUid() ?: return
 
         router.navigateTo(
-            NoteEditorScreen(
+            NewScreens.NoteEditorScreen(
                 NoteEditorArgs(
                     mode = NoteEditorMode.NEW,
                     groupUid = currentGroupUid,
@@ -386,7 +379,7 @@ class GroupsViewModel(
 
     fun onEditGroupClicked(group: Group) {
         router.navigateTo(
-            GroupEditorScreen(
+            NewScreens.GroupEditorScreen(
                 GroupEditorArgs.editGroupArgs(
                     groupUid = group.uid
                 )
@@ -415,7 +408,7 @@ class GroupsViewModel(
 
     fun onEditNoteClicked(note: Note) {
         router.navigateTo(
-            NoteEditorScreen(
+            NewScreens.NoteEditorScreen(
                 NoteEditorArgs(
                     mode = NoteEditorMode.EDIT,
                     noteUid = note.uid,
@@ -498,7 +491,7 @@ class GroupsViewModel(
             if (args.appMode == AUTOFILL_SELECTION && currentGroupUid == rootGroup?.uid) {
                 finishActivityEvent.send(Unit)
             } else {
-                router.exit()
+                router.navigateBack()
             }
         }
     }
@@ -512,7 +505,7 @@ class GroupsViewModel(
 
             else -> {
                 router.backTo(
-                    UnlockScreen(
+                    NewScreens.UnlockScreen(
                         UnlockScreenArgs(
                             appMode = args.appMode,
                             autofillStructure = args.autofillStructure
@@ -578,7 +571,7 @@ class GroupsViewModel(
         showSortAndViewDialogEvent.send(dialogArgs)
     }
 
-    fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
+    fun onSettingsButtonClicked() = router.navigateTo(NewScreens.MainSettingsScreen())
 
     fun onEnableBiometricUnlockButtonClicked() {
         if (!isBiometricUnlockAllowedForDatabase()) {
@@ -659,19 +652,16 @@ class GroupsViewModel(
     }
 
     fun onDiffWithButtonClicked() {
-        val resultKey = StorageListScreen.newResultKey()
-
-        router.setResultListener(resultKey) { file ->
+        router.setResultListener(NewScreens.StorageListScreen::class) { file ->
             if (file is FileDescriptor) {
                 onDiffFileSelected(file)
             }
         }
 
         router.navigateTo(
-            StorageListScreen(
+            NewScreens.StorageListScreen(
                 StorageListArgs(
-                    action = Action.PICK_FILE,
-                    resultKey = resultKey
+                    action = Action.PICK_FILE
                 )
             )
         )
@@ -693,13 +683,13 @@ class GroupsViewModel(
     }
 
     private fun onDiffFileSelected(file: FileDescriptor) {
-        router.setResultListener(EnterDbCredentialsScreen.RESULT_KEY) { key ->
+        router.setResultListener(NewScreens.EnterDbCredentialsScreen::class) { key ->
             if (key is EncryptedDatabaseKey) {
                 onDiffFileUnlocked(key, file)
             }
         }
         router.navigateTo(
-            EnterDbCredentialsScreen(
+            NewScreens.EnterDbCredentialsScreen(
                 EnterDbCredentialsScreenArgs(
                     file = file
                 )
@@ -709,7 +699,7 @@ class GroupsViewModel(
 
     private fun onDiffFileUnlocked(key: EncryptedDatabaseKey, file: FileDescriptor) {
         router.navigateTo(
-            Screens.DiffViewerScreen(
+            NewScreens.DiffViewerScreen(
                 DiffViewerScreenArgs(
                     left = DiffEntity.OpenedDatabase,
                     right = DiffEntity.File(
@@ -864,7 +854,7 @@ class GroupsViewModel(
 
     private fun onNoteClicked(noteUid: UUID) {
         router.navigateTo(
-            NoteScreen(
+            NewScreens.NoteScreen(
                 NoteScreenArgs(
                     appMode = args.appMode,
                     noteSource = NoteSource.ByUid(noteUid),
@@ -1004,7 +994,7 @@ class GroupsViewModel(
     private fun onSaveAutofillNoteClicked() {
         isAutofillSavingCancelled = true
         router.navigateTo(
-            NoteEditorScreen(
+            NewScreens.NoteEditorScreen(
                 NoteEditorArgs(
                     mode = NoteEditorMode.NEW,
                     groupUid = getCurrentGroupUid(),

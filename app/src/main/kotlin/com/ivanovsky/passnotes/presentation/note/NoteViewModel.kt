@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Attachment
@@ -22,11 +21,7 @@ import com.ivanovsky.passnotes.domain.interactor.note.NoteInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.Screens
-import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
-import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
-import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
-import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.CellId
@@ -38,6 +33,7 @@ import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.model.NavigationPanelCellModel
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.HeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NavigationPanelCellViewModel
@@ -135,7 +131,7 @@ class NoteViewModel(
         val note = this.note ?: return
 
         router.navigateTo(
-            NoteEditorScreen(
+            NewScreens.NoteEditorScreen(
                 NoteEditorArgs(
                     mode = NoteEditorMode.EDIT,
                     noteUid = note.uid,
@@ -162,7 +158,7 @@ class NoteViewModel(
 
             else -> {
                 router.backTo(
-                    UnlockScreen(
+                    NewScreens.UnlockScreen(
                         UnlockScreenArgs(
                             appMode = args.appMode,
                             autofillStructure = args.autofillStructure
@@ -175,7 +171,7 @@ class NoteViewModel(
 
     fun onSearchButtonClicked() {
         router.navigateTo(
-            GroupsScreen(
+            NewScreens.GroupsScreen(
                 GroupsScreenArgs(
                     appMode = args.appMode,
                     groupUid = null,
@@ -187,9 +183,9 @@ class NoteViewModel(
         )
     }
 
-    fun navigateBack() = router.exit()
+    fun navigateBack() = router.navigateBack()
 
-    fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
+    fun onSettingsButtonClicked() = router.navigateTo(NewScreens.MainSettingsScreen())
 
     fun onSelectButtonClicked() {
         val structure = args.autofillStructure ?: return
@@ -536,9 +532,9 @@ class NoteViewModel(
     private fun onNavigationPanelItemClicked(index: Int) {
         val groupUid = navigationPanelGroups.getOrNull(index)?.uid ?: return
 
-        router.exit()
-        router.newChain(
-            GroupsScreen(
+        router.navigateBack()
+        router.replaceCurrent(
+            NewScreens.GroupsScreen(
                 GroupsScreenArgs(
                     appMode = args.appMode,
                     groupUid = groupUid,
@@ -558,7 +554,7 @@ class NoteViewModel(
         val noteUid = this.noteUid ?: return
 
         router.navigateTo(
-            Screens.HistoryScreen(
+            NewScreens.HistoryScreen(
                 HistoryScreenArgs(
                     appMode = args.appMode,
                     noteUid = noteUid,

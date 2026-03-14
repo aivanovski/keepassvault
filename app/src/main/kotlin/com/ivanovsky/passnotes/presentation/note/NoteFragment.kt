@@ -9,14 +9,13 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.databinding.NoteFragmentBinding
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.Screens
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.autofill.AutofillDialogFactory
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
@@ -33,6 +32,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel.AttachmentAction
 import com.ivanovsky.passnotes.presentation.note.NoteViewModel.NoteMenuItem
@@ -191,7 +191,7 @@ class NoteFragment : BaseFragment() {
         }
         viewModel.lockScreenEvent.observe(viewLifecycleOwner) {
             router.backTo(
-                Screens.UnlockScreen(
+                NewScreens.UnlockScreen(
                     args = UnlockScreenArgs(ApplicationLaunchMode.NORMAL)
                 )
             )

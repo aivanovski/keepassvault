@@ -4,7 +4,6 @@ import androidx.annotation.IdRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSCredentials
@@ -14,13 +13,13 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.serverLogin.ServerLoginInteractor
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.toFileId
-import com.ivanovsky.passnotes.presentation.Screens.ServerLoginScreen
-import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 import com.ivanovsky.passnotes.presentation.core.compose.themeFlow
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.serverLogin.model.LoginType
 import com.ivanovsky.passnotes.presentation.serverLogin.model.ServerLoginState
 import com.ivanovsky.passnotes.presentation.serverLogin.model.SshOption
@@ -90,7 +89,7 @@ class ServerLoginViewModel(
     }
 
     fun navigateBack() {
-        router.exit()
+        router.navigateBack()
     }
 
     fun onDoneButtonClicked() {
@@ -134,8 +133,8 @@ class ServerLoginViewModel(
                 return@launch
             }
 
-            router.exit()
-            router.sendResult(ServerLoginScreen.RESULT_KEY, file)
+            router.navigateBack()
+            router.setResult(NewScreens.ServerLoginScreen::class, file)
         }
     }
 
@@ -187,19 +186,16 @@ class ServerLoginViewModel(
                 // otherwise it produces crash
                 delay(500L)
 
-                val resultKey = StorageListScreen.newResultKey()
-
-                router.setResultListener(resultKey) { file ->
+                router.setResultListener(NewScreens.StorageListScreen::class) { file ->
                     if (file is FileDescriptor) {
                         onSshKeyFileSelected(file)
                     }
                 }
 
                 router.navigateTo(
-                    StorageListScreen(
+                    NewScreens.StorageListScreen(
                         StorageListArgs(
-                            action = Action.PICK_FILE,
-                            resultKey = resultKey
+                            action = Action.PICK_FILE
                         )
                     )
                 )

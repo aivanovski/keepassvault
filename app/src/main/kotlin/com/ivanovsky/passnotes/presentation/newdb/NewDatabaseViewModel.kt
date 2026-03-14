@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.presentation.newdb
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
@@ -13,12 +12,12 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.interactor.newdb.NewDatabaseInteractor
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
-import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
@@ -84,8 +83,8 @@ class NewDatabaseViewModel(
                 val created = result.obj
 
                 if (created) {
-                    router.replaceScreen(
-                        GroupsScreen(
+                    router.replaceCurrent(
+                        NewScreens.GroupsScreen(
                             GroupsScreenArgs(
                                 appMode = ApplicationLaunchMode.NORMAL,
                                 groupUid = null,
@@ -147,18 +146,15 @@ class NewDatabaseViewModel(
     }
 
     fun onSelectStorageClicked() {
-        val resultKey = StorageListScreen.newResultKey()
-
-        router.setResultListener(resultKey) { file ->
+        router.setResultListener(NewScreens.StorageListScreen::class) { file ->
             if (file is FileDescriptor) {
                 onStorageSelected(file)
             }
         }
         router.navigateTo(
-            StorageListScreen(
+            NewScreens.StorageListScreen(
                 StorageListArgs(
-                    action = Action.PICK_STORAGE,
-                    resultKey = resultKey
+                    action = Action.PICK_STORAGE
                 )
             )
         )
@@ -170,7 +166,7 @@ class NewDatabaseViewModel(
         )
     }
 
-    fun navigateBack() = router.exit()
+    fun navigateBack() = router.navigateBack()
 
     private fun onStorageSelected(selectedFile: FileDescriptor) {
         when (selectedFile.fsAuthority.type) {

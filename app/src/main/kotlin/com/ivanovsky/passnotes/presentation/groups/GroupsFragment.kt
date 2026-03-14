@@ -11,7 +11,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Group
@@ -24,7 +23,7 @@ import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.injection.GlobalInjector.get
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.Screens
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.core.BackNavigationIcon
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
@@ -44,6 +43,7 @@ import com.ivanovsky.passnotes.presentation.core.extensions.showErrorDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.showToastMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestResultReceiver
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.GroupsMenuItem
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
@@ -221,7 +221,7 @@ class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
         }
         viewModel.lockScreenEvent.observe(viewLifecycleOwner) {
             router.backTo(
-                Screens.UnlockScreen(
+                NewScreens.UnlockScreen(
                     args = UnlockScreenArgs(ApplicationLaunchMode.NORMAL)
                 )
             )

@@ -3,7 +3,9 @@ package com.ivanovsky.passnotes.presentation.core.navigation
 import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
+import java.lang.ref.Reference
 import java.lang.ref.WeakReference
+import java.util.Deque
 import java.util.LinkedList
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
@@ -30,7 +32,7 @@ class NavigationHostImpl(
 ) : NavigationHost {
 
     private val stack = LinkedList<StackItem>()
-    private val resultListeners: MutableMap<String, WeakReference<ResultListener>> =
+    private val resultListeners: MutableMap<String, Deque<ResultListener>> =
         ConcurrentHashMap()
 
     override fun handleEvent(event: NavigationEvent) {
@@ -48,7 +50,10 @@ class NavigationHostImpl(
         onResult: ResultListener
     ) {
         val screenTag = screenType.java.name
-        resultListeners[screenTag] = WeakReference(onResult)
+        resultListeners[screenTag] = resultListeners.getOrDefault(screenTag, LinkedList())
+            .apply {
+                add(onResult)
+            }
     }
 
     override fun setResult(
@@ -56,15 +61,20 @@ class NavigationHostImpl(
         result: Any
     ) {
         val screenTag = screenType.java.name
+        val listeners = resultListeners[screenTag]
 
         Timber.d(
-            "setResult: screenTag=%s, hasListener=%s, listeners.size=%s",
+            "setResult: screenTag=%s, screenListeners=%s, listeners.size=%s",
             screenTag,
-            resultListeners.containsKey(screenTag),
+            listeners?.size ?: 0,
             resultListeners.size
         )
 
-        resultListeners.remove(screenTag)?.get()?.onResult(result)
+        listeners?.pop()?.onResult(result)
+
+        if (listeners == null || listeners.isEmpty()) {
+            resultListeners.remove(screenTag)
+        }
     }
 
     private fun navigateTo(screen: Screen) {
@@ -142,14 +152,18 @@ class NavigationHostImpl(
             fragment.setInitialSavedState(newItem.savedState);
 
             val screenTag = newItem.tag
+            val listeners = resultListeners[screenTag]
             Timber.d(
-                "exit: screenTag=%s, hasListener=%s, listeners.size=%s",
+                "exit: screenTag=%s, screenListener=%s, listeners.size=%s",
                 screenTag,
-                resultListeners.containsKey(screenTag),
+                listeners?.size ?: 0,
                 resultListeners.size
             )
 
-            resultListeners.remove(screenTag)
+            listeners?.pop()
+            if (listeners != null && listeners.isEmpty()) {
+                resultListeners.remove(screenTag)
+            }
 
             fragmentManager.beginTransaction()
                 .replace(fragmentContainerResId, fragment, newItem.tag)

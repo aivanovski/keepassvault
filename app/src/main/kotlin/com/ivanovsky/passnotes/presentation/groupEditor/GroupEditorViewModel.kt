@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
@@ -19,6 +18,7 @@ import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.LockScreenLiveEvent
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import org.koin.core.parameter.parametersOf
@@ -82,7 +82,7 @@ class GroupEditorViewModel(
         }
     }
 
-    fun navigateBack() = router.exit()
+    fun navigateBack() = router.navigateBack()
 
     private fun onDataLoaded(group: Group?, parentGroup: Group) {
         this.parentGroup = parentGroup
@@ -130,7 +130,7 @@ class GroupEditorViewModel(
             val createResult = interactor.createNewGroup(entity)
 
             if (createResult.isSucceededOrDeferred) {
-                router.exit()
+                router.navigateBack()
             } else {
                 doneButtonVisibility.value = true
 
@@ -152,7 +152,7 @@ class GroupEditorViewModel(
             newGroup.autotypeEnabled == group.autotypeEnabled &&
             newGroup.searchEnabled == group.searchEnabled
         ) {
-            router.exit()
+            router.navigateBack()
             return
         }
 
@@ -164,7 +164,7 @@ class GroupEditorViewModel(
             val updateResult = interactor.updateGroup(newGroup)
 
             if (updateResult.isSucceededOrDeferred) {
-                router.exit()
+                router.navigateBack()
             } else {
                 doneButtonVisibility.value = true
 

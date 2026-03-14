@@ -33,12 +33,8 @@ import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.storagelist.StorageListFragment
 import com.ivanovsky.passnotes.presentation.unlock.UnlockFragment
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
-import java.util.UUID
 
 object NewScreens {
-
-    // TODO(refactor): all result keys should be unique as static values
-    //  could be overriden by other instance of the save screen
 
     class UnlockScreen(private val args: UnlockScreenArgs) : Screen {
         override fun tag(): String = UnlockFragment::class.java.simpleName as String
@@ -47,36 +43,19 @@ object NewScreens {
 
     // File and Storage
     class StorageListScreen(private val args: StorageListArgs) : Screen {
-
         override fun tag(): String = StorageListFragment::class.java.simpleName
         override fun create() = StorageListFragment.newInstance(args)
-
-        companion object {
-            fun newResultKey(): String {
-                return StorageListScreen::class.simpleName + "_result_" + UUID.randomUUID()
-            }
-        }
     }
 
     class FilePickerScreen(private val args: FilePickerArgs) : Screen {
-
         override fun tag(): String = FilePickerFragment::class.java.simpleName
         override fun create() = FilePickerFragment.newInstance(args)
-
-        companion object {
-            val RESULT_KEY = FilePickerScreen::class.simpleName + "_result"
-        }
     }
 
     // Network
     class ServerLoginScreen(private val args: ServerLoginArgs) : Screen {
-
         override fun tag(): String = ServerLoginFragment::class.java.simpleName
         override fun create(): Fragment = ServerLoginFragment.newInstance(args)
-
-        companion object {
-            val RESULT_KEY = ServerLoginScreen::class.simpleName + "_result"
-        }
     }
 
     // Database
@@ -112,40 +91,21 @@ object NewScreens {
     }
 
     class PasswordGeneratorScreen : Screen {
-
         override fun tag(): String = PasswordGeneratorFragment::class.java.simpleName
         override fun create(): Fragment = PasswordGeneratorFragment.newInstance()
-
-        companion object {
-            val RESULT_KEY = PasswordGeneratorScreen::class.simpleName + "_result"
-        }
     }
 
-    class SetupOneTimePasswordScreen(
-        private val args: SetupOneTimePasswordArgs
-    ) : Screen {
+    class SetupOneTimePasswordScreen(private val args: SetupOneTimePasswordArgs) : Screen {
         override fun tag(): String = SetupOneTimePasswordFragment::class.java.simpleName
         override fun create(): Fragment = SetupOneTimePasswordFragment.newInstance(args)
-
-        companion object {
-            val RESULT_KEY = SetupOneTimePasswordScreen::class.simpleName + "_result"
-        }
     }
 
-    class EnterDbCredentialsScreen(
-        private val args: EnterDbCredentialsScreenArgs
-    ) : Screen {
+    class EnterDbCredentialsScreen(private val args: EnterDbCredentialsScreenArgs) : Screen {
         override fun tag(): String = EnterDbCredentialsFragment::class.java.simpleName
         override fun create(): Fragment = EnterDbCredentialsFragment.newInstance(args)
-
-        companion object {
-            val RESULT_KEY = EnterDbCredentialsScreen::class.simpleName + "_result"
-        }
     }
 
-    class HistoryScreen(
-        private val args: HistoryScreenArgs
-    ) : Screen {
+    class HistoryScreen(private val args: HistoryScreenArgs) : Screen {
         override fun tag(): String = HistoryFragment::class.java.simpleName
         override fun create(): Fragment = HistoryFragment.newInstance(args)
     }

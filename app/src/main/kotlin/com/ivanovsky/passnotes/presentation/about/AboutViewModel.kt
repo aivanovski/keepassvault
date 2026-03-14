@@ -1,10 +1,10 @@
 package com.ivanovsky.passnotes.presentation.about
 
 import androidx.lifecycle.ViewModel
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 import com.ivanovsky.passnotes.presentation.core.compose.themeFlow
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 
 class AboutViewModel(
     themeProvider: ThemeProvider,
@@ -15,5 +15,5 @@ class AboutViewModel(
     val appBuildType = BuildConfig.BUILD_TYPE
     val theme = themeFlow(themeProvider)
 
-    fun onBackClicked() = router.exit()
+    fun onBackClicked() = router.navigateBack()
 }

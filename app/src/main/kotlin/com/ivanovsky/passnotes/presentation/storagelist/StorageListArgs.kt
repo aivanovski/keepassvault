@@ -5,6 +5,5 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class StorageListArgs(
-    val action: Action,
-    val resultKey: String
+    val action: Action
 ) : Parcelable

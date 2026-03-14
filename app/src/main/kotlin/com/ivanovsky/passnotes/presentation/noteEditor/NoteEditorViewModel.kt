@@ -151,7 +151,7 @@ class NoteEditorViewModel(
             val groupUid = args.groupUid ?: return
 
             val note = createNewNoteFromCells(groupUid, template)
-            hideKeyboardEvent.call(Unit)
+            hideKeyboardEvent.send(Unit)
             setScreenState(ScreenState.loading())
 
             viewModelScope.launch {
@@ -169,7 +169,7 @@ class NoteEditorViewModel(
             val sourceNote = note ?: return
             val sourceTemplate = template
 
-            hideKeyboardEvent.call(Unit)
+            hideKeyboardEvent.send(Unit)
             setScreenState(ScreenState.loading())
 
             val newNote = createModifiedNoteFromCells(sourceNote, sourceTemplate)
@@ -184,7 +184,7 @@ class NoteEditorViewModel(
                     }
                 }
             } else {
-                showToastEvent.call(resources.getString(R.string.no_changes))
+                showToastEvent.send(resources.getString(R.string.no_changes))
                 finishScreen()
             }
         }
@@ -202,7 +202,7 @@ class NoteEditorViewModel(
                 if (properties.isEmpty() || isAllEmpty(properties)) {
                     finishScreen()
                 } else {
-                    showDiscardDialogEvent.call(resources.getString(R.string.discard_changes))
+                    showDiscardDialogEvent.send(resources.getString(R.string.discard_changes))
                 }
             }
 
@@ -212,7 +212,7 @@ class NoteEditorViewModel(
 
                 val newNote = createModifiedNoteFromCells(sourceNote, sourceTemplate)
                 if (isNoteChanged(sourceNote, newNote)) {
-                    showDiscardDialogEvent.call(resources.getString(R.string.discard_changes))
+                    showDiscardDialogEvent.send(resources.getString(R.string.discard_changes))
                 } else {
                     finishScreen()
                 }
@@ -239,7 +239,7 @@ class NoteEditorViewModel(
             cellType to name
         }
 
-        showAddDialogEvent.call(dialogItems)
+        showAddDialogEvent.send(dialogItems)
     }
 
     fun onAddDialogItemSelected(cellType: CellType) {
@@ -486,13 +486,13 @@ class NoteEditorViewModel(
     private fun onExpirationDateClicked() {
         val date = getExpirationFromCell()?.toDate() ?: return
 
-        showDatePickerEvent.call(date)
+        showDatePickerEvent.send(date)
     }
 
     private fun onExpirationTimeClicked() {
         val time = getExpirationFromCell()?.toTime() ?: return
 
-        showTimePickerEvent.call(time)
+        showTimePickerEvent.send(time)
     }
 
     private fun setPasswordToCell(cellId: String, password: String) {

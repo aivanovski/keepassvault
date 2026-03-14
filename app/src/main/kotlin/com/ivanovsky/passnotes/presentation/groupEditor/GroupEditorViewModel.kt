@@ -121,7 +121,7 @@ class GroupEditorViewModel(
             return
         }
 
-        hideKeyboardEvent.call(Unit)
+        hideKeyboardEvent.send(Unit)
         doneButtonVisibility.value = false
         errorText.value = null
         setScreenState(ScreenState.loading())
@@ -156,7 +156,7 @@ class GroupEditorViewModel(
             return
         }
 
-        hideKeyboardEvent.call(Unit)
+        hideKeyboardEvent.send(Unit)
         doneButtonVisibility.value = false
         setScreenState(ScreenState.loading())
 

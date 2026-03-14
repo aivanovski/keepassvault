@@ -120,9 +120,9 @@ class FilePickerViewModel(
 
             permissionHelper.getRequiredFilePermission()?.let { permission ->
                 if (permission == SystemPermission.ALL_FILES_PERMISSION) {
-                    showAllFilePermissionDialogEvent.call(Unit)
+                    showAllFilePermissionDialogEvent.send(Unit)
                 } else {
-                    requestPermissionEvent.call(permission)
+                    requestPermissionEvent.send(permission)
                 }
             }
         } else {
@@ -172,7 +172,7 @@ class FilePickerViewModel(
                 if (file != null) {
                     selectFileAndExit(file)
                 } else {
-                    showSnackbarMessageEvent.call(
+                    showSnackbarMessageEvent.send(
                         resourceProvider.getString(R.string.please_select_any_file)
                     )
                 }
@@ -360,7 +360,7 @@ class FilePickerViewModel(
         }
 
         if (menuItems.isNotEmpty()) {
-            showFileMenuDialog.call(menuItems)
+            showFileMenuDialog.send(menuItems)
         }
     }
 

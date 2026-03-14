@@ -3,13 +3,13 @@ package com.ivanovsky.passnotes.presentation.main.navigation
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.Screens.AboutScreen
 import com.ivanovsky.passnotes.presentation.Screens.DebugMenuScreen
 import com.ivanovsky.passnotes.presentation.Screens.DiffViewerScreen
@@ -20,6 +20,7 @@ import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SingleTextWithIconCellViewModel
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
 import com.ivanovsky.passnotes.presentation.diffViewer.model.DiffEntity
@@ -76,7 +77,7 @@ class NavigationMenuViewModel(
     }
 
     fun onMenuDragging() {
-        hideKeyboardEvent.call(Unit)
+        hideKeyboardEvent.send(Unit)
     }
 
     private fun subscribeToEvents() {
@@ -96,24 +97,24 @@ class NavigationMenuViewModel(
     private fun onItemClicked(cellId: Int) {
         when (cellId) {
             CellId.SELECT_FILE -> {
-                router.backTo(UnlockScreen(UnlockScreenArgs(ApplicationLaunchMode.NORMAL)))
+                router.backTo(NewScreens.UnlockScreen(UnlockScreenArgs(ApplicationLaunchMode.NORMAL)))
             }
 
             CellId.LOCK -> {
-                router.backTo(UnlockScreen(UnlockScreenArgs(ApplicationLaunchMode.NORMAL)))
+                router.backTo(NewScreens.UnlockScreen(UnlockScreenArgs(ApplicationLaunchMode.NORMAL)))
             }
 
             CellId.SETTINGS -> {
-                router.navigateTo(MainSettingsScreen())
+                router.navigateTo(NewScreens.MainSettingsScreen())
             }
 
             CellId.ABOUT -> {
-                router.navigateTo(AboutScreen())
+                router.navigateTo(NewScreens.AboutScreen())
             }
 
             CellId.COMPARE_FILES -> {
                 router.navigateTo(
-                    DiffViewerScreen(
+                    NewScreens.DiffViewerScreen(
                         DiffViewerScreenArgs(
                             left = DiffEntity.SelectFile,
                             right = DiffEntity.SelectFile,
@@ -124,10 +125,10 @@ class NavigationMenuViewModel(
             }
 
             CellId.DEBUG_MENU -> {
-                router.navigateTo(DebugMenuScreen())
+                router.navigateTo(NewScreens.DebugMenuScreen())
             }
         }
-        hideMenuEvent.call(Unit)
+        hideMenuEvent.send(Unit)
     }
 
     private fun buildCellViewModels(): List<BaseCellViewModel> {

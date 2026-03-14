@@ -281,11 +281,11 @@ class StorageListViewModel(
 
         when (args.action) {
             Action.PICK_FILE -> {
-                showSystemFilePickerEvent.call(Unit)
+                showSystemFilePickerEvent.send(Unit)
             }
 
             Action.PICK_STORAGE -> {
-                showSystemFileCreatorEvent.call(Unit)
+                showSystemFileCreatorEvent.send(Unit)
             }
         }
     }
@@ -302,7 +302,7 @@ class StorageListViewModel(
                 navigateToServerLogin(root.fsAuthority)
             } else if (authType == AuthType.EXTERNAL) {
                 isExternalAuthActivityLaunched = true
-                showAuthActivityEvent.call(root.fsAuthority)
+                showAuthActivityEvent.send(root.fsAuthority)
             }
         } else {
             loadRootAndNavigateToPicker(root.fsAuthority)

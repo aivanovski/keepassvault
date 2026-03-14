@@ -339,7 +339,7 @@ class GroupsViewModel(
     }
 
     fun onAddButtonClicked() {
-        showNewEntryDialogEvent.call(templates ?: emptyList())
+        showNewEntryDialogEvent.send(templates ?: emptyList())
     }
 
     fun onCreateNewGroupClicked() {
@@ -395,7 +395,7 @@ class GroupsViewModel(
     }
 
     fun onRemoveGroupClicked(group: Group) {
-        showRemoveConfirmationDialogEvent.call(Pair(group, null))
+        showRemoveConfirmationDialogEvent.send(Pair(group, null))
     }
 
     fun onCutGroupClicked(group: Group) {
@@ -426,7 +426,7 @@ class GroupsViewModel(
     }
 
     fun onRemoveNoteClicked(note: Note) {
-        showRemoveConfirmationDialogEvent.call(Pair(null, note))
+        showRemoveConfirmationDialogEvent.send(Pair(null, note))
     }
 
     fun onCutNoteClicked(note: Note) {
@@ -496,7 +496,7 @@ class GroupsViewModel(
             }
 
             if (args.appMode == AUTOFILL_SELECTION && currentGroupUid == rootGroup?.uid) {
-                finishActivityEvent.call(Unit)
+                finishActivityEvent.send(Unit)
             } else {
                 router.exit()
             }
@@ -507,7 +507,7 @@ class GroupsViewModel(
         interactor.lockDatabase()
         when (args.appMode) {
             AUTOFILL_SELECTION -> {
-                finishActivityEvent.call(Unit)
+                finishActivityEvent.send(Unit)
             }
 
             else -> {
@@ -524,11 +524,11 @@ class GroupsViewModel(
     }
 
     fun onAddTemplatesClicked() {
-        showAddTemplatesDialogEvent.call(Unit)
+        showAddTemplatesDialogEvent.send(Unit)
     }
 
     fun onExportButtonClicked() {
-        showExportPickerEvent.call(Unit)
+        showExportPickerEvent.send(Unit)
     }
 
     fun onExportFilePicked(destination: Uri) {
@@ -539,7 +539,7 @@ class GroupsViewModel(
 
             if (exportResult.isSucceededOrDeferred) {
                 setScreenState(ScreenState.data())
-                showToastEvent.call(resourceProvider.getString(R.string.exported_successfully))
+                showToastEvent.send(resourceProvider.getString(R.string.exported_successfully))
             } else {
                 setErrorPanelState(exportResult.error)
             }
@@ -554,7 +554,7 @@ class GroupsViewModel(
 
             if (isAdded.isSucceededOrDeferred) {
                 setScreenState(ScreenState.data())
-                showToastEvent.call(resourceProvider.getString(R.string.successfully_added))
+                showToastEvent.send(resourceProvider.getString(R.string.successfully_added))
 
                 visibleMenuItems.value = getVisibleMenuItems()
             } else {
@@ -575,7 +575,7 @@ class GroupsViewModel(
             SortAndViewDialogArgs(ScreenType.GROUPS)
         }
 
-        showSortAndViewDialogEvent.call(dialogArgs)
+        showSortAndViewDialogEvent.send(dialogArgs)
     }
 
     fun onSettingsButtonClicked() = router.navigateTo(MainSettingsScreen())
@@ -599,7 +599,7 @@ class GroupsViewModel(
         }
 
         val cipher = getCipherResult.getOrThrow()
-        showBiometricSetupDialog.call(cipher)
+        showBiometricSetupDialog.send(cipher)
     }
 
     fun onBiometricSetupSuccess(encoder: BiometricEncoder) {
@@ -679,7 +679,7 @@ class GroupsViewModel(
 
     fun onRequestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= 33) {
-            requestPermissionEvent.call(SystemPermission.NOTIFICATION)
+            requestPermissionEvent.send(SystemPermission.NOTIFICATION)
         }
     }
 
@@ -784,7 +784,7 @@ class GroupsViewModel(
     private fun onGroupLongClicked(groupUid: UUID) {
         val group = findGroupInItems(groupUid) ?: return
 
-        showGroupActionsDialogEvent.call(group)
+        showGroupActionsDialogEvent.send(group)
     }
 
     private fun onNavigationPanelClicked(index: Int) {
@@ -878,7 +878,7 @@ class GroupsViewModel(
     private fun onNoteLongClicked(noteUid: UUID) {
         val note = findNoteInItems(noteUid) ?: return
 
-        showNoteActionsDialogEvent.call(note)
+        showNoteActionsDialogEvent.send(note)
     }
 
     private fun findNoteInItems(noteUid: UUID): Note? {
@@ -907,7 +907,7 @@ class GroupsViewModel(
             }
 
             if (removeResult.isSucceededOrDeferred) {
-                showToastEvent.call(resourceProvider.getString(R.string.successfully_removed))
+                showToastEvent.send(resourceProvider.getString(R.string.successfully_removed))
 
                 visibleMenuItems.value = getVisibleMenuItems()
             } else {
@@ -925,7 +925,7 @@ class GroupsViewModel(
             }
 
             if (removeResult.isSucceededOrDeferred) {
-                showToastEvent.call(resourceProvider.getString(R.string.successfully_removed))
+                showToastEvent.send(resourceProvider.getString(R.string.successfully_removed))
 
                 visibleMenuItems.value = getVisibleMenuItems()
             } else {
@@ -992,7 +992,7 @@ class GroupsViewModel(
             selectionHolder.clear()
 
             if (actionResult.isSucceededOrDeferred) {
-                showToastEvent.call(resourceProvider.getString(R.string.successfully))
+                showToastEvent.send(resourceProvider.getString(R.string.successfully))
                 setScreenState(ScreenState.data())
                 visibleMenuItems.value = getVisibleMenuItems()
             } else {
@@ -1199,7 +1199,7 @@ class GroupsViewModel(
         if (settings.isLockNotificationDialogEnabled &&
             !persmissionHelper.isPermissionGranted(SystemPermission.NOTIFICATION)
         ) {
-            showLockNotificationDialogEvent.call(Unit)
+            showLockNotificationDialogEvent.send(Unit)
         }
     }
 

@@ -113,7 +113,7 @@ class DebugMenuViewModel(
             if (result.isSucceededOrDeferred) {
                 onDbFileAvailable(result.obj.first, result.obj.second)
 
-                showSnackbarEvent.call(resourceProvider.getString(R.string.file_read))
+                showSnackbarEvent.send(resourceProvider.getString(R.string.file_read))
             } else {
                 setErrorPanelState(result.error)
             }
@@ -150,7 +150,7 @@ class DebugMenuViewModel(
                 if (result.isSucceededOrDeferred) {
                     onDbFileAvailable(result.obj.first, result.obj.second)
 
-                    showSnackbarEvent.call(resourceProvider.getString(R.string.file_wrote))
+                    showSnackbarEvent.send(resourceProvider.getString(R.string.file_wrote))
                 } else {
                     setErrorPanelState(result.error)
                 }
@@ -183,7 +183,7 @@ class DebugMenuViewModel(
             if (result.isSucceededOrDeferred) {
                 onDbFileAvailable(result.obj.first, result.obj.second)
 
-                showSnackbarEvent.call(resourceProvider.getString(R.string.new_file_created))
+                showSnackbarEvent.send(resourceProvider.getString(R.string.new_file_created))
             } else {
                 setErrorPanelState(result.error)
             }
@@ -205,7 +205,7 @@ class DebugMenuViewModel(
             if (result.isSucceededOrDeferred) {
                 val isFileExist = result.obj
 
-                showSnackbarEvent.call(
+                showSnackbarEvent.send(
                     resourceProvider.getString(R.string.file_exits_with_str, isFileExist.toString())
                 )
             } else {
@@ -232,7 +232,7 @@ class DebugMenuViewModel(
                 if (result.isSucceededOrDeferred) {
                     onDbOpened()
 
-                    showSnackbarEvent.call(resourceProvider.getString(R.string.db_opened))
+                    showSnackbarEvent.send(resourceProvider.getString(R.string.db_opened))
                 } else {
                     setErrorPanelState(result.error)
                 }
@@ -284,7 +284,7 @@ class DebugMenuViewModel(
             if (result.isSucceededOrDeferred) {
                 onDbClosed()
 
-                showSnackbarEvent.call(resourceProvider.getString(R.string.db_closed))
+                showSnackbarEvent.send(resourceProvider.getString(R.string.db_closed))
             } else {
                 setErrorPanelState(result.error)
             }
@@ -307,7 +307,7 @@ class DebugMenuViewModel(
             }
 
             if (result.isSucceededOrDeferred) {
-                showSnackbarEvent.call(resourceProvider.getString(R.string.entry_added))
+                showSnackbarEvent.send(resourceProvider.getString(R.string.entry_added))
             } else {
                 setErrorPanelState(result.error)
             }
@@ -350,11 +350,11 @@ class DebugMenuViewModel(
     }
 
     fun onPickFileButtonClicked() {
-        showSystemFilePickerEvent.call(Unit)
+        showSystemFilePickerEvent.send(Unit)
     }
 
     fun onCreateFileButtonClicked() {
-        showSystemFileCreatorEvent.call(Unit)
+        showSystemFileCreatorEvent.send(Unit)
     }
 
     fun onFilePicked(uri: Uri) {
@@ -369,7 +369,7 @@ class DebugMenuViewModel(
                 uriFileDescriptor = file
 
                 filePath.value = file.path
-                showSnackbarEvent.call(
+                showSnackbarEvent.send(
                     resourceProvider.getString(R.string.successfully)
                 )
             } else {
@@ -383,7 +383,7 @@ class DebugMenuViewModel(
             val getRootResult = interactor.getRootFile(getSelectedFsAuthority())
 
             if (getRootResult.isSucceededOrDeferred) {
-                showSnackbarEvent.call(
+                showSnackbarEvent.send(
                     resourceProvider.getString(R.string.successfully)
                 )
             } else {
@@ -399,7 +399,7 @@ class DebugMenuViewModel(
     fun onResetTestDataButtonClicked() {
         settings.testAutofillData = null
         settings.testToggles = null
-        showSnackbarEvent.call(resourceProvider.getString(R.string.test_data_removed))
+        showSnackbarEvent.send(resourceProvider.getString(R.string.test_data_removed))
     }
 
     fun onViewSimpleDiffButtonClicked() {

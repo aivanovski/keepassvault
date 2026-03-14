@@ -131,7 +131,7 @@ class HistoryViewModel(
             ?.getOrNull(eventIndex)
             ?: return
 
-        showPropertyActionDialog.call(event.getEntity())
+        showPropertyActionDialog.send(event.getEntity())
     }
 
     private fun loadData() {
@@ -171,7 +171,7 @@ class HistoryViewModel(
     private fun copyText(text: String) {
         interactor.copyToClipboard(text, isProtected = false)
         if (Build.VERSION.SDK_INT < 33) {
-            showSnackbarMessageEvent.call(resourceProvider.getString(R.string.copied))
+            showSnackbarMessageEvent.send(resourceProvider.getString(R.string.copied))
         }
     }
 
@@ -185,7 +185,7 @@ class HistoryViewModel(
             delayInSeconds
         )
         if (Build.VERSION.SDK_INT < 33) {
-            showSnackbarMessageEvent.call(message)
+            showSnackbarMessageEvent.send(message)
         }
     }
 

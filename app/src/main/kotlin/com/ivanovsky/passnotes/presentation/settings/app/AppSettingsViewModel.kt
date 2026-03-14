@@ -95,10 +95,10 @@ class AppSettingsViewModel(
 
             isLoading.value = false
             if (getFileResult.isSucceeded) {
-                shareFileEvent.call(getFileResult.obj)
+                shareFileEvent.send(getFileResult.obj)
             } else {
                 val message = getFileResult.error.formatReadableMessage(resourceProvider)
-                showErrorDialogEvent.call(message)
+                showErrorDialogEvent.send(message)
             }
         }
     }
@@ -111,16 +111,16 @@ class AppSettingsViewModel(
 
             isLoading.value = false
             if (removeResult.isSucceeded) {
-                showToastEvent.call(resourceProvider.getString(R.string.successfully))
+                showToastEvent.send(resourceProvider.getString(R.string.successfully))
             } else {
                 val message = removeResult.error.formatReadableMessage(resourceProvider)
-                showErrorDialogEvent.call(message)
+                showErrorDialogEvent.send(message)
             }
         }
     }
 
     fun onRequestNotificationPermissionClicked() {
-        requestPermissionEvent.call(SystemPermission.NOTIFICATION)
+        requestPermissionEvent.send(SystemPermission.NOTIFICATION)
     }
 
     fun onNotificationPermissionResult(isGranted: Boolean) {

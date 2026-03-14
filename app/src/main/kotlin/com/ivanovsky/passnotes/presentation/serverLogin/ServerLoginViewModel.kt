@@ -109,7 +109,7 @@ class ServerLoginViewModel(
                 screenState = ScreenState.loading()
             )
         )
-        hideKeyboardEvent.call(Unit)
+        hideKeyboardEvent.send(Unit)
 
         viewModelScope.launch {
             val authentication = interactor.authenticate(credentials, args.fsAuthority)

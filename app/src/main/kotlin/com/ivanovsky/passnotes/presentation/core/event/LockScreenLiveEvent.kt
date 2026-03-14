@@ -30,6 +30,6 @@ class LockScreenLiveEvent(
     }
 
     override fun onDatabaseClosed() {
-        call(Unit)
+        send(Unit)
     }
 }

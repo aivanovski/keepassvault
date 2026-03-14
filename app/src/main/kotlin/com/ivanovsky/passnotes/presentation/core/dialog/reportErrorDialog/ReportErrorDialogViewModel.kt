@@ -47,7 +47,7 @@ class ReportErrorDialogViewModel(
 
     fun navigateToIssues() {
         val url = resourceProvider.getString(R.string.issues_url)
-        openIssuesUrlEvent.call(url)
+        openIssuesUrlEvent.send(url)
     }
 
     fun onToggleStateClicked() {

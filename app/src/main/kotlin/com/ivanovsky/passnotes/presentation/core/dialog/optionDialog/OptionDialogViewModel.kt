@@ -48,7 +48,7 @@ class OptionDialogViewModel(
     private fun onCellClicked(cellId: String) {
         val index = cellId.toIntSafely() ?: return
 
-        selectItemEvent.call(index)
+        selectItemEvent.send(index)
     }
 
     private fun unsubscribeFromEvents() {

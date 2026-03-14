@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
@@ -39,9 +38,7 @@ import com.ivanovsky.passnotes.extensions.toUsedFile
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_AUTHORIZATION
-import com.ivanovsky.passnotes.presentation.Screens
-import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
-import com.ivanovsky.passnotes.presentation.Screens.NewDatabaseScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
 import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
@@ -50,6 +47,7 @@ import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.serverLogin.ServerLoginArgs
 import com.ivanovsky.passnotes.presentation.storagelist.Action
@@ -163,7 +161,7 @@ class UnlockViewModel(
                     setScreenState(ScreenState.data())
 
                     if (isShowKeyboard) {
-                        isKeyboardVisibleEvent.call(true)
+                        isKeyboardVisibleEvent.send(true)
                     }
                 } else {
                     val emptyText = resourceProvider.getString(R.string.no_databases)
@@ -202,7 +200,7 @@ class UnlockViewModel(
             val getDecoderResult = biometricResolver.getInteractor()
                 .getCipherForDecryption(biometricData)
             if (getDecoderResult.isSucceeded) {
-                showBiometricUnlockDialog.call(getDecoderResult.obj)
+                showBiometricUnlockDialog.send(getDecoderResult.obj)
             } else {
                 removeBiometricData()
             }
@@ -235,7 +233,7 @@ class UnlockViewModel(
             options.add(UnlockOption.BIOMETRIC)
         }
 
-        showUnlockOptionsDialog.call(options)
+        showUnlockOptionsDialog.send(options)
     }
 
     fun onUnlockOptionSelected(option: UnlockOption) {
@@ -275,7 +273,7 @@ class UnlockViewModel(
     private fun unlock(key: EncryptedDatabaseKey) {
         val selectedFile = selectedUsedFile?.getFileDescriptor() ?: return
 
-        isKeyboardVisibleEvent.call(false)
+        isKeyboardVisibleEvent.send(false)
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
@@ -326,7 +324,7 @@ class UnlockViewModel(
             setScreenState(ScreenState.data())
 
             if (isBiometricDataInvalidated) {
-                showMessageDialog.call(
+                showMessageDialog.send(
                     resourceProvider.getString(
                         R.string.biometric_data_is_invalidated
                     )
@@ -428,16 +426,16 @@ class UnlockViewModel(
     }
 
     fun onAddButtonClicked() {
-        showAddMenuDialog.call(Unit)
+        showAddMenuDialog.send(Unit)
     }
 
     fun onNewFileClicked() {
-        isKeyboardVisibleEvent.call(false)
-        router.navigateTo(NewDatabaseScreen())
+        isKeyboardVisibleEvent.send(false)
+        router.navigateTo(NewScreens.NewDatabaseScreen())
     }
 
     fun onOpenFileClicked() {
-        isKeyboardVisibleEvent.call(false)
+        isKeyboardVisibleEvent.send(false)
         navigateToFilePickerToSelectDatabase()
     }
 
@@ -474,7 +472,7 @@ class UnlockViewModel(
     private fun onDatabaseFileLongClicked(usedFileId: Int) {
         val selectedFile = recentlyUsedFiles?.firstOrNull { it.id == usedFileId } ?: return
 
-        showFileActionsDialog.call(selectedFile)
+        showFileActionsDialog.send(selectedFile)
     }
 
     private fun checkAndSetSelectedKeyFile(keyFile: FileDescriptor) {
@@ -528,7 +526,7 @@ class UnlockViewModel(
                 if (autofillNoteResult.isSucceeded) {
                     val note = autofillNoteResult.obj
 
-                    sendAutofillResponseEvent.call(Pair(note, structure))
+                    sendAutofillResponseEvent.send(Pair(note, structure))
                 } else {
                     setErrorPanelState(autofillNoteResult.error)
                 }
@@ -537,8 +535,8 @@ class UnlockViewModel(
             else -> {
                 clearEnteredPassword()
 
-                router.newChain(
-                    GroupsScreen(
+                router.navigateTo(
+                    NewScreens.GroupsScreen(
                         GroupsScreenArgs(
                             appMode = args.appMode,
                             groupUid = null,
@@ -557,14 +555,14 @@ class UnlockViewModel(
     private fun navigateToFilePickerToSelectDatabase() {
         val resultKey = StorageListScreen.newResultKey()
 
-        router.setResultListener(resultKey) { file ->
+        router.setResultListener(NewScreens.StorageListScreen::class) { file ->
             if (file is FileDescriptor) {
                 onDatabaseFilePicked(file)
             }
         }
 
         router.navigateTo(
-            StorageListScreen(
+            NewScreens.StorageListScreen(
                 StorageListArgs(
                     action = Action.PICK_FILE,
                     resultKey = resultKey
@@ -576,14 +574,14 @@ class UnlockViewModel(
     private fun navigateToFilePickerToSelectKey() {
         val resultKey = StorageListScreen.newResultKey()
 
-        router.setResultListener(resultKey) { keyFile ->
+        router.setResultListener(NewScreens.StorageListScreen::class) { keyFile ->
             if (keyFile is FileDescriptor) {
                 checkAndSetSelectedKeyFile(keyFile)
             }
         }
 
         router.navigateTo(
-            StorageListScreen(
+            NewScreens.StorageListScreen(
                 StorageListArgs(
                     action = Action.PICK_FILE,
                     resultKey = resultKey
@@ -615,7 +613,7 @@ class UnlockViewModel(
                 setScreenState(ScreenState.data())
 
                 val message = saveResult.error.formatReadableMessage(resourceProvider)
-                showSnackbarMessage.call(message)
+                showSnackbarMessage.send(message)
             }
         }
     }
@@ -795,7 +793,7 @@ class UnlockViewModel(
     private fun onResolveConflictButtonClicked() {
         val selectedFile = selectedUsedFile?.getFileDescriptor() ?: return
 
-        showResolveConflictDialog.call(selectedFile)
+        showResolveConflictDialog.send(selectedFile)
     }
 
     private fun onRemoveSelectedFileButtonClicked() {
@@ -822,7 +820,7 @@ class UnlockViewModel(
         val selectedFile = selectedUsedFile?.getFileDescriptor() ?: return
         val oldFsAuthority = selectedFile.fsAuthority
 
-        router.setResultListener(Screens.ServerLoginScreen.RESULT_KEY) { file ->
+        router.setResultListener(NewScreens.ServerLoginScreen::class) { file ->
             if (file is FileDescriptor) {
                 onServerLoginSuccess(
                     fileUid = selectedFile.uid,
@@ -832,7 +830,7 @@ class UnlockViewModel(
             }
         }
         router.navigateTo(
-            Screens.ServerLoginScreen(
+            NewScreens.ServerLoginScreen(
                 ServerLoginArgs(
                     fsAuthority = oldFsAuthority,
                     loginType = selectedFile.fsAuthority.type.getLoginType()

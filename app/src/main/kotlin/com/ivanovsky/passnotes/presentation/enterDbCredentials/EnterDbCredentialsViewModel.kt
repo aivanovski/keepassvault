@@ -43,11 +43,11 @@ class EnterDbCredentialsViewModel(
     private var selectedKeyFile: FileDescriptor? = null
 
     fun start() {
-        isKeyboardVisibleEvent.call(true)
+        isKeyboardVisibleEvent.send(true)
     }
 
     fun onUnlockButtonClicked() {
-        isKeyboardVisibleEvent.call(false)
+        isKeyboardVisibleEvent.send(false)
 
         setScreenState(ScreenState.loading())
 
@@ -64,7 +64,7 @@ class EnterDbCredentialsViewModel(
                 router.sendResult(RESULT_KEY, key)
             } else {
                 setErrorPanelState(isValidKey.error)
-                isKeyboardVisibleEvent.call(true)
+                isKeyboardVisibleEvent.send(true)
             }
         }
     }

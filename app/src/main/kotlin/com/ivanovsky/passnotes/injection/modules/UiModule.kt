@@ -38,6 +38,9 @@ import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveC
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogViewModel
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogViewModel
+import com.ivanovsky.passnotes.presentation.core.navigation.RouterImpl
+import com.ivanovsky.passnotes.presentation.core.navigation.RouterProvider
+import com.ivanovsky.passnotes.presentation.core.navigation.RouterProviderImpl
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerInteractor
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
@@ -97,6 +100,8 @@ import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 object UiModule {
@@ -221,6 +226,10 @@ object UiModule {
             single { provideCiceroneRouter(get()) }
             single { provideCiceroneNavigatorHolder(get()) }
             single { SettingsRouter(get()) }
+
+            // Navigation
+            singleOf(::RouterProviderImpl).bind(RouterProvider::class)
+            single { provideRouter(get()) }
 
             // ViewModels
             factory { (args: StorageListArgs) ->
@@ -396,6 +405,9 @@ object UiModule {
                 )
             }
         }
+
+    private fun provideRouter(routerProvider: RouterProvider) =
+        routerProvider.getRouter()
 
     private fun provideCiceroneRouter(cicerone: Cicerone<Router>) =
         cicerone.router

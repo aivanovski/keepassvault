@@ -12,12 +12,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import com.github.terrakok.cicerone.NavigatorHolder
-import com.github.terrakok.cicerone.androidx.AppNavigator
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.NoteCandidate
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityWithSideMenuBinding
-import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
@@ -27,11 +24,13 @@ import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryExtra
 import com.ivanovsky.passnotes.presentation.core.extensions.initActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
+import com.ivanovsky.passnotes.presentation.core.navigation.NavigationHost
+import com.ivanovsky.passnotes.presentation.core.navigation.NavigationHostImpl
+import com.ivanovsky.passnotes.presentation.core.navigation.RouterProvider
 import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestResultReceiver
 import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestSender
 import com.ivanovsky.passnotes.presentation.main.ActivityResultManager.LauncherType
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
-import com.ivanovsky.passnotes.presentation.settings.SettingsRouter
 import com.ivanovsky.passnotes.util.InputMethodUtils
 import com.ivanovsky.passnotes.util.IntentUtils.immutablePendingIntentFlags
 import org.koin.android.ext.android.inject
@@ -45,10 +44,15 @@ class MainActivity :
     private lateinit var binding: CoreBaseActivityWithSideMenuBinding
 
     private val themeProvider: ThemeProvider by inject()
-    private val navigatorHolder: NavigatorHolder by inject()
-    private val settingsRouter: SettingsRouter by inject()
-    private val permissionHelper: PermissionHelper by inject()
-    private val navigator = AppNavigator(this, R.id.fragmentContainer)
+    private val routerProvider: RouterProvider by inject()
+    private val navHost: NavigationHost by lazy {
+        NavigationHostImpl(
+            fragmentContainerResId = R.id.fragmentContainer,
+            fragmentManager = supportFragmentManager,
+            onExit = { finish() }
+        )
+    }
+
     private var requestPermission: SystemPermission? = null
     private lateinit var activityResultManager: ActivityResultManager
 
@@ -88,6 +92,11 @@ class MainActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        routerProvider.bind(
+            owner = this,
+            host = navHost
+        )
+
         themeProvider.onThemeContextCreated(this)
 
         binding = CoreBaseActivityWithSideMenuBinding.inflate(layoutInflater)
@@ -144,18 +153,8 @@ class MainActivity :
             fragment is BaseFragment && fragment.onBackPressed()
         }
         if (!handledByFragment) {
-            super.onBackPressed()
+            routerProvider.getRouter().navigateBack()
         }
-    }
-
-    override fun onPause() {
-        navigatorHolder.removeNavigator()
-        super.onPause()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        navigatorHolder.setNavigator(navigator)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -207,7 +206,8 @@ class MainActivity :
         pref: Preference
     ): Boolean {
         val settingsFragmentName = pref.fragment ?: throw IllegalStateException()
-        settingsRouter.navigateTo(settingsFragmentName)
+        // TODO: fix
+        // settingsRouter.navigateTo(settingsFragmentName)
         return true
     }
 

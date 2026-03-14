@@ -157,7 +157,7 @@ class NoteViewModel(
         interactor.lockDatabase()
         when (args.appMode) {
             ApplicationLaunchMode.AUTOFILL_SELECTION -> {
-                finishActivityEvent.call(Unit)
+                finishActivityEvent.send(Unit)
             }
 
             else -> {
@@ -200,15 +200,15 @@ class NoteViewModel(
 
         val note = this.note
         if (note == null) {
-            sendAutofillResponseEvent.call(Pair(null, structure))
+            sendAutofillResponseEvent.send(Pair(null, structure))
             return
         }
 
         viewModelScope.launch {
             if (interactor.shouldUpdateNoteAutofillData(note, structure)) {
-                showAddAutofillDataDialog.call(note)
+                showAddAutofillDataDialog.send(note)
             } else {
-                sendAutofillResponseEvent.call(Pair(note, structure))
+                sendAutofillResponseEvent.send(Pair(note, structure))
             }
         }
     }
@@ -225,14 +225,14 @@ class NoteViewModel(
                 return@launch
             }
 
-            sendAutofillResponseEvent.call(Pair(note, structure))
+            sendAutofillResponseEvent.send(Pair(note, structure))
         }
     }
 
     fun onAddAutofillDataDenied(note: Note) {
         val structure = args.autofillStructure ?: return
 
-        sendAutofillResponseEvent.call(Pair(note, structure))
+        sendAutofillResponseEvent.send(Pair(note, structure))
     }
 
     fun loadData() {
@@ -438,7 +438,7 @@ class NoteViewModel(
         }
 
         if (url?.isValid() == true) {
-            openUrlEvent.call(url.formatToString())
+            openUrlEvent.send(url.formatToString())
         } else {
             if (property.isProtected) {
                 copyProtectedText(value)
@@ -451,7 +451,7 @@ class NoteViewModel(
     private fun copyText(text: String) {
         interactor.copyToClipboard(text, isProtected = false)
         if (Build.VERSION.SDK_INT < 33) {
-            showSnackbarMessageEvent.call(resourceProvider.getString(R.string.copied))
+            showSnackbarMessageEvent.send(resourceProvider.getString(R.string.copied))
         }
     }
 
@@ -465,7 +465,7 @@ class NoteViewModel(
             delayInSeconds
         )
         if (Build.VERSION.SDK_INT < 33) {
-            showSnackbarMessageEvent.call(message)
+            showSnackbarMessageEvent.send(message)
         }
     }
 
@@ -479,7 +479,7 @@ class NoteViewModel(
             isProtected = isValueProtected
         )
 
-        showPropertyActionDialog.call(currentProperty)
+        showPropertyActionDialog.send(currentProperty)
     }
 
     fun onOpenAttachmentClicked(cellId: String) {
@@ -488,7 +488,7 @@ class NoteViewModel(
         viewModelScope.launch {
             val file = saveAttachmentAndGetFile(attachment) ?: return@launch
 
-            openFileEvent.call(file)
+            openFileEvent.send(file)
             setScreenState(ScreenState.data())
         }
     }
@@ -499,7 +499,7 @@ class NoteViewModel(
         viewModelScope.launch {
             val file = saveAttachmentAndGetFile(attachment) ?: return@launch
 
-            shareFileEvent.call(file)
+            shareFileEvent.send(file)
             setScreenState(ScreenState.data())
         }
     }
@@ -510,7 +510,7 @@ class NoteViewModel(
         viewModelScope.launch {
             val file = saveAttachmentAndGetFile(attachment) ?: return@launch
 
-            showAttachmentActionDialog.call(
+            showAttachmentActionDialog.send(
                 listOf(
                     AttachmentAction.OpenFile(file),
                     AttachmentAction.OpenAsText(file),

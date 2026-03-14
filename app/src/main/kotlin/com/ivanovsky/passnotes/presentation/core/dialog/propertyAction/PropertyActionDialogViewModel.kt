@@ -26,7 +26,7 @@ class PropertyActionDialogViewModel(
     fun processAction(action: PropertyAction): Boolean {
         return when (action) {
             is OpenUrl -> {
-                openUrlEvent.call(action.url)
+                openUrlEvent.send(action.url)
                 true
             }
 

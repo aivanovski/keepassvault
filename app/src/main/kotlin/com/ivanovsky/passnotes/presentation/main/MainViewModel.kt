@@ -2,12 +2,11 @@ package com.ivanovsky.passnotes.presentation.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.domain.interactor.main.MainInteractor
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_SELECTION
-import com.ivanovsky.passnotes.presentation.Screens.GroupsScreen
-import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
+import com.ivanovsky.passnotes.presentation.NewScreens
+import com.ivanovsky.passnotes.presentation.core.navigation.Router
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
 import org.koin.core.parameter.parametersOf
@@ -21,13 +20,13 @@ class MainViewModel(
     fun navigateToRootScreen() {
         if (args.appMode == AUTOFILL_SELECTION && interactor.isDatabaseOpened()) {
             val chain = arrayOf(
-                UnlockScreen(
+                NewScreens.UnlockScreen(
                     UnlockScreenArgs(
                         appMode = args.appMode,
                         autofillStructure = args.autofillStructure
                     )
                 ),
-                GroupsScreen(
+                NewScreens.GroupsScreen(
                     GroupsScreenArgs(
                         appMode = args.appMode,
                         groupUid = null,
@@ -37,10 +36,10 @@ class MainViewModel(
                     )
                 )
             )
-            router.newRootChain(*chain)
+            router.setRoot(*chain)
         } else {
-            router.newRootScreen(
-                UnlockScreen(
+            router.setRoot(
+                NewScreens.UnlockScreen(
                     UnlockScreenArgs(
                         appMode = args.appMode,
                         autofillStructure = args.autofillStructure,

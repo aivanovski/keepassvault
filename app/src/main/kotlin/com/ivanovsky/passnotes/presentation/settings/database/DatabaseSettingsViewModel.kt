@@ -39,7 +39,7 @@ class DatabaseSettingsViewModel(
                 isLoading.value = false
             } else {
                 val message = getConfig.error.formatReadableMessage(resourceProvider)
-                showErrorDialogEvent.call(message)
+                showErrorDialogEvent.send(message)
             }
         }
     }
@@ -62,7 +62,7 @@ class DatabaseSettingsViewModel(
             } else {
                 isRecycleBinEnabled.value = isRecycleBinEnabled.value
                 val message = applyConfig.error.formatReadableMessage(resourceProvider)
-                showErrorDialogEvent.call(message)
+                showErrorDialogEvent.send(message)
             }
         }
     }

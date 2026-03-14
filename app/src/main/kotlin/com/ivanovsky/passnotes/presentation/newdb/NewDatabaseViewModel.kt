@@ -71,7 +71,7 @@ class NewDatabaseViewModel(
             return
         }
 
-        hideKeyboardEvent.call(Unit)
+        hideKeyboardEvent.send(Unit)
         setScreenState(ScreenState.loading())
 
         val dbKey = PasswordKeepassKey(password)
@@ -165,7 +165,7 @@ class NewDatabaseViewModel(
     }
 
     fun onTemplatesInfoButtonClicked() {
-        showSnackBarEvent.call(
+        showSnackBarEvent.send(
             resourceProvider.getString(R.string.add_templates_info_message)
         )
     }

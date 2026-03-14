@@ -220,7 +220,7 @@ class SyncStateViewModel(
     private fun onResolveConflictButtonClicked() {
         val file = dbFile ?: return
 
-        showResolveConflictDialogEvent.call(file)
+        showResolveConflictDialogEvent.send(file)
     }
 
     private fun showSyncState(

@@ -1,7 +1,7 @@
 *.iml
 .gradle
 /local.properties
-/.idea
+.idea
 /keys/debug.keystore
 /keys/release.keystore
 /keys/google-cloud-key.json
@@ -13,6 +13,7 @@ ci.properties
 project.properties
 /.project
 /tmp
+/rust/**/target
 
 # Clojure
 .lsp/

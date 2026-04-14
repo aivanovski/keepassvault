@@ -30,6 +30,7 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.interactor.unlock.UnlockInteractor
+import com.ivanovsky.passnotes.domain.rust.RustBridge
 import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.extensions.getFileDescriptor
 import com.ivanovsky.passnotes.extensions.getKeyFileDescriptor
@@ -61,6 +62,7 @@ import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.parameter.parametersOf
+import timber.log.Timber
 
 class UnlockViewModel(
     private val interactor: UnlockInteractor,
@@ -428,6 +430,7 @@ class UnlockViewModel(
     }
 
     fun onAddButtonClicked() {
+        Timber.d("RustSum=${RustBridge.nativeAdd(40, 2)}")
         showAddMenuDialog.call(Unit)
     }
 

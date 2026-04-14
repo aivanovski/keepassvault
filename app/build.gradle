@@ -40,6 +40,233 @@ String getCustomProperty(String key) {
     return project.ext.customProps[key] ?: System.getenv(key) ?: ""
 }
 
+def RUST_MODULE_DIR = file("$rootDir/rust/passnotes-rust")
+def RUST_ABIS = ['armeabi-v7a', 'arm64-v8a', 'x86_64']
+
+String getLocalProperty(String key) {
+    def localPropertiesFile = rootProject.file("local.properties")
+    if (!localPropertiesFile.exists()) {
+        return ""
+    }
+
+    def properties = new Properties()
+    localPropertiesFile.withInputStream { inputStream ->
+        properties.load(inputStream)
+    }
+
+    return properties.getProperty(key, "")
+}
+
+String getRustBuildProfile() {
+    def explicitProfile = project.findProperty("rustProfile")?.toString()?.trim()
+    if (explicitProfile) {
+        def normalizedProfile = explicitProfile.toLowerCase(Locale.US)
+        if (!['debug', 'release'].contains(normalizedProfile)) {
+            throw new GradleException(
+                    "Unsupported rustProfile='$explicitProfile'. Expected debug or release."
+            )
+        }
+
+        return normalizedProfile
+    }
+
+    def requestedTasks = gradle.startParameter.taskNames.collect { taskName ->
+        taskName.toLowerCase(Locale.US)
+    }
+
+    def isReleaseBuild = requestedTasks.any { taskName ->
+        taskName.contains("release") ||
+                taskName.contains("bundle") ||
+                taskName.contains("publish")
+    }
+
+    return isReleaseBuild ? 'release' : 'debug'
+}
+
+File resolveAndroidSdkDir() {
+    def sdkPath = getLocalProperty("sdk.dir")
+    if (!sdkPath) {
+        sdkPath = System.getenv("ANDROID_SDK_ROOT")
+    }
+    if (!sdkPath) {
+        sdkPath = System.getenv("ANDROID_HOME")
+    }
+
+    return sdkPath ? file(sdkPath) : null
+}
+
+File resolveAndroidNdkDir() {
+    def ndkPath = System.getenv("ANDROID_NDK_HOME")
+    if (!ndkPath) {
+        ndkPath = System.getenv("ANDROID_NDK_ROOT")
+    }
+    if (ndkPath) {
+        return file(ndkPath)
+    }
+
+    def sdkDir = resolveAndroidSdkDir()
+    def ndkRootDir = sdkDir ? new File(sdkDir, "ndk") : null
+    def installedNdkVersions = ndkRootDir?.exists()
+            ? ndkRootDir.listFiles()?.findAll { it.directory }?.sort { left, right -> left.name <=> right.name }
+            : []
+
+    return installedNdkVersions ? installedNdkVersions.last() : null
+}
+
+String getOptionalBuildProperty(String key) {
+    def projectValue = project.findProperty(key)?.toString()?.trim()
+    if (projectValue) {
+        return projectValue
+    }
+
+    def localValue = getLocalProperty(key)?.trim()
+    return localValue ?: ""
+}
+
+String getExecutableName(String baseName) {
+    def osName = System.getProperty("os.name", "").toLowerCase(Locale.US)
+    return osName.contains("windows") ? "${baseName}.exe" : baseName
+}
+
+File findExecutableInPath(String executableName) {
+    def path = System.getenv("PATH")
+    if (!path) {
+        return null
+    }
+
+    return path.tokenize(File.pathSeparator)
+            .collect { directory -> new File(directory, executableName) }
+            .find { candidate -> candidate.exists() && candidate.canExecute() }
+}
+
+File resolveCargoExecutable() {
+    def executableName = getExecutableName("cargo")
+    def configuredCargoPath = getOptionalBuildProperty("cargo.path")
+    if (configuredCargoPath) {
+        return file(configuredCargoPath)
+    }
+
+    def cargoHome = getOptionalBuildProperty("cargo.home")
+    if (!cargoHome) {
+        cargoHome = System.getenv("CARGO_HOME")
+    }
+    if (cargoHome) {
+        def cargoFromHome = new File(cargoHome, "bin/${executableName}")
+        if (cargoFromHome.exists() && cargoFromHome.canExecute()) {
+            return cargoFromHome
+        }
+    }
+
+    def cargoFromDefaultHome = new File(System.getProperty("user.home"), ".cargo/bin/${executableName}")
+    if (cargoFromDefaultHome.exists() && cargoFromDefaultHome.canExecute()) {
+        return cargoFromDefaultHome
+    }
+
+    return findExecutableInPath(executableName)
+}
+
+Map<String, String> getRustCommandEnvironment(File sdkDir, File ndkDir, File cargoExecutable) {
+    def environment = [
+            "ANDROID_HOME"    : sdkDir.absolutePath,
+            "ANDROID_SDK_ROOT": sdkDir.absolutePath,
+            "ANDROID_NDK_HOME": ndkDir.absolutePath,
+            "ANDROID_NDK_ROOT": ndkDir.absolutePath,
+    ]
+
+    def cargoBinDir = cargoExecutable?.parentFile
+    if (cargoBinDir != null) {
+        def currentPath = System.getenv("PATH")
+        environment["PATH"] = [cargoBinDir.absolutePath, currentPath]
+                .findAll { value -> value }
+                .join(File.pathSeparator)
+
+        def cargoHomeDir = cargoBinDir.parentFile
+        if (cargoHomeDir != null) {
+            environment["CARGO_HOME"] = cargoHomeDir.absolutePath
+        }
+    }
+
+    return environment
+}
+
+def rustBuildProfile = getRustBuildProfile()
+def rustGeneratedJniLibsDir = file("$buildDir/generated/rust/jniLibs/$rustBuildProfile")
+
+tasks.register("buildRustJni", Exec) { task ->
+    group = "rust"
+    description = "Builds the Rust JNI library for Android."
+
+    inputs.dir(RUST_MODULE_DIR)
+    outputs.dir(rustGeneratedJniLibsDir)
+
+    doFirst {
+        def sdkDir = resolveAndroidSdkDir()
+        def ndkDir = resolveAndroidNdkDir()
+        def cargoExecutable = resolveCargoExecutable()
+
+        if (!RUST_MODULE_DIR.exists()) {
+            throw new GradleException("Rust module not found at: ${RUST_MODULE_DIR}")
+        }
+        if (sdkDir == null || !sdkDir.exists()) {
+            throw new GradleException(
+                    "Android SDK not found. Set sdk.dir in local.properties or ANDROID_SDK_ROOT."
+            )
+        }
+        if (ndkDir == null || !ndkDir.exists()) {
+            throw new GradleException(
+                    "Android NDK not found. Install it with the Android SDK manager or set ANDROID_NDK_HOME."
+            )
+        }
+        if (cargoExecutable == null || !cargoExecutable.exists() || !cargoExecutable.canExecute()) {
+            throw new GradleException(
+                    "Cargo executable not found. Android Studio may not inherit your shell PATH. " +
+                            "Set cargo.path in local.properties or install Cargo under ~/.cargo/bin."
+            )
+        }
+
+        def rustCommandEnvironment = getRustCommandEnvironment(sdkDir, ndkDir, cargoExecutable)
+
+        def cargoNdkCheck = project.exec {
+            executable cargoExecutable.absolutePath
+            args "ndk", "--version"
+            workingDir RUST_MODULE_DIR
+            environment rustCommandEnvironment
+            ignoreExitValue true
+        }
+
+        if (cargoNdkCheck.exitValue != 0) {
+            throw new GradleException("cargo-ndk is required. Install it with `cargo install cargo-ndk`.")
+        }
+
+        project.delete(rustGeneratedJniLibsDir)
+        rustGeneratedJniLibsDir.mkdirs()
+
+        def args = ["ndk"]
+        RUST_ABIS.each { abi ->
+            args += ["-t", abi]
+        }
+        args += ["-o", rustGeneratedJniLibsDir.absolutePath, "build", "--lib"]
+
+        if (rustBuildProfile == 'release') {
+            args += ["--release"]
+        }
+
+        workingDir RUST_MODULE_DIR
+        environment rustCommandEnvironment
+        commandLine cargoExecutable.absolutePath, *args
+
+        logger.lifecycle(
+                "Building Rust JNI library: profile=${rustBuildProfile}, cargo=${cargoExecutable}, output=${rustGeneratedJniLibsDir}"
+        )
+    }
+}
+
+tasks.matching { task ->
+    task.name ==~ /merge.*JniLibFolders/
+}.configureEach {
+    dependsOn(tasks.named("buildRustJni"))
+}
+
 task generateVersionPropertiesFile {
     // This task is need only for F-Droid
     def PROPERTY_VERSION_CODE = "versionCode"
@@ -95,6 +322,7 @@ android {
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+        main.jniLibs.srcDirs += rustGeneratedJniLibsDir
         androidTest.java.srcDirs += 'src/androidTest/kotlin'
         androidTest.assets.srcDirs += 'schemas'
         test.java.srcDirs += 'src/test/kotlin'
@@ -152,6 +380,12 @@ android {
             minifyEnabled false
             versionNameSuffix 'd'
             signingConfig signingConfigs.debug
+
+            packagingOptions {
+                doNotStrip '**/*.so'
+            }
+            debuggable true
+            jniDebuggable true
         }
         automation {
             debuggable true

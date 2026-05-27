@@ -209,20 +209,30 @@ class MainActivity :
 
     private fun setupWindowInsets() {
         if (Build.VERSION.SDK_INT < 35) {
+            // Skip Edge-To-Edge paddings for old Android API
             return
         }
 
-        val initialPaddingTop = binding.toolbar.paddingTop
-        val initialPaddingBottom = binding.fragmentContainer.paddingBottom
+        val toolbarLeftPadding = binding.toolbar.paddingLeft
+        val toolbarRightPadding = binding.toolbar.paddingRight
+        val toolbarTopPadding = binding.toolbar.paddingTop
+
+        val containerLeftPadding = binding.fragmentContainer.paddingLeft
+        val containerRightPadding = binding.fragmentContainer.paddingRight
+        val containerBottomPadding = binding.fragmentContainer.paddingBottom
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.drawerLayout) { _, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
 
             binding.toolbar.updatePadding(
-                top = initialPaddingTop + systemBars.top
+                left = toolbarLeftPadding + systemBars.left,
+                right = toolbarRightPadding + systemBars.right,
+                top = toolbarTopPadding + systemBars.top
             )
             binding.fragmentContainer.updatePadding(
-                bottom = initialPaddingBottom + systemBars.bottom
+                left = containerLeftPadding + systemBars.left,
+                right = containerRightPadding + systemBars.right,
+                bottom = containerBottomPadding + systemBars.bottom
             )
 
             insets

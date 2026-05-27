@@ -3,11 +3,15 @@ package com.ivanovsky.passnotes.presentation.main
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
@@ -103,6 +107,7 @@ class MainActivity :
 
         setContentView(binding.root)
         initActionBar(R.id.toolbar)
+        setupWindowInsets()
 
         binding.drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
             override fun onDrawerSlide(drawerView: View, slideOffset: Float) {
@@ -200,6 +205,40 @@ class MainActivity :
         } else {
             binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         }
+    }
+
+    private fun setupWindowInsets() {
+        if (Build.VERSION.SDK_INT < 35) {
+            // Skip Edge-To-Edge paddings for old Android API
+            return
+        }
+
+        val toolbarLeftPadding = binding.toolbar.paddingLeft
+        val toolbarRightPadding = binding.toolbar.paddingRight
+        val toolbarTopPadding = binding.toolbar.paddingTop
+
+        val containerLeftPadding = binding.fragmentContainer.paddingLeft
+        val containerRightPadding = binding.fragmentContainer.paddingRight
+        val containerBottomPadding = binding.fragmentContainer.paddingBottom
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.drawerLayout) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            binding.toolbar.updatePadding(
+                left = toolbarLeftPadding + systemBars.left,
+                right = toolbarRightPadding + systemBars.right,
+                top = toolbarTopPadding + systemBars.top
+            )
+            binding.fragmentContainer.updatePadding(
+                left = containerLeftPadding + systemBars.left,
+                right = containerRightPadding + systemBars.right,
+                bottom = containerBottomPadding + systemBars.bottom
+            )
+
+            insets
+        }
+
+        ViewCompat.requestApplyInsets(binding.drawerLayout)
     }
 
     override fun onPreferenceStartFragment(

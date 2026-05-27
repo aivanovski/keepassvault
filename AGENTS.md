@@ -24,4 +24,10 @@ The project follows Clean Architecture pattern
 - Build: ./gradlew test
 
 # Continuous Integration
-he workflows are defined in .github/workflows/*.yaml
+The workflows are defined in .github/workflows/*.yaml
+
+# Key Guidelines for Agents
+- Before creating a PR:
+    - Validate that app compiles
+    - Run tests
+    - Validate code formatting

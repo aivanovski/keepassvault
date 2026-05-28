@@ -369,7 +369,7 @@
     <string name="pref_is_biometric_unlock_enabled_summary">Allows to unlock database with fingerprint</string>
     <string name="pref_search_type_title">Search algorithm</string>
     <string name="pref_search_type_summary">Algorithm used in the app to look up entries</string>
-    <string name="pref_is_activate_search_on_start_title">Activate search on start</string>
+    <string name="pref_is_activate_search_on_start_title">Open search on startup</string>
     <string name="pref_is_activate_search_on_start_summary">Open the search field automatically after the database is opened</string>
     <string name="general">General</string>
     <string name="notifications">Notifications</string>

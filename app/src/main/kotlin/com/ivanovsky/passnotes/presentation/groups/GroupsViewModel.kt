@@ -45,7 +45,6 @@ import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode.AUTOFILL_SELECTION
 import com.ivanovsky.passnotes.presentation.Screens
 import com.ivanovsky.passnotes.presentation.Screens.EnterDbCredentialsScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
@@ -494,7 +493,9 @@ class GroupsViewModel(
             if (settings.isLockDatabaseOnBack) {
                 interactor.lockDatabase()
 
-                if (args.appMode == AUTOFILL_SELECTION && currentGroupUid == rootGroup?.uid) {
+                if (args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION &&
+                    currentGroupUid == rootGroup?.uid
+                ) {
                     finishActivityEvent.call(Unit)
                 } else {
                     router.exit()
@@ -508,7 +509,7 @@ class GroupsViewModel(
     fun onLockButtonClicked() {
         interactor.lockDatabase()
         when (args.appMode) {
-            AUTOFILL_SELECTION -> {
+            ApplicationLaunchMode.AUTOFILL_SELECTION -> {
                 finishActivityEvent.call(Unit)
             }
 
@@ -1033,10 +1034,11 @@ class GroupsViewModel(
     }
 
     private fun shouldActivateSearchOnStart(): Boolean {
-        return args.isSearchModeEnabled ||
-            settings.isActivateSearchOnStart &&
-            args.appMode == ApplicationLaunchMode.NORMAL &&
-            args.groupUid == null
+        val isInAutofillMode = (args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION)
+        val isSearchRequested = (args.isSearchModeEnabled || settings.isActivateSearchOnStart) &&
+            args.appMode == ApplicationLaunchMode.NORMAL
+
+        return isInAutofillMode || isSearchRequested
     }
 
     private fun enableSearchMode() {
@@ -1046,9 +1048,12 @@ class GroupsViewModel(
         backIcon.value = getBackIconInternal()
         isKeyboardVisibleEvent.value = true
 
-        if (searchableEntries == null) {
-            loadAllSearchableEntries()
-        }
+        navigationPanelViewModel.setModel(
+            NavigationPanelCellModel(
+                items = navigationPanelViewModel.model.items,
+                isVisible = false
+            )
+        )
     }
 
     private fun disableSearchMode() {
@@ -1060,27 +1065,14 @@ class GroupsViewModel(
         visibleMenuItems.value = getVisibleMenuItems()
     }
 
-    private fun loadAllSearchableEntries() {
-        viewModelScope.launch {
-            val getAllEntries = interactor.getAllSearchableEntries(
-                isRespectAutotypeProperty = (args.appMode == AUTOFILL_SELECTION)
-            )
-            if (getAllEntries.isFailed) {
-                setErrorState(getAllEntries.error)
-                return@launch
-            }
-
-            searchableEntries = getAllEntries.getOrThrow()
-        }
-    }
-
     private suspend fun loadSearchEntries(
         query: String
     ): OperationResult<List<EncryptedDatabaseEntry>> {
         var allEntries = searchableEntries
         if (allEntries == null) {
             val getAllEntriesResult = interactor.getAllSearchableEntries(
-                isRespectAutotypeProperty = (args.appMode == AUTOFILL_SELECTION)
+                isRespectAutotypeProperty =
+                (args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION)
             )
             if (getAllEntriesResult.isFailed) {
                 setErrorPanelState(getAllEntriesResult.error)
@@ -1101,7 +1093,7 @@ class GroupsViewModel(
                 query = query
             )
         } else {
-            emptyList()
+            allEntries
         }
 
         return OperationResult.success(searchEntries)
@@ -1297,7 +1289,7 @@ class GroupsViewModel(
                     }
             }
 
-            isShowMenu && args.appMode == AUTOFILL_SELECTION -> {
+            isShowMenu && args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION -> {
                 mutableListOf<GroupsMenuItem>()
                     .apply {
                         if (!isSearchModeEnabled) {

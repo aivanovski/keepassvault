@@ -9,12 +9,6 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/menu_search"
-        android:icon="@drawable/ic_search_24dp"
-        android:title="@string/search"
-        app:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/menu_lock"
         android:title="@string/lock"
         app:showAsAction="never" />

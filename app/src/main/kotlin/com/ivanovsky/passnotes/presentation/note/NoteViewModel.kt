@@ -585,10 +585,6 @@ class NoteViewModel(
 
                     add(NoteMenuItem.LOCK)
 
-                    if (!args.isViewOnly) {
-                        add(NoteMenuItem.SEARCH)
-                    }
-
                     if (args.appMode == ApplicationLaunchMode.NORMAL) {
                         add(NoteMenuItem.SETTINGS)
                     }
@@ -652,7 +648,6 @@ class NoteViewModel(
     enum class NoteMenuItem(@IdRes override val menuId: Int) : ScreenMenuItem {
         SELECT(R.id.menu_select),
         LOCK(R.id.menu_lock),
-        SEARCH(R.id.menu_search),
         SETTINGS(R.id.menu_settings),
         TOGGLE_HIDDEN(R.id.menu_toggle_hidden)
     }

@@ -11,7 +11,6 @@ import kotlinx.parcelize.Parcelize
 data class GroupsScreenArgs(
     val appMode: ApplicationLaunchMode,
     val groupUid: UUID?,
-    val isCloseDatabaseOnExit: Boolean,
     val isSearchModeEnabled: Boolean,
     val autofillStructure: AutofillStructure? = null,
     val note: NoteCandidate? = null

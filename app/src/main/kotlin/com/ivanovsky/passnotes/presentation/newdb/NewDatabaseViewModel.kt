@@ -89,7 +89,6 @@ class NewDatabaseViewModel(
                             GroupsScreenArgs(
                                 appMode = ApplicationLaunchMode.NORMAL,
                                 groupUid = null,
-                                isCloseDatabaseOnExit = true,
                                 isSearchModeEnabled = false
                             )
                         )

@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
@@ -17,11 +18,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.github.terrakok.cicerone.NavigatorHolder
+import com.github.terrakok.cicerone.Router
 import com.github.terrakok.cicerone.androidx.AppNavigator
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.NoteCandidate
 import com.ivanovsky.passnotes.databinding.CoreBaseActivityWithSideMenuBinding
-import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
@@ -51,7 +52,7 @@ class MainActivity :
     private val themeProvider: ThemeProvider by inject()
     private val navigatorHolder: NavigatorHolder by inject()
     private val settingsRouter: SettingsRouter by inject()
-    private val permissionHelper: PermissionHelper by inject()
+    private val router: Router by inject()
     private val navigator = AppNavigator(this, R.id.fragmentContainer)
     private var requestPermission: SystemPermission? = null
     private lateinit var activityResultManager: ActivityResultManager
@@ -135,6 +136,7 @@ class MainActivity :
             onAllFilePermissionResult = { handleAllFilePermissionResult() }
         )
         lifecycle.addObserver(activityResultManager)
+        setupBackPressedHandler()
 
         if (savedInstanceState == null) {
             viewModel.navigateToRootScreen()
@@ -144,13 +146,30 @@ class MainActivity :
         subscribeToEvents()
     }
 
-    override fun onBackPressed() {
+    private fun setupBackPressedHandler() {
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (handleBackPressedByFragment()) {
+                    return
+                }
+
+                if (binding.drawerLayout.isOpen) {
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                } else {
+                    router.exit()
+                }
+            }
+        }
+
+        onBackPressedDispatcher.addCallback(this, callback)
+    }
+
+    private fun handleBackPressedByFragment(): Boolean {
         val handledByFragment = supportFragmentManager.fragments.any { fragment ->
             fragment is BaseFragment && fragment.onBackPressed()
         }
-        if (!handledByFragment) {
-            super.onBackPressed()
-        }
+
+        return handledByFragment
     }
 
     override fun onPause() {

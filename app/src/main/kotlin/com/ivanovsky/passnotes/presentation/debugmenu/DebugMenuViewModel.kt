@@ -266,7 +266,6 @@ class DebugMenuViewModel(
                 GroupsScreenArgs(
                     appMode = ApplicationLaunchMode.NORMAL,
                     groupUid = null,
-                    isCloseDatabaseOnExit = false,
                     isSearchModeEnabled = false
                 )
             )

@@ -5,8 +5,6 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.addCallback
 import com.github.terrakok.cicerone.Router
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
@@ -47,7 +45,6 @@ class NoteEditorFragment : FragmentWithDoneButton() {
     )
     private val router: Router by inject()
     private val dateFormatProvider: DateFormatProvider by inject()
-    private var backCallback: OnBackPressedCallback? = null
     private lateinit var binding: NoteEditorFragmentBinding
 
     override fun onCreateView(
@@ -84,17 +81,9 @@ class NoteEditorFragment : FragmentWithDoneButton() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        backCallback = requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            viewModel.onBackClicked()
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        backCallback?.remove()
-        backCallback = null
+    override fun onBackPressed(): Boolean {
+        viewModel.onBackClicked()
+        return true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

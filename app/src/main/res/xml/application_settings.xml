@@ -20,6 +20,11 @@
             app:summary="@string/pref_auto_clear_clipboard_delay_in_ms_summary"
             app:title="@string/pref_auto_clear_clipboard_delay_in_ms_title" />
 
+        <SwitchPreferenceCompat
+            app:key="@string/pref_is_lock_database_on_back"
+            app:summary="@string/pref_is_lock_database_on_back_summary"
+            app:title="@string/pref_is_lock_database_on_back_title" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

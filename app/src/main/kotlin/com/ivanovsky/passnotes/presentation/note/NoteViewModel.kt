@@ -179,7 +179,6 @@ class NoteViewModel(
                 GroupsScreenArgs(
                     appMode = args.appMode,
                     groupUid = null,
-                    isCloseDatabaseOnExit = false,
                     isSearchModeEnabled = true,
                     autofillStructure = args.autofillStructure
                 )
@@ -542,7 +541,6 @@ class NoteViewModel(
                 GroupsScreenArgs(
                     appMode = args.appMode,
                     groupUid = groupUid,
-                    isCloseDatabaseOnExit = true,
                     isSearchModeEnabled = false,
                     autofillStructure = args.autofillStructure
                 )

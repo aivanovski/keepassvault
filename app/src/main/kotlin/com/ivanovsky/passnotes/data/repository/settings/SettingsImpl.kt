@@ -18,6 +18,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIO
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXTERNAL_STORAGE_CACHE_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_DATABASE_ON_BACK
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_DIALOG_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
@@ -84,6 +85,12 @@ class SettingsImpl(private val context: Context) : Settings {
         get() = getBoolean(IS_LOCK_NOTIFICATION_DIALOG_ENABLED)
         set(value) {
             putBoolean(IS_LOCK_NOTIFICATION_DIALOG_ENABLED, value)
+        }
+
+    override var isLockDatabaseOnBack: Boolean
+        get() = getBoolean(IS_LOCK_DATABASE_ON_BACK)
+        set(value) {
+            putBoolean(IS_LOCK_DATABASE_ON_BACK, value)
         }
 
     override var isFileLogEnabled: Boolean
@@ -290,6 +297,11 @@ class SettingsImpl(private val context: Context) : Settings {
         ),
         IS_LOCK_NOTIFICATION_DIALOG_ENABLED(
             keyId = R.string.pref_is_lock_notification_dialog_enabled,
+            type = BOOLEAN,
+            defaultValue = true
+        ),
+        IS_LOCK_DATABASE_ON_BACK(
+            keyId = R.string.pref_is_lock_database_on_back,
             type = BOOLEAN,
             defaultValue = true
         ),

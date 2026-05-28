@@ -19,21 +19,22 @@ class MainViewModel(
 ) : ViewModel() {
 
     fun navigateToRootScreen() {
-        if (args.appMode == AUTOFILL_SELECTION && interactor.isDatabaseOpened()) {
+        if (interactor.isDatabaseOpened()) {
             val chain = arrayOf(
                 UnlockScreen(
                     UnlockScreenArgs(
                         appMode = args.appMode,
-                        autofillStructure = args.autofillStructure
+                        autofillStructure = args.autofillStructure,
+                        note = args.note
                     )
                 ),
                 GroupsScreen(
                     GroupsScreenArgs(
                         appMode = args.appMode,
                         groupUid = null,
-                        isCloseDatabaseOnExit = false,
-                        isSearchModeEnabled = true,
-                        autofillStructure = args.autofillStructure
+                        isSearchModeEnabled = (args.appMode == AUTOFILL_SELECTION),
+                        autofillStructure = args.autofillStructure,
+                        note = args.note
                     )
                 )
             )

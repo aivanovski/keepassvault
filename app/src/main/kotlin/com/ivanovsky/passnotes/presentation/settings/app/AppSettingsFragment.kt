@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_ACTIVATE_SEARCH_ON_START
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIOMETRIC_UNLOCK_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_DATABASE_ON_BACK
@@ -85,7 +86,8 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
             IS_FILE_LOG_ENABLED,
             IS_POSTPONED_SYNC_ENABLED,
             IS_BIOMETRIC_UNLOCK_ENABLED,
-            SEARCH_TYPE
+            SEARCH_TYPE,
+            IS_ACTIVATE_SEARCH_ON_START
         )
             .forEach { settings.initDefaultIfNeed(it) }
 

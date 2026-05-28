@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_C
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.GIT_USER_EMAIL
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.GIT_USER_NAME
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_ACTIVATE_SEARCH_ON_START
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIOMETRIC_UNLOCK_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXTERNAL_STORAGE_CACHE_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
@@ -126,6 +127,12 @@ class SettingsImpl(private val context: Context) : Settings {
         }
         set(value) {
             putString(SEARCH_TYPE, value.name)
+        }
+
+    override var isActivateSearchOnStart: Boolean
+        get() = getBoolean(IS_ACTIVATE_SEARCH_ON_START)
+        set(value) {
+            putBoolean(IS_ACTIVATE_SEARCH_ON_START, value)
         }
 
     override var sortType: SortType
@@ -324,6 +331,11 @@ class SettingsImpl(private val context: Context) : Settings {
             keyId = R.string.pref_is_biometric_unlock_enabled,
             type = BOOLEAN,
             defaultValue = true
+        ),
+        IS_ACTIVATE_SEARCH_ON_START(
+            keyId = R.string.pref_is_activate_search_on_start,
+            type = BOOLEAN,
+            defaultValue = false
         ),
 
         // Int prefs

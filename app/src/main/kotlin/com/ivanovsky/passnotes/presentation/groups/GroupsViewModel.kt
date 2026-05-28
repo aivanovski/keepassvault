@@ -208,7 +208,7 @@ class GroupsViewModel(
         }
         currentGroupUid = args.groupUid
 
-        if (args.isSearchModeEnabled) {
+        if (shouldActivateSearchOnStart()) {
             enableSearchMode()
         }
 
@@ -1032,18 +1032,19 @@ class GroupsViewModel(
         updateOptionPanelState()
     }
 
+    private fun shouldActivateSearchOnStart(): Boolean {
+        return args.isSearchModeEnabled ||
+            settings.isActivateSearchOnStart &&
+            args.appMode == ApplicationLaunchMode.NORMAL &&
+            args.groupUid == null
+    }
+
     private fun enableSearchMode() {
         isSearchModeEnabled = true
 
         isSearchQueryVisible.value = isSearchModeEnabled
         backIcon.value = getBackIconInternal()
         isKeyboardVisibleEvent.value = true
-
-        setScreenState(
-            ScreenState.empty(
-                emptyText = resourceProvider.getString(R.string.no_search_results)
-            )
-        )
 
         if (searchableEntries == null) {
             loadAllSearchableEntries()

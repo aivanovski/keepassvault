@@ -491,14 +491,16 @@ class GroupsViewModel(
 
             loadData(isResetScroll = true)
         } else {
-            if (args.isCloseDatabaseOnExit) {
+            if (settings.isLockDatabaseOnBack) {
                 interactor.lockDatabase()
-            }
 
-            if (args.appMode == AUTOFILL_SELECTION && currentGroupUid == rootGroup?.uid) {
-                finishActivityEvent.call(Unit)
+                if (args.appMode == AUTOFILL_SELECTION && currentGroupUid == rootGroup?.uid) {
+                    finishActivityEvent.call(Unit)
+                } else {
+                    router.exit()
+                }
             } else {
-                router.exit()
+                finishActivityEvent.call(Unit)
             }
         }
     }

@@ -16,6 +16,7 @@ interface Settings {
     var autoClearClipboardDelayInMs: Int
     var isLockNotificationVisible: Boolean
     var isLockNotificationDialogEnabled: Boolean
+    var isLockDatabaseOnBack: Boolean
     var isFileLogEnabled: Boolean
     var searchType: SearchType
     var sortType: SortType

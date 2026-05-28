@@ -16,6 +16,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_C
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIOMETRIC_UNLOCK_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_DATABASE_ON_BACK
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SEARCH_TYPE
@@ -78,6 +79,7 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
         // Init default values to make it visible for UI components
         listOf(
             IS_LOCK_NOTIFICATION_VISIBLE,
+            IS_LOCK_DATABASE_ON_BACK,
             AUTO_LOCK_DELAY_IN_MS,
             AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS,
             IS_FILE_LOG_ENABLED,

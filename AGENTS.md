@@ -28,6 +28,7 @@ The workflows are defined in .github/workflows/*.yaml
 
 # Key Guidelines for Agents
 - Before creating a PR:
+    - Do a code review for the changes. Don't change anything in the code, just highlight issues may found in the diff
     - Validate that app compiles
     - Run tests
-    - Validate code formatting
+    - Validate code formatting and commit changes if there are some

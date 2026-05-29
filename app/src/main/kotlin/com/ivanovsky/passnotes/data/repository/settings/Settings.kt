@@ -19,6 +19,7 @@ interface Settings {
     var isLockDatabaseOnBack: Boolean
     var isFileLogEnabled: Boolean
     var searchType: SearchType
+    var isActivateSearchOnStart: Boolean
     var sortType: SortType
     var sortDirection: SortDirection
     var isGroupsAtStartEnabled: Boolean

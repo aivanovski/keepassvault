@@ -16,6 +16,7 @@
     <string name="pref_git_user_name" translatable="false">gitUserName</string>
     <string name="pref_git_user_email" translatable="false">gitUserEmail</string>
     <string name="pref_search_type" translatable="false">searchType</string>
+    <string name="pref_is_activate_search_on_start" translatable="false">isActivateSearchOnStart</string>
     <string name="pref_sort_type" translatable="false">sortType</string>
     <string name="pref_sort_direction" translatable="false">sortDirection</string>
     <string name="pref_is_groups_at_start_enabled" translatable="false">isGroupsAtStartEnabled</string>

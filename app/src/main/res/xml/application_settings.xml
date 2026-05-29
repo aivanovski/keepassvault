@@ -59,6 +59,11 @@
             app:summary="@string/pref_search_type_summary"
             app:title="@string/pref_search_type_title" />
 
+        <SwitchPreferenceCompat
+            app:key="@string/pref_is_activate_search_on_start"
+            app:summary="@string/pref_is_activate_search_on_start_summary"
+            app:title="@string/pref_is_activate_search_on_start_title" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

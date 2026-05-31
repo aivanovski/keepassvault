@@ -98,7 +98,7 @@ fun String.toUUID(): UUID? {
 }
 
 private fun Char.isHex(): Boolean {
-    return isDigit() || (toLowerCase() in 'a'..'f')
+    return isDigit() || (lowercaseChar() in 'a'..'f')
 }
 
 // parses string containing date "2020-02-18"

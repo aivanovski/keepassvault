@@ -13,6 +13,7 @@ ci.properties
 project.properties
 /.project
 /tmp
+.kotlin/
 
 # Clojure
 .lsp/

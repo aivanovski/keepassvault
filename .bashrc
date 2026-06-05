@@ -17,6 +17,20 @@ if [ -d $HOME/.maestro/bin ]; then
     export PATH=$PATH:$HOME/.maestro/bin
 fi
 
+if [ -d $HOME/Library/org.swift.swiftpm/swift-sdks/swift-6.3.1-RELEASE_android.artifactbundle/swift-android/android-ndk-r27d ]; then
+    export ANDROID_NDK_HOME=$HOME/Library/org.swift.swiftpm/swift-sdks/swift-6.3.1-RELEASE_android.artifactbundle/swift-android/android-ndk-r27d
+fi
+
+# Added by swiftly
+if [ -d $HOME/.swiftly ]; then
+    export SWIFTLY_HOME_DIR=$HOME/.swiftly
+fi
+
+[[ -f $HOME/.swiftly/env.sh ]] && . "$HOME/.swiftly/env.sh"
+
+# Coursier
+[[ -d "$HOME/Library/Application Support/Coursier/bin" ]] && export PATH="$PATH:/Users/aivanouski/Library/Application Support/Coursier/bin"
+
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 

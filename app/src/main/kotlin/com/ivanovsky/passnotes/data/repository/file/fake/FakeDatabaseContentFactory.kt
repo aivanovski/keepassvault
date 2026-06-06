@@ -23,24 +23,36 @@ object FakeDatabaseContentFactory {
         return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
             .key(PASSWORD_KEY)
             .content(ROOT) {
-                group(GROUP_EMAIL)
+                group(GROUP_EMAIL) {
+                    entry(ENTRY_PROTON_MAIL)
+                    entry(ENTRY_OUTLOOK)
+                }
                 group(GROUP_INTERNET) {
                     group(GROUP_CODING) {
                         entry(ENTRY_LEETCODE)
                         entry(ENTRY_NEETCODE)
                         entry(ENTRY_GITHUB)
+                        entry(ENTRY_STACK_OVERFLOW)
+                        entry(ENTRY_BITBUCKET)
                     }
                     group(GROUP_GAMING) {
                         entry(ENTRY_STADIA)
+                        entry(ENTRY_STEAM)
                     }
                     group(GROUP_SHOPPING) {
                         entry(ENTRY_AMAZON)
+                        entry(ENTRY_EBAY)
+                        entry(ENTRY_ETSY)
                     }
-                    group(GROUP_SOCIAL)
+                    group(GROUP_SOCIAL) {
+                        entry(ENTRY_LINKEDIN)
+                        entry(ENTRY_REDDIT)
+                    }
 
                     entry(ENTRY_GOOGLE)
                     entry(ENTRY_APPLE)
                     entry(ENTRY_MICROSOFT)
+                    entry(ENTRY_DROPBOX)
                 }
                 entry(ENTRY_NAS_LOGIN)
                 entry(ENTRY_LAPTOP_LOGIN)
@@ -159,24 +171,36 @@ object FakeDatabaseContentFactory {
         return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
             .key(PASSWORD_KEY)
             .content(ROOT) {
-                group(GROUP_EMAIL)
+                group(GROUP_EMAIL) {
+                    entry(ENTRY_PROTON_MAIL)
+                    entry(ENTRY_OUTLOOK)
+                }
                 group(GROUP_INTERNET) {
                     group(GROUP_CODING) {
                         entry(ENTRY_LEETCODE)
                         entry(ENTRY_NEETCODE)
                         entry(ENTRY_GITHUB)
+                        entry(ENTRY_STACK_OVERFLOW)
+                        entry(ENTRY_BITBUCKET)
                     }
                     group(GROUP_GAMING) {
                         entry(ENTRY_STADIA)
+                        entry(ENTRY_STEAM)
                     }
                     group(GROUP_SHOPPING) {
                         entry(newDemoAmazonEntry())
+                        entry(ENTRY_EBAY)
+                        entry(ENTRY_ETSY)
                     }
-                    group(GROUP_SOCIAL)
+                    group(GROUP_SOCIAL) {
+                        entry(ENTRY_LINKEDIN)
+                        entry(ENTRY_REDDIT)
+                    }
 
                     entry(ENTRY_GOOGLE)
                     entry(ENTRY_APPLE)
                     entry(ENTRY_MICROSOFT)
+                    entry(ENTRY_DROPBOX)
                 }
                 entry(ENTRY_NAS_LOGIN)
                 entry(ENTRY_LAPTOP_LOGIN)
@@ -502,6 +526,96 @@ object FakeDatabaseContentFactory {
             PropertyType.URL.propertyName to "https://amazon.com",
             PropertyType.OTP.propertyName to TOTP_URL
         )
+    )
+
+    private val ENTRY_PROTON_MAIL = newEntry(
+        title = "Proton Mail",
+        username = "john.doe@protonmail.com",
+        password = "abc123",
+        url = "https://mail.proton.me",
+        created = parseDate("2020-01-10"),
+        modified = parseDate("2020-01-10")
+    )
+
+    private val ENTRY_OUTLOOK = newEntry(
+        title = "Outlook",
+        username = "john.doe@outlook.com",
+        password = "abc123",
+        url = "https://outlook.live.com",
+        created = parseDate("2020-01-11"),
+        modified = parseDate("2020-01-11")
+    )
+
+    private val ENTRY_STACK_OVERFLOW = newEntry(
+        title = "Stack Overflow",
+        username = "john.doe@example.com",
+        password = "abc123",
+        url = "https://stackoverflow.com",
+        created = parseDate("2020-01-12"),
+        modified = parseDate("2020-01-12")
+    )
+
+    private val ENTRY_BITBUCKET = newEntry(
+        title = "Bitbucket",
+        username = "john.doe@example.com",
+        password = "abc123",
+        url = "https://bitbucket.org",
+        created = parseDate("2020-01-13"),
+        modified = parseDate("2020-01-13")
+    )
+
+    private val ENTRY_STEAM = newEntry(
+        title = "Steam",
+        username = "john.doe",
+        password = "abc123",
+        url = "https://store.steampowered.com",
+        created = parseDate("2020-01-14"),
+        modified = parseDate("2020-01-14")
+    )
+
+    private val ENTRY_EBAY = newEntry(
+        title = "eBay",
+        username = "john.doe@example.com",
+        password = "abc123",
+        url = "https://ebay.com",
+        created = parseDate("2020-01-15"),
+        modified = parseDate("2020-01-15")
+    )
+
+    private val ENTRY_ETSY = newEntry(
+        title = "Etsy",
+        username = "john.doe@example.com",
+        password = "abc123",
+        url = "https://etsy.com",
+        created = parseDate("2020-01-16"),
+        modified = parseDate("2020-01-16")
+    )
+
+    private val ENTRY_LINKEDIN = newEntry(
+        title = "LinkedIn",
+        username = "john.doe@example.com",
+        password = "abc123",
+        url = "https://linkedin.com",
+        created = parseDate("2020-01-17"),
+        modified = parseDate("2020-01-17")
+    )
+
+    private val ENTRY_REDDIT = newEntry(
+        title = "Reddit",
+        username = "john.doe",
+        password = "abc123",
+        url = "https://reddit.com",
+        created = parseDate("2020-01-18"),
+        modified = parseDate("2020-01-18")
+    )
+
+    private val ENTRY_DROPBOX = newEntry(
+        title = "Dropbox",
+        username = "john.doe@example.com",
+        password = "abc123",
+        url = "https://dropbox.com",
+        created = parseDate("2020-01-19"),
+        modified = parseDate("2020-01-19")
     )
 
     private val ENTRY_TOTP = newEntry(

@@ -179,7 +179,6 @@ android {
         release {
             isDebuggable = false
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("release")
         }
     }
@@ -259,9 +258,11 @@ dependencies {
     androidTestImplementation(libs.truth)
     androidTestImplementation(libs.kotlin.reflect)
 
+    // DI
     implementation(libs.koin.android)
     implementation(libs.koin.core)
 
+    // Room
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     androidTestImplementation(libs.room.testing)
@@ -289,29 +290,37 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    implementation(libs.apache.commons.lang3)
+    implementation(libs.apache.commons.lang3) // TODO: Remove
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.coroutines.android)
 
+    // Network
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
-
     implementation(libs.sardine.android)
 
-    implementation(libs.cicerone)
-
-    implementation(libs.timber)
-    implementation(libs.treessence)
-
+    // Git
     implementation(libs.jgit)
     implementation(libs.jgit.ssh.jsch)
 
+    // Routing
+    implementation(libs.cicerone)
+
+    // Logging
+    implementation(libs.timber)
+    implementation(libs.treessence)
+
+    // KeePass
     implementation(libs.kotpass)
     implementation(libs.keepass.tree.diff)
     implementation(libs.keepass.tree.builder)
 
-    implementation(libs.fzf4j)
+    // Arrow
+    implementation(libs.arrowCore)
+    implementation(libs.arrowCoroutines)
 
+    // Other
+    implementation(libs.fzf4j)
     implementation(libs.totp.kt)
 }

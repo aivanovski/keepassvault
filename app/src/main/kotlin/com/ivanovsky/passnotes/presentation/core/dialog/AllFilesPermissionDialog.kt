@@ -4,13 +4,12 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 
-class AllFilesPermissionDialog : DialogFragment(), DialogInterface.OnClickListener {
+class AllFilesPermissionDialog : BaseDialogFragment(), DialogInterface.OnClickListener {
 
     lateinit var onPositiveClicked: () -> Unit
     lateinit var onNegativeClicked: () -> Unit

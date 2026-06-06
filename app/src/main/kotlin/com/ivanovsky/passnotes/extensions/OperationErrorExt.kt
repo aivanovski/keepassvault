@@ -1,7 +1,9 @@
 package com.ivanovsky.passnotes.extensions
 
+import arrow.core.Either
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.ResourceProvider
 
 fun OperationError.formatReadableMessage(
@@ -31,5 +33,13 @@ fun OperationError.formatReadableMessage(
         typeMessage != null -> typeMessage
         exceptionMessage != null -> exceptionMessage
         else -> resourceProvider.getString(R.string.error_has_been_occurred)
+    }
+}
+
+fun <T> OperationResult<T>.toEither(): Either<OperationError, T> {
+    return if (isSucceededOrDeferred) {
+        Either.Right(getOrThrow())
+    } else {
+        Either.Left(error)
     }
 }

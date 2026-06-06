@@ -59,7 +59,7 @@ object UseCaseModule {
             single { RemoveBiometricDataUseCase(get(), get(), get()) }
             single { DecodePasswordWithBiometricUseCase(get()) }
             single { EncodePasswordWithBiometricUseCase(get()) }
-            single { SearchUseCases(get(), get(), get(), get()) }
+            single { SearchUseCases(get(), get(), get()) }
             single { FindParentGroupsUseCase(get(), get()) }
             single { GetDiffUseCase(get()) }
             single { GetHistoryUseCase(get(), get()) }

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -36,7 +37,7 @@
         <com.ivanovsky.passnotes.presentation.core.widget.MaterialEditText
             android:id="@+id/searchText"
             text="@={viewModel.searchQuery}"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/element_margin"
             android:layout_marginTop="@dimen/group_margin"
@@ -44,8 +45,27 @@
             app:description="@string/query"
             app:hint="@string/query"
             app:isClearButtonEnabled="true"
+            app:layout_constraintEnd_toStartOf="@id/searchConfigButton"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/navigationPanelLayout"
             app:onTextChanged="@{(text) -> viewModel.onSearchQueryChanged(text)}"
+            app:visible="@{viewModel.isSearchQueryVisible}" />
+
+        <ImageButton
+            android:id="@+id/searchConfigButton"
+            style="@style/Material.MediumBorderlessButton.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/half_margin"
+            android:contentDescription="@string/eye_icon"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:src="@drawable/ic_search_config_24dp"
+            android:onClick="@{() -> viewModel.onSearchConfigButtonClicked()}"
+            app:layout_constraintBottom_toBottomOf="@id/searchText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/searchText"
+            app:tint="?attr/kpIconPrimaryColor"
             app:visible="@{viewModel.isSearchQueryVisible}" />
 
         <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView

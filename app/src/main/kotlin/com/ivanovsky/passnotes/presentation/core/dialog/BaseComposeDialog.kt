@@ -6,13 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModel
 import com.ivanovsky.passnotes.databinding.CoreComposeDialogBinding
 import com.ivanovsky.passnotes.presentation.core.compose.AppTheme
 import com.ivanovsky.passnotes.presentation.core.compose.getComposeTheme
 
-abstract class BaseComposeDialog<T : ViewModel> : DialogFragment() {
+abstract class BaseComposeDialog<T : ViewModel> : BaseDialogFragment() {
 
     abstract val viewModel: T
 

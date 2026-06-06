@@ -52,13 +52,6 @@
         app:key="@string/pref_category_search"
         app:title="@string/search">
 
-        <ListPreference
-            app:entries="@array/pref_search_type_entries"
-            app:entryValues="@array/pref_search_type_values"
-            app:key="@string/pref_search_type"
-            app:summary="@string/pref_search_type_summary"
-            app:title="@string/pref_search_type_title" />
-
         <SwitchPreferenceCompat
             app:key="@string/pref_is_activate_search_on_start"
             app:summary="@string/pref_is_activate_search_on_start_summary"

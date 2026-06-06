@@ -69,9 +69,11 @@
         <item name="kpDiffUpdateColor">@color/diff_update</item>
     </style>
 
-    <style name="AppDialogTheme" parent="Theme.Material3.DayNight.Dialog.Alert">
+    <style name="AppDialogTheme" parent="ThemeOverlay.Material3.MaterialAlertDialog">
         <item name="android:windowBackground">@color/dialog_background</item>
         <item name="colorPrimary">@color/dialog_primary</item>
+        <item name="android:windowMinWidthMajor">92%</item>
+        <item name="android:windowMinWidthMinor">92%</item>
 
         <item name="kpBackgroundColor">@color/dialog_background</item>
         <item name="kpPrimaryColor">@color/primary</item>

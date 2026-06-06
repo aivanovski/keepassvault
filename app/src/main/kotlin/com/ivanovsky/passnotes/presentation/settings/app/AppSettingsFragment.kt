@@ -20,7 +20,6 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FIL
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_DATABASE_ON_BACK
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
-import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SEARCH_TYPE
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
@@ -86,7 +85,6 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
             IS_FILE_LOG_ENABLED,
             IS_POSTPONED_SYNC_ENABLED,
             IS_BIOMETRIC_UNLOCK_ENABLED,
-            SEARCH_TYPE,
             IS_ACTIVATE_SEARCH_ON_START
         )
             .forEach { settings.initDefaultIfNeed(it) }

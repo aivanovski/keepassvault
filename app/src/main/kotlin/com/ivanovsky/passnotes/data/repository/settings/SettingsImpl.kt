@@ -25,7 +25,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOC
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_SSL_CERTIFICATE_VALIDATION_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.PASSWORD_GENERATOR_SETTINGS
-import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SEARCH_TYPE
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SEARCH_OPTIONS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_DIRECTION
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_TYPE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.TEST_AUTOFILL_DATA
@@ -34,9 +34,10 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.BO
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.INT
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.PrefType.STRING
 import com.ivanovsky.passnotes.data.serialization.PasswordGeneratorSettingsConverter
+import com.ivanovsky.passnotes.data.serialization.SearchSettingsConverter
 import com.ivanovsky.passnotes.data.serialization.TestAutofillDataConverter
 import com.ivanovsky.passnotes.data.serialization.TestTogglesConverter
-import com.ivanovsky.passnotes.domain.entity.SearchType
+import com.ivanovsky.passnotes.domain.entity.SearchOptions
 import com.ivanovsky.passnotes.domain.entity.SortDirection
 import com.ivanovsky.passnotes.domain.entity.SortType
 import java.util.concurrent.CopyOnWriteArrayList
@@ -120,13 +121,13 @@ class SettingsImpl(private val context: Context) : Settings {
             putString(AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS, value.toString())
         }
 
-    override var searchType: SearchType
-        get() {
-            return getString(SEARCH_TYPE)?.let { SearchType.getByName(it) }
-                ?: SearchType.default()
-        }
+    override var searchOptions: SearchOptions
+        get() = getString(SEARCH_OPTIONS)?.let {
+            SearchSettingsConverter.fromString(it)
+        } ?: SearchOptions.DEFAULT
         set(value) {
-            putString(SEARCH_TYPE, value.name)
+            val strValue = value.let { SearchSettingsConverter.toString(it) }
+            putString(SEARCH_OPTIONS, strValue)
         }
 
     override var isActivateSearchOnStart: Boolean
@@ -351,10 +352,10 @@ class SettingsImpl(private val context: Context) : Settings {
         ),
 
         // String prefs
-        SEARCH_TYPE(
-            keyId = R.string.pref_search_type,
+        SEARCH_OPTIONS(
+            keyId = R.string.pref_search_options,
             type = STRING,
-            defaultValue = SearchType.default().name
+            defaultValue = null
         ),
         SORT_TYPE(
             keyId = R.string.pref_sort_type,

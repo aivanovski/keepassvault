@@ -26,11 +26,12 @@ import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
 import com.ivanovsky.passnotes.data.repository.settings.Settings
-import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
+import com.ivanovsky.passnotes.domain.entity.SearchOptions
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
@@ -97,6 +98,7 @@ import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.parameter.parametersOf
@@ -172,6 +174,7 @@ class GroupsViewModel(
     val requestPermissionEvent = SingleLiveEvent<SystemPermission>()
     val finishActivityEvent = SingleLiveEvent<Unit>()
     val showSortAndViewDialogEvent = SingleLiveEvent<SortAndViewDialogArgs>()
+    val showSearchOptionDialogEvent = SingleLiveEvent<Unit>()
     val showBiometricSetupDialog = SingleLiveEvent<BiometricEncoder>()
     val lockScreenEvent = LockScreenLiveEvent(observerBus, lockInteractor)
     val backIcon = MutableLiveData<BackNavigationIcon>(BackNavigationIcon.Arrow)
@@ -192,6 +195,7 @@ class GroupsViewModel(
     private var searchableEntries: List<EncryptedDatabaseEntry>? = null
     private var navigationPanelGroups: List<Group> = emptyList()
     private var loadDataJob: Job? = null
+    private var searchOptions = MutableStateFlow<SearchOptions?>(null)
 
     init {
         observerBus.register(this)
@@ -242,11 +246,14 @@ class GroupsViewModel(
         }
     }
 
-    override fun onSettingsChanged(pref: SettingsImpl.Pref) {
-        if (pref == SettingsImpl.Pref.SORT_TYPE ||
-            pref == SettingsImpl.Pref.SORT_DIRECTION ||
-            pref == SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED
+    override fun onSettingsChanged(pref: Pref) {
+        if (pref == Pref.SORT_TYPE ||
+            pref == Pref.SORT_DIRECTION ||
+            pref == Pref.IS_GROUPS_AT_START_ENABLED ||
+            pref == Pref.SEARCH_OPTIONS
         ) {
+            searchOptions.value = null
+            searchableEntries = null
             loadData()
         }
     }
@@ -569,6 +576,10 @@ class GroupsViewModel(
     fun onSearchButtonClicked() {
         searchQuery.value = EMPTY
         enableSearchMode()
+    }
+
+    fun onSearchConfigButtonClicked() {
+        showSearchOptionDialogEvent.call(Unit)
     }
 
     fun onSortAndViewButtonClicked() {
@@ -1071,6 +1082,7 @@ class GroupsViewModel(
         var allEntries = searchableEntries
         if (allEntries == null) {
             val getAllEntriesResult = interactor.getAllSearchableEntries(
+                options = getSearchOptions(),
                 isRespectAutotypeProperty =
                 (args.appMode == ApplicationLaunchMode.AUTOFILL_SELECTION)
             )
@@ -1089,6 +1101,7 @@ class GroupsViewModel(
 
         val searchEntries = if (query.isNotEmpty()) {
             interactor.filterEntries(
+                options = getSearchOptions(),
                 entries = allEntries,
                 query = query
             )
@@ -1303,6 +1316,16 @@ class GroupsViewModel(
 
             else -> emptyList()
         }
+    }
+
+    private fun getSearchOptions(): SearchOptions {
+        val current = searchOptions.value ?: settings.searchOptions
+
+        if (searchOptions.value == null) {
+            searchOptions.value = current
+        }
+
+        return current
     }
 
     private fun isBiometricUnlockAllowedForDatabase(): Boolean {

@@ -22,6 +22,10 @@ fun OperationError.formatReadableMessage(
             resourceProvider.getString(R.string.file_not_found)
         }
 
+        OperationError.Type.FILE_ALREADY_EXISTS -> {
+            resourceProvider.getString(R.string.file_already_exists)
+        }
+
         else -> null
     }
 

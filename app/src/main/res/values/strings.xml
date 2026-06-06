@@ -71,7 +71,8 @@
     <string name="error_has_been_occurred">Error has been occurred</string>
     <string name="network_error_message">Network error has been occurred, check internet connection</string>
     <string name="file_permission_error_message">Unable to access to file, please provider permission for application</string>
-    <string name="file_is_already_exist">File is already exist</string>
+    <string name="file_already_exists">File already exists</string>
+    <string name="file_already_exists_detailed">File %s already exists</string>
     <string name="empty_field">Empty field</string>
     <string name="sync_conflict_message">There is a conflict between version of local and remote databases. Please resolve this conflict before accessing database.</string>
     <string name="sync_file_not_found_message">Unable to find database file on remote server. Please try to remove this file and add it again.</string>

@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.domain.interactor.newdb
 
+import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_DEFERRED_OPERATIONS_ARE_NOT_SUPPORTED
 import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
@@ -12,6 +13,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.toUsedFile
 import kotlinx.coroutines.withContext
@@ -20,6 +22,7 @@ class NewDatabaseInteractor(
     private val dbRepo: EncryptedDatabaseRepository,
     private val usedFileRepository: UsedFileRepository,
     private val fileSystemResolver: FileSystemResolver,
+    private val resourceProvider: ResourceProvider,
     private val dispatchers: DispatcherProvider
 ) {
 
@@ -38,7 +41,14 @@ class NewDatabaseInteractor(
 
             val isExists = existsResult.obj
             if (isExists) {
-                return@withContext OperationResult.error(newFileAlreadyExistsError(Stacktrace()))
+                val message =
+                    resourceProvider.getString(R.string.file_already_exists_detailed, file.name)
+                return@withContext OperationResult.error(
+                    newFileAlreadyExistsError(
+                        message,
+                        Stacktrace()
+                    )
+                )
             }
 
             val creationResult = dbRepo.createNew(

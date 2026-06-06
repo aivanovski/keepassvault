@@ -157,11 +157,11 @@ public class OperationError implements Serializable {
     }
 
     public static OperationError newFileAlreadyExistsError(String message, Stacktrace stacktrace) {
-        return new OperationError(Type.FILE_IS_ALREADY_EXISTS, message, stacktrace);
+        return new OperationError(Type.FILE_ALREADY_EXISTS, message, stacktrace);
     }
 
     public static OperationError newFileAlreadyExistsError(Stacktrace stacktrace) {
-        return new OperationError(Type.FILE_IS_ALREADY_EXISTS, null, stacktrace);
+        return new OperationError(Type.FILE_ALREADY_EXISTS, null, stacktrace);
     }
 
     public static OperationError newCacheError(String message, Stacktrace stacktrace) {
@@ -203,7 +203,7 @@ public class OperationError implements Serializable {
         GENERIC_IO_ERROR,
         AUTH_ERROR,
         NETWORK_IO_ERROR,
-        FILE_IS_ALREADY_EXISTS,
+        FILE_ALREADY_EXISTS,
         // inconsistent cached data,
         CACHE_ERROR,
         REMOTE_API_ERROR,

@@ -4,14 +4,14 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.presentation.core.dialog.BaseDialogFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.openUrl
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
-class PropertyActionDialog : DialogFragment() {
+class PropertyActionDialog : BaseDialogFragment() {
 
     lateinit var onActionClicked: (action: PropertyAction) -> Unit
 

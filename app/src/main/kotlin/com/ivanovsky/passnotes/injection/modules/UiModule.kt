@@ -36,6 +36,7 @@ import com.ivanovsky.passnotes.presentation.core.dialog.reportErrorDialog.Report
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogInteractor
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogViewModel
+import com.ivanovsky.passnotes.presentation.core.dialog.searchOptions.SearchOptionsDialogViewModel
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogViewModel
 import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
@@ -330,6 +331,7 @@ object UiModule {
             viewModel { AppSettingsViewModel(get(), get(), get(), get(), get(), get()) }
             viewModel { DatabaseSettingsViewModel(get(), get(), get(), get()) }
             viewModel { ChangePasswordDialogViewModel(get(), get()) }
+            viewModel { SearchOptionsDialogViewModel(get()) }
             viewModel {
                 PasswordGeneratorViewModel(
                     get(),

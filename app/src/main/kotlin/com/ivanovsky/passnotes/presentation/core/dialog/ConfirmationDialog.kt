@@ -4,10 +4,9 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
 import com.ivanovsky.passnotes.R
 
-class ConfirmationDialog : DialogFragment(), DialogInterface.OnClickListener {
+class ConfirmationDialog : BaseDialogFragment(), DialogInterface.OnClickListener {
 
     var onConfirmed: (() -> Unit)? = null
     var onDenied: (() -> Unit)? = null

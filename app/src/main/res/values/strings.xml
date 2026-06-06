@@ -177,6 +177,14 @@
         <item>Cut</item>
     </string-array>
     <string name="search_type">Search type</string>
+    <string name="search_options">Search options</string>
+    <string name="search_fields">Search fields</string>
+    <string name="search_scope">Search scope</string>
+    <string name="searchable">Searchable</string>
+    <string name="recycle_bin">Recycle Bin</string>
+    <string name="other">Other</string>
+    <string name="additional_options">Additional options</string>
+    <string name="case_sensitive">Case sensitive</string>
     <string name="fuzzy">Fuzzy</string>
     <string name="strict">Strict</string>
     <string name="sort_by">Sort by</string>

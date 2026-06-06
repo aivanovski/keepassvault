@@ -15,7 +15,7 @@
     <string name="pref_is_postponed_sync_enabled" translatable="false">isPostponedSyncEnabled</string>
     <string name="pref_git_user_name" translatable="false">gitUserName</string>
     <string name="pref_git_user_email" translatable="false">gitUserEmail</string>
-    <string name="pref_search_type" translatable="false">searchType</string>
+    <string name="pref_search_options" translatable="false">searchOptions</string>
     <string name="pref_is_activate_search_on_start" translatable="false">isActivateSearchOnStart</string>
     <string name="pref_sort_type" translatable="false">sortType</string>
     <string name="pref_sort_direction" translatable="false">sortDirection</string>

@@ -34,6 +34,7 @@ import com.ivanovsky.passnotes.presentation.core.animation.AnimationFactory
 import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
+import com.ivanovsky.passnotes.presentation.core.dialog.searchOptions.SearchOptionsDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.sortAndView.SortAndViewDialogArgs
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity
@@ -229,6 +230,9 @@ class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
         viewModel.showSortAndViewDialogEvent.observe(viewLifecycleOwner) { args ->
             showSortAndViewDialog(args)
         }
+        viewModel.showSearchOptionDialogEvent.observe(viewLifecycleOwner) {
+            showSearchOptionDialog()
+        }
         viewModel.showBiometricSetupDialog.observe(viewLifecycleOwner) { cipher ->
             biometricAuthenticator.authenticateForSetup(
                 activity = requireActivity(),
@@ -353,6 +357,11 @@ class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
     private fun showSortAndViewDialog(args: SortAndViewDialogArgs) {
         val dialog = SortAndViewDialog.newInstance(args)
         dialog.show(childFragmentManager, SortAndViewDialog.TAG)
+    }
+
+    private fun showSearchOptionDialog() {
+        val dialog = SearchOptionsDialog.newInstance()
+        dialog.show(childFragmentManager, SearchOptionsDialog.TAG)
     }
 
     private fun showResolveConflictDialog(file: FileDescriptor) {

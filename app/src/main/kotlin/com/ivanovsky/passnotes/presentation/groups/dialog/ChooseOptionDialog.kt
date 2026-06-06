@@ -4,11 +4,11 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.presentation.core.dialog.BaseDialogFragment
 
 @Deprecated("Use OptionDialog instead")
-class ChooseOptionDialog : DialogFragment(), DialogInterface.OnClickListener {
+class ChooseOptionDialog : BaseDialogFragment(), DialogInterface.OnClickListener {
 
     lateinit var onItemClickListener: (itemIndex: Int) -> Unit
 

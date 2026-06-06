@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.entity.SearchOptions
 import com.ivanovsky.passnotes.domain.entity.SelectionItem
 import com.ivanovsky.passnotes.domain.entity.SelectionItemType
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
@@ -261,13 +262,15 @@ class GroupsInteractor(
     }
 
     suspend fun getAllSearchableEntries(
+        options: SearchOptions,
         isRespectAutotypeProperty: Boolean
     ): OperationResult<List<EncryptedDatabaseEntry>> =
-        searchUseCases.getAllSearchableEntries(isRespectAutotypeProperty)
+        searchUseCases.getAllSearchableEntries(options, isRespectAutotypeProperty)
 
     suspend fun filterEntries(
+        options: SearchOptions,
         entries: List<EncryptedDatabaseEntry>,
         query: String
     ): List<EncryptedDatabaseEntry> =
-        searchUseCases.filterEntries(entries, query)
+        searchUseCases.filterEntries(options, entries, query)
 }

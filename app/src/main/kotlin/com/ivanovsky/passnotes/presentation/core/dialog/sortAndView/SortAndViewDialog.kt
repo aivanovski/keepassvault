@@ -4,15 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.DialogSortAndViewBinding
 import com.ivanovsky.passnotes.extensions.cloneInContext
+import com.ivanovsky.passnotes.presentation.core.dialog.BaseDialogFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
-class SortAndViewDialog : DialogFragment() {
+class SortAndViewDialog : BaseDialogFragment() {
 
     private val viewModel: SortAndViewDialogViewModel by lazy {
         ViewModelProvider(

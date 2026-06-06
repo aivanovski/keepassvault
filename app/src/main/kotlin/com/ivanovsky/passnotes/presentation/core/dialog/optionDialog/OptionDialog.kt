@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.CoreBaseCellDialogBinding
 import com.ivanovsky.passnotes.extensions.cloneInContext
 import com.ivanovsky.passnotes.presentation.core.ViewModelTypes
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
+import com.ivanovsky.passnotes.presentation.core.dialog.BaseDialogFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setViewModels
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
@@ -18,7 +18,7 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.OneLineTextCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.TwoLineTextCellViewModel
 
-class OptionDialog : DialogFragment() {
+class OptionDialog : BaseDialogFragment() {
 
     private val args: OptionDialogArgs by lazy {
         getMandatoryArgument(ARGUMENTS)

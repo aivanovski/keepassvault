@@ -87,8 +87,8 @@ class FakeFileFactory(
             newEntry(
                 localFile = newFile(Path.DEMO, Time.NO_CHANGES),
                 syncStatus = SyncStatus.NO_CHANGES,
-                localContentFactory = LOCAL_CONTENT_FACTORY,
-                remoteContentFactory = LOCAL_CONTENT_FACTORY
+                localContentFactory = { createDemoDatabase() },
+                remoteContentFactory = { createDemoDatabase() }
             ),
 
             newEntry(

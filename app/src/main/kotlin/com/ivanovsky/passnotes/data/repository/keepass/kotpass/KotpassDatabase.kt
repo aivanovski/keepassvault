@@ -88,6 +88,7 @@ class KotpassDatabase(
 
             val config = MutableEncryptedDatabaseConfig(
                 isRecycleBinEnabled = rawDatabase.content.meta.recycleBinEnabled,
+                recycleBinUid = rawDatabase.content.meta.recycleBinUuid,
                 maxHistoryItems = rawDatabase.content.meta.historyMaxItems
             )
 

@@ -15,7 +15,7 @@ class SortAndViewDialogViewModel(
     private val args: SortAndViewDialogArgs
 ) : ViewModel() {
 
-    private var selectedSearchType = settings.searchType
+    private var selectedSearchType = settings.searchOptions.searchType
     private var selectedSortType = settings.sortType
     private var selectedSortDirection = settings.sortDirection
 
@@ -42,7 +42,7 @@ class SortAndViewDialogViewModel(
 
         if (isChecked && searchType != selectedSearchType) {
             selectedSearchType = searchType
-            settings.searchType = searchType
+            settings.searchOptions = settings.searchOptions.copy(searchType = searchType)
             isSortGroupsEnabled.value = isSortGroupsEnabledInternal()
         }
     }

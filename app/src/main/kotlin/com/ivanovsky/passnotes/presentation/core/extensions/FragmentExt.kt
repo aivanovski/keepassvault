@@ -21,8 +21,6 @@ import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.dialog.MessageDialog
-import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialog
-import com.ivanovsky.passnotes.presentation.core.dialog.helpDialog.HelpDialogArgs
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestSender
 import com.ivanovsky.passnotes.util.InputMethodUtils
@@ -111,11 +109,6 @@ fun Fragment.showErrorDialog(message: String) {
 fun Fragment.showMessageDialog(message: String) {
     val dialog = MessageDialog.newMessageDialogInstance(message)
     dialog.show(childFragmentManager, MessageDialog.TAG)
-}
-
-fun Fragment.showHelpDialog(arguments: HelpDialogArgs) {
-    val dialog = HelpDialog.newInstance(arguments)
-    dialog.show(childFragmentManager, HelpDialog.TAG)
 }
 
 fun Fragment.updateMenuItemVisibility(

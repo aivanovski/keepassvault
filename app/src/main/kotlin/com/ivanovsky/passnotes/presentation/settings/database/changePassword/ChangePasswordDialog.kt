@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.DialogChangePasswordBinding
 import com.ivanovsky.passnotes.extensions.cloneInContext
+import com.ivanovsky.passnotes.presentation.core.dialog.BaseDialogFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class ChangePasswordDialog : DialogFragment() {
+class ChangePasswordDialog : BaseDialogFragment() {
 
     private val viewModel: ChangePasswordDialogViewModel by viewModel()
 

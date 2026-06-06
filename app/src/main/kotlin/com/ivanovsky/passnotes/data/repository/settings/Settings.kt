@@ -4,7 +4,7 @@ import com.ivanovsky.passnotes.data.entity.PasswordGeneratorSettings
 import com.ivanovsky.passnotes.data.entity.TestAutofillData
 import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref
-import com.ivanovsky.passnotes.domain.entity.SearchType
+import com.ivanovsky.passnotes.domain.entity.SearchOptions
 import com.ivanovsky.passnotes.domain.entity.SortDirection
 import com.ivanovsky.passnotes.domain.entity.SortType
 
@@ -18,7 +18,7 @@ interface Settings {
     var isLockNotificationDialogEnabled: Boolean
     var isLockDatabaseOnBack: Boolean
     var isFileLogEnabled: Boolean
-    var searchType: SearchType
+    var searchOptions: SearchOptions
     var isActivateSearchOnStart: Boolean
     var sortType: SortType
     var sortDirection: SortDirection

@@ -4,15 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.databinding.DialogResolveConflictBinding
 import com.ivanovsky.passnotes.extensions.cloneInContext
+import com.ivanovsky.passnotes.presentation.core.dialog.BaseDialogFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
-class ResolveConflictDialog : DialogFragment() {
+class ResolveConflictDialog : BaseDialogFragment() {
 
     private val viewModel: ResolveConflictDialogViewModel by lazy {
         ViewModelProvider(

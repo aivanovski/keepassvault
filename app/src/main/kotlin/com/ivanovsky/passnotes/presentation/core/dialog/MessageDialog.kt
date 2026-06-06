@@ -3,12 +3,11 @@ package com.ivanovsky.passnotes.presentation.core.dialog
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
-import androidx.fragment.app.DialogFragment
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
-class MessageDialog : DialogFragment() {
+class MessageDialog : BaseDialogFragment() {
 
     private val args: MessageDialogArgs by lazy {
         getMandatoryArgument(ARGUMENTS)

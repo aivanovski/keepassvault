@@ -576,6 +576,7 @@ class GroupsViewModel(
     fun onSearchButtonClicked() {
         searchQuery.value = EMPTY
         enableSearchMode()
+        loadData()
     }
 
     fun onSearchConfigButtonClicked() {

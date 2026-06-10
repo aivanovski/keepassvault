@@ -84,7 +84,7 @@ map_key_bindings({
   { mode = 'v', key = 'gy', command = '"+y' },
 
   -- Remap gyl to copy line
-  { key = 'gl', command = '^v$h"+y' },
+  { key = 'gyl', command = '^v$h"+y' },
   
   -- Coment/uncomment
   -- { key = 'gc', command = ':Commentary<CR>' },
@@ -98,9 +98,10 @@ map_key_bindings({
   -- Select all
   { mode = 'v', key = 'ia', command = 'gg^G' },
 
-  -- Remap :tag and :po commands (jump to tag and go back)
+  -- Code navigation
   { key = 'gd', command = '<C-]>' },
-  { key = 'gb', command = ':po<CR>' },
+  { key = 'gh', command = '<C-o>' },
+  { key = 'gl', command = '<C-i>' },
 
   -- Split line by symbol ','
   { key = 'gs', command = 'f,lxi<CR>l' },

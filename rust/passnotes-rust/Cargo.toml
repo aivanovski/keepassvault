@@ -10,3 +10,11 @@ crate-type = ["cdylib"]
 
 [dependencies]
 keepass = "0.13.10"
+chrono = "0.4.45"
+jni = "0.21.1"
+prost = "0.13.5"
+uuid = "1.23.3"
+
+[build-dependencies]
+prost-build = "0.13.5"
+protoc-bin-vendored = "3.0.0"

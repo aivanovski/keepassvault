@@ -25,6 +25,8 @@ import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory
 import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
+import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.ReadDatabaseResponse
+import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.databaseOrNull
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
@@ -433,11 +435,14 @@ class UnlockViewModel(
     fun onAddButtonClicked() {
         val databaseData = FakeDatabaseContentFactory.createDefaultLocalDatabase()
 
-        val isDecoded = RustBridge.nativeCanDecodeWithPassword(
+        val responseBytes = RustBridge.nativeCanDecodeWithPassword(
             databaseData = databaseData,
             password = "abc123"
         )
-        Timber.d("isDecoded=$isDecoded")
+        val database = responseBytes
+            ?.let(ReadDatabaseResponse::parseFrom)
+            ?.databaseOrNull
+        Timber.d("RustDecodedDatabase=${database?.rootGroup?.name}")
         showAddMenuDialog.call(Unit)
     }
 

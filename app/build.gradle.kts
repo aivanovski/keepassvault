@@ -1,4 +1,6 @@
 import com.github.triplet.gradle.androidpublisher.ReleaseStatus
+import com.google.protobuf.gradle.id
+import com.google.protobuf.gradle.proto
 import java.io.BufferedWriter
 import java.io.FileInputStream
 import java.io.FileWriter
@@ -15,6 +17,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.room)
+    alias(libs.plugins.protobuf)
 }
 
 val versionMajor = 1
@@ -120,6 +123,9 @@ android {
     sourceSets {
         getByName("main") {
             java.srcDir("src/main/kotlin")
+            proto {
+                srcDir("../proto")
+            }
         }
         getByName("androidTest") {
             java.srcDir("src/androidTest/kotlin")
@@ -197,6 +203,25 @@ android {
     packaging {
         resources {
             excludes += "plugin.properties"
+        }
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${libs.versions.protobuf.get()}"
+    }
+
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                id("java") {
+                    option("lite")
+                }
+                id("kotlin") {
+                    option("lite")
+                }
+            }
         }
     }
 }
@@ -294,6 +319,8 @@ dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.protobuf.javalite)
+    implementation(libs.protobuf.kotlin.lite)
 
     // Network
     implementation(libs.okhttp)

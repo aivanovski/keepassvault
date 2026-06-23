@@ -27,6 +27,7 @@ The project follows Clean Architecture pattern
 The workflows are defined in .github/workflows/*.yaml
 
 # Key Guidelines for Agents
+- Don't write tests until it will be requested
 - Before creating a PR:
     - Do a code review for the changes. Don't change anything in the code, just highlight issues may found in the diff
     - Validate that app compiles

@@ -14,6 +14,9 @@ project.properties
 /.project
 /tmp
 .kotlin/
+*.so
+
+# Rust
 /rust/**/target
 
 # Clojure

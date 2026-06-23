@@ -61,6 +61,46 @@ You can also invoke the Rust build directly:
 ./gradlew buildRustJni
 ```
 
+To build Android JNI binaries without Gradle, use the helper script from the
+repository root:
+
+```bash
+./rust/build.sh
+```
+
+This builds release binaries by default and writes them to
+`rust/android-libs/release/`.
+
+To build debug binaries:
+
+```bash
+./rust/build.sh --debug
+```
+
+To copy the built libraries into the Android project under
+`app/src/main/jniLibs/`:
+
+```bash
+./rust/build.sh --copy
+```
+
+You can combine both options:
+
+```bash
+./rust/build.sh --debug --copy
+```
+
+Produced files:
+
+- `rust/android-libs/release/armeabi-v7a/libpassnotes_rust.so`
+- `rust/android-libs/release/arm64-v8a/libpassnotes_rust.so`
+- `rust/android-libs/release/x86_64/libpassnotes_rust.so`
+
+The script resolves the Android SDK from `ANDROID_SDK_ROOT`, `ANDROID_HOME`, or
+`local.properties`. It resolves the NDK from `ANDROID_NDK_HOME`,
+`ANDROID_NDK_ROOT`, `NDK_HOME`, or the newest installed directory under
+`$ANDROID_SDK_ROOT/ndk`.
+
 ## Kotlin usage
 
 Example call from Android code:

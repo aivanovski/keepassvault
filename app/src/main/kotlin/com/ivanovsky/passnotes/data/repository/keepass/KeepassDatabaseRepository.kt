@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.data.repository.keepass
 
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_GET_DATABASE
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -13,6 +14,7 @@ import com.ivanovsky.passnotes.data.repository.file.FSOptions.Companion.READ_ONL
 import com.ivanovsky.passnotes.data.repository.file.FSOptions.Companion.defaultOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
+import com.ivanovsky.passnotes.data.repository.keepass.keepassrs.KeepassRsDatabase
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.domain.DatabaseLockInteractor
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
@@ -175,13 +177,22 @@ class KeepassDatabaseRepository(
         isAddTemplates: Boolean
     ): OperationResult<Boolean> {
         return lock.withLock {
-            val dbResult = KotpassDatabase.new(
-                fsResolver = fileSystemResolver,
-                fsOptions = defaultOptions(),
-                file = file,
-                key = key,
-                isAddTemplates = isAddTemplates
-            )
+            val dbResult = when (type) {
+                KeepassImplementation.KOTPASS -> KotpassDatabase.new(
+                    fsResolver = fileSystemResolver,
+                    fsOptions = defaultOptions(),
+                    file = file,
+                    key = key,
+                    isAddTemplates = isAddTemplates
+                )
+
+                KeepassImplementation.KEEPASS_RS -> OperationResult.error(
+                    OperationError.newDbError(
+                        OperationError.MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED,
+                        Stacktrace()
+                    )
+                )
+            }
             if (dbResult.isFailed) {
                 return@withLock dbResult.takeError()
             }
@@ -233,6 +244,12 @@ class KeepassDatabaseRepository(
         val openResult = when (type) {
             KeepassImplementation.KOTPASS -> KotpassDatabase.open(
                 fsResolver,
+                fsOptions,
+                file,
+                input,
+                key
+            )
+            KeepassImplementation.KEEPASS_RS -> KeepassRsDatabase.open(
                 fsOptions,
                 file,
                 input,

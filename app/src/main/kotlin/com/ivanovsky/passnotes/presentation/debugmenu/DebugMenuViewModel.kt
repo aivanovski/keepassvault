@@ -551,6 +551,7 @@ class DebugMenuViewModel(
     private fun KeepassImplementation.getTitle(): String {
         val id = when (this) {
             KeepassImplementation.KOTPASS -> R.string.kotpass
+            KeepassImplementation.KEEPASS_RS -> R.string.keepass_rs
         }
         return resourceProvider.getString(id)
     }
@@ -567,7 +568,8 @@ class DebugMenuViewModel(
         )
 
         private val KEEPASS_IMPLEMENTATION_TYPE = listOf(
-            KeepassImplementation.KOTPASS
+            KeepassImplementation.KOTPASS,
+            KeepassImplementation.KEEPASS_RS
         )
     }
 }

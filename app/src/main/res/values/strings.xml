@@ -345,6 +345,7 @@
     <string name="feedback">Feedback</string>
     <string name="homepage">Homepage</string>
     <string name="kotpass">Kotpass</string>
+    <string name="keepass_rs">KeePass RS</string>
 
     <!-- Settings screens -->
     <string name="database">Database</string>

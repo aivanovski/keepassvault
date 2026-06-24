@@ -433,16 +433,6 @@ class UnlockViewModel(
     }
 
     fun onAddButtonClicked() {
-        val databaseData = FakeDatabaseContentFactory.createDefaultLocalDatabase()
-
-        val responseBytes = RustBridge.nativeCanDecodeWithPassword(
-            databaseData = databaseData,
-            password = "abc123"
-        )
-        val database = responseBytes
-            ?.let(ReadDatabaseResponse::parseFrom)
-            ?.databaseOrNull
-        Timber.d("RustDecodedDatabase=${database?.rootGroup?.name}")
         showAddMenuDialog.call(Unit)
     }
 

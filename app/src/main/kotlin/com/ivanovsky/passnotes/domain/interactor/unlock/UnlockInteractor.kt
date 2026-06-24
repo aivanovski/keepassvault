@@ -25,7 +25,6 @@ import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
-import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
@@ -44,6 +43,7 @@ import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class UnlockInteractor(
     private val fileRepository: UsedFileRepository,
@@ -99,9 +99,12 @@ class UnlockInteractor(
                 return@withContext awaitResult.mapError()
             }
 
+            val implementation = settings.keepassImplementation
+            val start = System.nanoTime()
+
             val result = if (canBeOpenedFromCache(file)) {
                 dbRepo.open(
-                    KeepassImplementation.KOTPASS,
+                    implementation,
                     key,
                     file,
                     FSOptions.CACHE_ONLY
@@ -112,12 +115,17 @@ class UnlockInteractor(
                 )
 
                 dbRepo.open(
-                    KeepassImplementation.KOTPASS,
+                    implementation,
                     key,
                     file,
                     fsOptions
                 )
             }
+
+            val elapsedNanos = System.nanoTime() - start
+            val elapsedMillis = elapsedNanos / 1_000_000.0
+
+            Timber.i("Db read took $elapsedMillis ms ($elapsedNanos ns) for $implementation")
 
             if (result.isSucceededOrDeferred) {
                 updateUsedFile(file, key)

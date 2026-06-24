@@ -21,6 +21,7 @@
     <string name="pref_sort_direction" translatable="false">sortDirection</string>
     <string name="pref_is_groups_at_start_enabled" translatable="false">isGroupsAtStartEnabled</string>
     <string name="pref_is_biometric_unlock_enabled" translatable="false">isBiometricUnlockEnabled</string>
+    <string name="pref_keepass_implementation" translatable="false">keepassImplementation</string>
     <string name="pref_password_generator_settings" translatable="false">passwordGeneratorSettings</string>
     <string name="pref_test_autofill_data" translatable="false">testAutofillData</string>
     <string name="pref_test_toggles" translatable="false">testToggles</string>
@@ -98,6 +99,11 @@
     <string-array name="pref_search_type_values">
         <item>STRICT</item>
         <item>FUZZY</item>
+    </string-array>
+
+    <string-array name="pref_keepass_implementation_values">
+        <item>KOTPASS</item>
+        <item>KEEPASS_RS</item>
     </string-array>
 
 </resources>

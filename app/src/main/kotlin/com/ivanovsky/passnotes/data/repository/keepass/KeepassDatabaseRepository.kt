@@ -250,6 +250,7 @@ class KeepassDatabaseRepository(
                 key
             )
             KeepassImplementation.KEEPASS_RS -> KeepassRsDatabase.open(
+                fsResolver,
                 fsOptions,
                 file,
                 input,

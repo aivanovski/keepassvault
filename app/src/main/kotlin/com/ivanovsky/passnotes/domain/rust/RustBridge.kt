@@ -11,4 +11,17 @@ object RustBridge {
     external fun nativeAdd(left: Int, right: Int): Int
 
     external fun nativeCanDecodeWithPassword(databaseData: ByteArray, password: String): ByteArray?
+
+    external fun nativeWriteDatabaseWithPassword(
+        originalDatabaseData: ByteArray,
+        writeRequestData: ByteArray,
+        password: String
+    ): ByteArray?
+
+    external fun nativeWriteDatabaseWithPasswords(
+        originalDatabaseData: ByteArray,
+        writeRequestData: ByteArray,
+        oldPassword: String,
+        newPassword: String
+    ): ByteArray?
 }

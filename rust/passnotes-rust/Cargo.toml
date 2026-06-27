@@ -9,7 +9,7 @@ name = "passnotes_rust"
 crate-type = ["cdylib"]
 
 [dependencies]
-keepass = "0.13.10"
+keepass = { version = "0.13.10", features = ["save_kdbx4"] }
 chrono = "0.4.45"
 jni = "0.21.1"
 prost = "0.13.5"

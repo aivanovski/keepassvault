@@ -1,4 +1,4 @@
-use std::ptr;
+use std::{collections::HashMap, ptr};
 
 use jni::{
     objects::{JByteArray, JObject, JString},
@@ -11,8 +11,8 @@ use keepass::{
         OuterCipherConfig, VariantDictionaryValue,
     },
     db::{
-        AttachmentRef, AutoType, Color, CustomDataItem, CustomDataValue, CustomIconRef, EntryRef,
-        GroupRef, Icon, Meta, Times,
+        AttachmentRef, AutoType, Color, CustomDataItem, CustomDataValue, CustomIconRef, EntryId,
+        EntryRef, GroupId, GroupRef, Icon, Meta, Times, Value,
     },
     Database, DatabaseKey,
 };
@@ -36,6 +36,254 @@ fn read_database_with_password(database_data: &[u8], password: &str) -> Option<V
     };
 
     Some(response.encode_to_vec())
+}
+
+fn write_database_with_password(
+    original_database_data: &[u8],
+    request_data: &[u8],
+    password: &str,
+) -> Option<Vec<u8>> {
+    write_database_with_passwords(original_database_data, request_data, password, password)
+}
+
+fn write_database_with_passwords(
+    original_database_data: &[u8],
+    request_data: &[u8],
+    old_password: &str,
+    new_password: &str,
+) -> Option<Vec<u8>> {
+    let old_key = DatabaseKey::new().with_password(old_password);
+    let new_key = DatabaseKey::new().with_password(new_password);
+    let mut database = Database::parse(original_database_data, old_key).ok()?;
+    let request = proto::WriteDatabaseRequest::decode(request_data).ok()?;
+    let proto_database = request.database?;
+
+    apply_database(&mut database, &proto_database).ok()?;
+
+    let mut output = Vec::new();
+    database.save(&mut output, new_key).ok()?;
+    Some(output)
+}
+
+fn apply_database(database: &mut Database, proto_database: &proto::Database) -> Result<(), String> {
+    if let Some(meta) = &proto_database.meta {
+        apply_meta(&mut database.meta, meta);
+    }
+
+    let root = proto_database
+        .root_group
+        .as_ref()
+        .ok_or_else(|| "missing root group".to_string())?;
+
+    let entry_ids = database
+        .root()
+        .entries()
+        .map(|entry| entry.id())
+        .collect::<Vec<_>>();
+    for entry_id in entry_ids {
+        if let Some(entry) = database.entry_mut(entry_id) {
+            entry.remove();
+        }
+    }
+
+    let group_ids = database
+        .root()
+        .groups()
+        .map(|group| group.id())
+        .collect::<Vec<_>>();
+    for group_id in group_ids {
+        if let Some(group) = database.group_mut(group_id) {
+            group.remove();
+        }
+    }
+
+    {
+        let mut root_group = database.root_mut();
+        apply_group_fields(&mut root_group, root);
+    }
+
+    let attachment_by_id = proto_database
+        .attachments
+        .iter()
+        .map(|attachment| (attachment.id, attachment))
+        .collect::<HashMap<_, _>>();
+
+    for child in &root.groups {
+        add_group_recursive(database, database.root().id(), child, &attachment_by_id)?;
+    }
+    for entry in &root.entries {
+        add_entry(database, database.root().id(), entry, &attachment_by_id)?;
+    }
+
+    Ok(())
+}
+
+fn apply_meta(meta: &mut Meta, proto: &proto::DatabaseMeta) {
+    meta.generator = proto.generator.clone();
+    meta.database_name = proto.database_name.clone();
+    meta.database_name_changed = proto
+        .database_name_changed_epoch_ms
+        .and_then(epoch_ms_to_time);
+    meta.database_description = proto.database_description.clone();
+    meta.database_description_changed = proto
+        .database_description_changed_epoch_ms
+        .and_then(epoch_ms_to_time);
+    meta.default_username = proto.default_username.clone();
+    meta.default_username_changed = proto
+        .default_username_changed_epoch_ms
+        .and_then(epoch_ms_to_time);
+    meta.maintenance_history_days = proto.maintenance_history_days.map(|value| value as usize);
+    meta.recyclebin_enabled = proto.recycle_bin_enabled;
+    meta.recyclebin_uuid = proto
+        .recycle_bin_uuid
+        .as_ref()
+        .and_then(|bytes| uuid_from_bytes(bytes));
+    meta.recyclebin_changed = proto
+        .recycle_bin_changed_epoch_ms
+        .and_then(epoch_ms_to_time);
+    meta.entry_templates_group = proto
+        .entry_templates_group_uuid
+        .as_ref()
+        .and_then(|bytes| uuid_from_bytes(bytes));
+    meta.entry_templates_group_changed = proto
+        .entry_templates_group_changed_epoch_ms
+        .and_then(epoch_ms_to_time);
+    meta.last_selected_group = proto
+        .last_selected_group_uuid
+        .as_ref()
+        .and_then(|bytes| uuid_from_bytes(bytes));
+    meta.last_top_visible_group = proto
+        .last_top_visible_group_uuid
+        .as_ref()
+        .and_then(|bytes| uuid_from_bytes(bytes));
+    meta.history_max_items = proto.history_max_items.map(|value| value as isize);
+    meta.history_max_size = proto.history_max_size.map(|value| value as isize);
+    meta.settings_changed = proto.settings_changed_epoch_ms.and_then(epoch_ms_to_time);
+}
+
+fn add_group_recursive(
+    database: &mut Database,
+    parent_id: GroupId,
+    proto_group: &proto::Group,
+    attachments: &HashMap<u32, &proto::Attachment>,
+) -> Result<(), String> {
+    let group_id = GroupId::from(uuid_from_bytes(&proto_group.uuid).ok_or("invalid group uuid")?);
+    {
+        let mut parent = database
+            .group_mut(parent_id)
+            .ok_or_else(|| "missing parent group".to_string())?;
+        let mut group = parent
+            .add_group_with_id(group_id)
+            .map_err(|error| error.to_string())?;
+        apply_group_fields(&mut group, proto_group);
+    }
+
+    for child in &proto_group.groups {
+        add_group_recursive(database, group_id, child, attachments)?;
+    }
+    for entry in &proto_group.entries {
+        add_entry(database, group_id, entry, attachments)?;
+    }
+
+    Ok(())
+}
+
+fn apply_group_fields(group: &mut keepass::db::GroupMut<'_>, proto_group: &proto::Group) {
+    group.name = proto_group.name.clone();
+    group.notes = proto_group.notes.clone();
+    group.tags = proto_group.tags.clone();
+    group.times = proto_group
+        .times
+        .as_ref()
+        .map(convert_proto_times)
+        .unwrap_or_default();
+    group.is_expanded = proto_group.is_expanded;
+    group.default_autotype_sequence = proto_group.default_autotype_sequence.clone();
+    group.enable_autotype = proto_group.enable_autotype;
+    group.enable_searching = proto_group.enable_searching;
+}
+
+fn add_entry(
+    database: &mut Database,
+    parent_id: GroupId,
+    proto_entry: &proto::Entry,
+    attachments: &HashMap<u32, &proto::Attachment>,
+) -> Result<(), String> {
+    let entry_id = EntryId::from(uuid_from_bytes(&proto_entry.uuid).ok_or("invalid entry uuid")?);
+    let mut parent = database
+        .group_mut(parent_id)
+        .ok_or_else(|| "missing parent group".to_string())?;
+    let mut entry = parent
+        .add_entry_with_id(entry_id)
+        .map_err(|error| error.to_string())?;
+
+    entry.fields.clear();
+    for field in &proto_entry.fields {
+        let value = if field.is_protected {
+            Value::protected(field.value.clone())
+        } else {
+            Value::unprotected(field.value.clone())
+        };
+        entry.set(field.name.clone(), value);
+    }
+
+    entry.tags = proto_entry.tags.clone();
+    entry.times = proto_entry
+        .times
+        .as_ref()
+        .map(convert_proto_times)
+        .unwrap_or_default();
+    entry.foreground_color = proto_entry
+        .foreground_color
+        .as_ref()
+        .map(convert_proto_color);
+    entry.background_color = proto_entry
+        .background_color
+        .as_ref()
+        .map(convert_proto_color);
+    entry.override_url = proto_entry.override_url.clone();
+    entry.quality_check = proto_entry.quality_check;
+
+    for attachment_ref in &proto_entry.attachments {
+        if let Some(attachment) = attachments.get(&attachment_ref.attachment_id) {
+            let data = if attachment.is_protected {
+                Value::protected(attachment.data.clone())
+            } else {
+                Value::unprotected(attachment.data.clone())
+            };
+            entry.add_attachment(attachment_ref.name.clone(), data);
+        }
+    }
+
+    Ok(())
+}
+
+fn convert_proto_times(times: &proto::Times) -> Times {
+    let mut result = Times::default();
+    result.creation = times.creation_epoch_ms.and_then(epoch_ms_to_time);
+    result.last_modification = times.last_modification_epoch_ms.and_then(epoch_ms_to_time);
+    result.last_access = times.last_access_epoch_ms.and_then(epoch_ms_to_time);
+    result.expiry = times.expiry_epoch_ms.and_then(epoch_ms_to_time);
+    result.location_changed = times.location_changed_epoch_ms.and_then(epoch_ms_to_time);
+    result.expires = times.expires;
+    result.usage_count = times.usage_count.map(|value| value as usize);
+    result
+}
+
+fn convert_proto_color(color: &proto::Color) -> Color {
+    Color {
+        r: color.red as u8,
+        g: color.green as u8,
+        b: color.blue as u8,
+    }
+}
+
+fn uuid_from_bytes(bytes: &[u8]) -> Option<uuid::Uuid> {
+    uuid::Uuid::from_slice(bytes).ok()
+}
+
+fn epoch_ms_to_time(epoch_ms: i64) -> Option<chrono::NaiveDateTime> {
+    chrono::DateTime::from_timestamp_millis(epoch_ms).map(|time| time.naive_utc())
 }
 
 fn convert_database(database: &Database) -> proto::Database {
@@ -480,9 +728,64 @@ pub extern "system" fn Java_com_ivanovsky_passnotes_domain_rust_RustBridge_nativ
     }
 }
 
+#[allow(non_snake_case)]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_ivanovsky_passnotes_domain_rust_RustBridge_nativeWriteDatabaseWithPassword(
+    mut env: JNIEnv<'_>,
+    _this: JObject<'_>,
+    original_database_data: JByteArray<'_>,
+    write_request_data: JByteArray<'_>,
+    password: JString<'_>,
+) -> jbyteArray {
+    let original_bytes = get_jni_byte_array(&env, original_database_data);
+    let request_bytes = get_jni_byte_array(&env, write_request_data);
+    let password = get_jni_string(&mut env, password);
+
+    match (original_bytes, request_bytes, password) {
+        (Some(original_bytes), Some(request_bytes), Some(password)) => {
+            write_database_with_password(&original_bytes, &request_bytes, &password)
+                .map(|response| new_jni_byte_array(&env, &response))
+                .unwrap_or_else(ptr::null_mut)
+        }
+        _ => ptr::null_mut(),
+    }
+}
+
+#[allow(non_snake_case)]
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_ivanovsky_passnotes_domain_rust_RustBridge_nativeWriteDatabaseWithPasswords(
+    mut env: JNIEnv<'_>,
+    _this: JObject<'_>,
+    original_database_data: JByteArray<'_>,
+    write_request_data: JByteArray<'_>,
+    old_password: JString<'_>,
+    new_password: JString<'_>,
+) -> jbyteArray {
+    let original_bytes = get_jni_byte_array(&env, original_database_data);
+    let request_bytes = get_jni_byte_array(&env, write_request_data);
+    let old_password = get_jni_string(&mut env, old_password);
+    let new_password = get_jni_string(&mut env, new_password);
+
+    match (original_bytes, request_bytes, old_password, new_password) {
+        (Some(original_bytes), Some(request_bytes), Some(old_password), Some(new_password)) => {
+            write_database_with_passwords(
+                &original_bytes,
+                &request_bytes,
+                &old_password,
+                &new_password,
+            )
+            .map(|response| new_jni_byte_array(&env, &response))
+            .unwrap_or_else(ptr::null_mut)
+        }
+        _ => ptr::null_mut(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{add, read_database_with_password};
+    use super::{add, proto, read_database_with_password, write_database_with_password};
+    use keepass::{Database, DatabaseKey};
+    use prost::Message;
 
     #[test]
     fn should_add_numbers() {
@@ -492,5 +795,28 @@ mod tests {
     #[test]
     fn should_not_decode_invalid_database() {
         assert!(read_database_with_password(b"not-a-database", "abc123").is_none());
+    }
+
+    #[test]
+    fn should_write_database() {
+        let password = "testing";
+        let mut original = Vec::new();
+        Database::new()
+            .save(&mut original, DatabaseKey::new().with_password(password))
+            .unwrap();
+
+        let response = read_database_with_password(&original, password).unwrap();
+        let database = proto::ReadDatabaseResponse::decode(response.as_slice())
+            .unwrap()
+            .database
+            .unwrap();
+        let request = proto::WriteDatabaseRequest {
+            database: Some(database),
+        };
+
+        let updated = write_database_with_password(&original, &request.encode_to_vec(), password)
+            .expect("database should be written");
+
+        assert!(read_database_with_password(&updated, password).is_some());
     }
 }

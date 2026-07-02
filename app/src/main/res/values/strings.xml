@@ -416,4 +416,11 @@
     <string name="go_to_issues">Go to issues</string>
     <string name="show_stacktrace">...Show stacktrace...</string>
 
+    <string name="crash_report_dialog_title">KeePassVault crashed</string>
+    <string name="crash_report_dialog_message">KeePassVault has encountered an unexpected error. You can review the crash report before sending or sharing it as plain text with another app.</string>
+    <string name="crash_report_dialog_send">Send report</string>
+    <string name="crash_report_dialog_comment">Optional: describe what you were doing before the crash</string>
+    <string name="crash_report_email_subject">KeePassVault crash report</string>
+    <string name="crash_report_email_body">Please review the crash report before sending it. It may include device and app diagnostics, but it should not include your database password or KeePass entries. You can also share this plain text report with another app from the chooser.</string>
+
 </resources>

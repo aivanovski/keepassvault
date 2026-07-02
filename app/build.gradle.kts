@@ -310,6 +310,8 @@ dependencies {
     // Logging
     implementation(libs.timber)
     implementation(libs.treessence)
+    implementation(libs.acra.dialog)
+    implementation(libs.acra.mail)
 
     // KeePass
     implementation(libs.kotpass)

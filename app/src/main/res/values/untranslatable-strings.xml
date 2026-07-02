@@ -100,4 +100,5 @@
         <item>FUZZY</item>
     </string-array>
 
+    <string name="crash_report_email" translatable="false">alexei.ivanovski@gmail.com</string>
 </resources>

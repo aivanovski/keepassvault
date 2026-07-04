@@ -96,6 +96,10 @@ class AppSettingsViewModel(
         }
     }
 
+    fun onKeepassImplementationChanged() {
+        interactor.lockDatabase()
+    }
+
     fun onSendLongFileClicked() {
         isLoading.value = true
 

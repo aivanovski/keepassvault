@@ -1,0 +1,282 @@
+syntax = "proto3";
+
+package passnotes.keepass.v1;
+
+option java_multiple_files = true;
+option java_outer_classname = "KeepassDatabaseProto";
+option java_package = "com.ivanovsky.passnotes.data.repository.keepass.proto.v1";
+
+// Wire contract for the stateless Rust bridge:
+// - read(kdbx bytes, key) returns ReadDatabaseResponse encoded as protobuf.
+// - write(WriteDatabaseRequest protobuf, key) returns KDBX bytes.
+//
+// UUID fields are raw 16-byte KeePass UUID values. Timestamps are epoch
+// milliseconds interpreted as UTC.
+
+message DatabaseKey {
+  optional string password = 1;
+  optional bytes key_bytes = 2;
+}
+
+enum DatabaseErrorType {
+  GENERIC_ERROR = 0;
+  INVALID_KEY = 1;
+}
+
+message DatabaseError {
+  DatabaseErrorType error_type = 1;
+  string message = 2;
+}
+
+message DecodeDatabaseResult {
+  optional Database database = 1;
+  optional DatabaseError error = 2;
+}
+
+message EncodeDatabaseResult {
+  optional bytes database = 1;
+  optional DatabaseError error = 2;
+}
+
+message Database {
+  DatabaseConfig config = 1;
+  DatabaseMeta meta = 2;
+  Group root_group = 3;
+  repeated Attachment attachments = 4;
+  repeated CustomIcon custom_icons = 5;
+  repeated DeletedObject deleted_objects = 6;
+}
+
+message DatabaseConfig {
+  DatabaseVersion version = 1;
+  OuterCipher outer_cipher = 2;
+  Compression compression = 3;
+  InnerCipher inner_cipher = 4;
+  KdfConfig kdf = 5;
+  repeated VariantDictionaryItem public_custom_data = 6;
+}
+
+message DatabaseVersion {
+  DatabaseFormat format = 1;
+  optional uint32 major = 2;
+  optional uint32 minor = 3;
+}
+
+enum DatabaseFormat {
+  DATABASE_FORMAT_UNSPECIFIED = 0;
+  DATABASE_FORMAT_KDB = 1;
+  DATABASE_FORMAT_KDBX2 = 2;
+  DATABASE_FORMAT_KDBX3 = 3;
+  DATABASE_FORMAT_KDBX4 = 4;
+}
+
+enum OuterCipher {
+  OUTER_CIPHER_UNSPECIFIED = 0;
+  OUTER_CIPHER_AES_256 = 1;
+  OUTER_CIPHER_TWOFISH = 2;
+  OUTER_CIPHER_CHACHA20 = 3;
+}
+
+enum Compression {
+  COMPRESSION_UNSPECIFIED = 0;
+  COMPRESSION_NONE = 1;
+  COMPRESSION_GZIP = 2;
+}
+
+enum InnerCipher {
+  INNER_CIPHER_UNSPECIFIED = 0;
+  INNER_CIPHER_PLAIN = 1;
+  INNER_CIPHER_SALSA20 = 2;
+  INNER_CIPHER_CHACHA20 = 3;
+}
+
+message KdfConfig {
+  oneof value {
+    AesKdf aes = 1;
+    Argon2Kdf argon2 = 2;
+    Argon2Kdf argon2id = 3;
+  }
+}
+
+message AesKdf {
+  uint64 rounds = 1;
+}
+
+message Argon2Kdf {
+  uint64 iterations = 1;
+  uint64 memory_kib = 2;
+  uint32 parallelism = 3;
+  uint32 version = 4;
+}
+
+message DatabaseMeta {
+  optional string generator = 1;
+  optional string database_name = 2;
+  optional int64 database_name_changed_epoch_ms = 3;
+  optional string database_description = 4;
+  optional int64 database_description_changed_epoch_ms = 5;
+  optional string default_username = 6;
+  optional int64 default_username_changed_epoch_ms = 7;
+  optional uint32 maintenance_history_days = 8;
+  Color color = 9;
+  optional int64 master_key_changed_epoch_ms = 10;
+  optional sint32 master_key_change_rec_days = 11;
+  optional sint32 master_key_change_force_days = 12;
+  MemoryProtection memory_protection = 13;
+  optional bool recycle_bin_enabled = 14;
+  optional bytes recycle_bin_uuid = 15;
+  optional int64 recycle_bin_changed_epoch_ms = 16;
+  optional bytes entry_templates_group_uuid = 17;
+  optional int64 entry_templates_group_changed_epoch_ms = 18;
+  optional bytes last_selected_group_uuid = 19;
+  optional bytes last_top_visible_group_uuid = 20;
+  optional sint32 history_max_items = 21;
+  optional sint32 history_max_size = 22;
+  optional int64 settings_changed_epoch_ms = 23;
+  repeated CustomDataItem custom_data = 24;
+}
+
+message MemoryProtection {
+  bool protect_title = 1;
+  bool protect_username = 2;
+  bool protect_password = 3;
+  bool protect_url = 4;
+  bool protect_notes = 5;
+}
+
+message Group {
+  bytes uuid = 1;
+  optional bytes parent_uuid = 2;
+  optional bytes previous_parent_group_uuid = 3;
+  string name = 4;
+  optional string notes = 5;
+  repeated string tags = 6;
+  Icon icon = 7;
+  Times times = 8;
+  repeated CustomDataItem custom_data = 9;
+  bool is_expanded = 10;
+  optional string default_autotype_sequence = 11;
+  optional bool enable_autotype = 12;
+  optional bool enable_searching = 13;
+  optional bytes last_top_visible_entry_uuid = 14;
+  repeated Group groups = 15;
+  repeated Entry entries = 16;
+}
+
+message Entry {
+  bytes uuid = 1;
+  bytes parent_group_uuid = 2;
+  optional bytes previous_parent_group_uuid = 3;
+  repeated Field fields = 4;
+  AutoType autotype = 5;
+  repeated string tags = 6;
+  Times times = 7;
+  repeated CustomDataItem custom_data = 8;
+  Icon icon = 9;
+  Color foreground_color = 10;
+  Color background_color = 11;
+  optional string override_url = 12;
+  bool quality_check = 13;
+  repeated EntryAttachment attachments = 14;
+  repeated Entry history = 15;
+}
+
+message Field {
+  string name = 1;
+  string value = 2;
+  bool is_protected = 3;
+}
+
+message EntryAttachment {
+  string name = 1;
+  uint32 attachment_id = 2;
+}
+
+message Attachment {
+  uint32 id = 1;
+  bytes data = 2;
+  bool is_protected = 3;
+}
+
+message CustomIcon {
+  bytes uuid = 1;
+  optional string name = 2;
+  optional int64 last_modification_time_epoch_ms = 3;
+  bytes data = 4;
+}
+
+message Icon {
+  oneof value {
+    uint32 builtin_id = 1;
+    bytes custom_icon_uuid = 2;
+  }
+}
+
+message AutoType {
+  bool enabled = 1;
+  optional string default_sequence = 2;
+  DataTransferObfuscation data_transfer_obfuscation = 3;
+  repeated AutoTypeAssociation associations = 4;
+}
+
+message AutoTypeAssociation {
+  string window = 1;
+  string sequence = 2;
+}
+
+enum DataTransferObfuscation {
+  DATA_TRANSFER_OBFUSCATION_UNSPECIFIED = 0;
+  DATA_TRANSFER_OBFUSCATION_NONE = 1;
+  DATA_TRANSFER_OBFUSCATION_USE_CLIPBOARD = 2;
+}
+
+message Times {
+  optional int64 creation_epoch_ms = 1;
+  optional int64 last_modification_epoch_ms = 2;
+  optional int64 last_access_epoch_ms = 3;
+  optional int64 expiry_epoch_ms = 4;
+  optional int64 location_changed_epoch_ms = 5;
+  optional bool expires = 6;
+  optional uint32 usage_count = 7;
+}
+
+message Color {
+  uint32 red = 1;
+  uint32 green = 2;
+  uint32 blue = 3;
+}
+
+message CustomDataItem {
+  string key = 1;
+  CustomDataValue value = 2;
+  optional int64 last_modification_time_epoch_ms = 3;
+}
+
+message CustomDataValue {
+  oneof value {
+    string string_value = 1;
+    bytes binary_value = 2;
+  }
+}
+
+message DeletedObject {
+  bytes uuid = 1;
+  optional int64 deletion_time_epoch_ms = 2;
+}
+
+message VariantDictionaryItem {
+  string key = 1;
+  VariantDictionaryValue value = 2;
+}
+
+message VariantDictionaryValue {
+  oneof value {
+    uint32 uint32_value = 1;
+    uint64 uint64_value = 2;
+    sint32 int32_value = 3;
+    sint64 int64_value = 4;
+    bool bool_value = 5;
+    string string_value = 6;
+    bytes bytes_value = 7;
+  }
+}

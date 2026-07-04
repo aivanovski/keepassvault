@@ -7,6 +7,7 @@ import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import com.ivanovsky.passnotes.databinding.ViewScreenStateBinding
 import com.ivanovsky.passnotes.presentation.core.ScreenState
+import com.ivanovsky.passnotes.presentation.core.ScreenStateType
 
 class ScreenStateView(context: Context, attrs: AttributeSet?) : FrameLayout(context, attrs) {
 
@@ -28,7 +29,7 @@ class ScreenStateView(context: Context, attrs: AttributeSet?) : FrameLayout(cont
     private fun applyState(screenState: ScreenState?) {
         if (screenState == null) return
 
-        binding.errorView.state = screenState
+        binding.errorView.state = screenState.copy(type = ScreenStateType.DATA_WITH_ERROR)
         binding.emptyTextView.text = screenState.emptyText
 
         binding.progressBar.isVisible = screenState.isDisplayingLoading

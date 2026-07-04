@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.PasswordGeneratorSettings
 import com.ivanovsky.passnotes.data.entity.TestAutofillData
 import com.ivanovsky.passnotes.data.entity.TestToggles
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.GIT_USER_EMAIL
@@ -26,6 +27,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOC
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_SSL_CERTIFICATE_VALIDATION_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.KEEPASS_IMPLEMENTATION
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.PASSWORD_GENERATOR_SETTINGS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SEARCH_OPTIONS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.SORT_DIRECTION
@@ -113,6 +115,14 @@ class SettingsImpl(private val context: Context) : Settings {
         get() = getBoolean(IS_BIOMETRIC_UNLOCK_ENABLED)
         set(value) {
             putBoolean(IS_BIOMETRIC_UNLOCK_ENABLED, value)
+        }
+
+    override var keepassImplementation: KeepassImplementation
+        get() = getString(KEEPASS_IMPLEMENTATION)
+            ?.let { value -> KeepassImplementation.entries.firstOrNull { it.name == value } }
+            ?: KeepassImplementation.KOTPASS
+        set(value) {
+            putString(KEEPASS_IMPLEMENTATION, value.name)
         }
 
     override var autoLockDelayInMs: Int
@@ -385,6 +395,11 @@ class SettingsImpl(private val context: Context) : Settings {
             keyId = R.string.pref_password_generator_settings,
             type = STRING,
             defaultValue = null
+        ),
+        KEEPASS_IMPLEMENTATION(
+            keyId = R.string.pref_keepass_implementation,
+            type = STRING,
+            defaultValue = KeepassImplementation.KOTPASS.name
         ),
         TEST_AUTOFILL_DATA(
             keyId = R.string.pref_test_autofill_data,

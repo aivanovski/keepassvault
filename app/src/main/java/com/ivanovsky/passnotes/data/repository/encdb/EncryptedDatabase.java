@@ -9,6 +9,8 @@ import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao;
 import com.ivanovsky.passnotes.data.repository.file.FSOptions;
 import java.util.concurrent.locks.ReentrantLock;
 
+/** {@link EncryptedDatabaseV2} should be used instead */
+@Deprecated
 public interface EncryptedDatabase {
 
     @NonNull
@@ -50,5 +52,5 @@ public interface EncryptedDatabase {
     OperationResult<Boolean> commitTo(@NonNull FileDescriptor output, @NonNull FSOptions fsOptions);
 
     @NonNull
-    DatabaseWatcher getWatcher();
+    DatabaseWatcher<EncryptedDatabase> getWatcher();
 }

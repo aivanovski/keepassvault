@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.data.repository.settings
 import com.ivanovsky.passnotes.data.entity.PasswordGeneratorSettings
 import com.ivanovsky.passnotes.data.entity.TestAutofillData
 import com.ivanovsky.passnotes.data.entity.TestToggles
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref
 import com.ivanovsky.passnotes.domain.entity.SearchOptions
 import com.ivanovsky.passnotes.domain.entity.SortDirection
@@ -25,6 +26,7 @@ interface Settings {
     var sortDirection: SortDirection
     var isGroupsAtStartEnabled: Boolean
     var isBiometricUnlockEnabled: Boolean
+    var keepassImplementation: KeepassImplementation
     var passwordGeneratorSettings: PasswordGeneratorSettings
     var gitUserName: String?
     var gitUserEmail: String?

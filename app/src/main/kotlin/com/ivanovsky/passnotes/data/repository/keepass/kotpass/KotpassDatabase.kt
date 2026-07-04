@@ -59,14 +59,14 @@ class KotpassDatabase(
     private val database = AtomicReference(db)
     private val key = AtomicReference(key)
     private val file = AtomicReference(file)
-    private val autotypeOptionMap = AtomicReference(createInheritableOptionsMap())
+    private val inheritableOptionsMap = AtomicReference(createInheritableOptionsMap())
     private val groupUidToParentMap = AtomicReference(createGroupUidToParentMap())
     private val groupDao = KotpassGroupDao(this)
     private val noteDao = KotpassNoteDao(this)
     private val templateDao = TemplateDaoImpl(groupDao, noteDao)
-    private val dbWatcher = DatabaseWatcher()
+    private val dbWatcher = DatabaseWatcher<EncryptedDatabase>()
 
-    override fun getWatcher(): DatabaseWatcher = dbWatcher
+    override fun getWatcher() = dbWatcher
 
     override fun getLock(): ReentrantLock = lock
 
@@ -203,7 +203,7 @@ class KotpassDatabase(
     fun swapDatabase(db: KeePassDatabase) {
         lock.withLock {
             database.set(db)
-            autotypeOptionMap.set(createInheritableOptionsMap())
+            inheritableOptionsMap.set(createInheritableOptionsMap())
             groupUidToParentMap.set(createGroupUidToParentMap())
         }
     }
@@ -320,7 +320,7 @@ class KotpassDatabase(
                 add(root)
             }
 
-        while (nextGroups.size > 0) {
+        while (nextGroups.isNotEmpty()) {
             val currentGroup = nextGroups.pop()
             nextGroups.addAll(currentGroup.groups)
             result.addAll(transform.invoke(currentGroup, currentGroup.entries))
@@ -330,7 +330,7 @@ class KotpassDatabase(
     }
 
     fun getInheritableOptions(groupUid: UUID): OperationResult<InheritableOptions> {
-        val options = autotypeOptionMap.get()[groupUid]
+        val options = inheritableOptionsMap.get()[groupUid]
         return options?.let { OperationResult.success(it) }
             ?: OperationResult.error(
                 newDbError(
@@ -381,7 +381,7 @@ class KotpassDatabase(
                 add(getRawRootGroup())
             }
 
-        while (nextGroups.size > 0) {
+        while (nextGroups.isNotEmpty()) {
             val group = nextGroups.removeFirst()
 
             for (child in group.groups) {

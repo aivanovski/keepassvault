@@ -176,7 +176,7 @@ object UiModule {
             single { ResolveConflictDialogInteractor(get()) }
             single { SyncStateCache(get()) }
             single { SyncStateInteractor(get(), get(), get()) }
-            single { EnterDbCredentialsInteractor(get(), get(), get()) }
+            single { EnterDbCredentialsInteractor(get(), get(), get(), get()) }
             single { DiffViewerInteractor(get(), get(), get(), get(), get()) }
             single { SetupOneTimePasswordInteractor() }
             single { HistoryInteractor(get(), get(), get()) }

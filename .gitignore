@@ -1,7 +1,7 @@
 *.iml
 .gradle
 /local.properties
-/.idea
+.idea
 /keys/debug.keystore
 /keys/release.keystore
 /keys/google-cloud-key.json
@@ -15,6 +15,10 @@ project.properties
 /.project
 /tmp
 .kotlin/
+*.so
+
+# Rust
+/keepass-rs/target
 
 # Clojure
 .lsp/

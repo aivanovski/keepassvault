@@ -3,8 +3,7 @@ package com.ivanovsky.passnotes.data.entity;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import java.util.Objects;
 
 @Entity(tableName = "remote_file")
 public class RemoteFile {
@@ -190,52 +189,47 @@ public class RemoteFile {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-
         if (o == null || getClass() != o.getClass()) return false;
 
         RemoteFile that = (RemoteFile) o;
-
-        return new EqualsBuilder()
-                .append(locallyModified, that.locallyModified)
-                .append(uploaded, that.uploaded)
-                .append(uploadFailed, that.uploadFailed)
-                .append(uploading, that.uploading)
-                .append(downloading, that.downloading)
-                .append(retryCount, that.retryCount)
-                .append(fsAuthority, that.fsAuthority)
-                .append(id, that.id)
-                .append(lastRetryTimestamp, that.lastRetryTimestamp)
-                .append(lastDownloadTimestamp, that.lastDownloadTimestamp)
-                .append(lastModificationTimestamp, that.lastModificationTimestamp)
-                .append(lastRemoteModificationTimestamp, that.lastRemoteModificationTimestamp)
-                .append(localPath, that.localPath)
-                .append(remotePath, that.remotePath)
-                .append(uid, that.uid)
-                .append(revision, that.revision)
-                .isEquals();
+        return locallyModified == that.locallyModified
+                && uploaded == that.uploaded
+                && uploadFailed == that.uploadFailed
+                && uploading == that.uploading
+                && downloading == that.downloading
+                && retryCount == that.retryCount
+                && Objects.equals(fsAuthority, that.fsAuthority)
+                && Objects.equals(id, that.id)
+                && Objects.equals(lastRetryTimestamp, that.lastRetryTimestamp)
+                && Objects.equals(lastDownloadTimestamp, that.lastDownloadTimestamp)
+                && Objects.equals(lastModificationTimestamp, that.lastModificationTimestamp)
+                && Objects.equals(
+                        lastRemoteModificationTimestamp, that.lastRemoteModificationTimestamp)
+                && Objects.equals(localPath, that.localPath)
+                && Objects.equals(remotePath, that.remotePath)
+                && Objects.equals(uid, that.uid)
+                && Objects.equals(revision, that.revision);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(fsAuthority)
-                .append(locallyModified)
-                .append(uploaded)
-                .append(uploadFailed)
-                .append(uploading)
-                .append(downloading)
-                .append(id)
-                .append(retryCount)
-                .append(lastRetryTimestamp)
-                .append(lastDownloadTimestamp)
-                .append(lastModificationTimestamp)
-                .append(lastRemoteModificationTimestamp)
-                .append(localPath)
-                .append(remotePath)
-                .append(uid)
-                .append(revision)
-                .toHashCode();
+        int result = Objects.hashCode(fsAuthority);
+        result = 31 * result + Boolean.hashCode(locallyModified);
+        result = 31 * result + Boolean.hashCode(uploaded);
+        result = 31 * result + Boolean.hashCode(uploadFailed);
+        result = 31 * result + Boolean.hashCode(uploading);
+        result = 31 * result + Boolean.hashCode(downloading);
+        result = 31 * result + Objects.hashCode(id);
+        result = 31 * result + retryCount;
+        result = 31 * result + Objects.hashCode(lastRetryTimestamp);
+        result = 31 * result + Objects.hashCode(lastDownloadTimestamp);
+        result = 31 * result + Objects.hashCode(lastModificationTimestamp);
+        result = 31 * result + Objects.hashCode(lastRemoteModificationTimestamp);
+        result = 31 * result + Objects.hashCode(localPath);
+        result = 31 * result + Objects.hashCode(remotePath);
+        result = 31 * result + Objects.hashCode(uid);
+        result = 31 * result + Objects.hashCode(revision);
+        return result;
     }
 
     @Override

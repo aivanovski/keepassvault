@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
+import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import com.ivanovsky.passnotes.R
@@ -21,6 +22,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FIL
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_DATABASE_ON_BACK
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_POSTPONED_SYNC_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.KEEPASS_IMPLEMENTATION
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
@@ -46,6 +48,7 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
     private lateinit var isCrashReportingEnabledPref: SwitchPreferenceCompat
     private lateinit var isPostponedSyncEnabledPref: SwitchPreferenceCompat
     private lateinit var isBiometricUnlockEnabledPref: SwitchPreferenceCompat
+    private lateinit var keepassImplementationPref: ListPreference
     private lateinit var sendLogFilePref: Preference
     private lateinit var removeLogFilesPref: Preference
     private lateinit var enableNotificationPermissionPref: Preference
@@ -88,7 +91,8 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
             IS_CRASH_REPORTING_ENABLED,
             IS_POSTPONED_SYNC_ENABLED,
             IS_BIOMETRIC_UNLOCK_ENABLED,
-            IS_ACTIVATE_SEARCH_ON_START
+            IS_ACTIVATE_SEARCH_ON_START,
+            KEEPASS_IMPLEMENTATION
         )
             .forEach { settings.initDefaultIfNeed(it) }
 
@@ -117,6 +121,11 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
             getString(R.string.pref_is_biometric_unlock_enabled)
         )
             ?: throwPreferenceNotFound(R.string.pref_is_biometric_unlock_enabled)
+
+        keepassImplementationPref = findPreference(
+            getString(R.string.pref_keepass_implementation)
+        )
+            ?: throwPreferenceNotFound(R.string.pref_keepass_implementation)
 
         enableNotificationPermissionPref = findPreference(
             getString(R.string.pref_enable_notification_permission)
@@ -157,6 +166,11 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
 
         isBiometricUnlockEnabledPref.setOnPreferenceChangeListener { _, newValue ->
             viewModel.onBiometricUnlockEnabledChanged(newValue as Boolean)
+            true
+        }
+
+        keepassImplementationPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.onKeepassImplementationChanged()
             true
         }
 

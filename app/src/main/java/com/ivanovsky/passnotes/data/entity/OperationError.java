@@ -4,8 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace;
 import java.io.Serializable;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import java.util.Objects;
 
 public class OperationError implements Serializable {
 
@@ -19,6 +18,7 @@ public class OperationError implements Serializable {
     public static final String MESSAGE_IO_ERROR = "IO error";
     public static final String MESSAGE_RECORD_IS_ALREADY_EXISTS = "Record is already exists";
     public static final String MESSAGE_FAILED_TO_OPEN_DB_FILE = "Failed to open DB file";
+    public static final String MESSAGE_FAILED_TO_DECODE_DB_FILE = "Failed to decode DB file";
     public static final String MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE =
             "Local version conflicts with remote";
     public static final String MESSAGE_FAILED_TO_FIND_FILE = "Failed to find file";
@@ -51,6 +51,7 @@ public class OperationError implements Serializable {
     public static final String MESSAGE_SYNCHRONIZATION_TAKES_TOO_LONG =
             "Synchronization takes too long";
     public static final String MESSAGE_UNSUPPORTED_DATABASE_TYPE = "Unsupported database type";
+    public static final String MESSAGE_FAILED_TO_PARSE_UUID = "Failed to parse UUID";
 
     public static final String GENERIC_MESSAGE_NOT_FOUND = "%s not found";
     public static final String GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST = "Group '%s' already exists";
@@ -237,25 +238,19 @@ public class OperationError implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-
         if (o == null || getClass() != o.getClass()) return false;
 
         OperationError that = (OperationError) o;
-
-        return new EqualsBuilder()
-                .append(type, that.type)
-                .append(message, that.message)
-                .append(throwable, that.throwable)
-                .isEquals();
+        return type == that.type
+                && Objects.equals(message, that.message)
+                && Objects.equals(throwable, that.throwable);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(type)
-                .append(message)
-                .append(throwable)
-                .toHashCode();
+        int result = type.hashCode();
+        result = 31 * result + Objects.hashCode(message);
+        result = 31 * result + Objects.hashCode(throwable);
+        return result;
     }
 }

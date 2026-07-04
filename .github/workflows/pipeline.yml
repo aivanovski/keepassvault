@@ -80,6 +80,9 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
 
+      - name: Setup keepass-rs Android build
+        uses: ./.github/actions/setup-keepass-rs
+
       - name: Decrypt and validate decrypted data
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

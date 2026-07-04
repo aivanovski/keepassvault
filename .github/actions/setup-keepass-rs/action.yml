@@ -1,0 +1,63 @@
+name: Setup keepass-rs Android build
+description: Install the Rust and Android NDK tooling required to build keepass-rs JNI libraries.
+
+inputs:
+  ndk-version:
+    description: Android NDK version to install and use.
+    required: false
+    default: 29.0.14206865
+
+runs:
+  using: composite
+  steps:
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
+    - name: Cache Rust dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/bin/cargo-ndk
+          ~/.cargo/registry
+          ~/.cargo/git
+          keepass-rs/target
+        key: ${{ runner.os }}-keepass-rs-${{ hashFiles('keepass-rs/Cargo.lock') }}
+
+    - name: Install Android NDK
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+        if [[ -z "$sdk_root" ]]; then
+          echo "ANDROID_HOME or ANDROID_SDK_ROOT must be set." >&2
+          exit 1
+        fi
+
+        sdkmanager_bin="$(command -v sdkmanager || true)"
+        if [[ -z "$sdkmanager_bin" && -x "$sdk_root/cmdline-tools/latest/bin/sdkmanager" ]]; then
+          sdkmanager_bin="$sdk_root/cmdline-tools/latest/bin/sdkmanager"
+        fi
+        if [[ -z "$sdkmanager_bin" ]]; then
+          echo "sdkmanager was not found in PATH or under the Android SDK." >&2
+          exit 1
+        fi
+
+        "$sdkmanager_bin" --install "ndk;${{ inputs.ndk-version }}"
+
+        {
+          echo "ANDROID_SDK_ROOT=$sdk_root"
+          echo "ANDROID_NDK_HOME=$sdk_root/ndk/${{ inputs.ndk-version }}"
+          echo "ANDROID_NDK_ROOT=$sdk_root/ndk/${{ inputs.ndk-version }}"
+        } >> "$GITHUB_ENV"
+
+    - name: Install cargo-ndk
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if ! cargo ndk --help >/dev/null 2>&1; then
+          cargo install cargo-ndk --locked
+        fi

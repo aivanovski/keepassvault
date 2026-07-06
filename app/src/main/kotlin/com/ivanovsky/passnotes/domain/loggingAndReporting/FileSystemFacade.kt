@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.domain.logger
+package com.ivanovsky.passnotes.domain.loggingAndReporting
 
 import java.io.BufferedWriter
 import java.io.File

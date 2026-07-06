@@ -16,6 +16,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_C
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_ACTIVATE_SEARCH_ON_START
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIOMETRIC_UNLOCK_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_CRASH_REPORTING_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_DATABASE_ON_BACK
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_LOCK_NOTIFICATION_VISIBLE
@@ -42,6 +43,7 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
     private val viewModel: AppSettingsViewModel by viewModel()
 
     private lateinit var isFileLogEnabledPref: SwitchPreferenceCompat
+    private lateinit var isCrashReportingEnabledPref: SwitchPreferenceCompat
     private lateinit var isPostponedSyncEnabledPref: SwitchPreferenceCompat
     private lateinit var isBiometricUnlockEnabledPref: SwitchPreferenceCompat
     private lateinit var sendLogFilePref: Preference
@@ -83,6 +85,7 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
             AUTO_LOCK_DELAY_IN_MS,
             AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS,
             IS_FILE_LOG_ENABLED,
+            IS_CRASH_REPORTING_ENABLED,
             IS_POSTPONED_SYNC_ENABLED,
             IS_BIOMETRIC_UNLOCK_ENABLED,
             IS_ACTIVATE_SEARCH_ON_START
@@ -99,6 +102,11 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
 
         isFileLogEnabledPref = findPreference(getString(R.string.pref_is_file_log_enabled))
             ?: throwPreferenceNotFound(R.string.pref_is_file_log_enabled)
+
+        isCrashReportingEnabledPref = findPreference(
+            getString(R.string.pref_is_crash_reporting_enabled)
+        )
+            ?: throwPreferenceNotFound(R.string.pref_is_crash_reporting_enabled)
 
         isPostponedSyncEnabledPref = findPreference(
             getString(R.string.pref_is_postponed_sync_enabled)
@@ -129,11 +137,16 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
         categoryNotifications = findPreference(getString(R.string.pref_category_notifications))
             ?: throwPreferenceNotFound(R.string.pref_category_notifications)
 
-        categoryLogging = findPreference(getString(R.string.pref_category_logging))
-            ?: throwPreferenceNotFound(R.string.pref_category_logging)
+        categoryLogging = findPreference(getString(R.string.pref_category_reporting))
+            ?: throwPreferenceNotFound(R.string.pref_category_reporting)
 
         isFileLogEnabledPref.setOnPreferenceChangeListener { _, newValue ->
             viewModel.onFileLogEnabledChanged(newValue as Boolean)
+            true
+        }
+
+        isCrashReportingEnabledPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.onCrashReportingEnabledChanged(newValue as Boolean)
             true
         }
 
@@ -148,6 +161,12 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
         }
 
         categoryBiometric.isVisible = viewModel.isBiometricUnlockAvailable()
+        isCrashReportingEnabledPref.isEnabled = viewModel.isCrashReportingAvailable()
+        if (!viewModel.isCrashReportingAvailable()) {
+            isCrashReportingEnabledPref.summary = getString(
+                R.string.pref_is_crash_reporting_enabled_not_configured_summary
+            )
+        }
         enableNotificationPermissionPref.isVisible =
             viewModel.isEnableNotificationPermissionVisible.value ?: false
     }

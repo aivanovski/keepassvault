@@ -15,6 +15,7 @@ import org.koin.core.module.Module
 class DebugModuleBuilder(
     private val context: Context,
     private val loggerInteractor: LoggerInteractor,
+    private val crashReporterInteractor: CrashReporterInteractor,
     private val settings: Settings
 ) : DIModuleBuilder {
 
@@ -25,7 +26,7 @@ class DebugModuleBuilder(
         val isFakeFileSystemEnabled = settings.testToggles?.isFakeFileSystemEnabled ?: false
 
         return listOf(
-            CoreModule.build(loggerInteractor),
+            CoreModule.build(loggerInteractor, crashReporterInteractor),
             DebugModule.build(),
             DebugFileSystemProvidersModule.build(
                 isExternalStorageAccessEnabled = isExternalStorageAccessEnabled,

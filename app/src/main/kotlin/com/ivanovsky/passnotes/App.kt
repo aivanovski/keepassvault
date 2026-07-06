@@ -4,7 +4,8 @@ import android.app.Application
 import android.content.Context
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
-import com.ivanovsky.passnotes.domain.logger.LoggerInteractor
+import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor
+import com.ivanovsky.passnotes.domain.loggingAndReporting.LoggerInteractor
 import com.ivanovsky.passnotes.injection.DIModuleBuilder
 import com.ivanovsky.passnotes.injection.DefaultModuleBuilder
 import org.koin.android.ext.koin.androidContext
@@ -21,6 +22,11 @@ open class App : Application() {
         super.onCreate()
 
         val settings = SettingsImpl(context = this)
+        val crashReporterInteractor = CrashReporterInteractor(context = this)
+            .apply {
+                initialize(settings)
+            }
+
         val loggerInteractor = LoggerInteractor(context = this, settings)
             .apply {
                 initialize()
@@ -32,12 +38,18 @@ open class App : Application() {
             val constructor = type.getConstructor(
                 Context::class.java,
                 LoggerInteractor::class.java,
+                CrashReporterInteractor::class.java,
                 Settings::class.java
             )
 
-            constructor.newInstance(this, loggerInteractor, settings) as DIModuleBuilder
+            constructor.newInstance(
+                this,
+                loggerInteractor,
+                crashReporterInteractor,
+                settings
+            ) as DIModuleBuilder
         } else {
-            DefaultModuleBuilder(loggerInteractor)
+            DefaultModuleBuilder(loggerInteractor, crashReporterInteractor)
         }
 
         configureModuleBuilder(moduleBuilder)

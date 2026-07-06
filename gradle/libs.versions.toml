@@ -25,6 +25,7 @@ liveDataKtx = "2.7.0"
 composeBom = "2026.01.01"
 composeIcons = "1.6.8"
 arrow = "2.1.2"
+sentry = "8.47.0"
 
 okHttp = "4.12.0"
 apacheCommonsLang = "3.13.0"
@@ -121,3 +122,4 @@ fzf4j = { module = "com.github.aivanovski:fzf4j", version.ref = "fzf4j" }
 totp-kt = { module = "com.github.robinohs:totp-kt", version.ref = "totpKt" }
 arrowCore = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrowCoroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
+sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentry" }

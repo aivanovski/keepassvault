@@ -18,6 +18,7 @@ interface Settings {
     var isLockNotificationDialogEnabled: Boolean
     var isLockDatabaseOnBack: Boolean
     var isFileLogEnabled: Boolean
+    var isCrashReportingEnabled: Boolean
     var searchOptions: SearchOptions
     var isActivateSearchOnStart: Boolean
     var sortType: SortType

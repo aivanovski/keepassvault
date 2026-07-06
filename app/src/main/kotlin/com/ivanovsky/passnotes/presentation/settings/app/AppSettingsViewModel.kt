@@ -74,6 +74,14 @@ class AppSettingsViewModel(
         interactor.reInitializeLogging()
     }
 
+    fun isCrashReportingAvailable(): Boolean =
+        interactor.isCrashReportingAvailable()
+
+    fun onCrashReportingEnabledChanged(isEnabled: Boolean) {
+        settings.isCrashReportingEnabled = isEnabled
+        interactor.setCrashReportingEnabled(isEnabled)
+    }
+
     fun onPostponedSyncEnabledChanged(isEnabled: Boolean) {
         interactor.lockDatabase()
     }

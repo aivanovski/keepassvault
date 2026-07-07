@@ -11,7 +11,6 @@ import com.ivanovsky.passnotes.data.repository.file.saf.SAFHelper
 import com.ivanovsky.passnotes.data.repository.keepass.DatabaseSyncStateProvider
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.settings.Settings
-import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.DateFormatter
 import com.ivanovsky.passnotes.domain.DispatcherProvider
@@ -21,18 +20,16 @@ import com.ivanovsky.passnotes.domain.NoteDiffer
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
-import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor
-import com.ivanovsky.passnotes.domain.loggingAndReporting.LoggerInteractor
+import com.ivanovsky.passnotes.injection.AppStartDependencies
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 import org.koin.dsl.module
 
 object CoreModule {
 
     fun build(
-        loggerInteractor: LoggerInteractor,
-        crashReporterInteractor: CrashReporterInteractor
+        appStartDeps: AppStartDependencies
     ) = module {
-        single { loggerInteractor }
+        single { appStartDeps.loggerInteractor }
         single { ThemeProvider(get()) }
         single { ResourceProvider(get(), get()) }
         single { PermissionHelper(get()) }
@@ -43,8 +40,8 @@ object CoreModule {
         single { DateFormatter(get()) }
         single { NoteDiffer() }
         single { SelectionHolder() }
-        single<Settings> { SettingsImpl(get()) }
-        single { crashReporterInteractor }
+        single<Settings> { appStartDeps.settings }
+        single { appStartDeps.crashReporterInteractor }
         single<DataCipherProvider> { DataCipherProviderImpl(get()) }
         single { FileHelper(get(), get()) }
         single { SAFHelper(get()) }

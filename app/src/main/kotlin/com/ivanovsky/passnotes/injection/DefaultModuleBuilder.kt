@@ -1,7 +1,5 @@
 package com.ivanovsky.passnotes.injection
 
-import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor
-import com.ivanovsky.passnotes.domain.loggingAndReporting.LoggerInteractor
 import com.ivanovsky.passnotes.injection.modules.BiometricModule
 import com.ivanovsky.passnotes.injection.modules.CoreModule
 import com.ivanovsky.passnotes.injection.modules.FileSystemProvidersModule
@@ -10,15 +8,14 @@ import com.ivanovsky.passnotes.injection.modules.UseCaseModule
 import org.koin.core.module.Module
 
 class DefaultModuleBuilder(
-    private val loggerInteractor: LoggerInteractor,
-    private val crashReporterInteractor: CrashReporterInteractor
+    private val appDeps: AppStartDependencies
 ) : DIModuleBuilder {
 
     override var isExternalStorageAccessEnabled: Boolean = false
 
     override fun buildModules(): List<Module> {
         return listOf(
-            CoreModule.build(loggerInteractor, crashReporterInteractor),
+            CoreModule.build(appDeps),
             FileSystemProvidersModule.build(
                 isExternalStorageAccessEnabled = isExternalStorageAccessEnabled
             ),

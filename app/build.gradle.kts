@@ -167,9 +167,15 @@ android {
     productFlavors {
         create("fdroid") {
             dimension = "default"
+            buildConfigField("boolean", "IS_AUTOMATION_BUILD", "false")
+        }
+        create("automation") {
+            applicationIdSuffix = ".automation"
+            buildConfigField("boolean", "IS_AUTOMATION_BUILD", "true")
         }
         create("gplay") {
             dimension = "default"
+            buildConfigField("boolean", "IS_AUTOMATION_BUILD", "false")
         }
     }
 
@@ -179,12 +185,6 @@ android {
             isMinifyEnabled = false
             versionNameSuffix = "d"
             signingConfig = signingConfigs.getByName("debug")
-        }
-        create("automation") {
-            isDebuggable = true
-            isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
-            applicationIdSuffix = ".automation"
         }
         release {
             isDebuggable = false

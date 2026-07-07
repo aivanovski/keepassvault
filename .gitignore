@@ -20,6 +20,3 @@ project.properties
 .clj-kondo/
 .cpcache/
 .nrepl-port
-
-keepass-rs/
-keepass-rs-android/

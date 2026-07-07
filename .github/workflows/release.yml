@@ -26,13 +26,12 @@ jobs:
 
       - name: Build apk's
         run: |
-          ./gradlew app:assembleFdroidDebug app:assembleFdroidRelease app:assembleFdroidAutomation
+          app:assembleFdroidRelease app:assembleAutomationDebug
 
       - name: Rename files
         run: |
-          cp ./app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk ./keepassvault-debug.apk
           cp ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk ./keepassvault-release.apk
-          cp ./app/build/outputs/apk/fdroid/automation/app-fdroid-automation.apk ./keepassvault-test.apk
+          cp ./app/build/outputs/apk/automation/debug/app-automation-debug.apk ./keepassvault-test.apk
 
       - name: Publish Github Release
         uses: softprops/action-gh-release@v2
@@ -40,7 +39,6 @@ jobs:
           generate_release_notes: true
           prerelease: true
           files: |
-            ./keepassvault-debug.apk
             ./keepassvault-release.apk
             ./keepassvault-test.apk
 

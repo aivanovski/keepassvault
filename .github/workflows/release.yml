@@ -24,14 +24,22 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: ./.github/workflows/decrypt-and-validate-data.sh
 
-      - name: Build apk's
+      - name: Build Github Release apk's
         run: |
-          ./gradlew app:assembleFdroidRelease app:assembleAutomationDebug
+          ./gradlew app:assembleFdroidRelease
+
+      - name: Build Github test apk's
+        run: |
+          ./gradlew app:assembleAutomationDebug
+
+      - name: Build Google Play bundle
+        run: |
+          ./gradlew app:bundleGplayRelease
 
       - name: Rename files
         run: |
-          cp ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk ./keepassvault-release.apk
-          cp ./app/build/outputs/apk/automation/debug/app-automation-debug.apk ./keepassvault-test.apk
+          cp ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk ./keepassvault.apk
+          cp ./app/build/outputs/apk/automation/debug/app-automation-debug.apk ./test-build.apk
 
       - name: Publish Github Release
         uses: softprops/action-gh-release@v2
@@ -39,8 +47,8 @@ jobs:
           generate_release_notes: true
           prerelease: true
           files: |
-            ./keepassvault-release.apk
-            ./keepassvault-test.apk
+            ./keepassvault.apk
+            ./test-build.apk
 
   upload-to-google-play:
     name: Upload App Bundle to Google Play

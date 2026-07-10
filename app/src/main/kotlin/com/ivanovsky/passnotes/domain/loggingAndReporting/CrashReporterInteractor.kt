@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.domain.loggingAndReporting
 
 import android.content.Context
+import com.ivanovsky.passnotes.AppFlavor
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import io.sentry.Sentry
@@ -10,10 +11,10 @@ class CrashReporterInteractor(
     private val context: Context
 ) {
 
-    @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
     fun getAvailability(): CrashReporterAvailability {
+        val appFlavor = AppFlavor.get()
         return when {
-            BuildConfig.FLAVOR == FLAVOR_FDROID && !BuildConfig.DEBUG ->
+            appFlavor == AppFlavor.FDROID && !BuildConfig.DEBUG ->
                 CrashReporterAvailability.UNAVAILABLE
 
             BuildConfig.SENTRY_DSN.isNotBlank() ->
@@ -58,9 +59,5 @@ class CrashReporterInteractor(
         AVAILABLE,
         NOT_CONFIGURED,
         UNAVAILABLE
-    }
-
-    companion object {
-        private const val FLAVOR_FDROID = "fdroid"
     }
 }

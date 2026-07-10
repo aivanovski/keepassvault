@@ -365,8 +365,9 @@
     <string name="pref_is_file_log_enabled_title">Write log to file</string>
     <string name="pref_is_file_log_enabled_summary">Application will write all logs to file that can be attached to issue at Github page</string>
     <string name="pref_is_crash_reporting_enabled_title">Send crash reports</string>
-    <string name="pref_is_crash_reporting_enabled_summary">Send crash reports to Sentry to help diagnose application failures</string>
-    <string name="pref_is_crash_reporting_enabled_not_configured_summary">Crash reporting is not configured for this build</string>
+    <string name="pref_is_crash_reporting_available_summary">Send crash reports to Sentry to help diagnose application failures</string>
+    <string name="pref_is_crash_reporting_not_configured_summary">Crash reporting is not configured for this build</string>
+    <string name="pref_is_crash_reporting_unavailable_summary">Crash reporting is available only in Google Play build</string>
     <string name="pref_send_log_file_title">Send log file</string>
     <string name="pref_remove_log_files_title">Clear logs</string>
     <string name="pref_is_postponed_sync_enabled_title">Postpone uploading</string>

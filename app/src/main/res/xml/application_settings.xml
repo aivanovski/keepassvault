@@ -91,7 +91,7 @@
 
         <SwitchPreferenceCompat
             app:key="@string/pref_is_crash_reporting_enabled"
-            app:summary="@string/pref_is_crash_reporting_enabled_summary"
+            app:summary="@string/pref_is_crash_reporting_available_summary"
             app:title="@string/pref_is_crash_reporting_enabled_title" />
 
         <SwitchPreferenceCompat

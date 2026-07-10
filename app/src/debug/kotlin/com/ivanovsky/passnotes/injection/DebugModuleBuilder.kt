@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.injection.modules.debug.DebugFileSystemProvidersM
 import com.ivanovsky.passnotes.injection.modules.debug.DebugModule
 import org.koin.core.module.Module
 
+// Is loaded via reflection in App.kt
 class DebugModuleBuilder(
     private val startDeps: AppStartDependencies
 ) : DIModuleBuilder {

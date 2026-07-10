@@ -10,14 +10,25 @@ class CrashReporterInteractor(
     private val context: Context
 ) {
 
-    val isAvailable: Boolean = BuildConfig.SENTRY_DSN.isNotBlank()
+    @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
+    fun getAvailability(): CrashReporterAvailability {
+        return when {
+            BuildConfig.FLAVOR == FLAVOR_FDROID && !BuildConfig.DEBUG ->
+                CrashReporterAvailability.UNAVAILABLE
+
+            BuildConfig.SENTRY_DSN.isNotBlank() ->
+                CrashReporterAvailability.AVAILABLE
+
+            else -> CrashReporterAvailability.NOT_CONFIGURED
+        }
+    }
 
     fun initialize(settings: Settings) {
         setEnabled(settings.isCrashReportingEnabled)
     }
 
     fun setEnabled(isEnabled: Boolean) {
-        if (!isEnabled || !isAvailable) {
+        if (!isEnabled || getAvailability() != CrashReporterAvailability.AVAILABLE) {
             Sentry.close()
             return
         }
@@ -42,4 +53,14 @@ class CrashReporterInteractor(
             append('+')
             append(BuildConfig.VERSION_CODE)
         }
+
+    enum class CrashReporterAvailability {
+        AVAILABLE,
+        NOT_CONFIGURED,
+        UNAVAILABLE
+    }
+
+    companion object {
+        private const val FLAVOR_FDROID = "fdroid"
+    }
 }

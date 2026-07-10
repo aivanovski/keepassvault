@@ -6,7 +6,6 @@ import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteracto
 import com.ivanovsky.passnotes.domain.loggingAndReporting.LoggerInteractor
 import com.ivanovsky.passnotes.injection.AppStartDependencies
 import com.ivanovsky.passnotes.injection.DIModuleBuilder
-import com.ivanovsky.passnotes.injection.DebugModuleBuilder
 import com.ivanovsky.passnotes.injection.DefaultModuleBuilder
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -40,7 +39,11 @@ open class App : Application() {
         )
 
         val moduleBuilder = if (BuildConfig.DEBUG) {
-            DebugModuleBuilder(deps)
+            val type = Class.forName("com.ivanovsky.passnotes.injection.DebugModuleBuilder")
+
+            val constructor = type.getConstructor(AppStartDependencies::class.java)
+
+            constructor.newInstance(deps) as DIModuleBuilder
         } else {
             DefaultModuleBuilder(deps)
         }

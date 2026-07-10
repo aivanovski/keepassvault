@@ -7,6 +7,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor
+import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor.CrashReporterAvailability
 import com.ivanovsky.passnotes.domain.loggingAndReporting.LoggerInteractor
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveBiometricDataUseCase
@@ -21,8 +22,8 @@ class AppSettingsInteractor(
     private val crashReporterInteractor: CrashReporterInteractor
 ) {
 
-    fun isCrashReportingAvailable(): Boolean =
-        crashReporterInteractor.isAvailable
+    fun getCrashReportingAvailability(): CrashReporterAvailability =
+        crashReporterInteractor.getAvailability()
 
     fun reInitializeLogging() {
         loggerInteractor.initialize()

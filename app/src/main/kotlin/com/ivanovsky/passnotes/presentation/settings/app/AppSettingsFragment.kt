@@ -162,11 +162,7 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
 
         categoryBiometric.isVisible = viewModel.isBiometricUnlockAvailable()
         isCrashReportingEnabledPref.isEnabled = viewModel.isCrashReportingAvailable()
-        if (!viewModel.isCrashReportingAvailable()) {
-            isCrashReportingEnabledPref.summary = getString(
-                R.string.pref_is_crash_reporting_enabled_not_configured_summary
-            )
-        }
+        isCrashReportingEnabledPref.summary = viewModel.getCrashReportingSummary()
         enableNotificationPermissionPref.isVisible =
             viewModel.isEnableNotificationPermissionVisible.value ?: false
     }

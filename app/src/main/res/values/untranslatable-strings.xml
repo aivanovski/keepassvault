@@ -12,6 +12,7 @@
     <string name="pref_is_external_storage_cache_enabled" translatable="false">isExternalStorageCacheEnabled</string>
     <string name="pref_is_ssl_certificate_validation_enabled" translatable="false">isSslCertificateValidationEnabled</string>
     <string name="pref_is_file_log_enabled" translatable="false">isLogToFileEnabled</string>
+    <string name="pref_is_crash_reporting_enabled" translatable="false">isCrashReportingEnabled</string>
     <string name="pref_is_postponed_sync_enabled" translatable="false">isPostponedSyncEnabled</string>
     <string name="pref_git_user_name" translatable="false">gitUserName</string>
     <string name="pref_git_user_email" translatable="false">gitUserEmail</string>
@@ -35,7 +36,7 @@
     <string name="pref_category_general" translatable="false">categoryGeneral</string>
     <string name="pref_category_biometrics" translatable="false">categoryBiometrics</string>
     <string name="pref_category_notifications" translatable="false">categoryNotifications</string>
-    <string name="pref_category_logging" translatable="false">categoryLogging</string>
+    <string name="pref_category_reporting" translatable="false">categoryLogging</string>
     <string name="pref_category_search" translatable="false">categorySearch</string>
     <string name="pref_category_synchronization" translatable="false">categorySynchronization</string>
 

@@ -1,8 +1,8 @@
-package com.ivanovsky.passnotes.domain.logger
+package com.ivanovsky.passnotes.domain.loggingAndReporting
 
-import com.ivanovsky.passnotes.domain.logger.FileLoggerImplTest.Companion.LOG_DATE_FORMAT
-import com.ivanovsky.passnotes.domain.logger.FileLoggerImplTest.Companion.LOG_START_TIME
-import com.ivanovsky.passnotes.domain.logger.FileLoggerImplTest.Companion.parseDateToMillis
+import com.ivanovsky.passnotes.domain.loggingAndReporting.FileLoggerImplTest.Companion.LOG_DATE_FORMAT
+import com.ivanovsky.passnotes.domain.loggingAndReporting.FileLoggerImplTest.Companion.LOG_START_TIME
+import com.ivanovsky.passnotes.domain.loggingAndReporting.FileLoggerImplTest.Companion.parseDateToMillis
 import java.util.Date
 
 class MockLogGenerator {

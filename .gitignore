@@ -5,6 +5,7 @@
 /keys/debug.keystore
 /keys/release.keystore
 /keys/google-cloud-key.json
+/keys/keepassvault-firebase-service-account.json
 ci.properties
 .DS_Store
 /build

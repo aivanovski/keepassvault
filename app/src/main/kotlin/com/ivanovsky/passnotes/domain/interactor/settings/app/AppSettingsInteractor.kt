@@ -6,7 +6,9 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
-import com.ivanovsky.passnotes.domain.logger.LoggerInteractor
+import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor
+import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor.CrashReporterAvailability
+import com.ivanovsky.passnotes.domain.loggingAndReporting.LoggerInteractor
 import com.ivanovsky.passnotes.domain.usecases.LockDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveBiometricDataUseCase
 import java.io.File
@@ -16,11 +18,19 @@ class AppSettingsInteractor(
     private val loggerInteractor: LoggerInteractor,
     private val dispatchers: DispatcherProvider,
     private val lockUseCase: LockDatabaseUseCase,
-    private val removeBiometricDataUseCase: RemoveBiometricDataUseCase
+    private val removeBiometricDataUseCase: RemoveBiometricDataUseCase,
+    private val crashReporterInteractor: CrashReporterInteractor
 ) {
+
+    fun getCrashReportingAvailability(): CrashReporterAvailability =
+        crashReporterInteractor.getAvailability()
 
     fun reInitializeLogging() {
         loggerInteractor.initialize()
+    }
+
+    fun setCrashReportingEnabled(isEnabled: Boolean) {
+        crashReporterInteractor.setEnabled(isEnabled)
     }
 
     fun lockDatabase() {

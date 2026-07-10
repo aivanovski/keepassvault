@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
+import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor.CrashReporterAvailability
 import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.util.StringUtils
@@ -74,6 +75,14 @@ class AppSettingsViewModel(
         interactor.reInitializeLogging()
     }
 
+    fun isCrashReportingAvailable(): Boolean =
+        interactor.getCrashReportingAvailability() == CrashReporterAvailability.AVAILABLE
+
+    fun onCrashReportingEnabledChanged(isEnabled: Boolean) {
+        settings.isCrashReportingEnabled = isEnabled
+        interactor.setCrashReportingEnabled(isEnabled)
+    }
+
     fun onPostponedSyncEnabledChanged(isEnabled: Boolean) {
         interactor.lockDatabase()
     }
@@ -125,5 +134,20 @@ class AppSettingsViewModel(
 
     fun onNotificationPermissionResult(isGranted: Boolean) {
         updateNotificationPermissionData()
+    }
+
+    fun getCrashReportingSummary(): String {
+        val summaryResId = when (interactor.getCrashReportingAvailability()) {
+            CrashReporterAvailability.UNAVAILABLE ->
+                R.string.pref_is_crash_reporting_unavailable_summary
+
+            CrashReporterAvailability.AVAILABLE ->
+                R.string.pref_is_crash_reporting_available_summary
+
+            CrashReporterAvailability.NOT_CONFIGURED ->
+                R.string.pref_is_crash_reporting_not_configured_summary
+        }
+
+        return resourceProvider.getString(summaryResId)
     }
 }

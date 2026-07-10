@@ -16,6 +16,7 @@ import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.GIT_US
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.GIT_USER_NAME
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_ACTIVATE_SEARCH_ON_START
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIOMETRIC_UNLOCK_ENABLED
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_CRASH_REPORTING_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_EXTERNAL_STORAGE_CACHE_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_FILE_LOG_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_GROUPS_AT_START_ENABLED
@@ -99,6 +100,12 @@ class SettingsImpl(private val context: Context) : Settings {
         get() = getBoolean(IS_FILE_LOG_ENABLED)
         set(value) {
             putBoolean(IS_FILE_LOG_ENABLED, value)
+        }
+
+    override var isCrashReportingEnabled: Boolean
+        get() = getBoolean(IS_CRASH_REPORTING_ENABLED)
+        set(value) {
+            putBoolean(IS_CRASH_REPORTING_ENABLED, value)
         }
 
     override var isBiometricUnlockEnabled: Boolean
@@ -315,6 +322,11 @@ class SettingsImpl(private val context: Context) : Settings {
         ),
         IS_FILE_LOG_ENABLED(
             keyId = R.string.pref_is_file_log_enabled,
+            type = BOOLEAN,
+            defaultValue = false
+        ),
+        IS_CRASH_REPORTING_ENABLED(
+            keyId = R.string.pref_is_crash_reporting_enabled,
             type = BOOLEAN,
             defaultValue = false
         ),

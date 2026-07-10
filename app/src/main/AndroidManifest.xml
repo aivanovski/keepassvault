@@ -20,6 +20,10 @@
         android:theme="@style/AppTheme"
         android:networkSecurityConfig="@xml/network_security_config">
 
+        <meta-data
+            android:name="io.sentry.auto-init"
+            android:value="false" />
+
         <!-- Activities -->
         <activity
             android:name=".presentation.StartActivity"

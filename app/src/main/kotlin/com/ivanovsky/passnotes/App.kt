@@ -1,10 +1,10 @@
 package com.ivanovsky.passnotes
 
 import android.app.Application
-import android.content.Context
-import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
-import com.ivanovsky.passnotes.domain.logger.LoggerInteractor
+import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor
+import com.ivanovsky.passnotes.domain.loggingAndReporting.LoggerInteractor
+import com.ivanovsky.passnotes.injection.AppStartDependencies
 import com.ivanovsky.passnotes.injection.DIModuleBuilder
 import com.ivanovsky.passnotes.injection.DefaultModuleBuilder
 import org.koin.android.ext.koin.androidContext
@@ -15,29 +15,37 @@ open class App : Application() {
 
     open fun configureModuleBuilder(builder: DIModuleBuilder) {
         // implementation should be flavor specific
+        if (BuildConfig.IS_AUTOMATION_BUILD) {
+            builder.isExternalStorageAccessEnabled = true
+        }
     }
 
     override fun onCreate() {
         super.onCreate()
 
         val settings = SettingsImpl(context = this)
-        val loggerInteractor = LoggerInteractor(context = this, settings)
-            .apply {
-                initialize()
-            }
+
+        val deps = AppStartDependencies(
+            context = this,
+            settings = settings,
+            loggerInteractor = LoggerInteractor(context = this, settings)
+                .apply {
+                    initialize()
+                },
+            crashReporterInteractor = CrashReporterInteractor(context = this)
+                .apply {
+                    initialize(settings)
+                }
+        )
 
         val moduleBuilder = if (BuildConfig.DEBUG) {
             val type = Class.forName("com.ivanovsky.passnotes.injection.DebugModuleBuilder")
 
-            val constructor = type.getConstructor(
-                Context::class.java,
-                LoggerInteractor::class.java,
-                Settings::class.java
-            )
+            val constructor = type.getConstructor(AppStartDependencies::class.java)
 
-            constructor.newInstance(this, loggerInteractor, settings) as DIModuleBuilder
+            constructor.newInstance(deps) as DIModuleBuilder
         } else {
-            DefaultModuleBuilder(loggerInteractor)
+            DefaultModuleBuilder(deps)
         }
 
         configureModuleBuilder(moduleBuilder)

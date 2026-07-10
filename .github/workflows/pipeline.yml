@@ -56,10 +56,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - command: assembleGplayDebug
-            fileName: app-gplay-debug.apk
-            filePath: ./app/build/outputs/apk/gplay/debug/app-gplay-debug.apk
-
           - command: assembleGplayRelease
             fileName: app-gplay-release.apk
             filePath: ./app/build/outputs/apk/gplay/release/app-gplay-release.apk
@@ -72,9 +68,9 @@ jobs:
             fileName: app-fdroid-release.apk
             filePath: ./app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
 
-          - command: assembleFdroidAutomation
-            fileName: app-fdroid-automation.apk
-            filePath: ./app/build/outputs/apk/fdroid/automation/app-fdroid-automation.apk
+          - command: assembleAutomationDebug
+            fileName: app-automation-debug.apk
+            filePath: ./app/build/outputs/apk/automation/debug/app-automation-debug.apk
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -98,3 +94,55 @@ jobs:
         with:
           name: ${{ matrix.fileName }}
           path: ${{ matrix.filePath }}
+
+  upload-fdroid-debug-to-firebase-app-distribution:
+    name: Upload F-Droid debug APK to Firebase App Distribution
+    needs: [ build-apks ]
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Decrypt and validate decrypted data
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: ./.github/workflows/decrypt-and-validate-data.sh
+
+      - name: Download F-Droid debug APK
+        uses: actions/download-artifact@v4
+        with:
+          name: app-fdroid-debug.apk
+          path: firebase-upload
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Upload to Firebase App Distribution
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ./keys/keepassvault-firebase-service-account.json
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+
+          FIREBASE_APP_ID="$(sed -n 's/^FIREBASE_APP_ID=//p' ci.properties)"
+          FIREBASE_GROUPS="$(sed -n 's/^FIREBASE_GROUPS=//p' ci.properties)"
+
+          : "${FIREBASE_APP_ID:?FIREBASE_APP_ID is required in ci.properties}"
+          : "${FIREBASE_GROUPS:?FIREBASE_GROUPS is required in ci.properties}"
+
+          printf 'Pull request #%s: %s\nCommit: %s\n' \
+            "$PR_NUMBER" \
+            "$PR_TITLE" \
+            "$GITHUB_SHA" \
+            > firebase-release-notes.txt
+
+          firebase appdistribution:distribute firebase-upload/app-fdroid-debug.apk \
+            --app "$FIREBASE_APP_ID" \
+            --groups "$FIREBASE_GROUPS" \
+            --release-notes-file firebase-release-notes.txt

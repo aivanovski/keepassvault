@@ -194,7 +194,7 @@ fun DarkPreview() {
     ) {
         AboutScreen(
             version = BuildConfig.VERSION_NAME,
-            buildType = BuildConfig.BUILD_TYPE
+            buildType = "${BuildConfig.BUILD_TYPE} / ${BuildConfig.FLAVOR}"
         )
     }
 }

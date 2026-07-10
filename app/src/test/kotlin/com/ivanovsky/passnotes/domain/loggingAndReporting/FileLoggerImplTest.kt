@@ -1,9 +1,9 @@
-package com.ivanovsky.passnotes.domain.logger
+package com.ivanovsky.passnotes.domain.loggingAndReporting
 
 import com.google.common.truth.Truth.assertThat
-import com.ivanovsky.passnotes.domain.logger.FileLoggerImpl.Companion.RELEASE_RESOURCES_DELAY_IN_MS
-import com.ivanovsky.passnotes.domain.logger.MockFileSystemFacade.MockWriter
-import com.ivanovsky.passnotes.domain.logger.MockFileSystemFacade.ThrowOnWriteWriter
+import com.ivanovsky.passnotes.domain.loggingAndReporting.FileLoggerImpl.Companion.RELEASE_RESOURCES_DELAY_IN_MS
+import com.ivanovsky.passnotes.domain.loggingAndReporting.MockFileSystemFacade.MockWriter
+import com.ivanovsky.passnotes.domain.loggingAndReporting.MockFileSystemFacade.ThrowOnWriteWriter
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale

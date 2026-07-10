@@ -12,7 +12,7 @@ class AboutViewModel(
 ) : ViewModel() {
 
     val appVersion = BuildConfig.VERSION_NAME
-    val appBuildType = BuildConfig.BUILD_TYPE
+    val appBuildType = "${BuildConfig.BUILD_TYPE} / ${BuildConfig.FLAVOR}"
     val theme = themeFlow(themeProvider)
 
     fun onBackClicked() = router.exit()

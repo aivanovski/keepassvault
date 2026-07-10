@@ -18,7 +18,7 @@ plugins {
 }
 
 val versionMajor = 1
-val versionMinor = 17
+val versionMinor = 18
 val versionPatch = 0
 
 val formattedVersionCode = (versionMajor * 10000 + versionMinor * 100 + versionPatch).toString()
@@ -29,6 +29,7 @@ val ciPropertiesFile = file("../ci.properties")
 
 val propertyKeystorePassword = "KEYSTORE_PASSWORD"
 val propertyKeystoreAlias = "KEYSTORE_ALIAS"
+val propertySentryDsn = "SENTRY_DSN"
 
 val debugKeyPath = "../keys/debug.keystore"
 val releaseKeyPath = "../keys/release.keystore"
@@ -49,6 +50,10 @@ val customProps = Properties().apply {
 
 fun getCustomProperty(key: String): String {
     return customProps.getProperty(key) ?: System.getenv(key).orEmpty()
+}
+
+fun String.toBuildConfigString(): String {
+    return "\"${replace("\\", "\\\\").replace("\"", "\\\"")}\""
 }
 
 val generateVersionPropertiesFile by tasks.registering {
@@ -91,6 +96,11 @@ android {
         versionCode = formattedVersionCode.toInt()
         versionName = formattedVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField(
+            "String",
+            "SENTRY_DSN",
+            getCustomProperty(propertySentryDsn).toBuildConfigString()
+        )
 
         vectorDrawables {
             useSupportLibrary = true
@@ -157,9 +167,15 @@ android {
     productFlavors {
         create("fdroid") {
             dimension = "default"
+            buildConfigField("boolean", "IS_AUTOMATION_BUILD", "false")
+        }
+        create("automation") {
+            applicationIdSuffix = ".automation"
+            buildConfigField("boolean", "IS_AUTOMATION_BUILD", "true")
         }
         create("gplay") {
             dimension = "default"
+            buildConfigField("boolean", "IS_AUTOMATION_BUILD", "false")
         }
     }
 
@@ -169,12 +185,6 @@ android {
             isMinifyEnabled = false
             versionNameSuffix = "d"
             signingConfig = signingConfigs.getByName("debug")
-        }
-        create("automation") {
-            isDebuggable = true
-            isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
-            applicationIdSuffix = ".automation"
         }
         release {
             isDebuggable = false
@@ -310,6 +320,7 @@ dependencies {
     // Logging
     implementation(libs.timber)
     implementation(libs.treessence)
+    implementation(libs.sentry.android)
 
     // KeePass
     implementation(libs.kotpass)

@@ -168,7 +168,7 @@ object UiModule {
             single { ServerLoginInteractor(get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
             single { DatabaseSettingsInteractor(get(), get()) }
-            single { AppSettingsInteractor(get(), get(), get(), get()) }
+            single { AppSettingsInteractor(get(), get(), get(), get(), get()) }
             single { AutofillInteractor(get(), get()) }
             single { MainInteractor(get()) }
             single { LockServiceInteractor(get(), get(), get(), get(), get()) }

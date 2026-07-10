@@ -14,7 +14,7 @@ For a better experience, while using our Service, I may require you to provide u
 
 **Log Data**
 
-I want to inform you that whenever you use my Service, in a case of an error in the app I collect data and information (through third-party products) on your phone called Log Data. This Log Data may include information such as your device Internet Protocol (“IP”) address, device name, operating system version, the configuration of the app when utilizing my Service, the time and date of your use of the Service, and other statistics.
+If you enable crash reporting in the application settings, then in a case of an error in the app I collect data and information (through third-party products) on your phone called Log Data. This Log Data may include information such as your device Internet Protocol (“IP”) address, device name, operating system version, the configuration of the app when utilizing my Service, the time and date of your use of the Service, and other statistics. Crash reporting is disabled by default.
 
 **Cookies**
 
@@ -49,7 +49,7 @@ I do not knowingly collect personally identifiable information from children. I 
 
 I may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically for any changes. I will notify you of any changes by posting the new Privacy Policy on this page.
 
-This policy is effective as of 2022-10-22
+This policy is effective as of 2026-07-06
 
 **Contact Us**
 

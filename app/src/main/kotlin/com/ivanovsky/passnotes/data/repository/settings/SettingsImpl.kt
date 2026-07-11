@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.StringRes
 import androidx.preference.PreferenceManager
+import com.ivanovsky.passnotes.AppFlavor
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.PasswordGeneratorSettings
 import com.ivanovsky.passnotes.data.entity.TestAutofillData
@@ -328,7 +329,8 @@ class SettingsImpl(private val context: Context) : Settings {
         IS_CRASH_REPORTING_ENABLED(
             keyId = R.string.pref_is_crash_reporting_enabled,
             type = BOOLEAN,
-            defaultValue = false
+            // Crash reporting should be enabled by default for Google Play build
+            defaultValue = (AppFlavor.get() == AppFlavor.GOOGLE_PLAY)
         ),
         IS_POSTPONED_SYNC_ENABLED(
             keyId = R.string.pref_is_postponed_sync_enabled,

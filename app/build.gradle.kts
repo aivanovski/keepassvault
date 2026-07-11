@@ -19,7 +19,7 @@ plugins {
 
 val versionMajor = 1
 val versionMinor = 18
-val versionPatch = 0
+val versionPatch = 1
 
 val formattedVersionCode = (versionMajor * 10000 + versionMinor * 100 + versionPatch).toString()
 val formattedVersionName = "$versionMajor.$versionMinor.$versionPatch"

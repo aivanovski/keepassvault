@@ -7,7 +7,6 @@ import android.os.Looper
 import androidx.annotation.StringRes
 import androidx.preference.PreferenceManager
 import com.ivanovsky.passnotes.AppFlavor
-import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.PasswordGeneratorSettings
 import com.ivanovsky.passnotes.data.entity.TestAutofillData
@@ -43,7 +42,6 @@ import com.ivanovsky.passnotes.data.serialization.TestTogglesConverter
 import com.ivanovsky.passnotes.domain.entity.SearchOptions
 import com.ivanovsky.passnotes.domain.entity.SortDirection
 import com.ivanovsky.passnotes.domain.entity.SortType
-import com.ivanovsky.passnotes.injection.AppStartDependencies
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 

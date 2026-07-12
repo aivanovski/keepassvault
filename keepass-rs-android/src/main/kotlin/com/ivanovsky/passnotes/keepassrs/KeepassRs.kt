@@ -3,13 +3,13 @@ package com.ivanovsky.passnotes.keepassrs
 import arrow.core.Either
 import arrow.core.raise.either
 import com.google.protobuf.InvalidProtocolBufferException
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Database
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.DatabaseError
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.DatabaseErrorType
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.DatabaseKey
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.DecodeDatabaseResult
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.EncodeDatabaseResult
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.errorOrNull
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Database
+import com.ivanovsky.passnotes.keepassrs.proto.v1.DatabaseError
+import com.ivanovsky.passnotes.keepassrs.proto.v1.DatabaseErrorType
+import com.ivanovsky.passnotes.keepassrs.proto.v1.DatabaseKey
+import com.ivanovsky.passnotes.keepassrs.proto.v1.DecodeDatabaseResult
+import com.ivanovsky.passnotes.keepassrs.proto.v1.EncodeDatabaseResult
+import com.ivanovsky.passnotes.keepassrs.proto.v1.errorOrNull
 import com.ivanovsky.passnotes.keepassrs.KeepassRsAndroid.nativeDecode
 import com.ivanovsky.passnotes.keepassrs.KeepassRsAndroid.nativeEncode
 

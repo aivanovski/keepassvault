@@ -19,7 +19,7 @@ use std::ptr;
 pub mod proto {
     #![allow(dead_code)]
 
-    include!(concat!(env!("OUT_DIR"), "/passnotes.keepass.v1.rs"));
+    include!(concat!(env!("OUT_DIR"), "/keepassvault.v1.rs"));
 }
 
 fn get_jni_byte_array(env: &JNIEnv<'_>, value: JByteArray<'_>) -> Result<Vec<u8>, BridgeError> {

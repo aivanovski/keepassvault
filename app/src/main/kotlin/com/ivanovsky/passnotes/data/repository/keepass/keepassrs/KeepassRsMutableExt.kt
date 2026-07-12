@@ -6,13 +6,13 @@ import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.Hash
 import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Attachment as ProtoAttachment
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Database as ProtoDatabase
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Entry as ProtoEntry
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.EntryAttachment as ProtoEntryAttachment
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Field as ProtoField
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Group as ProtoGroup
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Times as ProtoTimes
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Attachment as ProtoAttachment
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Database as ProtoDatabase
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Entry as ProtoEntry
+import com.ivanovsky.passnotes.keepassrs.proto.v1.EntryAttachment as ProtoEntryAttachment
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Field as ProtoField
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Group as ProtoGroup
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Times as ProtoTimes
 import java.nio.ByteBuffer
 import java.util.UUID
 

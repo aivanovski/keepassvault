@@ -13,14 +13,14 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Attachment as ProtoAttachment
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Entry as ProtoEntry
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.EntryAttachment
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Group as ProtoGroup
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.timesOrNull
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.matches
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Attachment as ProtoAttachment
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Entry as ProtoEntry
+import com.ivanovsky.passnotes.keepassrs.proto.v1.EntryAttachment
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Group as ProtoGroup
+import com.ivanovsky.passnotes.keepassrs.proto.v1.timesOrNull
 import com.ivanovsky.passnotes.util.ShaUtils
 import com.ivanovsky.passnotes.util.format
 import com.ivanovsky.passnotes.util.toOperationResult

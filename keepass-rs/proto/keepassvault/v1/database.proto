@@ -1,17 +1,14 @@
 syntax = "proto3";
 
-package passnotes.keepass.v1;
+package keepassvault.v1;
 
 option java_multiple_files = true;
 option java_outer_classname = "KeepassDatabaseProto";
-option java_package = "com.ivanovsky.passnotes.data.repository.keepass.proto.v1";
+option java_package = "com.ivanovsky.passnotes.keepassrs.proto.v1";
 
 // Wire contract for the stateless Rust bridge:
-// - read(kdbx bytes, key) returns ReadDatabaseResponse encoded as protobuf.
-// - write(WriteDatabaseRequest protobuf, key) returns KDBX bytes.
-//
-// UUID fields are raw 16-byte KeePass UUID values. Timestamps are epoch
-// milliseconds interpreted as UTC.
+// UUID fields are raw 16-byte KeePass UUID values.
+// Timestamps are epoch milliseconds interpreted as UTC.
 
 message DatabaseKey {
   optional string password = 1;

@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes.data.repository.keepass.keepassrs
 
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Entry as ProtoEntry
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Group as ProtoGroup
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Entry as ProtoEntry
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Group as ProtoGroup
 import java.util.UUID
 
 // TODO: all functions should return Either

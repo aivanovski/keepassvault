@@ -829,15 +829,6 @@ fn apply_entry_fields(
         custom_icon_id_by_uuid,
     )?;
 
-    for attachment_ref in &proto.attachments {
-        if let Some(attachment) = attachment_by_id.get(&attachment_ref.attachment_id) {
-            entry.add_attachment(
-                attachment_ref.name.clone(),
-                convert_proto_bytes_value(&attachment.data, attachment.is_protected),
-            );
-        }
-    }
-
     if !proto.history.is_empty() {
         let mut historical_entries = Vec::new();
         for historical in proto.history.iter().rev() {
@@ -851,6 +842,15 @@ fn apply_entry_fields(
         let history = entry.history.get_or_insert_with(History::default);
         for historical_entry in historical_entries {
             history.add_entry(historical_entry);
+        }
+    }
+
+    for attachment_ref in &proto.attachments {
+        if let Some(attachment) = attachment_by_id.get(&attachment_ref.attachment_id) {
+            entry.add_attachment(
+                attachment_ref.name.clone(),
+                convert_proto_bytes_value(&attachment.data, attachment.is_protected),
+            );
         }
     }
 

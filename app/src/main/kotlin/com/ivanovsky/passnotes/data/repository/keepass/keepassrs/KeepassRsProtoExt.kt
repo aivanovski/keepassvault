@@ -12,14 +12,14 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.repository.keepass.determinePropertyType
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Attachment as RawAttachment
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Database as RawDatabase
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Entry as RawEntry
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.EntryAttachment
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Group as RawGroup
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Times as RawTimes
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.group
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Attachment as RawAttachment
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Database as RawDatabase
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Entry as RawEntry
+import com.ivanovsky.passnotes.keepassrs.proto.v1.EntryAttachment
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Group as RawGroup
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Times as RawTimes
+import com.ivanovsky.passnotes.keepassrs.proto.v1.group
 import com.ivanovsky.passnotes.util.Base64Utils
 import com.ivanovsky.passnotes.util.ShaUtils
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY

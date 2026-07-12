@@ -32,15 +32,15 @@ import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.TemplateDaoImpl
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Database as RawDatabase
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.DatabaseKey as RawKey
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Entry as RawEntry
-import com.ivanovsky.passnotes.data.repository.keepass.proto.v1.Group as RawGroup
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.toEither
 import com.ivanovsky.passnotes.keepassrs.InvalidKeyException
 import com.ivanovsky.passnotes.keepassrs.KeepassRs
 import com.ivanovsky.passnotes.keepassrs.KeepassRsException
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Database as RawDatabase
+import com.ivanovsky.passnotes.keepassrs.proto.v1.DatabaseKey as RawKey
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Entry as RawEntry
+import com.ivanovsky.passnotes.keepassrs.proto.v1.Group as RawGroup
 import com.ivanovsky.passnotes.util.InputOutputUtils
 import com.ivanovsky.passnotes.util.toOperationResult
 import java.io.ByteArrayInputStream

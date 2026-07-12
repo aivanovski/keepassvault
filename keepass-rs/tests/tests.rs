@@ -95,7 +95,7 @@ mod tests {
             assert_eq!(actual.config, expected.config);
             assert_eq!(actual.meta, expected.meta);
             // TODO: uncomment
-            // assert_eq!(actual.root_group, expected.root_group);
+            assert_eq!(actual.root_group, expected.root_group);
             assert_eq!(actual.attachments, expected.attachments);
             assert_eq!(actual.custom_icons, expected.custom_icons);
             assert_eq!(actual.deleted_objects, expected.deleted_objects);

@@ -454,7 +454,15 @@ pub fn convert_proto_database(proto: proto::Database) -> Result<Database, Bridge
         .map(convert_proto_config)
         .transpose()?
         .unwrap_or_default();
-    let mut database = Database::with_config(config);
+
+    let root_group = proto
+        .root_group
+        .as_ref()
+        .ok_or_else(|| protobuf_error("missing root group"))?;
+    let root_id = uuid_from_bytes_required(&root_group.uuid)?;
+
+    let mut database = Database::new_with_root_id(GroupId::from_uuid(root_id));
+    database.config = config;
 
     if let Some(meta) = proto.meta.as_ref() {
         apply_meta(&mut database, meta)?;
@@ -469,10 +477,6 @@ pub fn convert_proto_database(proto: proto::Database) -> Result<Database, Bridge
         );
     }
 
-    let root_group = proto
-        .root_group
-        .as_ref()
-        .ok_or_else(|| protobuf_error("missing root group"))?;
     let attachment_by_id = proto
         .attachments
         .iter()

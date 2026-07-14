@@ -210,6 +210,8 @@
     <string name="expires">过期时间</string>
     <string name="expiration">过期设置</string>
     <string name="history">历史记录</string>
+    <string name="clear_history">清除历史记录</string>
+    <string name="clear_history_confirmation_message">您确定要清除条目历史记录吗？</string>
     <!-- History screen -->
     <string name="added">已添加</string>
     <string name="deleted">已删除</string>

@@ -179,7 +179,7 @@ object UiModule {
             single { EnterDbCredentialsInteractor(get(), get(), get()) }
             single { DiffViewerInteractor(get(), get(), get(), get(), get()) }
             single { SetupOneTimePasswordInteractor() }
-            single { HistoryInteractor(get(), get(), get()) }
+            single { HistoryInteractor(get(), get(), get(), get()) }
 
             // Autofill
             single { AutofillViewFactory(get(), get()) }

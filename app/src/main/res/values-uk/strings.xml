@@ -225,6 +225,8 @@
     <string name="expires">Термін дії закінчується</string>
     <string name="expiration">Термін дії</string>
     <string name="history">Історія</string>
+    <string name="clear_history">Очистити історію</string>
+    <string name="clear_history_confirmation_message">Ви дійсно хочете очистити історію запису?</string>
 
     <!-- History screen -->
     <string name="added">Додано</string>

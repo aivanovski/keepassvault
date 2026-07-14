@@ -1,19 +1,22 @@
 # Project Overview
-KeePassVault is an Android application written in Kotlin.
-It provides possibility to view and modify KeePass database files.
+KeePassVault is an Android application to view and modify KeePass database files.
 Users can synchronize KeePass file with remove server using WebDav or Git.
+Project consists of several modules:
+- `:app` - The main Android application, written in Kotlin (some legacy parts are in Java)
+- `:keepass-rs-android` - Provides Kotlin interface for calling JNI wrapper for keepass-rs module
+- `:keepass-rs` - The Rust JNI wrapper over Rust crate keepass-rs
 
 # Technology Stack
-- Language: Kotlin (some legacy parts on Java)
-- UI Framework: Compose for new screens, View for old
+- Languages: Kotlin (some legacy parts on Java), Rust (for decoding database)
+- UI Framework: Compose, View for old screens
 - Architecture: MVVM + Clean Architecture
 - Navigation: Cicerone
 - Dependency Injection: Koin
 
-# Directory Structure
+# Android app directory Structure
 The project follows Clean Architecture pattern
 - /data - responsible for work with KeePass file, server synchronization, encrypting
-- /domain - UseCases + Interactors and not ui related logic
+- /domain - reusable UseCases and Interactors across the app, plus not ui related logic (eg crash reporting, logging)
 - /presentation - UI for screens
 - /injection - Modules for DependencyInjections
 

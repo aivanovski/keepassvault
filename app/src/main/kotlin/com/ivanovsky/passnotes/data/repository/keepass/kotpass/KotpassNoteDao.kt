@@ -555,5 +555,4 @@ class KotpassNoteDao(
             OperationResult.success(history)
         }
     }
-
 }

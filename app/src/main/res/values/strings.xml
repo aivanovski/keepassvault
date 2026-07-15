@@ -236,6 +236,8 @@
     <string name="history">History</string>
 
     <!-- History screen -->
+    <string name="clear_history">Clear history</string>
+    <string name="clear_history_confirmation_message">Are you sure you want to clear entry history?</string>
     <string name="added">Added</string>
     <string name="deleted">Deleted</string>
     <string name="changed">Changed</string>

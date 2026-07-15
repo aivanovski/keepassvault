@@ -42,4 +42,7 @@ public interface NoteDao {
 
     @NonNull
     OperationResult<List<Note>> getHistory(@NonNull UUID noteUid);
+
+    @NonNull
+    OperationResult<Boolean> setHistory(@NonNull UUID noteUid, @NonNull List<Note> history);
 }

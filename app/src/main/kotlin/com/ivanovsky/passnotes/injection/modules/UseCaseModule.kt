@@ -26,6 +26,7 @@ import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.diff.GetDiffUseCase
+import com.ivanovsky.passnotes.domain.usecases.history.ClearHistoryUseCase
 import com.ivanovsky.passnotes.domain.usecases.history.GetHistoryUseCase
 import com.ivanovsky.passnotes.domain.usecases.test.GetTestCredentialsUseCase
 import com.ivanovsky.passnotes.domain.usecases.test.GetTestPasswordUseCase
@@ -63,6 +64,7 @@ object UseCaseModule {
             single { FindParentGroupsUseCase(get(), get()) }
             single { GetDiffUseCase(get()) }
             single { GetHistoryUseCase(get(), get()) }
+            single { ClearHistoryUseCase(get(), get()) }
             single { ExportDatabaseUseCase(get(), get(), get(), get()) }
         }
 }

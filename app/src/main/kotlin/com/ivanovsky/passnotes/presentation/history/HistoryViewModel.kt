@@ -1,6 +1,8 @@
 package com.ivanovsky.passnotes.presentation.history
 
 import android.os.Build
+import androidx.annotation.IdRes
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -19,6 +21,7 @@ import com.ivanovsky.passnotes.presentation.core.compose.themeFlow
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyAction
 import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryDiffCellViewModel
 import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryHeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.history.factory.HistoryCellModelFactory
@@ -43,8 +46,10 @@ class HistoryViewModel(
 
     val theme = themeFlow(themeProvider)
     val state = MutableStateFlow<HistoryState>(HistoryState.Loading)
+    val visibleMenuItems = MutableLiveData<List<HistoryMenuItem>>(emptyList())
     val showPropertyActionDialog = SingleLiveEvent<Property>()
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
+    val showClearHistoryConfirmationDialogEvent = SingleLiveEvent<Unit>()
 
     private var diff: List<HistoryDiffItem> = emptyList()
     private val eventProvider = EventProviderImpl()
@@ -64,6 +69,27 @@ class HistoryViewModel(
 
     fun navigateBack() {
         router.exit()
+    }
+
+    fun onClearHistoryClicked() {
+        showClearHistoryConfirmationDialogEvent.call(Unit)
+    }
+
+    fun onClearHistoryConfirmed() {
+        state.value = HistoryState.Loading
+        visibleMenuItems.value = emptyList()
+
+        viewModelScope.launch {
+            val result = interactor.clearHistory(args.noteUid)
+            if (result.isFailed) {
+                state.value = HistoryState.Error(
+                    message = result.error.formatReadableMessage(resourceProvider)
+                )
+                return@launch
+            }
+
+            router.exit()
+        }
     }
 
     fun onPropertyActionClicked(action: PropertyAction) {
@@ -136,6 +162,7 @@ class HistoryViewModel(
 
     private fun loadData() {
         state.value = HistoryState.Loading
+        visibleMenuItems.value = emptyList()
 
         viewModelScope.launch {
             val getHistoryDiff = interactor.getHistoryDiff(args.noteUid)
@@ -160,10 +187,12 @@ class HistoryViewModel(
             val models = modelFactory.createHistoryDiffModels(diff)
             val viewModels = viewModelFactory.createCellViewModels(models, eventProvider)
 
+            visibleMenuItems.value = listOf(HistoryMenuItem.CLEAR_HISTORY)
             state.value = HistoryState.Data(
                 viewModels = viewModels
             )
         } else {
+            visibleMenuItems.value = emptyList()
             state.value = HistoryState.Empty
         }
     }
@@ -197,5 +226,9 @@ class HistoryViewModel(
                 parametersOf(args)
             ) as T
         }
+    }
+
+    enum class HistoryMenuItem(@IdRes override val menuId: Int) : ScreenMenuItem {
+        CLEAR_HISTORY(R.id.menu_clear_history)
     }
 }

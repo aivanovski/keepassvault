@@ -2,6 +2,8 @@ package com.ivanovsky.passnotes.presentation.history
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -16,12 +18,15 @@ import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.compose.AppTheme
 import com.ivanovsky.passnotes.presentation.core.compose.getComposeTheme
+import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialogArgs
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
+import com.ivanovsky.passnotes.presentation.core.extensions.updateMenuItemVisibility
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
+import com.ivanovsky.passnotes.presentation.history.HistoryViewModel.HistoryMenuItem
 
 class HistoryFragment : BaseFragment() {
 
@@ -33,6 +38,12 @@ class HistoryFragment : BaseFragment() {
             )
         )
             .get(HistoryViewModel::class.java)
+    }
+    private var menu: Menu? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -64,7 +75,26 @@ class HistoryFragment : BaseFragment() {
                 true
             }
 
+            R.id.menu_clear_history -> {
+                viewModel.onClearHistoryClicked()
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        this.menu = menu
+
+        inflater.inflate(R.menu.history, menu)
+
+        viewModel.visibleMenuItems.value?.let { visibleItems ->
+            updateMenuItemVisibility(
+                menu = menu,
+                visibleItems = visibleItems,
+                allScreenItems = HistoryMenuItem.values().toList()
+            )
         }
     }
 
@@ -91,6 +121,18 @@ class HistoryFragment : BaseFragment() {
         viewModel.showSnackbarMessageEvent.observe(viewLifecycleOwner) { message ->
             showSnackbarMessage(message)
         }
+        viewModel.visibleMenuItems.observe(viewLifecycleOwner) { visibleItems ->
+            menu?.let { menu ->
+                updateMenuItemVisibility(
+                    menu = menu,
+                    visibleItems = visibleItems,
+                    allScreenItems = HistoryMenuItem.values().toList()
+                )
+            }
+        }
+        viewModel.showClearHistoryConfirmationDialogEvent.observe(viewLifecycleOwner) {
+            showClearHistoryConfirmationDialog()
+        }
     }
 
     private fun showPropertyActionDialog(property: Property) {
@@ -104,6 +146,20 @@ class HistoryFragment : BaseFragment() {
             }
 
         dialog.show(childFragmentManager, PropertyActionDialog.TAG)
+    }
+
+    private fun showClearHistoryConfirmationDialog() {
+        val dialog = ConfirmationDialog.newInstance(
+            getString(R.string.clear_history_confirmation_message),
+            getString(R.string.clear_history),
+            getString(R.string.cancel)
+        )
+
+        dialog.onConfirmed = {
+            viewModel.onClearHistoryConfirmed()
+        }
+
+        dialog.show(childFragmentManager, ConfirmationDialog.TAG)
     }
 
     companion object {

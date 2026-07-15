@@ -555,4 +555,72 @@ class KotpassNoteDao(
             OperationResult.success(history)
         }
     }
+
+    override fun setHistory(noteUid: UUID, history: List<Note>): OperationResult<Boolean> {
+        val result = db.lock.withLock {
+            val getNoteResult = getNoteByUid(noteUid)
+            if (getNoteResult.isFailed) {
+                return@withLock getNoteResult.mapError()
+            }
+
+            val getEntryAndGroupResult = db.getRawEntryAndGroupByUid(noteUid)
+            if (getEntryAndGroupResult.isFailed) {
+                return@withLock getEntryAndGroupResult.mapError()
+            }
+
+            val note = getNoteResult.getOrThrow()
+            val (group, entry) = getEntryAndGroupResult.getOrThrow()
+            val entryIdx = group.entries.indexOfFirst { it.uuid == noteUid }
+            if (entryIdx == -1) {
+                return@withLock OperationResult.error(
+                    newDbError(
+                        MESSAGE_FAILED_TO_FIND_NOTE,
+                        Stacktrace()
+                    )
+                )
+            }
+
+            val newHistory = history.map { historyNote ->
+                historyNote
+                    .copy(uid = historyNote.uid ?: noteUid)
+                    .convertToEntry()
+            }
+
+            var newDb = db.getRawDatabase()
+            val (toInsert, toRemove) = prepareAttachmentsDiff(
+                oldEntry = entry,
+                oldBinariesMap = db.getRawDatabase().binaries,
+                newNote = note,
+                newHistory = newHistory
+            )
+
+            if (toInsert.isNotEmpty() || toRemove.isNotEmpty()) {
+                newDb = modifyBinaries(
+                    noteUid = noteUid,
+                    toInsert = toInsert,
+                    toRemove = toRemove
+                )
+            }
+
+            newDb = newDb.modifyGroup(group.uuid) {
+                copy(
+                    entries = entries.toMutableList()
+                        .apply {
+                            this[entryIdx] = entry.copy(history = newHistory)
+                        }
+                )
+            }
+
+            db.swapDatabase(newDb)
+
+            db.commit().mapWithObject(note)
+        }
+
+        if (result.isSucceededOrDeferred) {
+            val note = result.getOrThrow()
+            watcher.notifyEntryChanged(note, note)
+        }
+
+        return result.mapWithObject(true)
+    }
 }

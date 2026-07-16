@@ -7,7 +7,7 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
-import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import kotlinx.coroutines.withContext
@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 class EnterDbCredentialsInteractor(
     private val dbRepository: EncryptedDatabaseRepository,
     private val fileSystemResolver: FileSystemResolver,
+    private val settings: Settings,
     private val dispatchers: DispatcherProvider
 ) {
 
@@ -23,7 +24,7 @@ class EnterDbCredentialsInteractor(
         file: FileDescriptor
     ): OperationResult<Unit> =
         withContext(dispatchers.IO) {
-            dbRepository.read(KeepassImplementation.KOTPASS, key, file)
+            dbRepository.read(settings.keepassImplementation, key, file)
                 .mapWithObject(Unit)
         }
 

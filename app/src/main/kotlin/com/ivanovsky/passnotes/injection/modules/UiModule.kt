@@ -167,7 +167,7 @@ object UiModule {
             single { NoteEditorInteractor(get(), get(), get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
-            single { DatabaseSettingsInteractor(get(), get()) }
+            single { DatabaseSettingsInteractor(get(), get(), get()) }
             single { AppSettingsInteractor(get(), get(), get(), get(), get()) }
             single { AutofillInteractor(get(), get()) }
             single { MainInteractor(get()) }
@@ -176,7 +176,7 @@ object UiModule {
             single { ResolveConflictDialogInteractor(get()) }
             single { SyncStateCache(get()) }
             single { SyncStateInteractor(get(), get(), get()) }
-            single { EnterDbCredentialsInteractor(get(), get(), get()) }
+            single { EnterDbCredentialsInteractor(get(), get(), get(), get()) }
             single { DiffViewerInteractor(get(), get(), get(), get(), get()) }
             single { SetupOneTimePasswordInteractor() }
             single { HistoryInteractor(get(), get(), get()) }

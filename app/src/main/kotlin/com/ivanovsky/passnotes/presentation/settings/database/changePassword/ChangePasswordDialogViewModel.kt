@@ -39,13 +39,11 @@ class ChangePasswordDialogViewModel(
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val changeResult = interactor.changePassword(password, newPassword)
-
-            if (changeResult.isSucceededOrDeferred) {
-                finishScreenEvent.call(Unit)
-            } else {
-                setErrorPanelState(changeResult.error)
-            }
+            interactor.changePassword(password, newPassword)
+                .fold(
+                    ifLeft = { error -> setErrorPanelState(error) },
+                    ifRight = { finishScreenEvent.call(Unit) }
+                )
         }
     }
 
@@ -74,9 +72,11 @@ class ChangePasswordDialogViewModel(
             confirmation.isBlank() -> {
                 resourceProvider.getString(R.string.empty_field)
             }
+
             newPassword != confirmation -> {
                 resourceProvider.getString(R.string.this_field_should_match_password)
             }
+
             else -> null
         }
 

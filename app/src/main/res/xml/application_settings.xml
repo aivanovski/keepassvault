@@ -25,6 +25,11 @@
             app:summary="@string/pref_is_lock_database_on_back_summary"
             app:title="@string/pref_is_lock_database_on_back_title" />
 
+        <com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
+            app:key="@string/pref_keepass_implementation"
+            app:title="@string/pref_keepass_implementation_title"
+            app:summary="@string/pref_keepass_implementation_summary" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

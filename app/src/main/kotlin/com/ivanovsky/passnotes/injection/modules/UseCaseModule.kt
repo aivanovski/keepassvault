@@ -20,6 +20,7 @@ import com.ivanovsky.passnotes.domain.usecases.MoveNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveBiometricDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.RemoveUsedFileUseCase
 import com.ivanovsky.passnotes.domain.usecases.SearchUseCases
+import com.ivanovsky.passnotes.domain.usecases.SetupRecycleBinUseCase
 import com.ivanovsky.passnotes.domain.usecases.SortGroupsAndNotesUseCase
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
@@ -41,7 +42,7 @@ object UseCaseModule {
             single { GetRecentlyOpenedFilesUseCase(get(), get()) }
             single { SyncUseCases(get(), get(), get()) }
             single { AddTemplatesUseCase(get(), get(), get()) }
-            single { GetDatabaseUseCase(get(), get()) }
+            single { GetDatabaseUseCase(get()) }
             single { MoveNoteUseCase(get(), get(), get()) }
             single { MoveGroupUseCase(get(), get(), get()) }
             single { GetGroupUseCase(get(), get()) }
@@ -64,5 +65,6 @@ object UseCaseModule {
             single { GetDiffUseCase(get()) }
             single { GetHistoryUseCase(get(), get()) }
             single { ExportDatabaseUseCase(get(), get(), get(), get()) }
+            single { SetupRecycleBinUseCase(get(), get()) }
         }
 }

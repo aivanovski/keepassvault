@@ -18,8 +18,10 @@ import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
 import com.ivanovsky.passnotes.extensions.mapError
-import com.ivanovsky.passnotes.util.InputOutputUtils
+import com.ivanovsky.passnotes.util.InputOutputUtils.readAllBytes
 import com.ivanovsky.passnotes.util.ShaUtils
+import com.ivanovsky.passnotes.util.format
+import com.ivanovsky.passnotes.util.toOperationResult
 import java.util.UUID
 import kotlinx.coroutines.withContext
 
@@ -94,10 +96,11 @@ class NoteEditorInteractor(
                 return@withContext openFileResult.mapError()
             }
 
-            val readBytesResult = InputOutputUtils.readAllBytes(
-                openFileResult.obj,
+            val readBytesResult = readAllBytes(
+                source = openFileResult.obj,
                 isCloseOnFinish = true
-            )
+            ).toOperationResult()
+
             if (readBytesResult.isFailed) {
                 return@withContext readBytesResult.mapError()
             }
@@ -130,7 +133,7 @@ class NoteEditorInteractor(
 
             OperationResult.success(
                 Attachment(
-                    uid = hash.toString(),
+                    uid = hash.format(),
                     name = file.name,
                     hash = hash,
                     data = content

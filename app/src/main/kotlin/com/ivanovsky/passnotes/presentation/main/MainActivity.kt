@@ -7,11 +7,14 @@ import android.os.Build
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
@@ -232,6 +235,8 @@ class MainActivity :
             return
         }
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         val toolbarLeftPadding = binding.toolbar.paddingLeft
         val toolbarRightPadding = binding.toolbar.paddingRight
         val toolbarTopPadding = binding.toolbar.paddingTop
@@ -239,9 +244,13 @@ class MainActivity :
         val containerLeftPadding = binding.fragmentContainer.paddingLeft
         val containerRightPadding = binding.fragmentContainer.paddingRight
         val containerBottomPadding = binding.fragmentContainer.paddingBottom
+        val containerBottomMargin =
+            (binding.fragmentContainer.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.drawerLayout) { _, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val bottomInset = maxOf(systemBars.bottom, ime.bottom)
 
             binding.toolbar.updatePadding(
                 left = toolbarLeftPadding + systemBars.left,
@@ -251,8 +260,11 @@ class MainActivity :
             binding.fragmentContainer.updatePadding(
                 left = containerLeftPadding + systemBars.left,
                 right = containerRightPadding + systemBars.right,
-                bottom = containerBottomPadding + systemBars.bottom
+                bottom = containerBottomPadding
             )
+            binding.fragmentContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = containerBottomMargin + bottomInset
+            }
 
             insets
         }

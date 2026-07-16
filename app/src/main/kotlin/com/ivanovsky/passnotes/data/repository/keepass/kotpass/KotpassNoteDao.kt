@@ -9,6 +9,7 @@ import app.keemobile.kotpass.database.modifiers.removeEntry
 import app.keemobile.kotpass.models.BinaryData
 import app.keemobile.kotpass.models.BinaryReference
 import app.keemobile.kotpass.models.Entry
+import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Hash
 import com.ivanovsky.passnotes.data.entity.HashType
@@ -26,6 +27,7 @@ import com.ivanovsky.passnotes.domain.NoteDiffer.DiffAction
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrNull
 import com.ivanovsky.passnotes.extensions.getOrThrow
+import com.ivanovsky.passnotes.extensions.map
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.extensions.matches
@@ -34,6 +36,7 @@ import java.util.UUID
 import kotlin.concurrent.withLock
 import kotlin.math.max
 import okio.ByteString
+import timber.log.Timber
 
 class KotpassNoteDao(
     private val db: KotpassDatabase
@@ -257,7 +260,11 @@ class KotpassNoteDao(
 
             db.swapDatabase(newDb)
 
-            db.commit().mapWithObject(noteUid)
+            if (doCommit) {
+                db.commit().mapWithObject(noteUid)
+            } else {
+                OperationResult.success(noteUid)
+            }
         }
 
         if (result.isSucceededOrDeferred) {
@@ -509,6 +516,18 @@ class KotpassNoteDao(
                 if (binary.hash in removeSet) {
                     skip.add(Hash(binary.hash.toByteArray(), HashType.SHA_256))
                 }
+            }
+        }
+
+        if (BuildConfig.DEBUG) {
+            Timber.d("Adding ${toInsert.size} attachments:")
+            for (attachment in toInsert) {
+                Timber.d("    + uid=${attachment.uid}, ${attachment.name}, hash=${attachment.hash}")
+            }
+
+            Timber.d("Removing ${toRemove.size} attachments:")
+            for (attachment in toRemove) {
+                Timber.d("    - uid=${attachment.uid}, ${attachment.name}, hash=${attachment.hash}")
             }
         }
 

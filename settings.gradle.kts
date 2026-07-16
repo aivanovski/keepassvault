@@ -8,3 +8,4 @@ pluginManagement {
 
 rootProject.name = "KeePassVault"
 include(":app")
+include(":keepass-rs-android")

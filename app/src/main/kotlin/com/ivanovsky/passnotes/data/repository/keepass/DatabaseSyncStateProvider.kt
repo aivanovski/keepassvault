@@ -20,7 +20,7 @@ class DatabaseSyncStateProvider(
     private val fileSystemResolver: FileSystemResolver,
     dispatchers: DispatcherProvider,
     private val observerBus: ObserverBus
-) : DatabaseWatcher.OnCommitListener,
+) : DatabaseWatcher.OnCommitListener<EncryptedDatabase>,
     ObserverBus.SyncProgressStatusObserver {
 
     val syncState: SyncState?

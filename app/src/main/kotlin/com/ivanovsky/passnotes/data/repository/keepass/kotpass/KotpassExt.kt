@@ -17,12 +17,12 @@ import com.ivanovsky.passnotes.data.entity.HashType
 import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.Property
-import com.ivanovsky.passnotes.data.entity.PropertyType
+import com.ivanovsky.passnotes.data.repository.keepass.determinePropertyType
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions
 import com.ivanovsky.passnotes.domain.entity.PropertyFilter
-import com.ivanovsky.passnotes.domain.otp.OtpUriFactory
 import com.ivanovsky.passnotes.extensions.toByteString
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
+import com.ivanovsky.passnotes.util.format
 import java.time.Instant
 import java.util.Date
 import java.util.LinkedList
@@ -124,27 +124,13 @@ fun BinaryReference.toAttachment(
     allBinaries: Map<ByteString, BinaryData>
 ): Attachment? {
     val data = allBinaries[hash] ?: return null
-
+    val h = Hash(hash.toByteArray(), HashType.SHA_256)
     return Attachment(
-        uid = hash.base64(),
+        uid = h.format(),
         name = name,
-        hash = Hash(hash.toByteArray(), HashType.SHA_256),
+        hash = h,
         data = data.getContent()
     )
-}
-
-private fun determinePropertyType(name: String, value: String): PropertyType? {
-    val type = PropertyType.getByName(name) ?: return null
-
-    return if (type == PropertyType.OTP) {
-        if (OtpUriFactory.parseUri(value) != null) {
-            PropertyType.OTP
-        } else {
-            null
-        }
-    } else {
-        type
-    }
 }
 
 private fun RawEntry.getCreationTime(): Long {

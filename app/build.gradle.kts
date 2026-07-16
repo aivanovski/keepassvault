@@ -17,9 +17,9 @@ plugins {
     alias(libs.plugins.room)
 }
 
-val versionMajor = 1
-val versionMinor = 18
-val versionPatch = 1
+val versionMajor = 2
+val versionMinor = 0
+val versionPatch = 0
 
 val formattedVersionCode = (versionMajor * 10000 + versionMinor * 100 + versionPatch).toString()
 val formattedVersionName = "$versionMajor.$versionMinor.$versionPatch"
@@ -254,6 +254,8 @@ spotless {
 }
 
 dependencies {
+    implementation(project(":keepass-rs-android"))
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.truth)
@@ -300,7 +302,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    implementation(libs.apache.commons.lang3) // TODO: Remove
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.coroutines.android)

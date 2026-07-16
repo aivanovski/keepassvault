@@ -1,5 +1,7 @@
 package com.ivanovsky.passnotes.extensions
 
+import arrow.core.Either
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 
 inline fun <T, R> OperationResult<T>.map(transform: (T) -> R): OperationResult<R> {
@@ -39,5 +41,13 @@ fun <T> OperationResult<T>.getOrThrow(): T {
         obj
     } else {
         throw IllegalStateException()
+    }
+}
+
+fun <T> OperationResult<T>.toEither(): Either<OperationError, T> {
+    return if (isSucceededOrDeferred) {
+        Either.Right(getOrThrow())
+    } else {
+        Either.Left(error)
     }
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
@@ -13,6 +14,8 @@ import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
 import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor.CrashReporterAvailability
 import com.ivanovsky.passnotes.extensions.formatReadableMessage
+import com.ivanovsky.passnotes.presentation.core.dialog.selectorDialog.SelectorDialogArgs
+import com.ivanovsky.passnotes.presentation.core.dialog.selectorDialog.model.SelectorDialogItem
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.util.StringUtils
 import java.io.File
@@ -36,6 +39,7 @@ class AppSettingsViewModel(
     val showErrorDialogEvent = SingleLiveEvent<String>()
     val showToastEvent = SingleLiveEvent<String>()
     val shareFileEvent = SingleLiveEvent<File>()
+    val showKeepassImplementationDialogEvent = SingleLiveEvent<SelectorDialogArgs>()
     val requestPermissionEvent = SingleLiveEvent<SystemPermission>()
 
     fun navigateBack() = router.exit()
@@ -94,6 +98,48 @@ class AppSettingsViewModel(
             interactor.removeAllBiometricData()
             isLoading.value = false
         }
+    }
+
+    fun onKeepassImplementationClicked() {
+        val items = KeepassImplementation.entries
+            .map { implementation ->
+                val title = when (implementation) {
+                    KeepassImplementation.KOTPASS -> "kotpass"
+                    KeepassImplementation.KEEPASS_RS -> "keepass-rs"
+                }
+
+                val description = when (implementation) {
+                    KeepassImplementation.KOTPASS -> "https://github.com/keemobile/kotpass"
+                    KeepassImplementation.KEEPASS_RS -> "https://github.com/sseemayer/keepass-rs"
+                }
+
+                SelectorDialogItem(
+                    title = title,
+                    description = description
+                )
+            }
+
+        val currImplementation = settings.keepassImplementation
+
+        val selectedIndex = KeepassImplementation.entries
+            .indexOfFirst { implementation -> implementation == currImplementation }
+            .takeIf { index -> index != -1 }
+
+        val args = SelectorDialogArgs(
+            title = resourceProvider.getString(R.string.pref_keepass_implementation_title),
+            description = resourceProvider.getString(R.string.pref_keepass_implementation_summary),
+            items = items,
+            selectedItemIndex = selectedIndex
+        )
+
+        showKeepassImplementationDialogEvent.value = args
+    }
+
+    fun onKeepassImplementationSelected(index: Int) {
+        val implementation = KeepassImplementation.entries.getOrNull(index) ?: return
+
+        settings.keepassImplementation = implementation
+        interactor.lockDatabase()
     }
 
     fun onSendLongFileClicked() {

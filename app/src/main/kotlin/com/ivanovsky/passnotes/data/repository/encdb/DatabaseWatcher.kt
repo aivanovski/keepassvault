@@ -3,15 +3,15 @@ package com.ivanovsky.passnotes.data.repository.encdb
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import java.util.concurrent.CopyOnWriteArrayList
 
-class DatabaseWatcher {
+class DatabaseWatcher<T> {
 
     private val listeners: MutableList<DatabaseListener> = CopyOnWriteArrayList()
 
     fun notifyOnCommit(
-        database: EncryptedDatabase,
+        database: T,
         result: OperationResult<*>
     ) {
-        listeners.filterIsInstance<OnCommitListener>()
+        listeners.filterIsInstance<OnCommitListener<T>>()
             .forEach { listener -> listener.onCommit(database, result) }
     }
 
@@ -27,9 +27,9 @@ class DatabaseWatcher {
 
     interface DatabaseListener
 
-    interface OnCommitListener : DatabaseListener {
+    interface OnCommitListener<T> : DatabaseListener {
         fun onCommit(
-            database: EncryptedDatabase,
+            database: T,
             result: OperationResult<*>
         )
     }

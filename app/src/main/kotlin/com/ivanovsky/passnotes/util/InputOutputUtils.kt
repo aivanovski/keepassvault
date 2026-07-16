@@ -1,5 +1,9 @@
 package com.ivanovsky.passnotes.util
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import java.io.Closeable
@@ -177,18 +181,16 @@ object InputOutputUtils {
     fun readAllBytes(
         source: InputStream,
         isCloseOnFinish: Boolean
-    ): OperationResult<ByteArray> {
+    ): Either<OperationError, ByteArray> {
         return try {
-            val bytes = source.readBytes()
-
+            source.readBytes().right()
+        } catch (e: IOException) {
+            Timber.e(e)
+            newGenericIOError(e).left()
+        } finally {
             if (isCloseOnFinish) {
                 close(source)
             }
-
-            OperationResult.success(bytes)
-        } catch (e: IOException) {
-            Timber.e(e)
-            OperationResult.error(newGenericIOError(e))
         }
     }
 }

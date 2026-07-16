@@ -29,6 +29,7 @@
 
     <string name="pref_database_settings_fragment" translatable="false">databaseSettingsFragment</string>
     <string name="pref_is_recycle_bin_enabled" translatable="false">isRecycleBinEnabled</string>
+    <string name="pref_recycle_bin_group" translatable="false">recycleBinGroup</string>
     <string name="pref_change_password" translatable="false">changePassword</string>
     <string name="pref_progress" translatable="false">progress</string>
     <string name="pref_send_log_file" translatable="false">sendLogFile</string>
@@ -100,11 +101,6 @@
     <string-array name="pref_search_type_values">
         <item>STRICT</item>
         <item>FUZZY</item>
-    </string-array>
-
-    <string-array name="pref_keepass_implementation_values">
-        <item>KOTPASS</item>
-        <item>KEEPASS_RS</item>
     </string-array>
 
 </resources>

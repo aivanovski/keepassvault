@@ -229,15 +229,35 @@ class KeepassRsNoteDao(
             return noteResult.mapError()
         }
 
-        db.lock.withLock {
-            db.swapDatabase { db ->
-                db.toBuilder()
-                    .setRootGroup(db.rootGroup.removeEntry(noteUid))
-                    .build()
-            }
-        }
+        val result = db.lock.withLock {
+            either {
+                val recycleBinGroup = db.getRecycleBindGroup().bind().getOrNull()
+                val recycleBinUid = recycleBinGroup?.uuid?.toUuid()?.bind()
+                val isInsideRecycleBin = if (recycleBinUid != null) {
+                    isEntryInsideGroupTree(
+                        entryUid = noteUid,
+                        groupTreeRootUid = recycleBinUid
+                    ).bind()
+                } else {
+                    false
+                }
 
-        val result = db.commit().toOperationResult()
+                if (recycleBinUid != null && !isInsideRecycleBin) {
+                    moveNoteToGroup(
+                        noteUid = noteUid,
+                        targetGroupUid = recycleBinUid
+                    ).bind()
+                } else {
+                    db.swapDatabase { db ->
+                        db.toBuilder()
+                            .setRootGroup(db.rootGroup.removeEntry(noteUid))
+                            .build()
+                    }
+                }
+
+                db.commit().bind()
+            }
+        }.toOperationResult()
         if (result.isSucceededOrDeferred) {
             watcher.notifyEntryRemoved(noteResult.obj)
         }
@@ -271,6 +291,46 @@ class KeepassRsNoteDao(
                     allAttachments = db.getRawDatabase().getAllAttachmentsMap()
                 ).sortedBy { note -> note.modified }
             }.toOperationResult()
+        }
+
+    private fun moveNoteToGroup(
+        noteUid: UUID,
+        targetGroupUid: UUID
+    ): Either<OperationError, Unit> =
+        either {
+            val (_, oldRawEntry) = db.getRawEntryWithGroupByUid(noteUid).bind()
+            db.getRawGroupByUid(targetGroupUid).bind()
+
+            val newHistory = prepareEntryHistory(oldRawEntry).bind()
+            val newEntry = oldRawEntry.toBuilder()
+                .setParentGroupUuid(targetGroupUid.toByteString())
+                .clearHistory()
+                .addAllHistory(newHistory)
+                .build()
+
+            db.swapDatabase { db ->
+                db.toBuilder()
+                    .setRootGroup(
+                        db.rootGroup
+                            .removeEntry(noteUid)
+                            .updateGroup(targetGroupUid) { group ->
+                                group.toBuilder()
+                                    .addEntries(newEntry)
+                                    .build()
+                            }
+                    )
+                    .build()
+            }
+        }
+
+    private fun isEntryInsideGroupTree(
+        entryUid: UUID,
+        groupTreeRootUid: UUID
+    ): Either<OperationError, Boolean> =
+        either {
+            val treeRootGroup = db.getRawGroupByUid(groupTreeRootUid).bind()
+
+            treeRootGroup.getEntry { _, entry -> entry.uuid.toUuidOrNull() == entryUid } != null
         }
 
     private fun ProtoGroup.flattenEntries(): List<Pair<UUID, ProtoEntry>> {

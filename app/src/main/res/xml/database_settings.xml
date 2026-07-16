@@ -6,11 +6,16 @@
         app:key="@string/pref_progress"
         app:isPreferenceVisible="true"/>
 
-    <CheckBoxPreference
+    <SwitchPreferenceCompat
         app:key="@string/pref_is_recycle_bin_enabled"
         app:isPreferenceVisible="false"
         app:title="@string/pref_is_recycle_bin_enabled_title"
         app:summary="@string/pref_is_recycle_bin_enabled_summary"/>
+
+    <com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
+        app:key="@string/pref_recycle_bin_group"
+        app:isPreferenceVisible="false"
+        app:title="@string/pref_recycle_bin_group_title" />
 
     <com.ivanovsky.passnotes.presentation.core.preference.CustomDialogPreference
         app:key="@string/pref_change_password"

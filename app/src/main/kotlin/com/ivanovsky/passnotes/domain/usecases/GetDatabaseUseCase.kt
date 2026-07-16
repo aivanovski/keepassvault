@@ -5,20 +5,14 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
-import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
-import kotlinx.coroutines.withContext
 
 class GetDatabaseUseCase(
-    private val dbRepo: EncryptedDatabaseRepository,
-    private val dispatchers: DispatcherProvider
+    private val dbRepo: EncryptedDatabaseRepository
 ) {
 
-    suspend fun getDatabase(): OperationResult<EncryptedDatabase> {
-        return withContext(dispatchers.IO) {
-            getDatabaseSynchronously()
-        }
-    }
+    fun getDatabase(): OperationResult<EncryptedDatabase> =
+        getDatabaseSynchronously()
 
     fun getDatabaseSynchronously(): OperationResult<EncryptedDatabase> {
         val db = dbRepo.database

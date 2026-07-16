@@ -167,7 +167,7 @@ object UiModule {
             single { NoteEditorInteractor(get(), get(), get(), get(), get(), get()) }
             single { ServerLoginInteractor(get(), get(), get()) }
             single { MainSettingsInteractor(get()) }
-            single { DatabaseSettingsInteractor(get(), get()) }
+            single { DatabaseSettingsInteractor(get(), get(), get()) }
             single { AppSettingsInteractor(get(), get(), get(), get(), get()) }
             single { AutofillInteractor(get(), get()) }
             single { MainInteractor(get()) }

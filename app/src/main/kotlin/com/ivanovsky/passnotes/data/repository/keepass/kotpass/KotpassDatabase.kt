@@ -8,6 +8,7 @@ import app.keemobile.kotpass.database.modifiers.modifyMeta
 import app.keemobile.kotpass.models.Entry
 import app.keemobile.kotpass.models.Group as RawGroup
 import app.keemobile.kotpass.models.Meta
+import arrow.core.raise.either
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
@@ -37,7 +38,9 @@ import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.Inheritable
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrNull
 import com.ivanovsky.passnotes.extensions.mapError
+import com.ivanovsky.passnotes.extensions.toEither
 import com.ivanovsky.passnotes.util.InputOutputUtils
+import com.ivanovsky.passnotes.util.toOperationResult
 import java.io.IOException
 import java.io.InputStream
 import java.util.LinkedList
@@ -82,42 +85,45 @@ class KotpassDatabase(
 
     override fun getTemplateDao(): TemplateDao = templateDao
 
-    override fun getConfig(): OperationResult<EncryptedDatabaseConfig> {
-        return lock.withLock {
-            val rawDatabase = getRawDatabase()
+    override fun getConfig(): OperationResult<EncryptedDatabaseConfig> =
+        lock.withLock {
+            either {
+                val rawDatabase = getRawDatabase()
 
-            val config = MutableEncryptedDatabaseConfig(
-                isRecycleBinEnabled = rawDatabase.content.meta.recycleBinEnabled,
-                recycleBinUid = rawDatabase.content.meta.recycleBinUuid,
-                maxHistoryItems = rawDatabase.content.meta.historyMaxItems
-            )
+                val recycleBinUid = getRecycleBinGroup().toEither()
+                    .map { group -> group?.uuid }
+                    .bind()
 
-            OperationResult.success(config)
-        }
-    }
-
-    override fun applyConfig(newConfig: EncryptedDatabaseConfig): OperationResult<Boolean> {
-        return lock.withLock {
-            val getOldConfigResult = config
-            if (getOldConfigResult.isFailed) {
-                return@withLock getOldConfigResult.mapError()
-            }
-
-            val oldConfig = getOldConfigResult.obj
-
-            if (oldConfig != newConfig) {
-                swapDatabase(
-                    getRawDatabase().modifyMeta {
-                        copy(
-                            recycleBinEnabled = newConfig.isRecycleBinEnabled
-                        )
-                    }
+                val config = MutableEncryptedDatabaseConfig(
+                    isRecycleBinEnabled =
+                    rawDatabase.content.meta.recycleBinEnabled && recycleBinUid != null,
+                    recycleBinUid = recycleBinUid,
+                    maxHistoryItems = rawDatabase.content.meta.historyMaxItems
                 )
-            }
 
-            commit()
+                config
+            }.toOperationResult()
         }
-    }
+
+    override fun applyConfig(newConfig: EncryptedDatabaseConfig): OperationResult<Boolean> =
+        lock.withLock {
+            either {
+                val oldConfig = config.toEither().bind()
+
+                if (oldConfig != newConfig) {
+                    swapDatabase(
+                        getRawDatabase().modifyMeta {
+                            copy(
+                                recycleBinEnabled = newConfig.isRecycleBinEnabled,
+                                recycleBinUuid = newConfig.recycleBinUid
+                            )
+                        }
+                    )
+                }
+
+                commit().toEither().bind()
+            }.toOperationResult()
+        }
 
     override fun changeKey(
         oldKey: EncryptedDatabaseKey,

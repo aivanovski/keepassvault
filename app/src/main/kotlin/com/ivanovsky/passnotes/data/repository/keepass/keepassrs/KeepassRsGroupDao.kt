@@ -134,15 +134,37 @@ class KeepassRsGroupDao(
             return groupResult.mapError()
         }
 
-        db.lock.withLock {
-            db.swapDatabase { db ->
-                db.toBuilder()
-                    .setRootGroup(db.rootGroup.removeGroup(groupUid))
-                    .build()
-            }
-        }
+        val result = db.lock.withLock {
+            either {
+                val recycleBinGroup = db.getRecycleBindGroup().bind().getOrNull()
+                val recycleBinUid = recycleBinGroup?.uuid?.toUuid()?.bind()
+                val isInsideRecycleBin = if (recycleBinUid != null) {
+                    isGroupInsideGroupTree(
+                        groupUid = groupUid,
+                        groupTreeRootUid = recycleBinUid
+                    ).bind()
+                } else {
+                    false
+                }
 
-        val result = db.commit().toOperationResult()
+                db.swapDatabase { db ->
+                    val newRootGroup = if (recycleBinUid != null && !isInsideRecycleBin) {
+                        db.rootGroup.moveGroup(
+                            targetUid = groupUid,
+                            newParentUid = recycleBinUid
+                        )
+                    } else {
+                        db.rootGroup.removeGroup(groupUid)
+                    }
+
+                    db.toBuilder()
+                        .setRootGroup(newRootGroup)
+                        .build()
+                }
+
+                db.commit().bind()
+            }
+        }.toOperationResult()
         if (result.isSucceededOrDeferred) {
             watcher.notifyEntryRemoved(groupResult.obj)
         }
@@ -216,4 +238,14 @@ class KeepassRsGroupDao(
     }
 
     override fun getContentWatcher(): ContentWatcher<Group> = watcher
+
+    private fun isGroupInsideGroupTree(
+        groupUid: UUID,
+        groupTreeRootUid: UUID
+    ) = either {
+        val treeRootGroup = db.getRawGroupByUid(groupTreeRootUid).bind()
+
+        groupUid == groupTreeRootUid ||
+            treeRootGroup.getGroup { group -> group.uuid.toUuidOrNull() == groupUid } != null
+    }
 }

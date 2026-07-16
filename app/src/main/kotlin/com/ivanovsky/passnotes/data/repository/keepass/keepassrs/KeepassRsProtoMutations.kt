@@ -39,6 +39,25 @@ fun ProtoGroup.removeGroup(targetUid: UUID): ProtoGroup {
         .build()
 }
 
+fun ProtoGroup.moveGroup(
+    targetUid: UUID,
+    newParentUid: UUID
+): ProtoGroup {
+    val targetGroup = getGroup { group -> group.uuid.toUuidOrNull() == targetUid }
+        ?: return this
+
+    val movedGroup = targetGroup.toBuilder()
+        .setParentUuid(newParentUid.toByteString())
+        .build()
+
+    return removeGroup(targetUid)
+        .updateGroup(newParentUid) { group ->
+            group.toBuilder()
+                .addGroups(movedGroup)
+                .build()
+        }
+}
+
 fun ProtoGroup.updateEntry(targetUid: UUID, transform: (ProtoEntry) -> ProtoEntry): ProtoGroup {
     return toBuilder()
         .clearEntries()

@@ -80,28 +80,37 @@ class KeepassRsDatabase(
 
     override fun getConfig(): Either<OperationError, EncryptedDatabaseConfig> {
         return lock.withLock {
-            val meta = databaseRef.get().meta
-            Either.Right(
+            either {
+                val meta = databaseRef.get().meta
+
+                val recycleBinUid = getRecycleBindGroup()
+                    .map { group -> group.getOrNull()?.uuid?.toUuidOrNull() }
+                    .bind()
+
+                val isRecycleBinEnabled = (
+                    meta.hasRecycleBinEnabled() &&
+                        meta.recycleBinEnabled &&
+                        recycleBinUid != null
+                    )
+
                 MutableEncryptedDatabaseConfig(
-                    isRecycleBinEnabled = meta.hasRecycleBinEnabled() && meta.recycleBinEnabled,
-                    recycleBinUid = meta.recycleBinUuid.toUuidOrNull(),
+                    isRecycleBinEnabled = isRecycleBinEnabled,
+                    recycleBinUid = recycleBinUid,
                     maxHistoryItems = if (meta.hasHistoryMaxItems()) meta.historyMaxItems else 0
                 )
-            )
+            }
         }
     }
 
     override fun applyConfig(config: EncryptedDatabaseConfig): Either<OperationError, Boolean> {
         return lock.withLock {
-            val updatedMeta = databaseRef.get().meta.toBuilder()
-                .setRecycleBinEnabled(config.isRecycleBinEnabled)
-                .setHistoryMaxItems(config.maxHistoryItems)
-                .build()
+            val updatedMeta =
+                databaseRef.get().meta.toBuilder().setRecycleBinEnabled(config.isRecycleBinEnabled)
+                    .setRecycleBinUuid(config.recycleBinUid?.toByteString())
+                    .setHistoryMaxItems(config.maxHistoryItems).build()
 
             swapDatabase { db ->
-                db.toBuilder()
-                    .setMeta(updatedMeta)
-                    .build()
+                db.toBuilder().setMeta(updatedMeta).build()
             }
 
             commit()
@@ -153,11 +162,9 @@ class KeepassRsDatabase(
                 val databaseBytes = KeepassRs.encode(
                     database = databaseRef.get(),
                     key = key
-                )
-                    .mapLeft { error ->
-                        newDbError(OperationError.MESSAGE_FAILED_TO_ENCODE_DATA, error)
-                    }
-                    .bind()
+                ).mapLeft { error ->
+                    newDbError(OperationError.MESSAGE_FAILED_TO_ENCODE_DATA, error)
+                }.bind()
 
                 val output = fsProvider.openFileForWrite(
                     output,
@@ -169,9 +176,7 @@ class KeepassRsDatabase(
                     from = ByteArrayInputStream(databaseBytes),
                     to = output,
                     isClose = true
-                )
-                    .takeStatusWith(true)
-                    .toEither().bind()
+                ).takeStatusWith(true).toEither().bind()
             }
         }
 
@@ -192,90 +197,98 @@ class KeepassRsDatabase(
         }
     }
 
-    fun getRawGroupByUid(uid: UUID): Either<OperationError, RawGroup> =
-        either {
-            val group = getRawDatabase()
-                .rootGroup
-                .getGroup(
-                    predicate = { group -> group.uuid.toUuidOrNull() == uid }
-                ) ?: raise(failedToFindGroupByUid(uid))
+    fun getRawGroupByUid(uid: UUID): Either<OperationError, RawGroup> = either {
+        val group = getRawDatabase().rootGroup.getGroup(
+            predicate = { group -> group.uuid.toUuidOrNull() == uid }
+        ) ?: raise(
+            failedToFindGroupByUid(uid)
+        )
 
-            group
-        }
+        group
+    }
 
     fun getRawEntryByUid(uid: UUID): Either<OperationError, RawEntry> =
         either {
-            val (_, entry) = getRawDatabase()
-                .rootGroup
+            val (_, entry) = getRawDatabase().rootGroup
                 .getEntryAndGroup { entry -> entry.uuid.toUuidOrNull() == uid }
                 ?: raise(failedToFindEntryByUid(uid))
 
             entry
         }
 
-    fun getRawEntryWithGroupByUid(uid: UUID): Either<OperationError, Pair<RawGroup, RawEntry>> =
+    fun getRawEntryWithGroupByUid(
+        uid: UUID
+    ): Either<OperationError, Pair<RawGroup, RawEntry>> =
         either {
-            val (group, entry) = getRawDatabase()
-                .rootGroup
+            val (group, entry) = getRawDatabase().rootGroup
                 .getEntryAndGroup { entry -> entry.uuid.toUuidOrNull() == uid }
                 ?: raise(failedToFindEntryByUid(uid))
 
             group to entry
         }
 
-    fun failedToFindGroupByUid(uid: UUID): OperationError =
-        newDbError(
-            String.format(
-                GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
-                Group::class.simpleName,
-                uid
-            ),
-            Stacktrace()
-        )
+    fun failedToFindGroupByUid(uid: UUID): OperationError = newDbError(
+        String.format(
+            GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
+            Group::class.simpleName,
+            uid
+        ),
+        Stacktrace()
+    )
 
-    fun failedToFindEntryByUid(uid: UUID): OperationError =
-        newDbError(
-            String.format(
-                GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
-                Note::class.simpleName,
-                uid
-            ),
-            Stacktrace()
-        )
+    fun failedToFindEntryByUid(uid: UUID): OperationError = newDbError(
+        String.format(
+            GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
+            Note::class.simpleName,
+            uid
+        ),
+        Stacktrace()
+    )
 
     fun getAllGroups(): List<RawGroup> {
-        return getRawDatabase().rootGroup
-            .collectEntries { group, _ -> listOf(group) }
+        return getRawDatabase().rootGroup.collectEntries { group, _ -> listOf(group) }
     }
 
     fun getInheritableOptions(groupUid: UUID): Either<OperationError, InheritableOptions> {
-        val options = inheritableOptionsMap.get()[groupUid]
-            ?: return Either.Left(failedToFindGroupByUid(groupUid))
+        val options = inheritableOptionsMap.get()[groupUid] ?: return Either.Left(
+            failedToFindGroupByUid(groupUid)
+        )
 
         return Either.Right(options)
     }
 
-    fun getRawParentGroup(childUid: UUID): Either<OperationError, Option<RawGroup>> =
-        either {
-            val rootUid = getRawDatabase().rootGroup.uuid.toUuid().bind()
-            if (childUid != rootUid) {
-                val parentGroup = groupUidToParentMap.get()[childUid]
-                    ?: raise(failedToFindGroupByUid(childUid))
+    fun getRawParentGroup(childUid: UUID): Either<OperationError, Option<RawGroup>> = either {
+        val rootUid = getRawDatabase().rootGroup.uuid.toUuid().bind()
+        if (childUid != rootUid) {
+            val parentGroup =
+                groupUidToParentMap.get()[childUid] ?: raise(failedToFindGroupByUid(childUid))
 
-                Some(parentGroup)
-            } else {
-                None
-            }
+            Some(parentGroup)
+        } else {
+            None
+        }
+    }
+
+    fun getParentGroupUid(childUid: UUID): Either<OperationError, Option<UUID>> = either {
+        val parentGroup = getRawParentGroup(childUid).bind()
+
+        val parentUid = parentGroup.flatMap { group -> group.uuid.toUuid().getOrNone() }
+
+        parentUid
+    }
+
+    fun getRecycleBindGroup(): Either<OperationError, Option<RawGroup>> = either {
+        val meta = databaseRef.get().meta
+        val isRecycleBinEnabled = meta.recycleBinEnabled
+        if (!isRecycleBinEnabled) {
+            return@either None
         }
 
-    fun getParentGroupUid(childUid: UUID): Either<OperationError, Option<UUID>> =
-        either {
-            val parentGroup = getRawParentGroup(childUid).bind()
+        val recycleBinUid = meta.recycleBinUuid.toUuid().bind()
+        val group = getRawGroupByUid(recycleBinUid).getOrNone()
 
-            val parentUid = parentGroup.flatMap { group -> group.uuid.toUuid().getOrNone() }
-
-            parentUid
-        }
+        group
+    }
 
     private fun getRawRootGroupOptions(): InheritableOptions {
         val root = getRawDatabase().rootGroup
@@ -324,10 +337,9 @@ class KeepassRsDatabase(
         val rootOptions = getRawRootGroupOptions()
         result.add(root.uuid to rootOptions)
 
-        val nextGroups = LinkedList<Pair<RawGroup, InheritableOptions>>()
-            .apply {
-                add(Pair(root, rootOptions))
-            }
+        val nextGroups = LinkedList<Pair<RawGroup, InheritableOptions>>().apply {
+            add(Pair(root, rootOptions))
+        }
 
         while (nextGroups.isNotEmpty()) {
             val (group, parentOptions) = nextGroups.removeFirst()
@@ -340,22 +352,19 @@ class KeepassRsDatabase(
             }
         }
 
-        return result
-            .mapNotNull { (key, options) ->
-                val uuid = key.toUuidOrNull() ?: return@mapNotNull null
+        return result.mapNotNull { (key, options) ->
+            val uuid = key.toUuidOrNull() ?: return@mapNotNull null
 
-                uuid to options
-            }
-            .toMap()
+            uuid to options
+        }.toMap()
     }
 
     private fun createGroupUidToParentMap(): Map<UUID, RawGroup> {
         val result = hashMapOf<UUID, RawGroup>()
 
-        val nextGroups = LinkedList<RawGroup>()
-            .apply {
-                add(getRawDatabase().rootGroup)
-            }
+        val nextGroups = LinkedList<RawGroup>().apply {
+            add(getRawDatabase().rootGroup)
+        }
 
         while (nextGroups.isNotEmpty()) {
             val group = nextGroups.removeFirst()
@@ -378,36 +387,29 @@ class KeepassRsDatabase(
             file: FileDescriptor,
             content: OperationResult<InputStream>,
             key: EncryptedDatabaseKey
-        ): Either<OperationError, EncryptedDatabase> =
-            either {
-                val databaseBytes = InputOutputUtils
-                    .readAllBytes(
-                        source = content.toEither().bind(),
-                        isCloseOnFinish = true
-                    )
-                    .mapLeft { error ->
-                        newDbError(MESSAGE_FAILED_TO_OPEN_DB_FILE, error.throwable as? Exception)
-                    }
-                    .bind()
+        ): Either<OperationError, EncryptedDatabase> = either {
+            val databaseBytes = InputOutputUtils.readAllBytes(
+                source = content.toEither().bind(),
+                isCloseOnFinish = true
+            ).mapLeft { error ->
+                newDbError(MESSAGE_FAILED_TO_OPEN_DB_FILE, error.throwable as? Exception)
+            }.bind()
 
-                val database = KeepassRs
-                    .decode(
-                        data = databaseBytes,
-                        key = createKey(fsResolver, key).toEither().bind()
-                    )
-                    .mapLeft { error -> error.toOperationError() }
-                    .bind()
+            val database = KeepassRs.decode(
+                data = databaseBytes,
+                key = createKey(fsResolver, key).toEither().bind()
+            ).mapLeft { error -> error.toOperationError() }.bind()
 
-                EncryptedDatabaseAdapter(
-                    db = KeepassRsDatabase(
-                        fsResolver = fsResolver,
-                        fsOptions = fsOptions,
-                        file = file,
-                        key = key,
-                        protoDatabase = database
-                    )
+            EncryptedDatabaseAdapter(
+                db = KeepassRsDatabase(
+                    fsResolver = fsResolver,
+                    fsOptions = fsOptions,
+                    file = file,
+                    key = key,
+                    protoDatabase = database
                 )
-            }
+            )
+        }
 
         private fun KeepassRsException.toOperationError(): OperationError {
             return when (this) {
@@ -441,9 +443,7 @@ class KeepassRsDatabase(
             return when (key) {
                 is PasswordKeepassKey -> {
                     OperationResult.success(
-                        RawKey.newBuilder()
-                            .setPassword(key.password)
-                            .build()
+                        RawKey.newBuilder().setPassword(key.password).build()
                     )
                 }
 
@@ -462,8 +462,7 @@ class KeepassRsDatabase(
                         val keyBytes = inputResult.obj.use { input ->
                             input.readBytes()
                         }
-                        val builder = RawKey.newBuilder()
-                            .setKeyBytes(ByteString.copyFrom(keyBytes))
+                        val builder = RawKey.newBuilder().setKeyBytes(ByteString.copyFrom(keyBytes))
 
                         key.password?.let { password ->
                             builder.setPassword(password)

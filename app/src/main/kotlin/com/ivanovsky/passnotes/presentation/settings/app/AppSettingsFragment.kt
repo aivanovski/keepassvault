@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
-import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreferenceCompat
 import com.ivanovsky.passnotes.R
@@ -27,6 +26,8 @@ import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import com.ivanovsky.passnotes.presentation.core.BasePreferenceFragment
+import com.ivanovsky.passnotes.presentation.core.dialog.selectorDialog.SelectorDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.selectorDialog.SelectorDialogArgs
 import com.ivanovsky.passnotes.presentation.core.extensions.requestSystemPermission
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
 import com.ivanovsky.passnotes.presentation.core.extensions.showErrorDialog
@@ -48,7 +49,7 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
     private lateinit var isCrashReportingEnabledPref: SwitchPreferenceCompat
     private lateinit var isPostponedSyncEnabledPref: SwitchPreferenceCompat
     private lateinit var isBiometricUnlockEnabledPref: SwitchPreferenceCompat
-    private lateinit var keepassImplementationPref: ListPreference
+    private lateinit var keepassImplementationPref: Preference
     private lateinit var sendLogFilePref: Preference
     private lateinit var removeLogFilesPref: Preference
     private lateinit var enableNotificationPermissionPref: Preference
@@ -169,11 +170,6 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
             true
         }
 
-        keepassImplementationPref.setOnPreferenceChangeListener { _, newValue ->
-            viewModel.onKeepassImplementationChanged()
-            true
-        }
-
         categoryBiometric.isVisible = viewModel.isBiometricUnlockAvailable()
         isCrashReportingEnabledPref.isEnabled = viewModel.isCrashReportingAvailable()
         isCrashReportingEnabledPref.summary = viewModel.getCrashReportingSummary()
@@ -215,6 +211,10 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
 
             enableNotificationPermissionPref -> {
                 viewModel.onRequestNotificationPermissionClicked()
+            }
+
+            keepassImplementationPref -> {
+                viewModel.onKeepassImplementationClicked()
             }
         }
     }
@@ -290,6 +290,9 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
         viewModel.requestPermissionEvent.observe(viewLifecycleOwner) { permission ->
             requestSystemPermission(permission)
         }
+        viewModel.showKeepassImplementationDialogEvent.observe(viewLifecycleOwner) { args ->
+            showKeepassImplementationSelectorDialog(args)
+        }
     }
 
     private fun setProgressVisibility(isProgressVisible: Boolean) {
@@ -313,6 +316,16 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
             }
 
         startActivity(Intent.createChooser(intent, null))
+    }
+
+    private fun showKeepassImplementationSelectorDialog(args: SelectorDialogArgs) {
+        val dialog = SelectorDialog.newInstance(
+            args = args,
+            onItemSelected = { index ->
+                viewModel.onKeepassImplementationSelected(index)
+            }
+        )
+        dialog.show(childFragmentManager, SelectorDialog.TAG)
     }
 
     companion object {

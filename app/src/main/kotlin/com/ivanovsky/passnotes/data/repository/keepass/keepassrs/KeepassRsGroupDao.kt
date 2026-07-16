@@ -194,23 +194,58 @@ class KeepassRsGroupDao(
             return oldGroupResult.mapError()
         }
 
-        db.lock.withLock {
-            db.swapDatabase { db ->
-                db.toBuilder()
-                    .setRootGroup(
-                        db.rootGroup.updateGroup(uid) { oldGroup ->
-                            group.toProtoGroup(uid).toBuilder()
-                                .addAllGroups(oldGroup.groupsList)
-                                .addAllEntries(oldGroup.entriesList)
-                                .build()
-                        }
-                    )
-                    .build()
-            }
-        }
+        val result = db.lock.withLock {
+            either {
+                if (group.parentUid != null) {
+                    val isInsideItself = isGroupInsideGroupTree(
+                        groupUid = group.parentUid,
+                        groupTreeRootUid = uid
+                    ).bind()
 
-        val result =
-            if (doCommit) db.commit().toOperationResult() else OperationResult.success(true)
+                    if (isInsideItself) {
+                        raise(
+                            newDbError(
+                                OperationError.MESSAGE_FAILED_TO_MOVE_GROUP_INSIDE_ITS_OWN_TREE,
+                                Stacktrace()
+                            )
+                        )
+                    }
+
+                    db.getRawGroupByUid(group.parentUid).bind()
+                }
+
+                val oldParentUid = db.getParentGroupUid(uid).bind().getOrNull()
+
+                db.swapDatabase { db ->
+                    val rootGroup =
+                        if (group.parentUid != null && oldParentUid != group.parentUid) {
+                            db.rootGroup.moveGroup(
+                                targetUid = uid,
+                                newParentUid = group.parentUid
+                            )
+                        } else {
+                            db.rootGroup
+                        }
+
+                    db.toBuilder()
+                        .setRootGroup(
+                            rootGroup.updateGroup(uid) { oldGroup ->
+                                group.toProtoGroup(uid).toBuilder()
+                                    .addAllGroups(oldGroup.groupsList)
+                                    .addAllEntries(oldGroup.entriesList)
+                                    .build()
+                            }
+                        )
+                        .build()
+                }
+
+                if (doCommit) {
+                    db.commit().bind()
+                } else {
+                    true
+                }
+            }
+        }.toOperationResult()
         if (result.isSucceededOrDeferred) {
             val newGroupResult = getGroupByUid(uid)
             if (newGroupResult.isSucceeded) {

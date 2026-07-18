@@ -1,0 +1,7 @@
+appId: com.ivanovsky.passnotes.automation
+---
+- tapOn: "Password"
+- inputText: "${PASSWORD}"
+- tapOn: "Unlock button"
+
+- assertVisible: "screen:groups"

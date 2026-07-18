@@ -1,0 +1,25 @@
+appId: com.ivanovsky.passnotes.automation
+---
+- runFlow:
+    file: "../common/setup-database-file.yaml"
+    env:
+      DATABASE_FILE: "basic-key-file.kdbx"
+
+- tapOn: "ADD KEY"
+- tapOn: "Fake File System"
+- tapOn: "URL"
+- inputText: "content://fakefs.com"
+- tapOn: "Username"
+- inputText: "user"
+- tapOn: "Password"
+- inputText: "abc123"
+- tapOn: "Done"
+- tapOn: "keys/"
+- longPressOn: "key"
+- tapOn: "Make a copy and Select"
+- assertVisible: "basic-key-file.kdbx"
+
+- tapOn: "Add entry"
+- tapOn: "Open file"
+- tapOn: "Private app storage"
+- assertVisible: "key"

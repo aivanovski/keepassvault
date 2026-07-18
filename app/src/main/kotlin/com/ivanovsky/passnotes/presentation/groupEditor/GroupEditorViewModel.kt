@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.presentation.groupEditor
 
+import android.view.inputmethod.EditorInfo
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -72,6 +73,12 @@ class GroupEditorViewModel(
 
             onDataLoaded(group, parentGroup)
             setScreenState(ScreenState.data())
+        }
+    }
+
+    fun onEditorAction(actionId: Int) {
+        if (actionId == EditorInfo.IME_ACTION_DONE) {
+            onDoneButtonClicked()
         }
     }
 

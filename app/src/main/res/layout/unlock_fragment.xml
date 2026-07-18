@@ -18,7 +18,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@id/rootLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:contentDescription="screens:unlock">
 
         <com.ivanovsky.passnotes.presentation.core.widget.ErrorPanelView
             android:id="@+id/errorPanelView"

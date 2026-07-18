@@ -1,0 +1,53 @@
+appId: com.ivanovsky.passnotes.automation
+---
+- runFlow:
+    file: "../common/setup-database-file.yaml"
+    env:
+      DATABASE_FILE: "basic.kdbx"
+- runFlow: "../common/set-keepassrs-in-settings.yaml"
+- runFlow:
+    file: "../common/unlock-database.yaml"
+    env:
+      PASSWORD: "abc123"
+
+- tapOn: "Add entry"
+- tapOn: "Standard Entry"
+
+- tapOn: "Title"
+- inputText: "Created entry"
+
+- tapOn: "Username"
+- inputText: "john.galt@example.com"
+
+- tapOn: "Password"
+- inputText: "abc123"
+
+- tapOn: "Confirm password"
+- inputText: "abc123"
+
+- scrollUntilVisible:
+    element: "URL"
+    direction: DOWN
+- tapOn: "URL"
+- inputText: "https://johngalt.com"
+
+- scrollUntilVisible:
+    element: "Notes"
+    direction: DOWN
+- tapOn: "Notes"
+- inputText: "Created notes"
+
+- tapOn: "Done"
+
+- tapOn: "Created entry"
+
+- assertVisible: "Title"
+- assertVisible: "Created entry"
+- assertVisible: "UserName"
+- assertVisible: "john.galt@example.com"
+- assertVisible: "Password"
+- assertVisible: "URL"
+- assertVisible: "https://johngalt.com"
+- assertVisible: "Notes"
+- assertVisible: "Created notes"
+

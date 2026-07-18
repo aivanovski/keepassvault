@@ -1,0 +1,28 @@
+appId: com.ivanovsky.passnotes.automation
+---
+- launchApp:
+    clearState: true
+- runFlow: "../common/set-keepassrs-in-settings.yaml"
+
+- tapOn: "Add entry"
+- tapOn: "New file"
+- tapOn: "Add entry templates"
+- tapOn: "Not selected"
+- tapOn: "Private app storage"
+
+- tapOn: "File name"
+- inputText: "database"
+- tapOn: "Password"
+- inputText: "abc123"
+- tapOn: "Confirm password"
+- inputText: "abc123"
+- tapOn: "Done"
+
+- extendedWaitUntil:
+    notVisible: "Loading indicator"
+    timeout: 10000
+- tapOn:
+    text: "DISABLE"
+    optional: true
+
+- assertVisible: "No items"

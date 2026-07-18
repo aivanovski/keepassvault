@@ -1,0 +1,15 @@
+appId: com.ivanovsky.passnotes.automation
+---
+- runFlow:
+    file: "../common/setup-database-file.yaml"
+    env:
+      DATABASE_FILE: "basic-xml-key-file.kdbx"
+- runFlow:
+    file: "../common/select-key-file.yaml"
+    env:
+      KEY_FILE: "xml-key.keyx"
+- runFlow: "../common/set-keepassrs-in-settings.yaml"
+
+- assertVisible: "XML-KEY.KEYX"
+- tapOn: "Unlock button"
+- assertVisible: "Basic entry"

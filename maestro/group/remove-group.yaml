@@ -1,0 +1,10 @@
+appId: com.ivanovsky.passnotes.automation
+---
+- runFlow: "create-new-group.yaml"
+
+- longPressOn: "Basic Group"
+- tapOn: "Remove"
+- tapOn: "Yes"
+
+- assertVisible: "Basic entry"
+- assertNotVisible: "Basic Group"

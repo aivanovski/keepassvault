@@ -1,0 +1,23 @@
+appId: com.ivanovsky.passnotes.automation
+---
+- launchApp:
+    clearState: true
+
+- tapOn: "Add entry"
+- tapOn: "Open file"
+- tapOn: "Fake File System"
+
+- tapOn: "URL"
+- inputText: "content://fakefs.com"
+- tapOn: "Username"
+- inputText: "user"
+- tapOn: "Password"
+- inputText: "abc123"
+- tapOn: "Done"
+
+- tapOn: "automation/"
+- tapOn: "${DATABASE_FILE}"
+- tapOn: "Done"
+
+- assertVisible: "Unlock button"
+- assertVisible: "${DATABASE_FILE}"

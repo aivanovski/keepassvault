@@ -1,0 +1,20 @@
+appId: com.ivanovsky.passnotes.automation
+---
+- runFlow:
+    file: "../common/setup-database-file.yaml"
+    env:
+      DATABASE_FILE: "basic.kdbx"
+- runFlow: "../common/set-keepassrs-in-settings.yaml"
+- runFlow:
+    file: "../common/unlock-database.yaml"
+    env:
+      PASSWORD: "abc123"
+
+- tapOn: "Add entry"
+- tapOn: "New Group"
+- tapOn: "Title"
+- inputText: "Basic Group"
+- tapOn: "Done"
+
+- assertVisible: "screen:groups"
+- assertVisible: "Basic Group"

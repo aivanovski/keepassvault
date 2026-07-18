@@ -1,0 +1,9 @@
+appId: com.ivanovsky.passnotes.automation
+---
+- tapOn: "Navigate up"
+- tapOn: "Settings"
+- tapOn: "Application settings"
+- tapOn: "KeePass opening library"
+- tapOn: "keepass-rs"
+- back
+- back

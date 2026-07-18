@@ -1,0 +1,16 @@
+appId: com.ivanovsky.passnotes.automation
+---
+- tapOn: "ADD KEY"
+- tapOn: "Fake File System"
+
+- tapOn: "URL"
+- inputText: "content://fakefs.com"
+- tapOn: "Username"
+- inputText: "user"
+- tapOn: "Password"
+- inputText: "abc123"
+- tapOn: "Done"
+
+- tapOn: "keys/"
+- tapOn: "${KEY_FILE}"
+- tapOn: "Done"

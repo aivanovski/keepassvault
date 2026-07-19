@@ -20,14 +20,14 @@ Migrate all 30 Java source files currently in `:app` (3,068 lines) to Kotlin wit
 
 These provide quick validation of Kotlin/Java interop and remove leaf Java types first.
 
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/OnConflictStrategy.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/SyncStrategy.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/util/ObjectUtils.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/util/CollectionUtils.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/util/DateUtils.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/util/LocaleUtils.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/util/InputMethodUtils.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/BaseRemoteFileOutputStream.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/OnConflictStrategy.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/SyncStrategy.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/util/ObjectUtils.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/util/CollectionUtils.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/util/DateUtils.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/util/LocaleUtils.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/util/InputMethodUtils.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/BaseRemoteFileOutputStream.java`
 
 Pay particular attention to static utility call sites: preserve source compatibility with `@JvmStatic` while Java callers remain. Preserve nullable return values and the `OutputStream` contract.
 
@@ -104,7 +104,7 @@ For each class:
 ## Progress
 
 - Total Java files: **30**
-- Migrated: **0 / 30**
-- Remaining: **30 / 30**
+- Migrated: **8 / 30**
+- Remaining: **22 / 30**
 
 Update these totals whenever a file checklist item is completed.

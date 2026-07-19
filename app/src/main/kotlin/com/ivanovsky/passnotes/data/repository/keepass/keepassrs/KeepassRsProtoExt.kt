@@ -7,8 +7,8 @@ import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_PARSE_UUID
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_FAILED_TO_PARSE_UUID
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.repository.keepass.determinePropertyType
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.model.InheritableOptions

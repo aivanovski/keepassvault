@@ -9,7 +9,7 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationError.newErrorMessage
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newErrorMessage
 import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation

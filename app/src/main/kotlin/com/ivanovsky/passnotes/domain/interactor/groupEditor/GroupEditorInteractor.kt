@@ -4,8 +4,8 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_PARENT_UID_IS_NULL
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_PARENT_UID_IS_NULL
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider

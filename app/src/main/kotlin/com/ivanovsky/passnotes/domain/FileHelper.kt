@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.domain
 
 import android.content.Context
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_CREATE_A_DIRECTORY
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_FAILED_TO_ACCESS_TO_PRIVATE_STORAGE
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_FAILED_TO_CREATE_A_DIRECTORY
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace

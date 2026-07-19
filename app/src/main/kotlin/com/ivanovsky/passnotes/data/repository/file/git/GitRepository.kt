@@ -2,10 +2,10 @@ package com.ivanovsky.passnotes.data.repository.file.git
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_GET_REFERENCE_TO
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
-import com.ivanovsky.passnotes.data.entity.OperationError.newNetworkIOError
-import com.ivanovsky.passnotes.data.entity.OperationError.newRemoteApiError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.GENERIC_MESSAGE_FAILED_TO_GET_REFERENCE_TO
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericIOError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newNetworkIOError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newRemoteApiError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata
 import com.ivanovsky.passnotes.data.repository.file.git.model.SshKey

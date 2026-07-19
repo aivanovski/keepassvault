@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.domain.interactor.filepicker
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_FILE_ALREADY_EXISTS
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.GENERIC_FILE_ALREADY_EXISTS
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver

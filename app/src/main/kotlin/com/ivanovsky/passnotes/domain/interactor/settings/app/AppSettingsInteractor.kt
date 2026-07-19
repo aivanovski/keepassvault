@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.domain.interactor.settings.app
 
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_REMOVE_FILE
-import com.ivanovsky.passnotes.data.entity.OperationError.newFileNotFoundError
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_FAILED_TO_REMOVE_FILE
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newFileNotFoundError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace

@@ -12,6 +12,7 @@ import static com.ivanovsky.passnotes.util.ObjectUtils.isNotEquals;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
 import com.ivanovsky.passnotes.data.entity.FileDescriptor;
@@ -37,6 +38,7 @@ import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
 import com.ivanovsky.passnotes.extensions.RemoteFileMetadataExtKt;
 import com.ivanovsky.passnotes.util.DateUtils;
 import com.ivanovsky.passnotes.util.FileUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -51,6 +53,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import timber.log.Timber;
 
 public class RemoteFileSystemProvider implements FileSystemProvider {
@@ -319,21 +322,28 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                     metadata = client.downloadFileOrThrow(remotePath, destinationPath);
 
                     if (options.isCacheEnabled()) {
-                        cachedFile = new RemoteFile();
+                        var lastModificationTimestamp = anyLastTimestamp(
+                                metadata.getServerModified(),
+                                metadata.getClientModified());
 
-                        cachedFile.setFsAuthority(fsAuthority);
-                        cachedFile.setUid(metadata.getUid());
-                        cachedFile.setRemotePath(metadata.getPath());
-                        cachedFile.setLocalPath(destinationPath);
-                        cachedFile.setRevision(metadata.getRevision());
-                        cachedFile.setUploaded(true);
-                        cachedFile.setLastModificationTimestamp(
-                                anyLastTimestamp(
-                                        metadata.getServerModified(),
-                                        metadata.getClientModified()));
-                        cachedFile.setLastRemoteModificationTimestamp(
-                                metadata.getServerModified().getTime());
-                        cachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
+                        cachedFile = new RemoteFile(
+                                null,
+                                fsAuthority,
+                                false,
+                                true,
+                                false,
+                                false,
+                                false,
+                                0,
+                                null,
+                                System.currentTimeMillis(),
+                                lastModificationTimestamp,
+                                metadata.getServerModified().getTime(),
+                                destinationPath,
+                                metadata.getPath(),
+                                metadata.getUid(),
+                                metadata.getRevision()
+                        );
 
                         cache.put(cachedFile);
                     }
@@ -363,20 +373,27 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         metadata =
                                 client.downloadFileOrThrow(remotePath, cachedFile.getLocalPath());
 
-                        cachedFile.setRemotePath(metadata.getPath());
-                        cachedFile.setRevision(metadata.getRevision());
-                        cachedFile.setUploaded(true);
-                        cachedFile.setUploadFailed(false);
-                        cachedFile.setLocallyModified(false);
-                        cachedFile.setLastModificationTimestamp(
-                                anyLastTimestamp(
-                                        metadata.getServerModified(),
-                                        metadata.getClientModified()));
-                        cachedFile.setLastRemoteModificationTimestamp(
-                                metadata.getServerModified().getTime());
-                        cachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
-                        cachedFile.setRetryCount(0);
-                        cachedFile.setLastRetryTimestamp(null);
+                        var lastModificationTimestamp = anyLastTimestamp(
+                                metadata.getServerModified(),
+                                metadata.getClientModified());
+
+                        cachedFile = cachedFile.copy(
+                                cachedFile.getId(),
+                                cachedFile.getFsAuthority(),
+                                false,
+                                true,
+                                false,
+                                cachedFile.isUploading(),
+                                cachedFile.isDownloading(),
+                                0,
+                                null,
+                                System.currentTimeMillis(),
+                                lastModificationTimestamp,
+                                metadata.getServerModified().getTime(),
+                                cachedFile.getLocalPath(),
+                                metadata.getPath(),
+                                cachedFile.getUid(),
+                                metadata.getRevision());
 
                         cache.update(cachedFile);
 
@@ -398,17 +415,27 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         "Local cached file is up to date: remote=%s, local=%s",
                         remotePath, cachedFile.getLocalPath());
 
-                cachedFile.setRemotePath(metadata.getPath());
-                cachedFile.setLastModificationTimestamp(
-                        anyLastTimestamp(
-                                metadata.getServerModified(), metadata.getClientModified()));
-                cachedFile.setLastRemoteModificationTimestamp(
-                        metadata.getServerModified().getTime());
-                cachedFile.setUploaded(true);
-                cachedFile.setUploadFailed(false);
-                cachedFile.setLocallyModified(false);
-                cachedFile.setRetryCount(0);
-                cachedFile.setLastRetryTimestamp(null);
+                var lastModificationTimestamp = anyLastTimestamp(
+                        metadata.getServerModified(),
+                        metadata.getClientModified());
+
+                cachedFile = cachedFile.copy(
+                        cachedFile.getId(),
+                        cachedFile.getFsAuthority(),
+                        false,
+                        true,
+                        false,
+                        cachedFile.isUploading(),
+                        cachedFile.isDownloading(),
+                        0,
+                        null,
+                        cachedFile.getLastDownloadTimestamp(),
+                        lastModificationTimestamp,
+                        metadata.getServerModified().getTime(),
+                        cachedFile.getLocalPath(),
+                        metadata.getPath(),
+                        cachedFile.getUid(),
+                        cachedFile.getRevision());
 
                 cache.update(cachedFile);
 
@@ -474,9 +501,23 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
             return OperationResult.error(newGenericIOError(message, new Stacktrace()));
         }
 
-        cachedFile.setLastModificationTimestamp(file.getModified());
-        cachedFile.setLocallyModified(true);
-        cachedFile.setUploaded(false);
+        cachedFile = cachedFile.copy(
+                cachedFile.getId(),
+                cachedFile.getFsAuthority(),
+                true,
+                false,
+                cachedFile.isUploadFailed(),
+                cachedFile.isUploading(),
+                cachedFile.isDownloading(),
+                cachedFile.getRetryCount(),
+                cachedFile.getLastRetryTimestamp(),
+                cachedFile.getLastDownloadTimestamp(),
+                file.getModified(),
+                cachedFile.getLastRemoteModificationTimestamp(),
+                cachedFile.getLocalPath(),
+                cachedFile.getRemotePath(),
+                cachedFile.getUid(),
+                cachedFile.getRevision());
 
         ProcessingUnit unit =
                 new ProcessingUnit(
@@ -559,18 +600,26 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                     parentPath = parent.getPath();
                 }
 
-                RemoteFile cachedFile = new RemoteFile();
-
                 long timestamp = System.currentTimeMillis();
 
-                cachedFile.setFsAuthority(fsAuthority);
-                cachedFile.setRemotePath(parentPath + "/" + file.getName());
-                cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
-                cachedFile.setUid(cachedFile.getRemotePath());
-                cachedFile.setLastModificationTimestamp(timestamp);
-                cachedFile.setLastRemoteModificationTimestamp(null);
-                cachedFile.setLastDownloadTimestamp(timestamp);
-                cachedFile.setLocallyModified(true);
+                RemoteFile cachedFile = new RemoteFile(
+                        null,
+                        fsAuthority,
+                        true,
+                        false,
+                        false,
+                        false,
+                        false,
+                        0,
+                        null,
+                        timestamp,
+                        timestamp,
+                        null,
+                        generateDestinationFilePath(destinationDir),
+                        parentPath + "/" + file.getName(),
+                        parentPath + "/" + file.getName(),
+                        null
+                );
 
                 ProcessingUnit unit =
                         new ProcessingUnit(
@@ -605,7 +654,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                 Date clientModified = metadata.getClientModified();
 
                 Date localModified;
-                if (cachedFile != null) {
+                if (cachedFile != null && cachedFile.getLastModificationTimestamp() != null) {
                     localModified = new Date(cachedFile.getLastModificationTimestamp());
                 } else if (file.getModified() != null) {
                     localModified = new Date(file.getModified());
@@ -618,16 +667,24 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                 if (canResolveMergeConflict(
                         localModified, serverModified, clientModified, onConflict)) {
                     if (cachedFile == null) {
-                        cachedFile = new RemoteFile();
-
-                        cachedFile.setFsAuthority(fsAuthority);
-                        cachedFile.setRemotePath(remotePath);
-                        cachedFile.setUid(uid);
-                        cachedFile.setLocalPath(generateDestinationFilePath(destinationDir));
-                        cachedFile.setLastModificationTimestamp(localModified.getTime());
-                        cachedFile.setLastRemoteModificationTimestamp(serverModified.getTime());
-                        cachedFile.setLastDownloadTimestamp(localModified.getTime());
-                        cachedFile.setLocallyModified(true);
+                        var localModifiedTimestamp = localModified != null ? localModified.getTime() : null;
+                        cachedFile = new RemoteFile(
+                                null,
+                                fsAuthority,
+                                true,
+                                false,
+                                false,
+                                false,
+                                false,
+                                0,
+                                null,
+                                localModifiedTimestamp,
+                                localModifiedTimestamp,
+                                serverModified.getTime(),
+                                generateDestinationFilePath(destinationDir),
+                                remotePath,
+                                uid,
+                                null);
 
                         ProcessingUnit unit =
                                 new ProcessingUnit(
@@ -654,12 +711,25 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
                         }
 
                     } else {
-                        cachedFile.setRemotePath(remotePath);
-                        cachedFile.setLastModificationTimestamp(localModified.getTime());
-                        cachedFile.setLastRemoteModificationTimestamp(serverModified.getTime());
-                        cachedFile.setLastDownloadTimestamp(localModified.getTime());
-                        cachedFile.setLocallyModified(true);
-                        cachedFile.setUploaded(false);
+                        var localModifiedTimestamp = localModified != null ? localModified.getTime() : null;
+
+                        cachedFile = cachedFile.copy(
+                                cachedFile.getId(),
+                                cachedFile.getFsAuthority(),
+                                true,
+                                false,
+                                cachedFile.isUploadFailed(),
+                                cachedFile.isUploading(),
+                                cachedFile.isDownloading(),
+                                cachedFile.getRetryCount(),
+                                cachedFile.getLastRetryTimestamp(),
+                                localModifiedTimestamp,
+                                localModifiedTimestamp,
+                                serverModified.getTime(),
+                                cachedFile.getLocalPath(),
+                                remotePath,
+                                cachedFile.getUid(),
+                                cachedFile.getRevision());
 
                         ProcessingUnit unit =
                                 new ProcessingUnit(
@@ -773,7 +843,23 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     public void onFileUploadFailed(RemoteFile file, UUID processingUnitUid) {
         Timber.d("onFileUploadFailed: unitUid=%s, file=%s", processingUnitUid, file);
 
-        file.setUploadFailed(true);
+        file = file.copy(
+                file.getId(),
+                file.getFsAuthority(),
+                file.isLocallyModified(),
+                file.isUploaded(),
+                true,
+                file.isUploading(),
+                file.isDownloading(),
+                file.getRetryCount(),
+                file.getLastRetryTimestamp(),
+                file.getLastDownloadTimestamp(),
+                file.getLastModificationTimestamp(),
+                file.getLastRemoteModificationTimestamp(),
+                file.getLocalPath(),
+                file.getRemotePath(),
+                file.getUid(),
+                file.getRevision());
 
         cache.update(file);
 
@@ -787,15 +873,23 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         Long modifiedTimestamp =
                 anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified());
 
-        file.setUploadFailed(false);
-        file.setLocallyModified(false);
-        file.setUploaded(true);
-        file.setLastModificationTimestamp(modifiedTimestamp);
-        file.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
-        file.setLastDownloadTimestamp(System.currentTimeMillis());
-        file.setRevision(metadata.getRevision());
-        file.setUid(metadata.getUid());
-        file.setRemotePath(metadata.getPath());
+        file = file.copy(
+                file.getId(),
+                file.getFsAuthority(),
+                false,
+                true,
+                false,
+                file.isUploading(),
+                file.isDownloading(),
+                file.getRetryCount(),
+                file.getLastRetryTimestamp(),
+                System.currentTimeMillis(),
+                modifiedTimestamp,
+                metadata.getServerModified().getTime(),
+                file.getLocalPath(),
+                metadata.getPath(),
+                metadata.getUid(),
+                metadata.getRevision());
 
         cache.update(file);
 

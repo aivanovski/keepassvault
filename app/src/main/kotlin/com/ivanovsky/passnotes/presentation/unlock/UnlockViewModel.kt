@@ -15,8 +15,8 @@ import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newErrorMessage
 import com.ivanovsky.passnotes.data.entity.OperationError.Type.BIOMETRIC_DATA_INVALIDATED_ERROR
-import com.ivanovsky.passnotes.data.entity.OperationError.newErrorMessage
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus

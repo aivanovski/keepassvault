@@ -46,9 +46,9 @@ Convert parent classes before subclasses and preserve constructor messages and i
 
 These types have broad call-site impact. Preserve their existing mutable/JavaBean shape until all consumers have migrated; do not automatically turn them into data or sealed classes.
 
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/entity/OperationError.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/entity/OperationResult.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/entity/RemoteFile.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/entity/OperationError.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/entity/OperationResult.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/entity/RemoteFile.java`
 
 For `OperationError`, retain `Serializable`, constants, factory methods, equality, and hash code semantics. For generic `OperationResult`, verify factory-method type inference, deferred/error state transitions, and nullable payload behavior from both Kotlin and remaining Java callers. For `RemoteFile`, retain its no-argument construction path, mutable accessors, Room annotations/defaults, and equality/hash code behavior.
 
@@ -56,7 +56,7 @@ For `OperationError`, retain `Serializable`, constants, factory methods, equalit
 
 Convert interfaces before their larger implementations. Kotlin nullability here becomes part of the implementation contract, so compare every signature with all implementors and callers.
 
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/db/dao/RemoteFileDao.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/repository/db/dao/RemoteFileDao.java`
 - [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/db/dao/UsedFileDao.java`
 - [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/encdb/dao/GroupDao.java`
 - [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/encdb/dao/NoteDao.java`
@@ -104,7 +104,7 @@ For each class:
 ## Progress
 
 - Total Java files: **30**
-- Migrated: **14 / 30**
-- Remaining: **16 / 30**
+- Migrated: **17 / 30**
+- Remaining: **13 / 30**
 
 Update these totals whenever a file checklist item is completed.

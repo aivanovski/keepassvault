@@ -9,11 +9,11 @@ import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_RECORD_IS_ALREADY_EXISTS
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_SYNCHRONIZATION_TAKES_TOO_LONG
-import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_RECORD_IS_ALREADY_EXISTS
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_SYNCHRONIZATION_TAKES_TOO_LONG
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newDbError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState

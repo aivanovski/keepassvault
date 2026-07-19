@@ -6,10 +6,10 @@ import android.provider.OpenableColumns
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_USE_CASE
-import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
-import com.ivanovsky.passnotes.data.entity.OperationError.newFileNotFoundError
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_INCORRECT_USE_CASE
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newFileAccessError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newFileNotFoundError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider

@@ -6,7 +6,7 @@ import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Hash
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationError.newErrorMessage
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newErrorMessage
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.file.FSOptions

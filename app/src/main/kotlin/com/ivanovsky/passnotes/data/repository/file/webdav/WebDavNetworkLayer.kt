@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.data.repository.file.webdav
 import com.ivanovsky.passnotes.BuildConfig
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.newRemoteApiError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newRemoteApiError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine

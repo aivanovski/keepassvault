@@ -2,8 +2,8 @@ package com.ivanovsky.passnotes.data.repository.file.saf
 
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_USE_CASE
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_INCORRECT_USE_CASE
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus

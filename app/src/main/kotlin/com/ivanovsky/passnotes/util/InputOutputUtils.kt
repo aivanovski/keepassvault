@@ -4,7 +4,7 @@ import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import java.io.Closeable
 import java.io.File

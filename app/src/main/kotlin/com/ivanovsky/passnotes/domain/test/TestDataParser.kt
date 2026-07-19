@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes.domain.test
 
 import android.os.Bundle
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.TestAutofillData
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace

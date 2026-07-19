@@ -15,9 +15,9 @@ import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_UID_IS_NULL
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationError.Type.BIOMETRIC_DATA_INVALIDATED_ERROR
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.UsedFile

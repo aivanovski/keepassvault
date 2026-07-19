@@ -1,0 +1,258 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 7,
+    "identityHash": "67697c4eb01ccc885bf62737aa113e98",
+    "entities": [
+      {
+        "tableName": "used_file",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `fs_authority` TEXT NOT NULL, `file_path` TEXT NOT NULL, `file_uid` TEXT NOT NULL, `file_name` TEXT NOT NULL, `is_root` INTEGER NOT NULL, `added_time` INTEGER NOT NULL, `last_access_time` INTEGER, `key_type` TEXT NOT NULL, `key_file_fs_authority` TEXT, `key_file_path` TEXT, `key_file_uid` TEXT, `key_file_name` TEXT, `biometric_data` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "fsAuthority",
+            "columnName": "fs_authority",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filePath",
+            "columnName": "file_path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileUid",
+            "columnName": "file_uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fileName",
+            "columnName": "file_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isRoot",
+            "columnName": "is_root",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "addedTime",
+            "columnName": "added_time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastAccessTime",
+            "columnName": "last_access_time",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "keyType",
+            "columnName": "key_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "keyFileFsAuthority",
+            "columnName": "key_file_fs_authority",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "keyFilePath",
+            "columnName": "key_file_path",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "keyFileUid",
+            "columnName": "key_file_uid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "keyFileName",
+            "columnName": "key_file_name",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "biometricData",
+            "columnName": "biometric_data",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "remote_file",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `fs_authority` TEXT NOT NULL, `locally_modified` INTEGER NOT NULL, `uploaded` INTEGER NOT NULL, `upload_failed` INTEGER NOT NULL, `uploading` INTEGER NOT NULL, `downloading` INTEGER NOT NULL, `retry_count` INTEGER NOT NULL, `last_retry_timestamp` INTEGER, `last_download_timestamp` INTEGER, `last_modification_timestamp` INTEGER, `last_remote_modification_timestamp` INTEGER, `local_path` TEXT NOT NULL, `remote_path` TEXT NOT NULL, `uid` TEXT NOT NULL, `revision` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "fsAuthority",
+            "columnName": "fs_authority",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isLocallyModified",
+            "columnName": "locally_modified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isUploaded",
+            "columnName": "uploaded",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isUploadFailed",
+            "columnName": "upload_failed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isUploading",
+            "columnName": "uploading",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isDownloading",
+            "columnName": "downloading",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "retryCount",
+            "columnName": "retry_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastRetryTimestamp",
+            "columnName": "last_retry_timestamp",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastDownloadTimestamp",
+            "columnName": "last_download_timestamp",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastModificationTimestamp",
+            "columnName": "last_modification_timestamp",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastRemoteModificationTimestamp",
+            "columnName": "last_remote_modification_timestamp",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "localPath",
+            "columnName": "local_path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remotePath",
+            "columnName": "remote_path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uid",
+            "columnName": "uid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revision",
+            "columnName": "revision",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "git_root",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `fs_authority` TEXT NOT NULL, `path` TEXT NOT NULL, `ssh_key_path` TEXT, `ssh_key_file_fsAuthority` TEXT, `ssh_key_file_path` TEXT, `ssh_key_file_uid` TEXT, `ssh_key_file_name` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "fsAuthority",
+            "columnName": "fs_authority",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "path",
+            "columnName": "path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sshKeyPath",
+            "columnName": "ssh_key_path",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sshKeyFile.fsAuthority",
+            "columnName": "ssh_key_file_fsAuthority",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sshKeyFile.path",
+            "columnName": "ssh_key_file_path",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sshKeyFile.uid",
+            "columnName": "ssh_key_file_uid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "sshKeyFile.name",
+            "columnName": "ssh_key_file_name",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '67697c4eb01ccc885bf62737aa113e98')"
+    ]
+  }
+}

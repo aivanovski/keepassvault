@@ -6,7 +6,7 @@ import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_FILE
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.GENERIC_MESSAGE_FAILED_TO_FIND_FILE
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator

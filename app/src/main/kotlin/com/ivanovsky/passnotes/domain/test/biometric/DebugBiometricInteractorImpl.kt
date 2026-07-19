@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.domain.test.biometric
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.crypto.entity.BiometricData
-import com.ivanovsky.passnotes.data.entity.OperationError.newBiometricDataError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newBiometricDataError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator

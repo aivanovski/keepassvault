@@ -14,11 +14,11 @@ import com.ivanovsky.passnotes.data.entity.Attachment
 import com.ivanovsky.passnotes.data.entity.Hash
 import com.ivanovsky.passnotes.data.entity.HashType
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID
-import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_NOT_FOUND
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_NOTE
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL
-import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.GENERIC_MESSAGE_NOT_FOUND
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_FAILED_TO_FIND_NOTE
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_UID_IS_NULL
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
 import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao

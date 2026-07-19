@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.presentation.diffViewer
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_DATABASE_TYPE
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_UNSUPPORTED_DATABASE_TYPE
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey

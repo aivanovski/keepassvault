@@ -2,14 +2,14 @@ package com.ivanovsky.passnotes.data.repository.file.webdav
 
 import com.ivanovsky.passnotes.data.entity.FSCredentials
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_GET_PARENT_PATH
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FILE_IS_NOT_A_DIRECTORY
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_IO_ERROR
-import com.ivanovsky.passnotes.data.entity.OperationError.newAuthError
-import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
-import com.ivanovsky.passnotes.data.entity.OperationError.newFileNotFoundError
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_FAILED_TO_GET_PARENT_PATH
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_FILE_IS_NOT_A_DIRECTORY
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_INCORRECT_FILE_SYSTEM_CREDENTIALS
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_IO_ERROR
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newAuthError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newFileAccessError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newFileNotFoundError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientV2

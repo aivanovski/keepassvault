@@ -5,10 +5,10 @@ import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_FILE
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_SYNC_STATUS
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.GENERIC_MESSAGE_FAILED_TO_FIND_FILE
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_INCORRECT_SYNC_STATUS
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus

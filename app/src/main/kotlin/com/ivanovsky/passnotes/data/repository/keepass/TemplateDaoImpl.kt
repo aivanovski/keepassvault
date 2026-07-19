@@ -4,8 +4,8 @@ import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.InheritableBooleanOption
 import com.ivanovsky.passnotes.data.entity.Note
-import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST
-import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.GENERIC_MESSAGE_GROUP_IS_ALREADY_EXIST
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.repository.TemplateDao

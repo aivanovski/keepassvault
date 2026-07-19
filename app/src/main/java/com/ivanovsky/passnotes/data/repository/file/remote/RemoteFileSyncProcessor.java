@@ -16,6 +16,7 @@ import static com.ivanovsky.passnotes.util.InputOutputUtils.newFileInputStreamOr
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.ivanovsky.passnotes.data.ObserverBus;
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy;
 import com.ivanovsky.passnotes.data.entity.FSAuthority;
@@ -41,12 +42,14 @@ import com.ivanovsky.passnotes.extensions.RemoteFileExtKt;
 import com.ivanovsky.passnotes.util.FileUtils;
 import com.ivanovsky.passnotes.util.InputOutputUtils;
 import com.ivanovsky.passnotes.util.LongExtKt;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import timber.log.Timber;
 
 public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
@@ -350,16 +353,23 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         RemoteFileMetadata metadata = metadataResult.getObj();
 
-        updatedCachedFile.setUid(metadata.getUid());
-        updatedCachedFile.setLocalPath(out.getOutputFile().getPath());
-        updatedCachedFile.setRemotePath(metadata.getPath());
-        updatedCachedFile.setRevision(metadata.getRevision());
-        updatedCachedFile.setLastModificationTimestamp(metadata.getServerModified().getTime());
-        updatedCachedFile.setLastRemoteModificationTimestamp(
-                metadata.getServerModified().getTime());
-        updatedCachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
-        updatedCachedFile.setUploaded(true);
-        updatedCachedFile.setLocallyModified(false);
+        updatedCachedFile = updatedCachedFile.copy(
+                updatedCachedFile.getId(),
+                updatedCachedFile.getFsAuthority(),
+                false,
+                true,
+                updatedCachedFile.isUploadFailed(),
+                updatedCachedFile.isUploading(),
+                updatedCachedFile.isDownloading(),
+                updatedCachedFile.getRetryCount(),
+                updatedCachedFile.getLastRetryTimestamp(),
+                System.currentTimeMillis(),
+                metadata.getServerModified().getTime(),
+                metadata.getServerModified().getTime(),
+                out.getOutputFile().getPath(),
+                metadata.getPath(),
+                metadata.getUid(),
+                metadata.getRevision());
 
         cache.update(updatedCachedFile);
 
@@ -444,16 +454,23 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
 
         RemoteFileMetadata metadata = metadataResult.getObj();
 
-        updatedCachedFile.setUid(metadata.getUid());
-        updatedCachedFile.setLocalPath(input.getPath());
-        updatedCachedFile.setRemotePath(metadata.getPath());
-        updatedCachedFile.setRevision(metadata.getRevision());
-        updatedCachedFile.setLastModificationTimestamp(metadata.getServerModified().getTime());
-        updatedCachedFile.setLastRemoteModificationTimestamp(
-                metadata.getServerModified().getTime());
-        updatedCachedFile.setLastDownloadTimestamp(System.currentTimeMillis());
-        updatedCachedFile.setUploaded(true);
-        updatedCachedFile.setLocallyModified(false);
+        updatedCachedFile = updatedCachedFile.copy(
+                updatedCachedFile.getId(),
+                updatedCachedFile.getFsAuthority(),
+                false,
+                true,
+                updatedCachedFile.isUploadFailed(),
+                updatedCachedFile.isUploading(),
+                updatedCachedFile.isDownloading(),
+                updatedCachedFile.getRetryCount(),
+                updatedCachedFile.getLastRetryTimestamp(),
+                System.currentTimeMillis(),
+                metadata.getServerModified().getTime(),
+                metadata.getServerModified().getTime(),
+                input.getPath(),
+                metadata.getPath(),
+                metadata.getUid(),
+                metadata.getRevision());
 
         cache.update(updatedCachedFile);
 

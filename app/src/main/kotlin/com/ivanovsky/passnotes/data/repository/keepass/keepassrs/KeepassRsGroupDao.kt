@@ -4,7 +4,7 @@ import arrow.core.raise.either
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.GroupEntity
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.encdb.ContentWatcher
 import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao

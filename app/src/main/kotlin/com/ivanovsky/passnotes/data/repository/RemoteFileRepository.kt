@@ -9,25 +9,24 @@ class RemoteFileRepository(
 ) {
 
     fun getAll(fsAuthority: FSAuthority): List<RemoteFile> {
-        return dao.all
+        return dao.getAll()
             .filter { file -> file.fsAuthority == fsAuthority }
     }
 
     fun findByUid(uid: String, fsAuthority: FSAuthority): RemoteFile? {
-        return dao.all
+        return dao.getAll()
             .firstOrNull { file -> file.uid == uid && file.fsAuthority == fsAuthority }
     }
 
     fun findByRemotePath(remotePath: String, fsAuthority: FSAuthority): RemoteFile? {
-        return dao.all
+        return dao.getAll()
             .firstOrNull { file ->
                 file.remotePath == remotePath && file.fsAuthority == fsAuthority
             }
     }
 
-    fun insert(file: RemoteFile) {
-        val id = dao.insert(file)
-        file.id = id
+    fun insert(file: RemoteFile): Long {
+        return dao.insert(file)
     }
 
     fun update(file: RemoteFile) {

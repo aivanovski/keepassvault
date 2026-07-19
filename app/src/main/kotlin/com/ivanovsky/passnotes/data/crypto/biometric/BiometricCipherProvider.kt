@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.data.crypto.biometric
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
-import com.ivanovsky.passnotes.data.entity.OperationError.newBiometricDataError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newBiometricDataError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import java.security.KeyStore
 import javax.crypto.Cipher

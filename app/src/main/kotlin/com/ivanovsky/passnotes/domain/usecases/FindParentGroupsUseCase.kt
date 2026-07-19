@@ -2,8 +2,8 @@ package com.ivanovsky.passnotes.domain.usecases
 
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_ROOT_GROUP
-import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.MESSAGE_FAILED_TO_FIND_ROOT_GROUP
+import com.ivanovsky.passnotes.data.entity.OperationError.Companion.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace

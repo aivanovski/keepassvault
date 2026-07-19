@@ -35,12 +35,12 @@ Pay particular attention to static utility call sites: preserve source compatibi
 
 Convert parent classes before subclasses and preserve constructor messages and inheritance exactly.
 
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/remote/exception/RemoteFSException.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/remote/exception/RemoteFSApiException.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/remote/exception/RemoteFSAuthException.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/remote/exception/RemoteFSFileNotFoundException.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/remote/exception/RemoteFSNetworkException.java`
-- [ ] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/remote/exception/InternalCacheException.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/remote/exception/RemoteFSException.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/remote/exception/RemoteFSApiException.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/remote/exception/RemoteFSAuthException.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/remote/exception/RemoteFSFileNotFoundException.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/remote/exception/RemoteFSNetworkException.java`
+- [x] `app/src/main/java/com/ivanovsky/passnotes/data/repository/file/remote/exception/InternalCacheException.java`
 
 ## Phase 3: Core result and persistence models
 
@@ -104,7 +104,7 @@ For each class:
 ## Progress
 
 - Total Java files: **30**
-- Migrated: **8 / 30**
-- Remaining: **22 / 30**
+- Migrated: **14 / 30**
+- Remaining: **16 / 30**
 
 Update these totals whenever a file checklist item is completed.

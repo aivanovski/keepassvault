@@ -32,6 +32,7 @@ public class OperationError implements Serializable {
     public static final String MESSAGE_FAILED_TO_FIND_ROOT_GROUP = "Failed to find root group";
     public static final String MESSAGE_UID_IS_NULL = "Uid is null";
     public static final String MESSAGE_PARENT_UID_IS_NULL = "Parent uid is null";
+    public static final String MESSAGE_NOTE_UID_IS_NULL = "Note uid is null";
     public static final String MESSAGE_FAILED_TO_GET_PARENT_PATH = "Failed to get parent path";
     public static final String MESSAGE_FILE_IS_NOT_MODIFIED = "File is not modified";
     public static final String MESSAGE_INCORRECT_SYNC_STATUS = "Incorrect sync status";

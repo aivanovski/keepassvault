@@ -3,6 +3,7 @@ package com.ivanovsky.passnotes.extensions
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
+import java.util.LinkedList
 
 fun FileSystemProvider.listAllFiles(): OperationResult<List<FileDescriptor>> {
     val getRootResult = rootFile
@@ -12,11 +13,15 @@ fun FileSystemProvider.listAllFiles(): OperationResult<List<FileDescriptor>> {
 
     val root = getRootResult.getOrThrow()
 
-    val queue = mutableListOf(root)
+    val queue = LinkedList<FileDescriptor>()
+        .apply {
+            add(root)
+        }
     val allFiles = mutableListOf(root)
 
     while (queue.isNotEmpty()) {
-        val dir = queue.removeFirst()
+        val dir = queue.poll() ?: continue
+
         val listFilesResult = listFiles(dir)
         if (listFilesResult.isFailed) {
             return listFilesResult.mapError()

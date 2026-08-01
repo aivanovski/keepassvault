@@ -448,6 +448,8 @@ checksum = "d466e9454f08e4a911e14806c24e16fba1b4c121d1ea474396f396069cf949d9"
 dependencies = [
  "equivalent",
  "hashbrown",
+ "serde",
+ "serde_core",
 ]
 
 [[package]]
@@ -526,9 +528,9 @@ dependencies = [
 
 [[package]]
 name = "keepass"
-version = "0.13.16"
+version = "0.13.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cd9de0a6cd63e83eed9afd7985120db74cc167b7360fe1b77e7ef3f4ee501443"
+checksum = "438f8808c4b866efb9446a3e48f80ef5830c32b3a3210a89d1d62d030aaf32ad"
 dependencies = [
  "aes",
  "base64",
@@ -544,6 +546,7 @@ dependencies = [
  "hex-literal",
  "hmac",
  "hybrid-array",
+ "indexmap",
  "js-sys",
  "quick-xml",
  "rust-argon2",

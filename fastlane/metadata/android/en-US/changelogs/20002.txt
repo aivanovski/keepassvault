@@ -1,0 +1,2 @@
+- Update keepass-rs version
+- Fix API compatibility on old devices

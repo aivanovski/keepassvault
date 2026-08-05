@@ -291,6 +291,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.preference.ktx)
+    implementation(libs.androidx.work.runtime)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material3)

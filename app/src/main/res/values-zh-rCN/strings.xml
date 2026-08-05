@@ -329,6 +329,8 @@
     <string name="pref_remove_log_files_title">清除日志</string>
     <string name="pref_is_postponed_sync_enabled_title">延迟上传</string>
     <string name="pref_is_postponed_sync_enabled_summary">通过网络上传数据的操作将延迟至数据库锁定后执行</string>
+    <string name="pref_background_sync_interval_title">后台同步</string>
+    <string name="pref_background_sync_interval_summary">应用通过 Wi-Fi 检查已打开数据库远程更新的频率</string>
     <string name="pref_git_user_name_title">Git用户名</string>
     <string name="pref_git_user_name_summary">将用于提交信息中的用户名</string>
     <string name="pref_git_user_email_title">Git用户邮箱</string>

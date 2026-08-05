@@ -15,6 +15,7 @@ interface Settings {
     var isPostponedSyncEnabled: Boolean
     var autoLockDelayInMs: Int
     var autoClearClipboardDelayInMs: Int
+    var backgroundSyncIntervalInMs: Int
     var isLockNotificationVisible: Boolean
     var isLockNotificationDialogEnabled: Boolean
     var isLockDatabaseOnBack: Boolean

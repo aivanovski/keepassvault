@@ -40,7 +40,7 @@ object UseCaseModule {
             single { GetTestPasswordUseCase(get(), get()) }
             single { LockDatabaseUseCase() }
             single { GetRecentlyOpenedFilesUseCase(get(), get()) }
-            single { SyncUseCases(get(), get(), get()) }
+            single { SyncUseCases(get(), get(), get(), get()) }
             single { AddTemplatesUseCase(get(), get(), get()) }
             single { GetDatabaseUseCase(get()) }
             single { MoveNoteUseCase(get(), get(), get()) }

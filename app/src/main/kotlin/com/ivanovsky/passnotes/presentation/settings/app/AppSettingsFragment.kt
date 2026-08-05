@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.BACKGROUND_SYNC_INTERVAL_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_ACTIVATE_SEARCH_ON_START
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_BIOMETRIC_UNLOCK_ENABLED
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_CRASH_REPORTING_ENABLED
@@ -47,6 +48,7 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
 
     private lateinit var isFileLogEnabledPref: SwitchPreferenceCompat
     private lateinit var isCrashReportingEnabledPref: SwitchPreferenceCompat
+    private lateinit var backgroundSyncIntervalPref: Preference
     private lateinit var isPostponedSyncEnabledPref: SwitchPreferenceCompat
     private lateinit var isBiometricUnlockEnabledPref: SwitchPreferenceCompat
     private lateinit var keepassImplementationPref: Preference
@@ -88,6 +90,7 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
             IS_LOCK_DATABASE_ON_BACK,
             AUTO_LOCK_DELAY_IN_MS,
             AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS,
+            BACKGROUND_SYNC_INTERVAL_IN_MS,
             IS_FILE_LOG_ENABLED,
             IS_CRASH_REPORTING_ENABLED,
             IS_POSTPONED_SYNC_ENABLED,
@@ -112,6 +115,11 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
             getString(R.string.pref_is_crash_reporting_enabled)
         )
             ?: throwPreferenceNotFound(R.string.pref_is_crash_reporting_enabled)
+
+        backgroundSyncIntervalPref = findPreference(
+            getString(R.string.pref_background_sync_interval_in_ms)
+        )
+            ?: throwPreferenceNotFound(R.string.pref_background_sync_interval_in_ms)
 
         isPostponedSyncEnabledPref = findPreference(
             getString(R.string.pref_is_postponed_sync_enabled)
@@ -149,6 +157,11 @@ class AppSettingsFragment : BasePreferenceFragment(), PermissionRequestResultRec
 
         categoryLogging = findPreference(getString(R.string.pref_category_reporting))
             ?: throwPreferenceNotFound(R.string.pref_category_reporting)
+
+        backgroundSyncIntervalPref.setOnPreferenceChangeListener { _, newValue ->
+            viewModel.onBackgroundSyncIntervalSelected((newValue as String).toInt())
+            true
+        }
 
         isFileLogEnabledPref.setOnPreferenceChangeListener { _, newValue ->
             viewModel.onFileLogEnabledChanged(newValue as Boolean)

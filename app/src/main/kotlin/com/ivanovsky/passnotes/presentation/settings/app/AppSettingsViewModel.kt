@@ -13,6 +13,7 @@ import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
 import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor.CrashReporterAvailability
+import com.ivanovsky.passnotes.domain.worker.BackgroundSyncWorker
 import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.presentation.core.dialog.selectorDialog.SelectorDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.selectorDialog.model.SelectorDialogItem
@@ -140,6 +141,16 @@ class AppSettingsViewModel(
 
         settings.keepassImplementation = implementation
         interactor.lockDatabase()
+    }
+
+    fun onBackgroundSyncIntervalSelected(intervalInMs: Int) {
+        val isChanged = (settings.backgroundSyncIntervalInMs != intervalInMs)
+
+        settings.backgroundSyncIntervalInMs = intervalInMs
+
+        if (isChanged) {
+            BackgroundSyncWorker.schedule(settings)
+        }
     }
 
     fun onSendLongFileClicked() {

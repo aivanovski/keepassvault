@@ -15,3 +15,5 @@ fun FSType.getLoginType(): LoginType? {
         else -> null
     }
 }
+
+// fun FSType.is

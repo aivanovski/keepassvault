@@ -14,6 +14,7 @@ import com.ivanovsky.passnotes.data.entity.TestToggles
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.AUTO_LOCK_DELAY_IN_MS
+import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.BACKGROUND_SYNC_INTERVAL_IN_MS
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.GIT_USER_EMAIL
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.GIT_USER_NAME
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl.Pref.IS_ACTIVATE_SEARCH_ON_START
@@ -137,6 +138,13 @@ class SettingsImpl(private val context: Context) : Settings {
             ?: (AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS.defaultValue as String).toInt()
         set(value) {
             putString(AUTO_CLEAR_CLIPBOARD_DELAY_IN_MS, value.toString())
+        }
+
+    override var backgroundSyncIntervalInMs: Int
+        get() = getString(BACKGROUND_SYNC_INTERVAL_IN_MS)?.toInt()
+            ?: (BACKGROUND_SYNC_INTERVAL_IN_MS.defaultValue as String).toInt()
+        set(value) {
+            putString(BACKGROUND_SYNC_INTERVAL_IN_MS, value.toString())
         }
 
     override var searchOptions: SearchOptions
@@ -373,6 +381,11 @@ class SettingsImpl(private val context: Context) : Settings {
             keyId = R.string.pref_auto_clear_clipboard_delay_in_ms,
             type = STRING,
             defaultValue = TimeUnit.SECONDS.toMillis(30).toString()
+        ),
+        BACKGROUND_SYNC_INTERVAL_IN_MS(
+            keyId = R.string.pref_background_sync_interval_in_ms,
+            type = STRING,
+            defaultValue = TimeUnit.DAYS.toMillis(1).toString()
         ),
 
         // String prefs

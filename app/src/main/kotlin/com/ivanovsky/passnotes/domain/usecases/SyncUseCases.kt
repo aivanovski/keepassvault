@@ -1,24 +1,87 @@
 package com.ivanovsky.passnotes.domain.usecases
 
+import arrow.core.Either
+import arrow.core.raise.either
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
+import com.ivanovsky.passnotes.data.repository.UsedFileRepository
+import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
+import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.extensions.getFileDescriptor
 import com.ivanovsky.passnotes.extensions.isSameFile
+import com.ivanovsky.passnotes.extensions.isSyncable
+import com.ivanovsky.passnotes.extensions.toEither
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 class SyncUseCases(
     private val fileSystemResolver: FileSystemResolver,
     private val dispatchers: DispatcherProvider,
-    private val dbRepo: EncryptedDatabaseRepository
+    private val dbRepo: EncryptedDatabaseRepository,
+    private val usedFileRepository: UsedFileRepository
 ) {
+
+    suspend fun syncChanges(): Either<OperationError, Unit> =
+        withContext(dispatchers.IO) {
+            either {
+                val syncableFiles = usedFileRepository.getAll()
+                    .map { file -> file.getFileDescriptor() }
+                    .filter { file -> file.fsAuthority.isSyncable() }
+
+                for (file in syncableFiles) {
+                    val provider = fileSystemResolver.resolveProvider(file.fsAuthority)
+                    val cachedFile = provider.syncProcessor.getCachedFile(file.uid)
+
+                    if (cachedFile == null) {
+                        // The file isn't downloaded, it should be downloaded first
+                        Timber.d(
+                            "Syncing file: file=%s, fsType=%s".format(
+                                file.path,
+                                file.fsAuthority.type
+                            )
+                        )
+
+                        val content = provider.openFileForRead(
+                            file,
+                            OnConflictStrategy.CANCEL,
+                            FSOptions.READ_ONLY
+                        ).toEither().bind()
+
+                        Either.catch { content.close() }
+                            .mapLeft { error -> newGenericError(error) }
+                            .bind()
+                    } else {
+                        val syncState = getSyncState(file)
+
+                        val hasRemoteChanges = (syncState.status == SyncStatus.REMOTE_CHANGES)
+                        val hasLocalChanges = (syncState.status == SyncStatus.LOCAL_CHANGES)
+
+                        if (hasRemoteChanges || hasLocalChanges) {
+                            Timber.d(
+                                "Syncing file: syncState=%s, file=%s, fsType=%s".format(
+                                    syncState,
+                                    file.path,
+                                    file.fsAuthority.type
+                                )
+                            )
+
+                            processSync(file)
+                        }
+                    }
+                }
+            }
+        }
 
     suspend fun getSyncConflictInfo(file: FileDescriptor): OperationResult<SyncConflictInfo> =
         withContext(dispatchers.IO) {

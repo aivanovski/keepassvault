@@ -357,6 +357,8 @@
     <string name="pref_remove_log_files_title">Очистити журнали</string>
     <string name="pref_is_postponed_sync_enabled_title">Відкласти вивантаження</string>
     <string name="pref_is_postponed_sync_enabled_summary">Вивантаження даних через мережу буде відкладено до блокування бази даних.</string>
+    <string name="pref_background_sync_interval_title">Фонова синхронізація</string>
+    <string name="pref_background_sync_interval_summary">Як часто застосунок перевіряє відкриті бази даних на наявність віддалених оновлень через Wi-Fi</string>
 
     <string name="pref_git_user_name_title">Ім\'я користувача Git</string>
     <string name="pref_git_user_name_summary">Це ім\'я користувача буде використано в повідомленні про коміт.</string>

@@ -233,6 +233,7 @@ public class RemoteFileSyncProcessor implements FileSystemSyncProcessor {
             Timber.d("Unable to process file, no cached file");
 
             updateProgressStatusForFile(file.getUid(), SyncProgressStatus.IDLE);
+
             return OperationResult.error(
                     newCacheError(MESSAGE_FAILED_TO_FIND_CACHED_FILE, new Stacktrace()));
         }

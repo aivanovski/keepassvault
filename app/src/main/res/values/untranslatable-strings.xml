@@ -26,6 +26,7 @@
     <string name="pref_password_generator_settings" translatable="false">passwordGeneratorSettings</string>
     <string name="pref_test_autofill_data" translatable="false">testAutofillData</string>
     <string name="pref_test_toggles" translatable="false">testToggles</string>
+    <string name="pref_background_sync_interval_in_ms" translatable="false">backgroundSyncInterval</string>
 
     <string name="pref_database_settings_fragment" translatable="false">databaseSettingsFragment</string>
     <string name="pref_is_recycle_bin_enabled" translatable="false">isRecycleBinEnabled</string>
@@ -91,6 +92,26 @@
         <item>60000</item>
         <item>120000</item>
         <item>300000</item>
+    </string-array>
+
+    <string-array name="pref_background_sync_interval_in_ms_entries">
+        <item>15 minutes</item>
+        <item>1 hour</item>
+        <item>2 hours</item>
+        <item>6 hours</item>
+        <item>12 hours</item>
+        <item>Once a day</item>
+        <item>Manual only</item>
+    </string-array>
+
+    <string-array name="pref_background_sync_interval_in_ms_values">
+        <item>900000</item>
+        <item>3600000</item>
+        <item>7200000</item>
+        <item>21600000</item>
+        <item>43200000</item>
+        <item>86400000</item>
+        <item>-1</item>
     </string-array>
 
     <string-array name="pref_search_type_entries">

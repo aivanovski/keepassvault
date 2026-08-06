@@ -6,5 +6,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class SelectorDialogItem(
     val title: String,
-    val description: String
+    val description: String? = null
 ) : Parcelable

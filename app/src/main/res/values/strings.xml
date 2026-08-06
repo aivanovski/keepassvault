@@ -375,6 +375,8 @@
     <string name="pref_remove_log_files_title">Clear logs</string>
     <string name="pref_is_postponed_sync_enabled_title">Postpone uploading</string>
     <string name="pref_is_postponed_sync_enabled_summary">Uploading data via network will be postponed until database will be locked</string>
+    <string name="pref_background_sync_interval_title">Background synchronization</string>
+    <string name="pref_background_sync_interval_summary">How often the app checks opened databases for remote updates over Wi-Fi</string>
 
     <string name="pref_git_user_name_title">Git user name</string>
     <string name="pref_git_user_name_summary">The user name will be used in the commit message</string>

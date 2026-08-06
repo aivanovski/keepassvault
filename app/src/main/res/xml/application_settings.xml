@@ -36,6 +36,13 @@
         app:key="@string/pref_category_synchronization"
         app:title="@string/synchronization_with_server">
 
+        <ListPreference
+            app:key="@string/pref_background_sync_interval_in_ms"
+            app:entries="@array/pref_background_sync_interval_in_ms_entries"
+            app:entryValues="@array/pref_background_sync_interval_in_ms_values"
+            app:summary="@string/pref_background_sync_interval_summary"
+            app:title="@string/pref_background_sync_interval_title" />
+
         <SwitchPreferenceCompat
             app:key="@string/pref_is_postponed_sync_enabled"
             app:summary="@string/pref_is_postponed_sync_enabled_summary"

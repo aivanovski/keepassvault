@@ -138,13 +138,15 @@ private fun SelectorItem(
                 text = item.title,
                 style = PrimaryTextStyle()
             )
-            Text(
-                text = item.description,
-                style = SecondaryTextStyle(
-                    fontSize = AppTheme.theme.textMetrics.secondary
-                ),
-                modifier = Modifier.padding(top = QuarterMargin)
-            )
+            item.description?.let { description ->
+                Text(
+                    text = description,
+                    style = SecondaryTextStyle(
+                        fontSize = AppTheme.theme.textMetrics.secondary
+                    ),
+                    modifier = Modifier.padding(top = QuarterMargin)
+                )
+            }
         }
     }
 }

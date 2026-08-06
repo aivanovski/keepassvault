@@ -67,15 +67,15 @@ class SyncUseCases(
                         val hasRemoteChanges = (syncState.status == SyncStatus.REMOTE_CHANGES)
                         val hasLocalChanges = (syncState.status == SyncStatus.LOCAL_CHANGES)
 
-                        if (hasRemoteChanges || hasLocalChanges) {
-                            Timber.d(
-                                "Syncing file: syncState=%s, file=%s, fsType=%s".format(
-                                    syncState,
-                                    file.path,
-                                    file.fsAuthority.type
-                                )
+                        Timber.d(
+                            "Syncing file: syncState=%s, file=%s, fsType=%s".format(
+                                syncState,
+                                file.path,
+                                file.fsAuthority.type
                             )
+                        )
 
+                        if (hasRemoteChanges || hasLocalChanges) {
                             processSync(file).toEither().bind()
                         }
                     }

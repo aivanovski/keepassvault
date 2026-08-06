@@ -49,18 +49,12 @@ class BackgroundSyncWorker(
             val context: Context = GlobalInjector.get()
             val interval = settings.backgroundSyncIntervalInMs
 
-            Timber.d(
-                "Schedule background worker: interval=%s".format(
-                    if (interval != -1) interval / 1000L else interval
-                )
-            )
+            Timber.d("Schedule background worker: interval=%s".format(interval))
 
             if (interval == -1) {
                 WorkManager.getInstance(context).cancelUniqueWork(BACKGROUND_SYNC_WORKER_NAME)
                 return
             }
-
-            val intervalInMinutes = settings.backgroundSyncIntervalInMs / 1000L
 
             val constraints = Constraints.Builder()
                 .setRequiredNetworkRequest(
@@ -72,8 +66,8 @@ class BackgroundSyncWorker(
                 .build()
 
             val request = PeriodicWorkRequestBuilder<BackgroundSyncWorker>(
-                intervalInMinutes,
-                TimeUnit.MINUTES
+                interval.toLong(),
+                TimeUnit.MILLISECONDS
             )
                 .setConstraints(constraints)
                 .build()

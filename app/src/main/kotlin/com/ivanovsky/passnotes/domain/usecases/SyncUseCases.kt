@@ -76,7 +76,7 @@ class SyncUseCases(
                                 )
                             )
 
-                            processSync(file)
+                            processSync(file).toEither().bind()
                         }
                     }
                 }

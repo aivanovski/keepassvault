@@ -21,7 +21,7 @@ The project follows Clean Architecture pattern
 - /injection - Modules for DependencyInjections
 
 # Commands to build and test
-- Verification: ./gradlew app:compileFdroidDebugKotlin
+- Verification: ./gradlew app:assembleFdroidDebugKotlin
 - Build the app: ./gradlew app:assembleFdroidDebug
 - Fix code formatting: ./gradlew app:spotlessApply
 - Build: ./gradlew test

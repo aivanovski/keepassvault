@@ -51,6 +51,7 @@ object CoreModule {
         single { provideRemoteFileRepository(get()) }
         single { provideUsedFileRepository(get(), get()) }
         single { provideGitRootDao(get()) }
+        single { provideTemporaryFileDao(get()) }
 
         // Files, Keepass
         single { DatabaseSyncStateProvider(get(), get(), get()) }
@@ -67,4 +68,7 @@ object CoreModule {
 
     private fun provideGitRootDao(database: AppDatabase) =
         database.gitRootDao
+
+    private fun provideTemporaryFileDao(database: AppDatabase) =
+        database.temporaryFileDao
 }

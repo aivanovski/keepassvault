@@ -22,10 +22,16 @@ object DebugFileSystemProvidersModule {
 
         if (isFakeFileSystemEnabled) {
             factories[FSType.FAKE] = FileSystemResolver.Factory { fsAuthority ->
+                val fsResolver: FileSystemResolver = GlobalInjector.get()
                 val observerBus: ObserverBus = GlobalInjector.get()
                 val throttler = ThreadThrottlerImpl()
 
-                FakeFileSystemProvider(throttler, observerBus, fsAuthority)
+                FakeFileSystemProvider(
+                    fsResolver = fsResolver,
+                    observerBus = observerBus,
+                    throttler = throttler,
+                    fsAuthority = fsAuthority
+                )
             }
         }
 

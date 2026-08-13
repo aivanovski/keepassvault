@@ -6,10 +6,10 @@ import android.provider.OpenableColumns
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_USE_CASE
 import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
 import com.ivanovsky.passnotes.data.entity.OperationError.newFileNotFoundError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
+import com.ivanovsky.passnotes.data.entity.OperationError.newInvalidFileSystemProviderUsage
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
@@ -38,12 +38,12 @@ class SAFFileSystemProvider(
         return if (dir.isRoot) {
             OperationResult.success(emptyList())
         } else {
-            OperationResult.error(newGenericIOError(MESSAGE_INCORRECT_USE_CASE, Stacktrace()))
+            OperationResult.error(newInvalidFileSystemProviderUsage(Stacktrace()))
         }
     }
 
     override fun getParent(file: FileDescriptor): OperationResult<FileDescriptor> {
-        return OperationResult.error(newGenericIOError(MESSAGE_INCORRECT_USE_CASE, Stacktrace()))
+        return OperationResult.error(newInvalidFileSystemProviderUsage(Stacktrace()))
     }
 
     override fun getRootFile(): OperationResult<FileDescriptor> {

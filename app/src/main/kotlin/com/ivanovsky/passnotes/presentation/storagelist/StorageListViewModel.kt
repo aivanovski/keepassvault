@@ -13,6 +13,7 @@ import com.ivanovsky.passnotes.data.entity.FSType.FAKE
 import com.ivanovsky.passnotes.data.entity.FSType.GIT
 import com.ivanovsky.passnotes.data.entity.FSType.INTERNAL_STORAGE
 import com.ivanovsky.passnotes.data.entity.FSType.SAF
+import com.ivanovsky.passnotes.data.entity.FSType.TEMPORAL_STORAGE
 import com.ivanovsky.passnotes.data.entity.FSType.UNDEFINED
 import com.ivanovsky.passnotes.data.entity.FSType.WEBDAV
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
@@ -241,7 +242,7 @@ class StorageListViewModel(
         this.selectedOption = selectedOption
 
         when (selectedOption.root.fsAuthority.type) {
-            INTERNAL_STORAGE, EXTERNAL_STORAGE -> {
+            INTERNAL_STORAGE, EXTERNAL_STORAGE, TEMPORAL_STORAGE -> {
                 onDeviceStorageSelected(selectedOption.root, selectedOption.root.fsAuthority.type)
             }
 

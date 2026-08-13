@@ -12,7 +12,6 @@ import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
 import com.ivanovsky.passnotes.presentation.Screens.AboutScreen
 import com.ivanovsky.passnotes.presentation.Screens.DebugMenuScreen
-import com.ivanovsky.passnotes.presentation.Screens.DiffViewerScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
@@ -21,8 +20,6 @@ import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SingleTextWithIconCellViewModel
-import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
-import com.ivanovsky.passnotes.presentation.diffViewer.model.DiffEntity
 import com.ivanovsky.passnotes.presentation.main.navigation.cells.factory.NavigationMenuCellModelFactory
 import com.ivanovsky.passnotes.presentation.main.navigation.cells.factory.NavigationMenuCellModelFactory.CellId
 import com.ivanovsky.passnotes.presentation.main.navigation.cells.factory.NavigationMenuCellViewModelFactory
@@ -111,18 +108,6 @@ class NavigationMenuViewModel(
                 router.navigateTo(AboutScreen())
             }
 
-            CellId.COMPARE_FILES -> {
-                router.navigateTo(
-                    DiffViewerScreen(
-                        DiffViewerScreenArgs(
-                            left = DiffEntity.SelectFile,
-                            right = DiffEntity.SelectFile,
-                            isHoldDatabaseInteraction = false
-                        )
-                    )
-                )
-            }
-
             CellId.DEBUG_MENU -> {
                 router.navigateTo(DebugMenuScreen())
             }
@@ -134,7 +119,7 @@ class NavigationMenuViewModel(
         val header = modelFactory.creteHeaderModel()
         val items = modelFactory.createMenuItemModels(
             isDatabaseOpened = isDbOpened,
-            isDebugMenuVisible = (BuildConfig.BUILD_TYPE == "debug")
+            isDebugMenuVisible = BuildConfig.DEBUG
         )
 
         return viewModelFactory.createCellViewModels(header + items, eventProvider)

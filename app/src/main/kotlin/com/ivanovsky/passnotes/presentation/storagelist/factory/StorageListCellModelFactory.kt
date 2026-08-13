@@ -59,6 +59,7 @@ class StorageListCellModelFactory(
                 }
             }
 
+            FSType.TEMPORAL_STORAGE -> throw IllegalArgumentException()
             FSType.UNDEFINED -> throw IllegalArgumentException()
         }
 

@@ -298,7 +298,7 @@ class DebugMenuInteractor(
 
     @Suppress("FoldInitializerAndIfToElvis")
     fun addEntryToDb(): OperationResult<Boolean> {
-        val db = dbRepository.database
+        val db = dbRepository.getDatabase()
         if (db == null) {
             return OperationResult.error(
                 newDbError(

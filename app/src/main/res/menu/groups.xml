@@ -41,11 +41,6 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/menu_diff_with"
-        android:title="@string/compare_with"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/menu_export"
         android:title="@string/save_as"
         app:showAsAction="never" />

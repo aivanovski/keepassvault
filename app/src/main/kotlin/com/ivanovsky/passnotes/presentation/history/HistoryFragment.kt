@@ -8,12 +8,13 @@ import android.view.ViewGroup
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.databinding.CoreComposeFragmentBinding
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
+import com.ivanovsky.passnotes.presentation.core.ViewModelFactory
 import com.ivanovsky.passnotes.presentation.core.compose.AppTheme
 import com.ivanovsky.passnotes.presentation.core.compose.getComposeTheme
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialog
@@ -25,15 +26,9 @@ import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
 class HistoryFragment : BaseFragment() {
 
-    private val viewModel: HistoryViewModel by lazy {
-        ViewModelProvider(
-            this,
-            HistoryViewModel.Factory(
-                args = getMandatoryArgument(ARGUMENTS)
-            )
-        )
-            .get(HistoryViewModel::class.java)
-    }
+    private val viewModel: HistoryViewModel by viewModels(
+        factoryProducer = { ViewModelFactory(getMandatoryArgument(ARGUMENTS)) }
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -20,11 +20,12 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.file.git.model.SshKey
 import com.ivanovsky.passnotes.data.repository.file.git.model.VersionedFile
-import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientV2
+import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClient
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
+import com.ivanovsky.passnotes.extensions.getOrNull
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.getUrl
 import com.ivanovsky.passnotes.extensions.mapError
@@ -45,7 +46,7 @@ class GitClient(
     private val gitRootDao: GitRootDao,
     private val settings: Settings,
     private val resourceProvider: ResourceProvider
-) : RemoteApiClientV2 {
+) : RemoteApiClient {
 
     private val lock = ReentrantLock()
 
@@ -278,6 +279,9 @@ class GitClient(
             }
 
             val repository = repositoryResult.obj
+
+            Timber.d("Local head: %s", repository.getLocalHeadId().getOrNull())
+
             val fetchResult = repository.fetch()
             if (fetchResult.isFailed) {
                 return fetchResult.mapError()
@@ -288,7 +292,8 @@ class GitClient(
                 return isUpToDateResult.mapError()
             }
 
-            val isUpToDate = isUpToDateResult.obj
+            val isUpToDate = isUpToDateResult.getOrThrow()
+            Timber.d("isUpToDate=%s", isUpToDate)
             if (!isUpToDate) {
                 val pullResult = repository.pull()
                 if (pullResult.isFailed) {

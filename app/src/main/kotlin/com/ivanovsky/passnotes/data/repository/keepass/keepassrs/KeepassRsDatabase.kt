@@ -20,10 +20,8 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.encdb.DatabaseWatcher
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
-import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseAdapter
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseConfig
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
-import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseV2
 import com.ivanovsky.passnotes.data.repository.encdb.MutableEncryptedDatabaseConfig
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
@@ -50,6 +48,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.reflect.KClass
 import timber.log.Timber
 
 class KeepassRsDatabase(
@@ -58,7 +57,7 @@ class KeepassRsDatabase(
     file: FileDescriptor,
     key: EncryptedDatabaseKey,
     protoDatabase: RawDatabase
-) : EncryptedDatabaseV2 {
+) : EncryptedDatabase {
 
     private val fileRef = AtomicReference(file)
     private val keyRef = AtomicReference(key)
@@ -69,7 +68,7 @@ class KeepassRsDatabase(
     override val lock = ReentrantLock()
     override val groupDao = KeepassRsGroupDao(this)
     override val noteDao = KeepassRsNoteDao(this)
-    override val watcher = DatabaseWatcher<EncryptedDatabaseV2>()
+    override val watcher = DatabaseWatcher<EncryptedDatabase>()
     override val templateDao = TemplateDaoImpl(groupDao, noteDao)
 
     override fun getFile(): FileDescriptor = fileRef.get()
@@ -200,9 +199,7 @@ class KeepassRsDatabase(
     fun getRawGroupByUid(uid: UUID): Either<OperationError, RawGroup> = either {
         val group = getRawDatabase().rootGroup.getGroup(
             predicate = { group -> group.uuid.toUuidOrNull() == uid }
-        ) ?: raise(
-            failedToFindGroupByUid(uid)
-        )
+        ) ?: raise(failedToFindEntityByUid(uid, Group::class))
 
         group
     }
@@ -211,7 +208,7 @@ class KeepassRsDatabase(
         either {
             val (_, entry) = getRawDatabase().rootGroup
                 .getEntryAndGroup { entry -> entry.uuid.toUuidOrNull() == uid }
-                ?: raise(failedToFindEntryByUid(uid))
+                ?: raise(failedToFindEntityByUid(uid, Note::class))
 
             entry
         }
@@ -222,24 +219,18 @@ class KeepassRsDatabase(
         either {
             val (group, entry) = getRawDatabase().rootGroup
                 .getEntryAndGroup { entry -> entry.uuid.toUuidOrNull() == uid }
-                ?: raise(failedToFindEntryByUid(uid))
+                ?: raise(failedToFindEntityByUid(uid, Note::class))
 
             group to entry
         }
 
-    fun failedToFindGroupByUid(uid: UUID): OperationError = newDbError(
+    private fun failedToFindEntityByUid(
+        uid: UUID,
+        type: KClass<*>
+    ): OperationError = newDbError(
         String.format(
             GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
-            Group::class.simpleName,
-            uid
-        ),
-        Stacktrace()
-    )
-
-    fun failedToFindEntryByUid(uid: UUID): OperationError = newDbError(
-        String.format(
-            GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
-            Note::class.simpleName,
+            type.java.simpleName,
             uid
         ),
         Stacktrace()
@@ -251,7 +242,7 @@ class KeepassRsDatabase(
 
     fun getInheritableOptions(groupUid: UUID): Either<OperationError, InheritableOptions> {
         val options = inheritableOptionsMap.get()[groupUid] ?: return Either.Left(
-            failedToFindGroupByUid(groupUid)
+            failedToFindEntityByUid(groupUid, Group::class)
         )
 
         return Either.Right(options)
@@ -260,8 +251,8 @@ class KeepassRsDatabase(
     fun getRawParentGroup(childUid: UUID): Either<OperationError, Option<RawGroup>> = either {
         val rootUid = getRawDatabase().rootGroup.uuid.toUuid().bind()
         if (childUid != rootUid) {
-            val parentGroup =
-                groupUidToParentMap.get()[childUid] ?: raise(failedToFindGroupByUid(childUid))
+            val parentGroup = groupUidToParentMap.get()[childUid]
+                ?: raise(failedToFindEntityByUid(childUid, Group::class))
 
             Some(parentGroup)
         } else {
@@ -400,14 +391,12 @@ class KeepassRsDatabase(
                 key = createKey(fsResolver, key).toEither().bind()
             ).mapLeft { error -> error.toOperationError() }.bind()
 
-            EncryptedDatabaseAdapter(
-                db = KeepassRsDatabase(
-                    fsResolver = fsResolver,
-                    fsOptions = fsOptions,
-                    file = file,
-                    key = key,
-                    protoDatabase = database
-                )
+            KeepassRsDatabase(
+                fsResolver = fsResolver,
+                fsOptions = fsOptions,
+                file = file,
+                key = key,
+                protoDatabase = database
             )
         }
 

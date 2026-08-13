@@ -18,7 +18,7 @@ import com.ivanovsky.passnotes.presentation.core.compose.DarkTheme
 import com.ivanovsky.passnotes.presentation.core.compose.LightTheme
 import com.ivanovsky.passnotes.presentation.core.compose.SecondaryTextStyle
 import com.ivanovsky.passnotes.presentation.core.compose.ThemedScreenPreview
-import com.ivanovsky.passnotes.presentation.core.compose.newEventProvider
+import com.ivanovsky.passnotes.presentation.core.compose.newCellEventProvider
 import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryHeaderCellModel
 import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryHeaderCellViewModel
 
@@ -72,12 +72,7 @@ fun HistoryHeaderCell(viewModel: HistoryHeaderCellViewModel) {
 @Composable
 fun LightDiffHeaderPreview() {
     ThemedScreenPreview(theme = LightTheme) {
-        HistoryHeaderCell(
-            HistoryHeaderCellViewModel(
-                model = newHistoryHeaderModel(),
-                eventProvider = newEventProvider()
-            )
-        )
+        HistoryHeaderCell(newHistoryHeaderCell())
     }
 }
 
@@ -85,23 +80,20 @@ fun LightDiffHeaderPreview() {
 @Composable
 fun DarkDiffHeaderPreview() {
     ThemedScreenPreview(theme = DarkTheme) {
-        HistoryHeaderCell(
-            HistoryHeaderCellViewModel(
-                model = newHistoryHeaderModel(),
-                eventProvider = newEventProvider()
-            )
-        )
+        HistoryHeaderCell(newHistoryHeaderCell())
     }
 }
 
-fun newHistoryHeaderModel(
+fun newHistoryHeaderCell(
     title: String = "01.01.2024 12:00:00",
     description: String = "View"
-) =
+) = HistoryHeaderCellViewModel(
     HistoryHeaderCellModel(
         id = 1,
         itemId = 1,
         title = title,
         description = description,
         descriptionIcon = R.drawable.ic_chevron_right_24dp
-    )
+    ),
+    newCellEventProvider()
+)

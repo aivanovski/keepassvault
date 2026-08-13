@@ -10,6 +10,7 @@ class GetDiffUseCase(
     private val dispatchers: DispatcherProvider
 ) {
 
+    // TODO: KotapassDatabase should be replaced with EncryptedDatabase
     suspend fun getDiff(
         lhs: KotpassDatabase,
         rhs: KotpassDatabase

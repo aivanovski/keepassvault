@@ -29,8 +29,11 @@ data class AppColors(
     val secondaryIconBackground: Color,
     val importantIcon: Color,
     val diffInsert: Color,
+    val diffInsertText: Color,
     val diffDelete: Color,
+    val diffDeleteText: Color,
     val diffUpdate: Color,
+    val diffUpdateText: Color,
     val progress: Color,
     val progressSecondary: Color
 )
@@ -60,8 +63,11 @@ val LightAppColors = AppColors(
     secondaryIconBackground = Color(0xFFD9DDE8),
     importantIcon = Color(0xFFEF5350),
     diffInsert = Color(0xFFBEFFBB),
+    diffInsertText = Color(0xFF009D74),
     diffDelete = Color(0xFFFFD5D5),
+    diffDeleteText = Color(0xFFE35D62),
     diffUpdate = Color(0xFFF0EFAA),
+    diffUpdateText = Color(0xFFE48700),
     progress = Color(0xFF3F51B5),
     progressSecondary = Color(0xFF3F51B5)
 )
@@ -91,8 +97,11 @@ val DarkAppColors = AppColors(
     secondaryIconBackground = Color(0xFF586380),
     importantIcon = Color(0xFF690005),
     diffInsert = Color(0xFF061E0B),
+    diffInsertText = Color(0xFF009D74),
     diffDelete = Color(0xFF300406),
+    diffDeleteText = Color(0xFFE35D62),
     diffUpdate = Color(0xFF33331B),
+    diffUpdateText = Color(0xFFE48700),
     progress = Color(0xFF2E3856),
     progressSecondary = Color(0xFFEADDFF)
 )

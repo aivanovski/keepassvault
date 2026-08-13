@@ -1,20 +1,18 @@
 package com.ivanovsky.passnotes.presentation.history.cells.viewModel
 
-import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
-import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
-import com.ivanovsky.passnotes.presentation.core.event.EventProvider
+import androidx.compose.runtime.Immutable
+import com.ivanovsky.passnotes.presentation.core.compose.cells.CellEventProvider
+import com.ivanovsky.passnotes.presentation.core.compose.cells.CellViewModel
+import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryDiffCellEvent
 import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryDiffCellModel
 
+@Immutable
 class HistoryDiffCellViewModel(
     override val model: HistoryDiffCellModel,
-    val eventProvider: EventProvider
-) : BaseCellViewModel(model) {
+    private val eventProvider: CellEventProvider
+) : CellViewModel {
 
     fun onClicked() {
-        eventProvider.send((ITEM_CLICK_EVENT to model.eventId).toEvent())
-    }
-
-    companion object {
-        val ITEM_CLICK_EVENT = HistoryDiffCellViewModel::class.simpleName + "_itemClickEvent"
+        eventProvider.sendEvent(HistoryDiffCellEvent.OnClick(model.eventId))
     }
 }

@@ -11,6 +11,7 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.file.fake.delay.ThreadThrottler
@@ -25,8 +26,9 @@ import java.io.OutputStream
 import timber.log.Timber
 
 class FakeFileSystemProvider(
-    throttler: ThreadThrottler,
+    fsResolver: FileSystemResolver,
     observerBus: ObserverBus,
+    throttler: ThreadThrottler,
     fsAuthority: FSAuthority
 ) : FileSystemProvider {
 
@@ -39,6 +41,7 @@ class FakeFileSystemProvider(
     )
 
     private val syncProcessor = FakeFileSystemSyncProcessor(
+        fileSystemResolver = fsResolver,
         storage = storage,
         observerBus = observerBus,
         throttler = throttler,
@@ -102,7 +105,7 @@ class FakeFileSystemProvider(
             return OperationResult.error(newAuthError())
         }
 
-        val content = storage.get(file.uid, options)
+        val content = storage.getContentOrNull(file.uid, options)
             ?: return OperationResult.error(newFileNotFoundError(file.uid))
 
         return try {
@@ -134,7 +137,7 @@ class FakeFileSystemProvider(
 
         val stream = FakeFileOutputStream(
             onFinished = { bytes ->
-                storage.put(file.uid, StorageDestinationType.LOCAL, bytes)
+                storage.putContent(file.uid, StorageDestinationType.LOCAL, bytes)
             }
         )
 

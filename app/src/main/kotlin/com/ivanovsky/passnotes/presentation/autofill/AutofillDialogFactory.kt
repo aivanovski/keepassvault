@@ -3,7 +3,7 @@ package com.ivanovsky.passnotes.presentation.autofill
 import android.content.Context
 import androidx.fragment.app.DialogFragment
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.confirmationDialog.ConfirmationDialog
 
 class AutofillDialogFactory(
     private val context: Context

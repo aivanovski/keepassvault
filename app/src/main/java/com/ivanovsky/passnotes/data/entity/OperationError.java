@@ -2,13 +2,16 @@ package com.ivanovsky.passnotes.data.entity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider;
+import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor;
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace;
 import java.io.Serializable;
 import java.util.Objects;
 
 public class OperationError implements Serializable {
 
-    public static final String MESSAGE_FAILED_TO_FIND_GROUP = "Failed to find group";
+    public static final String MESSAGE_FAILED_TO_GET_TEMPLATE_GROUP =
+            "Failed to get Templates group";
     public static final String MESSAGE_FAILED_TO_FIND_NOTE = "Failed to find note";
     public static final String MESSAGE_UNKNOWN_ERROR = "Unknown error";
     public static final String MESSAGE_FILE_ACCESS_IS_FORBIDDEN = "File access is forbidden";
@@ -36,7 +39,10 @@ public class OperationError implements Serializable {
     public static final String MESSAGE_FAILED_TO_GET_PARENT_PATH = "Failed to get parent path";
     public static final String MESSAGE_FILE_IS_NOT_MODIFIED = "File is not modified";
     public static final String MESSAGE_INCORRECT_SYNC_STATUS = "Incorrect sync status";
-    public static final String MESSAGE_INCORRECT_USE_CASE = "Incorrect use case";
+    public static final String MESSAGE_INVALID_FILE_SYSTEM_PROVIDER_API_USAGE =
+            "Invalid " + FileSystemProvider.class.getSimpleName() + " API usage";
+    public static final String MESSAGE_INVALID_SYNC_PROCESSOR_API_USAGE =
+            "Invalid " + FileSystemSyncProcessor.class.getSimpleName() + " API usage";
     public static final String MESSAGE_WRITE_OPERATION_IS_NOT_SUPPORTED =
             "Write operation is not supported";
     public static final String MESSAGE_FAILED_TO_MOVE_GROUP_INSIDE_ITS_OWN_TREE =
@@ -75,6 +81,8 @@ public class OperationError implements Serializable {
     public static final String GENERIC_INVALID_DATABASE_ENTRY = "Invalid db entry: %s";
     public static final String GENERIC_FILE_ALREADY_EXISTS =
             "File with identical name already exists: %s";
+    public static final String GENERIC_MESSAGE_FAILED_TO_FIND_CACHED_FILE =
+            "Failed to find cached file: %s";
 
     @NonNull private final Type type;
 
@@ -194,6 +202,20 @@ public class OperationError implements Serializable {
         return new OperationError(Type.BIOMETRIC_DATA_INVALIDATED_ERROR, null, cause);
     }
 
+    public static OperationError newInvalidFileSystemProviderUsage(Stacktrace stacktrace) {
+        return new OperationError(
+                Type.INVALID_INTERNAL_API_USAGE,
+                MESSAGE_INVALID_FILE_SYSTEM_PROVIDER_API_USAGE,
+                stacktrace);
+    }
+
+    public static OperationError newInvalidSyncProcessorUsage(Stacktrace stacktrace) {
+        return new OperationError(
+                Type.INVALID_INTERNAL_API_USAGE,
+                MESSAGE_INVALID_SYNC_PROCESSOR_API_USAGE,
+                stacktrace);
+    }
+
     public enum Type {
         GENERIC_ERROR,
         DB_AUTH_ERROR,
@@ -212,7 +234,8 @@ public class OperationError implements Serializable {
         // not important error that can be ignored
         ERROR_MESSAGE,
         // if user modified biometric data on phone (e.g. add new finger)
-        BIOMETRIC_DATA_INVALIDATED_ERROR
+        BIOMETRIC_DATA_INVALIDATED_ERROR,
+        INVALID_INTERNAL_API_USAGE
     }
 
     private OperationError(

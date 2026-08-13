@@ -11,9 +11,6 @@ sealed class DiffEntity : Parcelable {
     object OpenedDatabase : DiffEntity()
 
     @Parcelize
-    object SelectFile : DiffEntity()
-
-    @Parcelize
     data class File(
         val key: EncryptedDatabaseKey,
         val file: FileDescriptor

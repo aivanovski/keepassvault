@@ -71,4 +71,12 @@ class ErrorPanelView : FrameLayout {
         )
         dialog.show(fragmentManager, ReportErrorDialog.TAG)
     }
+
+    // TODO: fix crash with ResolveConflictDialog
+    // private fun getFragmentManager(): FragmentManager {
+    //     return when (val ctx = context) {
+    //         is ContextThemeWrapper -> (ctx.baseContext as AppCompatActivity).supportFragmentManager
+    //         else -> (context as AppCompatActivity).supportFragmentManager
+    //     }
+    // }
 }

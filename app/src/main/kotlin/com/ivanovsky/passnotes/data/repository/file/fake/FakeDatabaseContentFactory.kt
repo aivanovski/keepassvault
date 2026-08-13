@@ -28,34 +28,15 @@ object FakeDatabaseContentFactory {
                     entry(ENTRY_OUTLOOK)
                 }
                 group(GROUP_INTERNET) {
-                    group(GROUP_CODING) {
-                        entry(ENTRY_LEETCODE)
-                        entry(ENTRY_NEETCODE)
-                        entry(ENTRY_GITHUB)
-                        entry(ENTRY_STACK_OVERFLOW)
-                        entry(ENTRY_BITBUCKET)
-                    }
-                    group(GROUP_GAMING) {
-                        entry(ENTRY_STADIA)
-                        entry(ENTRY_STEAM)
-                    }
-                    group(GROUP_SHOPPING) {
-                        entry(ENTRY_AMAZON)
-                        entry(ENTRY_EBAY)
-                        entry(ENTRY_ETSY)
-                    }
-                    group(GROUP_SOCIAL) {
-                        entry(ENTRY_LINKEDIN)
-                        entry(ENTRY_REDDIT)
-                    }
-
+                    group(GROUP_CODING)
+                    entry(ENTRY_AMAZON)
                     entry(ENTRY_GOOGLE)
                     entry(ENTRY_APPLE)
                     entry(ENTRY_MICROSOFT)
                     entry(ENTRY_DROPBOX)
+                    entry(ENTRY_GITHUB)
                 }
                 entry(ENTRY_NAS_LOGIN)
-                entry(ENTRY_LAPTOP_LOGIN)
             }
             .build()
             .toByteArray()
@@ -67,25 +48,54 @@ object FakeDatabaseContentFactory {
             .content(ROOT) {
                 group(GROUP_EMAIL)
                 group(GROUP_INTERNET) {
-                    group(GROUP_CODING) {
-                        entry(ENTRY_LEETCODE)
-                        entry(ENTRY_NEETCODE)
-                        entry(ENTRY_GITLAB)
-                    }
-                    group(GROUP_GAMING) {
-                        entry(ENTRY_STADIA)
-                    }
-                    group(GROUP_SHOPPING) {
-                        entry(ENTRY_AMAZON)
-                    }
-                    group(GROUP_SOCIAL)
-
                     entry(ENTRY_GOOGLE)
                     entry(ENTRY_APPLE)
                     entry(ENTRY_MICROSOFT_MODIFIED)
                 }
                 entry(ENTRY_NAS_LOGIN)
                 entry(ENTRY_LAPTOP_LOGIN)
+            }
+            .build()
+            .toByteArray()
+    }
+
+    fun createThreeWayMergeBaseDatabase(): ByteArray {
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                group(GROUP_SHARED) {
+                    entry(ENTRY_SHARED_BASE)
+                }
+            }
+            .build()
+            .toByteArray()
+    }
+
+    fun createThreeWayMergeLocalDatabase(): ByteArray {
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                group(GROUP_SHARED) {
+                    entry(ENTRY_SHARED_LOCAL)
+                }
+                group(GROUP_LOCAL) {
+                    entry(ENTRY_LOCAL)
+                }
+            }
+            .build()
+            .toByteArray()
+    }
+
+    fun createThreeWayMergeRemoteDatabase(): ByteArray {
+        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                group(GROUP_SHARED) {
+                    entry(ENTRY_SHARED_REMOTE)
+                }
+                group(GROUP_REMOTE) {
+                    entry(ENTRY_REMOTE)
+                }
             }
             .build()
             .toByteArray()
@@ -209,18 +219,55 @@ object FakeDatabaseContentFactory {
             .toByteArray()
     }
 
-    fun createDiffDatabase(): ByteArray {
+    fun createDiffDatabase(): ByteArray =
+        DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                group(GROUP_EMAIL) {
+                    entry(ENTRY_PROTON_MAIL)
+                    entry(ENTRY_OUTLOOK)
+                }
+                group(GROUP_INTERNET) {
+                    entry(ENTRY_AMAZON)
+                    entry(ENTRY_GOOGLE)
+                    entry(ENTRY_APPLE)
+                    entry(ENTRY_MICROSOFT)
+                    entry(ENTRY_DROPBOX)
+                    entry(ENTRY_GITHUB)
+                }
+                entry(ENTRY_NAS_LOGIN)
+            }
+            .build()
+            .toByteArray()
+
+    fun createDiffModifiedDatabase(): ByteArray =
+        DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT) {
+                group(GROUP_EMAIL)
+                group(GROUP_INTERNET) {
+                    group(GROUP_CODING)
+                    entry(ENTRY_AMAZON_MODIFIED)
+                    entry(ENTRY_GOOGLE)
+                    entry(ENTRY_APPLE)
+                    entry(ENTRY_MICROSOFT_MODIFIED)
+                }
+                entry(ENTRY_LAPTOP_LOGIN)
+            }
+            .build()
+            .toByteArray()
+
+    fun createShortDiffDatabase(): ByteArray {
         return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
             .key(PASSWORD_KEY)
             .content(ROOT) {
-                // TODO: add more fields
                 entry(ENTRY_APPLE)
             }
             .build()
             .toByteArray()
     }
 
-    fun createDiffModifiedDatabase(): ByteArray {
+    fun createShortDiffModifiedDatabase(): ByteArray {
         return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
             .key(PASSWORD_KEY)
             .content(ROOT) {
@@ -388,6 +435,64 @@ object FakeDatabaseContentFactory {
     private val GROUP_SHOPPING = newGroup(title = "Shopping")
     private val GROUP_SOCIAL = newGroup(title = "Social")
 
+    private val GROUP_SHARED = newGroup(title = "Shared Group")
+    private val GROUP_LOCAL = newGroup(title = "Local Group")
+    private val GROUP_REMOTE = newGroup(title = "Remote Group")
+
+    private val ENTRY_SHARED_BASE = newEntry(
+        title = "Base Entry",
+        username = "base-user",
+        password = "base-password",
+        notes = "This entry is modified by both local and remote databases",
+        custom = mapOf("Base Property" to "Base Value"),
+        created = parseDate("2020-01-01"),
+        modified = parseDate("2020-01-01")
+    )
+
+    private val ENTRY_SHARED_LOCAL = ENTRY_SHARED_BASE.copy(
+        fields = ENTRY_SHARED_BASE.fields.plus(
+            mapOf(
+                PropertyType.TITLE.propertyName to "Locally Modified Entry",
+                PropertyType.USER_NAME.propertyName to "local-user",
+                PropertyType.NOTES.propertyName to "Changed in the local database",
+                "Local Property" to "Local Value"
+            )
+        ),
+        modified = parseDate("2020-02-01").toInstant()
+    )
+
+    private val ENTRY_SHARED_REMOTE = ENTRY_SHARED_BASE.copy(
+        fields = ENTRY_SHARED_BASE.fields.plus(
+            mapOf(
+                PropertyType.TITLE.propertyName to "Remotely Modified Entry",
+                PropertyType.USER_NAME.propertyName to "remote-user",
+                PropertyType.NOTES.propertyName to "Changed in the remote database",
+                "Remote Property" to "Remote Value"
+            )
+        ),
+        modified = parseDate("2020-02-02").toInstant()
+    )
+
+    private val ENTRY_LOCAL = newEntry(
+        title = "Local Entry",
+        username = "local-user",
+        password = "local-password",
+        notes = "Added only to the local database",
+        custom = mapOf("Local Property" to "Local Value"),
+        created = parseDate("2020-02-01"),
+        modified = parseDate("2020-02-01")
+    )
+
+    private val ENTRY_REMOTE = newEntry(
+        title = "Remote Entry",
+        username = "remote-user",
+        password = "remote-password",
+        notes = "Added only to the remote database",
+        custom = mapOf("Remote Property" to "Remote Value"),
+        created = parseDate("2020-02-02"),
+        modified = parseDate("2020-02-02")
+    )
+
     private val TOTP_URL = """
             otpauth://totp/Example:john.doe?secret=AAAABBBBCCCCDDDD&period=30
             &digits=6&issuer=Example&algorithm=SHA1
@@ -519,12 +624,26 @@ object FakeDatabaseContentFactory {
         title = "Amazon.com",
         username = "john.doe@example.com",
         password = "abc123",
+        url = "https://amazon.com",
         created = parseDate("2020-01-09"),
         modified = parseDate("2020-01-09"),
         expires = parseDate("2030-01-10"),
         custom = mapOf(
-            PropertyType.URL.propertyName to "https://amazon.com",
-            PropertyType.OTP.propertyName to TOTP_URL
+            PropertyType.OTP.propertyName to TOTP_URL,
+            "Recovery Codes" to "abc123\ndef456\nghi789"
+        )
+    )
+
+    private val ENTRY_AMAZON_MODIFIED = newEntry(
+        title = "Amazon.com",
+        username = "john.doe@mail.com",
+        password = "abc123",
+        created = parseDate("2020-01-09"),
+        modified = parseDate("2020-01-09"),
+        expires = parseDate("2030-01-10"),
+        url = "https://amazon.com",
+        custom = mapOf(
+            "Memo" to "Some important memo"
         )
     )
 

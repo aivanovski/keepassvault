@@ -54,7 +54,7 @@ class SyncStateViewModel(
             return
         }
 
-        dbFile = getDbResult.getOrThrow().file
+        dbFile = getDbResult.getOrThrow().getFile()
         interactor.cache.subscribe(this)
         observerBus.register(this)
     }
@@ -138,9 +138,9 @@ class SyncStateViewModel(
             }
 
             val db = getDatabaseResult.getOrThrow()
-            dbFile = db.file
+            dbFile = db.getFile()
 
-            val syncState = interactor.getSyncState(db.file)
+            val syncState = interactor.getSyncState(db.getFile())
             onSyncDataLoaded(syncState, db, isForceShowMessage)
         }
     }
@@ -179,11 +179,11 @@ class SyncStateViewModel(
         db: EncryptedDatabase,
         isForceShowMessage: Boolean
     ) {
-        val dbFile = db.file
+        val dbFile = db.getFile()
         val hasRemoteChanges = (syncState.status == SyncStatus.REMOTE_CHANGES)
         val hasLocalChanges = (syncState.status == SyncStatus.LOCAL_CHANGES)
         val isSyncInIdle = (syncState.progress == SyncProgressStatus.IDLE)
-        val isDatabaseWriteable = db.fsOptions.isWriteEnabled
+        val isDatabaseWriteable = db.getFSOptions().isWriteEnabled
         val isShouldSync = (hasRemoteChanges || (hasLocalChanges && isDatabaseWriteable))
 
         Timber.d(

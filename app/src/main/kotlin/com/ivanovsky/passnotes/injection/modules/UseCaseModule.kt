@@ -26,6 +26,7 @@ import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateNoteWithAutofillDataUseCase
 import com.ivanovsky.passnotes.domain.usecases.UpdateUsedFileUseCase
+import com.ivanovsky.passnotes.domain.usecases.diff.ApplyDiffUseCase
 import com.ivanovsky.passnotes.domain.usecases.diff.GetDiffUseCase
 import com.ivanovsky.passnotes.domain.usecases.history.GetHistoryUseCase
 import com.ivanovsky.passnotes.domain.usecases.test.GetTestCredentialsUseCase
@@ -52,7 +53,7 @@ object UseCaseModule {
             single { UpdateNoteWithAutofillDataUseCase(get(), get(), get()) }
             single { CheckNoteAutofillDataUseCase(get()) }
             single { UpdateNoteUseCase(get(), get(), get()) }
-            single { RemoveUsedFileUseCase(get(), get(), get()) }
+            single { RemoveUsedFileUseCase(get(), get(), get(), get()) }
             single { GetUsedFileUseCase(get(), get()) }
             single { UpdateUsedFileUseCase(get(), get()) }
             single { SortGroupsAndNotesUseCase(get(), get()) }
@@ -66,5 +67,6 @@ object UseCaseModule {
             single { GetHistoryUseCase(get(), get()) }
             single { ExportDatabaseUseCase(get(), get(), get(), get()) }
             single { SetupRecycleBinUseCase(get(), get()) }
+            single { ApplyDiffUseCase(get(), get()) }
         }
 }

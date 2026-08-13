@@ -156,7 +156,7 @@ class KotpassGroupDao(
             )
 
             if (doCommit) {
-                db.commit().mapWithObject(newGroup)
+                db.commitLegacy().mapWithObject(newGroup)
             } else {
                 OperationResult.success(newGroup)
             }
@@ -216,7 +216,7 @@ class KotpassGroupDao(
                 }
             }
 
-            db.commit().mapWithObject(group)
+            db.commitLegacy().mapWithObject(group)
         }
 
         if (result.isSucceededOrDeferred) {
@@ -297,7 +297,7 @@ class KotpassGroupDao(
 
                 db.swapDatabase(newDb)
 
-                return@withLock db.commit().mapWithObject(newGroup)
+                return@withLock db.commitLegacy().mapWithObject(newGroup)
             }
 
             val isInsideItself = isGroupInsideGroupTree(entity.parentUid, entity.uid)
@@ -354,7 +354,7 @@ class KotpassGroupDao(
 
             db.swapDatabase(newDb)
 
-            db.commit().mapWithObject(newGroup)
+            db.commitLegacy().mapWithObject(newGroup)
         }
 
         if (result.isSucceededOrDeferred) {

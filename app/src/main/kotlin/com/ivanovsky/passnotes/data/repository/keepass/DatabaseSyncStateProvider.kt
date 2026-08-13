@@ -72,7 +72,7 @@ class DatabaseSyncStateProvider(
         openResult: OperationResult<EncryptedDatabase>
     ) {
         syncStateRef.set(null)
-        dbFileRef.set(db.file)
+        dbFileRef.set(db.getFile())
 
         onCommit(db, openResult)
     }

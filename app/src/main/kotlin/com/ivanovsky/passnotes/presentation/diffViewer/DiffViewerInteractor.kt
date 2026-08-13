@@ -1,6 +1,12 @@
 package com.ivanovsky.passnotes.presentation.diffViewer
 
+import arrow.core.Either
+import arrow.core.raise.either
+import arrow.core.right
+import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
+import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseElement
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_DATABASE_TYPE
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -8,88 +14,233 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
+import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
+import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.domain.usecases.GetDatabaseUseCase
+import com.ivanovsky.passnotes.domain.usecases.diff.ApplyDiffUseCase
 import com.ivanovsky.passnotes.domain.usecases.diff.GetDiffUseCase
+import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffEvent
 import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffListItem
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
+import com.ivanovsky.passnotes.extensions.toEither
+import com.ivanovsky.passnotes.presentation.diffViewer.model.CompareData
+import com.ivanovsky.passnotes.presentation.diffViewer.model.DiffEntity
+import com.ivanovsky.passnotes.presentation.diffViewer.model.MergeData
+import com.ivanovsky.passnotes.util.FileUtils
+import com.ivanovsky.passnotes.util.FileUtils.copyFile
 import kotlinx.coroutines.withContext
 
 class DiffViewerInteractor(
+    private val settings: Settings,
     private val dispatchers: DispatcherProvider,
     private val dbRepository: EncryptedDatabaseRepository,
     private val fileSystemResolver: FileSystemResolver,
     private val getDbUseCase: GetDatabaseUseCase,
-    private val diffUseCase: GetDiffUseCase
+    private val diffUseCase: GetDiffUseCase,
+    private val applyDiffUseCase: ApplyDiffUseCase
 ) {
 
-    suspend fun getOpenedDatabaseAndFile():
-        OperationResult<Pair<KotpassDatabase, FileDescriptor>> =
+    suspend fun loadMergeData(
+        mode: DiffViewerMode.Merge
+    ): Either<OperationError, MergeData> =
         withContext(dispatchers.IO) {
-            val getDbResult = getDbUseCase.getDatabaseSynchronously()
-            if (getDbResult.isFailed) {
-                return@withContext getDbResult.mapError()
-            }
+            either {
+                val base = dbRepository.read(
+                    KeepassImplementation.KOTPASS,
+                    mode.key,
+                    mode.base,
+                    FSOptions.READ_ONLY
+                ).toEither().bind() as KotpassDatabase
 
-            val db = getDbResult.getOrThrow()
+                val local = dbRepository.read(
+                    KeepassImplementation.KOTPASS,
+                    mode.key,
+                    mode.local,
+                    FSOptions.READ_ONLY
+                ).toEither().bind() as KotpassDatabase
 
-            val fsProvider = fileSystemResolver.resolveProvider(db.file.fsAuthority)
-            val getFileResult = fsProvider.getFile(db.file.path, FSOptions.READ_ONLY)
-            if (getFileResult.isFailed) {
-                return@withContext getFileResult.mapError()
-            }
+                val remote = dbRepository.read(
+                    KeepassImplementation.KOTPASS,
+                    mode.key,
+                    mode.remote,
+                    FSOptions.READ_ONLY
+                ).toEither().bind() as KotpassDatabase
 
-            val file = getFileResult.getOrThrow()
+                val localDiff = getDiff(
+                    lhs = base,
+                    rhs = local
+                ).bind()
 
-            if (db is KotpassDatabase) {
-                OperationResult.success(Pair(db, file))
-            } else {
-                OperationResult.error(
-                    newGenericError(
-                        MESSAGE_UNSUPPORTED_DATABASE_TYPE,
-                        Stacktrace()
-                    )
+                val remoteDiff = getDiff(
+                    lhs = base,
+                    rhs = remote
+                ).bind()
+
+                MergeData(
+                    base = base,
+                    local = local,
+                    remote = remote,
+                    localDiff = localDiff,
+                    remoteDiff = remoteDiff
                 )
             }
         }
 
-    suspend fun readDatabase(
+    suspend fun loadCompareData(
+        mode: DiffViewerMode.Compare
+    ): Either<OperationError, CompareData> =
+        withContext(dispatchers.IO) {
+            either {
+                val left = loadDatabaseAndFile(mode.left).bind()
+                val right = loadDatabaseAndFile(mode.right).bind()
+
+                val diff = getDiff(
+                    lhs = left.db,
+                    rhs = right.db
+                ).bind()
+
+                CompareData(
+                    left = left.db,
+                    right = right.db,
+                    diff = diff
+                )
+            }
+        }
+
+    suspend fun applyDiff(
+        key: EncryptedDatabaseKey,
+        base: FileDescriptor,
+        output: FileDescriptor,
+        diff: List<DiffEvent<EncryptedDatabaseElement>>
+    ): Either<OperationError, Unit> =
+        withContext(dispatchers.IO) {
+            either {
+                val tempOutput = FileUtils.createTemporalFile(
+                    fileSystemResolver = fileSystemResolver,
+                    source = output
+                ).bind()
+
+                copyFile(
+                    fileSystemResolver = fileSystemResolver,
+                    source = base,
+                    destination = tempOutput
+                ).bind()
+
+                val db = dbRepository.read(
+                    settings.keepassImplementation,
+                    key,
+                    tempOutput,
+                    FSOptions.NO_CACHE
+                ).toEither().bind()
+
+                val result = applyDiffUseCase.applyDiff(
+                    db = db,
+                    diff = diff
+                ).bind()
+
+                val fsProvider = fileSystemResolver.resolveProvider(output.fsAuthority)
+                result.commitTo(
+                    output.copy(modified = System.currentTimeMillis()),
+                    FSOptions.CACHE_ONLY
+                ).bind()
+
+                fsProvider.syncProcessor.process(
+                    output.copy(),
+                    SyncStrategy.LAST_MODIFICATION_WINS,
+                    ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE
+                ).toEither().bind()
+
+                dbRepository.reload().toEither().bind()
+            }
+        }
+
+    private fun loadDatabaseAndFile(
+        entity: DiffEntity
+    ): Either<OperationError, DatabaseAndFile> =
+        either {
+            when (entity) {
+                is DiffEntity.OpenedDatabase -> getOpenedDatabaseAndFile().bind()
+
+                is DiffEntity.File -> {
+                    val db = dbRepository.read(
+                        KeepassImplementation.KOTPASS,
+                        entity.key,
+                        entity.file,
+                        FSOptions.READ_ONLY
+                    ).toEither().bind()
+
+                    DatabaseAndFile(
+                        db = db as KotpassDatabase,
+                        file = entity.file
+                    )
+                }
+            }
+        }
+
+    private fun readDatabase(
         key: EncryptedDatabaseKey,
         file: FileDescriptor
-    ): OperationResult<KotpassDatabase> =
-        withContext(dispatchers.IO) {
-            val readResult = dbRepository.read(
-                KeepassImplementation.KOTPASS,
-                key,
-                file
-            )
-            if (readResult.isFailed) {
-                return@withContext readResult.mapError()
-            }
-
-            val db = readResult.getOrThrow()
-
-            if (db is KotpassDatabase) {
-                OperationResult.success(db)
-            } else {
-                OperationResult.error(
-                    newGenericError(
-                        MESSAGE_UNSUPPORTED_DATABASE_TYPE,
-                        Stacktrace()
-                    )
-                )
-            }
+    ): OperationResult<KotpassDatabase> {
+        val readResult = dbRepository.read(
+            KeepassImplementation.KOTPASS,
+            key,
+            file,
+            FSOptions.READ_ONLY
+        )
+        if (readResult.isFailed) {
+            return readResult.mapError()
         }
 
-    suspend fun getDiff(
+        val db = readResult.getOrThrow()
+
+        return if (db is KotpassDatabase) {
+            OperationResult.success(db)
+        } else {
+            OperationResult.error(
+                newGenericError(
+                    MESSAGE_UNSUPPORTED_DATABASE_TYPE,
+                    Stacktrace()
+                )
+            )
+        }
+    }
+
+    private fun getOpenedDatabaseAndFile(): Either<OperationError, DatabaseAndFile> =
+        either {
+            val openedDb = getDbUseCase.getDatabaseSynchronously().toEither().bind()
+            val fsProvider = fileSystemResolver.resolveProvider(openedDb.getFile().fsAuthority)
+
+            val db = dbRepository.read(
+                KeepassImplementation.KOTPASS,
+                openedDb.getKey(),
+                openedDb.getFile(),
+                FSOptions.READ_ONLY
+            ).toEither().bind()
+
+            val file = fsProvider.getFile(
+                openedDb.getFile().path,
+                FSOptions.READ_ONLY
+            ).toEither().bind()
+
+            DatabaseAndFile(
+                db = db as KotpassDatabase,
+                file = file
+            )
+        }
+
+    private suspend fun getDiff(
         lhs: KotpassDatabase,
         rhs: KotpassDatabase
-    ): OperationResult<List<DiffListItem>> =
-        withContext(dispatchers.Default) {
-            OperationResult.success(diffUseCase.getDiff(lhs, rhs))
-        }
+    ): Either<OperationError, List<DiffListItem>> =
+        diffUseCase.getDiff(lhs, rhs).right()
+
+    data class DatabaseAndFile(
+        val db: KotpassDatabase,
+        val file: FileDescriptor
+    )
 }

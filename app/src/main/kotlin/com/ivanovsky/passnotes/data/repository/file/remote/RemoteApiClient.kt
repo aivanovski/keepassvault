@@ -1,33 +1,22 @@
 package com.ivanovsky.passnotes.data.repository.file.remote
 
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.RemoteFileMetadata
-import com.ivanovsky.passnotes.data.repository.file.remote.exception.RemoteFSException
 
-@Deprecated("RemoteApiClientV2 should be used instead")
 interface RemoteApiClient {
+    fun listFiles(dir: FileDescriptor): OperationResult<List<FileDescriptor>>
+    fun getParent(file: FileDescriptor): OperationResult<FileDescriptor>
+    fun getRoot(): OperationResult<FileDescriptor>
+    fun getFileMetadata(file: FileDescriptor): OperationResult<RemoteFileMetadata>
 
-    @Deprecated("RemoteApiClientV2 should be used instead")
-    @Throws(RemoteFSException::class)
-    fun listFiles(dir: FileDescriptor): List<FileDescriptor>
+    fun downloadFile(
+        remotePath: String,
+        destinationPath: String
+    ): OperationResult<RemoteFileMetadata>
 
-    @Deprecated("RemoteApiClientV2 should be used instead")
-    @Throws(RemoteFSException::class)
-    fun getParent(file: FileDescriptor): FileDescriptor
-
-    @Deprecated("RemoteApiClientV2 should be used instead")
-    @Throws(RemoteFSException::class)
-    fun getRoot(): FileDescriptor
-
-    @Deprecated("RemoteApiClientV2 should be used instead")
-    @Throws(RemoteFSException::class)
-    fun getFileMetadataOrThrow(file: FileDescriptor): RemoteFileMetadata
-
-    @Deprecated("RemoteApiClientV2 should be used instead")
-    @Throws(RemoteFSException::class)
-    fun downloadFileOrThrow(remotePath: String, destinationPath: String): RemoteFileMetadata
-
-    @Deprecated("RemoteApiClientV2 should be used instead")
-    @Throws(RemoteFSException::class)
-    fun uploadFileOrThrow(remotePath: String, localPath: String): RemoteFileMetadata
+    fun uploadFile(
+        remotePath: String,
+        localPath: String
+    ): OperationResult<RemoteFileMetadata>
 }

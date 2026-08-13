@@ -17,6 +17,10 @@ project.properties
 .kotlin/
 *.so
 
+# VSCode
+.vscode/
+.metals/
+
 # Rust
 /keepass-rs/target
 

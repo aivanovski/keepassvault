@@ -4,6 +4,7 @@ import arrow.core.Either
 import arrow.core.raise.either
 import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.MergeFiles
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
@@ -90,6 +91,12 @@ class SyncUseCases(
                 .getSyncConflictForFile(file.uid)
         }
 
+    fun getMergeFiles(file: FileDescriptor): Either<OperationError, MergeFiles> =
+        either {
+            val syncProcessor = fileSystemResolver.resolveSyncProcessor(file.fsAuthority)
+            syncProcessor.getMergeFiles(file.uid).toEither().bind()
+        }
+
     suspend fun getSyncState(file: FileDescriptor): SyncState =
         withContext(dispatchers.IO) {
             val syncProcessor = fileSystemResolver.resolveSyncProcessor(file.fsAuthority)
@@ -139,10 +146,10 @@ class SyncUseCases(
             )
 
             // Reload database if it was changed
-            val db = dbRepo.database
+            val db = dbRepo.getDatabase()
             if (processResult.isSucceeded &&
                 db != null &&
-                db.file.isSameFile(file)
+                db.getFile().isSameFile(file)
             ) {
                 dbRepo.reload()
             }

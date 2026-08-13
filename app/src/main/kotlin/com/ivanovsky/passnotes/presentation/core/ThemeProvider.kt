@@ -46,6 +46,8 @@ class ThemeProvider(
 
     fun getTheme(): Theme? = currentTheme.get()
 
+    fun resolveTheme(): Theme = currentTheme.get() ?: Theme.LIGHT
+
     fun interface ThemeChangeListener {
         fun onThemeChanged(theme: Theme)
     }

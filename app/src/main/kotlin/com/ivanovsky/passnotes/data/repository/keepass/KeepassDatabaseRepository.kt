@@ -10,7 +10,6 @@ import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
-import com.ivanovsky.passnotes.data.repository.file.FSOptions.Companion.READ_ONLY
 import com.ivanovsky.passnotes.data.repository.file.FSOptions.Companion.defaultOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
@@ -34,12 +33,12 @@ class KeepassDatabaseRepository(
     private val observerBus: ObserverBus
 ) : EncryptedDatabaseRepository {
 
-    private val database = AtomicReference<DatabaseReference>()
+    private val databaseRef = AtomicReference<DatabaseReference>()
     private val lock = ReentrantLock()
 
-    override fun isOpened(): Boolean = (database.get() != null)
+    override fun isOpened(): Boolean = (databaseRef.get() != null)
 
-    override fun getDatabase(): EncryptedDatabase? = database.get()?.database
+    override fun getDatabase(): EncryptedDatabase? = databaseRef.get()?.database
 
     override fun open(
         type: KeepassImplementation,
@@ -50,7 +49,7 @@ class KeepassDatabaseRepository(
         val fsProvider = fileSystemResolver.resolveProvider(file.fsAuthority)
 
         val openDbResult = lock.withLock {
-            if (isOpened) {
+            if (isOpened()) {
                 close()
             }
 
@@ -76,7 +75,7 @@ class KeepassDatabaseRepository(
             }
 
             val db = openResult.obj
-            database.set(DatabaseReference(type, db))
+            databaseRef.set(DatabaseReference(type, db))
             openResult.takeStatusWith(db)
         }
 
@@ -90,11 +89,12 @@ class KeepassDatabaseRepository(
     override fun read(
         type: KeepassImplementation,
         key: EncryptedDatabaseKey,
-        file: FileDescriptor
+        file: FileDescriptor,
+        options: FSOptions
     ): OperationResult<EncryptedDatabase> {
         val fsProvider = fileSystemResolver.resolveProvider(file.fsAuthority)
 
-        val reloadFileResult = fsProvider.getFile(file.path, READ_ONLY)
+        val reloadFileResult = fsProvider.getFile(file.path, options)
         if (reloadFileResult.isFailed) {
             return reloadFileResult.mapError()
         }
@@ -104,7 +104,7 @@ class KeepassDatabaseRepository(
         val openFileResult = fsProvider.openFileForRead(
             reloadedFile,
             OnConflictStrategy.CANCEL,
-            READ_ONLY
+            options
         )
         if (openFileResult.isFailed) {
             return openFileResult.mapError()
@@ -113,7 +113,7 @@ class KeepassDatabaseRepository(
         return openDatabase(
             type,
             fileSystemResolver,
-            READ_ONLY,
+            options,
             reloadedFile,
             openFileResult,
             key
@@ -122,7 +122,7 @@ class KeepassDatabaseRepository(
 
     override fun reload(): OperationResult<Boolean> {
         val result = lock.withLock {
-            if (!isOpened) {
+            if (!isOpened()) {
                 return@withLock OperationResult.error(
                     newDbError(
                         MESSAGE_FAILED_TO_GET_DATABASE,
@@ -131,12 +131,12 @@ class KeepassDatabaseRepository(
                 )
             }
 
-            val oldDb = database.get().database
-            val type = database.get().type
-            val fsProvider = fileSystemResolver.resolveProvider(oldDb.file.fsAuthority)
-            val fsOptions = oldDb.fsOptions
-            val file = oldDb.file
-            val key = oldDb.key
+            val oldDb = databaseRef.get().database
+            val type = databaseRef.get().type
+            val fsProvider = fileSystemResolver.resolveProvider(oldDb.getFile().fsAuthority)
+            val fsOptions = oldDb.getFSOptions()
+            val file = oldDb.getFile()
+            val key = oldDb.getKey()
 
             val openFileResult = fsProvider.openFileForRead(
                 file,
@@ -160,7 +160,7 @@ class KeepassDatabaseRepository(
             }
 
             val db = openResult.obj
-            database.set(DatabaseReference(type, db))
+            databaseRef.set(DatabaseReference(type, db))
             openResult.takeStatusWith(db)
         }
 
@@ -175,7 +175,7 @@ class KeepassDatabaseRepository(
         type: KeepassImplementation,
         key: EncryptedDatabaseKey,
         file: FileDescriptor,
-        isAddTemplates: Boolean
+        addTemplates: Boolean
     ): OperationResult<Boolean> {
         return lock.withLock {
             val dbResult = when (type) {
@@ -184,7 +184,7 @@ class KeepassDatabaseRepository(
                     fsOptions = defaultOptions(),
                     file = file,
                     key = key,
-                    isAddTemplates = isAddTemplates
+                    isAddTemplates = addTemplates
                 )
 
                 KeepassImplementation.KEEPASS_RS -> OperationResult.error(
@@ -204,13 +204,13 @@ class KeepassDatabaseRepository(
 
     override fun close(): OperationResult<Boolean> {
         lock.withLock {
-            if (isOpened) {
-                database.get().database
+            if (isOpened()) {
+                databaseRef.get().database
                     .apply {
                         this.watcher.unsubscribe(syncStatusProvider)
                     }
 
-                database.set(null)
+                databaseRef.set(null)
             }
         }
 

@@ -43,7 +43,7 @@ fun FileDescriptor.formatReadablePath(resourceProvider: ResourceProvider): Strin
             path
         }
 
-        FSType.INTERNAL_STORAGE, FSType.EXTERNAL_STORAGE -> {
+        FSType.INTERNAL_STORAGE, FSType.EXTERNAL_STORAGE, FSType.TEMPORAL_STORAGE -> {
             path
         }
 

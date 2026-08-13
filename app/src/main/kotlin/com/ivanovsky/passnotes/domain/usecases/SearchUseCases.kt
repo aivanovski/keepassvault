@@ -36,7 +36,7 @@ class SearchUseCases(
                 val root = db.groupDao.rootGroup.toEither().bind()
                 val allNotes = db.noteDao.all.toEither().bind()
                 val allGroups = db.groupDao.all.toEither().bind()
-                val dbConfig = db.config.toEither().bind()
+                val dbConfig = db.getConfig().bind()
 
                 val recycledGroupUids = filterRecycledGroups(
                     config = dbConfig,

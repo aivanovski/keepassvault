@@ -9,6 +9,7 @@ import com.ivanovsky.passnotes.data.repository.file.saf.SAFHelper
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
+import com.ivanovsky.passnotes.util.toOperationResult
 import kotlinx.coroutines.withContext
 
 class ExportDatabaseUseCase(
@@ -39,6 +40,6 @@ class ExportDatabaseUseCase(
             }
 
             val file = getFileResult.getOrThrow()
-            db.commitTo(file, FSOptions.DEFAULT)
+            db.commitTo(file, FSOptions.DEFAULT).toOperationResult()
         }
 }

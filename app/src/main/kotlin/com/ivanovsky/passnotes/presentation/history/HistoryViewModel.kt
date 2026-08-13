@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.presentation.history
 
 import android.os.Build
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
@@ -12,31 +11,27 @@ import com.ivanovsky.passnotes.domain.usecases.diff.getEntity
 import com.ivanovsky.passnotes.domain.usecases.history.entity.HistoryDiffItem
 import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.extensions.getOrThrow
-import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
+import com.ivanovsky.passnotes.presentation.core.compose.cells.CellEventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.compose.themeFlow
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyAction
-import com.ivanovsky.passnotes.presentation.core.event.EventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
-import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryDiffCellViewModel
-import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryHeaderCellViewModel
-import com.ivanovsky.passnotes.presentation.history.factory.HistoryCellModelFactory
-import com.ivanovsky.passnotes.presentation.history.factory.HistoryCellModelFactory.Companion.FIRST_VERSION_INDEX
-import com.ivanovsky.passnotes.presentation.history.factory.HistoryCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.history.cells.HistoryCellFactory
+import com.ivanovsky.passnotes.presentation.history.cells.HistoryCellFactory.Companion.FIRST_VERSION_INDEX
+import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryDiffCellEvent
+import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryHeaderCellEvent
 import com.ivanovsky.passnotes.presentation.history.model.HistoryState
 import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note.NoteSource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.koin.core.parameter.parametersOf
 
 class HistoryViewModel(
     private val interactor: HistoryInteractor,
     private val resourceProvider: ResourceProvider,
     private val themeProvider: ThemeProvider,
-    private val modelFactory: HistoryCellModelFactory,
-    private val viewModelFactory: HistoryCellViewModelFactory,
+    private val cellFactory: HistoryCellFactory,
     private val router: Router,
     private val args: HistoryScreenArgs
 ) : ViewModel() {
@@ -47,7 +42,7 @@ class HistoryViewModel(
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
 
     private var diff: List<HistoryDiffItem> = emptyList()
-    private val eventProvider = EventProviderImpl()
+    private val eventProvider = CellEventProviderImpl()
 
     init {
         subscribeEvents()
@@ -55,7 +50,7 @@ class HistoryViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        eventProvider.unSubscribe(this)
+        eventProvider.unsubscribe(this)
     }
 
     fun start() {
@@ -82,21 +77,11 @@ class HistoryViewModel(
 
     private fun subscribeEvents() {
         eventProvider.subscribe(this) { event ->
-            when (event.key()) {
-                HistoryHeaderCellViewModel.ITEM_CLICK_EVENT -> {
-                    val noteIndex = event.getInt(HistoryHeaderCellViewModel.ITEM_CLICK_EVENT)
-                    if (noteIndex != null) {
-                        onNoteClicked(noteIndex)
-                    }
-                }
-
-                HistoryDiffCellViewModel.ITEM_CLICK_EVENT -> {
-                    val id = event.getString(HistoryDiffCellViewModel.ITEM_CLICK_EVENT)
-                    if (!id.isNullOrEmpty()) {
-                        val values = id.split(":")
-                            .map { it.toInt() }
-                        onPropertyClicked(values[0], values[1])
-                    }
+            when (event) {
+                is HistoryHeaderCellEvent.OnClick -> onNoteClicked(event.itemId)
+                is HistoryDiffCellEvent.OnClick -> {
+                    val values = event.eventId.split(":").map { it.toInt() }
+                    onPropertyClicked(values[0], values[1])
                 }
             }
         }
@@ -157,9 +142,7 @@ class HistoryViewModel(
         this.diff = diff
 
         if (diff.isNotEmpty()) {
-            val models = modelFactory.createHistoryDiffModels(diff)
-            val viewModels = viewModelFactory.createCellViewModels(models, eventProvider)
-
+            val viewModels = cellFactory.createHistoryDiffCellViewModels(diff, eventProvider)
             state.value = HistoryState.Data(
                 viewModels = viewModels
             )
@@ -186,16 +169,6 @@ class HistoryViewModel(
         )
         if (Build.VERSION.SDK_INT < 33) {
             showSnackbarMessageEvent.call(message)
-        }
-    }
-
-    class Factory(private val args: HistoryScreenArgs) : ViewModelProvider.Factory {
-
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return GlobalInjector.get<HistoryViewModel>(
-                parametersOf(args)
-            ) as T
         }
     }
 }

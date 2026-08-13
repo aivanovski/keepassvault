@@ -24,7 +24,7 @@ class EnterDbCredentialsInteractor(
         file: FileDescriptor
     ): OperationResult<Unit> =
         withContext(dispatchers.IO) {
-            dbRepository.read(settings.keepassImplementation, key, file)
+            dbRepository.read(settings.keepassImplementation, key, file, FSOptions.READ_ONLY)
                 .mapWithObject(Unit)
         }
 

@@ -220,7 +220,7 @@ class GroupsInteractor(
                 return@withContext getDbResult.mapError()
             }
 
-            val dbFile = getDbResult.obj.file
+            val dbFile = getDbResult.obj.getFile()
             val getUsedFileResult = getUsedFileUseCase.getUsedFile(dbFile.uid, dbFile.fsAuthority)
             if (getUsedFileResult.isFailed) {
                 return@withContext getUsedFileResult.mapError()
@@ -236,7 +236,7 @@ class GroupsInteractor(
                 return@withContext getDbResult.mapError()
             }
 
-            OperationResult.success(getDbResult.obj.key)
+            OperationResult.success(getDbResult.obj.getKey())
         }
 
     suspend fun doActionOnSelection(

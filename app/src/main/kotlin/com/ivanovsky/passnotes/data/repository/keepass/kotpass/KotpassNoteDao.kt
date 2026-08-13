@@ -27,11 +27,11 @@ import com.ivanovsky.passnotes.domain.NoteDiffer.DiffAction
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrNull
 import com.ivanovsky.passnotes.extensions.getOrThrow
-import com.ivanovsky.passnotes.extensions.map
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.extensions.matches
 import com.ivanovsky.passnotes.extensions.toByteString
+import com.ivanovsky.passnotes.util.toOperationResult
 import java.util.UUID
 import kotlin.concurrent.withLock
 import kotlin.math.max
@@ -132,7 +132,7 @@ class KotpassNoteDao(
 
         return if (isSuccess) {
             val commitResult = if (doCommit) {
-                val commit = db.commit()
+                val commit = db.commitLegacy()
                 if (commit.isFailed) {
                     return commit.mapError()
                 }
@@ -261,7 +261,7 @@ class KotpassNoteDao(
             db.swapDatabase(newDb)
 
             if (doCommit) {
-                db.commit().mapWithObject(noteUid)
+                db.commitLegacy().mapWithObject(noteUid)
             } else {
                 OperationResult.success(noteUid)
             }
@@ -275,7 +275,7 @@ class KotpassNoteDao(
     }
 
     private fun prepareEntryHistory(oldEntry: Entry): OperationResult<List<Entry>> {
-        val getConfigResult = db.config
+        val getConfigResult = db.getConfig().toOperationResult()
         if (getConfigResult.isFailed) {
             return getConfigResult.mapError()
         }
@@ -419,7 +419,7 @@ class KotpassNoteDao(
                 }
             }
 
-            db.commit().mapWithObject(note)
+            db.commitLegacy().mapWithObject(note)
         }
 
         if (result.isSucceededOrDeferred) {
@@ -482,7 +482,7 @@ class KotpassNoteDao(
             db.swapDatabase(newDb)
 
             if (doCommit) {
-                db.commit().mapWithObject(newUid)
+                db.commitLegacy().mapWithObject(newUid)
             } else {
                 OperationResult.success(newUid)
             }

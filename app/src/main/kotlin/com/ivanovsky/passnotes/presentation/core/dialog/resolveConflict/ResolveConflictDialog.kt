@@ -10,6 +10,7 @@ import com.ivanovsky.passnotes.databinding.DialogResolveConflictBinding
 import com.ivanovsky.passnotes.extensions.cloneInContext
 import com.ivanovsky.passnotes.presentation.core.dialog.BaseDialogFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
+import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
 class ResolveConflictDialog : BaseDialogFragment() {
@@ -20,8 +21,7 @@ class ResolveConflictDialog : BaseDialogFragment() {
             ResolveConflictDialogViewModel.Factory(
                 args = getMandatoryArgument(ARGUMENTS)
             )
-        )
-            .get(ResolveConflictDialogViewModel::class.java)
+        )[ResolveConflictDialogViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -50,6 +50,9 @@ class ResolveConflictDialog : BaseDialogFragment() {
     private fun subscribeToEvents() {
         viewModel.dismissEvent.observe(viewLifecycleOwner) {
             dismiss()
+        }
+        viewModel.showSnackbarMessageEvent.observe(viewLifecycleOwner) { message ->
+            showSnackbarMessage(message)
         }
     }
 

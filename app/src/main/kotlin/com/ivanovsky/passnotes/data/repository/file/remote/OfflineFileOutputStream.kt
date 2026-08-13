@@ -4,16 +4,13 @@ import com.ivanovsky.passnotes.data.entity.RemoteFile
 import com.ivanovsky.passnotes.data.repository.file.BaseRemoteFileOutputStream
 import java.io.BufferedOutputStream
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
 import java.util.UUID
 import timber.log.Timber
 
-class OfflineFileOutputStream
-@Throws(FileNotFoundException::class)
-constructor(
+class OfflineFileOutputStream(
     private val provider: RemoteFileSystemProvider,
     private val file: RemoteFile,
     private val processingUnitUid: UUID

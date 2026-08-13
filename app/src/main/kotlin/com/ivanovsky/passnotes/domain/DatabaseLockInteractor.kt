@@ -84,7 +84,7 @@ class DatabaseLockInteractor(
 
     private fun startServiceIfNeed(db: EncryptedDatabase) {
         val shouldShowNotification =
-            (settings.isLockNotificationVisible || db.fsOptions.isPostponedSyncEnabled)
+            (settings.isLockNotificationVisible || db.getFSOptions().isPostponedSyncEnabled)
         val shouldStart = (
             LockService.getCurrentState() == ServiceState.STOPPED &&
                 shouldShowNotification

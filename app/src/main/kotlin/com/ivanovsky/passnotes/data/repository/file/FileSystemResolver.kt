@@ -5,10 +5,10 @@ import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.repository.file.git.GitClient
 import com.ivanovsky.passnotes.data.repository.file.git.GitFileSystemAuthenticator
 import com.ivanovsky.passnotes.data.repository.file.regular.RegularFileSystemProvider
-import com.ivanovsky.passnotes.data.repository.file.remote.RemoteApiClientAdapter
 import com.ivanovsky.passnotes.data.repository.file.remote.RemoteFileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.saf.SAFFileSystemProvider
-import com.ivanovsky.passnotes.data.repository.file.webdav.WebDavClientV2
+import com.ivanovsky.passnotes.data.repository.file.temporary.TemporaryFileSystemProvider
+import com.ivanovsky.passnotes.data.repository.file.webdav.WebDavClient
 import com.ivanovsky.passnotes.data.repository.file.webdav.WebdavAuthenticator
 import com.ivanovsky.passnotes.injection.GlobalInjector.get
 import java.util.concurrent.locks.ReentrantLock
@@ -59,6 +59,7 @@ open class FileSystemResolver(
             isExternalStorageAccessEnabled: Boolean
         ): Map<FSType, Factory> {
             val result = mutableMapOf(
+                FSType.TEMPORAL_STORAGE to TemporalFileSystemFactory(),
                 FSType.INTERNAL_STORAGE to InternalFileSystemFactory(),
                 FSType.SAF to SAFFileSystemFactory(),
                 FSType.WEBDAV to WebdavFileSystemFactory(),
@@ -75,6 +76,16 @@ open class FileSystemResolver(
 
     fun interface Factory {
         fun createProvider(fsAuthority: FSAuthority): FileSystemProvider
+    }
+
+    class TemporalFileSystemFactory : Factory {
+        override fun createProvider(fsAuthority: FSAuthority): FileSystemProvider {
+            return TemporaryFileSystemProvider(
+                context = get(),
+                fileDao = get(),
+                fsAuthority = fsAuthority
+            )
+        }
     }
 
     class InternalFileSystemFactory : Factory {
@@ -98,9 +109,10 @@ open class FileSystemResolver(
     class WebdavFileSystemFactory : Factory {
         override fun createProvider(fsAuthority: FSAuthority): FileSystemProvider {
             val authenticator = WebdavAuthenticator(fsAuthority)
-            val client = RemoteApiClientAdapter(WebDavClientV2(authenticator))
+            val client = WebDavClient(authenticator)
 
             return RemoteFileSystemProvider(
+                get(),
                 authenticator,
                 client,
                 get(),
@@ -114,18 +126,17 @@ open class FileSystemResolver(
     class GitFileSystemFactory : Factory {
         override fun createProvider(fsAuthority: FSAuthority): FileSystemProvider {
             val authenticator = GitFileSystemAuthenticator(fsAuthority)
-            val client = RemoteApiClientAdapter(
-                GitClient(
-                    get(),
-                    authenticator,
-                    get(),
-                    get(),
-                    get(),
-                    get()
-                )
+            val client = GitClient(
+                get(),
+                authenticator,
+                get(),
+                get(),
+                get(),
+                get()
             )
 
             return RemoteFileSystemProvider(
+                get(),
                 authenticator,
                 client,
                 get(),

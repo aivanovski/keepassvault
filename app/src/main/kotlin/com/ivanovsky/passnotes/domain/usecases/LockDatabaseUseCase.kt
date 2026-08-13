@@ -21,13 +21,13 @@ class LockDatabaseUseCase {
     private val observerBus: ObserverBus by inject()
 
     fun lockIfNeed(): OperationResult<Unit> {
-        val db = dbRepository.database ?: return OperationResult.success(Unit)
+        val db = dbRepository.getDatabase() ?: return OperationResult.success(Unit)
 
         val syncState = syncStateProvider.syncState
         Timber.d("syncState=%s", syncState)
 
         if (syncState == null || syncState.status.isNeedToSync()) {
-            LockService.runCommand(context, LockServiceCommand.SyncAndLock(db.file))
+            LockService.runCommand(context, LockServiceCommand.SyncAndLock(db.getFile()))
             observerBus.notifyDatabaseClosed()
             return OperationResult.success(Unit)
         }

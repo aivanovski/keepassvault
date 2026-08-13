@@ -8,27 +8,26 @@ import app.keemobile.kotpass.database.modifiers.modifyMeta
 import app.keemobile.kotpass.models.Entry
 import app.keemobile.kotpass.models.Group as RawGroup
 import app.keemobile.kotpass.models.Meta
+import arrow.core.Either
 import arrow.core.raise.either
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
+import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.KeyType
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_FIND_GROUP
+import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_FAILED_TO_GET_TEMPLATE_GROUP
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INVALID_KEY_FILE
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INVALID_PASSWORD
 import com.ivanovsky.passnotes.data.entity.OperationError.newAuthError
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericIOError
 import com.ivanovsky.passnotes.data.entity.OperationResult
-import com.ivanovsky.passnotes.data.repository.TemplateDao
 import com.ivanovsky.passnotes.data.repository.encdb.DatabaseWatcher
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabase
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseConfig
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.encdb.MutableEncryptedDatabaseConfig
-import com.ivanovsky.passnotes.data.repository.encdb.dao.GroupDao
-import com.ivanovsky.passnotes.data.repository.encdb.dao.NoteDao
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
@@ -48,6 +47,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
+import kotlin.reflect.KClass
 import timber.log.Timber
 
 class KotpassDatabase(
@@ -58,34 +58,24 @@ class KotpassDatabase(
     db: KeePassDatabase
 ) : EncryptedDatabase {
 
-    private val lock = ReentrantLock()
+    override val lock = ReentrantLock()
     private val database = AtomicReference(db)
-    private val key = AtomicReference(key)
-    private val file = AtomicReference(file)
+    private val keyRef = AtomicReference(key)
+    private val fileRef = AtomicReference(file)
     private val inheritableOptionsMap = AtomicReference(createInheritableOptionsMap())
     private val groupUidToParentMap = AtomicReference(createGroupUidToParentMap())
-    private val groupDao = KotpassGroupDao(this)
-    private val noteDao = KotpassNoteDao(this)
-    private val templateDao = TemplateDaoImpl(groupDao, noteDao)
-    private val dbWatcher = DatabaseWatcher<EncryptedDatabase>()
+    override val groupDao = KotpassGroupDao(this)
+    override val noteDao = KotpassNoteDao(this)
+    override val templateDao = TemplateDaoImpl(groupDao, noteDao)
+    override val watcher = DatabaseWatcher<EncryptedDatabase>()
 
-    override fun getWatcher() = dbWatcher
+    override fun getKey(): EncryptedDatabaseKey = keyRef.get()
 
-    override fun getLock(): ReentrantLock = lock
-
-    override fun getFile(): FileDescriptor = file.get()
+    override fun getFile(): FileDescriptor = fileRef.get()
 
     override fun getFSOptions(): FSOptions = fsOptions
 
-    override fun getKey(): EncryptedDatabaseKey = key.get()
-
-    override fun getGroupDao(): GroupDao = groupDao
-
-    override fun getNoteDao(): NoteDao = noteDao
-
-    override fun getTemplateDao(): TemplateDao = templateDao
-
-    override fun getConfig(): OperationResult<EncryptedDatabaseConfig> =
+    override fun getConfig(): Either<OperationError, EncryptedDatabaseConfig> =
         lock.withLock {
             either {
                 val rawDatabase = getRawDatabase()
@@ -102,13 +92,13 @@ class KotpassDatabase(
                 )
 
                 config
-            }.toOperationResult()
+            }
         }
 
-    override fun applyConfig(newConfig: EncryptedDatabaseConfig): OperationResult<Boolean> =
+    override fun applyConfig(newConfig: EncryptedDatabaseConfig): Either<OperationError, Boolean> =
         lock.withLock {
             either {
-                val oldConfig = config.toEither().bind()
+                val oldConfig = getConfig().bind()
 
                 if (oldConfig != newConfig) {
                     swapDatabase(
@@ -121,86 +111,81 @@ class KotpassDatabase(
                     )
                 }
 
-                commit().toEither().bind()
-            }.toOperationResult()
+                commit().bind()
+            }
         }
 
     override fun changeKey(
         oldKey: EncryptedDatabaseKey,
         newKey: EncryptedDatabaseKey
-    ): OperationResult<Boolean> {
-        return lock.withLock {
-            val currentKey = key.get()
-            if (oldKey != currentKey) {
-                return@withLock OperationResult.error(
-                    newAuthError(
-                        if (currentKey.type == KeyType.PASSWORD) {
-                            MESSAGE_INVALID_PASSWORD
-                        } else {
-                            MESSAGE_INVALID_KEY_FILE
-                        },
-                        Stacktrace()
+    ): Either<OperationError, Boolean> =
+        lock.withLock {
+            either {
+                val currentKey = keyRef.get()
+                if (oldKey != currentKey) {
+                    raise(
+                        newAuthError(
+                            if (currentKey.type == KeyType.PASSWORD) {
+                                MESSAGE_INVALID_PASSWORD
+                            } else {
+                                MESSAGE_INVALID_KEY_FILE
+                            },
+                            Stacktrace()
+                        )
                     )
-                )
-            }
+                }
 
-            val getCredentialsResult = newKey.toCredentials(fsResolver)
-            if (getCredentialsResult.isFailed) {
-                return getCredentialsResult.mapError()
-            }
+                val newCredentials = newKey.toCredentials(fsResolver).toEither().bind()
+                val newDb = database.get().modifyCredentials {
+                    newCredentials
+                }
+                swapDatabase(newDb)
+                keyRef.set(newKey)
 
-            val newCredentials = getCredentialsResult.obj
-            val newDb = database.get().modifyCredentials {
-                newCredentials
+                commit().bind()
             }
-            swapDatabase(newDb)
-            key.set(newKey)
-
-            commit()
         }
-    }
 
-    override fun commit(): OperationResult<Boolean> {
-        val updatedFile = file.get().copy(modified = System.currentTimeMillis())
+    override fun commit(): Either<OperationError, Boolean> {
+        val updatedFile = fileRef.get().copy(modified = System.currentTimeMillis())
 
         val result = commitTo(updatedFile, fsOptions)
-        if (result.isSucceededOrDeferred) {
-            file.set(updatedFile)
+        if (result.isRight()) {
+            fileRef.set(updatedFile)
         }
 
         return result
     }
 
+    fun commitLegacy(): OperationResult<Boolean> = commit().toOperationResult()
+
     override fun commitTo(
         output: FileDescriptor,
         fsOptions: FSOptions
-    ): OperationResult<Boolean> {
+    ): Either<OperationError, Boolean> {
         val fsProvider = fsResolver.resolveProvider(output.fsAuthority)
 
         val commitResult = lock.withLock {
-            val outResult = fsProvider.openFileForWrite(
-                output,
-                OnConflictStrategy.CANCEL,
-                fsOptions
-            )
-            if (outResult.isFailed) {
-                return outResult.mapError()
-            }
-
-            val out = outResult.obj
-            val db = database.get()
-            try {
-                db.encode(out)
-                outResult.takeStatusWith(true)
-            } catch (e: IOException) {
-                InputOutputUtils.close(out)
-
-                OperationResult.error(newGenericIOError(e))
+            either {
+                val outResult = fsProvider.openFileForWrite(
+                    output,
+                    OnConflictStrategy.CANCEL,
+                    fsOptions
+                )
+                val out = outResult.toEither().bind()
+                val db = database.get()
+                try {
+                    db.encode(out)
+                    true
+                } catch (e: IOException) {
+                    InputOutputUtils.close(out)
+                    raise(newGenericIOError(e))
+                }
             }
         }
 
-        if (commitResult.isSucceededOrDeferred) {
-            dbWatcher.notifyOnCommit(this, commitResult)
+        if (commitResult.isRight()) {
+            watcher.notifyOnCommit(this, commitResult.toOperationResult())
         }
 
         return commitResult
@@ -233,12 +218,7 @@ class KotpassDatabase(
 
     fun getRawParentGroup(childUid: UUID): OperationResult<RawGroup> {
         val parentGroup = groupUidToParentMap.get()[childUid]
-            ?: return OperationResult.error(
-                newDbError(
-                    MESSAGE_FAILED_TO_FIND_GROUP,
-                    Stacktrace()
-                )
-            )
+            ?: return OperationResult.error(failedToFindEntityByUid(childUid, Group::class))
 
         return OperationResult.success(parentGroup)
     }
@@ -250,12 +230,7 @@ class KotpassDatabase(
         }
 
         val (_, parentGroup) = rootGroup.findChildGroup { it.uuid == uid }
-            ?: return OperationResult.error(
-                newDbError(
-                    MESSAGE_FAILED_TO_FIND_GROUP,
-                    Stacktrace()
-                )
-            )
+            ?: return OperationResult.error(failedToFindEntityByUid(uid, Group::class))
 
         return OperationResult.success(parentGroup)
     }
@@ -338,12 +313,7 @@ class KotpassDatabase(
     fun getInheritableOptions(groupUid: UUID): OperationResult<InheritableOptions> {
         val options = inheritableOptionsMap.get()[groupUid]
         return options?.let { OperationResult.success(it) }
-            ?: OperationResult.error(
-                newDbError(
-                    MESSAGE_FAILED_TO_FIND_GROUP,
-                    Stacktrace()
-                )
-            )
+            ?: OperationResult.error(failedToFindEntityByUid(groupUid, Group::class))
     }
 
     private fun createInheritableOptionsMap(): Map<UUID, InheritableOptions> {
@@ -429,7 +399,7 @@ class KotpassDatabase(
         val templateGroupUid = getTemplateUidResult.getOrNull()
             ?: return OperationResult.error(
                 newDbError(
-                    MESSAGE_FAILED_TO_FIND_GROUP,
+                    MESSAGE_FAILED_TO_GET_TEMPLATE_GROUP,
                     Stacktrace()
                 )
             )
@@ -443,7 +413,7 @@ class KotpassDatabase(
         )
 
         return if (doCommit) {
-            commit().takeStatusWith(Unit)
+            commitLegacy().takeStatusWith(Unit)
         } else {
             OperationResult.success(Unit)
         }
@@ -480,6 +450,18 @@ class KotpassDatabase(
         val getRecycleBinResult = getRawGroupByUid(recycleBinUid)
         return OperationResult.success(getRecycleBinResult.getOrNull())
     }
+
+    private fun failedToFindEntityByUid(
+        uid: UUID,
+        type: KClass<*>
+    ): OperationError = newDbError(
+        String.format(
+            GENERIC_MESSAGE_FAILED_TO_FIND_ENTITY_BY_UID,
+            type.java.simpleName,
+            uid
+        ),
+        Stacktrace()
+    )
 
     companion object {
 
@@ -529,7 +511,7 @@ class KotpassDatabase(
                 }
             }
 
-            val commitResult = db.commit()
+            val commitResult = db.commit().toOperationResult()
             if (commitResult.isFailed) {
                 return commitResult.mapError()
             }

@@ -62,11 +62,11 @@ class UnlockInteractor(
 ) {
 
     fun hasActiveDatabase(): Boolean {
-        return dbRepo.isOpened
+        return dbRepo.isOpened()
     }
 
     fun closeActiveDatabase(): OperationResult<Unit> {
-        if (!dbRepo.isOpened) {
+        if (!dbRepo.isOpened()) {
             return OperationResult.success(Unit)
         }
 

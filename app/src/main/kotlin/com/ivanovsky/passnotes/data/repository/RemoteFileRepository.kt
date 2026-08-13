@@ -34,7 +34,7 @@ class RemoteFileRepository(
         dao.update(file)
     }
 
-    fun delete(id: Int) {
-        dao.delete(id.toLong())
+    fun remove(id: Long) {
+        dao.delete(id)
     }
 }

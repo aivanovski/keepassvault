@@ -9,16 +9,19 @@ import androidx.room.migration.Migration
 import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.entity.GitRoot
 import com.ivanovsky.passnotes.data.entity.RemoteFile
+import com.ivanovsky.passnotes.data.entity.TemporaryFile
 import com.ivanovsky.passnotes.data.entity.UsedFile
 import com.ivanovsky.passnotes.data.repository.db.converters.FSAuthorityTypeConverter
 import com.ivanovsky.passnotes.data.repository.db.dao.GitRootDao
 import com.ivanovsky.passnotes.data.repository.db.dao.RemoteFileDao
+import com.ivanovsky.passnotes.data.repository.db.dao.TemporaryFileDao
 import com.ivanovsky.passnotes.data.repository.db.dao.UsedFileDao
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom1To2
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom2To3
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom3To4
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom4To5
 import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom5To6
+import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom6To7
 
 // TODO(improvement): Unused data from should be removed from database
 
@@ -26,9 +29,10 @@ import com.ivanovsky.passnotes.data.repository.db.migration.MigrationFrom5To6
     entities = [
         UsedFile::class,
         RemoteFile::class,
-        GitRoot::class
+        GitRoot::class,
+        TemporaryFile::class
     ],
-    version = 6
+    version = 7
 )
 @TypeConverters(
     FSAuthorityTypeConverter::class
@@ -38,6 +42,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract val usedFileDao: UsedFileDao
     abstract val remoteFileDao: RemoteFileDao
     abstract val gitRootDao: GitRootDao
+    abstract val temporaryFileDao: TemporaryFileDao
 
     companion object {
 
@@ -63,7 +68,8 @@ abstract class AppDatabase : RoomDatabase() {
                 MigrationFrom2To3(cipherProvider),
                 MigrationFrom3To4(),
                 MigrationFrom4To5(),
-                MigrationFrom5To6()
+                MigrationFrom5To6(),
+                MigrationFrom6To7()
             )
         }
     }

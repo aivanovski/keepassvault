@@ -21,7 +21,7 @@ import com.ivanovsky.passnotes.presentation.autofill.AutofillDialogFactory
 import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
-import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.confirmationDialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialogArgs
 import com.ivanovsky.passnotes.presentation.core.extensions.finishActivity

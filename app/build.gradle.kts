@@ -18,7 +18,7 @@ plugins {
 }
 
 val versionMajor = 2
-val versionMinor = 1
+val versionMinor = 2
 val versionPatch = 0
 
 val formattedVersionCode = (versionMajor * 10000 + versionMinor * 100 + versionPatch).toString()
@@ -299,6 +299,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.andoridx.compose.constraintLayout)
+    implementation(libs.androidx.compose.foundation.layout)
 
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)

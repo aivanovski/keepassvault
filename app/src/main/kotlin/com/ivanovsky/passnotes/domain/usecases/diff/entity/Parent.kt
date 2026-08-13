@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.domain.usecases.diff.entity
 
-import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseElement
+import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
 import java.util.UUID
 
 data class Parent(
     val uuid: UUID,
-    val entity: EncryptedDatabaseElement?
+    val entity: EncryptedDatabaseEntry?
 )

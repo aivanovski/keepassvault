@@ -12,6 +12,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.presentation.core.compose.cells.CellEventProvider
+import com.ivanovsky.passnotes.presentation.core.compose.cells.CellEventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.Event
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 
@@ -87,6 +89,9 @@ fun newEventProvider(): EventProvider {
         }
     }
 }
+
+fun newCellEventProvider(): CellEventProvider =
+    CellEventProviderImpl()
 
 @Composable
 fun newResourceProvider(): ResourceProvider {

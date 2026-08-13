@@ -1,7 +1,7 @@
 package com.ivanovsky.passnotes.presentation.history.model
 
 import androidx.compose.runtime.Immutable
-import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
+import com.ivanovsky.passnotes.presentation.core.compose.cells.CellViewModel
 
 @Immutable
 sealed interface HistoryState {
@@ -19,6 +19,6 @@ sealed interface HistoryState {
 
     @Immutable
     data class Data(
-        val viewModels: List<BaseCellViewModel>
+        val viewModels: List<CellViewModel>
     ) : HistoryState
 }

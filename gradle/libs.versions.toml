@@ -135,3 +135,4 @@ arrowCore = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrowCoroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
 sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentry" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
+kotlinx-serializationCore = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serializationJson" }

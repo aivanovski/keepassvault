@@ -5,16 +5,15 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 class MigrationFrom6To7 : Migration(6, 7) {
 
-    // TODO: add test
-
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE remote_file ADD COLUMN local_backup_path TEXT DEFAULT null")
         db.execSQL(
             """
             CREATE TABLE IF NOT EXISTS temporary_file (
-                file_path TEXT NOT NULL,
-                created_time INTEGER NOT NULL,
-                PRIMARY KEY(file_path)
+                path TEXT NOT NULL,
+                created INTEGER NOT NULL,
+                modified INTEGER,
+                PRIMARY KEY(path)
             )
             """.trimIndent()
         )

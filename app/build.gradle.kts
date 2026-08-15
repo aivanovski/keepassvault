@@ -269,15 +269,17 @@ dependencies {
     androidTestImplementation(libs.room.testing)
     androidTestImplementation(libs.truth)
     androidTestImplementation(libs.kotlin.reflect)
+    androidTestImplementation(libs.room.testing)
 
     // DI
     implementation(libs.koin.android)
     implementation(libs.koin.core)
+    // Old serialization library produce a crash in Room testing library
+    implementation(libs.kotlinx.serializationCore)
 
     // Room
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
-    androidTestImplementation(libs.room.testing)
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.material)

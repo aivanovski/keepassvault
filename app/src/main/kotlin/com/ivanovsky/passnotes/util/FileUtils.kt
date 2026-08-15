@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.util
 
 import android.webkit.MimeTypeMap
 import arrow.core.Either
+import arrow.core.catch
 import arrow.core.raise.either
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
@@ -93,11 +94,19 @@ object FileUtils {
 
     @JvmStatic
     @Throws(IOException::class)
-    fun copyFile(source: File, destination: File) {
-        val input: InputStream = BufferedInputStream(FileInputStream(source))
-        val output: OutputStream = BufferedOutputStream(FileOutputStream(destination))
+    fun copyFileOrThrow(source: File, destination: File) {
+        val input = BufferedInputStream(FileInputStream(source))
+        val output = BufferedOutputStream(FileOutputStream(destination, false))
         InputOutputUtils.copyOrThrow(input, output, true)
     }
+
+    fun copyFile(
+        source: File,
+        destination: File
+    ): Either<OperationError, Unit> =
+        Either
+            .catch { copyFileOrThrow(source, destination) }
+            .mapLeft { exception -> OperationError.newGenericIOError(exception) }
 
     @JvmStatic
     fun createPath(parentPath: String, name: String): String {

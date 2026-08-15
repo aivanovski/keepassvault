@@ -258,7 +258,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
                     if (options.isCacheEnabled()) {
                         String localBackupPath = destinationPath + "_backup";
-                        FileUtils.copyFile(new File(destinationPath), new File(localBackupPath));
+                        FileUtils.copyFileOrThrow(new File(destinationPath), new File(localBackupPath));
 
                         cachedFile = new RemoteFile();
 
@@ -308,7 +308,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
                         if (options.isCacheEnabled()) {
                             String lastBackupPath = cachedFile.getLocalPath() + "_backup";
-                            FileUtils.copyFile(
+                            FileUtils.copyFileOrThrow(
                                     new File(cachedFile.getLocalPath()), new File(lastBackupPath));
 
                             cachedFile.setRemotePath(metadata.getPath());

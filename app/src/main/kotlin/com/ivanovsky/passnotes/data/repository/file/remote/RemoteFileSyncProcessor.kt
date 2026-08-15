@@ -22,9 +22,12 @@ import com.ivanovsky.passnotes.data.repository.file.RemoteFileInputStream
 import com.ivanovsky.passnotes.domain.SyncResolutionResolver
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrThrow
+import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.toEither
 import com.ivanovsky.passnotes.extensions.toFileDescriptor
 import com.ivanovsky.passnotes.util.FileUtils
+import com.ivanovsky.passnotes.util.FileUtils.copyFile
+import com.ivanovsky.passnotes.util.FileUtils.createTemporalFile
 import com.ivanovsky.passnotes.util.isNewerThan
 import com.ivanovsky.passnotes.util.toOperationResult
 import java.io.File
@@ -130,24 +133,23 @@ class RemoteFileSyncProcessor(
                 FSOptions.NO_CACHE
             ).toEither().bind()
 
-            val baseProxyFile = FileUtils.createTemporalFile(fileSystemResolver, baseFile).bind()
-            val localProxyFile = FileUtils.createTemporalFile(fileSystemResolver, localFile).bind()
-            val remoteProxyFile =
-                FileUtils.createTemporalFile(fileSystemResolver, remoteFile).bind()
+            val baseProxyFile = createTemporalFile(fileSystemResolver, baseFile).bind()
+            val localProxyFile = createTemporalFile(fileSystemResolver, localFile).bind()
+            val remoteProxyFile = createTemporalFile(fileSystemResolver, remoteFile).bind()
 
-            FileUtils.copyFile(
+            copyFile(
                 fileSystemResolver = fileSystemResolver,
                 source = File(cachedFile.localBackupPath),
                 destination = baseProxyFile
             ).bind()
 
-            FileUtils.copyFile(
+            copyFile(
                 fileSystemResolver = fileSystemResolver,
                 source = File(cachedFile.localPath),
                 destination = localProxyFile
             ).bind()
 
-            FileUtils.copyFile(
+            copyFile(
                 fileSystemResolver = fileSystemResolver,
                 source = remoteFile,
                 destination = remoteProxyFile
@@ -270,14 +272,14 @@ class RemoteFileSyncProcessor(
         updateSyncStatusForFile(file.uid, status)
 
         Timber.d(
-            "process: remoteFile=%s, localModified=%s, remoteModified=%s, resolution=%s",
-            remoteDescriptor,
+            "process: localModified=%s, remoteModified=%s, resolution=%s, remoteFile=%s",
             localModified,
             remoteModified,
-            resolution
+            resolution,
+            remoteDescriptor
         )
 
-        return when (resolution) {
+        val result = when (resolution) {
             SyncResolution.UPLOAD_LOCAL -> uploadLocalFile(cachedFile, localFile)
             SyncResolution.DOWNLOAD_REMOTE -> downloadFile(cachedFile, localFile, remoteDescriptor)
             SyncResolution.NO_CHANGES -> OperationResult.success(remoteDescriptor)
@@ -290,6 +292,13 @@ class RemoteFileSyncProcessor(
                 )
             }
         }
+
+        if (result.isFailed) {
+            updateProgressStatusForFile(cachedFile.uid, SyncProgressStatus.IDLE)
+            removeSyncStatusForFile(cachedFile.uid)
+        }
+
+        return result
     }
 
     private fun uploadLocalFile(
@@ -319,8 +328,18 @@ class RemoteFileSyncProcessor(
         val localFile = uploadResult.getOrThrow().first
         val metadata = uploadResult.getOrThrow().second
 
+        val localBackupPath = localFile.path + "_backup"
+        val copyResult = copyFile(
+            source = File(localFile.path),
+            destination = File(localBackupPath)
+        ).toOperationResult()
+        if (copyResult.isFailed) {
+            return copyResult.mapError()
+        }
+
         updatedCachedFile.uid = metadata.uid
         updatedCachedFile.localPath = localFile.path
+        updatedCachedFile.localBackupPath = localBackupPath
         updatedCachedFile.remotePath = metadata.path
         updatedCachedFile.revision = metadata.revision
         updatedCachedFile.lastModificationTimestamp = metadata.serverModified.time
@@ -399,9 +418,19 @@ class RemoteFileSyncProcessor(
 
         val metadata = metadataResult.getOrThrow()
 
+        val localBackupPath = input.path + "_backup"
+        val copyResult = copyFile(
+            File(input.path),
+            File(localBackupPath)
+        ).toOperationResult()
+        if (copyResult.isFailed) {
+            Timber.d("Failed to create local")
+            return copyResult.mapError()
+        }
+
         updatedCachedFile.uid = metadata.uid
-        // TODO: update localBackupPath
         updatedCachedFile.localPath = input.path
+        updatedCachedFile.localBackupPath = localBackupPath
         updatedCachedFile.remotePath = metadata.path
         updatedCachedFile.revision = metadata.revision
         updatedCachedFile.lastModificationTimestamp = metadata.serverModified.time

@@ -4,12 +4,12 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.databinding.ViewErrorPanelBinding
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.extensions.formatReadableMessage
+import com.ivanovsky.passnotes.extensions.getOrUnwrapActivity
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.dialog.reportErrorDialog.ReportErrorDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.reportErrorDialog.ReportErrorDialogArgs
@@ -64,19 +64,11 @@ class ErrorPanelView : FrameLayout {
     private fun onReportButtonClicked() {
         val error = currentError ?: return
 
-        val fragmentManager = (context as AppCompatActivity).supportFragmentManager
+        val fragmentManager = context.getOrUnwrapActivity().supportFragmentManager
 
         val dialog = ReportErrorDialog.newInstance(
             args = ReportErrorDialogArgs(error)
         )
         dialog.show(fragmentManager, ReportErrorDialog.TAG)
     }
-
-    // TODO: fix crash with ResolveConflictDialog
-    // private fun getFragmentManager(): FragmentManager {
-    //     return when (val ctx = context) {
-    //         is ContextThemeWrapper -> (ctx.baseContext as AppCompatActivity).supportFragmentManager
-    //         else -> (context as AppCompatActivity).supportFragmentManager
-    //     }
-    // }
 }

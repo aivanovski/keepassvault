@@ -2,12 +2,12 @@ package com.ivanovsky.passnotes.domain.usecases
 
 import arrow.core.Either
 import arrow.core.raise.either
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.MergeFiles
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
@@ -17,7 +17,6 @@ import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
-import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
 import com.ivanovsky.passnotes.domain.DispatcherProvider
 import com.ivanovsky.passnotes.extensions.getFileDescriptor
 import com.ivanovsky.passnotes.extensions.isSameFile
@@ -116,12 +115,12 @@ class SyncUseCases(
 
     suspend fun resolveConflict(
         file: FileDescriptor,
-        resolutionStrategy: ConflictResolutionStrategy
+        requestedResolution: RequestedSyncResolution
     ): OperationResult<FileDescriptor> =
         withContext(dispatchers.IO) {
             fileSystemResolver
                 .resolveSyncProcessor(file.fsAuthority)
-                .process(file, SyncStrategy.LAST_REMOTE_MODIFICATION_WINS, resolutionStrategy)
+                .process(file, requestedResolution)
         }
 
     suspend fun isSyncNeeded(file: FileDescriptor): OperationResult<Boolean> =
@@ -139,11 +138,7 @@ class SyncUseCases(
     suspend fun processSync(file: FileDescriptor): OperationResult<FileDescriptor> =
         withContext(dispatchers.IO) {
             val syncProcessor = fileSystemResolver.resolveSyncProcessor(file.fsAuthority)
-            val processResult = syncProcessor.process(
-                file,
-                SyncStrategy.LAST_REMOTE_MODIFICATION_WINS,
-                null
-            )
+            val processResult = syncProcessor.process(file, RequestedSyncResolution.NOT_SPECIFIED)
 
             // Reload database if it was changed
             val db = dbRepo.getDatabase()

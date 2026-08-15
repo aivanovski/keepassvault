@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.fake.delay.ThreadThrottlerImpl
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.injection.GlobalInjector.get
 
 class DebugFileSystemResolver(
@@ -20,11 +21,13 @@ class DebugFileSystemResolver(
         override fun createProvider(fsAuthority: FSAuthority): FileSystemProvider {
             val fsResolver: FileSystemResolver = get()
             val observerBus: ObserverBus = get()
+            val resourceProvider: ResourceProvider = get()
             val throttler = ThreadThrottlerImpl()
 
             return FakeFileSystemProvider(
                 fsResolver = fsResolver,
                 observerBus = observerBus,
+                resourceProvider = resourceProvider,
                 throttler = throttler,
                 fsAuthority = fsAuthority
             )

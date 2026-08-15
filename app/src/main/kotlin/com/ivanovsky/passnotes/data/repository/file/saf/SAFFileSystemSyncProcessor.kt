@@ -1,15 +1,14 @@
 package com.ivanovsky.passnotes.data.repository.file.saf
 
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.MergeFiles
 import com.ivanovsky.passnotes.data.entity.OperationError.newInvalidSyncProcessorUsage
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
-import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 
 class SAFFileSystemSyncProcessor : FileSystemSyncProcessor {
@@ -38,8 +37,7 @@ class SAFFileSystemSyncProcessor : FileSystemSyncProcessor {
 
     override fun process(
         file: FileDescriptor,
-        syncStrategy: SyncStrategy,
-        resolutionStrategy: ConflictResolutionStrategy?
+        requestedResolution: RequestedSyncResolution
     ): OperationResult<FileDescriptor> =
         OperationResult.error(newInvalidSyncProcessorUsage(Stacktrace()))
 }

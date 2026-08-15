@@ -2,10 +2,10 @@ package com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict
 
 import arrow.core.Either
 import arrow.core.raise.either
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.MergeFiles
 import com.ivanovsky.passnotes.data.entity.OperationError
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
@@ -41,10 +41,10 @@ class ResolveConflictDialogInteractor(
 
     suspend fun resolveConflict(
         file: FileDescriptor,
-        resolutionStrategy: ConflictResolutionStrategy
+        requestedResolution: RequestedSyncResolution
     ): Either<OperationError, FileDescriptor> =
         withContext(dispatchers.IO) {
-            syncUseCases.resolveConflict(file, resolutionStrategy).toEither()
+            syncUseCases.resolveConflict(file, requestedResolution).toEither()
         }
 
     suspend fun getMergeFiles(

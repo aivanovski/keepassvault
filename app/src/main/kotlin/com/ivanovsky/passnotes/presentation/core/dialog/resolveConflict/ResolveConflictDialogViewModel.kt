@@ -7,10 +7,10 @@ import androidx.lifecycle.viewModelScope
 import arrow.core.raise.either
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE
 import com.ivanovsky.passnotes.data.entity.MergeFiles
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution.DOWNLOAD_REMOTE_FILE
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution.UPLOAD_LOCAL_FILE
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.domain.DateFormatProvider
@@ -106,18 +106,18 @@ class ResolveConflictDialogViewModel(
     }
 
     fun onLocalButtonClicked() {
-        onResolveConflictConfirmed(RESOLVE_WITH_LOCAL_FILE)
+        onResolveConflictConfirmed(UPLOAD_LOCAL_FILE)
     }
 
     fun onRemoteButtonClicked() {
-        onResolveConflictConfirmed(RESOLVE_WITH_REMOTE_FILE)
+        onResolveConflictConfirmed(DOWNLOAD_REMOTE_FILE)
     }
 
-    private fun onResolveConflictConfirmed(resolutionStrategy: ConflictResolutionStrategy) {
+    private fun onResolveConflictConfirmed(requestedResolution: RequestedSyncResolution) {
         screenState.value = ScreenState.loading()
 
         viewModelScope.launch {
-            interactor.resolveConflict(args.file, resolutionStrategy).fold(
+            interactor.resolveConflict(args.file, requestedResolution).fold(
                 ifLeft = { error -> setErrorState(error) },
                 ifRight = { dismissEvent.call(Unit) }
             )

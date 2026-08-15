@@ -16,6 +16,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.file.fake.delay.ThreadThrottler
 import com.ivanovsky.passnotes.data.repository.file.fake.entity.StorageDestinationType
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.util.FileUtils
 import java.io.ByteArrayInputStream
@@ -28,6 +29,7 @@ import timber.log.Timber
 class FakeFileSystemProvider(
     fsResolver: FileSystemResolver,
     observerBus: ObserverBus,
+    resourceProvider: ResourceProvider,
     throttler: ThreadThrottler,
     fsAuthority: FSAuthority
 ) : FileSystemProvider {
@@ -44,6 +46,7 @@ class FakeFileSystemProvider(
         fileSystemResolver = fsResolver,
         storage = storage,
         observerBus = observerBus,
+        resourceProvider = resourceProvider,
         throttler = throttler,
         fsAuthority = fsAuthority
     )

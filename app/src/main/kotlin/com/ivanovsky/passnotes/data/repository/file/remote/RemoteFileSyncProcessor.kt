@@ -3,13 +3,13 @@ package com.ivanovsky.passnotes.data.repository.file.remote
 import arrow.core.Either
 import arrow.core.raise.either
 import com.ivanovsky.passnotes.data.ObserverBus
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.MergeFiles
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.RemoteFile
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncResolution
@@ -19,8 +19,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.file.RemoteFileInputStream
-import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
-import com.ivanovsky.passnotes.domain.SyncStrategyResolver
+import com.ivanovsky.passnotes.domain.SyncResolutionResolver
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.toEither
@@ -41,7 +40,7 @@ class RemoteFileSyncProcessor(
     private val fsAuthority: FSAuthority
 ) : FileSystemSyncProcessor {
 
-    private val syncResolver = SyncStrategyResolver()
+    private val syncResolver = SyncResolutionResolver()
     private val progressStatuses = ConcurrentHashMap<String, SyncProgressStatus>()
     private val statuses = ConcurrentHashMap<String, SyncStatus>()
 
@@ -64,7 +63,7 @@ class RemoteFileSyncProcessor(
             return SyncStatus.FILE_NOT_FOUND
         }
 
-        val getFile = provider.getFile(cachedFile.remotePath, FSOptions.Companion.noCache())
+        val getFile = provider.getFile(cachedFile.remotePath, FSOptions.noCache())
         if (getFile.isFailed) {
             val errorType = getFile.error.type
 
@@ -81,30 +80,30 @@ class RemoteFileSyncProcessor(
             }
         }
 
-        val localModified = cachedFile.lastModificationTimestamp
-        val remoteModified = getFile.getObj().modified
+        val remoteFile = getFile.getOrThrow()
 
-        if (cachedFile.isLocallyModified) {
-            val resolution =
-                syncResolver.resolve(
-                    localModified,
-                    cachedFile.lastRemoteModificationTimestamp,
-                    remoteModified,
-                    SyncStrategy.LAST_REMOTE_MODIFICATION_WINS
-                )
+        return if (cachedFile.isLocallyModified) {
+            val resolution = syncResolver.resolve(
+                isLocalModified = cachedFile.isLocallyModified,
+                isRemoteModified = syncResolver.isRemoteModified(
+                    lastDownloadTimestamp = cachedFile.lastDownloadTimestamp,
+                    remoteModifiedTimestamp = remoteFile.modified
+                ),
+                requestedResolution = RequestedSyncResolution.NOT_SPECIFIED
+            )
 
-            return when (resolution) {
-                SyncResolution.LOCAL -> SyncStatus.LOCAL_CHANGES
-                SyncResolution.REMOTE -> SyncStatus.REMOTE_CHANGES
-                SyncResolution.EQUALS -> SyncStatus.NO_CHANGES
-                SyncResolution.ERROR -> SyncStatus.CONFLICT
+            when (resolution) {
+                SyncResolution.UPLOAD_LOCAL -> SyncStatus.LOCAL_CHANGES
+                SyncResolution.DOWNLOAD_REMOTE -> SyncStatus.REMOTE_CHANGES
+                SyncResolution.CONFLICT -> SyncStatus.CONFLICT
+                SyncResolution.NO_CHANGES -> SyncStatus.NO_CHANGES
             }
-        }
-
-        return if (remoteModified.isNewerThan(cachedFile.lastRemoteModificationTimestamp)) {
-            SyncStatus.REMOTE_CHANGES
         } else {
-            SyncStatus.NO_CHANGES
+            if (remoteFile.modified.isNewerThan(cachedFile.lastRemoteModificationTimestamp)) {
+                SyncStatus.REMOTE_CHANGES
+            } else {
+                SyncStatus.NO_CHANGES
+            }
         }
     }
 
@@ -128,7 +127,7 @@ class RemoteFileSyncProcessor(
 
             val remoteFile = provider.getFile(
                 outputFile.path,
-                FSOptions.Companion.NO_CACHE
+                FSOptions.NO_CACHE
             ).toEither().bind()
 
             val baseProxyFile = FileUtils.createTemporalFile(fileSystemResolver, baseFile).bind()
@@ -172,13 +171,12 @@ class RemoteFileSyncProcessor(
             )
 
         val getFile =
-            provider.getFile(cachedFile.remotePath, FSOptions.Companion.noCache())
+            provider.getFile(cachedFile.remotePath, FSOptions.noCache())
         if (getFile.isFailed) {
             return getFile.takeError()
         }
 
-        val localModified = cachedFile.lastModificationTimestamp
-        val remoteModified = getFile.getObj().modified
+        val remoteFile = getFile.getOrThrow()
 
         if (!cachedFile.isLocallyModified) {
             return OperationResult.error(
@@ -190,12 +188,14 @@ class RemoteFileSyncProcessor(
         }
 
         val resolution = syncResolver.resolve(
-            localModified,
-            cachedFile.lastRemoteModificationTimestamp,
-            remoteModified,
-            SyncStrategy.LAST_REMOTE_MODIFICATION_WINS
+            isLocalModified = cachedFile.isLocallyModified,
+            isRemoteModified = syncResolver.isRemoteModified(
+                lastDownloadTimestamp = cachedFile.lastDownloadTimestamp,
+                remoteModifiedTimestamp = remoteFile.modified
+            ),
+            requestedResolution = RequestedSyncResolution.NOT_SPECIFIED
         )
-        if (resolution != SyncResolution.ERROR) {
+        if (resolution != SyncResolution.CONFLICT) {
             return OperationResult.error(
                 OperationError.newGenericError(
                     OperationError.MESSAGE_INCORRECT_SYNC_STATUS,
@@ -209,7 +209,7 @@ class RemoteFileSyncProcessor(
 
         val info = SyncConflictInfo(
             cachedFile.toFileDescriptor(),
-            getFile.getObj(),
+            getFile.getOrThrow(),
             isThreeWayMergeAvailable
         )
 
@@ -218,14 +218,12 @@ class RemoteFileSyncProcessor(
 
     override fun process(
         file: FileDescriptor,
-        syncStrategy: SyncStrategy,
-        resolutionStrategy: ConflictResolutionStrategy?
+        requestedResolution: RequestedSyncResolution
     ): OperationResult<FileDescriptor> {
         Timber.d(
-            "process: file=%s, strategy=%s, conflictStrategy=%s",
+            "process: file=%s, requestedResolution=%s",
             file,
-            syncStrategy,
-            resolutionStrategy
+            requestedResolution
         )
 
         updateProgressStatusForFile(file.uid, SyncProgressStatus.SYNCING)
@@ -247,7 +245,7 @@ class RemoteFileSyncProcessor(
         val localFile = cachedFile.toFileDescriptor()
 
         val getFile =
-            provider.getFile(localFile.path, FSOptions.Companion.noCache())
+            provider.getFile(localFile.path, FSOptions.noCache())
         if (getFile.isFailed) {
             Timber.d("Unable to process file, failed to get file info")
 
@@ -255,18 +253,19 @@ class RemoteFileSyncProcessor(
             return getFile.takeError()
         }
 
-        val remoteDescriptor = getFile.getObj()
+        val remoteDescriptor = getFile.getOrThrow()
 
         val localModified = localFile.modified
         val remoteModified = remoteDescriptor.modified
 
-        val resolution =
-            syncResolver.resolve(
-                localModified,
-                cachedFile.lastRemoteModificationTimestamp,
-                remoteModified,
-                syncStrategy
-            )
+        val resolution = syncResolver.resolve(
+            isLocalModified = cachedFile.isLocallyModified,
+            isRemoteModified = syncResolver.isRemoteModified(
+                lastDownloadTimestamp = cachedFile.lastDownloadTimestamp,
+                remoteModifiedTimestamp = remoteDescriptor.modified
+            ),
+            requestedResolution = requestedResolution
+        )
         val status = convertResolutionToStatus(resolution)
         updateSyncStatusForFile(file.uid, status)
 
@@ -279,28 +278,16 @@ class RemoteFileSyncProcessor(
         )
 
         return when (resolution) {
-            SyncResolution.LOCAL -> uploadLocalFile(cachedFile, localFile)
-
-            SyncResolution.REMOTE,
-            SyncResolution.EQUALS -> downloadFile(cachedFile, localFile, remoteDescriptor)
-
-            SyncResolution.ERROR -> when (resolutionStrategy) {
-                ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE -> {
-                    uploadLocalFile(cachedFile, localFile)
-                }
-
-                ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE -> {
-                    downloadFile(cachedFile, localFile, remoteDescriptor)
-                }
-
-                else -> {
-                    OperationResult.error(
-                        OperationError.newDbVersionConflictError(
-                            OperationError.MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE,
-                            Stacktrace()
-                        )
+            SyncResolution.UPLOAD_LOCAL -> uploadLocalFile(cachedFile, localFile)
+            SyncResolution.DOWNLOAD_REMOTE -> downloadFile(cachedFile, localFile, remoteDescriptor)
+            SyncResolution.NO_CHANGES -> OperationResult.success(remoteDescriptor)
+            SyncResolution.CONFLICT -> {
+                OperationResult.error(
+                    OperationError.newDbVersionConflictError(
+                        OperationError.MESSAGE_LOCAL_VERSION_CONFLICTS_WITH_REMOTE,
+                        Stacktrace()
                     )
-                }
+                )
             }
         }
     }
@@ -369,7 +356,7 @@ class RemoteFileSyncProcessor(
             return inResult.takeError()
         }
 
-        if (inResult.getObj() !is RemoteFileInputStream) {
+        if (inResult.getOrThrow() !is RemoteFileInputStream) {
             Timber.d("Failed to open file")
             return OperationResult.error(
                 OperationError.newGenericIOError(
@@ -379,7 +366,7 @@ class RemoteFileSyncProcessor(
             )
         }
 
-        val input = inResult.getObj() as RemoteFileInputStream
+        val input = inResult.getOrThrow() as RemoteFileInputStream
         try {
             input.close()
         } catch (e: IOException) {
@@ -410,7 +397,7 @@ class RemoteFileSyncProcessor(
             return metadataResult.takeError()
         }
 
-        val metadata = metadataResult.getObj()
+        val metadata = metadataResult.getOrThrow()
 
         updatedCachedFile.uid = metadata.uid
         // TODO: update localBackupPath
@@ -456,10 +443,10 @@ class RemoteFileSyncProcessor(
 
     private fun convertResolutionToStatus(resolution: SyncResolution): SyncStatus {
         return when (resolution) {
-            SyncResolution.LOCAL -> SyncStatus.LOCAL_CHANGES
-            SyncResolution.REMOTE -> SyncStatus.REMOTE_CHANGES
-            SyncResolution.EQUALS -> SyncStatus.NO_CHANGES
-            SyncResolution.ERROR -> SyncStatus.CONFLICT
+            SyncResolution.UPLOAD_LOCAL -> SyncStatus.LOCAL_CHANGES
+            SyncResolution.DOWNLOAD_REMOTE -> SyncStatus.REMOTE_CHANGES
+            SyncResolution.CONFLICT -> SyncStatus.CONFLICT
+            SyncResolution.NO_CHANGES -> SyncStatus.NO_CHANGES
         }
     }
 

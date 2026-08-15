@@ -3,18 +3,17 @@ package com.ivanovsky.passnotes.presentation.diffViewer
 import arrow.core.Either
 import arrow.core.raise.either
 import arrow.core.right
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseElement
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UNSUPPORTED_DATABASE_TYPE
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
-import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
 import com.ivanovsky.passnotes.data.repository.keepass.KeepassImplementation
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.data.repository.settings.Settings
@@ -150,9 +149,8 @@ class DiffViewerInteractor(
                 ).bind()
 
                 fsProvider.syncProcessor.process(
-                    output.copy(),
-                    SyncStrategy.LAST_MODIFICATION_WINS,
-                    ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE
+                    file = output.copy(),
+                    requestedResolution = RequestedSyncResolution.UPLOAD_LOCAL_FILE
                 ).toEither().bind()
 
                 dbRepository.reload().toEither().bind()

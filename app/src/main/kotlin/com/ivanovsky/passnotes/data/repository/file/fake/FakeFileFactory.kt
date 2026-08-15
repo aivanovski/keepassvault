@@ -149,6 +149,14 @@ class FakeFileFactory(
                 remoteContentFactory = { createThreeWayMergeRemoteDatabase() }
             ),
 
+            newEntry(
+                localFile = newFile(Path.UPLOAD_FAILURE, Time.LOCAL),
+                remoteFile = newFile(Path.UPLOAD_FAILURE, Time.REMOTE),
+                syncStatus = SyncStatus.CONFLICT,
+                localContentFactory = LOCAL_CONTENT_FACTORY,
+                remoteContentFactory = REMOTE_CONTENT_FACTORY
+            ),
+
             // keys
             newEntry(
                 localFile = newFile(Path.KEY, Time.NO_CHANGES),
@@ -278,6 +286,9 @@ class FakeFileFactory(
 
     object FileUid {
         val THREE_WAY_MERGE = Path.THREE_WAY_MERGE
+        val UPLOAD_FAILURE = Path.UPLOAD_FAILURE
+
+        val CONFLICT_IDS = setOf(UPLOAD_FAILURE, THREE_WAY_MERGE)
     }
 
     object Path {
@@ -301,6 +312,7 @@ class FakeFileFactory(
 
         // conflicts
         val THREE_WAY_MERGE = "/conflicts/test-3-way-merge.kdbx"
+        val UPLOAD_FAILURE = "/conflicts/test-upload-failure.kdbx"
 
         // keys
         val KEY = "/keys/key"

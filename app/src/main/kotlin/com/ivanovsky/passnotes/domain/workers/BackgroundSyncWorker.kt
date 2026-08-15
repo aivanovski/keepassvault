@@ -1,4 +1,4 @@
-package com.ivanovsky.passnotes.domain.worker
+package com.ivanovsky.passnotes.domain.workers
 
 import android.content.Context
 import android.net.NetworkCapabilities
@@ -12,15 +12,14 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.usecases.SyncUseCases
-import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.injection.GlobalInjector.inject
 import java.util.concurrent.TimeUnit
 import timber.log.Timber
 
 class BackgroundSyncWorker(
-    appContext: Context,
+    content: Context,
     workerParams: WorkerParameters
-) : CoroutineWorker(appContext, workerParams) {
+) : CoroutineWorker(content, workerParams) {
 
     private val syncUseCases: SyncUseCases by inject()
 
@@ -31,12 +30,10 @@ class BackgroundSyncWorker(
             ifLeft = { error ->
                 Timber.e("Sync failed: %s".format(error))
                 Timber.e(error.throwable)
-
                 Result.retry()
             },
             ifRight = {
                 Timber.d("Sync finished successfully")
-
                 Result.success()
             }
         )
@@ -45,11 +42,15 @@ class BackgroundSyncWorker(
     companion object {
         private const val BACKGROUND_SYNC_WORKER_NAME = "background-sync-worker"
 
-        fun schedule(settings: Settings) {
-            val context: Context = GlobalInjector.get()
+        fun schedule(settings: Settings, context: Context) {
             val interval = settings.backgroundSyncIntervalInMs
 
-            Timber.d("Schedule background worker: interval=%s".format(interval))
+            Timber.d(
+                "Schedule background worker[%s]: interval=%s".format(
+                    BACKGROUND_SYNC_WORKER_NAME,
+                    interval
+                )
+            )
 
             if (interval == -1) {
                 WorkManager.getInstance(context).cancelUniqueWork(BACKGROUND_SYNC_WORKER_NAME)

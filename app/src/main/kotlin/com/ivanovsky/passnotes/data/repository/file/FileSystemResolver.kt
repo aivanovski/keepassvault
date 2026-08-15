@@ -82,7 +82,7 @@ open class FileSystemResolver(
         override fun createProvider(fsAuthority: FSAuthority): FileSystemProvider {
             return TemporaryFileSystemProvider(
                 context = get(),
-                fileDao = get(),
+                fileRepository = get(),
                 fsAuthority = fsAuthority
             )
         }

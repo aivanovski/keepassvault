@@ -4,7 +4,8 @@ import android.app.Application
 import com.ivanovsky.passnotes.data.repository.settings.SettingsImpl
 import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor
 import com.ivanovsky.passnotes.domain.loggingAndReporting.LoggerInteractor
-import com.ivanovsky.passnotes.domain.worker.BackgroundSyncWorker
+import com.ivanovsky.passnotes.domain.workers.BackgroundSyncWorker
+import com.ivanovsky.passnotes.domain.workers.CleanUpWorker
 import com.ivanovsky.passnotes.injection.AppStartDependencies
 import com.ivanovsky.passnotes.injection.DIModuleBuilder
 import com.ivanovsky.passnotes.injection.DefaultModuleBuilder
@@ -57,6 +58,7 @@ open class App : Application() {
             modules(moduleBuilder.buildModules())
         }
 
-        BackgroundSyncWorker.schedule(settings)
+        BackgroundSyncWorker.schedule(settings, this)
+        CleanUpWorker.schedule(this)
     }
 }

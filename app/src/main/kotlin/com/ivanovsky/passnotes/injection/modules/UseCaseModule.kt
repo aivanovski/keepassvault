@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.injection.modules
 
 import com.ivanovsky.passnotes.domain.usecases.AddTemplatesUseCase
 import com.ivanovsky.passnotes.domain.usecases.CheckNoteAutofillDataUseCase
+import com.ivanovsky.passnotes.domain.usecases.CleanUpFilesUseCase
 import com.ivanovsky.passnotes.domain.usecases.DecodePasswordWithBiometricUseCase
 import com.ivanovsky.passnotes.domain.usecases.EncodePasswordWithBiometricUseCase
 import com.ivanovsky.passnotes.domain.usecases.ExportDatabaseUseCase
@@ -68,5 +69,6 @@ object UseCaseModule {
             single { ExportDatabaseUseCase(get(), get(), get(), get()) }
             single { SetupRecycleBinUseCase(get(), get()) }
             single { ApplyDiffUseCase(get(), get()) }
+            single { CleanUpFilesUseCase(get()) }
         }
 }

@@ -11,7 +11,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newFileAccessError
 import com.ivanovsky.passnotes.data.entity.OperationError.newInvalidFileSystemProviderUsage
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.TemporaryFile
-import com.ivanovsky.passnotes.data.repository.db.dao.TemporaryFileDao
+import com.ivanovsky.passnotes.data.repository.TemporaryFileRepository
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
@@ -25,7 +25,7 @@ import java.io.OutputStream
 
 class TemporaryFileSystemProvider(
     context: Context,
-    private val fileDao: TemporaryFileDao,
+    private val fileRepository: TemporaryFileRepository,
     private val fsAuthority: FSAuthority
 ) : FileSystemProvider {
 
@@ -85,9 +85,9 @@ class TemporaryFileSystemProvider(
             val output =
                 provider.openFileForWrite(file, onConflictStrategy, options).toEither().bind()
 
-            fileDao.insert(
+            fileRepository.insert(
                 TemporaryFile(
-                    path = File(file.path).path,
+                    path = file.path,
                     created = System.currentTimeMillis(),
                     modified = file.modified
                 )

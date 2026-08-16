@@ -113,7 +113,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         return client.listFiles(dir);
     }
 
-    private OperationError createOperationErrorFromException(RemoteFSException exception) {
+    private OperationError createOperationErrorFromException(Exception exception) {
         OperationError result;
 
         if (exception instanceof RemoteFSAuthException) {
@@ -123,6 +123,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
         } else if (exception instanceof RemoteFSFileNotFoundException) {
             result = newGenericIOError(exception);
         } else if (exception instanceof RemoteFSApiException) {
+            result = newGenericIOError(exception);
+        } else if (exception instanceof IOException) {
             result = newGenericIOError(exception);
         } else {
             throw new IllegalArgumentException(
@@ -678,7 +680,7 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
             Timber.d(e);
             onOfflineWriteFinished(cachedFile, unit.getProcessingUid());
             return OperationResult.error(createOperationErrorFromException(e));
-        } catch (RemoteFSException e) {
+        } catch (RemoteFSException | IOException e) {
             Timber.d(e);
             onFileUploadFailed(cachedFile, unit.getProcessingUid());
             return OperationResult.error(createOperationErrorFromException(e));
@@ -757,15 +759,20 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
     }
 
     public void onFileUploadFinished(
-            RemoteFile file, RemoteFileMetadata metadata, UUID processingUnitUid) {
+            RemoteFile file, RemoteFileMetadata metadata, UUID processingUnitUid)
+            throws IOException {
         Timber.d("onFileUploadFinished: unitUid=%s, file=%s", processingUnitUid, file);
 
         Long modifiedTimestamp =
                 anyLastTimestamp(metadata.getServerModified(), metadata.getClientModified());
 
+        String localBackupPath = file.getLocalPath() + "_backup";
+        FileUtils.copyFileOrThrow(new File(file.getLocalBackupPath()), new File(localBackupPath));
+
         file.setUploadFailed(false);
         file.setLocallyModified(false);
         file.setUploaded(true);
+        file.setLocalBackupPath(localBackupPath);
         file.setLastModificationTimestamp(modifiedTimestamp);
         file.setLastRemoteModificationTimestamp(metadata.getServerModified().getTime());
         file.setLastDownloadTimestamp(System.currentTimeMillis());

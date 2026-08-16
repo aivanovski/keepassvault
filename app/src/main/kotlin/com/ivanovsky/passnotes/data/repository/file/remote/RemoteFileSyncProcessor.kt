@@ -306,8 +306,7 @@ class RemoteFileSyncProcessor(
     ): OperationResult<FileDescriptor> {
         updateProgressStatusForFile(cachedFile.uid, SyncProgressStatus.UPLOADING)
 
-        val uploadResult =
-            provider.uploadFromCache(localDescriptor)
+        val uploadResult = provider.uploadFromCache(localDescriptor)
         if (uploadResult.isFailed) {
             Timber.d("Failed to upload file, error=%s", uploadResult.error)
             return uploadResult.takeError()

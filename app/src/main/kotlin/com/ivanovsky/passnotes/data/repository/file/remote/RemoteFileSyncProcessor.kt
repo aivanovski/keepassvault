@@ -25,7 +25,6 @@ import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.toEither
 import com.ivanovsky.passnotes.extensions.toFileDescriptor
-import com.ivanovsky.passnotes.util.FileUtils
 import com.ivanovsky.passnotes.util.FileUtils.copyFile
 import com.ivanovsky.passnotes.util.FileUtils.createTemporalFile
 import com.ivanovsky.passnotes.util.isNewerThan

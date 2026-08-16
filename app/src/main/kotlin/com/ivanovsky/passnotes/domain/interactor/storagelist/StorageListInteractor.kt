@@ -60,7 +60,7 @@ class StorageListInteractor(
     private fun createPrivateStorageOption(): StorageOption? {
         val getRootResult = fileSystemResolver
             .resolveProvider(FSAuthority.INTERNAL_FS_AUTHORITY)
-            .rootFile
+            .getRootFile()
 
         if (getRootResult.isFailed) {
             return null
@@ -75,7 +75,7 @@ class StorageListInteractor(
     private fun createExternalStorageOption(): StorageOption? {
         val getRootResult = fileSystemResolver
             .resolveProvider(FSAuthority.EXTERNAL_FS_AUTHORITY)
-            .rootFile
+            .getRootFile()
 
         if (getRootResult.isFailed) {
             return null
@@ -157,7 +157,7 @@ class StorageListInteractor(
         withContext(dispatchers.IO) {
             fileSystemResolver
                 .resolveProvider(fsAuthority)
-                .rootFile
+                .getRootFile()
         }
 
     suspend fun getFileByPath(

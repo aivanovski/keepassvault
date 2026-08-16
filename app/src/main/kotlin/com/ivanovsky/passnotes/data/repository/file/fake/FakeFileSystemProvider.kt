@@ -34,7 +34,7 @@ class FakeFileSystemProvider(
     fsAuthority: FSAuthority
 ) : FileSystemProvider {
 
-    private val authenticator = FakeFileSystemAuthenticator(fsAuthority)
+    override val authenticator: FileSystemAuthenticator = FakeFileSystemAuthenticator(fsAuthority)
 
     private val storage = FakeFileStorage(
         authenticator = authenticator,
@@ -42,7 +42,7 @@ class FakeFileSystemProvider(
         initialEntries = FakeFileFactory(fsAuthority).createDefaultFiles()
     )
 
-    private val syncProcessor = FakeFileSystemSyncProcessor(
+    override val syncProcessor: FileSystemSyncProcessor = FakeFileSystemSyncProcessor(
         fileSystemResolver = fsResolver,
         storage = storage,
         observerBus = observerBus,
@@ -50,14 +50,6 @@ class FakeFileSystemProvider(
         throttler = throttler,
         fsAuthority = fsAuthority
     )
-
-    override fun getAuthenticator(): FileSystemAuthenticator {
-        return authenticator
-    }
-
-    override fun getSyncProcessor(): FileSystemSyncProcessor {
-        return syncProcessor
-    }
 
     override fun listFiles(dir: FileDescriptor): OperationResult<List<FileDescriptor>> {
         if (!isAuthenticated()) {

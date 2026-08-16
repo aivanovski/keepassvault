@@ -32,8 +32,8 @@ class TemporaryFileSystemProvider(
     private val root = File(context.filesDir, DIRECTORY_NAME).apply { mkdirs() }
     private val provider = RegularFileSystemProvider(context, fsAuthority)
 
-    override fun getAuthenticator() = provider.authenticator
-    override fun getSyncProcessor() = provider.syncProcessor
+    override val authenticator = provider.authenticator
+    override val syncProcessor = provider.syncProcessor
 
     override fun listFiles(
         dir: FileDescriptor

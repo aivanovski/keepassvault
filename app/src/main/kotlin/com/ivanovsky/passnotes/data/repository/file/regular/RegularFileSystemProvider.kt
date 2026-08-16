@@ -42,17 +42,9 @@ class RegularFileSystemProvider(
 ) : FileSystemProvider {
 
     private val lock = ReentrantLock()
-    private val syncProcessor = RegularFileSystemSyncProcessor(this)
+    override val syncProcessor: FileSystemSyncProcessor = RegularFileSystemSyncProcessor(this)
     private val permissionHelper = PermissionHelper(context)
-    private val authenticator = createAuthenticator(fsAuthority.type)
-
-    override fun getAuthenticator(): FileSystemAuthenticator {
-        return authenticator
-    }
-
-    override fun getSyncProcessor(): FileSystemSyncProcessor {
-        return syncProcessor
-    }
+    override val authenticator: FileSystemAuthenticator = createAuthenticator(fsAuthority.type)
 
     override fun listFiles(dir: FileDescriptor): OperationResult<List<FileDescriptor>> {
         if (!dir.isDirectory) {

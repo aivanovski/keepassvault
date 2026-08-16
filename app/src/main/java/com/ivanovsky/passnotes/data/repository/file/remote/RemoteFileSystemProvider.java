@@ -258,7 +258,8 @@ public class RemoteFileSystemProvider implements FileSystemProvider {
 
                     if (options.isCacheEnabled()) {
                         String localBackupPath = destinationPath + "_backup";
-                        FileUtils.copyFileOrThrow(new File(destinationPath), new File(localBackupPath));
+                        FileUtils.copyFileOrThrow(
+                                new File(destinationPath), new File(localBackupPath));
 
                         cachedFile = new RemoteFile();
 

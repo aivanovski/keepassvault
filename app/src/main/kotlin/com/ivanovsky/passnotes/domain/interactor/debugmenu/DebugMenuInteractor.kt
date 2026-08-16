@@ -362,7 +362,7 @@ class DebugMenuInteractor(
         withContext(dispatchers.IO) {
             fileSystemResolver
                 .resolveProvider(fsAuthority)
-                .rootFile
+                .getRootFile()
         }
 
     suspend fun getFakeFileSystemFiles(

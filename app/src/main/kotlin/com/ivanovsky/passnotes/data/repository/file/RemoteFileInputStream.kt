@@ -8,32 +8,13 @@ class RemoteFileInputStream(
     private val source: InputStream
 ) : InputStream() {
 
-    override fun read(): Int {
-        return source.read()
-    }
-
-    override fun skip(n: Long): Long {
-        return source.skip(n)
-    }
-
-    override fun mark(readlimit: Int) {
-        source.mark(readlimit)
-    }
-
-    override fun markSupported(): Boolean {
-        return source.markSupported()
-    }
-
-    override fun reset() {
-        source.reset()
-    }
-
-    override fun available(): Int {
-        return source.available()
-    }
+    override fun read(): Int = source.read()
+    override fun skip(n: Long): Long = source.skip(n)
+    override fun mark(readlimit: Int) = source.mark(readlimit)
+    override fun markSupported(): Boolean = source.markSupported()
+    override fun reset() = source.reset()
+    override fun available(): Int = source.available()
 
     @Throws(IOException::class)
-    override fun close() {
-        source.close()
-    }
+    override fun close() = source.close()
 }

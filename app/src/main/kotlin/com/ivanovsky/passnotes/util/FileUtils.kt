@@ -17,8 +17,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
 import java.util.UUID
 
 object FileUtils {
@@ -123,7 +121,7 @@ object FileUtils {
     ): Either<OperationError, FileDescriptor> =
         either {
             val fsProvider = fileSystemResolver.resolveProvider(FSAuthority.TEMPORAL_FS_AUTHORITY)
-            val rootFile = fsProvider.rootFile.toEither().bind()
+            val rootFile = fsProvider.getRootFile().toEither().bind()
 
             val newPath = rootFile.path + "/" + UUID.randomUUID() + "_" + source.name
 

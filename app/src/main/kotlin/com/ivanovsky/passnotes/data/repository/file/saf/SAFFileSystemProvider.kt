@@ -27,12 +27,8 @@ class SAFFileSystemProvider(
     private val safHelper: SAFHelper
 ) : FileSystemProvider {
 
-    private val authenticator = SAFFileSystemAuthenticator()
-    private val syncProcessor = SAFFileSystemSyncProcessor()
-
-    override fun getAuthenticator() = authenticator
-
-    override fun getSyncProcessor() = syncProcessor
+    override val authenticator = SAFFileSystemAuthenticator()
+    override val syncProcessor = SAFFileSystemSyncProcessor()
 
     override fun listFiles(dir: FileDescriptor): OperationResult<List<FileDescriptor>> {
         return if (dir.isRoot) {

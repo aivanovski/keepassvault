@@ -51,7 +51,7 @@ class ServerLoginInteractor(
             val fileSystemProvider = fileSystemResolver.resolveProvider(fsAuthority)
             fileSystemProvider.authenticator.setCredentials(credentials)
 
-            val result = fileSystemProvider.rootFile
+            val result = fileSystemProvider.getRootFile()
             if (result.isFailed) {
                 fileSystemProvider.authenticator.setCredentials(null)
                 return@withContext result.mapError()

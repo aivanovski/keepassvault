@@ -6,6 +6,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.UsedFile
+import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.db.dao.GitRootDao
 import com.ivanovsky.passnotes.domain.DispatcherProvider
@@ -16,6 +17,7 @@ import timber.log.Timber
 
 class RemoveUsedFileUseCase(
     private val fileRepository: UsedFileRepository,
+    private val remoteFileRepository: RemoteFileRepository,
     private val gitRootDao: GitRootDao,
     private val dispatchers: DispatcherProvider
 ) {
@@ -44,6 +46,8 @@ class RemoveUsedFileUseCase(
                 fileRepository.remove(usedFile.id)
             }
 
+            removeRemoteFileIfNeed(uid = uid, fsAuthority = fsAuthority)
+
             OperationResult.success(true)
         }
 
@@ -69,6 +73,20 @@ class RemoveUsedFileUseCase(
             if (keyFile.exists()) {
                 Timber.d("Remove ssh key file: %s", keyFilePath)
                 keyFile.delete()
+            }
+        }
+    }
+
+    private fun removeRemoteFileIfNeed(uid: String, fsAuthority: FSAuthority) {
+        val remoteFile = remoteFileRepository.findByUid(uid, fsAuthority)
+        if (remoteFile?.id != null) {
+            Timber.d("Remove remote file: id=%s", remoteFile.id)
+            remoteFileRepository.remove(remoteFile.id)
+
+            val localFile = File(remoteFile.localPath)
+            if (localFile.exists()) {
+                Timber.d("Remove cached remote file: path=%s", localFile.path)
+                localFile.delete()
             }
         }
     }

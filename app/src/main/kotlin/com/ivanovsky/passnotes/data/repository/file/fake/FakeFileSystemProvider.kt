@@ -11,10 +11,12 @@ import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.repository.file.FSOptions
 import com.ivanovsky.passnotes.data.repository.file.FileSystemAuthenticator
 import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
+import com.ivanovsky.passnotes.data.repository.file.FileSystemResolver
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
 import com.ivanovsky.passnotes.data.repository.file.OnConflictStrategy
 import com.ivanovsky.passnotes.data.repository.file.fake.delay.ThreadThrottler
 import com.ivanovsky.passnotes.data.repository.file.fake.entity.StorageDestinationType
+import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.util.FileUtils
 import java.io.ByteArrayInputStream
@@ -25,12 +27,14 @@ import java.io.OutputStream
 import timber.log.Timber
 
 class FakeFileSystemProvider(
-    throttler: ThreadThrottler,
+    fsResolver: FileSystemResolver,
     observerBus: ObserverBus,
+    resourceProvider: ResourceProvider,
+    throttler: ThreadThrottler,
     fsAuthority: FSAuthority
 ) : FileSystemProvider {
 
-    private val authenticator = FakeFileSystemAuthenticator(fsAuthority)
+    override val authenticator: FileSystemAuthenticator = FakeFileSystemAuthenticator(fsAuthority)
 
     private val storage = FakeFileStorage(
         authenticator = authenticator,
@@ -38,20 +42,14 @@ class FakeFileSystemProvider(
         initialEntries = FakeFileFactory(fsAuthority).createDefaultFiles()
     )
 
-    private val syncProcessor = FakeFileSystemSyncProcessor(
+    override val syncProcessor: FileSystemSyncProcessor = FakeFileSystemSyncProcessor(
+        fileSystemResolver = fsResolver,
         storage = storage,
         observerBus = observerBus,
+        resourceProvider = resourceProvider,
         throttler = throttler,
         fsAuthority = fsAuthority
     )
-
-    override fun getAuthenticator(): FileSystemAuthenticator {
-        return authenticator
-    }
-
-    override fun getSyncProcessor(): FileSystemSyncProcessor {
-        return syncProcessor
-    }
 
     override fun listFiles(dir: FileDescriptor): OperationResult<List<FileDescriptor>> {
         if (!isAuthenticated()) {
@@ -102,7 +100,7 @@ class FakeFileSystemProvider(
             return OperationResult.error(newAuthError())
         }
 
-        val content = storage.get(file.uid, options)
+        val content = storage.getContentOrNull(file.uid, options)
             ?: return OperationResult.error(newFileNotFoundError(file.uid))
 
         return try {
@@ -134,7 +132,7 @@ class FakeFileSystemProvider(
 
         val stream = FakeFileOutputStream(
             onFinished = { bytes ->
-                storage.put(file.uid, StorageDestinationType.LOCAL, bytes)
+                storage.putContent(file.uid, StorageDestinationType.LOCAL, bytes)
             }
         )
 

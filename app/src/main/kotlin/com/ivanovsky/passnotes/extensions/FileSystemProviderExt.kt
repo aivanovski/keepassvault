@@ -6,7 +6,7 @@ import com.ivanovsky.passnotes.data.repository.file.FileSystemProvider
 import java.util.LinkedList
 
 fun FileSystemProvider.listAllFiles(): OperationResult<List<FileDescriptor>> {
-    val getRootResult = rootFile
+    val getRootResult = getRootFile()
     if (getRootResult.isFailed) {
         return getRootResult.mapError()
     }

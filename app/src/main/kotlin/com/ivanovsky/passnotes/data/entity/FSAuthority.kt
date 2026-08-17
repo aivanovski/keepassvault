@@ -8,12 +8,19 @@ data class FSAuthority(
     val credentials: FSCredentials?,
     val type: FSType,
     val isBrowsable: Boolean
+    // val isProxyFile: Boolean
 ) : Parcelable {
 
     // TODO: (refactor) move to extension function
     val isRequireCredentials: Boolean = (credentials == null)
 
     companion object {
+        val TEMPORAL_FS_AUTHORITY = FSAuthority(
+            credentials = null,
+            type = FSType.TEMPORAL_STORAGE,
+            isBrowsable = true
+        )
+
         val INTERNAL_FS_AUTHORITY = FSAuthority(
             credentials = null,
             type = FSType.INTERNAL_STORAGE,

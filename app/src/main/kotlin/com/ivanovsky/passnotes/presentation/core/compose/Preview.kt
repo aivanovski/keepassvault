@@ -10,8 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
+import com.ivanovsky.passnotes.presentation.core.compose.cells.CellEventProvider
+import com.ivanovsky.passnotes.presentation.core.compose.cells.CellEventProviderImpl
 import com.ivanovsky.passnotes.presentation.core.event.Event
 import com.ivanovsky.passnotes.presentation.core.event.EventProvider
 
@@ -55,6 +58,11 @@ fun ThemedPreview(
     }
 }
 
+class ComposeThemeProvider : PreviewParameterProvider<ComposeTheme> {
+    override val values: Sequence<ComposeTheme>
+        get() = sequenceOf(LightTheme, DarkTheme)
+}
+
 @Composable
 fun ElementSpace() {
     Spacer(modifier = Modifier.height(height = ElementMargin))
@@ -87,6 +95,9 @@ fun newEventProvider(): EventProvider {
         }
     }
 }
+
+fun newCellEventProvider(): CellEventProvider =
+    CellEventProviderImpl()
 
 @Composable
 fun newResourceProvider(): ResourceProvider {

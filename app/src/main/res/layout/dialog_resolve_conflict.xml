@@ -12,6 +12,7 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/rootLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/kpDialogBackgroundColor"
@@ -23,66 +24,82 @@
             android:id="@+id/placeholder"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/message"
-            style="@style/Material.PrimaryText"
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/element_margin"
-            android:layout_marginVertical="@dimen/element_margin"
-            android:text="@{viewModel.message}"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/remoteButton"
-            app:layout_constraintTop_toTopOf="parent"
-            app:screenState="@{viewModel.screenState}"
-            app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}"
-            tools:text="@string/resolve_conflict_dialog_message" />
-
-        <Button
-            android:id="@+id/remoteButton"
-            style="@style/Material.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/element_margin"
-            android:layout_marginBottom="@dimen/quarter_margin"
-            android:onClick="@{() -> viewModel.onRemoteButtonClicked()}"
-            android:text="@string/remote_database"
-            app:layout_constraintBottom_toTopOf="@id/localButton"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:screenState="@{viewModel.screenState}"
-            app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}" />
-
-        <Button
-            android:id="@+id/localButton"
-            style="@style/Material.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/element_margin"
-            android:layout_marginBottom="@dimen/quarter_margin"
-            android:onClick="@{() -> viewModel.onLocalButtonClicked()}"
-            android:text="@string/local_database"
-            app:layout_constraintBottom_toTopOf="@id/cancelButton"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:screenState="@{viewModel.screenState}"
-            app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}" />
-
-        <Button
-            android:id="@+id/cancelButton"
-            style="@style/Material.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/element_margin"
-            android:layout_marginBottom="@dimen/element_margin"
-            android:onClick="@{() -> viewModel.onCancelButtonClicked()}"
-            android:text="@string/cancel"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:screenState="@{viewModel.screenState}"
-            app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}" />
+            app:screenVisibilityHandler="@{viewModel.screenVisibilityHandler}">
+
+            <TextView
+                android:id="@+id/message"
+                style="@style/Material.PrimaryText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/element_margin"
+                android:layout_marginVertical="@dimen/element_margin"
+                android:text="@{viewModel.message}"
+                app:layout_constraintBottom_toTopOf="@id/mergeButton"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="@string/resolve_conflict_dialog_message" />
+
+            <Button
+                android:id="@+id/mergeButton"
+                style="@style/Material.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/element_margin"
+                android:layout_marginBottom="@dimen/quarter_margin"
+                android:onClick="@{() -> viewModel.onMergeButtonClicked()}"
+                android:text="@string/merge_conflicts"
+                app:visible="@{viewModel.isMergeButtonVisible}"
+                app:layout_constraintBottom_toTopOf="@id/remoteButton"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <Button
+                android:id="@+id/remoteButton"
+                style="@style/Material.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/element_margin"
+                android:layout_marginBottom="@dimen/quarter_margin"
+                android:onClick="@{() -> viewModel.onRemoteButtonClicked()}"
+                android:text="@string/remote_database"
+                app:layout_constraintBottom_toTopOf="@id/localButton"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <Button
+                android:id="@+id/localButton"
+                style="@style/Material.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/element_margin"
+                android:layout_marginBottom="@dimen/quarter_margin"
+                android:onClick="@{() -> viewModel.onLocalButtonClicked()}"
+                android:text="@string/local_database"
+                app:layout_constraintBottom_toTopOf="@id/cancelButton"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <Button
+                android:id="@+id/cancelButton"
+                style="@style/Material.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/element_margin"
+                android:layout_marginBottom="@dimen/element_margin"
+                android:onClick="@{() -> viewModel.onCancelButtonClicked()}"
+                android:text="@string/cancel"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.ivanovsky.passnotes.presentation.core.widget.ScreenStateView
             state="@{viewModel.screenState}"

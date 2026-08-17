@@ -173,7 +173,7 @@ class NewDatabaseViewModel(
 
     private fun onStorageSelected(selectedFile: FileDescriptor) {
         when (selectedFile.fsAuthority.type) {
-            FSType.INTERNAL_STORAGE, FSType.EXTERNAL_STORAGE -> {
+            FSType.INTERNAL_STORAGE, FSType.EXTERNAL_STORAGE, FSType.TEMPORAL_STORAGE -> {
                 selectedStorage = SelectedStorage.ParentDir(selectedFile)
 
                 if (fileHelper.isLocatedInInternalStorage(File(selectedFile.path))) {

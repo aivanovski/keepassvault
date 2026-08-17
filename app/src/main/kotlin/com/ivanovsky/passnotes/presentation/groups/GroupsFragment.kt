@@ -31,7 +31,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.animation.AnimationFactory
-import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.confirmationDialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.searchOptions.SearchOptionsDialog
@@ -414,7 +414,6 @@ class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
             R.id.menu_disable_biometric_unlock to { vm ->
                 vm.onDisableBiometricUnlockButtonClicked()
             },
-            R.id.menu_diff_with to { vm -> vm.onDiffWithButtonClicked() },
             R.id.menu_export to { vm -> vm.onExportButtonClicked() }
         )
 

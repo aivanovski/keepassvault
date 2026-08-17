@@ -12,7 +12,6 @@ import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.ObserverBus
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseEntry
-import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.Group
 import com.ivanovsky.passnotes.data.entity.Note
 import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_UID_IS_NULL
@@ -21,7 +20,6 @@ import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
 import com.ivanovsky.passnotes.data.entity.Template
 import com.ivanovsky.passnotes.data.entity.UsedFile
-import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.data.repository.keepass.FileKeepassKey
 import com.ivanovsky.passnotes.data.repository.keepass.PasswordKeepassKey
 import com.ivanovsky.passnotes.data.repository.settings.OnSettingsChangeListener
@@ -46,13 +44,10 @@ import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
 import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.ApplicationLaunchMode
-import com.ivanovsky.passnotes.presentation.Screens
-import com.ivanovsky.passnotes.presentation.Screens.EnterDbCredentialsScreen
 import com.ivanovsky.passnotes.presentation.Screens.GroupEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.MainSettingsScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteEditorScreen
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
-import com.ivanovsky.passnotes.presentation.Screens.StorageListScreen
 import com.ivanovsky.passnotes.presentation.Screens.UnlockScreen
 import com.ivanovsky.passnotes.presentation.core.BackNavigationIcon
 import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
@@ -73,9 +68,6 @@ import com.ivanovsky.passnotes.presentation.core.viewmodel.NavigationPanelCellVi
 import com.ivanovsky.passnotes.presentation.core.viewmodel.NoteCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.OptionPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.core.viewmodel.SpaceCellViewModel
-import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
-import com.ivanovsky.passnotes.presentation.diffViewer.model.DiffEntity
-import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsScreenArgs
 import com.ivanovsky.passnotes.presentation.groupEditor.GroupEditorArgs
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellModelFactory
 import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFactory
@@ -85,8 +77,6 @@ import com.ivanovsky.passnotes.presentation.note.NoteScreenArgs
 import com.ivanovsky.passnotes.presentation.note.NoteSource
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorArgs
 import com.ivanovsky.passnotes.presentation.noteEditor.NoteEditorMode
-import com.ivanovsky.passnotes.presentation.storagelist.Action
-import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.syncState.factory.SyncStateCellModelFactory
 import com.ivanovsky.passnotes.presentation.syncState.viewmodel.SyncStateViewModel
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
@@ -673,25 +663,6 @@ class GroupsViewModel(
         loadData(isResetScroll = true)
     }
 
-    fun onDiffWithButtonClicked() {
-        val resultKey = StorageListScreen.newResultKey()
-
-        router.setResultListener(resultKey) { file ->
-            if (file is FileDescriptor) {
-                onDiffFileSelected(file)
-            }
-        }
-
-        router.navigateTo(
-            StorageListScreen(
-                StorageListArgs(
-                    action = Action.PICK_FILE,
-                    resultKey = resultKey
-                )
-            )
-        )
-    }
-
     fun onRequestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= 33) {
             requestPermissionEvent.call(SystemPermission.NOTIFICATION)
@@ -705,36 +676,6 @@ class GroupsViewModel(
     fun onLockNotificationDialogDisabled() {
         settings.isLockNotificationVisible = false
         settings.isLockNotificationDialogEnabled = false
-    }
-
-    private fun onDiffFileSelected(file: FileDescriptor) {
-        router.setResultListener(EnterDbCredentialsScreen.RESULT_KEY) { key ->
-            if (key is EncryptedDatabaseKey) {
-                onDiffFileUnlocked(key, file)
-            }
-        }
-        router.navigateTo(
-            EnterDbCredentialsScreen(
-                EnterDbCredentialsScreenArgs(
-                    file = file
-                )
-            )
-        )
-    }
-
-    private fun onDiffFileUnlocked(key: EncryptedDatabaseKey, file: FileDescriptor) {
-        router.navigateTo(
-            Screens.DiffViewerScreen(
-                DiffViewerScreenArgs(
-                    left = DiffEntity.OpenedDatabase,
-                    right = DiffEntity.File(
-                        key = key,
-                        file = file
-                    ),
-                    isHoldDatabaseInteraction = true
-                )
-            )
-        )
     }
 
     private fun subscribeToEvents() {
@@ -1286,7 +1227,6 @@ class GroupsViewModel(
 
                         add(GroupsMenuItem.VIEW_MODE)
                         add(GroupsMenuItem.SETTINGS)
-                        add(GroupsMenuItem.DIFF_WITH)
                         add(GroupsMenuItem.EXPORT)
 
                         if (templates.isNullOrEmpty()) {
@@ -1359,7 +1299,6 @@ class GroupsViewModel(
         SYNCHRONIZE(R.id.menu_synchronize),
         ENABLE_BIOMETRIC_UNLOCK(R.id.menu_enable_biometric_unlock),
         DISABLE_BIOMETRIC_UNLOCK(R.id.menu_disable_biometric_unlock),
-        DIFF_WITH(R.id.menu_diff_with),
         EXPORT(R.id.menu_export)
     }
 

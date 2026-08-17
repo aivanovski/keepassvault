@@ -43,8 +43,7 @@ import com.ivanovsky.passnotes.presentation.debugmenu.DebugMenuViewModel
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerInteractor
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerViewModel
-import com.ivanovsky.passnotes.presentation.diffViewer.factory.DiffViewerCellModelFactory
-import com.ivanovsky.passnotes.presentation.diffViewer.factory.DiffViewerCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.diffViewer.cells.DiffViewerCellFactory
 import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsInteractor
 import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsScreenArgs
 import com.ivanovsky.passnotes.presentation.enterDbCredentials.EnterDbCredentialsViewModel
@@ -61,8 +60,7 @@ import com.ivanovsky.passnotes.presentation.groups.factory.GroupsCellViewModelFa
 import com.ivanovsky.passnotes.presentation.history.HistoryInteractor
 import com.ivanovsky.passnotes.presentation.history.HistoryScreenArgs
 import com.ivanovsky.passnotes.presentation.history.HistoryViewModel
-import com.ivanovsky.passnotes.presentation.history.factory.HistoryCellModelFactory
-import com.ivanovsky.passnotes.presentation.history.factory.HistoryCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.history.cells.HistoryCellFactory
 import com.ivanovsky.passnotes.presentation.main.MainScreenArgs
 import com.ivanovsky.passnotes.presentation.main.MainViewModel
 import com.ivanovsky.passnotes.presentation.main.navigation.NavigationMenuViewModel
@@ -173,11 +171,11 @@ object UiModule {
             single { MainInteractor(get()) }
             single { LockServiceInteractor(get(), get(), get(), get(), get()) }
             single { PasswordGeneratorInteractor(get()) }
-            single { ResolveConflictDialogInteractor(get()) }
+            single { ResolveConflictDialogInteractor(get(), get(), get(), get()) }
             single { SyncStateCache(get()) }
             single { SyncStateInteractor(get(), get(), get()) }
             single { EnterDbCredentialsInteractor(get(), get(), get(), get()) }
-            single { DiffViewerInteractor(get(), get(), get(), get(), get()) }
+            single { DiffViewerInteractor(get(), get(), get(), get(), get(), get(), get()) }
             single { SetupOneTimePasswordInteractor() }
             single { HistoryInteractor(get(), get(), get()) }
 
@@ -208,11 +206,9 @@ object UiModule {
 
             single { SyncStateCellModelFactory(get()) }
 
-            single { DiffViewerCellModelFactory(get(), get()) }
-            single { DiffViewerCellViewModelFactory(get()) }
+            single { DiffViewerCellFactory(get(), get(), get()) }
 
-            single { HistoryCellModelFactory(get(), get()) }
-            single { HistoryCellViewModelFactory(get()) }
+            single { HistoryCellFactory(get(), get()) }
 
             single { OptionDialogCellModelFactory(get()) }
             single { OptionDialogCellViewModelFactory(get()) }
@@ -351,6 +347,7 @@ object UiModule {
                     get(),
                     get(),
                     get(),
+                    get(),
                     args
                 )
             }
@@ -371,7 +368,6 @@ object UiModule {
             }
             factory { (args: HistoryScreenArgs) ->
                 HistoryViewModel(
-                    get(),
                     get(),
                     get(),
                     get(),

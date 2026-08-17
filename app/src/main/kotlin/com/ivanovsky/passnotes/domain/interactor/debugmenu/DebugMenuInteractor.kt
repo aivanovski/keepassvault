@@ -298,7 +298,7 @@ class DebugMenuInteractor(
 
     @Suppress("FoldInitializerAndIfToElvis")
     fun addEntryToDb(): OperationResult<Boolean> {
-        val db = dbRepository.database
+        val db = dbRepository.getDatabase()
         if (db == null) {
             return OperationResult.error(
                 newDbError(
@@ -362,7 +362,7 @@ class DebugMenuInteractor(
         withContext(dispatchers.IO) {
             fileSystemResolver
                 .resolveProvider(fsAuthority)
-                .rootFile
+                .getRootFile()
         }
 
     suspend fun getFakeFileSystemFiles(

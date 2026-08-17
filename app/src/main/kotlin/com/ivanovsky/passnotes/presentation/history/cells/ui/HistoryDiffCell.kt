@@ -15,18 +15,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.compose.AppTheme
+import com.ivanovsky.passnotes.presentation.core.compose.CardCornerRadius
 import com.ivanovsky.passnotes.presentation.core.compose.DarkTheme
 import com.ivanovsky.passnotes.presentation.core.compose.LightTheme
 import com.ivanovsky.passnotes.presentation.core.compose.PrimaryTextStyle
 import com.ivanovsky.passnotes.presentation.core.compose.SecondaryTextStyle
 import com.ivanovsky.passnotes.presentation.core.compose.ThemedScreenPreview
-import com.ivanovsky.passnotes.presentation.core.compose.newEventProvider
+import com.ivanovsky.passnotes.presentation.core.compose.TwoLineListItemHeight
+import com.ivanovsky.passnotes.presentation.core.compose.newCellEventProvider
 import com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape
 import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryDiffCellModel
 import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryDiffCellViewModel
@@ -35,18 +36,14 @@ import com.ivanovsky.passnotes.util.toRoundedCornerShape
 
 @Composable
 fun HistoryDiffCell(viewModel: HistoryDiffCellViewModel) {
-    val cornerRadius = LocalDensity.current.run {
-        dimensionResource(R.dimen.card_corner_radius).toPx()
-    }
-
     Card(
-        shape = viewModel.model.backgroundShape.toRoundedCornerShape(cornerRadius),
+        shape = viewModel.model.backgroundShape.toRoundedCornerShape(CardCornerRadius),
         colors = CardDefaults.cardColors(
             containerColor = Color(viewModel.model.backgroundColor)
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = 70.dp)
+            .defaultMinSize(minHeight = TwoLineListItemHeight)
             .padding(horizontal = dimensionResource(R.dimen.element_margin))
             .clickable {
                 viewModel.onClicked()
@@ -91,11 +88,11 @@ fun HistoryDiffCell(viewModel: HistoryDiffCellViewModel) {
 fun LightDiffCellPreview() {
     ThemedScreenPreview(theme = LightTheme) {
         Column {
-            HistoryDiffCell(newDiffViewModel(newInsertModel()))
+            HistoryDiffCell(newHistoryInsertCell())
             Spacer(modifier = Modifier.height(16.dp))
-            HistoryDiffCell(newDiffViewModel(newDeleteModel()))
+            HistoryDiffCell(newHistoryDeleteCell())
             Spacer(modifier = Modifier.height(16.dp))
-            HistoryDiffCell(newDiffViewModel(newUpdateModel()))
+            HistoryDiffCell(newHistoryUpdateCell())
         }
     }
 }
@@ -105,55 +102,56 @@ fun LightDiffCellPreview() {
 fun DarkDiffCellPreview() {
     ThemedScreenPreview(theme = DarkTheme) {
         Column {
-            HistoryDiffCell(newDiffViewModel(newInsertModel()))
+            HistoryDiffCell(newHistoryInsertCell())
             Spacer(modifier = Modifier.height(16.dp))
-            HistoryDiffCell(newDiffViewModel(newDeleteModel()))
+            HistoryDiffCell(newHistoryDeleteCell())
             Spacer(modifier = Modifier.height(16.dp))
-            HistoryDiffCell(newDiffViewModel(newUpdateModel()))
+            HistoryDiffCell(newHistoryUpdateCell())
         }
     }
 }
 
 @Composable
-fun newInsertModel() =
-    HistoryDiffCellModel(
-        id = 1,
-        eventId = StringUtils.EMPTY,
-        name = "UserName",
-        value = "john.doe",
-        event = "Added",
-        backgroundShape = RoundedShape.ALL,
-        backgroundColor = AppTheme.theme.colors.diffInsert.toArgb()
-    )
-
-@Composable
-fun newDeleteModel() =
-    HistoryDiffCellModel(
-        id = 2,
-        eventId = StringUtils.EMPTY,
-        name = "UserName",
-        value = "john.doe",
-        event = "Deleted",
-        backgroundShape = RoundedShape.ALL,
-        backgroundColor = AppTheme.theme.colors.diffDelete.toArgb()
-    )
-
-@Composable
-fun newUpdateModel() =
-    HistoryDiffCellModel(
-        id = 1,
-        eventId = StringUtils.EMPTY,
-        name = "UserName",
-        value = "'john.doe' changed to 'john.doe@example.com'",
-        event = "Changed",
-        backgroundShape = RoundedShape.ALL,
-        backgroundColor = AppTheme.theme.colors.diffUpdate.toArgb()
-    )
-
-private fun newDiffViewModel(
-    model: HistoryDiffCellModel
-) =
+fun newHistoryInsertCell() =
     HistoryDiffCellViewModel(
-        model = model,
-        eventProvider = newEventProvider()
+        HistoryDiffCellModel(
+            id = 1,
+            eventId = StringUtils.EMPTY,
+            name = "UserName",
+            value = "john.doe",
+            event = "Added",
+            backgroundShape = RoundedShape.ALL,
+            backgroundColor = AppTheme.theme.colors.diffInsert.toArgb()
+        ),
+        newCellEventProvider()
+    )
+
+@Composable
+fun newHistoryDeleteCell() =
+    HistoryDiffCellViewModel(
+        HistoryDiffCellModel(
+            id = 2,
+            eventId = StringUtils.EMPTY,
+            name = "UserName",
+            value = "john.doe",
+            event = "Deleted",
+            backgroundShape = RoundedShape.ALL,
+            backgroundColor = AppTheme.theme.colors.diffDelete.toArgb()
+        ),
+        newCellEventProvider()
+    )
+
+@Composable
+fun newHistoryUpdateCell() =
+    HistoryDiffCellViewModel(
+        HistoryDiffCellModel(
+            id = 1,
+            eventId = StringUtils.EMPTY,
+            name = "UserName",
+            value = "'john.doe' changed to 'john.doe@example.com'",
+            event = "Changed",
+            backgroundShape = RoundedShape.ALL,
+            backgroundColor = AppTheme.theme.colors.diffUpdate.toArgb()
+        ),
+        newCellEventProvider()
     )

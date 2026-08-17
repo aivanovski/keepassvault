@@ -1,5 +1,6 @@
 package com.ivanovsky.passnotes.data.repository.file.git
 
+import arrow.core.raise.either
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.OperationError.GENERIC_MESSAGE_FAILED_TO_GET_REFERENCE_TO
@@ -14,7 +15,9 @@ import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 import com.ivanovsky.passnotes.extensions.map
 import com.ivanovsky.passnotes.extensions.mapError
 import com.ivanovsky.passnotes.extensions.mapWithObject
+import com.ivanovsky.passnotes.extensions.toEither
 import com.ivanovsky.passnotes.util.InputOutputUtils
+import com.ivanovsky.passnotes.util.toOperationResult
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
 import java.io.File
@@ -29,6 +32,7 @@ import org.eclipse.jgit.lib.BranchConfig
 import org.eclipse.jgit.lib.ObjectId
 import org.eclipse.jgit.lib.PersonIdent
 import org.eclipse.jgit.lib.Ref
+import org.eclipse.jgit.revwalk.RevCommit
 import org.eclipse.jgit.transport.PushResult
 import org.eclipse.jgit.transport.RemoteRefUpdate
 import org.eclipse.jgit.transport.SshTransport
@@ -37,7 +41,7 @@ import org.eclipse.jgit.transport.ssh.jsch.OpenSshConfig
 import org.eclipse.jgit.util.FS
 import timber.log.Timber
 
-class GitRepository(
+class GitRepository private constructor(
     private val sshKey: SshKey?,
     private val git: Git,
     val root: File
@@ -82,6 +86,12 @@ class GitRepository(
         )
     }
 
+    fun getLog(numberOfCommits: Int): OperationResult<List<RevCommit>> =
+        either {
+            val log = execute { git.log().call() }.toEither().bind()
+            log.take(numberOfCommits)
+        }.toOperationResult()
+
     fun isUpToDate(): OperationResult<Boolean> {
         val getLocalHeadId = getLocalHeadId()
         val getRemoteHeadId = getRemoteHeadId()
@@ -123,6 +133,7 @@ class GitRepository(
         file: VersionedFile? = null,
         changedFile: File? = null
     ): OperationResult<Unit> {
+        Timber.d("pull: %s", root.path)
         for (pullIdx in 0..1) {
             val pullResult = execute {
                 git.pull()
@@ -208,6 +219,8 @@ class GitRepository(
     }
 
     fun push(): OperationResult<Unit> {
+        Timber.d("push: %s", root.path)
+
         val pushResult = execute {
             git.push()
                 .apply {
@@ -278,7 +291,7 @@ class GitRepository(
         }
     }
 
-    private fun getLocalHeadId(): OperationResult<ObjectId> {
+    fun getLocalHeadId(): OperationResult<ObjectId> {
         return getLocalHead().map { head -> head.objectId }
     }
 
@@ -292,6 +305,8 @@ class GitRepository(
     }
 
     fun fetch(): OperationResult<Unit> {
+        Timber.d("fetch: %s", root.path)
+
         return execute {
             git.fetch()
                 .apply {

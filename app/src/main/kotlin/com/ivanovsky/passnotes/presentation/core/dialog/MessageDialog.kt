@@ -60,5 +60,11 @@ class MessageDialog : BaseDialogFragment() {
                     putParcelable(ARGUMENTS, args)
                 }
         }
+
+        fun newInstance(args: MessageDialogArgs): MessageDialog =
+            MessageDialog()
+                .withArguments {
+                    putParcelable(ARGUMENTS, args)
+                }
     }
 }

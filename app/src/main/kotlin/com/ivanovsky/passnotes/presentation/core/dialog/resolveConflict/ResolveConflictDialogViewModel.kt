@@ -4,19 +4,25 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import arrow.core.raise.either
+import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_LOCAL_FILE
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy.RESOLVE_WITH_REMOTE_FILE
+import com.ivanovsky.passnotes.data.entity.MergeFiles
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution.DOWNLOAD_REMOTE_FILE
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution.UPLOAD_LOCAL_FILE
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
+import com.ivanovsky.passnotes.data.repository.encdb.EncryptedDatabaseKey
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.ResourceProvider
-import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.injection.GlobalInjector
+import com.ivanovsky.passnotes.presentation.Screens.DiffViewerScreen
 import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerMode
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
 import com.ivanovsky.passnotes.util.StringUtils.EMPTY
 import java.util.Date
 import kotlinx.coroutines.launch
@@ -26,6 +32,7 @@ class ResolveConflictDialogViewModel(
     private val interactor: ResolveConflictDialogInteractor,
     private val dateFormatProvider: DateFormatProvider,
     private val resourceProvider: ResourceProvider,
+    private val router: Router,
     private val args: ResolveConflictDialogArgs
 ) : BaseScreenViewModel(
     initialState = ScreenState.loading()
@@ -34,17 +41,17 @@ class ResolveConflictDialogViewModel(
     val screenVisibilityHandler = DefaultScreenVisibilityHandler()
     val message = MutableLiveData(EMPTY)
     val dismissEvent = SingleLiveEvent<Unit>()
+    val isMergeButtonVisible = MutableLiveData(false)
+    val showSnackbarMessageEvent = SingleLiveEvent<String>()
 
     fun start() {
         setScreenState(ScreenState.loading())
 
         viewModelScope.launch {
-            val getConflictResult = interactor.getSyncConflictInfo(args.file)
-            if (getConflictResult.isSucceededOrDeferred) {
-                onSyncConflictInfoLoaded(getConflictResult.getOrThrow())
-            } else {
-                setErrorState(getConflictResult.error)
-            }
+            interactor.getSyncConflictInfo(args.file).fold(
+                ifLeft = { error -> setErrorState(error) },
+                ifRight = { info -> onSyncConflictInfoLoaded(info) }
+            )
         }
     }
 
@@ -52,24 +59,68 @@ class ResolveConflictDialogViewModel(
         dismissEvent.call(Unit)
     }
 
+    fun onMergeButtonClicked() {
+        if (!interactor.isDatabaseOpened()) {
+            showSnackbarMessageEvent.value = resourceProvider.getString(
+                R.string.unlock_database_error_message
+            )
+            return
+        }
+
+        setScreenState(ScreenState.loading())
+
+        viewModelScope.launch {
+            either {
+                val key = interactor.getOpenedDatabaseKey().bind()
+                val files = interactor.getMergeFiles(args.file).bind()
+
+                key to files
+            }.fold(
+                ifLeft = { error -> setErrorState(error) },
+                ifRight = { (key, files) ->
+                    navigateToDiffViewer(key, files)
+                    dismissEvent.call(Unit)
+                }
+            )
+        }
+    }
+
+    private fun navigateToDiffViewer(
+        key: EncryptedDatabaseKey,
+        files: MergeFiles
+    ) {
+        router.navigateTo(
+            DiffViewerScreen(
+                DiffViewerScreenArgs(
+                    mode = DiffViewerMode.Merge(
+                        key = key,
+                        base = files.base,
+                        local = files.local,
+                        remote = files.remote,
+                        output = files.output
+                    ),
+                    isHoldDatabaseInteraction = true
+                )
+            )
+        )
+    }
+
     fun onLocalButtonClicked() {
-        onResolveConflictConfirmed(RESOLVE_WITH_LOCAL_FILE)
+        onResolveConflictConfirmed(UPLOAD_LOCAL_FILE)
     }
 
     fun onRemoteButtonClicked() {
-        onResolveConflictConfirmed(RESOLVE_WITH_REMOTE_FILE)
+        onResolveConflictConfirmed(DOWNLOAD_REMOTE_FILE)
     }
 
-    private fun onResolveConflictConfirmed(resolutionStrategy: ConflictResolutionStrategy) {
+    private fun onResolveConflictConfirmed(requestedResolution: RequestedSyncResolution) {
         screenState.value = ScreenState.loading()
 
         viewModelScope.launch {
-            val resolvedConflict = interactor.resolveConflict(args.file, resolutionStrategy)
-            if (resolvedConflict.isSucceededOrDeferred) {
-                dismissEvent.call(Unit)
-            } else {
-                setErrorState(resolvedConflict.error)
-            }
+            interactor.resolveConflict(args.file, requestedResolution).fold(
+                ifLeft = { error -> setErrorState(error) },
+                ifRight = { dismissEvent.call(Unit) }
+            )
         }
     }
 
@@ -79,6 +130,7 @@ class ResolveConflictDialogViewModel(
             info.localFile.modified?.formatDateAndTime() ?: EMPTY,
             info.remoteFile.modified?.formatDateAndTime() ?: EMPTY
         )
+        isMergeButtonVisible.value = info.isMergeAvailable
         setScreenState(ScreenState.data())
     }
 

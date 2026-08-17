@@ -42,17 +42,9 @@ class RegularFileSystemProvider(
 ) : FileSystemProvider {
 
     private val lock = ReentrantLock()
-    private val syncProcessor = RegularFileSystemSyncProcessor(this)
+    override val syncProcessor: FileSystemSyncProcessor = RegularFileSystemSyncProcessor(this)
     private val permissionHelper = PermissionHelper(context)
-    private val authenticator = createAuthenticator(fsAuthority.type)
-
-    override fun getAuthenticator(): FileSystemAuthenticator {
-        return authenticator
-    }
-
-    override fun getSyncProcessor(): FileSystemSyncProcessor {
-        return syncProcessor
-    }
+    override val authenticator: FileSystemAuthenticator = createAuthenticator(fsAuthority.type)
 
     override fun listFiles(dir: FileDescriptor): OperationResult<List<FileDescriptor>> {
         if (!dir.isDirectory) {
@@ -114,17 +106,10 @@ class RegularFileSystemProvider(
 
     override fun getRootFile(): OperationResult<FileDescriptor> {
         val path = when (fsAuthority.type) {
-            FSType.INTERNAL_STORAGE -> {
-                getInternalRoot()
-            }
-
-            FSType.EXTERNAL_STORAGE -> {
-                getExternalRoots().firstOrNull()
-            }
-
-            else -> {
-                throw IllegalStateException()
-            }
+            FSType.TEMPORAL_STORAGE -> getInternalRoot()
+            FSType.INTERNAL_STORAGE -> getInternalRoot()
+            FSType.EXTERNAL_STORAGE -> getExternalRoots().firstOrNull()
+            else -> throw IllegalStateException()
         } ?: return OperationResult.error(newFileNotFoundError(Stacktrace()))
 
         val root = File(path)
@@ -320,8 +305,18 @@ class RegularFileSystemProvider(
 
     private fun createAuthenticator(fsType: FSType): FileSystemAuthenticator {
         return when (fsType) {
-            FSType.INTERNAL_STORAGE -> InternalStorageAuthenticator()
-            FSType.EXTERNAL_STORAGE -> ExternalStorageAuthenticator(permissionHelper)
+            FSType.INTERNAL_STORAGE -> InternalStorageAuthenticator(
+                FSAuthority.INTERNAL_FS_AUTHORITY
+            )
+
+            FSType.EXTERNAL_STORAGE -> ExternalStorageAuthenticator(
+                permissionHelper
+            )
+
+            FSType.TEMPORAL_STORAGE -> InternalStorageAuthenticator(
+                fsAuthority
+            )
+
             else -> throw IllegalArgumentException()
         }
     }

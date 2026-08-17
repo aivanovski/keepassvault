@@ -7,7 +7,7 @@ import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricEncoder
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.biometric.BiometricAuthenticator
-import com.ivanovsky.passnotes.presentation.core.dialog.ConfirmationDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.confirmationDialog.ConfirmationDialog
 import timber.log.Timber
 
 class DebugBiometricAuthenticatorImpl(

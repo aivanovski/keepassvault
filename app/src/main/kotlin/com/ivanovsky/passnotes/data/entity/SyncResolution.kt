@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.data.entity
 
 enum class SyncResolution {
-    LOCAL,
-    REMOTE,
-    EQUALS,
-    ERROR
+    UPLOAD_LOCAL,
+    DOWNLOAD_REMOTE,
+    CONFLICT,
+    NO_CHANGES
 }

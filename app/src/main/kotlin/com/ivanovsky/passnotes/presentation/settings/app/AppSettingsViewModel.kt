@@ -13,8 +13,9 @@ import com.ivanovsky.passnotes.domain.biometric.BiometricResolver
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
 import com.ivanovsky.passnotes.domain.interactor.settings.app.AppSettingsInteractor
 import com.ivanovsky.passnotes.domain.loggingAndReporting.CrashReporterInteractor.CrashReporterAvailability
-import com.ivanovsky.passnotes.domain.worker.BackgroundSyncWorker
+import com.ivanovsky.passnotes.domain.workers.BackgroundSyncWorker
 import com.ivanovsky.passnotes.extensions.formatReadableMessage
+import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.core.dialog.selectorDialog.SelectorDialogArgs
 import com.ivanovsky.passnotes.presentation.core.dialog.selectorDialog.model.SelectorDialogItem
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
@@ -149,7 +150,10 @@ class AppSettingsViewModel(
         settings.backgroundSyncIntervalInMs = intervalInMs
 
         if (isChanged) {
-            BackgroundSyncWorker.schedule(settings)
+            BackgroundSyncWorker.schedule(
+                settings = settings,
+                context = GlobalInjector.get()
+            )
         }
     }
 

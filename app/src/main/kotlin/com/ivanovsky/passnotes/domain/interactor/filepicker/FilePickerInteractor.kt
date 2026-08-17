@@ -44,7 +44,7 @@ class FilePickerInteractor(
 
             val fsProvider = fileSystemResolver.resolveProvider(FSAuthority.INTERNAL_FS_AUTHORITY)
 
-            val getRootResult = fsProvider.rootFile
+            val getRootResult = fsProvider.getRootFile()
             if (getRootResult.isFailed) {
                 return@withContext getRootResult.mapError()
             }

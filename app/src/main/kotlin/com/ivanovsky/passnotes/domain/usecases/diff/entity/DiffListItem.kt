@@ -1,14 +1,24 @@
 package com.ivanovsky.passnotes.domain.usecases.diff.entity
 
-import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseElement
+import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.Property
 
-sealed class DiffListItem {
+sealed interface DiffListItem {
 
-    data class Parent(
-        val entity: EncryptedDatabaseElement?
-    ) : DiffListItem()
+    data class GroupItem(
+        val parents: List<Group>,
+        val event: DiffEvent<Group>
+    ) : DiffListItem
 
-    data class Event(
-        val event: DiffEvent<EncryptedDatabaseElement>
-    ) : DiffListItem()
+    data class NoteItem(
+        val parents: List<Group>,
+        val event: DiffEvent<Note>
+    ) : DiffListItem
+
+    data class PropertiesItem(
+        val parentGroups: List<Group>,
+        val note: Note,
+        val events: List<DiffEvent<Property>>
+    ) : DiffListItem
 }

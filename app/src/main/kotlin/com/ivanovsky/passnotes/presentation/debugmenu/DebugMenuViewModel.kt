@@ -27,6 +27,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseScreenViewModel
 import com.ivanovsky.passnotes.presentation.core.DefaultScreenVisibilityHandler
 import com.ivanovsky.passnotes.presentation.core.ScreenState
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
+import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerMode
 import com.ivanovsky.passnotes.presentation.diffViewer.DiffViewerScreenArgs
 import com.ivanovsky.passnotes.presentation.diffViewer.model.DiffEntity
 import com.ivanovsky.passnotes.presentation.groups.GroupsScreenArgs
@@ -438,8 +439,10 @@ class DebugMenuViewModel(
                 router.navigateTo(
                     DiffViewerScreen(
                         DiffViewerScreenArgs(
-                            left = DiffEntity.File(key, leftFile),
-                            right = DiffEntity.File(key, rightFile),
+                            mode = DiffViewerMode.Compare(
+                                left = DiffEntity.File(key, leftFile),
+                                right = DiffEntity.File(key, rightFile)
+                            ),
                             isHoldDatabaseInteraction = false
                         )
                     )
@@ -474,6 +477,7 @@ class DebugMenuViewModel(
 
     private fun getSelectedFsAuthority(): FSAuthority {
         return when (selectedFsType) {
+            FSType.TEMPORAL_STORAGE -> FSAuthority.TEMPORAL_FS_AUTHORITY
             FSType.INTERNAL_STORAGE -> FSAuthority.INTERNAL_FS_AUTHORITY
             FSType.EXTERNAL_STORAGE -> FSAuthority.EXTERNAL_FS_AUTHORITY
             FSType.SAF -> FSAuthority.SAF_FS_AUTHORITY
@@ -538,6 +542,7 @@ class DebugMenuViewModel(
 
     private fun FSType.getTitle(): String {
         return when (this) {
+            FSType.TEMPORAL_STORAGE -> resourceProvider.getString(R.string.temporal_storage)
             FSType.INTERNAL_STORAGE -> resourceProvider.getString(R.string.internal_storage)
             FSType.EXTERNAL_STORAGE -> resourceProvider.getString(R.string.external_storage)
             FSType.SAF -> resourceProvider.getString(R.string.storage_access_framework)

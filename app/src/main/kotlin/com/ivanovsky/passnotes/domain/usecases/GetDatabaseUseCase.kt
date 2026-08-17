@@ -15,7 +15,7 @@ class GetDatabaseUseCase(
         getDatabaseSynchronously()
 
     fun getDatabaseSynchronously(): OperationResult<EncryptedDatabase> {
-        val db = dbRepo.database
+        val db = dbRepo.getDatabase()
         return if (db != null) {
             OperationResult.success(db)
         } else {

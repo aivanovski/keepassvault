@@ -48,6 +48,9 @@ public class RemoteFile {
     @ColumnInfo(name = "local_path")
     private String localPath;
 
+    @ColumnInfo(name = "local_backup_path")
+    private String localBackupPath;
+
     @ColumnInfo(name = "remote_path")
     private String remotePath;
 
@@ -163,6 +166,14 @@ public class RemoteFile {
         this.localPath = localPath;
     }
 
+    public String getLocalBackupPath() {
+        return localBackupPath;
+    }
+
+    public void setLocalBackupPath(String localBackupPath) {
+        this.localBackupPath = localBackupPath;
+    }
+
     public String getRemotePath() {
         return remotePath;
     }
@@ -206,6 +217,7 @@ public class RemoteFile {
                 && Objects.equals(
                         lastRemoteModificationTimestamp, that.lastRemoteModificationTimestamp)
                 && Objects.equals(localPath, that.localPath)
+                && Objects.equals(localBackupPath, that.localBackupPath)
                 && Objects.equals(remotePath, that.remotePath)
                 && Objects.equals(uid, that.uid)
                 && Objects.equals(revision, that.revision);
@@ -226,6 +238,7 @@ public class RemoteFile {
         result = 31 * result + Objects.hashCode(lastModificationTimestamp);
         result = 31 * result + Objects.hashCode(lastRemoteModificationTimestamp);
         result = 31 * result + Objects.hashCode(localPath);
+        result = 31 * result + Objects.hashCode(localBackupPath);
         result = 31 * result + Objects.hashCode(remotePath);
         result = 31 * result + Objects.hashCode(uid);
         result = 31 * result + Objects.hashCode(revision);
@@ -261,6 +274,9 @@ public class RemoteFile {
                 + lastRemoteModificationTimestamp
                 + ", localPath='"
                 + localPath
+                + '\''
+                + ", lastRemoteFilePath='"
+                + localBackupPath
                 + '\''
                 + ", remotePath='"
                 + remotePath

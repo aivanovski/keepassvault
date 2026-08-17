@@ -3,6 +3,9 @@ package com.ivanovsky.passnotes.domain.usecases.diff
 import app.keemobile.kotpass.models.DatabaseElement as KotpassDatabaseElement
 import app.keemobile.kotpass.models.Group as KotpassGroup
 import com.ivanovsky.passnotes.data.entity.EncryptedDatabaseElement
+import com.ivanovsky.passnotes.data.entity.Group
+import com.ivanovsky.passnotes.data.entity.Note
+import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.data.repository.keepass.kotpass.KotpassDatabase
 import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffEvent
 import com.ivanovsky.passnotes.domain.usecases.diff.entity.DiffListItem
@@ -47,20 +50,55 @@ class DiffTransformer {
                     emptyList()
                 }
 
-                for (parent in parents) {
-                    result.add(
-                        DiffListItem.Parent(
-                            entity = parent.entity
-                        )
-                    )
-                }
+                val isPropertyUpdate = (eventsByParent.firstOrNull()?.getEntity() is Property)
 
-                for (event in eventsByParent) {
-                    result.add(
-                        DiffListItem.Event(
-                            event = event
+                if (isPropertyUpdate) {
+                    val parentGroups = parents.mapNotNull { parent ->
+                        parent.entity as? Group
+                    }
+
+                    val note = parents
+                        .lastOrNull { parent -> parent.entity is Note }
+                        ?.let { parent -> parent.entity as? Note }
+
+                    if (note != null) {
+                        @Suppress("UNCHECKED_CAST")
+                        val item = DiffListItem.PropertiesItem(
+                            parentGroups = parentGroups,
+                            note = note,
+                            events = eventsByParent as List<DiffEvent.Update<Property>>
                         )
-                    )
+
+                        result.add(item)
+                    }
+                } else {
+                    for (event in eventsByParent) {
+                        when (event.getEntity()) {
+                            is Group -> {
+                                @Suppress("UNCHECKED_CAST")
+                                val item = DiffListItem.GroupItem(
+                                    parents = parents.mapNotNull { parent ->
+                                        parent.entity as? Group
+                                    },
+                                    event = event as DiffEvent<Group>
+                                )
+
+                                result.add(item)
+                            }
+
+                            is Note -> {
+                                @Suppress("UNCHECKED_CAST")
+                                val item = DiffListItem.NoteItem(
+                                    parents = parents.mapNotNull { parent ->
+                                        parent.entity as? Group
+                                    },
+                                    event = event as DiffEvent<Note>
+                                )
+
+                                result.add(item)
+                            }
+                        }
+                    }
                 }
             }
         }

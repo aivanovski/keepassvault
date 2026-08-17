@@ -5,6 +5,7 @@ import com.ivanovsky.passnotes.data.crypto.DataCipherProvider
 import com.ivanovsky.passnotes.data.crypto.DataCipherProviderImpl
 import com.ivanovsky.passnotes.data.repository.EncryptedDatabaseRepository
 import com.ivanovsky.passnotes.data.repository.RemoteFileRepository
+import com.ivanovsky.passnotes.data.repository.TemporaryFileRepository
 import com.ivanovsky.passnotes.data.repository.UsedFileRepository
 import com.ivanovsky.passnotes.data.repository.db.AppDatabase
 import com.ivanovsky.passnotes.data.repository.file.saf.SAFHelper
@@ -48,9 +49,15 @@ object CoreModule {
 
         // Database
         single { AppDatabase.buildDatabase(get(), get()) }
-        single { provideRemoteFileRepository(get()) }
-        single { provideUsedFileRepository(get(), get()) }
+        // DAO's
+        single { provideRemoteFileDao(get()) }
         single { provideGitRootDao(get()) }
+        single { provideTemporaryFileDao(get()) }
+        single { provideUsedFileDao(get()) }
+        // Repositories
+        single { RemoteFileRepository(get()) }
+        single { UsedFileRepository(get(), get()) }
+        single { TemporaryFileRepository(get()) }
 
         // Files, Keepass
         single { DatabaseSyncStateProvider(get(), get(), get()) }
@@ -59,12 +66,15 @@ object CoreModule {
         }
     }
 
-    private fun provideRemoteFileRepository(database: AppDatabase) =
-        RemoteFileRepository(database.remoteFileDao)
-
-    private fun provideUsedFileRepository(database: AppDatabase, observerBus: ObserverBus) =
-        UsedFileRepository(database.usedFileDao, observerBus)
-
     private fun provideGitRootDao(database: AppDatabase) =
         database.gitRootDao
+
+    private fun provideTemporaryFileDao(database: AppDatabase) =
+        database.temporaryFileDao
+
+    private fun provideUsedFileDao(database: AppDatabase) =
+        database.usedFileDao
+
+    private fun provideRemoteFileDao(database: AppDatabase) =
+        database.remoteFileDao
 }

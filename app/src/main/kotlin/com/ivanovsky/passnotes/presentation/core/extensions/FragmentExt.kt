@@ -21,6 +21,11 @@ import com.ivanovsky.passnotes.injection.GlobalInjector
 import com.ivanovsky.passnotes.presentation.autofill.AutofillResponseFactory
 import com.ivanovsky.passnotes.presentation.autofill.model.AutofillStructure
 import com.ivanovsky.passnotes.presentation.core.dialog.MessageDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.MessageDialogArgs
+import com.ivanovsky.passnotes.presentation.core.dialog.confirmationDialog.ConfirmationDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.confirmationDialog.ConfirmationDialogArgs
+import com.ivanovsky.passnotes.presentation.core.dialog.reportErrorDialog.ReportErrorDialog
+import com.ivanovsky.passnotes.presentation.core.dialog.reportErrorDialog.ReportErrorDialogArgs
 import com.ivanovsky.passnotes.presentation.core.menu.ScreenMenuItem
 import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestSender
 import com.ivanovsky.passnotes.util.InputMethodUtils
@@ -109,6 +114,25 @@ fun Fragment.showErrorDialog(message: String) {
 fun Fragment.showMessageDialog(message: String) {
     val dialog = MessageDialog.newMessageDialogInstance(message)
     dialog.show(childFragmentManager, MessageDialog.TAG)
+}
+
+fun Fragment.showMessageDialog(args: MessageDialogArgs) {
+    val dialog = MessageDialog.newInstance(args)
+    dialog.show(childFragmentManager, MessageDialog.TAG)
+}
+
+fun Fragment.showReportErrorDialog(args: ReportErrorDialogArgs) {
+    val dialog = ReportErrorDialog.newInstance(args)
+    dialog.show(childFragmentManager, ReportErrorDialog.TAG)
+}
+
+fun Fragment.showConfirmationDialog(
+    args: ConfirmationDialogArgs,
+    onConfirm: (actionId: Int) -> Unit
+) {
+    val dialog = ConfirmationDialog.newInstance(args)
+    dialog.onConfirmed = onConfirm
+    dialog.show(childFragmentManager, ConfirmationDialog.TAG)
 }
 
 fun Fragment.updateMenuItemVisibility(

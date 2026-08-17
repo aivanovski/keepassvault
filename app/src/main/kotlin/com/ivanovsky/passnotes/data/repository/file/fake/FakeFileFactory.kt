@@ -19,6 +19,11 @@ import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFact
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDiffDatabase
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createDiffModifiedDatabase
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createKeyFileData
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createShortDiffDatabase
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createShortDiffModifiedDatabase
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createThreeWayMergeBaseDatabase
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createThreeWayMergeLocalDatabase
+import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createThreeWayMergeRemoteDatabase
 import com.ivanovsky.passnotes.data.repository.file.fake.FakeDatabaseContentFactory.createXmlKeyFileData
 import com.ivanovsky.passnotes.data.repository.file.fake.entity.FakeStorageEntry
 import com.ivanovsky.passnotes.util.FileUtils
@@ -135,8 +140,18 @@ class FakeFileFactory(
 
             // conflicts
             newEntry(
-                localFile = newFile(Path.CONFLICT, Time.REMOTE),
-                remoteFile = newFile(Path.CONFLICT, Time.LOCAL),
+                baseFile = newFile(Path.THREE_WAY_MERGE, Time.BASE),
+                localFile = newFile(Path.THREE_WAY_MERGE, Time.REMOTE),
+                remoteFile = newFile(Path.THREE_WAY_MERGE, Time.LOCAL),
+                syncStatus = SyncStatus.CONFLICT,
+                localContentFactory = { createThreeWayMergeLocalDatabase() },
+                baseContentFactory = { createThreeWayMergeBaseDatabase() },
+                remoteContentFactory = { createThreeWayMergeRemoteDatabase() }
+            ),
+
+            newEntry(
+                localFile = newFile(Path.UPLOAD_FAILURE, Time.LOCAL),
+                remoteFile = newFile(Path.UPLOAD_FAILURE, Time.REMOTE),
                 syncStatus = SyncStatus.CONFLICT,
                 localContentFactory = LOCAL_CONTENT_FACTORY,
                 remoteContentFactory = REMOTE_CONTENT_FACTORY
@@ -160,29 +175,29 @@ class FakeFileFactory(
             newEntry(
                 localFile = newFile(Path.PASSWORDS, Time.LOCAL),
                 syncStatus = SyncStatus.NO_CHANGES,
-                localContentFactory = { createDemoDatabase() },
-                remoteContentFactory = { createDemoDatabase() }
+                localContentFactory = { createDiffDatabase() },
+                remoteContentFactory = { createDiffDatabase() }
             ),
 
             newEntry(
                 localFile = newFile(Path.PASSWORDS_MODIFID, Time.REMOTE),
                 syncStatus = SyncStatus.NO_CHANGES,
-                localContentFactory = REMOTE_CONTENT_FACTORY,
-                remoteContentFactory = REMOTE_CONTENT_FACTORY
+                localContentFactory = { createDiffModifiedDatabase() },
+                remoteContentFactory = { createDiffModifiedDatabase() }
             ),
 
             // diff
             newEntry(
                 localFile = newFile(Path.DETAILED_DIFF, Time.LOCAL),
                 syncStatus = SyncStatus.NO_CHANGES,
-                localContentFactory = { createDiffDatabase() },
-                remoteContentFactory = { createDiffDatabase() }
+                localContentFactory = { createShortDiffDatabase() },
+                remoteContentFactory = { createShortDiffDatabase() }
             ),
             newEntry(
                 localFile = newFile(Path.DETAILED_DIFF_MODIFIED, Time.LOCAL),
                 syncStatus = SyncStatus.NO_CHANGES,
-                localContentFactory = { createDiffModifiedDatabase() },
-                remoteContentFactory = { createDiffModifiedDatabase() }
+                localContentFactory = { createShortDiffModifiedDatabase() },
+                remoteContentFactory = { createShortDiffModifiedDatabase() }
             ),
 
             // automation
@@ -221,15 +236,19 @@ class FakeFileFactory(
 
     private fun newEntry(
         localFile: FileDescriptor,
+        baseFile: FileDescriptor? = null,
         remoteFile: FileDescriptor? = null,
         syncStatus: SyncStatus = SyncStatus.NO_CHANGES,
         localContentFactory: DatabaseContentFactory? = null,
+        baseContentFactory: DatabaseContentFactory? = null,
         remoteContentFactory: DatabaseContentFactory? = null
     ): FakeStorageEntry {
         return FakeStorageEntry(
+            baseFile = baseFile ?: localFile,
             localFile = localFile,
             remoteFile = remoteFile ?: localFile,
             syncStatus = syncStatus,
+            baseContentFactory = baseContentFactory ?: localContentFactory,
             localContentFactory = localContentFactory,
             remoteContentFactory = remoteContentFactory
         )
@@ -254,21 +273,11 @@ class FakeFileFactory(
         path: String,
         modified: Long
     ): FileDescriptor {
-        val name = FileUtils.getFileNameFromPath(path)
-        val nameWithoutExtension = FileUtils.getFileNameWithoutExtensionFromPath(name)
-            ?: throw IllegalStateException()
-
-        val uid = if (nameWithoutExtension.startsWith("test-")) {
-            nameWithoutExtension.removePrefix("test-")
-        } else {
-            nameWithoutExtension
-        }
-
         return FileDescriptor(
             fsAuthority = fsAuthority,
             path = path,
-            uid = uid,
-            name = name,
+            uid = path,
+            name = FileUtils.getFileNameFromPath(path),
             isDirectory = false,
             isRoot = false,
             modified = modified
@@ -276,7 +285,10 @@ class FakeFileFactory(
     }
 
     object FileUid {
-        const val CONFLICT = "conflict"
+        val THREE_WAY_MERGE = Path.THREE_WAY_MERGE
+        val UPLOAD_FAILURE = Path.UPLOAD_FAILURE
+
+        val CONFLICT_IDS = setOf(UPLOAD_FAILURE, THREE_WAY_MERGE)
     }
 
     object Path {
@@ -299,7 +311,8 @@ class FakeFileFactory(
         val ATTACHMENTS = "/examples/test-attachments.kdbx"
 
         // conflicts
-        val CONFLICT = "/conflicts/test-conflict.kdbx"
+        val THREE_WAY_MERGE = "/conflicts/test-3-way-merge.kdbx"
+        val UPLOAD_FAILURE = "/conflicts/test-upload-failure.kdbx"
 
         // keys
         val KEY = "/keys/key"
@@ -326,6 +339,7 @@ class FakeFileFactory(
         val NO_CHANGES = parseDate("2020-02-01")
         val LOCAL = parseDate("2020-03-01")
         val REMOTE = parseDate("2020-03-02")
+        val BASE = parseDate("2020-02-30")
     }
 
     companion object {

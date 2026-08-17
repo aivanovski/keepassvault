@@ -8,21 +8,31 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.presentation.core.compose.CenteredBox
+import com.ivanovsky.passnotes.presentation.core.compose.ComposeTheme
+import com.ivanovsky.passnotes.presentation.core.compose.ComposeThemeProvider
 import com.ivanovsky.passnotes.presentation.core.compose.EmptyState
-import com.ivanovsky.passnotes.presentation.core.compose.ErrorState
-import com.ivanovsky.passnotes.presentation.core.compose.LightTheme
 import com.ivanovsky.passnotes.presentation.core.compose.ProgressIndicator
 import com.ivanovsky.passnotes.presentation.core.compose.ThemedScreenPreview
-import com.ivanovsky.passnotes.presentation.core.compose.newEventProvider
-import com.ivanovsky.passnotes.presentation.core.compose.newResourceProvider
-import com.ivanovsky.passnotes.presentation.history.cells.CellFactory
-import com.ivanovsky.passnotes.presentation.history.cells.ui.newDeleteModel
-import com.ivanovsky.passnotes.presentation.history.cells.ui.newHistoryHeaderModel
-import com.ivanovsky.passnotes.presentation.history.cells.ui.newInsertModel
-import com.ivanovsky.passnotes.presentation.history.cells.ui.newUpdateModel
-import com.ivanovsky.passnotes.presentation.history.factory.HistoryCellViewModelFactory
+import com.ivanovsky.passnotes.presentation.core.compose.cells.CellViewModel
+import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.CenteredTextCell
+import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.DividerCell
+import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.ErrorPanelCell
+import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.newCenteredTextCell
+import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.newErrorStateCell
+import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.CenteredTextCellViewModel
+import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.DividerCellViewModel
+import com.ivanovsky.passnotes.presentation.history.cells.ui.HistoryDiffCell
+import com.ivanovsky.passnotes.presentation.history.cells.ui.HistoryHeaderCell
+import com.ivanovsky.passnotes.presentation.history.cells.ui.newHistoryDeleteCell
+import com.ivanovsky.passnotes.presentation.history.cells.ui.newHistoryHeaderCell
+import com.ivanovsky.passnotes.presentation.history.cells.ui.newHistoryInsertCell
+import com.ivanovsky.passnotes.presentation.history.cells.ui.newHistoryUpdateCell
+import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryDiffCellViewModel
+import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryHeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.history.model.HistoryState
 
 @Composable
@@ -38,8 +48,6 @@ fun HistoryScreen(
 private fun HistoryScreen(
     state: HistoryState
 ) {
-    val cellFactory = CellFactory()
-
     when (state) {
         is HistoryState.Loading -> {
             ProgressIndicator()
@@ -52,9 +60,9 @@ private fun HistoryScreen(
         }
 
         is HistoryState.Error -> {
-            ErrorState(
-                message = state.message
-            )
+            CenteredBox {
+                ErrorPanelCell(state.cellViewModel)
+            }
         }
 
         is HistoryState.Data -> {
@@ -62,36 +70,42 @@ private fun HistoryScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(state.viewModels) { viewModel ->
-                    cellFactory.createCell(viewModel)
+                    CreateCell(viewModel)
                 }
             }
         }
     }
 }
 
-@Preview
 @Composable
-fun LightPreviewWithLoading() {
-    ThemedScreenPreview(theme = LightTheme) {
-        HistoryScreen(state = HistoryState.Loading)
+private fun CreateCell(viewModel: CellViewModel) {
+    when (viewModel) {
+        is HistoryHeaderCellViewModel -> HistoryHeaderCell(viewModel)
+        is HistoryDiffCellViewModel -> HistoryDiffCell(viewModel)
+        is CenteredTextCellViewModel -> CenteredTextCell(viewModel)
+        is DividerCellViewModel -> DividerCell(viewModel)
     }
 }
 
 @Preview
 @Composable
-fun LightPreviewWithEmptyState() {
-    ThemedScreenPreview(theme = LightTheme) {
-        HistoryScreen(state = HistoryState.Empty)
+fun HistoryPreview_Data(
+    @PreviewParameter(ComposeThemeProvider::class) theme: ComposeTheme
+) {
+    ThemedScreenPreview(theme) {
+        HistoryScreen(state = newDataState())
     }
 }
 
 @Preview
 @Composable
-fun LightPreviewWithError() {
-    ThemedScreenPreview(theme = LightTheme) {
+fun HistoryPreview_Error(
+    @PreviewParameter(ComposeThemeProvider::class) theme: ComposeTheme
+) {
+    ThemedScreenPreview(theme) {
         HistoryScreen(
             state = HistoryState.Error(
-                message = stringResource(R.string.error_has_been_occurred)
+                cellViewModel = newErrorStateCell()
             )
         )
     }
@@ -99,24 +113,36 @@ fun LightPreviewWithError() {
 
 @Preview
 @Composable
-fun LightPreviewWithData() {
-    val factory = HistoryCellViewModelFactory(newResourceProvider())
-
-    val models = listOf(
-        newHistoryHeaderModel(),
-        newInsertModel(),
-        newHistoryHeaderModel(),
-        newDeleteModel(),
-        newHistoryHeaderModel(),
-        newUpdateModel(),
-        newHistoryHeaderModel(title = "Created 01.01.2024 12:00:00")
-    )
-
-    val state = HistoryState.Data(
-        viewModels = factory.createCellViewModels(models, newEventProvider())
-    )
-
-    ThemedScreenPreview(theme = LightTheme) {
-        HistoryScreen(state = state)
+fun HistoryPreview_Empty(
+    @PreviewParameter(ComposeThemeProvider::class) theme: ComposeTheme
+) {
+    ThemedScreenPreview(theme) {
+        HistoryScreen(state = HistoryState.Empty)
     }
 }
+
+@Preview
+@Composable
+fun HistoryPreview_Loading(
+    @PreviewParameter(ComposeThemeProvider::class) theme: ComposeTheme
+) {
+    ThemedScreenPreview(theme) {
+        HistoryScreen(state = HistoryState.Loading)
+    }
+}
+
+@Composable
+private fun newDataState() =
+    HistoryState.Data(
+        viewModels = listOf(
+            newHistoryHeaderCell(),
+            newHistoryInsertCell(),
+            newHistoryHeaderCell(),
+            newHistoryDeleteCell(),
+            newHistoryHeaderCell(),
+            newHistoryUpdateCell(),
+            newHistoryHeaderCell(),
+            newCenteredTextCell(),
+            newHistoryHeaderCell()
+        )
+    )

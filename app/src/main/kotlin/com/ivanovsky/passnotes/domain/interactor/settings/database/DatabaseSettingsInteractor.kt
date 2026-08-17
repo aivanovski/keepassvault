@@ -24,7 +24,7 @@ class DatabaseSettingsInteractor(
             either {
                 val database = getDbUseCase.getDatabase().toEither().bind()
 
-                val config = database.config.toEither().bind()
+                val config = database.getConfig().bind()
 
                 val groups = database.groupDao.all.toEither().bind()
                     .filter { group -> group.parentUid != null }
@@ -43,7 +43,7 @@ class DatabaseSettingsInteractor(
             either {
                 val db = getDbUseCase.getDatabase().toEither().bind()
 
-                db.applyConfig(config).toEither().bind()
+                db.applyConfig(config).bind()
 
                 config
             }
@@ -63,7 +63,7 @@ class DatabaseSettingsInteractor(
                 database.changeKey(
                     PasswordKeepassKey(oldPassword),
                     PasswordKeepassKey(newPassword)
-                ).toEither().bind()
+                ).bind()
             }
         }
 }

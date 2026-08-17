@@ -2,7 +2,6 @@ package com.ivanovsky.passnotes.domain.interactor.unlock
 
 import com.ivanovsky.passnotes.data.crypto.biometric.BiometricDecoder
 import com.ivanovsky.passnotes.data.crypto.entity.BiometricData
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FSAuthority
 import com.ivanovsky.passnotes.data.entity.FSType
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
@@ -15,6 +14,7 @@ import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_SYNCHRONIZATIO
 import com.ivanovsky.passnotes.data.entity.OperationError.newDbError
 import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncState
 import com.ivanovsky.passnotes.data.entity.UsedFile
@@ -62,11 +62,11 @@ class UnlockInteractor(
 ) {
 
     fun hasActiveDatabase(): Boolean {
-        return dbRepo.isOpened
+        return dbRepo.isOpened()
     }
 
     fun closeActiveDatabase(): OperationResult<Unit> {
-        if (!dbRepo.isOpened) {
+        if (!dbRepo.isOpened()) {
             return OperationResult.success(Unit)
         }
 
@@ -85,9 +85,9 @@ class UnlockInteractor(
 
     suspend fun resolveConflict(
         file: FileDescriptor,
-        resolutionStrategy: ConflictResolutionStrategy
+        requestedResolution: RequestedSyncResolution
     ): OperationResult<FileDescriptor> =
-        syncUseCases.resolveConflict(file, resolutionStrategy)
+        syncUseCases.resolveConflict(file, requestedResolution)
 
     suspend fun openDatabase(
         key: EncryptedDatabaseKey,

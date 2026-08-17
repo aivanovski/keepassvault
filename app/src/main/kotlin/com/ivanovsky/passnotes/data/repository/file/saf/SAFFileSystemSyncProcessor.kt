@@ -1,15 +1,14 @@
 package com.ivanovsky.passnotes.data.repository.file.saf
 
-import com.ivanovsky.passnotes.data.entity.ConflictResolutionStrategy
 import com.ivanovsky.passnotes.data.entity.FileDescriptor
-import com.ivanovsky.passnotes.data.entity.OperationError.MESSAGE_INCORRECT_USE_CASE
-import com.ivanovsky.passnotes.data.entity.OperationError.newGenericError
+import com.ivanovsky.passnotes.data.entity.MergeFiles
+import com.ivanovsky.passnotes.data.entity.OperationError.newInvalidSyncProcessorUsage
 import com.ivanovsky.passnotes.data.entity.OperationResult
+import com.ivanovsky.passnotes.data.entity.RequestedSyncResolution
 import com.ivanovsky.passnotes.data.entity.SyncConflictInfo
 import com.ivanovsky.passnotes.data.entity.SyncProgressStatus
 import com.ivanovsky.passnotes.data.entity.SyncStatus
 import com.ivanovsky.passnotes.data.repository.file.FileSystemSyncProcessor
-import com.ivanovsky.passnotes.data.repository.file.SyncStrategy
 import com.ivanovsky.passnotes.domain.entity.exception.Stacktrace
 
 class SAFFileSystemSyncProcessor : FileSystemSyncProcessor {
@@ -26,25 +25,19 @@ class SAFFileSystemSyncProcessor : FileSystemSyncProcessor {
 
     override fun getRevision(uid: String): String? = null
 
-    override fun getSyncConflictForFile(uid: String): OperationResult<SyncConflictInfo> {
-        return OperationResult.error(
-            newGenericError(
-                MESSAGE_INCORRECT_USE_CASE,
-                Stacktrace()
-            )
-        )
-    }
+    override fun getMergeFiles(
+        uid: String
+    ): OperationResult<MergeFiles> =
+        OperationResult.error(newInvalidSyncProcessorUsage(Stacktrace()))
+
+    override fun getSyncConflictForFile(
+        uid: String
+    ): OperationResult<SyncConflictInfo> =
+        OperationResult.error(newInvalidSyncProcessorUsage(Stacktrace()))
 
     override fun process(
         file: FileDescriptor,
-        syncStrategy: SyncStrategy,
-        resolutionStrategy: ConflictResolutionStrategy?
-    ): OperationResult<FileDescriptor> {
-        return OperationResult.error(
-            newGenericError(
-                MESSAGE_INCORRECT_USE_CASE,
-                Stacktrace()
-            )
-        )
-    }
+        requestedResolution: RequestedSyncResolution
+    ): OperationResult<FileDescriptor> =
+        OperationResult.error(newInvalidSyncProcessorUsage(Stacktrace()))
 }

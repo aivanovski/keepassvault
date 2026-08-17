@@ -45,6 +45,7 @@
     <string name="details">Details</string>
     <string name="report">Report</string>
     <string name="copy">Copy</string>
+    <string name="merge">Merge</string>
 
     <!-- Accessibility descriptions -->
     <string name="url">URL</string>
@@ -86,18 +87,24 @@
     <string name="local_database">Local database</string>
     <string name="remote_database">Remote database</string>
     <string name="view_diff">View diff</string>
+    <string name="merge_conflicts">Merge conflicts</string>
+    <string name="unlock_database_error_message">Please unlock the database first</string>
 
     <!-- Diff Viewer screen -->
-    <string name="diff_event_group">Group \'%s\'</string>
-    <string name="diff_event_note">Entry \'%s\'</string>
+    <string name="group_with_str">Group: %s</string>
+    <string name="entry_with_str">Entry: %s</string>
     <string name="diff_event_property">Field \'%s\': \'%s\'</string>
     <string name="diff_event_property_update">Field \'%s\': \'%s\' changed to \'%s\'</string>
     <string name="unknown_entity">Unknown entity</string>
     <string name="compare_files">Compare files</string>
+    <string name="merge_changes">Merge changes</string>
     <string name="pick_file">Pick file</string>
     <string name="opened_database">Opened database</string>
     <string name="compare">Compare</string>
     <string name="files_are_identical">Files are identical</string>
+    <string name="local_changes">Local changes</string>
+    <string name="remote_changes">Remote changes</string>
+    <string name="merge_confirmation_message">Are you sure you want to merge the selected changes?</string>
 
     <!-- Unlock screen -->
     <string name="recently_used">Recently used</string>

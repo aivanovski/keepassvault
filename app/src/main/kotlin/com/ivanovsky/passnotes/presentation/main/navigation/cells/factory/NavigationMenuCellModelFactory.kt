@@ -31,7 +31,6 @@ class NavigationMenuCellModelFactory(
                     add(newModelById(CellId.SELECT_FILE))
                 }
 
-                add(newModelById(CellId.COMPARE_FILES))
                 add(newModelById(CellId.SETTINGS))
 
                 if (isDebugMenuVisible) {
@@ -68,12 +67,6 @@ class NavigationMenuCellModelFactory(
                 iconResId = R.drawable.ic_developer_mode_24dp
             )
 
-            CellId.COMPARE_FILES -> SingleTextWithIconCellModel(
-                id = cellId,
-                title = resourceProvider.getString(R.string.compare_files),
-                iconResId = R.drawable.ic_compare_24dp
-            )
-
             CellId.ABOUT -> SingleTextWithIconCellModel(
                 id = cellId,
                 title = resourceProvider.getString(R.string.about),
@@ -90,7 +83,6 @@ class NavigationMenuCellModelFactory(
         const val LOCK = 20
         const val SETTINGS = 30
         const val DEBUG_MENU = 40
-        const val COMPARE_FILES = 50
         const val ABOUT = 60
     }
 }

@@ -1,20 +1,18 @@
 package com.ivanovsky.passnotes.presentation.history.cells.viewModel
 
-import com.ivanovsky.passnotes.presentation.core.BaseCellViewModel
-import com.ivanovsky.passnotes.presentation.core.event.Event.Companion.toEvent
-import com.ivanovsky.passnotes.presentation.core.event.EventProvider
+import androidx.compose.runtime.Immutable
+import com.ivanovsky.passnotes.presentation.core.compose.cells.CellEventProvider
+import com.ivanovsky.passnotes.presentation.core.compose.cells.CellViewModel
+import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryHeaderCellEvent
 import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryHeaderCellModel
 
+@Immutable
 class HistoryHeaderCellViewModel(
     override val model: HistoryHeaderCellModel,
-    val eventProvider: EventProvider
-) : BaseCellViewModel(model) {
+    private val eventProvider: CellEventProvider
+) : CellViewModel {
 
     fun onClicked() {
-        eventProvider.send((ITEM_CLICK_EVENT to model.itemId).toEvent())
-    }
-
-    companion object {
-        val ITEM_CLICK_EVENT = HistoryHeaderCellViewModel::class.simpleName + "_itemClickEvent"
+        eventProvider.sendEvent(HistoryHeaderCellEvent.OnClick(model.itemId))
     }
 }

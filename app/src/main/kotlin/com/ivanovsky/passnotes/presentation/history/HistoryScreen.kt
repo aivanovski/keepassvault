@@ -18,19 +18,20 @@ import com.ivanovsky.passnotes.presentation.core.compose.EmptyState
 import com.ivanovsky.passnotes.presentation.core.compose.ProgressIndicator
 import com.ivanovsky.passnotes.presentation.core.compose.ThemedScreenPreview
 import com.ivanovsky.passnotes.presentation.core.compose.cells.CellViewModel
+import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.CenteredTextCell
 import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.DividerCell
 import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.ErrorPanelCell
+import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.newCenteredTextCell
 import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.newErrorStateCell
+import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.CenteredTextCellViewModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.history.cells.ui.HistoryDiffCell
-import com.ivanovsky.passnotes.presentation.history.cells.ui.HistoryDiffPlaceholderCell
 import com.ivanovsky.passnotes.presentation.history.cells.ui.HistoryHeaderCell
 import com.ivanovsky.passnotes.presentation.history.cells.ui.newHistoryDeleteCell
 import com.ivanovsky.passnotes.presentation.history.cells.ui.newHistoryHeaderCell
 import com.ivanovsky.passnotes.presentation.history.cells.ui.newHistoryInsertCell
 import com.ivanovsky.passnotes.presentation.history.cells.ui.newHistoryUpdateCell
 import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryDiffCellViewModel
-import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryDiffPlaceholderCellViewModel
 import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryHeaderCellViewModel
 import com.ivanovsky.passnotes.presentation.history.model.HistoryState
 
@@ -81,7 +82,7 @@ private fun CreateCell(viewModel: CellViewModel) {
     when (viewModel) {
         is HistoryHeaderCellViewModel -> HistoryHeaderCell(viewModel)
         is HistoryDiffCellViewModel -> HistoryDiffCell(viewModel)
-        is HistoryDiffPlaceholderCellViewModel -> HistoryDiffPlaceholderCell(viewModel)
+        is CenteredTextCellViewModel -> CenteredTextCell(viewModel)
         is DividerCellViewModel -> DividerCell(viewModel)
     }
 }
@@ -140,6 +141,8 @@ private fun newDataState() =
             newHistoryDeleteCell(),
             newHistoryHeaderCell(),
             newHistoryUpdateCell(),
+            newHistoryHeaderCell(),
+            newCenteredTextCell(),
             newHistoryHeaderCell()
         )
     )

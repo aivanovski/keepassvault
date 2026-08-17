@@ -19,16 +19,19 @@ import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 import com.ivanovsky.passnotes.presentation.core.compose.DoubleElementMargin
 import com.ivanovsky.passnotes.presentation.core.compose.ElementMargin
 import com.ivanovsky.passnotes.presentation.core.compose.GroupMargin
+import com.ivanovsky.passnotes.presentation.core.compose.TwoLineListItemHeight
 import com.ivanovsky.passnotes.presentation.core.compose.cells.CellEventProvider
 import com.ivanovsky.passnotes.presentation.core.compose.cells.CellIdGenerator
 import com.ivanovsky.passnotes.presentation.core.compose.cells.CellModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.CellViewModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.IllegalCellModelException
 import com.ivanovsky.passnotes.presentation.core.compose.cells.IntCellId
+import com.ivanovsky.passnotes.presentation.core.compose.cells.model.CenteredTextCellModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.model.ErrorPanelCellModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.model.SpaceCellModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.toBaseId
 import com.ivanovsky.passnotes.presentation.core.compose.cells.toId
+import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.CenteredTextCellViewModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.ErrorPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.core.compose.toComposeTheme
@@ -100,7 +103,7 @@ class DiffViewerCellFactory(
                 items = localDiffItems,
                 isAllCheckable = true,
                 isAllChecked = true,
-                idCounter = idGenerator
+                idGenerator = idGenerator
             )
         )
 
@@ -118,7 +121,7 @@ class DiffViewerCellFactory(
                 items = remoteDiffItems,
                 isAllCheckable = true,
                 isAllChecked = true,
-                idCounter = idGenerator
+                idGenerator = idGenerator
             )
         )
 
@@ -141,7 +144,7 @@ class DiffViewerCellFactory(
                 items = diffItems,
                 isAllCheckable = false,
                 isAllChecked = false,
-                idCounter = idCounter
+                idGenerator = idCounter
             )
         )
 
@@ -154,40 +157,44 @@ class DiffViewerCellFactory(
         items: List<Pair<IntCellId, DiffListItem>>,
         isAllCheckable: Boolean,
         isAllChecked: Boolean,
-        idCounter: CellIdGenerator
+        idGenerator: CellIdGenerator
     ): List<CellModel> {
         val models = mutableListOf<CellModel>()
 
-        for ((index, idAndItem) in items.withIndex()) {
-            val (id, item) = idAndItem
+        if (items.isNotEmpty()) {
+            for ((index, idAndItem) in items.withIndex()) {
+                val (id, item) = idAndItem
 
-            val model = when (item) {
-                is DiffListItem.GroupItem -> createGroupModel(
-                    id = id,
-                    item = item,
-                    isCheckable = isAllCheckable,
-                    isChecked = isAllChecked
-                )
+                val model = when (item) {
+                    is DiffListItem.GroupItem -> createGroupModel(
+                        id = id,
+                        item = item,
+                        isCheckable = isAllCheckable,
+                        isChecked = isAllChecked
+                    )
 
-                is DiffListItem.NoteItem -> createNoteModel(
-                    id = id,
-                    item = item,
-                    isCheckable = isAllCheckable,
-                    isChecked = isAllChecked
-                )
+                    is DiffListItem.NoteItem -> createNoteModel(
+                        id = id,
+                        item = item,
+                        isCheckable = isAllCheckable,
+                        isChecked = isAllChecked
+                    )
 
-                is DiffListItem.PropertiesItem -> createPropertiesModel(
-                    id = id,
-                    item = item,
-                    isCheckable = isAllCheckable,
-                    isChecked = isAllChecked
-                )
+                    is DiffListItem.PropertiesItem -> createPropertiesModel(
+                        id = id,
+                        item = item,
+                        isCheckable = isAllCheckable,
+                        isChecked = isAllChecked
+                    )
+                }
+
+                if (index > 0) {
+                    models.add(SpaceCellModel(id = idGenerator.nextId(), height = ElementMargin))
+                }
+                models.add(model)
             }
-
-            if (index > 0) {
-                models.add(SpaceCellModel(id = idCounter.nextId(), height = ElementMargin))
-            }
-            models.add(model)
+        } else {
+            models.add(createEmptyDiffCell(idGenerator = idGenerator))
         }
 
         return models
@@ -201,6 +208,7 @@ class DiffViewerCellFactory(
                 is DiffHeaderCellModel -> DiffHeaderCellViewModel(model, eventProvider)
                 is EntryDiffCellModel -> EntryDiffCellViewModel(model, eventProvider)
                 is GroupDiffCellModel -> GroupDiffCellViewModel(model, eventProvider)
+                is CenteredTextCellModel -> CenteredTextCellViewModel(model)
                 is SpaceCellModel -> SpaceCellViewModel(model)
                 else -> throw IllegalCellModelException(model)
             }
@@ -399,18 +407,19 @@ class DiffViewerCellFactory(
         }
     }
 
+    private fun createEmptyDiffCell(idGenerator: CellIdGenerator): CenteredTextCellModel {
+        return CenteredTextCellModel(
+            id = idGenerator.nextId(),
+            title = resourceProvider.getString(R.string.no_changes),
+            height = TwoLineListItemHeight
+        )
+    }
+
     private fun DiffEvent<*>.toCellEventType(): EventType =
         when (this) {
             is DiffEvent.Insert -> EventType.INSERT
             is DiffEvent.Delete -> EventType.DELETE
             is DiffEvent.Update -> EventType.UPDATE
-        }
-
-    private fun DiffEvent<*>.formatValuePrefix(): String =
-        when (this) {
-            is DiffEvent.Insert -> "+ "
-            is DiffEvent.Delete -> "- "
-            is DiffEvent.Update -> ""
         }
 
     private fun DiffEvent<*>.formatDescription(): String =

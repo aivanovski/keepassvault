@@ -1,6 +1,7 @@
 package com.ivanovsky.passnotes.presentation.history.cells
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.Property
@@ -16,18 +17,18 @@ import com.ivanovsky.passnotes.presentation.core.compose.cells.CellModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.CellViewModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.IllegalCellModelException
 import com.ivanovsky.passnotes.presentation.core.compose.cells.IntCellId
+import com.ivanovsky.passnotes.presentation.core.compose.cells.model.CenteredTextCellModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.model.DividerCellModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.model.ErrorPanelCellModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.toBaseId
 import com.ivanovsky.passnotes.presentation.core.compose.cells.toId
+import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.CenteredTextCellViewModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.ErrorPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape
 import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryDiffCellModel
-import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryDiffPlaceholderCellModel
 import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryHeaderCellModel
 import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryDiffCellViewModel
-import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryDiffPlaceholderCellViewModel
 import com.ivanovsky.passnotes.presentation.history.cells.viewModel.HistoryHeaderCellViewModel
 import com.ivanovsky.passnotes.util.StringUtils
 
@@ -111,7 +112,7 @@ class HistoryCellFactory(
             when (model) {
                 is HistoryHeaderCellModel -> HistoryHeaderCellViewModel(model, eventProvider)
                 is HistoryDiffCellModel -> HistoryDiffCellViewModel(model, eventProvider)
-                is HistoryDiffPlaceholderCellModel -> HistoryDiffPlaceholderCellViewModel(model)
+                is CenteredTextCellModel -> CenteredTextCellViewModel(model)
                 is DividerCellModel -> DividerCellViewModel(model)
                 else -> throw IllegalCellModelException(model)
             }
@@ -120,10 +121,11 @@ class HistoryCellFactory(
 
     private fun createEmptyDiffCell(
         cellId: Int
-    ): HistoryDiffPlaceholderCellModel {
-        return HistoryDiffPlaceholderCellModel(
-            id = cellId,
-            title = resourceProvider.getString(R.string.no_changes)
+    ): CenteredTextCellModel {
+        return CenteredTextCellModel(
+            id = cellId.toId(),
+            title = resourceProvider.getString(R.string.no_changes),
+            height = 70.dp
         )
     }
 

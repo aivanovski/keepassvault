@@ -20,11 +20,14 @@ import com.ivanovsky.passnotes.presentation.core.compose.EmptyState
 import com.ivanovsky.passnotes.presentation.core.compose.ProgressIndicator
 import com.ivanovsky.passnotes.presentation.core.compose.ThemedScreenPreview
 import com.ivanovsky.passnotes.presentation.core.compose.cells.CellViewModel
+import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.CenteredTextCell
 import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.ErrorPanelCell
 import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.SpaceCell
+import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.newCenteredTextCell
 import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.newErrorPanelCell
 import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.newErrorStateCell
 import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.newSpaceCell
+import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.CenteredTextCellViewModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.SpaceCellViewModel
 import com.ivanovsky.passnotes.presentation.diffViewer.cells.ui.DiffHeaderCell
 import com.ivanovsky.passnotes.presentation.diffViewer.cells.ui.EntryDiffCell
@@ -88,6 +91,7 @@ private fun CreateCell(viewModel: CellViewModel) {
         is EntryDiffCellViewModel -> EntryDiffCell(viewModel)
         is GroupDiffCellViewModel -> GroupDiffCell(viewModel)
         is SpaceCellViewModel -> SpaceCell(viewModel)
+        is CenteredTextCellViewModel -> CenteredTextCell(viewModel)
     }
 }
 
@@ -112,6 +116,34 @@ fun DiffViewerPreview_DataWithError(
         DiffViewerScreen(
             state = DiffViewerState.Data(
                 viewModels = newDataState().viewModels,
+                errorCellViewModel = newErrorPanelCell()
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
+fun DiffViewerPreview_DataWithEmptyDiff(
+    @PreviewParameter(ComposeThemeProvider::class) theme: ComposeTheme
+) {
+    ThemedScreenPreview(theme) {
+        DiffViewerScreen(
+            state = DiffViewerState.Data(
+                viewModels = listOf(
+                    newSpaceCell(),
+                    newDiffHeaderCell(title = stringResource(R.string.local_changes)),
+                    newCenteredTextCell(),
+                    newSpaceCell(height = DoubleElementMargin),
+                    newDiffHeaderCell(title = stringResource(R.string.local_changes)),
+                    newSpaceCell(),
+                    newDeleteGroupCell(),
+                    newSpaceCell(),
+                    newDeleteEntryCell(),
+                    newSpaceCell(),
+                    newUpdateEntryCell(),
+                    newSpaceCell()
+                ),
                 errorCellViewModel = newErrorPanelCell()
             )
         )

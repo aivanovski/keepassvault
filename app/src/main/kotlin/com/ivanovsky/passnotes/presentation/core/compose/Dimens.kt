@@ -21,3 +21,5 @@ val LargeCardCornerRadius = 16.dp
 val CardElevation = 5.dp
 
 val TextSizePrimary = 14.sp
+
+val TwoLineListItemHeight = 72.dp

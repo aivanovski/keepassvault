@@ -26,6 +26,7 @@ import com.ivanovsky.passnotes.presentation.core.compose.LightTheme
 import com.ivanovsky.passnotes.presentation.core.compose.PrimaryTextStyle
 import com.ivanovsky.passnotes.presentation.core.compose.SecondaryTextStyle
 import com.ivanovsky.passnotes.presentation.core.compose.ThemedScreenPreview
+import com.ivanovsky.passnotes.presentation.core.compose.TwoLineListItemHeight
 import com.ivanovsky.passnotes.presentation.core.compose.newCellEventProvider
 import com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape
 import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryDiffCellModel
@@ -42,7 +43,7 @@ fun HistoryDiffCell(viewModel: HistoryDiffCellViewModel) {
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = 70.dp)
+            .defaultMinSize(minHeight = TwoLineListItemHeight)
             .padding(horizontal = dimensionResource(R.dimen.element_margin))
             .clickable {
                 viewModel.onClicked()

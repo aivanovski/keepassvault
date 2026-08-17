@@ -8,8 +8,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.presentation.core.compose.ComposeTheme
+import com.ivanovsky.passnotes.presentation.core.compose.ComposeThemeProvider
 import com.ivanovsky.passnotes.presentation.core.compose.EmptyState
 import com.ivanovsky.passnotes.presentation.core.compose.ErrorState
 import com.ivanovsky.passnotes.presentation.core.compose.LightTheme
@@ -84,24 +87,20 @@ private fun CreateCell(viewModel: CellViewModel) {
 
 @Preview
 @Composable
-fun LightPreviewWithLoading() {
-    ThemedScreenPreview(theme = LightTheme) {
-        HistoryScreen(state = HistoryState.Loading)
+fun HistoryPreview_Data(
+    @PreviewParameter(ComposeThemeProvider::class) theme: ComposeTheme
+) {
+    ThemedScreenPreview(theme) {
+        HistoryScreen(state = newDataState())
     }
 }
 
 @Preview
 @Composable
-fun LightPreviewWithEmptyState() {
-    ThemedScreenPreview(theme = LightTheme) {
-        HistoryScreen(state = HistoryState.Empty)
-    }
-}
-
-@Preview
-@Composable
-fun LightPreviewWithError() {
-    ThemedScreenPreview(theme = LightTheme) {
+fun HistoryPreview_Error(
+    @PreviewParameter(ComposeThemeProvider::class) theme: ComposeTheme
+) {
+    ThemedScreenPreview(theme) {
         HistoryScreen(
             state = HistoryState.Error(
                 message = stringResource(R.string.error_has_been_occurred)
@@ -112,8 +111,27 @@ fun LightPreviewWithError() {
 
 @Preview
 @Composable
-fun LightPreviewWithData() {
-    val state = HistoryState.Data(
+fun HistoryPreview_Empty(
+    @PreviewParameter(ComposeThemeProvider::class) theme: ComposeTheme
+) {
+    ThemedScreenPreview(theme) {
+        HistoryScreen(state = HistoryState.Empty)
+    }
+}
+
+@Preview
+@Composable
+fun HistoryPreview_Loading(
+    @PreviewParameter(ComposeThemeProvider::class) theme: ComposeTheme
+) {
+    ThemedScreenPreview(theme = LightTheme) {
+        HistoryScreen(state = HistoryState.Loading)
+    }
+}
+
+@Composable
+private fun newDataState() =
+    HistoryState.Data(
         viewModels = listOf(
             newHistoryHeaderCell(),
             newHistoryInsertCell(),
@@ -121,11 +139,6 @@ fun LightPreviewWithData() {
             newHistoryDeleteCell(),
             newHistoryHeaderCell(),
             newHistoryUpdateCell(),
-            newHistoryHeaderCell(title = "Created 01.01.2024 12:00:00")
+            newHistoryHeaderCell()
         )
     )
-
-    ThemedScreenPreview(theme = LightTheme) {
-        HistoryScreen(state = state)
-    }
-}

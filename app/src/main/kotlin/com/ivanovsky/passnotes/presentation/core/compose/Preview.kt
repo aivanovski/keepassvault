@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.presentation.core.compose.cells.CellEventProvider
@@ -55,6 +56,11 @@ fun ThemedPreview(
             content.invoke()
         }
     }
+}
+
+class ComposeThemeProvider : PreviewParameterProvider<ComposeTheme> {
+    override val values: Sequence<ComposeTheme>
+        get() = sequenceOf(LightTheme, DarkTheme)
 }
 
 @Composable

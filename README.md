@@ -14,6 +14,7 @@ Android client app for KeePass databases.
 - Synchronization:
     - Sync with WebDav server
     - Sync with Git repository (via HTTPS and SSH)
+    - Resolve synchronization conflicts by reviewing local and remote changes and merging the changes you want to keep
 
 - Database Management:
     - Create new databases
@@ -32,6 +33,7 @@ Android client app for KeePass databases.
 
 - File Compatibility:
     - Supports .kdbx files up to version 4.1
+    - Uses two libraries for encoding and decoding KeePass files: [Kotpass](https://github.com/keemobile/kotpass) and [keepass-rs](https://github.com/sseemayer/keepass-rs)
 
 - User Convenience:
     - Autofill for Android >= 8.0
@@ -39,7 +41,7 @@ Android client app for KeePass databases.
     - Fuzzy search for easy finding of entries
 
 # Screenshots
-<img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="200"><img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="200"><img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="200"><img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="200">
+<img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="160"><img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="160"><img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="160"><img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width="160"><img src="https://github.com/aivanovski/keepassvault/blob/master/fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" width="160">
 
 # License
 ```

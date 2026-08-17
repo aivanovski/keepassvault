@@ -1,1 +1,1 @@
-- Add merge screen to resolve conflicts with remote
+- Added a merge screen for synchronization conflicts. Review local and remote changes, select what to keep.

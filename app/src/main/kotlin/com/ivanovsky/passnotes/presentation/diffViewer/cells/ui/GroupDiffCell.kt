@@ -162,7 +162,7 @@ private fun GroupDiffCellPreview() {
 }
 
 @Composable
-private fun newInsertGroupCell() =
+fun newInsertGroupCell() =
     GroupDiffCellViewModel(
         GroupDiffCellModel(
             id = 1.toId(),
@@ -177,7 +177,7 @@ private fun newInsertGroupCell() =
     )
 
 @Composable
-private fun newDeleteGroupCell() =
+fun newDeleteGroupCell() =
     GroupDiffCellViewModel(
         GroupDiffCellModel(
             id = 2.toId(),

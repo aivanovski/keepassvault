@@ -28,7 +28,6 @@ import com.ivanovsky.passnotes.presentation.core.compose.AppTheme
 import com.ivanovsky.passnotes.presentation.core.compose.CardElevation
 import com.ivanovsky.passnotes.presentation.core.compose.ElementMargin
 import com.ivanovsky.passnotes.presentation.core.compose.ElementSpace
-import com.ivanovsky.passnotes.presentation.core.compose.HalfMargin
 import com.ivanovsky.passnotes.presentation.core.compose.LargeCardCornerRadius
 import com.ivanovsky.passnotes.presentation.core.compose.LightTheme
 import com.ivanovsky.passnotes.presentation.core.compose.PrimaryTextStyle
@@ -65,9 +64,9 @@ fun GroupDiffCell(viewModel: GroupDiffCellViewModel) {
                 ConstraintLayout(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(ElementMargin)
+                        .padding(vertical = ElementMargin)
                 ) {
-                    val (icon, path, title, description, checkbox) = createRefs()
+                    val (path, title, description, checkbox) = createRefs()
 
                     val textChain = createVerticalChain(
                         path,
@@ -88,7 +87,7 @@ fun GroupDiffCell(viewModel: GroupDiffCellViewModel) {
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
                             .constrainAs(path) {
-                                start.linkTo(icon.end, margin = ElementMargin)
+                                start.linkTo(parent.start, margin = ElementMargin)
                                 end.linkTo(checkbox.start)
                                 width = Dimension.fillToConstraints
                             }
@@ -120,7 +119,7 @@ fun GroupDiffCell(viewModel: GroupDiffCellViewModel) {
                             .clip(RoundedCornerShape(QuarterMargin))
                             .background(model.chipBackgroundTint)
                             .padding(
-                                horizontal = HalfMargin,
+                                horizontal = ElementMargin,
                                 vertical = SmallMargin
                             )
                     )
@@ -130,7 +129,7 @@ fun GroupDiffCell(viewModel: GroupDiffCellViewModel) {
                             .constrainAs(checkbox) {
                                 top.linkTo(parent.top)
                                 bottom.linkTo(parent.bottom)
-                                end.linkTo(parent.end)
+                                end.linkTo(parent.end, margin = QuarterMargin)
                             }
                     ) {
                         if (model.isCheckable) {

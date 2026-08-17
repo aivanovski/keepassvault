@@ -7,6 +7,7 @@ Application Features:
 Synchronization:
  - Sync with WebDav server
  - Sync with Git repository (only via HTTPS, SSH protocol is not available)
+ - Resolve synchronization conflicts by reviewing local and remote changes
 
 Database Management:
  - Create new databases

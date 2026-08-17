@@ -11,15 +11,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.presentation.core.compose.CenteredBox
 import com.ivanovsky.passnotes.presentation.core.compose.ComposeTheme
 import com.ivanovsky.passnotes.presentation.core.compose.ComposeThemeProvider
 import com.ivanovsky.passnotes.presentation.core.compose.EmptyState
-import com.ivanovsky.passnotes.presentation.core.compose.ErrorState
-import com.ivanovsky.passnotes.presentation.core.compose.LightTheme
 import com.ivanovsky.passnotes.presentation.core.compose.ProgressIndicator
 import com.ivanovsky.passnotes.presentation.core.compose.ThemedScreenPreview
 import com.ivanovsky.passnotes.presentation.core.compose.cells.CellViewModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.DividerCell
+import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.ErrorPanelCell
+import com.ivanovsky.passnotes.presentation.core.compose.cells.ui.newErrorStateCell
 import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.DividerCellViewModel
 import com.ivanovsky.passnotes.presentation.history.cells.ui.HistoryDiffCell
 import com.ivanovsky.passnotes.presentation.history.cells.ui.HistoryDiffPlaceholderCell
@@ -58,9 +59,9 @@ private fun HistoryScreen(
         }
 
         is HistoryState.Error -> {
-            ErrorState(
-                message = state.message
-            )
+            CenteredBox {
+                ErrorPanelCell(state.cellViewModel)
+            }
         }
 
         is HistoryState.Data -> {
@@ -103,7 +104,7 @@ fun HistoryPreview_Error(
     ThemedScreenPreview(theme) {
         HistoryScreen(
             state = HistoryState.Error(
-                message = stringResource(R.string.error_has_been_occurred)
+                cellViewModel = newErrorStateCell()
             )
         )
     }
@@ -124,7 +125,7 @@ fun HistoryPreview_Empty(
 fun HistoryPreview_Loading(
     @PreviewParameter(ComposeThemeProvider::class) theme: ComposeTheme
 ) {
-    ThemedScreenPreview(theme = LightTheme) {
+    ThemedScreenPreview(theme) {
         HistoryScreen(state = HistoryState.Loading)
     }
 }

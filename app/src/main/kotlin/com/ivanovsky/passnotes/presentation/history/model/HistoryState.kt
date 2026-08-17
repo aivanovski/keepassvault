@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.history.model
 
 import androidx.compose.runtime.Immutable
 import com.ivanovsky.passnotes.presentation.core.compose.cells.CellViewModel
+import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.ErrorPanelCellViewModel
 
 @Immutable
 sealed interface HistoryState {
@@ -14,7 +15,7 @@ sealed interface HistoryState {
 
     @Immutable
     data class Error(
-        val message: String
+        val cellViewModel: ErrorPanelCellViewModel
     ) : HistoryState
 
     @Immutable

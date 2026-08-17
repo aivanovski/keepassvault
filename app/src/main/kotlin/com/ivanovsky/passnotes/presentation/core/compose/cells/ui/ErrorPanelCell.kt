@@ -177,7 +177,7 @@ private fun DarkErrorPanelCellPreview() {
 }
 
 @Composable
-private fun newErrorStateCell(
+fun newErrorStateCell(
     text: String = mediumDummyText()
 ) = ErrorPanelCellViewModel(
     model = ErrorPanelCellModel(
@@ -192,7 +192,7 @@ private fun newErrorStateCell(
 )
 
 @Composable
-private fun newErrorPanelCell(
+fun newErrorPanelCell(
     text: String = shortDummyText(),
     isCloseButtonVisible: Boolean = true,
     actionButtonText: String? = "Retry"

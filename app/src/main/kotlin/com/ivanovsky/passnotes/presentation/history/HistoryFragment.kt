@@ -21,6 +21,7 @@ import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyA
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyActionDialogArgs
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.setupActionBar
+import com.ivanovsky.passnotes.presentation.core.extensions.showReportErrorDialog
 import com.ivanovsky.passnotes.presentation.core.extensions.showSnackbarMessage
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 
@@ -85,6 +86,9 @@ class HistoryFragment : BaseFragment() {
         }
         viewModel.showSnackbarMessageEvent.observe(viewLifecycleOwner) { message ->
             showSnackbarMessage(message)
+        }
+        viewModel.showReportErrorDialogEvent.observe(viewLifecycleOwner) { args ->
+            showReportErrorDialog(args)
         }
     }
 

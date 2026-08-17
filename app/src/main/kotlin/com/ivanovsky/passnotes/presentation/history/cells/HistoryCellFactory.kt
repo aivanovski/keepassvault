@@ -2,6 +2,7 @@ package com.ivanovsky.passnotes.presentation.history.cells
 
 import androidx.compose.ui.graphics.Color
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.domain.DateFormatter
 import com.ivanovsky.passnotes.domain.ResourceProvider
@@ -16,8 +17,11 @@ import com.ivanovsky.passnotes.presentation.core.compose.cells.CellViewModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.IllegalCellModelException
 import com.ivanovsky.passnotes.presentation.core.compose.cells.IntCellId
 import com.ivanovsky.passnotes.presentation.core.compose.cells.model.DividerCellModel
+import com.ivanovsky.passnotes.presentation.core.compose.cells.model.ErrorPanelCellModel
 import com.ivanovsky.passnotes.presentation.core.compose.cells.toBaseId
+import com.ivanovsky.passnotes.presentation.core.compose.cells.toId
 import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.DividerCellViewModel
+import com.ivanovsky.passnotes.presentation.core.compose.cells.viewModel.ErrorPanelCellViewModel
 import com.ivanovsky.passnotes.presentation.core.widget.entity.RoundedShape
 import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryDiffCellModel
 import com.ivanovsky.passnotes.presentation.history.cells.model.HistoryDiffPlaceholderCellModel
@@ -31,6 +35,21 @@ class HistoryCellFactory(
     private val resourceProvider: ResourceProvider,
     private val dateFormatter: DateFormatter
 ) {
+
+    fun createErrorPanelCell(
+        error: OperationError,
+        eventProvider: CellEventProvider
+    ): ErrorPanelCellViewModel {
+        return ErrorPanelCellViewModel(
+            model = ErrorPanelCellModel(
+                id = CellIds.ERROR_PANEL,
+                error = error,
+                isCloseButtonVisible = false,
+                background = null
+            ),
+            eventProvider = eventProvider
+        )
+    }
 
     fun createHistoryDiffCellViewModels(
         diff: List<HistoryDiffItem>,
@@ -193,5 +212,9 @@ class HistoryCellFactory(
 
     companion object {
         const val FIRST_VERSION_INDEX = -1
+
+        private object CellIds {
+            val ERROR_PANEL = 1.toId()
+        }
     }
 }

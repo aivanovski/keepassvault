@@ -5,17 +5,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.terrakok.cicerone.Router
 import com.ivanovsky.passnotes.R
+import com.ivanovsky.passnotes.data.entity.OperationError
 import com.ivanovsky.passnotes.data.entity.Property
 import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.usecases.diff.getEntity
 import com.ivanovsky.passnotes.domain.usecases.history.entity.HistoryDiffItem
-import com.ivanovsky.passnotes.extensions.formatReadableMessage
 import com.ivanovsky.passnotes.extensions.getOrThrow
 import com.ivanovsky.passnotes.presentation.Screens.NoteScreen
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
 import com.ivanovsky.passnotes.presentation.core.compose.cells.CellEventProviderImpl
+import com.ivanovsky.passnotes.presentation.core.compose.cells.model.ErrorPanelCellEvent
 import com.ivanovsky.passnotes.presentation.core.compose.themeFlow
 import com.ivanovsky.passnotes.presentation.core.dialog.propertyAction.PropertyAction
+import com.ivanovsky.passnotes.presentation.core.dialog.reportErrorDialog.ReportErrorDialogArgs
 import com.ivanovsky.passnotes.presentation.core.event.SingleLiveEvent
 import com.ivanovsky.passnotes.presentation.history.cells.HistoryCellFactory
 import com.ivanovsky.passnotes.presentation.history.cells.HistoryCellFactory.Companion.FIRST_VERSION_INDEX
@@ -40,6 +42,7 @@ class HistoryViewModel(
     val state = MutableStateFlow<HistoryState>(HistoryState.Loading)
     val showPropertyActionDialog = SingleLiveEvent<Property>()
     val showSnackbarMessageEvent = SingleLiveEvent<String>()
+    val showReportErrorDialogEvent = SingleLiveEvent<ReportErrorDialogArgs>()
 
     private var diff: List<HistoryDiffItem> = emptyList()
     private val eventProvider = CellEventProviderImpl()
@@ -83,6 +86,10 @@ class HistoryViewModel(
                     val values = event.eventId.split(":").map { it.toInt() }
                     onPropertyClicked(values[0], values[1])
                 }
+
+                is ErrorPanelCellEvent.OnReportButtonClick -> onReportErrorButtonClicked(
+                    event.error
+                )
             }
         }
     }
@@ -126,7 +133,10 @@ class HistoryViewModel(
             val getHistoryDiff = interactor.getHistoryDiff(args.noteUid)
             if (getHistoryDiff.isFailed) {
                 state.value = HistoryState.Error(
-                    message = getHistoryDiff.error.formatReadableMessage(resourceProvider)
+                    cellViewModel = cellFactory.createErrorPanelCell(
+                        error = getHistoryDiff.error,
+                        eventProvider = eventProvider
+                    )
                 )
                 return@launch
             }
@@ -149,6 +159,10 @@ class HistoryViewModel(
         } else {
             state.value = HistoryState.Empty
         }
+    }
+
+    private fun onReportErrorButtonClicked(error: OperationError) {
+        showReportErrorDialogEvent.value = ReportErrorDialogArgs(error)
     }
 
     private fun copyText(text: String) {

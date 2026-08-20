@@ -96,6 +96,7 @@ import com.ivanovsky.passnotes.presentation.unlock.UnlockViewModel
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellModelFactory
 import com.ivanovsky.passnotes.presentation.unlock.cells.factory.UnlockCellViewModelFactory
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 object UiModule {
@@ -103,121 +104,72 @@ object UiModule {
     fun build() =
         module {
             // Interactors
-            single { ClipboardInteractor(get()) }
-            single { DatabaseLockInteractor(get(), get(), get(), get()) }
-            single { FilePickerInteractor(get(), get()) }
-            single {
-                UnlockInteractor(
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get()
-                )
-            }
-            single { StorageListInteractor(get(), get(), get()) }
-            single { NewDatabaseInteractor(get(), get(), get(), get(), get()) }
-            single { GroupEditorInteractor(get(), get(), get(), get(), get()) }
-            single { DebugMenuInteractor(get(), get(), get(), get(), get()) }
-            single {
-                NoteInteractor(
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get()
-                )
-            }
-            single {
-                GroupsInteractor(
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get(),
-                    get()
-                )
-            }
-            single { NoteEditorInteractor(get(), get(), get(), get(), get(), get()) }
-            single { ServerLoginInteractor(get(), get(), get()) }
-            single { MainSettingsInteractor(get()) }
-            single { DatabaseSettingsInteractor(get(), get(), get()) }
-            single { AppSettingsInteractor(get(), get(), get(), get(), get()) }
-            single { AutofillInteractor(get(), get()) }
-            single { MainInteractor(get()) }
-            single { LockServiceInteractor(get(), get(), get(), get(), get()) }
-            single { PasswordGeneratorInteractor(get()) }
-            single { ResolveConflictDialogInteractor(get(), get(), get(), get()) }
-            single { SyncStateCache(get()) }
-            single { SyncStateInteractor(get(), get(), get()) }
-            single { EnterDbCredentialsInteractor(get(), get(), get(), get()) }
-            single { DiffViewerInteractor(get(), get(), get(), get(), get(), get(), get()) }
-            single { SetupOneTimePasswordInteractor() }
-            single { HistoryInteractor(get(), get(), get()) }
+            singleOf(::ClipboardInteractor)
+            singleOf(::DatabaseLockInteractor)
+            singleOf(::FilePickerInteractor)
+            singleOf(::UnlockInteractor)
+            singleOf(::StorageListInteractor)
+            singleOf(::NewDatabaseInteractor)
+            singleOf(::GroupEditorInteractor)
+            singleOf(::DebugMenuInteractor)
+            singleOf(::NoteInteractor)
+            singleOf(::GroupsInteractor)
+            singleOf(::NoteEditorInteractor)
+            singleOf(::ServerLoginInteractor)
+            singleOf(::MainSettingsInteractor)
+            singleOf(::DatabaseSettingsInteractor)
+            singleOf(::AppSettingsInteractor)
+            singleOf(::AutofillInteractor)
+            singleOf(::MainInteractor)
+            singleOf(::LockServiceInteractor)
+            singleOf(::PasswordGeneratorInteractor)
+            singleOf(::ResolveConflictDialogInteractor)
+            singleOf(::SyncStateCache)
+            singleOf(::SyncStateInteractor)
+            singleOf(::EnterDbCredentialsInteractor)
+            singleOf(::DiffViewerInteractor)
+            singleOf(::SetupOneTimePasswordInteractor)
+            singleOf(::HistoryInteractor)
 
             // Autofill
-            single { AutofillViewFactory(get(), get()) }
+            singleOf(::AutofillViewFactory)
 
             // Cell factories
-            single { GroupsCellModelFactory(get()) }
-            single { GroupsCellViewModelFactory(get(), get()) }
+            singleOf(::GroupsCellModelFactory)
+            singleOf(::GroupsCellViewModelFactory)
 
-            single { NoteEditorCellModelFactory(get()) }
-            single { NoteEditorCellViewModelFactory(get(), get()) }
+            singleOf(::NoteEditorCellModelFactory)
+            singleOf(::NoteEditorCellViewModelFactory)
 
-            single { UnlockCellModelFactory(get()) }
-            single { UnlockCellViewModelFactory() }
+            singleOf(::UnlockCellModelFactory)
+            singleOf(::UnlockCellViewModelFactory)
 
-            single { NoteCellModelFactory(get(), get()) }
-            single { NoteCellViewModelFactory(get()) }
+            singleOf(::NoteCellModelFactory)
+            singleOf(::NoteCellViewModelFactory)
 
-            single { FilePickerCellModelFactory() }
-            single { FilePickerCellViewModelFactory() }
+            singleOf(::FilePickerCellModelFactory)
+            singleOf(::FilePickerCellViewModelFactory)
 
-            single { StorageListCellModelFactory(get()) }
-            single { StorageListCellViewModelFactory() }
+            singleOf(::StorageListCellModelFactory)
+            singleOf(::StorageListCellViewModelFactory)
 
-            single { NavigationMenuCellModelFactory(get()) }
-            single { NavigationMenuCellViewModelFactory() }
+            singleOf(::NavigationMenuCellModelFactory)
+            singleOf(::NavigationMenuCellViewModelFactory)
 
-            single { SyncStateCellModelFactory(get()) }
+            singleOf(::SyncStateCellModelFactory)
 
-            single { DiffViewerCellFactory(get(), get(), get()) }
+            singleOf(::DiffViewerCellFactory)
 
-            single { HistoryCellFactory(get(), get()) }
+            singleOf(::HistoryCellFactory)
 
-            single { OptionDialogCellModelFactory(get()) }
-            single { OptionDialogCellViewModelFactory(get()) }
+            singleOf(::OptionDialogCellModelFactory)
+            singleOf(::OptionDialogCellViewModelFactory)
 
             // Cicerone
             single { Cicerone.create() }
-            single { provideCiceroneRouter(get()) }
-            single { provideCiceroneNavigatorHolder(get()) }
-            single { SettingsRouter(get()) }
+            singleOf(::provideCiceroneRouter)
+            singleOf(::provideCiceroneNavigatorHolder)
+            singleOf(::SettingsRouter)
 
             // ViewModels
             factory { (args: StorageListArgs) ->

@@ -15,6 +15,7 @@ import com.ivanovsky.passnotes.data.repository.settings.Settings
 import com.ivanovsky.passnotes.domain.DateFormatProvider
 import com.ivanovsky.passnotes.domain.DateFormatter
 import com.ivanovsky.passnotes.domain.DispatcherProvider
+import com.ivanovsky.passnotes.domain.DispatcherProviderImpl
 import com.ivanovsky.passnotes.domain.FileHelper
 import com.ivanovsky.passnotes.domain.LocaleProvider
 import com.ivanovsky.passnotes.domain.NoteDiffer
@@ -23,6 +24,8 @@ import com.ivanovsky.passnotes.domain.ResourceProvider
 import com.ivanovsky.passnotes.domain.interactor.SelectionHolder
 import com.ivanovsky.passnotes.injection.AppStartDependencies
 import com.ivanovsky.passnotes.presentation.core.ThemeProvider
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 object CoreModule {
@@ -31,39 +34,37 @@ object CoreModule {
         appStartDeps: AppStartDependencies
     ) = module {
         single { appStartDeps.loggerInteractor }
-        single { ThemeProvider(get()) }
+        singleOf(::ThemeProvider)
         single { ResourceProvider(get(), get()) }
-        single { PermissionHelper(get()) }
-        single { LocaleProvider(get()) }
-        single { DispatcherProvider() }
-        single { ObserverBus() }
-        single { DateFormatProvider(get(), get()) }
-        single { DateFormatter(get()) }
-        single { NoteDiffer() }
-        single { SelectionHolder() }
+        singleOf(::PermissionHelper)
+        singleOf(::LocaleProvider)
+        singleOf(::DispatcherProviderImpl).bind(DispatcherProvider::class)
+        singleOf(::ObserverBus)
+        singleOf(::DateFormatProvider)
+        singleOf(::DateFormatter)
+        singleOf(::NoteDiffer)
+        singleOf(::SelectionHolder)
         single<Settings> { appStartDeps.settings }
         single { appStartDeps.crashReporterInteractor }
-        single<DataCipherProvider> { DataCipherProviderImpl(get()) }
-        single { FileHelper(get(), get()) }
-        single { SAFHelper(get()) }
+        singleOf(::DataCipherProviderImpl).bind(DataCipherProvider::class)
+        singleOf(::FileHelper)
+        singleOf(::SAFHelper)
 
         // Database
         single { AppDatabase.buildDatabase(get(), get()) }
         // DAO's
-        single { provideRemoteFileDao(get()) }
-        single { provideGitRootDao(get()) }
-        single { provideTemporaryFileDao(get()) }
-        single { provideUsedFileDao(get()) }
+        singleOf(::provideRemoteFileDao)
+        singleOf(::provideGitRootDao)
+        singleOf(::provideTemporaryFileDao)
+        singleOf(::provideUsedFileDao)
         // Repositories
-        single { RemoteFileRepository(get()) }
-        single { UsedFileRepository(get(), get()) }
-        single { TemporaryFileRepository(get()) }
+        singleOf(::RemoteFileRepository)
+        singleOf(::UsedFileRepository)
+        singleOf(::TemporaryFileRepository)
 
         // Files, Keepass
-        single { DatabaseSyncStateProvider(get(), get(), get()) }
-        single<EncryptedDatabaseRepository> {
-            KeepassDatabaseRepository(get(), get(), get(), get())
-        }
+        singleOf(::DatabaseSyncStateProvider)
+        singleOf(::KeepassDatabaseRepository).bind(EncryptedDatabaseRepository::class)
     }
 
     private fun provideGitRootDao(database: AppDatabase) =

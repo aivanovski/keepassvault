@@ -32,43 +32,44 @@ import com.ivanovsky.passnotes.domain.usecases.diff.GetDiffUseCase
 import com.ivanovsky.passnotes.domain.usecases.history.GetHistoryUseCase
 import com.ivanovsky.passnotes.domain.usecases.test.GetTestCredentialsUseCase
 import com.ivanovsky.passnotes.domain.usecases.test.GetTestPasswordUseCase
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 object UseCaseModule {
 
     fun build() =
         module {
-            single { GetTestCredentialsUseCase(get()) }
-            single { GetTestPasswordUseCase(get(), get()) }
-            single { LockDatabaseUseCase() }
-            single { GetRecentlyOpenedFilesUseCase(get(), get()) }
-            single { SyncUseCases(get(), get(), get(), get()) }
-            single { AddTemplatesUseCase(get(), get(), get()) }
-            single { GetDatabaseUseCase(get()) }
-            single { MoveNoteUseCase(get(), get(), get()) }
-            single { MoveGroupUseCase(get(), get(), get()) }
-            single { GetGroupUseCase(get(), get()) }
-            single { IsDatabaseOpenedUseCase(get()) }
-            single { GetNoteUseCase(get(), get()) }
-            single { FindNoteForAutofillUseCase(get(), get()) }
-            single { UpdateNoteWithAutofillDataUseCase(get(), get(), get()) }
-            single { CheckNoteAutofillDataUseCase(get()) }
-            single { UpdateNoteUseCase(get(), get(), get()) }
-            single { RemoveUsedFileUseCase(get(), get(), get(), get()) }
-            single { GetUsedFileUseCase(get(), get()) }
-            single { UpdateUsedFileUseCase(get(), get()) }
-            single { SortGroupsAndNotesUseCase(get(), get()) }
-            single { GeneratePasswordUseCase() }
-            single { RemoveBiometricDataUseCase(get(), get(), get()) }
-            single { DecodePasswordWithBiometricUseCase(get()) }
-            single { EncodePasswordWithBiometricUseCase(get()) }
-            single { SearchUseCases(get(), get(), get()) }
-            single { FindParentGroupsUseCase(get(), get()) }
-            single { GetDiffUseCase(get()) }
-            single { GetHistoryUseCase(get(), get()) }
-            single { ExportDatabaseUseCase(get(), get(), get(), get()) }
-            single { SetupRecycleBinUseCase(get(), get()) }
-            single { ApplyDiffUseCase(get(), get()) }
-            single { CleanUpFilesUseCase(get()) }
+            singleOf(::GetTestCredentialsUseCase)
+            singleOf(::GetTestPasswordUseCase)
+            singleOf(::LockDatabaseUseCase)
+            singleOf(::GetRecentlyOpenedFilesUseCase)
+            singleOf(::SyncUseCases)
+            singleOf(::AddTemplatesUseCase)
+            singleOf(::GetDatabaseUseCase)
+            singleOf(::MoveNoteUseCase)
+            singleOf(::MoveGroupUseCase)
+            singleOf(::GetGroupUseCase)
+            singleOf(::IsDatabaseOpenedUseCase)
+            singleOf(::GetNoteUseCase)
+            singleOf(::FindNoteForAutofillUseCase)
+            singleOf(::UpdateNoteWithAutofillDataUseCase)
+            singleOf(::CheckNoteAutofillDataUseCase)
+            singleOf(::UpdateNoteUseCase)
+            singleOf(::RemoveUsedFileUseCase)
+            singleOf(::GetUsedFileUseCase)
+            singleOf(::UpdateUsedFileUseCase)
+            singleOf(::SortGroupsAndNotesUseCase)
+            singleOf(::GeneratePasswordUseCase)
+            singleOf(::RemoveBiometricDataUseCase)
+            singleOf(::DecodePasswordWithBiometricUseCase)
+            singleOf(::EncodePasswordWithBiometricUseCase)
+            singleOf(::SearchUseCases)
+            singleOf(::FindParentGroupsUseCase)
+            singleOf(::GetDiffUseCase)
+            singleOf(::GetHistoryUseCase)
+            singleOf(::ExportDatabaseUseCase)
+            singleOf(::SetupRecycleBinUseCase)
+            singleOf(::ApplyDiffUseCase)
+            singleOf(::CleanUpFilesUseCase)
         }
 }

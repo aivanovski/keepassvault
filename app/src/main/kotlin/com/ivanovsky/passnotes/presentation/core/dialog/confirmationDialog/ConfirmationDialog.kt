@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.presentation.core.dialog.confirmationDialog
 
-import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.dialog.BaseDialogFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
@@ -27,7 +27,7 @@ class ConfirmationDialog : BaseDialogFragment(), DialogInterface.OnClickListener
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(context, R.style.AppDialogTheme)
+        return MaterialAlertDialogBuilder(requireContext(), R.style.AppDialogTheme)
             .apply {
                 setMessage(args.message)
 

@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.presentation.core.dialog
 
-import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.domain.PermissionHelper
 import com.ivanovsky.passnotes.domain.entity.SystemPermission
@@ -17,7 +17,7 @@ class AllFilesPermissionDialog : BaseDialogFragment(), DialogInterface.OnClickLi
     private val permissionHelper: PermissionHelper by inject()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(context, R.style.AppDialogTheme)
+        return MaterialAlertDialogBuilder(requireContext(), R.style.AppDialogTheme)
             .setTitle(R.string.all_files_permission_dialog_title)
             .setMessage(R.string.all_files_permission_dialog_message)
             .setPositiveButton(R.string.grant, this)

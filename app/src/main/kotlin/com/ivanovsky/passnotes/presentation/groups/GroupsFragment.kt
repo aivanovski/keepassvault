@@ -31,6 +31,7 @@ import com.ivanovsky.passnotes.presentation.core.BaseFragment
 import com.ivanovsky.passnotes.presentation.core.DatabaseInteractionWatcher
 import com.ivanovsky.passnotes.presentation.core.adapter.ViewModelsAdapter
 import com.ivanovsky.passnotes.presentation.core.animation.AnimationFactory
+import com.ivanovsky.passnotes.presentation.core.dialog.BottomSheetHostFragment
 import com.ivanovsky.passnotes.presentation.core.dialog.confirmationDialog.ConfirmationDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialog
 import com.ivanovsky.passnotes.presentation.core.dialog.resolveConflict.ResolveConflictDialogArgs
@@ -48,9 +49,9 @@ import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
 import com.ivanovsky.passnotes.presentation.core.permission.PermissionRequestResultReceiver
 import com.ivanovsky.passnotes.presentation.groups.GroupsViewModel.GroupsMenuItem
 import com.ivanovsky.passnotes.presentation.groups.dialog.ChooseOptionDialog
+import com.ivanovsky.passnotes.presentation.storagelist.Action
+import com.ivanovsky.passnotes.presentation.storagelist.StorageListArgs
 import com.ivanovsky.passnotes.presentation.unlock.UnlockScreenArgs
-import com.ivanovsky.passnotes.util.FileUtils.DEFAULT_DB_NAME
-import com.ivanovsky.passnotes.util.IntentUtils
 import timber.log.Timber
 
 class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
@@ -389,10 +390,17 @@ class GroupsFragment : BaseFragment(), PermissionRequestResultReceiver {
     }
 
     private fun showExportSystemPicker() {
-        startActivityForResult(
-            IntentUtils.newCreateFileIntent(DEFAULT_DB_NAME),
-            REQUEST_CODE_SAVE_AS_PICKER
+        val dialog = BottomSheetHostFragment.newInstance(
+            StorageListArgs(
+                action = Action.PICK_FILE,
+                resultKey = Screens.StorageListScreen.newResultKey()
+            )
         )
+        dialog.show(childFragmentManager, "dkjaskljadkl")
+        // startActivityForResult(
+        //     IntentUtils.newCreateFileIntent(DEFAULT_DB_NAME),
+        //     REQUEST_CODE_SAVE_AS_PICKER
+        // )
     }
 
     companion object {

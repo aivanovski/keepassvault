@@ -7,7 +7,7 @@
     <color name="primary">#3F51B5</color>
     <color name="background">#f6f7fb</color>
     <color name="action_bar_background">@color/primary</color>
-    <color name="dialog_background">@color/background</color>
+    <color name="dialog_background">@color/surface</color>
     <color name="dialog_primary">@color/primary</color>
     <color name="selected_background">#dee1f9</color>
     <color name="surface">#ffffff</color>

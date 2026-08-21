@@ -1,8 +1,8 @@
 package com.ivanovsky.passnotes.presentation.core.dialog
 
-import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
 import com.ivanovsky.passnotes.presentation.core.extensions.withArguments
@@ -14,7 +14,7 @@ class MessageDialog : BaseDialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return AlertDialog.Builder(requireContext(), R.style.AppDialogTheme)
+        return MaterialAlertDialogBuilder(requireContext(), R.style.AppDialogTheme)
             .apply {
                 if (args.isError) {
                     setTitle(R.string.error_has_been_occurred)

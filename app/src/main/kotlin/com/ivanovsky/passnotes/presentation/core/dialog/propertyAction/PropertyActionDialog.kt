@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.dialog.BaseDialogFragment
 import com.ivanovsky.passnotes.presentation.core.extensions.getMandatoryArgument
@@ -38,7 +39,7 @@ class PropertyActionDialog : BaseDialogFragment() {
         val actions = viewModel.actions
         val entries = actions.map { option -> option.title }
 
-        val builder = AlertDialog.Builder(context, R.style.AppDialogTheme)
+        val builder = MaterialAlertDialogBuilder(requireContext(), R.style.AppDialogTheme)
             .setItems(entries.toTypedArray()) { _, which ->
                 onOptionClicked(actions[which])
             }

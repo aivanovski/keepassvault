@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.ivanovsky.passnotes.presentation.core.widget.FragmentContainerFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/innerFragmentContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/fragment_bottom_sheet_background" />

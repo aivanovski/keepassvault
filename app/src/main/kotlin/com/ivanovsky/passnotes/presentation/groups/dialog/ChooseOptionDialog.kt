@@ -1,9 +1,9 @@
 package com.ivanovsky.passnotes.presentation.groups.dialog
 
-import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.ivanovsky.passnotes.R
 import com.ivanovsky.passnotes.presentation.core.dialog.BaseDialogFragment
 
@@ -24,7 +24,7 @@ class ChooseOptionDialog : BaseDialogFragment(), DialogInterface.OnClickListener
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(context, R.style.AppDialogTheme)
+        val builder = MaterialAlertDialogBuilder(requireContext(), R.style.AppDialogTheme)
             .setItems(entries.toTypedArray(), this)
 
         if (title != null) {

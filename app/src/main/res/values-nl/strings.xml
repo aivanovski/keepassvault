@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">KeePassVault</string>
+    <string name="app_name_automation">KeePassVault Test</string>
+
+    <!-- Common for all screens -->
+    <string name="webdav">WebDAV</string>
+    <string name="git">Git</string>
+    <string name="device">Apparaat</string>
+    <string name="no_items">Geen items</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nee</string>
+    <string name="text_with_colon" translatable="false">%s:</string>
+    <string name="text_with_dots" translatable="false">%s...</string>
+    <string name="remove_confirmation_message">Weet u zeker dat u %1$s "%2$s" wilt verwijderen?</string>
+    <string name="status_offline_mode">Gegevens worden weergegeven in off-line modus</string>
+    <string name="status_read_only_mode">Gegevens worden weergegeven in alleen-lezen modus</string>
+
+    <!-- Menu and buttons -->
+    <string name="retry">Opnieuwen</string>
+    <string name="create">Maken</string>
+    <string name="done">Klaar</string>
+    <string name="open_file">Bestand openen</string>
+    <string name="new_file">Nieuw bestand</string>
+    <string name="settings">Instellingen</string>
+    <string name="about">Over</string>
+    <string name="ok">Ok</string>
+    <string name="lock_database">Database vergrendelen</string>
+    <string name="lock">Vergrendelen</string>
+    <string name="resolve">Oplossen</string>
+    <string name="remove">Verwijderen</string>
+    <string name="add_templates">Veldsjablonen toevoegen</string>
+    <string name="more_options">Meer opties</string>
+    <string name="paste">Plakken</string>
+    <string name="apply">Toepassen</string>
+    <string name="select">Selecteren</string>
+    <string name="sort_and_view">Sorteren &amp; Weergeven</string>
+    <string name="login">Aanmelden</string>
+    <string name="refresh">Vernieuwen</string>
+    <string name="grant">Toestaan</string>
+    <string name="toggle_hidden">Zichtbaarheid wisselen</string>
+    <string name="dismiss">Afwegen</string>
+    <string name="synchronize_with_source">Synchroniseren met bron</string>
+    <string name="details">Details</string>
+    <string name="report">Rapporteren</string>
+    <string name="copy">Kopiëren</string>
+    <string name="merge">Samenvoegen</string>
+
+    <!-- Accessibility descriptions -->
+    <string name="url">URL</string>
+    <string name="unlock_button">Ontgrendelknop</string>
+    <string name="eye_icon">Oogpictogram</string>
+    <string name="loading_indicator">Laadinicator</string>
+    <string name="generate_icon">Genereerpictogram</string>
+
+    <!-- Lock notification -->
+    <string name="lock_notification_channel">Snel vergrendelen</string>
+    <string name="lock_notification_channel_description">Knop om geopende database te vergrendelen</string>
+    <string name="lock_notification_text_normal">Database is geopend</string>
+    <string name="lock_notification_text_not_synchronized">Database is geopend, niet verstrengd</string>
+    <string name="lock_notification_text_synchronizing">Synchroniseren</string>
+
+    <!-- Autofill -->
+    <string name="sign_in_with_app">Aanmelden met %s</string>
+    <string name="select_entry_with_dots">Selecteer een invoer…</string>
+    <string name="autofill_service_name">KeePassVault Automatisch invullen</string>
+    <string name="autofill_save_note_message">Eerder ingevoerde gegevens opslaan voor automatisch-vulsuggesties?</string>
+    <string name="add_autofill_data_message">Wilt u de geselecteerde invoer koppelen aan automatisch-vulgegevens voor later gebruik?</string>
+
+    <!-- Common for error -->
+    <string name="error_has_been_occurred">Er is een fout opgetreden</string>
+    <string name="network_error_message">Er is een netwerkfout opgetreden, controleer uw internetverbinding</string>
+    <string name="file_permission_error_message">Kan geen toegang krijgen tot bestand, geef alstublieft machtiging voor de applicatie</string>
+    <string name="file_already_exists">Bestand bestaat al</string>
+    <string name="file_already_exists_detailed">Bestand %s bestaat al</string>
+    <string name="empty_field">Leeg veld</string>
+    <string name="sync_conflict_message">Er is een conflict tussen de lokale en externe databases. Los dit conflict op voordat u de database gebruikt.</string>
+    <string name="sync_file_not_found_message">Kan het databasebestand op de externe server niet vinden. Probeer dit bestand te verwijderen en opnieuw toe te voegen.</string>
+    <string name="sync_auth_error_login_message">Applicatie kan zich niet authenticeren op de externe server.</string>
+    <string name="sync_auth_error_remove_message">Applicatie kan zich niet authenticeren op de externe server. Probeer dit bestand te verwijderen en opnieuw toe te voegen.</string>
+    <string name="sync_error_message">Kan de database niet synchroniseren met de externe server. Probeer dit bestand te verwijderen en opnieuw toe te voegen.</string>
+    <string name="file_not_found">Bestand niet gevonden</string>
+
+    <!-- Resolve Conflict Dialog -->
+    <string name="resolve_conflict_dialog_message">Er is een conflict tussen de lokale en externe databases. Los dit conflict op voordat u de database gebruikt.\n\nDEZE ACTIE KAN DATAVERLIER TOEBRENGEN!\n\nLokaal bestand is gewijzigd op:\n%1$s\nExtern bestand is gewijzigd op:\n%2$s\n\nSelecteer welke versie u wilt gebruiken?</string>
+    <string name="local_database">Lokale database</string>
+    <string name="remote_database">Externe database</string>
+    <string name="view_diff">Verschil weergeven</string>
+    <string name="merge_conflicts">Conflicten samenvoegen</string>
+    <string name="unlock_database_error_message">Unlock de database eerst</string>
+
+    <!-- Diff Viewer screen -->
+    <string name="group_with_str">Groep: %s</string>
+    <string name="entry_with_str">Invoer: %s</string>
+    <string name="diff_event_property">Veld '%s': '%s'</string>
+    <string name="diff_event_property_update">Veld '%s': '%s' gewijzigd naar '%s'</string>
+    <string name="unknown_entity">Onbekunde entiteit</string>
+    <string name="compare_files">Bestanden vergelijken</string>
+    <string name="merge_changes">Wijzigingen samenvoegen</string>
+    <string name="pick_file">Selecteer een bestand</string>
+    <string name="opened_database">Geopende database</string>
+    <string name="compare">Vergelijken</string>
+    <string name="files_are_identical">Bestanden zijn identiek</string>
+    <string name="local_changes">Lokale wijzigingen</string>
+    <string name="remote_changes">Extere wijzigingen</string>
+    <string name="merge_confirmation_message">Weet u zeker dat u de geselecteerde wijzigingen wilt samenvoegen?</string>
+
+    <!-- Unlock screen -->
+    <string name="recently_used">Recent gebruikt</string>
+    <string name="no_databases">Geen databases</string>
+    <string name="unlock">Ontgrendelen</string>
+    <string name="empty_file_name">Geen(bestands)naam</string>
+    <string name="file_is_up_to_date">Bestand is up-to-date</string>
+    <string name="new_version_of_file_is_available">Nieuwe versie van bestand is beschikbaar</string>
+    <string name="not_synchronized_and_offline_mode">Niet gesynchroniseerd, off-line modus</string>
+    <string name="offline_mode">Off-line modus</string>
+    <string name="checking">Controleren</string>
+    <string name="checking_status">Status controleren</string>
+    <string name="conflict">Conflict</string>
+    <string name="not_synchronized">Niet gesynchroniseerd</string>
+    <string name="synchronizing">Synchroniseren</string>
+    <string name="downloading">Downloaden</string>
+    <string name="uploading">Uploaden</string>
+    <string name="error">Fout</string>
+    <string name="not_found">Niet gevonden</string>
+    <string name="error_offline_mode">Fout, off-line modus</string>
+    <string name="auth_error_offline_mode">Niet geautoriseerd, off-line modus</string>
+    <string name="unauthorised">Niet geautoriseerd</string>
+    <string name="change">Wijzigen</string>
+    <string name="unlock_type">Ontgrendeltype</string>
+    <string name="key_file">Sleutelbestand</string>
+    <string name="key_file_is_not_selected">Sleutelbestand is niet gekozen</string>
+    <string name="unlock_with_fingerprint">Ontgrendelen met vingerafdruk</string>
+    <string name="setup_fingerprint_unlock">Vingerafdrukontgrendeling instellen</string>
+    <string name="setup_fingerprint_unlock_message">Authenticeer om door te gaan</string>
+    <string name="add_key">Sleutel toevoegen</string>
+    <string name="add_biometrics">Biometerieken toevoegen</string>
+    <string name="recent_files">Recente bestanden</string>
+    <string name="lock_notification_message">Wilt u een systeemmelding voor de geopende database inschakelen?\n\nDeze melding vereist machtiging, en maakt het mogelijk om de databasestatus weer te geven en de database eenvoudig te vergrendelen.</string>
+    <string name="permit">Toestaan</string>
+    <string name="later">Later</string>
+    <string name="biometric_data_is_invalidated">Biometerieken zijn ongeldig geworden (bijv. nieuwe vingerafdruk geregistreerd). Stel biometerieken opnieuw in.</string>
+    <string name="password_and_key_file">Wachtwoord en sleutelbestand</string>
+    <string name="unlock_with">Ontgrendelen met</string>
+
+    <!-- New database screen -->
+    <string name="new_database">Nieuwe database</string>
+    <string name="file_name">Bestandsnaam</string>
+    <string name="password">Wachtwoord</string>
+    <string name="confirm">Bevestigen</string>
+    <string name="you_entered_two_different_passwords_please_try_again">U heeft twee verschillende wachtwoorden ingevoerd. Probeer het opnieuw.</string>
+    <string name="this_field_should_match_password">Dit veld moet overeenkomen met het wachtwoord</string>
+    <string name="storage_type">Opslagtype</string>
+    <string name="not_selected">Niet geselecteerd</string>
+    <string name="dot_kdbx">.kdbx</string>
+    <string name="private_storage">Privé opslag</string>
+    <string name="public_storage">Publieke opslag</string>
+    <string name="storage_is_not_selected">Opslag is niet geselecteerd</string>
+    <string name="add_note_templates">Veldsjablonen toevoegen</string>
+    <string name="add_templates_info_message">Sjablonen maken het mogelijk om alleen belangrijke velden weer te geven en invoeren te maken met vooraf gedefinieerde veldnamen.</string>
+
+    <!-- Open file screen -->
+    <string name="file_path">Bestandspad</string>
+
+    <!-- Groups screen -->
+    <string name="groups">Groepen</string>
+    <string name="no_items_to_show">Geen items om weer te geven</string>
+    <string name="entries_with_count">Invoeren: %d</string>
+    <string name="groups_with_count">Groepen: %d</string>
+    <string name="groups_and_entries_with_count">Groepen: %1$d  Invoeren: %2$d</string>
+    <string name="new_item_entry_standard_entry">Standaard invoer</string>
+    <string name="new_item_entry_new_group">Nieuwe groep</string>
+    <string name="note_remove_confirmation_message">Weet u zeker dat u invoer "%s" wilt verwijderen?</string>
+    <string name="group_remove_confirmation_message">Weet u zeker dat u deze groep wilt verwijderen?</string>
+    <string name="add_templates_confirmation_message">Sjablonen maken het mogelijk om alleen belangrijke velden weer te geven en invoeren te maken met vooraf gedefinieerde veldnamen. Wilt u sjablonen aan de database toevoegen?</string>
+    <string name="successfully_removed">Succesvol verwijderd</string>
+    <string name="successfully_added">Succesvol toegevoegd</string>
+    <string name="successfully">Succesvol</string>
+    <string name="exported_successfully">Succesvol geëxporteerd</string>
+    <string name="selected_item_is_already_here">Geselecteerde item is hier al aanwezig</string>
+    <string-array name="item_actions_entries">
+        <item>Bewerken</item>
+        <item>Verwijderen</item>
+        <item>Knippen</item>
+    </string-array>
+    <string name="search_type">Zoektype</string>
+    <string name="search_options">Zoekopties</string>
+    <string name="search_fields">Zoekvelden</string>
+    <string name="search_scope">Zoekbereik</string>
+    <string name="searchable">Doorzoekbaar</string>
+    <string name="recycle_bin">Prullenbak</string>
+    <string name="other">Anders</string>
+    <string name="additional_options">Aanvullende opties</string>
+    <string name="case_sensitive">Hoofdlettergevoelig</string>
+    <string name="fuzzy">Vaag</string>
+    <string name="strict">Streng</string>
+    <string name="sort_by">Sorteren op</string>
+    <string name="sort_order">Sorteervolgorde</string>
+    <string name="modification">Wijziging</string>
+    <string name="creation">Creatie</string>
+    <string name="ascending">Oplopend</string>
+    <string name="descending">Aflopend</string>
+    <string name="default_">Natuurlijke volgorde</string>
+    <string name="list_groups_first">Groepen eerst weergeven</string>
+    <string name="enable_biometric_unlock">Biometerieken ontgrendeling inschakelen</string>
+    <string name="disable_biometric_unlock">Biometerieken ontgrendeling uitschakelen</string>
+    <string name="sync_error">Sync-fout</string>
+    <string name="no_search_results">Geen zoekresultaten</string>
+    <string name="compare_with">Vergelijken met</string>
+    <string name="add_entry">Invoer toevoegen</string>
+    <string name="save_as">Opslaan als</string>
+
+    <!-- Group editor screen -->
+    <string name="new_group">Nieuwe groep</string>
+    <string name="edit_group">Groep bewerken</string>
+    <string name="group_with_this_name_is_already_exist">Groep met deze naam bestaat al</string>
+    <string name="auto_dash_type">Auto-Type</string>
+    <string name="enable">Inschakelen</string>
+    <string name="disable">Uitschakelen</string>
+    <string name="inherit_from_parent">Overnemen van bovenliggende</string>
+    <string name="inherit_from_parent_with_value">Overnemen van bovenliggende (%s)</string>
+
+    <!-- Note screen -->
+    <string name="copied_clipboard_will_be_cleared_in_seconds">Gekopieerd! Klembord wordt gewist over %d seconden</string>
+    <string name="edited_at">Bewerkte %s</string>
+    <string name="copy_with_str">Kopiëren %s</string>
+    <string name="open_with_str">Openen %s</string>
+    <string name="copied">Gekopieerd</string>
+    <string name="hidden">Verborgen</string>
+    <string name="attachments">Bijlagen</string>
+    <string name="attachment">Bijlage</string>
+    <string name="file_lower">bestand</string>
+    <string name="view">Weergeven</string>
+    <string name="view_as_text">Als tekst weergeven</string>
+    <string name="share">Delen</string>
+    <string name="one_time_password">Eenmalig wachtwoord</string>
+    <string name="modified_with_str">Gewijzigde %s</string>
+    <string name="modified">Gewijzigd</string>
+    <string name="created">Gemaakt</string>
+    <string name="expires">Verloopt</string>
+    <string name="expiration">Vervaldatum</string>
+    <string name="history">Geschiedenis</string>
+
+    <!-- History screen -->
+    <string name="added">Toegevoegd</string>
+    <string name="deleted">Verwijderd</string>
+    <string name="changed">Gewijzigd</string>
+    <string name="history_event_property_updated">'%s' gewijzigd naar '%s'</string>
+
+    <!-- Note editor screen -->
+    <string name="new_entry">Nieuwe invoer</string>
+    <string name="name">Naam</string>
+    <string name="username">Gebruikersnaam</string>
+    <string name="no_changes">Geen wijzigingen</string>
+    <string name="url_cap">URL</string>
+    <string name="notes">Notities</string>
+    <string name="confirm_password">Bevestig wachtwoord</string>
+    <string name="does_not_match_with_password">Komt niet overeen met wachtwoord</string>
+    <string name="value">Waarde</string>
+    <string name="protected_">Beschermd</string>
+    <string name="field_name">Veldnaam</string>
+    <string name="field_value">Veldwaarde</string>
+    <string name="empty_field_name_message">Veldnaam mag niet leeg zijn</string>
+    <string name="title">Titel</string>
+    <string name="should_not_be_empty">Mag niet leeg zijn</string>
+    <string name="discard_changes">Wijzigingen verwijderen?</string>
+    <string name="discard">Verwijderen</string>
+    <string name="cancel">Annuleren</string>
+    <string name="select_item_to_add">Selecteer item om toe te voegen</string>
+    <string name="custom_property">Aangepast veld</string>
+    <string name="file_is_already_added_with_value">Bestand '%s' is al toegevoegd</string>
+    <string name="never">Nooit</string>
+
+    <!-- Password generator screen -->
+    <string name="generate_password">Wachtwoord genereren</string>
+    <string name="generate">Genereren</string>
+    <string name="generated_password">Gegenereerd wachtwoord</string>
+    <string name="length">Lengte</string>
+    <string name="eight">8</string>
+    <string name="twelve">12</string>
+    <string name="sixteen">16</string>
+    <string name="thirty_two">32</string>
+    <string name="sixty_four">64</string>
+    <string name="upper_case">Hoofdletters: A…Z</string>
+    <string name="lower_case">Kleine letters: a…z</string>
+    <string name="digits">Cijfers: 0…9</string>
+    <string name="minus">Min: -</string>
+    <string name="underscore">Liggende streep: _</string>
+    <string name="space">Spatie</string>
+    <string name="special">Speciaal: &amp;\/,^@.#&quot;:%\\='$!*`;+</string>
+    <string name="brackets">Haakjes: [](){}&lt;&gt;</string>
+    <string name="no_options_selected_message">Er moet minimaal één optie zijn geselecteerd (niet spatie)</string>
+
+    <string name="brackets_symbols">[](){}&lt;&gt;</string>
+
+    <!-- Storage screen -->
+    <string name="select_storage">Selecteer opslag</string>
+    <string name="private_app_storage">Prive app-opslag</string>
+    <string name="external_storage">Externe opslag</string>
+    <string name="external_storage_system_picker">Externe opslag (Systeembestandskiezer)</string>
+    <string name="external_storage_app_picker">Externe opslag (Ingebouwde bestandskiezer)</string>
+    <string name="authentication_failed">Authenticatie mislukt</string>
+    <string name="saf_warning_message">Niet aanbevolen, toegang verleend door Systeembestandskiezer kan tijdelijk zijn</string>
+    <string name="requires_permission">Machtiging vereist</string>
+
+    <!-- File picker screen -->
+    <string name="select_directory">Selecteer map</string>
+    <string name="select_file">Selecteer bestand</string>
+    <string name="permission_is_required">Machtiging is vereist</string>
+    <string name="please_select_any_file">Selecteer alstublieft een bestand</string>
+    <string name="all_files_permission_dialog_title">Machtiging verlenen</string>
+    <string name="all_files_permission_dialog_message">Om deze handeling uit te voeren heeft de applicatiemachtiging nodig om alle bestanden te beheren. Na het indrukken van de knop "Toestaan", selecteert u <b>Toestaan om alle bestanden te beheren</b> op het volgende scherm</string>
+    <string name="unable_to_authenticate">Kan niet authenticeren</string>
+    <string name="make_a_copy_and_select">Kopiëren en selecteren</string>
+    <string name="copy_and_select_description">Een kopie wordt aangemaakt in de prive map van de applicatie</string>
+
+    <!-- Server login screen -->
+    <string name="login_to_server">Aanmelden bij server</string>
+    <string name="login_to_git">Aanmelden bij Git-repository</string>
+    <string name="webdav_url_hint">URL naar WebDAV-server, bestand of map</string>
+    <string name="webdav_url_help_message">Alleen HTTPS-URL's worden ondersteund</string>
+    <string name="git_url_hint">Git-repository URL (bijv. https://git.example.com)</string>
+    <string name="git_url_help_message">HTTPS en SSH-protocollen worden ondersteund</string>
+    <string name="url_contains_secret_message">URL inmaskeren op het ontgrendelscherm</string>
+    <string name="ssh_key_copy_message">Uw privé SSH-sleutel wordt opgeslagen in de prive map van de applicatie. U kunt deze verwijderen door het bijbehorende database-item van het ontgrendelscherm te verwijderen.</string>
+    <string name="ssh_key_password">SSH-sleutelwachtwoord</string>
+    <string name="none">Geen</string>
+    <string name="ssh_key">SSH-sleutel</string>
+    <string name="ignore_ssl_certificate_validation">SSL-certificaatvalidatie negeren</string>
+
+    <!-- Debug menu screen -->
+    <string name="debug_menu">Debugmenu</string>
+    <string name="clone_repository">Repository klonen</string>
+
+    <!-- Select database screen -->
+    <string name="select_database">Selecteer database</string>
+    <string name="status">Status</string>
+    <string name="database_lower">database</string>
+
+    <!-- Search screen -->
+    <string name="search">Zoeken</string>
+    <string name="query">Query</string>
+    <string name="input_text_to_start_search">Voer tekst in om zoeken te starten</string>
+    <string name="no_results">Geen resultaten</string>
+
+    <!-- About screen -->
+    <string name="version_with_str">Versie: %s</string>
+    <string name="build_with_str">Build: %s</string>
+    <string name="about_intro">%s is een client voor KeePass-wachtwoordbeheerdatabases.\nHet gebruikt de %s-bibliotheek om KeePass-databasebestanden te openen.</string>
+    <string name="about_licence_intro">%s is open-source-software, geleverd onder de Apache License versie 2.0. Deze applicatie wordt aangeboden op een "STANDAARD" basis, ZONDER GARANTIES OF VOORWAARDEN VAN ENIGE AARD.</string>
+    <string name="feedback">Feedback</string>
+    <string name="homepage">Homepage</string>
+    <string name="kotpass">Kotpass</string>
+    <string name="keepass_rs">KeePass RS</string>
+
+    <!-- Settings screens -->
+    <string name="database">Database</string>
+    <string name="application">Applicatie</string>
+    <string name="database_settings">Databasinstellingen</string>
+    <string name="application_settings">Applicatie-instellingen</string>
+
+    <!-- AppSettings screen -->
+    <string name="pref_auto_lock_delay_in_ms_title">Databaseslotstijd</string>
+    <string name="pref_auto_lock_delay_in_ms_summary">Intervall waarna de database automatisch wordt vergrendeld bij niet-activiteit</string>
+    <string name="pref_is_lock_notification_visible_title">Melding met slotknop weergeven</string>
+    <string name="pref_is_lock_notification_visible_summary">Meldingsmachtiging is uitgeschakeld, schakel deze in in de systeeminstellingen</string>
+    <string name="pref_enable_notification_permission_title">Meldingsmachtiging inschakelen</string>
+    <string name="pref_auto_clear_clipboard_delay_in_ms_title">Klembord wissen</string>
+    <string name="pref_auto_clear_clipboard_delay_in_ms_summary">Intervall waarna het klembord wordt gewist</string>
+    <string name="pref_is_lock_database_on_back_title">Druk op 'Terug' om te vergrendelen</string>
+    <string name="pref_is_lock_database_on_back_summary">Database vergrendelen wanneer 'Terug' wordt ingedrukt vanaf het groepsbeginscherm</string>
+    <string name="pref_keepass_implementation_title">KeePass-bibliotheek om database te openen</string>
+    <string name="pref_keepass_implementation_summary">Bibliotheek gebruikt om database-bestanden te openen</string>
+    <string name="pref_is_file_log_enabled_title">Logboek naar bestand schrijven</string>
+    <string name="pref_is_file_log_enabled_summary">Applicatie schrijft alle logboeken naar een bestand dat bijgevoegd kan worden bij een probleem op de Github-pagina</string>
+    <string name="pref_is_crash_reporting_enabled_title">Crashrapporten verzenden</string>
+    <string name="pref_is_crash_reporting_available_summary">Crashrapporten verzenden naar Sentry om softwarefouten te diagnosticeren</string>
+    <string name="pref_is_crash_reporting_not_configured_summary">Crashmeldingen zijn niet geconfigureerd voor deze build</string>
+    <string name="pref_is_crash_reporting_unavailable_summary">Crashrapporten zijn alleen beschikbaar in Google Play-build</string>
+    <string name="pref_send_log_file_title">Logbestand verzenden</string>
+    <string name="pref_remove_log_files_title">Logbestanden wissen</string>
+    <string name="pref_is_postponed_sync_enabled_title">Upload vertragen</string>
+    <string name="pref_is_postponed_sync_enabled_summary">Upload via netwerk wordt uitgesteld tot de database is vergrendeld</string>
+    <string name="pref_background_sync_interval_title">Achtergrond synchronisatie</string>
+    <string name="pref_background_sync_interval_summary">Hoe vaak de app geopende databases op afstand controleert via Wi-Fi</string>
+
+    <string name="pref_git_user_name_title">Git-gebruikersnaam</string>
+    <string name="pref_git_user_name_summary">Wordt gebruikt in de commitboodschap</string>
+    <string name="pref_git_user_email_title">Git-gebruikers-e-mailadres</string>
+    <string name="pref_git_user_email_summary">Wordt gebruikt in de commitboodschap</string>
+
+    <string name="pref_is_biometric_unlock_enabled_title">Biometerieken ontgrendeling inschakelen</string>
+    <string name="pref_is_biometric_unlock_enabled_summary">Database ontgrendelen met vingerafdruk</string>
+    <string name="pref_search_type_title">Zoekalgoritme</string>
+    <string name="pref_search_type_summary">Wordt in de app gebruikt om invoeren op te zoeken</string>
+    <string name="pref_is_activate_search_on_start_title">Zoek op starten</string>
+    <string name="pref_is_activate_search_on_start_summary">Open het zoekveld automatisch na opening van de database</string>
+    <string name="general">Algemeen</string>
+    <string name="notifications">Meldingen</string>
+    <string name="reporting">Rapporteren</string>
+    <string name="biometrics">Biometerieken</string>
+    <string name="master_key">Mastercode</string>
+    <string name="synchronization_with_server">Synchronisatie met server</string>
+
+    <!-- DatabaseSettings screen -->
+    <string name="pref_is_recycle_bin_enabled_title">Prullenbak gebruiken</string>
+    <string name="pref_is_recycle_bin_enabled_summary">Verplaats groepen en notities naar de "Prullenbak"-groep bij verwijdering</string>
+    <string name="pref_recycle_bin_group_title">Prullenbak groep</string>
+    <string name="new_password">Nieuw wachtwoord</string>
+    <string name="change_password">Wijzig wachtwoord</string>
+
+    <!-- Enter database credentials screen -->
+    <string name="type_a_password">Voer een wachtwoord in</string>
+
+    <!-- Setup one-time password screen -->
+    <string name="add_one_time_password">Eenmalig wachtwoord toevoegen</string>
+    <string name="secret">Geheim</string>
+    <string name="type">Type</string>
+    <string name="algorithm">Algoritme</string>
+    <string name="generation_interval">Generatie-interval</string>
+    <string name="code_length">Code-lengte</string>
+    <string name="counter">Teller</string>
+    <string name="generation_interval_invalid_value_message">Waarde moet tussen 1 en 900 zijn</string>
+    <string name="counter_invalid_value_message">Waarde moet positief zijn of 0</string>
+    <string name="code_length_invalid_value_message">Waarde moet tussen 4 en 18 zijn</string>
+    <string name="empty_value_message">Mag niet leeg zijn</string>
+    <string name="custom">Aangepast</string>
+    <string name="invalid_value">Ongeldige waarde</string>
+    <string name="your_code_is">Je code is</string>
+
+    <!-- Report dialog -->
+    <string name="go_to_issues">Ga naar problemen</string>
+    <string name="show_stacktrace">...Stacktrace weergenceven...</string>
+
+</resources>

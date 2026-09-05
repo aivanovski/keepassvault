@@ -1,0 +1,33 @@
+Cliëntapp voor KeePass-databases.
+
+Deze app is gericht op mijn eigen gebruik. Deze kan bugs bevatten, maak daarom een back-up voordat u deze gebruikt.
+
+Functionaliteit:
+
+Synchronisatie:
+ - Sync met WebDav-server
+ - Sync met Git-repository (via HTTPS of SSH-protocollen)
+ - Synchronisatieconflicten oplossen door lokale en externe wijzigingen te controleren
+
+Databasbeheer:
+ - Nieuwe databases maken
+ - Bestaande databases bewerken
+ - Itemgeschiedenis beheren
+ - Bijlagen beheren
+ - Dynamische sjablonen (compatibel met andere Android-apps: KeePassDX, keepass2android)
+
+Geavanceerde databasehulpmiddelingen:
+ - Ingebouwde diffviewer voor databasawijzigingen
+ - Ondersteuning voor TOTP (Time-based One-Time Password) en HOTP (HMAC-based One-Time Password) voor tweefactorauthenticatie (2FA)
+
+Beveiligingsfuncties:
+ - Ontgrendelen met wachtwoord of sleutelbestand
+ - Ondersteunt biomentische ontgrendeling (vingerafdruk)
+
+Bestandscompatibiliteit:
+ - Ondersteunt .kdbx-bestanden tot versie 4.1
+
+Gebruiksgemak:
+ - Automatisch invullen voor Android >= 8.0
+ - Donker thema (gecontroleerd door systeeminstellingen)
+ - Vage zoekopdracht voor eenvoudig het vinden van items

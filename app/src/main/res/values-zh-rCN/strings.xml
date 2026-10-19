@@ -1,373 +1,800 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">KeePassVault</string>
+    <!-- EN: KeePassVault -->
     <string name="app_name_automation">KeePassVault Test</string>
+    <!-- EN: KeePassVault Test -->
+
     <!-- Common for all screens -->
     <string name="webdav">WebDAV</string>
+    <!-- EN: WebDAV -->
     <string name="git">Git</string>
-    <string name="device">本地设备</string>
+    <!-- EN: Git -->
+    <string name="device">设备</string>
+    <!-- EN: Device -->
     <string name="no_items">暂无项目</string>
+    <!-- EN: No items -->
     <string name="yes">是</string>
+    <!-- EN: Yes -->
     <string name="no">否</string>
+    <!-- EN: No -->
     <string name="text_with_colon" translatable="false">%s:</string>
+    <!-- EN: %s: -->
     <string name="text_with_dots" translatable="false">%s...</string>
-    <string name="remove_confirmation_message">您确定要删除%1$s“%2$s”吗？</string>
-    <string name="status_offline_mode">当前为离线模式，仅展示本地数据</string>
-    <string name="status_read_only_mode">当前为只读模式，仅可查看数据</string>
+    <!-- EN: %s... -->
+    <string name="remove_confirmation_message">确定要移除 %1$s “%2$s” 吗？</string>
+    <!-- EN: Are you sure want to remove %1$s "%2$s" ? -->
+    <string name="status_offline_mode">正在以离线模式显示数据</string>
+    <!-- EN: Displaying data in Offline mode -->
+    <string name="status_read_only_mode">正在以只读模式显示数据</string>
+    <!-- EN: Displaying data in Read-Only mode -->
+
     <!-- Menu and buttons -->
     <string name="retry">重试</string>
+    <!-- EN: Retry -->
     <string name="create">创建</string>
+    <!-- EN: Create -->
     <string name="done">完成</string>
+    <!-- EN: Done -->
     <string name="open_file">打开文件</string>
+    <!-- EN: Open file -->
     <string name="new_file">新建文件</string>
+    <!-- EN: New file -->
     <string name="settings">设置</string>
+    <!-- EN: Settings -->
     <string name="about">关于</string>
+    <!-- EN: About -->
     <string name="ok">确定</string>
+    <!-- EN: Ok -->
     <string name="lock_database">锁定数据库</string>
+    <!-- EN: Lock database -->
     <string name="lock">锁定</string>
+    <!-- EN: Lock -->
     <string name="resolve">解决</string>
-    <string name="remove">删除</string>
+    <!-- EN: Resolve -->
+    <string name="remove">移除</string>
+    <!-- EN: Remove -->
     <string name="add_templates">添加条目模板</string>
+    <!-- EN: Add entry templates -->
     <string name="more_options">更多选项</string>
+    <!-- EN: More options -->
     <string name="paste">粘贴</string>
+    <!-- EN: Paste -->
     <string name="apply">应用</string>
+    <!-- EN: Apply -->
     <string name="select">选择</string>
-    <string name="sort_and_view">排序与视图</string>
+    <!-- EN: Select -->
+    <string name="sort_and_view">视图与排序</string>
+    <!-- EN: Sort &amp; View -->
     <string name="login">登录</string>
+    <!-- EN: Login -->
     <string name="refresh">刷新</string>
-    <string name="grant">授权</string>
-    <string name="toggle_hidden">显示/隐藏内容</string>
-    <string name="dismiss">关闭</string>
-    <string name="synchronize_with_source">与源端同步</string>
+    <!-- EN: Refresh -->
+    <string name="grant">授予</string>
+    <!-- EN: Grant -->
+    <string name="toggle_hidden">切换隐藏状态</string>
+    <!-- EN: Toggle hidden -->
+    <string name="dismiss">忽略</string>
+    <!-- EN: Dismiss -->
+    <string name="synchronize_with_source">从源/仓库同步</string>
+    <!-- EN: Synchronize with source -->
     <string name="details">详情</string>
-    <string name="report">问题报告</string>
+    <!-- EN: Details -->
+    <string name="report">报告</string>
+    <!-- EN: Report -->
     <string name="copy">复制</string>
+    <!-- EN: Copy -->
+    <string name="merge">合并</string>
+    <!-- EN: Merge -->
+
     <!-- Accessibility descriptions -->
     <string name="url">网址</string>
+    <!-- EN: URL -->
     <string name="unlock_button">解锁按钮</string>
-    <string name="eye_icon">可见性切换图标</string>
-    <string name="loading_indicator">加载中指示器</string>
+    <!-- EN: Unlock button -->
+    <string name="eye_icon">眼睛图标</string>
+    <!-- EN: Eye icon -->
+    <string name="loading_indicator">加载指示器</string>
+    <!-- EN: Loading indicator -->
     <string name="generate_icon">生成图标</string>
+    <!-- EN: Generate icon -->
+
     <!-- Lock notification -->
-    <string name="lock_notification_channel">一键锁定</string>
-    <string name="lock_notification_channel_description">提供一键锁定已打开数据库的快捷按钮</string>
+    <string name="lock_notification_channel">快速锁定</string>
+    <!-- EN: Quick Lock -->
+    <string name="lock_notification_channel_description">锁定已打开数据库的按钮</string>
+    <!-- EN: Button to lock opened database -->
     <string name="lock_notification_text_normal">数据库已打开</string>
-    <string name="lock_notification_text_not_synchronized">数据库已打开但尚未同步</string>
-    <string name="lock_notification_text_synchronizing">同步中</string>
+    <!-- EN: Database is opened -->
+    <string name="lock_notification_text_not_synchronized">数据库已打开但未同步</string>
+    <!-- EN: Database is opened, not synchronized -->
+    <string name="lock_notification_text_synchronizing">正在同步...</string>
+    <!-- EN: Synchronizing -->
+
     <!-- Autofill -->
-    <string name="sign_in_with_app">使用%s登录</string>
+    <string name="sign_in_with_app">使用 %s 登录</string>
+    <!-- EN: Sign in with %s -->
     <string name="select_entry_with_dots">选择条目…</string>
-    <string name="autofill_service_name">KeePassVault 自动填充服务</string>
-    <string name="autofill_save_note_message">是否保存之前输入的内容并用于后续自动填充建议？</string>
-    <string name="add_autofill_data_message">是否将选中的条目与自动填充数据关联以便后续使用？</string>
+    <!-- EN: Select entry… -->
+    <string name="autofill_service_name">KeePassVault 自动填充</string>
+    <!-- EN: KeePassVault Autofill -->
+    <string name="autofill_save_note_message">是否保存之前输入的数据以供自动填充建议使用？</string>
+    <!-- EN: Save previously entered data for autofill suggestions? -->
+    <string name="add_autofill_data_message">是否将所选条目与自动填充数据关联以供将来使用？</string>
+    <!-- EN: Do you want to associate selected entry with Autofill data for future use? -->
+
     <!-- Common for error -->
     <string name="error_has_been_occurred">发生错误</string>
-    <string name="network_error_message">发生网络错误，请检查网络连接</string>
-    <string name="file_permission_error_message">无法访问文件，请为应用授予文件权限</string>
+    <!-- EN: Error has been occurred -->
+    <string name="network_error_message">请检查网络连接</string>
+    <!-- EN: Network error has been occurred, check internet connection -->
+    <string name="file_permission_error_message">请为应用授予文件访问权限</string>
+    <!-- EN: Unable to access to file, please provider permission for application -->
     <string name="file_already_exists">文件已存在</string>
-    <string name="empty_field">字段不能为空</string>
-    <string name="sync_conflict_message">本地数据库与远程数据库版本存在冲突，请先解决冲突再访问数据库。</string>
-    <string name="sync_file_not_found_message">在远程服务器上找不到数据库文件，请尝试删除该文件后重新添加。</string>
-    <string name="sync_auth_error_login_message">应用无法在远程服务器上完成身份验证。</string>
-    <string name="sync_auth_error_remove_message">应用无法在远程服务器上完成身份验证，请尝试删除该文件后重新添加。</string>
-    <string name="sync_error_message">无法将数据库与远程服务器同步，请尝试删除该文件后重新添加。</string>
-    <string name="file_not_found">未找到文件</string>
+    <!-- EN: File already exists -->
+    <string name="file_already_exists_detailed">文件 %s 已存在</string>
+    <!-- EN: File %s already exists -->
+    <string name="empty_field">字段为空</string>
+    <!-- EN: Empty field -->
+    <string name="sync_conflict_message">本地数据库与远程数据库版本存在冲突。请先解决此冲突再访问数据库。</string>
+    <!-- EN: There is a conflict between version of local and remote databases. Please resolve this conflict before accessing database. -->
+    <string name="sync_file_not_found_message">在远程服务器上找不到数据库文件。请尝试移除该文件并重新添加。</string>
+    <!-- EN: Unable to find database file on remote server. Please try to remove this file and add it again. -->
+    <string name="sync_auth_error_login_message">应用无法在远程服务器上进行身份验证。</string>
+    <!-- EN: Application is unable to authenticate on remote server. -->
+    <string name="sync_auth_error_remove_message">应用无法在远程服务器上进行身份验证。请尝试移除该文件并重新添加。</string>
+    <!-- EN: Application is unable to authenticate on remote server. Please try to remove this file and add it again. -->
+    <string name="sync_error_message">与远程服务器同步数据库失败。请尝试移除该文件并重新添加。</string>
+    <!-- EN: Failed to synchronize database with remote server. Please try to remove this file and add it again. -->
+    <string name="file_not_found">文件未找到</string>
+    <!-- EN: File not found -->
+
     <!-- Resolve Conflict Dialog -->
-    <string name="resolve_conflict_dialog_message">本地数据库与远程数据库版本存在冲突，请先解决冲突再访问数据库。\n\n此操作可能导致数据丢失！\n\n本地文件修改时间：\n%1$s\n远程文件修改时间：\n%2$s\n\n请选择您要使用的版本？</string>
+    <string name="resolve_conflict_dialog_message">本地数据库与远程数据库版本存在冲突。请先解决此冲突再访问数据库。\n\n此操作可能导致数据丢失！\n\n本地文件修改时间：\n%1$s\n远程文件修改时间：\n%2$s\n\n请指定您要使用的版本：</string>
+    <!-- EN: There is a conflict between version of local and remote databases. Please resolve this conflict before accessing database.\n\nTHIS ACTION MAY LEAD TO DATA LOSS!\n\nLocal file was modified at:\n%1$s\nRemote file was modified at:\n%2$s\n\nPlease specify which version you want to use? -->
     <string name="local_database">本地数据库</string>
+    <!-- EN: Local database -->
     <string name="remote_database">远程数据库</string>
+    <!-- EN: Remote database -->
     <string name="view_diff">查看差异</string>
+    <!-- EN: View diff -->
+    <string name="merge_conflicts">合并冲突</string>
+    <!-- EN: Merge conflicts -->
+    <string name="unlock_database_error_message">请先解锁数据库</string>
+    <!-- EN: Please unlock the database first -->
+
     <!-- Diff Viewer screen -->
-    <string name="diff_event_group">分组“%s”</string>
-    <string name="diff_event_note">条目“%s”</string>
+    <string name="group_with_str">分组：%s</string>
+    <!-- EN: Group: %s -->
+    <string name="entry_with_str">条目：%s</string>
+    <!-- EN: Entry: %s -->
     <string name="diff_event_property">字段“%s”：“%s”</string>
-    <string name="diff_event_property_update">字段“%s”：从“%s”修改为“%s”</string>
+    <!-- EN: Field \'%s\': \'%s\' -->
+    <string name="diff_event_property_update">字段“%s”：“%s” 已改为 “%s”</string>
+    <!-- EN: Field \'%s\': \'%s\' changed to \'%s\' -->
     <string name="unknown_entity">未知实体</string>
-    <string name="compare_files">对比文件</string>
+    <!-- EN: Unknown entity -->
+    <string name="compare_files">比较文件</string>
+    <!-- EN: Compare files -->
+    <string name="merge_changes">合并更改</string>
+    <!-- EN: Merge changes -->
     <string name="pick_file">选择文件</string>
+    <!-- EN: Pick file -->
     <string name="opened_database">已打开的数据库</string>
-    <string name="compare">对比</string>
-    <string name="files_are_identical">文件内容完全一致</string>
+    <!-- EN: Opened database -->
+    <string name="compare">比较</string>
+    <!-- EN: Compare -->
+    <string name="files_are_identical">文件相同</string>
+    <!-- EN: Files are identical -->
+    <string name="local_changes">本地更改</string>
+    <!-- EN: Local changes -->
+    <string name="remote_changes">远程更改</string>
+    <!-- EN: Remote changes -->
+    <string name="merge_confirmation_message">确定要合并所选更改吗？</string>
+    <!-- EN: Are you sure you want to merge the selected changes? -->
+
     <!-- Unlock screen -->
     <string name="recently_used">最近使用</string>
-    <string name="no_databases">暂无数据库</string>
+    <!-- EN: Recently used -->
+    <string name="no_databases">无数据库</string>
+    <!-- EN: No databases -->
     <string name="unlock">解锁</string>
-    <string name="empty_file_name">文件名为空</string>
-    <string name="file_is_up_to_date">已是最新版本</string>
-    <string name="new_version_of_file_is_available">数据库文件有新版本可用</string>
-    <string name="not_synchronized_and_offline_mode">未同步，离线模式</string>
+    <!-- EN: Unlock -->
+    <string name="empty_file_name">无文件名</string>
+    <!-- EN: No filename -->
+    <string name="file_is_up_to_date">文件已是最新版本</string>
+    <!-- EN: File is up to date -->
+    <string name="new_version_of_file_is_available">文件有新版本可用</string>
+    <!-- EN: New version of file is available -->
+    <string name="not_synchronized_and_offline_mode">未同步（离线模式）</string>
+    <!-- EN: Not synchronized, offline mode -->
     <string name="offline_mode">离线模式</string>
-    <string name="checking">检查中</string>
-    <string name="checking_status">正在检查状态</string>
+    <!-- EN: Offline mode -->
+    <string name="checking">检查中...</string>
+    <!-- EN: Checking -->
+    <string name="checking_status">检查状态</string>
+    <!-- EN: Checking status -->
     <string name="conflict">冲突</string>
+    <!-- EN: Conflict -->
     <string name="not_synchronized">未同步</string>
-    <string name="synchronizing">同步中</string>
-    <string name="downloading">下载中</string>
-    <string name="uploading">上传中</string>
+    <!-- EN: Not synchronized -->
+    <string name="synchronizing">同步中...</string>
+    <!-- EN: Synchronizing -->
+    <string name="downloading">下载中...</string>
+    <!-- EN: Downloading -->
+    <string name="uploading">上传中...</string>
+    <!-- EN: Uploading -->
     <string name="error">错误</string>
+    <!-- EN: Error -->
     <string name="not_found">未找到</string>
-    <string name="error_offline_mode">错误，离线模式</string>
-    <string name="auth_error_offline_mode">未授权，离线模式</string>
+    <!-- EN: Not found -->
+    <string name="error_offline_mode">错误（离线模式）</string>
+    <!-- EN: Error, offline mode -->
+    <string name="auth_error_offline_mode">未授权（离线模式）</string>
+    <!-- EN: Unauthorised, offline mode -->
     <string name="unauthorised">未授权</string>
-    <string name="change">修改</string>
+    <!-- EN: Unauthorised -->
+    <string name="change">更改</string>
+    <!-- EN: Change -->
     <string name="unlock_type">解锁方式</string>
+    <!-- EN: Unlock type -->
     <string name="key_file">密钥文件</string>
+    <!-- EN: Key file -->
     <string name="key_file_is_not_selected">未选择密钥文件</string>
+    <!-- EN: Key file is not selected -->
     <string name="unlock_with_fingerprint">使用指纹解锁</string>
+    <!-- EN: Unlock with fingerprint -->
     <string name="setup_fingerprint_unlock">设置指纹解锁</string>
-    <string name="setup_fingerprint_unlock_message">完成身份验证以继续</string>
+    <!-- EN: Setup fingerprint unlock -->
+    <string name="setup_fingerprint_unlock_message">请验证身份以继续</string>
+    <!-- EN: Please authenticate to continue -->
     <string name="add_key">添加密钥</string>
+    <!-- EN: Add key -->
     <string name="add_biometrics">添加生物识别</string>
+    <!-- EN: Add biometrics -->
     <string name="recent_files">最近文件</string>
-    <string name="lock_notification_message">是否为已打开的数据库启用系统通知？\n\n此功能需要通知权限，启用后可在通知中展示数据库状态，更便捷地锁定数据库。</string>
+    <!-- EN: Recent files -->
+    <string name="lock_notification_message">是否要为已打开的数据库启用系统通知？可用于显示数据库状态并更轻松地锁定数据库。</string>
+    <!-- EN: Would you like to enable system notification for opened database?\n\nThis notification requires permission, it allows to display database status and lock database more easily. -->
     <string name="permit">允许</string>
+    <!-- EN: Permit -->
     <string name="later">稍后</string>
-    <string name="biometric_data_is_invalidated">检测到系统录入了新的指纹数据，原有生物识别数据已失效，请重新设置生物识别解锁。</string>
-    <string name="password_and_key_file">密码+密钥文件</string>
-    <string name="unlock_with">使用以下方式解锁</string>
+    <!-- EN: Later -->
+    <string name="biometric_data_is_invalidated">新的指纹注册会导致生物识别数据失效。请重新设置生物识别解锁。</string>
+    <!-- EN: Biometric data was invalidated (i.e. new fingerprint enrolled). Please setup biometric unlock again. -->
+    <string name="password_and_key_file">密码和密钥文件</string>
+    <!-- EN: Password and key file -->
+    <string name="unlock_with">解锁方式</string>
+    <!-- EN: Unlock with -->
+
     <!-- New database screen -->
     <string name="new_database">新建数据库</string>
+    <!-- EN: New database -->
     <string name="file_name">文件名</string>
+    <!-- EN: File name -->
     <string name="password">密码</string>
-    <string name="confirm">确认密码</string>
-    <string name="you_entered_two_different_passwords_please_try_again">您两次输入的密码不一致，请重试。</string>
-    <string name="this_field_should_match_password">此字段内容需与密码一致</string>
+    <!-- EN: Password -->
+    <string name="confirm">确认</string>
+    <!-- EN: Confirm -->
+    <string name="you_entered_two_different_passwords_please_try_again">两次输入的密码不同！请重试。</string>
+    <!-- EN: You entered two different passwords. Please try again. -->
+    <string name="this_field_should_match_password">此字段应与密码一致</string>
+    <!-- EN: This field should match password -->
     <string name="storage_type">存储类型</string>
+    <!-- EN: Storage type -->
     <string name="not_selected">未选择</string>
+    <!-- EN: Not selected -->
     <string name="dot_kdbx">.kdbx</string>
+    <!-- EN: .kdbx -->
     <string name="private_storage">私有存储</string>
+    <!-- EN: Private storage -->
     <string name="public_storage">公共存储</string>
-    <string name="storage_is_not_selected">未选择存储位置</string>
+    <!-- EN: Public storage -->
+    <string name="storage_is_not_selected">未选择存储</string>
+    <!-- EN: Storage is not selected -->
     <string name="add_note_templates">添加条目模板</string>
-    <string name="add_templates_info_message">模板可让您仅展示重要字段，并快速创建带有预定义字段名的条目。</string>
+    <!-- EN: Add entry templates -->
+    <string name="add_templates_info_message">模板允许仅显示重要字段和使用预定义字段名创建条目。</string>
+    <!-- EN: Templates allows to display only important fields and create entries with pre-defined field names. -->
+
     <!-- Open file screen -->
     <string name="file_path">文件路径</string>
+    <!-- EN: File path -->
+
     <!-- Groups screen -->
     <string name="groups">分组</string>
-    <string name="no_items_to_show">暂无可展示的项目</string>
-    <string name="entries_with_count">条目数：%d</string>
-    <string name="groups_with_count">分组数：%d</string>
+    <!-- EN: Groups -->
+    <string name="no_items_to_show">没有可显示的项目</string>
+    <!-- EN: No items to show -->
+    <string name="entries_with_count">条目：%d</string>
+    <!-- EN: Entries: %d -->
+    <string name="groups_with_count">分组：%d</string>
+    <!-- EN: Groups: %d -->
     <string name="groups_and_entries_with_count">分组：%1$d  条目：%2$d</string>
+    <!-- EN: Groups: %1$d  Entries: %2$d -->
     <string name="new_item_entry_standard_entry">标准条目</string>
+    <!-- EN: Standard Entry -->
     <string name="new_item_entry_new_group">新建分组</string>
-    <string name="note_remove_confirmation_message">您确定要删除条目“%s”吗？</string>
-    <string name="group_remove_confirmation_message">您确定要删除此分组吗？</string>
-    <string name="add_templates_confirmation_message">模板可让您仅展示重要字段，并快速创建带有预定义字段名的条目。您确定要向数据库添加模板吗？</string>
-    <string name="successfully_removed">删除成功</string>
-    <string name="successfully_added">添加成功</string>
-    <string name="successfully">操作成功</string>
+    <!-- EN: New Group -->
+    <string name="note_remove_confirmation_message">确定要移除条目 “%s” 吗？</string>
+    <!-- EN: Are you sure want to remove entry "%s" ? -->
+    <string name="group_remove_confirmation_message">确定要移除此分组吗？</string>
+    <!-- EN: Are you sure want to remove this group? -->
+    <string name="add_templates_confirmation_message">模板允许仅显示重要字段和使用预定义字段名创建条目。确定要将模板添加到数据库吗？</string>
+    <!-- EN: Templates allows to display only important fields and create entries with pre-defined field names. Are you sure want to add templates to Database? -->
+    <string name="successfully_removed">已成功移除</string>
+    <!-- EN: Successfully removed -->
+    <string name="successfully_added">已成功添加</string>
+    <!-- EN: Successfully added -->
+    <string name="successfully">成功</string>
+    <!-- EN: Successfully -->
     <string name="exported_successfully">导出成功</string>
+    <!-- EN: Exported successfully -->
     <string name="selected_item_is_already_here">所选项目已在此处</string>
+    <!-- EN: Selected item is already here -->
     <string-array name="item_actions_entries">
         <item>编辑</item>
-        <item>删除</item>
+        <item>移除</item>
         <item>剪切</item>
     </string-array>
+    <!-- EN: Edit, Remove, Cut -->
     <string name="search_type">搜索类型</string>
-    <string name="fuzzy">模糊搜索</string>
-    <string name="strict">精准搜索</string>
+    <!-- EN: Search type -->
+    <string name="search_options">搜索选项</string>
+    <!-- EN: Search options -->
+    <string name="search_fields">搜索字段</string>
+    <!-- EN: Search fields -->
+    <string name="search_scope">搜索范围</string>
+    <!-- EN: Search scope -->
+    <string name="searchable">可搜索</string>
+    <!-- EN: Searchable -->
+    <string name="recycle_bin">回收站</string>
+    <!-- EN: Recycle Bin -->
+    <string name="other">其他</string>
+    <!-- EN: Other -->
+    <string name="additional_options">附加选项</string>
+    <!-- EN: Additional options -->
+    <string name="case_sensitive">区分大小写</string>
+    <!-- EN: Case sensitive -->
+    <string name="fuzzy">模糊</string>
+    <!-- EN: Fuzzy -->
+    <string name="strict">精确</string>
+    <!-- EN: Strict -->
     <string name="sort_by">排序依据</string>
+    <!-- EN: Sort by -->
     <string name="sort_order">排序顺序</string>
+    <!-- EN: Sort order -->
     <string name="modification">修改时间</string>
+    <!-- EN: Modification -->
     <string name="creation">创建时间</string>
+    <!-- EN: Creation -->
     <string name="ascending">升序</string>
+    <!-- EN: Ascending -->
     <string name="descending">降序</string>
-    <string name="default_">自然排序</string>
-    <string name="list_groups_first">分组优先展示</string>
+    <!-- EN: Descending -->
+    <string name="default_">自然顺序</string>
+    <!-- EN: Natural order -->
+    <string name="list_groups_first">优先列出分组</string>
+    <!-- EN: List groups first -->
     <string name="enable_biometric_unlock">启用生物识别解锁</string>
-    <string name="disable_biometric_unlock">关闭生物识别解锁</string>
+    <!-- EN: Enable biometric unlock -->
+    <string name="disable_biometric_unlock">禁用生物识别解锁</string>
+    <!-- EN: Disable biometric unlock -->
     <string name="sync_error">同步错误</string>
+    <!-- EN: Sync error -->
     <string name="no_search_results">无搜索结果</string>
-    <string name="compare_with">与…对比</string>
+    <!-- EN: No search results -->
+    <string name="compare_with">比较对象</string>
+    <!-- EN: Compare with -->
     <string name="add_entry">添加条目</string>
+    <!-- EN: Add entry -->
     <string name="save_as">另存为</string>
+    <!-- EN: Save as -->
+
     <!-- Group editor screen -->
     <string name="new_group">新建分组</string>
+    <!-- EN: New group -->
     <string name="edit_group">编辑分组</string>
+    <!-- EN: Edit group -->
     <string name="group_with_this_name_is_already_exist">已存在同名分组</string>
-    <string name="auto_dash_type">自动输入</string>
+    <!-- EN: Group with this name is already exist -->
+    <string name="auto_dash_type">自动键入</string>
+    <!-- EN: Auto-Type -->
     <string name="enable">启用</string>
+    <!-- EN: Enable -->
     <string name="disable">禁用</string>
-    <string name="inherit_from_parent">继承父级设置</string>
-    <string name="inherit_from_parent_with_value">继承父级设置（%s）</string>
+    <!-- EN: Disable -->
+    <string name="inherit_from_parent">从父级继承</string>
+    <!-- EN: Inherit from parent -->
+    <string name="inherit_from_parent_with_value">从父级继承（%s）</string>
+    <!-- EN: Inherit from parent (%s) -->
+
     <!-- Note screen -->
-    <string name="copied_clipboard_will_be_cleared_in_seconds">已复制！剪贴板内容将在%d秒后清除</string>
+    <string name="copied_clipboard_will_be_cleared_in_seconds">已复制！剪贴板将在 %d 秒后清除！</string>
+    <!-- EN: Copied! Clipboard will be cleared in %d seconds -->
     <string name="edited_at">编辑于 %s</string>
-    <string name="copy_with_str">复制%s</string>
-    <string name="open_with_str">打开%s</string>
+    <!-- EN: Edited %s -->
+    <string name="copy_with_str">复制 %s</string>
+    <!-- EN: Copy %s -->
+    <string name="open_with_str">打开 %s</string>
+    <!-- EN: Open %s -->
     <string name="copied">已复制</string>
-    <string name="hidden">已隐藏</string>
-    <string name="attachments">附件</string>
-    <string name="attachment">附件</string>
+    <!-- EN: Copied! -->
+    <string name="hidden">隐藏</string>
+    <!-- EN: Hidden -->
+    <string name="attachments">所有附件</string>
+    <!-- EN: Attachments -->
+    <string name="attachment">单个附件</string>
+    <!-- EN: Attachment -->
     <string name="file_lower">文件</string>
+    <!-- EN: file -->
     <string name="view">查看</string>
-    <string name="view_as_text">以文本形式查看</string>
+    <!-- EN: View -->
+    <string name="view_as_text">以文本查看</string>
+    <!-- EN: View as text -->
     <string name="share">分享</string>
+    <!-- EN: Share -->
     <string name="one_time_password">一次性密码</string>
+    <!-- EN: One-time password -->
     <string name="modified_with_str">修改于 %s</string>
+    <!-- EN: Modified %s -->
     <string name="modified">修改时间</string>
+    <!-- EN: Modified -->
     <string name="created">创建时间</string>
+    <!-- EN: Created -->
     <string name="expires">过期时间</string>
-    <string name="expiration">过期设置</string>
+    <!-- EN: Expires -->
+    <string name="expiration">过期</string>
+    <!-- EN: Expiration -->
     <string name="history">历史记录</string>
+    <!-- EN: History -->
+
     <!-- History screen -->
     <string name="added">已添加</string>
+    <!-- EN: Added -->
     <string name="deleted">已删除</string>
-    <string name="changed">已修改</string>
-    <string name="history_event_property_updated">“%s”已修改为“%s”</string>
+    <!-- EN: Deleted -->
+    <string name="changed">已更改</string>
+    <!-- EN: Changed -->
+    <string name="history_event_property_updated">“%s” 已更改为 “%s”</string>
+    <!-- EN: \'%s\' changed to \'%s\' -->
+
     <!-- Note editor screen -->
     <string name="new_entry">新建条目</string>
+    <!-- EN: New entry -->
     <string name="name">名称</string>
+    <!-- EN: Name -->
     <string name="username">用户名</string>
-    <string name="no_changes">未做修改</string>
+    <!-- EN: Username -->
+    <string name="no_changes">无更改</string>
+    <!-- EN: No changes -->
     <string name="url_cap">网址</string>
+    <!-- EN: URL -->
     <string name="notes">备注</string>
+    <!-- EN: Notes -->
     <string name="confirm_password">确认密码</string>
-    <string name="does_not_match_with_password">与密码不一致</string>
+    <!-- EN: Confirm password -->
+    <string name="does_not_match_with_password">与密码不匹配</string>
+    <!-- EN: Does not match with password -->
     <string name="value">值</string>
+    <!-- EN: Value -->
     <string name="protected_">受保护</string>
+    <!-- EN: Protected -->
     <string name="field_name">字段名称</string>
+    <!-- EN: Field Name -->
     <string name="field_value">字段值</string>
-    <string name="empty_field_name_message">字段名称不能为空</string>
+    <!-- EN: Field Value -->
+    <string name="empty_field_name_message">字段名不能为空！</string>
+    <!-- EN: Field Name shouldn\'t be empty -->
     <string name="title">标题</string>
-    <string name="should_not_be_empty">不能为空</string>
-    <string name="discard_changes">是否放弃修改？</string>
+    <!-- EN: Title -->
+    <string name="should_not_be_empty">不能为空！</string>
+    <!-- EN: Should not be empty -->
+    <string name="discard_changes">放弃更改？</string>
+    <!-- EN: Discard changes? -->
     <string name="discard">放弃</string>
+    <!-- EN: Discard -->
     <string name="cancel">取消</string>
+    <!-- EN: Cancel -->
     <string name="select_item_to_add">选择要添加的项目</string>
+    <!-- EN: Select item to add -->
     <string name="custom_property">自定义属性</string>
-    <string name="file_is_already_added_with_value">文件“%s”已添加</string>
-    <string name="never">永不</string>
+    <!-- EN: Custom property -->
+    <string name="file_is_already_added_with_value">文件 “%s” 已添加！</string>
+    <!-- EN: File \'%s\' is already added -->
+    <string name="never">从不</string>
+    <!-- EN: Never -->
+
     <!-- Password generator screen -->
     <string name="generate_password">生成密码</string>
+    <!-- EN: Generate password -->
     <string name="generate">生成</string>
-    <string name="generated_password">生成的密码</string>
+    <!-- EN: Generate -->
+    <string name="generated_password">已生成的密码</string>
+    <!-- EN: Generated password -->
     <string name="length">长度</string>
+    <!-- EN: Length -->
     <string name="eight">8</string>
+    <!-- EN: 8 -->
     <string name="twelve">12</string>
+    <!-- EN: 12 -->
     <string name="sixteen">16</string>
+    <!-- EN: 16 -->
     <string name="thirty_two">32</string>
+    <!-- EN: 32 -->
     <string name="sixty_four">64</string>
+    <!-- EN: 64 -->
     <string name="upper_case">大写字母：A…Z</string>
+    <!-- EN: Upper-case: A…Z -->
     <string name="lower_case">小写字母：a…z</string>
+    <!-- EN: Lower-case: a…z -->
     <string name="digits">数字：0…9</string>
-    <string name="minus">连字符：-</string>
+    <!-- EN: Digits: 0…9 -->
+    <string name="minus">减号：-</string>
+    <!-- EN: Minus: - -->
     <string name="underscore">下划线：_</string>
+    <!-- EN: Underscore: _ -->
     <string name="space">空格</string>
+    <!-- EN: Space -->
     <string name="special">特殊字符：&amp;\/,^@.#&quot;:%\\='$!*`;+</string>
+    <!-- EN: Special: &amp;\/,^@.#&quot;:%\\='$!*`;+ -->
     <string name="brackets">括号：[](){}&lt;&gt;</string>
-    <string name="no_options_selected_message">至少需选择一项（空格除外）</string>
+    <!-- EN: Brackets: [](){}&lt;&gt; -->
+    <string name="no_options_selected_message">除空格外应至少选择一个选项</string>
+    <!-- EN: At least one option should be selected (not space) -->
+
     <string name="brackets_symbols">[](){}&lt;&gt;</string>
+    <!-- EN: [](){}&lt;&gt; -->
+
     <!-- Storage screen -->
-    <string name="select_storage">选择存储位置</string>
+    <string name="select_storage">选择存储</string>
+    <!-- EN: Select storage -->
     <string name="private_app_storage">应用私有存储</string>
+    <!-- EN: Private app storage -->
     <string name="external_storage">外部存储</string>
-    <string name="external_storage_system_picker">外部存储（系统文件选择器）</string>
-    <string name="external_storage_app_picker">外部存储（应用内置文件选择器）</string>
+    <!-- EN: External storage -->
+    <string name="external_storage_system_picker">外部存储（system）</string>
+    <!-- EN: External storage (System File Picker) -->
+    <string name="external_storage_app_picker">外部存储（built-in）</string>
+    <!-- EN: External storage (Built-in file picker) -->
     <string name="authentication_failed">身份验证失败</string>
-    <string name="saf_warning_message">提示：\n\n系统文件选择器授予的访问权限可能是临时的</string>
+    <!-- EN: Authentication failed -->
+    <string name="saf_warning_message">不推荐：系统文件选择器授予的访问权限可能是临时的！</string>
+    <!-- EN: Not recommended, access granted by System File Picker can be temporal -->
     <string name="requires_permission">需要权限</string>
+    <!-- EN: Requires permission -->
+
     <!-- File picker screen -->
     <string name="select_directory">选择目录</string>
+    <!-- EN: Select directory -->
     <string name="select_file">选择文件</string>
-    <string name="permission_is_required">需要获取权限</string>
+    <!-- EN: Select file -->
+    <string name="permission_is_required">需要权限</string>
+    <!-- EN: Permission is required -->
     <string name="please_select_any_file">请选择任意文件</string>
+    <!-- EN: Please select any file -->
     <string name="all_files_permission_dialog_title">授予权限</string>
-    <string name="all_files_permission_dialog_message">要完成此操作，应用需要获取管理所有文件的权限。点击“授权”按钮后，请在下一界面选择<b>允许访问管理所有文件</b>选项</string>
-    <string name="unable_to_authenticate">无法完成身份验证</string>
+    <!-- EN: Grant permission -->
+    <string name="all_files_permission_dialog_message">要完成此操作，应用需要管理所有文件的权限。点击“授予”按钮后，请在下一个屏幕上选择“允许管理所有文件”选项。</string>
+    <!-- EN: To complete this action application needs the permission to manage all files. After pressing "Grant" button, please select <b>Allow access to manage all files</b> option on the next screen -->
+    <string name="unable_to_authenticate">无法验证身份！</string>
+    <!-- EN: Unable to authenticate -->
     <string name="make_a_copy_and_select">复制并选择</string>
-    <string name="copy_and_select_description">副本将创建在应用私有目录中</string>
+    <!-- EN: Make a copy and Select -->
+    <string name="copy_and_select_description">将在应用私有目录内创建副本</string>
+    <!-- EN: Copy will be created inside application private directory -->
+
     <!-- Server login screen -->
     <string name="login_to_server">登录服务器</string>
-    <string name="login_to_git">登录Git仓库</string>
-    <string name="webdav_url_hint">WebDAV服务器、文件或文件夹的URL</string>
-    <string name="webdav_url_help_message">仅支持HTTPS链接</string>
-    <string name="git_url_hint">Git仓库URL（例如 https://git.example.com）</string>
-    <string name="git_url_help_message">支持HTTPS和SSH协议</string>
-    <string name="url_contains_secret_message">在解锁界面隐藏链接地址</string>
-    <string name="ssh_key_copy_message">您的SSH私钥将存储在应用私有目录中。如需删除，请在解锁界面删除对应的数据库条目。</string>
-    <string name="ssh_key_password">SSH密钥密码</string>
+    <!-- EN: Login to server -->
+    <string name="login_to_git">登录 Git 仓库</string>
+    <!-- EN: Login to Git repository -->
+    <string name="webdav_url_hint">WebDAV 服务器、文件或文件夹的 URL</string>
+    <!-- EN: URL to WebDAV server, file or folder -->
+    <string name="webdav_url_help_message">仅支持 HTTPS URL</string>
+    <!-- EN: Only HTTPS URLs are supported -->
+    <string name="git_url_hint">Git 仓库 URL（例如 https://git.example.com）</string>
+    <!-- EN: Git repository URL (e.g. https://git.example.com) -->
+    <string name="git_url_help_message">支持 HTTPS 和 SSH 协议</string>
+    <!-- EN: HTTPS and SSH protocols are supported -->
+    <string name="url_contains_secret_message">在解锁屏幕上隐藏 URL</string>
+    <!-- EN: Mask url on unlock screen -->
+    <string name="ssh_key_copy_message">您的私有 SSH 密钥将存储在应用私有目录中。要移除它，请从解锁屏幕删除对应的数据库条目。</string>
+    <!-- EN: Your private SSH key will be stored in the private application directory. To remove it, delete the corresponding database entry from the unlock screen. -->
+    <string name="ssh_key_password">SSH 密钥密码</string>
+    <!-- EN: SSH key password -->
     <string name="none">无</string>
-    <string name="ssh_key">SSH密钥</string>
-    <string name="ignore_ssl_certificate_validation">忽略SSL证书验证</string>
+    <!-- EN: None -->
+    <string name="ssh_key">SSH 密钥</string>
+    <!-- EN: SSH key -->
+    <string name="ignore_ssl_certificate_validation">忽略 SSL 证书验证</string>
+    <!-- EN: Ignore SSL certificate validation -->
+
     <!-- Debug menu screen -->
     <string name="debug_menu">调试菜单</string>
+    <!-- EN: Debug menu -->
     <string name="clone_repository">克隆仓库</string>
+    <!-- EN: Clone repository -->
+
     <!-- Select database screen -->
     <string name="select_database">选择数据库</string>
+    <!-- EN: Select Database -->
     <string name="status">状态</string>
+    <!-- EN: Status -->
     <string name="database_lower">数据库</string>
+    <!-- EN: database -->
+
     <!-- Search screen -->
     <string name="search">搜索</string>
-    <string name="query">搜索词</string>
-    <string name="input_text_to_start_search">输入内容开始搜索</string>
+    <!-- EN: Search -->
+    <string name="query">查询</string>
+    <!-- EN: Query -->
+    <string name="input_text_to_start_search">输入文本以开始搜索</string>
+    <!-- EN: Input text to start search -->
     <string name="no_results">无结果</string>
+    <!-- EN: No results -->
+
     <!-- About screen -->
     <string name="version_with_str">版本：%s</string>
-    <string name="build_with_str">构建号：%s</string>
-    <string name="about_intro">%s是KeePass密码管理器数据库的客户端应用。\n应用基于%s库实现对KeePass数据库文件的访问。</string>
-    <string name="about_licence_intro">%s是基于Apache License 2.0开源协议发布的开源软件。本应用按“现状”提供，不附带任何形式的明示或暗示担保，包括但不限于适销性和特定用途适用性的担保。</string>
-    <string name="feedback">意见反馈</string>
+    <!-- EN: Version: %s -->
+    <string name="build_with_str">构建：%s</string>
+    <!-- EN: Build: %s -->
+    <string name="about_intro">%s 是 KeePass 密码管理器数据库的客户端。\n它使用 %s 库来访问 KeePass 数据库文件。</string>
+    <!-- EN: %s is client for KeePass password manager databases.\nIt uses %s library to access KeePass database files. -->
+    <string name="about_licence_intro">%s 是开源软件，基于 Apache License 2.0 提供。本应用按“现状”提供，不提供任何形式的担保或条件。</string>
+    <!-- EN: %s is open source software provided under Apache License version 2.0. This application is provided on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND. -->
+    <string name="feedback">反馈</string>
+    <!-- EN: Feedback -->
     <string name="homepage">主页</string>
+    <!-- EN: Homepage -->
     <string name="kotpass">Kotpass</string>
+    <!-- EN: Kotpass -->
+    <string name="keepass_rs">KeePass RS</string>
+    <!-- EN: KeePass RS -->
+
     <!-- Settings screens -->
     <string name="database">数据库</string>
+    <!-- EN: Database -->
     <string name="application">应用</string>
+    <!-- EN: Application -->
     <string name="database_settings">数据库设置</string>
+    <!-- EN: Database settings -->
     <string name="application_settings">应用设置</string>
+    <!-- EN: Application settings -->
+
     <!-- AppSettings screen -->
-    <string name="pref_auto_lock_delay_in_ms_title">数据库自动锁定超时时间</string>
-    <string name="pref_auto_lock_delay_in_ms_summary">应用无操作后，数据库自动锁定的时间间隔</string>
-    <string name="pref_is_lock_notification_visible_title">在通知中显示锁定按钮</string>
-    <string name="pref_is_lock_notification_visible_summary">通知权限已禁用，请在系统设置中开启</string>
-    <string name="pref_enable_notification_permission_title">开启通知权限</string>
-    <string name="pref_auto_clear_clipboard_delay_in_ms_title">剪贴板自动清除超时时间</string>
-    <string name="pref_auto_clear_clipboard_delay_in_ms_summary">复制内容后，剪贴板自动清除的时间间隔</string>
-    <string name="pref_is_file_log_enabled_title">写入日志到文件</string>
-    <string name="pref_is_file_log_enabled_summary">应用会将所有日志写入文件，您可在Github的issue页面附上该日志文件</string>
+    <string name="pref_auto_lock_delay_in_ms_title">数据库自动锁定超时</string>
+    <!-- EN: Database lock timeout -->
+    <string name="pref_auto_lock_delay_in_ms_summary">无操作后数据库自动锁定的间隔时间</string>
+    <!-- EN: Interval after which database will be locked due to inactivity -->
+    <string name="pref_is_lock_notification_visible_title">显示带锁定按钮的通知</string>
+    <!-- EN: Show notification with lock button -->
+    <string name="pref_is_lock_notification_visible_summary">请先在设置中启用通知权限</string>
+    <!-- EN: Notification permission is disabled, please enable it in system settings -->
+    <string name="pref_enable_notification_permission_title">启用通知权限</string>
+    <!-- EN: Enable notification permission -->
+    <string name="pref_auto_clear_clipboard_delay_in_ms_title">剪贴板自动清除超时</string>
+    <!-- EN: Clear clipboard timeout -->
+    <string name="pref_auto_clear_clipboard_delay_in_ms_summary">无操作后剪贴板内容自动清除的间隔时间</string>
+    <!-- EN: Interval after which clipboard will be cleared -->
+    <string name="pref_is_lock_database_on_back_title">返回键锁定</string>
+    <!-- EN: Press \'Back\' to lock -->
+    <string name="pref_is_lock_database_on_back_summary">在数据库主页按“返回”键时锁定数据库</string>
+    <!-- EN: Lock database when pressing \'Back\' from the root group screen -->
+    <string name="pref_keepass_implementation_title">KeePass 二进制</string>
+    <!-- EN: KeePass opening library -->
+    <string name="pref_keepass_implementation_summary">用于打开数据库文件的二进制库文件</string>
+    <!-- EN: Library used to open database files -->
+    <string name="pref_is_file_log_enabled_title">导出日志到文件</string>
+    <!-- EN: Write log to file -->
+    <string name="pref_is_file_log_enabled_summary">将所有日志写入文件用于 Github 上的问题报告</string>
+    <!-- EN: Application will write all logs to file that can be attached to issue at Github page -->
+    <string name="pref_is_crash_reporting_enabled_title">发送崩溃报告</string>
+    <!-- EN: Send crash reports -->
+    <string name="pref_is_crash_reporting_available_summary">将崩溃报告发送至 Sentry 以帮助诊断应用故障</string>
+    <!-- EN: Send crash reports to Sentry to help diagnose application failures -->
+    <string name="pref_is_crash_reporting_not_configured_summary">此构建版本未配置崩溃报告</string>
+    <!-- EN: Crash reporting is not configured for this build -->
+    <string name="pref_is_crash_reporting_unavailable_summary">崩溃报告仅适用于 Google Play 构建版本</string>
+    <!-- EN: Crash reporting is available only in Google Play build -->
     <string name="pref_send_log_file_title">发送日志文件</string>
+    <!-- EN: Send log file -->
     <string name="pref_remove_log_files_title">清除日志</string>
+    <!-- EN: Clear logs -->
     <string name="pref_is_postponed_sync_enabled_title">延迟上传</string>
-    <string name="pref_is_postponed_sync_enabled_summary">通过网络上传数据的操作将延迟至数据库锁定后执行</string>
+    <!-- EN: Postpone uploading -->
+    <string name="pref_is_postponed_sync_enabled_summary">将网络同步延迟到数据库锁定后进行</string>
+    <!-- EN: Uploading data via network will be postponed until database will be locked -->
     <string name="pref_background_sync_interval_title">后台同步</string>
+    <!-- EN: Background synchronization -->
     <string name="pref_background_sync_interval_summary">应用通过 Wi-Fi 检查已打开数据库远程更新的频率</string>
-    <string name="pref_git_user_name_title">Git用户名</string>
-    <string name="pref_git_user_name_summary">将用于提交信息中的用户名</string>
-    <string name="pref_git_user_email_title">Git用户邮箱</string>
-    <string name="pref_git_user_email_summary">将用于提交信息中的用户邮箱</string>
+    <!-- EN: How often the app checks opened databases for remote updates over Wi-Fi -->
+
+    <string name="pref_git_user_name_title">Git 用户名</string>
+    <!-- EN: Git user name -->
+    <string name="pref_git_user_name_summary">该用户名将用于提交消息</string>
+    <!-- EN: The user name will be used in the commit message -->
+    <string name="pref_git_user_email_title">Git 用户邮箱</string>
+    <!-- EN: Git user email -->
+    <string name="pref_git_user_email_summary">该邮箱将用于提交消息</string>
+    <!-- EN: The user email will be used in the commit message -->
+
     <string name="pref_is_biometric_unlock_enabled_title">启用生物识别解锁</string>
+    <!-- EN: Enable biometric unlock -->
     <string name="pref_is_biometric_unlock_enabled_summary">允许使用指纹解锁数据库</string>
+    <!-- EN: Allows to unlock database with fingerprint -->
     <string name="pref_search_type_title">搜索算法</string>
-    <string name="pref_search_type_summary">应用内用于查找条目的算法</string>
-    <string name="general">通用</string>
+    <!-- EN: Search algorithm -->
+    <string name="pref_search_type_summary">用于查找条目的算法</string>
+    <!-- EN: Algorithm used in the app to look up entries -->
+    <string name="pref_is_activate_search_on_start_title">启动时打开搜索</string>
+    <!-- EN: Open search on startup -->
+    <string name="pref_is_activate_search_on_start_summary">数据库打开后自动打开搜索</string>
+    <!-- EN: Open the search field automatically after the database is opened -->
+    <string name="general">常规</string>
+    <!-- EN: General -->
     <string name="notifications">通知</string>
-    <string name="logging">日志</string>
+    <!-- EN: Notifications -->
+    <string name="reporting">报告</string>
+    <!-- EN: Reporting -->
     <string name="biometrics">生物识别</string>
+    <!-- EN: Biometrics -->
     <string name="master_key">主密钥</string>
-    <string name="synchronization_with_server">服务器同步</string>
+    <!-- EN: Master key -->
+    <string name="synchronization_with_server">与服务器同步</string>
+    <!-- EN: Synchronization with server -->
+
     <!-- DatabaseSettings screen -->
-    <string name="pref_is_recycle_bin_enabled_title">启用回收站</string>
-    <string name="pref_is_recycle_bin_enabled_summary">删除分组和条目时，先将其移至“回收站”分组，而非直接永久删除</string>
+    <string name="pref_is_recycle_bin_enabled_title">使用回收站</string>
+    <!-- EN: Use Recycle bin -->
+    <string name="pref_is_recycle_bin_enabled_summary">删除前先移动条目到“回收站”分组</string>
+    <!-- EN: Moves groups and notes to "Recycle bin" group before deleting -->
+    <string name="pref_recycle_bin_group_title">设置数据库中作为“回收站”的分组</string>
+    <!-- EN: Recycle bin group -->
     <string name="new_password">新密码</string>
-    <string name="change_password">修改密码</string>
+    <!-- EN: New password -->
+    <string name="change_password">更改密码</string>
+    <!-- EN: Change password -->
+
     <!-- Enter database credentials screen -->
-    <string name="type_a_password">请输入密码</string>
+    <string name="type_a_password">输入密码</string>
+    <!-- EN: Type a password -->
+
     <!-- Setup one-time password screen -->
     <string name="add_one_time_password">添加一次性密码</string>
+    <!-- EN: Add one-time password -->
     <string name="secret">密钥</string>
+    <!-- EN: Secret -->
     <string name="type">类型</string>
+    <!-- EN: Type -->
     <string name="algorithm">算法</string>
+    <!-- EN: Algorithm -->
     <string name="generation_interval">生成间隔</string>
-    <string name="code_length">验证码长度</string>
+    <!-- EN: Generation interval -->
+    <string name="code_length">代码长度</string>
+    <!-- EN: Code length -->
     <string name="counter">计数器</string>
-    <string name="generation_interval_invalid_value_message">取值需在1到900之间</string>
-    <string name="counter_invalid_value_message">取值需为0或正整数</string>
-    <string name="code_length_invalid_value_message">取值需在4到18之间</string>
-    <string name="empty_value_message">不能为空</string>
+    <!-- EN: Counter -->
+    <string name="generation_interval_invalid_value_message">值应在 1 到 900 之间</string>
+    <!-- EN: Should be a value between 1 and 900 -->
+    <string name="counter_invalid_value_message">值应为正数或 0</string>
+    <!-- EN: Should be a positive value or 0 -->
+    <string name="code_length_invalid_value_message">值应在 4 到 18 之间</string>
+    <!-- EN: Should be a value between 4 and 18 -->
+    <string name="empty_value_message">不应为空值</string>
+    <!-- EN: Should not be an empty value -->
     <string name="custom">自定义</string>
+    <!-- EN: Custom -->
     <string name="invalid_value">无效值</string>
-    <string name="your_code_is">您的验证码为</string>
+    <!-- EN: Invalid value -->
+    <string name="your_code_is">您的代码是</string>
+    <!-- EN: Your code is -->
+
     <!-- Report dialog -->
-    <string name="go_to_issues">前往问题反馈页</string>
+    <string name="go_to_issues">转到问题页面</string>
+    <!-- EN: Go to issues -->
     <string name="show_stacktrace">…显示堆栈跟踪…</string>
+    <!-- EN: ...Show stacktrace... -->
+
 </resources>

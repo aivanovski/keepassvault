@@ -93,8 +93,8 @@
     <!-- Diff Viewer screen -->
     <string name="group_with_str">Groep: %s</string>
     <string name="entry_with_str">Invoer: %s</string>
-    <string name="diff_event_property">Veld '%s': '%s'</string>
-    <string name="diff_event_property_update">Veld '%s': '%s' gewijzigd naar '%s'</string>
+    <string name="diff_event_property">Veld \'%s\': \'%s\'</string>
+    <string name="diff_event_property_update">Veld \'%s\': \'%s\' gewijzigd naar \'%s\'</string>
     <string name="unknown_entity">Onbekunde entiteit</string>
     <string name="compare_files">Bestanden vergelijken</string>
     <string name="merge_changes">Wijzigingen samenvoegen</string>
@@ -246,7 +246,7 @@
     <string name="added">Toegevoegd</string>
     <string name="deleted">Verwijderd</string>
     <string name="changed">Gewijzigd</string>
-    <string name="history_event_property_updated">'%s' gewijzigd naar '%s'</string>
+    <string name="history_event_property_updated">\'%s\' gewijzigd naar \'%s\'</string>
 
     <!-- Note editor screen -->
     <string name="new_entry">Nieuwe invoer</string>
@@ -269,7 +269,7 @@
     <string name="cancel">Annuleren</string>
     <string name="select_item_to_add">Selecteer item om toe te voegen</string>
     <string name="custom_property">Aangepast veld</string>
-    <string name="file_is_already_added_with_value">Bestand '%s' is al toegevoegd</string>
+    <string name="file_is_already_added_with_value">Bestand \'%s\' is al toegevoegd</string>
     <string name="never">Nooit</string>
 
     <!-- Password generator screen -->
@@ -319,7 +319,7 @@
     <string name="login_to_server">Aanmelden bij server</string>
     <string name="login_to_git">Aanmelden bij Git-repository</string>
     <string name="webdav_url_hint">URL naar WebDAV-server, bestand of map</string>
-    <string name="webdav_url_help_message">Alleen HTTPS-URL's worden ondersteund</string>
+    <string name="webdav_url_help_message">Alleen HTTPS-URL\'s worden ondersteund</string>
     <string name="git_url_hint">Git-repository URL (bijv. https://git.example.com)</string>
     <string name="git_url_help_message">HTTPS en SSH-protocollen worden ondersteund</string>
     <string name="url_contains_secret_message">URL inmaskeren op het ontgrendelscherm</string>
@@ -368,8 +368,8 @@
     <string name="pref_enable_notification_permission_title">Meldingsmachtiging inschakelen</string>
     <string name="pref_auto_clear_clipboard_delay_in_ms_title">Klembord wissen</string>
     <string name="pref_auto_clear_clipboard_delay_in_ms_summary">Intervall waarna het klembord wordt gewist</string>
-    <string name="pref_is_lock_database_on_back_title">Druk op 'Terug' om te vergrendelen</string>
-    <string name="pref_is_lock_database_on_back_summary">Database vergrendelen wanneer 'Terug' wordt ingedrukt vanaf het groepsbeginscherm</string>
+    <string name="pref_is_lock_database_on_back_title">Druk op \'Terug\' om te vergrendelen</string>
+    <string name="pref_is_lock_database_on_back_summary">Database vergrendelen wanneer \'Terug\' wordt ingedrukt vanaf het groepsbeginscherm</string>
     <string name="pref_keepass_implementation_title">KeePass-bibliotheek om database te openen</string>
     <string name="pref_keepass_implementation_summary">Bibliotheek gebruikt om database-bestanden te openen</string>
     <string name="pref_is_file_log_enabled_title">Logboek naar bestand schrijven</string>
